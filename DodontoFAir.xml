@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<application xmlns="http://ns.adobe.com/air/application/1.5"> 
+    <id>com.dodontof.DodontoFAir</id> 
+    <version>Ver.1.30.00(2011/03/14)</version> 
+    <filename>DodontoFAir</filename> 
+    <initialWindow> 
+        <content>DodontoFAir.swf</content> 
+        <systemChrome>standard</systemChrome> 
+        <transparent>false</transparent> 
+        <visible>true</visible> 
+        <width>800</width> 
+        <height>600</height> 
+    </initialWindow> 
+</application>

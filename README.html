@@ -1,0 +1,1772 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title></title>
+</head>
+<body>
+<h1 id="manualTitle">「どどんとふ」マニュアル</h1>
+<!-- <p align="right">d(odonto)f - a tool of online session..</p> -->
+<p align="right">ALL YOU NEED IS THIS, on online TRPG session.</p>
+<p align="right">presented by たいたい竹流(taitai takeru)　from <a href="http://www.dodontof.com">http://www.dodontof.com</a><br>-- modified BSD licenses
+</p>
+
+<p align="left"><a id="howtobook" href="http://www.melonbooks.com/item/goods/id_goods/IT0000127911">使用方法については、どどんとふ解説書も参考下さい。<br/>体験版で全文参照可能です。</a></p>
+
+  
+<p>
+  <h2 id="index">目次</h2>
+<!-- INDEX-AREA --><ul><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><ul><font size='3'><li><a href='#login'>ログイン</a></li></font><font size='3'><li><a href='#map'>マップ関連の操作</a></li></font><ul><font size='2'><li><a href='#changeMap'>マップの変更</a></li></font><font size='2'><li><a href='#mapMask'>マップマスクの操作</a></li></font><font size='2'><li><a href='#zoomMap'>マップの拡大縮小</a></li></font><font size='2'><li><a href='#moveMap'>マップの移動</a></li></font></ul><font size='3'><li><a href='#character'>キャラクター関連の操作</a></li></font><ul><font size='2'><li><a href='#addCharacter'>キャラクターの追加</a></li></font><font size='2'><li><a href='#moveCharacter'>キャラクターの移動</a></li></font><font size='2'><li><a href='#changeCharacter'>キャラクターの変更</a></li></font><font size='2'><li><a href='#removeCharacter'>キャラクターの削除</a></li></font><font size='2'><li><a href='#returnCharacter'>キャラクター削除の取り消し</a></li></font><font size='2'><li><a href='#addMacgicRange'>魔法範囲の作成</a></li></font><font size='2'><li><a href='#changeMagicRange'>魔法範囲の変更</a></li></font><font size='2'><li><a href='#removeMagicRange'>魔法範囲の削除</a></li></font><font size='2'><li><a href='#returnMagicRange'>魔法範囲削除の取り消し</a></li></font></ul><font size='3'><li><a href='#initiative'>イニシアティブ表示関連</a></li></font><ul><font size='2'><li><a href='#initiativeList'>イニシアティブ情報の表示</a></li></font><font size='2'><li><a href='#addRound'>イニシアティブ情報欄によるラウンド進行</a></li></font></ul><font size='3'><li><a href='#chat'>チャット関連</a></li></font><ul><font size='2'><li><a href='#sendChat'>チャット機能</a></li></font><font size='2'><li><a href='#saveChatLog'>チャットログ保存機能</a></li></font><font size='2'><li><a href='#chatRefreshChaim'>チャット更新着信音</a></li></font><font size='2'><li><a href='#wakeupAlarm'>目覚ましアラーム機能</a></li></font></ul><font size='3'><li><a href='#card'>カード</a></li></font><ul><font size='2'><li><a href='#displayCard'>カード表示</a></li></font><font size='2'><li><a href='#cardZoom'>カード拡大・縮小</a></li></font><font size='2'><li><a href='#cardControl'>カードの操作</a></li></font></ul><font size='3'><li><a href='#dice'>ダイス関連</a></li></font><ul><font size='2'><li><a href='#visualDice'>ビジュアルダイス機能</a></li></font><font size='2'><li><a href='#diceBot'>ダイスボット機能</a></li></font></ul><font size='3'><li><a href='#image'>画像関連</a></li></font><ul><font size='2'><li><a href='#imageFileUploader'>画像ファイルアップローダ</a></li></font><font size='2'><li><a href='#imageUrlUploader'>画像URLアップローダ</a></li></font><font size='2'><li><a href='#imageWebCameraUploader'>WEBカメラ画像アップローダー</a></li></font><font size='2'><li><a href='#removeImage'>画像削除</a></li></font></ul><font size='3'><li><a href='#saveLoad'>セーブ・ロード関連</a></li></font><ul><font size='2'><li><a href='#save'>セーブ</a></li></font><font size='2'><li><a href='#load'>ロード</a></li></font><font size='2'><li><a href='#replay'>リプレイ録画・再生機能</a></li></font></ul></ul><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#cgiServerSetting'>CGIサーバの用意</a></li></font><font size='3'><li><a href='#dodontoFSetting'>設置方法</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#howToCheckSettingAboutDodontoF'>その1：どどんとふの動作確認</a></li></font><font size='3'><li><a href='#howToCheckSettingAboutDiceBot'>その2：ダイスボットの動作確認</a></li></font><font size='3'><li><a href='#othersSetting'>その他</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#HTTPPostBinary_class'>HTTPPostBinary class</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#cardGraphics'>カード用データ</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
+</p>
+
+<h2 id="aboutDodontoF">「どどんとふ」って何？</h2>
+「どどんとふ」はTRPGのオンラインセッションをお手軽＆楽しく遊ぶために作られたツールです。<br>
+ブラウザだけで全ての操作が可能。<br>
+マップ表示もキャラクター配置もチャットもイニシアティブ管理も、さらには動画や音楽の共有まで楽しめます。<br>
+OSをほとんど気にせず動作します。WindowsでもMacでもUNIXでもOK。<br>
+マップは四角形で区切られたいわゆる「スクウェアマップ」タイプです。D&amp;D3rd,3.5th,4thやウォーハンマー、あるいはソードワールド2.0やアリアンロッドといったTRPGで利用できます。<br>
+とりあえず使ってみたい人は続けて次の「<a href="#execteEnviroment">実行環境</a>」「<a href="#howToUse">使用方法</a>」を読んでください。<br>
+自分で「どどんとふ」を設置してみたい！と思った方は「<a href="#howToSetting">設置方法</a>」を参照してください。<br>
+
+<h2 id="execteEnviroment">実行環境</h2>
+「どどんとふ」を使用するには、インターネットに接続可能なPCとブラウザ、そしてブラウザへのAdobe Flash Playerのインストールが必須になります。<br>
+Windows版だと下記が最新のはず。<br>
+<a href="http://www.adobe.com/shockwave/download/index.cgi?Lang=Japanese&P1_Prod_Version=ShockwaveFlash">http://www.adobe.com/shockwave/download/index.cgi?Lang=Japanese&P1_Prod_Version=ShockwaveFlash</a><br>
+Flashって何？という方はすでに入っている可能性もありますので、<br>
+とりあえず「どどんとふ」のトップページ<br>
+<a href="http://www.dodontof.com/DodontoF/DodontoF.swf">http://www.dodontof.com/DodontoF/DodontoF.swf</a><br>
+にアクセスしてみてください。<br>
+何も画面が表示されないなど不具合があった場合に上記のリンクからFlash Playerをインストールして再度接続してみてください。<br>
+
+<h2 id="howToUse">使用方法</h2>
+以下、大まかな操作方法について<br>
+
+<h3 id="login">ログイン</h3>
+ログイン時のプレイルーム選択<br>
+「どどんとふ」では複数のマップを保存することができます。<br>
+このため、ログイン時にどのマップにアクセスするかを選択する必要があります。<br>
+マップは「プレイルームNo.」で管理されており、デフォルトではNo.0〜100まで選択可能です。<br>
+画面右側に現在のプレイルーム状況が一覧で表示されますので、その中から選択し「ログイン」ボタンを押してください。<br>
+また、プレイ途中に別のプレイルームに移動したくなった場合には画面を開きなおして再度ログインしてください。<br>
+
+<h3 id="map">マップ関連の操作</h3>
+<h4 id="changeMap">マップの変更</h4>
+画面上部のメニューから「マップ」＝＞「マップの変更」を選択。<br>
+出てきた画面に各データを入力し「変更」ボタンを押します。(*1)<br>
+しばらく待つとマップが更新されます。<br>
+なお、マップ画像には自動的にスクウェアが表示されます。<br>
+1スクウェアは50×50ピクセルになります。<br>
+
+<h4 id="mapMask">マップマスクの操作</h4>
+画面上部のメニューから「マップ」＝＞「マップマスクの追加」、あるいはマップ上で右クリックメニューから「マップマスクの追加」を選択。<br>
+出てきた画面に各データを入力し「追加」ボタンを押すとマップが追加されます。<br>
+マスク上で右クリックメニューから削除・固定ができます。<br>
+いったん固定したマスクはマップ上から移動できなくなるため削除するしかありません。<br>
+
+<h4 id="zoomMap">マップの拡大縮小</h4>
+マップ上にマウスカーソルを置いて、マウスホイールを上下するとカーソル位置を中心にマップの拡大・縮小ができます。<br>
+メニューにある虫眼鏡アイコンでも拡大・縮小できます。<br>
+この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
+
+<h4 id="moveMap">マップの移動</h4>
+マップ上でマウスをクリックしドラッグしてください。<br>
+この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
+<br>
+
+<h3 id="character">キャラクター関連の操作</h3>
+注意：魔法範囲もキャラクターと（ほぼ）同様に扱います。<br>
+
+<h4 id="addCharacter">キャラクターの追加</h4>
+マップ上で右クリックし「キャラクターの追加」を選択します。<br>
+キャラクター追加画面が表示されるので、各データを入力し「追加」ボタンを押します。(*1)<br>
+キャラクターはマップのクリックした地点に配置されます。<br>
+キャラクターが作成されるとイニシアティブ情報欄に情報が追加されます（後述）<br>
+
+<h4 id="moveCharacter">キャラクターの移動</h4>
+追加したキャラクターを移動する場合には、キャラクターの画像上でマウスボタンをクリックしドラッグしてください。<br>
+ドロップした場所に移動します。<br>
+移動したキャラクターは最前面に（他のキャラクターよりも上に）表示されます。<br>
+
+<h4 id="changeCharacter">キャラクターの変更</h4>
+キャラクターの画像で右クリック、メニューが出てくるのでその中から「キャラクターの変更」をクリックします。<br>
+画面が表示されますので、変更したいデータを入力し「変更」ボタンを押します。<br>
+
+<h4 id="removeCharacter">キャラクターの削除</h4>
+キャラクターの画像で右クリック、メニューが出てくるのでその中から「キャラクターの削除」をクリックします。<br>
+削除したキャラクターは「墓地」から元の配置に戻すことができます。（後述）<br>
+キャラクターが削除されるとイニシアティブ情報欄の情報も削除されます（後述）<br>
+
+<h4 id="returnCharacter">キャラクター削除の取り消し</h4>
+画面上部のメニューから「変更」＝＞「墓地」を選択。<br>
+墓地画面から削除を取り消したいキャラクターを選択し「復活」ボタンを押します。<br>
+キャラクターが削除前に配置されていた場所に再配置されます。<br>
+
+<h4 id="addMacgicRange">魔法範囲の作成</h4>
+キャラクターと同様にマップ上で右クリックし「魔法範囲の追加」を選択します。<br>
+魔法範囲は作成時に有効ラウンド数を指定することで、イニシアティブ管理票に残り有効ラウンド数が表示されるようになります。<br>
+バインドなど範囲系魔法の持続時間管理に活用してください。<br>
+
+<h4 id="changeMagicRange">魔法範囲の変更</h4>
+キャラクターと同様に魔法範囲の上で右クリック、メニューが出ますので、その中から「魔法範囲の変更」をクリックします。<br>
+
+<h4 id="removeMagicRange">魔法範囲の削除</h4>
+キャラクターと同様に魔法範囲の上で右クリック、メニューが出ますので、その中から「魔法範囲の削除」を選びます。<br>
+
+<h4 id="returnMagicRange">魔法範囲削除の取り消し</h4>
+キャラクターと同様に「墓地」から魔法範囲の「復活」を実行します。<br>
+
+<h3 id="initiative">イニシアティブ表示関連</h3>
+
+<h4 id="initiativeList">イニシアティブ情報の表示</h4>
+イニシアティブ情報欄は常に画面に表示されています。<br>
+キャラクター（や魔法範囲）を追加すると表示欄に追加されたキャラクターのイニシアティブ情報が追加されます。<br>
+
+<h4 id="addRound">イニシアティブ情報欄によるラウンド進行</h4>
+イニシアティブ情報欄には現在イニシアティブを持っているキャラクターの情報を黄色く強調表示してあります。<br>
+「次へ」ボタンを押すと、現在のイニシアティブ番号を次のキャラクターに進めることができます。<br>
+「戻る」ボタンを押すと、現在のイニシアティブ番号をひとつ前のキャラクターに戻すことができます。<br>
+イニシアティブをどんどん進め、一番最後のキャラクターまでたどり着くと次の「ラウンド」に進みます。<br>
+同一のイニシアティブ値のキャラクターがいる場合には敏捷の高い方が優先になるなどの対処が必要になります。<br>
+この場合、イニシアティブの高いほうの値に小数点以下で差分をつけると管理しやすいと思います。<br>
+たとえば イニシアティブが共に16のキャラクターがいた場合、敏捷度の高いほうのイニシアティブを 16.1 と入力します。<br>
+
+<h3 id="chat">チャット関連</h3>
+<h4 id="sendChat">チャット機能</h4>
+チャット画面は常に表示されています。<br>
+名前欄には発言者の名前を入力し、その下のメッセージ欄にチャットのメッセージを入力してください。<br>
+メッセージ欄でリターンキーを押すか「送信」ボタンを押すとメッセージが送信されます。<br>
+他のテキストファイルからコピーするなどすればメッセージ欄に改行文字も入力できます。<br>
+また発言者の横の四角ボタンを押すと色選択画面が表示され、文字の色を変えることができます。<br>
+
+<h4 id="saveChatLog">チャットログ保存機能</h4>
+チャット画面の「ログ保存」ボタンを押すことでHTML形式でチャットログが表示されます。<br>
+
+<h4 id="chatRefreshChaim">チャット更新着信音</h4>
+チャットに新しいメッセージの着信があった際に、効果音を鳴らすかどうかを選択します。<br>
+このチェックは後述の目覚ましアラームの音を発生するか、にも併用します。<br>
+静かな環境をお好みの方はチェックを外しておいてください。
+
+<h4 id="wakeupAlarm">目覚ましアラーム機能</h4>
+チャット画面の「目覚まし」ボタンを押すと目覚ましアラーム送信画面が表示されます<br>
+同一プレイルームの全員にアラームを送付する場合には＜全員＞を<br>
+それ以外はアラームを送付したいプレイヤー名を選択・あるいは入力してください。<br>
+指定した相手にのみ目覚ましアラームが鳴ります<br>
+アラームは sound/alarm.mp3 ファイルを使用していますので、任意のファイルを同一名で差し替えることで音を変更することができます。<br>
+寝オチプレイヤーを起こすのに、あるいはメンバーへの呼びかけ等に使用してください。<br>
+なお、スピーカー型アイコンが停止表示の際にはアラームはなりません。（ログイン直後は停止状態）<br>
+
+
+<h3 id="card">カード</h3>
+
+<h4 id="displayCard">カード表示</h4>
+画面上部メインメニューの「表示」＝＞「カード表示」を選択するとカード置き場が表示されます<br>
+
+<h4 id="cardZoom">カード拡大・縮小</h4>
+カード置き場の上にカーソルを置いて、マウスホイールを上下するとカーソル位置を中心にカード置き場の拡大・縮小ができます。<br>
+この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
+
+<h4 id="cardControl">カードの操作</h4>
+画面上部メインメニューの「カード」からカードの削除・初期化ができます。<br>
+カードはトーキョーN◎VAのニューロデッキ、トランプ、TORGドラマデッキに対応しています。<br>
+カードの初期化時にはカードの組毎に「山札」と「捨て札」の2つの山が作成されます。<br>
+「山札」の右クリックメニューからカードを引くことができます。<br>
+カードは自分にだけ見えるように引く方法（非公開状態）と、全員に見えるように引く方法（公開状態）があります。<br>
+引いたカードの右クリックメニューから非公開カードを公開に、公開カードを非公開にすることもできます。<br>
+使用し終わったカードは「捨て札」の上にドラッグして置いてください。<br>
+カードが「捨て札」の上に移動し、その後「捨て札」に吸い込まれます。<br>
+一度捨てたカードは「捨て札」の右クリックメニューから取り出すことができます。<br>
+
+<h3 id="dice">ダイス関連</h3>
+
+<h4 id="visualDice">ビジュアルダイス機能</h4>
+チャット欄でのダイスロールは実用的ですが、これでは物寂しいあなたのための機能。<br>
+画面右下のダイス表示欄をクリックするとそのダイスがマップ上に表示されます。最大で50個まで表示できます。<br>
+マップ上に表示されたダイスをクリックすると一斉にダイスロールされます。<br>
+ロール後、実行結果がメッセージ欄に表示されます。<br>
+ダイナミック且つ無意味。<br>
+
+<h4 id="diceBot">ダイスボット機能</h4>
+本機能はFacelessさんの「ボーンズ＆カーズ(bcdice.pl)」を元に作成しています。（ありがとうFacelessさん！）<br>
+このため、「どどんとふ」のチャットが不調な場合等にIRCを併用される際には、上記のダイスボットを使用するとスムーズに移行することができると思います。<br>
+<br>
+ダイスボットとは：<br>
+チャット上でダイスロールを行うことができる機能です。<br>
+例）「ななしさん」がチャットに「2d6 攻撃！」と入力した場合<br>
+　　ななしさん：2d6 攻撃！<br>
+　　diceBot: (2d6) → 7<br>
+これで、2d6の結果が「7」であることが分かります。<br>
+また例のようにダイスロール文字の後ろに半角スペースもしくは全角スペースを空ければ、好きなメッセージが追加できます。<br>
+ダイスロール文字には以下のパターンがあります。(例の英字は全て小文字ですが、大文字でもかまいません。)<br>
+<br>
+　3d6 → ダイスをロールして合算結果を出力する。<br>
+例）diceBot: (3d6) → 12<br>
+<br>
+　3d6+1>=11 →目標値11に対して合算結果が超えたかの判定を行う。<br>
+例）diceBot: (3d6+1>=11) → 6+1 → 7 → 失敗<br>
+　1d100<=50　のように下方にも判定可能<br>
+例）diceBot : (1d100<=50) → 23 → 成功<br>
+<br>
+　3B6 →ダイスを合算せず、バラバラに出力だけを行う。<br>
+例）diceBot : (3B6) → 2,1,4<br>
+<br>
+　3u6[6] →ダイスが6の場合に振り足し（上方無限）。（シャドウランや天羅用）<br>
+例）diceBot : (3u6[6]) → 2,13,2 → 合計 17<br>
+　10u6>=4 →更に天羅やシャドウランに特化して、10個ダイスを振り4を超えた個数を数える。<br>
+例）ShadowRun : (10U6[6]>=4) → 1,1,1,1,3,4,4,4,4,5 → 成功数5<br>
+<br>
+　[1...3]D[1...6] →ランダム数値の埋め込み<br>
+ダイスの個数がランダムに変化するなど、コマンド中に乱数を埋め込む必要がある時には<br>
+「[Min...Max]」(Min=乱数の最小値, Max=乱数の最大値。どちらも自然数)と書くと<br>
+乱数を埋め込むことが出来ます。<br>
+例)<br>
+[1...5]D6　　　([2...4]+2)D10　　　×[(2+3)...8]D6（←これはNG<br>
+<br>
+<br>
+【ソードワールド、ソードワールド2.0専用】<br>
+　K20+3→20のレーティング表の結果に+3した値を取得。<br>
+例）SwordWorld2.0 : KeyNo.20+3 → 2D:5 → 3+3 → 6<br>
+　K10+5[9]→10のレーティング表を9クリティカルで結果に+5した値を取得。<br>
+例）SwordWorld2.0 : KeyNo.10[9]+5 → 2D:9,5 → 7+5 → 12 → 1回転<br>
+<br>
+【ウォーハンマー専用】<br>
+　whH10 →クリティカル表結果出力。"WH部位 クリティカル値"の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。<br>
+例）Warhammer :腕部CT表(29+5) → 09:大動脈に傷が及んだ。コンマ数秒の内に損傷した肩から血を噴出して倒れる。ショックと失血により、ほぼ即死する。サドンデス×<br>
+<br>
+　wh60 →命中判定。"WH(命中値)@(種別)"の形で指定します。<br>
+部位は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。<br>
+「2H(二足)」「2W(有翼二足)」「4(四足)」「4H(半人四足)」「4W(有翼四足)」「W(鳥類)」となります。<br>
+命中判定を行って、当たれば部位も表示します。<br>
+なお、種別指定を省略すると「二足」、「@」だけにすると全種別の命中部位を表示します。(コマンドを忘れた時の対応です)<br>
+例）以下、各種出力例<br>
+wh60<br>
+Warhammer : (WH60) → 1 → 成功(成功度5) 二足:頭部<br>
+Wh43@4W<br>
+Warhammer : (WH43) → 1 → 成功(成功度4) 有翼四足:頭部<br>
+WH65@<br>
+Warhammer : (WH65) → 2 → 成功(成功度6) 二足:右腕 有翼二足:右腕 四足:胴体 半人四足:右腕 有翼四足:右翼 鳥:右翼<br>
+<br>
+【Chill専用】<br>
+　SR7 →ストライク・ランク・チャートに従って自動でダイスロールを行い、負傷とスタミナロスを計算します<br>
+例）Chill : (SR7:4d10, 1d10) → 20, 2 → スタミナ損失20, 負傷2<br>
+<br>
+【デモンパラサイト専用】<br>
+URGEx →"URGE衝動レベル"の形で指定します。<br>
+衝動表に従って自動でダイスロールを行い、結果を表示します。<br>
+ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。<br>
+"nURGE衝動レベル"と頭にNを付けると「新衝動表」、頭にAを付けると「誤作動表」<br>
+頭にMを付けると「ミュータント衝動表」になります。<br>
+<br>
+例）URGE1　nurge2　AURGE3　murge4　Surge5<br>
+<br>
+【シノビガミ専用】<br>
+BT→戦場表を振る<br>
+ET→感情表を振る<br>
+FT→ファンブル表を振る<br>
+ST→シーン表を振る<br>
+WT→変調表を振る<br>
+CST→都市シーン表を振る<br>
+MST→館シーン表を振る<br>
+DST→出島シーン表を振る<br>
+<br>
+<br>
+【ダブルクロス専用】<br>
+ダブルクロスの判定　(xDX@c)<br>
+ダブルクロス2ndおよび3rdの判定コマンド。<br>
+"(個数)DX(修正)@(クリティカル値)"で指定します。<br>
+加算減算のみ修正値も付けられます。<br>
+内部で読み替えています。<br>
+例）<br>
+10dx　　　10dx+5@8　　　5DX10+7-3@7<br>
+<br>
+ET→感情表を振る<br>
+例）<br>
+DoubleCross : 感情表(6-89) → ○憧憬(どうけい) - 不快感(ふかいかん)<br>
+<br>
+【トンネルズ＆トロールズ専用】<br>
+T&T バーサーク　　　　　(nBS+x)  (n:ダイス数, x:修正)<br>
+T&T ハイパーバーサーク　(nHBS+x) (n:ダイス数, x:修正)<br>
+<br>
+【ダークブレイズ専用】<br>
+判定　　(DBx,y#m)(DBxy#m)(DB@x@y#m) (x:能力値, y:技能値, m:修正)<br>
+掘り出し袋表　　(BTx) (x:ダイス数)<br>
+<br>
+<br>
+【ガンドッグ・ゼロ専用】<br>
+・ダメージペナルティ表　　(～DPTx) (x:修正)<br>
+　　射撃DP表(SDPT)、格闘DP表(MDPT)、車両DP表(VDPT)、汎用DP表(GDPT)<br>
+・ファンブル表　　　　　　(～FTx)  (x:修正)<br>
+　　射撃F表(SFT)、格闘F表(MFT)、投擲F表(TFT)<br>
+<br>
+<br>
+【ナイトウィザード専用】<br>
+・判定ロール (nNW+m@x#y) <br>
+　　(n:基本値+常時, m:否常時+状態異常, x:クリティカル値, y:ファンブル値)<br>
+<br>
+<br>
+<h3 id="image">画像関連</h3>
+<h4 id="imageFileUploader">画像ファイルアップローダ</h4>
+キャラクターあるいはマップに使用するための画像をサーバに転送することができます。<br>
+画面上部の「画像アップロード」ボタンを押すと画像アップロード用画面が表示されますので、ローカルのファイルを指定して転送実施してください。<br>
+画像は「地図」と「キャラクター画像」の2種類が選べます。<br>
+共に2MBのファイルサイズの画像までしかアップロードできません。<br>
+またファイル数は500が上限のため、それを超える場合は一番古いファイルが自動的に削除されます。<br>
+（サーバ作成者用注釈：これら上限値はファイル config.rb 内で $UPLOAD_IMAGE_MAX_SIZE および $UPLOAD_IMAGE_MAX_COUNT としてとして定義されていますので、書き換えることで変更が可能です。）<br>
+
+<h4 id="imageUrlUploader">画像URLアップローダ</h4>
+上記の「画像ファイルアップローダ」に似ていますが、ローカルファイルではなく外部URLを登録できます。<br>
+実際にはファイルを転送するわけではなくURLが記録されるだけですので、ファイル転送に比べて容量の上限もなく高速です。<br>
+ただし指定できる画像には厳しい制限があります。(*1)<br>
+一番手軽な利用方法はGoogleの画像検索からURLを取得する方法です。<br>
+
+<h4 id="imageWebCameraUploader">WEBカメラ画像アップローダー</h4>
+WEBカメラを接続した状態でメニューの「WEBカメラ画像アップローダー」を選択。<br>
+画面の指示に従って「撮影」「アップロード」を順次実行すると、WEBカメラで撮影した画像をキャラクター画像としてアップロードできます。<br>
+
+<h4 id="removeImage">画像削除</h4>
+上記の画像ファイルアップローダ・画像URLアップローダでアップロードした画像情報を削除します。<br>
+一覧で表示されている画像をクリックすると画像が選択状態になります。<br>
+再度クリックで選択解除。<br>
+「一括削除」ボタンを押すと選択状態の画像が全て削除されます。<br>
+<br>
+<br>
+(*1)画像の指定に関する注意点<br>
+キャラクターやマップの作成・変更では画像にURLが指摘できますが以下の制限があります。<br>
+・JPEG/PNG/GIF のみ指定可能。アニメーションGIFは最初の1フレーム目しか表示されません。<br>
+・同一のドメイン下のファイルは指定できます。<br>
+たとえば、 http://www.dodontof.com/DodontoF/DodontoF.swf が「どどんとふ」の画面であれば、<br>
+http://www.dodontof.com/ で始まるファイルなら指定できます。<br>
+・同一ドメイン以外でも指定できる場合があります。<br>
+Goole配下の全ての画像、たとえばイメージ検索で表示された画像は指定可能です。<br>
+またYahoo配下のファイルも同様に指定可能です。<br>
+これは技術的な話で言うとFlashの設定ポリシー(crossdomain.xml)をサーバ管理者が設定(許可)しているかで決まります。 <br>
+つまりGoogleとYahooは積極的にFlash系ツールへの情報公開を行っている、と言えます。<br>
+その他の各サイトが対応しているかは個別に調べる必要がありますが、残念ながら大抵のサイトは非公開だと考えてもらった方が良いでしょう。<br>
+
+
+<h3 id="saveLoad">セーブ・ロード関連</h3>
+
+<h4 id="save">セーブ</h4>
+上部メニューの「ファイル」＞「セーブ」からセーブ画面が起動します。<br>
+起動後しばらくすると「セーブ」ボタンが押せる状態となります。<br>
+セーブを実行するとローカルにセーブファイルを保存することができます。<br>
+保存されるデータは、マップ画像・サイズ・簡易マップ・キャラクターや魔法範囲等のコマ、イニシアティブ状態、などほぼ全てになります。<br>
+マップだけ、のように一部データのみのセーブ・ロードには現状対応していません。<br>
+
+<h4 id="load">ロード</h4>
+上部メニューの「ファイル」＞「ロード」からロード画面が起動します。<br>
+セーブ時に保存したセーブファイルをロードすることで、ほぼそのままの環境に復旧することができます。<br>
+
+<h4 id="replay">リプレイ録画・再生機能</h4>
+操作したプレイ内容をPC上に保存し、いつでも再生（リプレイ）出来る機能です。<br>
+上部メニューの「ファイル」−＞「録画開始」を押すと録画開始。<br>
+適当に操作を実施したら、同じく<br>
+上部メニューの「ファイル」−＞「録画終了」を押して録画を終了。<br>
+録画ファイル（〜.rec）の保存画面が出ますので、PC上にファイルを保存してください。<br>
+再生するには一旦ログイン画面に戻り、ログイン画面の右下「リプレイ再生」ボタンを押します。<br>
+ファイル選択画面が出るので、先ほど保存した録画ファイル（〜.rec）を選択します。<br>
+後は操作しないで待って頂ければ、録画したプレイ内容が順次再生されます。<br>
+
+
+<h2 id="howToSetting">設置方法</h2>
+
+「どどんとふ」を自前のサーバに設置してみよう、と思った人用の情報です。<br>
+使うだけの人や「サーバって何？」という人は読み飛ばしてOKです。<br>
+
+<h3 id="download">実行ファイル一式のダウンロード</h3>
+「どどんとふ」本体を以下からダウンロードしてください。<br>
+最新版が取得できます。<br>
+<a href="http://www.dodontof.com/DodontoF/newestVersion.html">http://www.dodontof.com/DodontoF/newestVersion.html</a><br>
+
+<h3 id="cgiServerSetting">CGIサーバの用意</h3>
+まず、Rubyの動くCGIサーバが必要です。<br>
+レンタルサーバであれば、<br>
+<br>
+<a href="http://www.xrea.com/">xrea</a><br>
+<a href="http://land.to/">land.to</a><br>
+<a href="http://atpages.jp/">@PAGES</a><br>
+<a href="http://moover.jp/">Mover</a><br>
+<a href="http://www.sakura.ad.jp/">さくらインターネット</a><br>
+<a href="http://www.xserver.ne.jp/">エックスサーバー</a><br>
+<s><a href="http://www.wisnet.ne.jp/">WISNET</a></s>→２００９年よりサーバ設定変更のため使用不能に？<br>
+<br>
+で動作実績があります。（オフィシャルサイトはxreaを使っています）<br>
+<br>
+またデータの保存にMySQLというデータベースを使うと動作が軽くなりますのでオススメです。<br>
+現状xreaがサポートしていることは確認済みですが、それ以外のサーバは皆さんからの人柱報告を大募集しております。<br>
+<br>
+どどんとふでは上記のようなレンタルサーバを借りてのCGI設置を大前提としています。<br>
+<br>
+もちろん、自分のPCをサーバにして開放することも出来ますが、それ相応の知識と手間、セキュリティー意識が必要となりますので、あまりお勧めはしません。<br>
+あくまで自己責任でお願いいたします。<br>
+<br>
+以下、自分のPCでサーバを立てる場合のTipsについて。<br>
+<br>
+<br>
+Windowsであれば <a href="http://www.st.rim.or.jp/~nakata/">AN HTTPD</a> を使用して、Windows版Rubyを使用するのが手軽かと思います。<br>
+参考：<a href="http://homepage1.nifty.com/yito/anhttpd/faq/ruby.html">http://homepage1.nifty.com/yito/anhttpd/faq/ruby.html</a><br>
+またWindowsで環境設定する場合、ダイスボットの乱数が期待通り動かない場合がありますので、以下の手順に従ってください。<br>
+まず<a href="src_perl/readme_BC.txt">src_perl/readme_BC.txt</a> のインストール手順を参照し、メルセンヌツイスター用のモジュール(Math-Random-MT)のみをインストールします（NET-IRCは不要です。入れても問題はありませんが）。<br>
+また customBot.pl の<br>
+<br>
+# BEGIN {     # メルセンヌ・ツイスターがインストールされていれば通常の乱数とコンパチで使う<br>
+（中略)<br>
+#     }<br>
+# }<br>
+<br>
+の行頭の # を削ってコメントアウトをはずし、メルセンヌ・ツイスターを有効にしてください。<br>
+<br>
+Unix系OSで自前でサーバを立てる場合は個別に知識が必要となります。<br>
+筆者はそちらの方面は詳しくないので、自力でがんばってみてください。<br>
+<br>
+以下、外部のCGIサーバサービス(xrea等)を使用する場合についての設定手順解説を述べます。<br>
+繰り返しますが、開発者としてはこちらがオススメです。手軽ですしね。<br>
+<br>
+<h3 id="dodontoFSetting">設置方法</h3>
+DodontoF.zipを展開します。<br>
+展開したら、<br>
+　DodontoFServer.rb<br>
+　WebCameraCaptureImageUploader.rb<br>
+はRubyへのパスを<br>
+　customBot.pl<br>
+はPerlへのパスを<br>
+それぞれファイルの先頭行に記載してください。<br>
+上記ファイルは文字コードがUTF-8、改行コードはUNIX方式になります。このためサクラエディタ等のそれ相応のエディタで編集するよう、またパス編集時にRuby/Perlのスクリプトのコマンド引数を変更しないように注意してください。(Rubyであれば  -Ku は削除しないでください)<br>
+パスはサーバに依存するため、各自で調べてください。<br>
+xrea の場合、初期値のままで問題ありません。多分。<br>
+<br>
+上記編集が完了したら、src_actionScript ディレクトリを除いた全てのファイルをCGI用サーバに転送してください。<br>
+　注：ファイルの転送は必ず全ファイルともバイナリモードで行ってください。<br>
+　　上述の文字コードの関係上、アスキーモードで転送してしまうとサーバの処理が失敗することになります。。<br>
+　　WinddowsではFFFTPという転送ツールが実績もありお勧めです。「B」マークのアイコンを押してバイナリ転送してください。<br>
+<br>
+転送後、以下のとおりファイル・ディレクトリの権限(属性)を変更します。<br>
+・「755」(実行権限あり)に変更するもの<br>
+　DodontoFServer.rb<br>
+　WebCameraCaptureImageUploader.rb<br>
+　customBot.pl<br>
+　saveData (ディレクトリ)<br>
+　imageUploadSpace (ディレクトリ)<br>
+　imageUploadSpace/smallImages (ディレクトリ)<br>
+　saveDataTempSpace (ディレクトリ)<br>
+　fileUploadSpace (ディレクトリ)<br>
+　replayDataUploadSpace (ディレクトリ)<br>
+<br>
+・「666」(書き込み権限あり)に変更するもの<br>
+　log.txt<br>
+　log.txt.0<br>
+<br>
+最後にディレクトリの設置場所を変更します。<br>
+以下の変更を行わない場合、次回「どどんとふ」をバージョンアップ際に画像ファイルやセーブデータが消える場合があります。<br>
+<br>
+まず、画像ファイルアップロード用のディレクトリ<br>
+<br>
+　imageUploadSpace<br>
+<br>
+を DodontoF ディレクトリと同じ階層（つまり今の1つ上のディレクトリ）に移動します。<br>
+次にセーブファイルディレクトリ<br>
+<br>
+　saveData<br>
+<br>
+の設置場所をWEB上から見えないパスに変更します。<br>
+具体例を挙げると、<br>
+<br>
+/public_html/DodontoF/DodontoFServer.rb<br>
+/public_html/DodontoF/imageUploadSpace<br>
+/public_html/DodontoF/saveData<br>
+<br>
+が初期設置であれば、<br>
+<br>
+/public_html/DodontoF/DodontoFServer.rb<br>
+/public_html/imageUploadSpace<br>
+/saveData<br>
+<br>
+と言った配置に変えます。<br>
+(imageUploadSpaceはWEB上から参照可能なディレクトリにするよう注意してください。)<br>
+次に、<br>
+src_ruby/config.rb<br>
+の<br>
+<br>
+$SAVE_DATA_DIR = '.'<br>
+<br>
+$imageUploadDir = "./imageUploadSpace"<br>
+<br>
+を、それぞれ上記で変更したパスを指すように変更します。<br>
+相対パスの場合の基点は DodontoF.swf になります。<br>
+上記の例の場合なら<br>
+<br>
+$SAVE_DATA_DIR = '../..'<br>
+<br>
+$imageUploadDir = "../imageUploadSpace"<br>
+<br>
+とします。<br>
+<br>
+<h3 id="dodontoFSettingMySQL">設置方法その２：MySQLサーバ編</h3>
+次に、MySQLというデータベースを使用してセーブデータの管理を行う場合について。<br>
+「MySQLって何？データベースって聞いたことあるようなないような」<br>
+と言う方はググって調べるか、あるいは諦めましょう。<br>
+この設定を行うと「どどんとふ」の動作が軽くなるのですが、設定しなくても従来通りに使用は可能ですのでそこまで問題にはなりませｎ。<br>
+<br>
+では設定方法について。ファイル<br>
+<br>
+src_ruby/config.rb<br>
+の
+<pre><code>
+#MySQLを使用する場合のDB設定。
+$databaseHostName = "127.0.0.1"
+$databaseName = "databaseName"
+$databaseUserName = "user"
+$databasePassword = "password"
+</code></pre>
+の部分を上から順番に接続先ホスト名、データベース名、DBユーザー名、DBパスワードに設定します。
+接続先ホスト名はデフォルトの localhost で問題ないと思いますが、Windowsサーバの場合は 127.0.0.1 にする必要があります。<br>
+その他の設定値も含めて、使用しているサーバの設定に従うようにして下さい。<br>
+<br>
+同様に、同じファイルの
+<pre><code>
+#セーブデータの管理方法(nil/"mysql")
+$dbType = nil
+</code></pre>
+の部分を
+<pre><code>
+#セーブデータの管理方法(nil/"mysql")
+$dbType = "mysql"
+</code></pre>
+に変更して下さい。<br>
+<br>
+以上で設置作業は完了です。<br>
+<br>
+<h3 id="howToCheckSetting">動作確認方法</h3>
+<h3 id="howToCheckSettingAboutDodontoF">その1：どどんとふの動作確認</h3>
+ブラウザをを立ち上げて、アップロードしたCGIサーバの<br>
+ DodontoFServer.rb<br>
+を開いてください。<br>
+設置が正しく行われている場合は、<br>
+<br>
+#D@EM&gt;#["「どどんとふ」の動作環境は正常に起動しています。"]#&lt;D@EM#<br>
+<br>
+のメッセージが、あるいはMySQLの設定を行っている場合は<br>
+<br>
+#D@EM&gt;#["「どどんとふ（MySQL）」の動作環境は正常に起動しています。"]#&lt;D@EM#<br>
+<br>
+のメッセージが画面に表示されます。<br>
+表示されない場合は、 DodontoFServer.rb のファイル先頭のRubyのパス指定が間違っている可能性があります。<br>
+「<a href='#howToSetting'>設置方法</a>」をよく読んでもう一度確認してみてください。<br>
+<br>
+メッセージ表示が確認できたら、次は<br><br>
+ DodontoF.swf<br>
+を開いてください。<br>
+「どどんとふ」のログイン画面が表示されれば成功です。<br>
+<br>
+<h3 id="howToCheckSettingAboutDiceBot">その2：ダイスボットの動作確認</h3>
+ダイスボットは「どどんとふ」のチャット上でダイスを擬似的に振るための機能です。詳しくは「<a href='#diceBot'>ダイスボット機能</a>」を参照してください。<br>
+ブラウザをを立ち上げて、アップロードしたCGIサーバの
+customBot.html<br>
+を開いてください。<br>
+入力欄が２つあるHTMLが開きますので、上の「message」入力欄に<br>
+「2D6」<br>
+とだけ入力して「送信」ボタンを押してください。<br>
+「2D6 SwordWorld 2.0 : (2D6) ＊＊＊」（＊＊＊の部分は文字化けでもかまいません)<br>
+のように表示されば正しく設定されています。<br>
+何も文字が表示されない場合は、 customBot.pl のファイル先頭のPerlのパス指定が間違っている可能性があります。<br>
+「<a href='#howToSetting'>設置方法</a>」をよく読んでもう一度確認してみてください。<br>
+上記を試しても正しく動作しないなどの理由により、ダイスボット機能を使用しない場合は<br>
+src_ruby/config.rb の $isDiceBotOn を false に設定してください。<br>
+ダイスボット機能が使用されず、チャットウィンドウのダイスボッツ設定項目も表示されなくなります。<br>
+<br>
+最後に、デフォルトで登録されている画像のキャッシュを作成します。<br>
+この手順は飛ばしても運用上支障はありません。ちょっと動作が速くなる程度なので、気にしない方は飛ばしてください。<br>
+(あなたのどどんとふへのURL)/DodontoF.swf?createSmallImage=on<br>
+でURLを開いて、画面の支持にしたがってボタンを操作してください。<br>
+画像の表示高速化用にキャッシュが作成されます。<br>
+<br>
+以上で設置に必要な作業は完了です。<br>
+お疲れ様でした。<br>
+<br>
+<h3 id="othersSetting">その他</h3>
+ログイン画面にに表示される「お知らせ」は loginMessage.txt を書き換えることで変更可能です。<br>
+<br>
+MySQLデータベース機能はお試し版のため従来の機能と両立する方法もあります。<br>
+その場合は、<br>
+１．<br>
+src_ruby/config.rbの$dbTypeを<br>
+$dbType = nil<br>
+に戻す。<br>
+２．<br>
+DodontoFServerMySql.rb<br>
+に他の.rbファイルと同じように実行権限を与えて、Rubyへのファイルパスを先頭行に記述する。<br>
+これで<br>
+DodontoF.swf?mode=mysql<br>
+にアクセスするとMySQL機能を使い、普通に<br>
+DodontoF.swf<br>
+にアクセスすると普段のファイル機能を使うようになります。<br>
+<br>
+<br>
+<h2 id="forDevelopment">開発向けの詳細</h2>
+
+以下はソースコードの中身に興味がある人用の情報です。<br>
+単純に利用するだけであれば読まなくでも問題ありません。<br>
+
+<h3 id="aboutCompile">コンパイル方法について</h3>
+「どどんとふ」でコンパイルして作成する必要があるのはFlex(ActionScript)の生成ファイル<br>
+DodontoF.swf<br>
+のみです。<br>
+以下、Windowsでのコンパイル方法について述べます。<br>
+
+<h3 id="aboutCompileInWindows">Windowsでのコンパイル方法</h3>
+コンパイルには<br>
+http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+3<br>
+から 3.2.0.3794 の Open Source Flex SDK をダウンロードします。<br>
+ダウンロードファイルを展開後、binディレクトリへパスを通しておきます。<br>
+またJavaも必要なため、<br>
+https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_Developer-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=jdk-6u11-oth-JPR@CDS-CDS_Developer<br>
+から「Java SE Development Kit 6u11」をダウンロードし、インストールしておきます。
+その後、DodontoF/src_actionScript ディレクトリで以下を実行します。<br>
+<br>
+mxmlc.exe  -services ./services-config.xml -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isGaeRuby,false -define=COMPILE::isGaeJava,false -define=COMPILE::isReplayer,false -define=COMPILE::isAir,false -define=COMPILE::isMySql,false -include-libraries+=./corelib/bin/corelib.swc;./lib/ymlib.swc DodontoF.mxml output ../DodontoFTest.swf<br>
+<br>
+これで DodontoF.swf が作成されるはずです。<br>
+作成された DodontoF.swf を DodontoF 直下に移動してください。<br>
+<br>
+コンパイル方法は以上です。<br>
+<br>
+上記以外はRubyのコードになりますのでファイルを直接編集してもらえれば反映されます。<br>
+ソースコードの内、〜Testで終わるファイルはUnitTest用ですので通常の運用では変更する必要はありません。<br>
+
+<h2 id="aboutLicense">ライセンスについて</h2>
+以下、各種同根ファイルを含めたライセンスについて。<br>
+<br>
+・使用許諾について<br>
+「どどんとふ」のライセンスは修正BSDライセンスとします。<br>
+URL： http://www.dodontof.com<br>
+配下の関連ページが開発元として参照できさえすれば、任意に使用していただいてかまいません。<br>
+（そのまま使用していただければ、ヘルプからURLが参照可能ですので問題ありません）<br>
+<br>
+ただし、以下に述べる本ツールに付属のライブラリ・画像データについては、それぞれのライセンスに従ってください。<br>
+こちらも、通常の公開・使用については特に問題ないはずです。<br>
+
+<h3 id="fileConstraction">ファイル構成</h3>
+ファイル構成は以下のとおりです。<br>
+<br>
+DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
+|<br>
++---:as2_tubeloc.swf:tubeloc、Youtube動画再生用ライブラリ(後述)<br>
+|<br>
++--+:saveData：各種データの保存先ディレクトリ。<br>
+|　+--:characterImages：キャラクターの画像はここに保管されます。(後述)<br>
+|　+--:data_x：プレイルーム用データはここに保管されます。xにはプレイルーム番号が付与されます。<br>
+|　+--:mapImages：マップの画像はここに保管されます。<br>
+|<br>
+|--:cards：カード用データ(後述)<br>
++--:saveDataDefault：新規作成時のプレイルーム用データ<br>
+|<br>
++--+:src_ruby：サーバCGI側、Ruby用のソースコード<br>
+|　+--json : サーバ・クライアント間データ転送用ライブラリ「jsonParser.rb」が含まれています。(後述)<br>
+|<br>
++--+:src_actionScript：クライアントGUI側、Flex(Flash)用のソースコード<br>
+   +--:com：tubeloc、Youtube動画再生用ライブラリ(後述)<br>
+ 　+--:corelib：Json変換用Flexライブラリ(後述)<br>
+ 　+--:diceImage：DiceInfo.asで使用しているダイス画像ファイル(コンパイル時組み込み)<br>
+ 　+-+:imageUploadSpace：画像データ置き場（後述）<br>
+ 　+-+:image：画像データ置き場（内部処理用）<br>
+ 　| +--:icons：各種アイコン用画像集(後述)<br>
+ 　| +--:stand：サンプル用立ち絵(後述)<br>
+ 　+--:sound：Flex用音データ(コンパイル時組み込み)<br>
+
+
+<h3 id="aboutLibrary">ライブラリ・画像データ等について</h3>
+本ツールでは、以下のライブラリ、データを使用しています。<br>
+各作者の方々に心から感謝。<br>
+以下、順不同です。<br>
+
+<h4 id="characterImage">キャラクター画像</h4>
+　<a href="http://www.tekepon.net/fsm/">http://www.tekepon.net/fsm/</a><br>
+　＝＞First Seed Material, REFMAPより画像を流用しています。<br>
+
+<h4 id="imageUploadSpace">立ち絵画像</h4>
+　＝＞「ど＠えむ」掲示板にて、Ragiさん、PLEさんよりご提供いただきました。ありがとうございます！<br>
+　　　「どどんとふ」での利用に限り流用可能とのことですので、皆さんガンガン使いましょう！<br>
+　　　結城ユキさんのドワーフ娘も追加！にぎやかになっていい感じですね！！<br>
+
+<h4 id="tubeloc">tubeloc</h4>
+　<a href="http://code.google.com/p/tubeloc/">tubeloc[http://code.google.com/p/tubeloc/]</a><br>
+ 　＝＞FlashでYoutubeの動画を再生するためのライブラリ。Apache License 2.0ライセンス。<br>
+
+<h4 id="HTTPPostBinary_class">HTTPPostBinary class</h4>
+　<a href="http://blog.ymatsusaka.com/2007/05/20/httppostbinary-class-connects-your-flash-program-to-general-webservice/">http://blog.ymatsusaka.com/2007/05/20/httppostbinary-class-connects-your-flash-program-to-general-webservice/</a><br>
+ 　＝＞ActionScriptで画像とデータを同時にアップロードするためのライブラリ。LGPLライセンス。<br>
+
+<h4 id="corelib">corelib</h4>
+　<a href="http://code.google.com/p/as3corelib/">http://groups.google.com/group/webos-goodies/</a><br>
+ 　＝＞RubyでJsonデータを変換するためのライブラリ。Public domainライセンス。<br>
+
+
+<h4 id="icons">各種アイコン用画像集</h4>
+　<a href="http://www.famfamfam.com/lab/icons/silk/">Mark James[http://www.famfamfam.com/lab/icons/silk/]</a><br>
+　＝＞アイコン用画像集<br>
+　<a href="http://raindropmemory.deviantart.com/">Raindropmemory[http://raindropmemory.deviantart.com/]</a><br>
+　＝＞アイコン用画像の一部（参照：<a href="http://findicons.com/icon/41229/note">http://findicons.com/icon/41229/note</a>）<br>
+
+<h4 id="standingGraphics">サンプル用立ち絵</h4>
+　<a href="http://www.vector.co.jp/soft/win95/game/se250013.html">http://www.vector.co.jp/soft/win95/game/se250013.html</a><br>
+　＝＞Vectorの「ゲーム製作用立ち絵素材集〜女の子編〜」から入手。<br>
+
+<h4 id="cardGraphics">カード用データ</h4>
+　<a href="http://shiroma.client.jp/download/material/trump_24x32/">白魔空間</a><br>
+  <a href="http://www.gamedesign.jp/sozai.html">GAMEDESIGN</a><br>
+  <a href="http://www.sasaraan.net/index.html">ささら庵</a><br>
+　＝＞トランプ用画像データ。<br>
+
+<h4 id="jsonPerser">jsonParser.rb</h4>
+　<a href="http://groups.google.com/group/webos-goodies/">http://groups.google.com/group/webos-goodies/</a><br>
+ 　＝＞RubyでJsonデータを変換するためのライブラリ。Public domainライセンス。<br>
+
+<h4 id="otherLibrary">その他</h4>
+　Dice.asの作成には<br>
+　<a href="http://realtimemachine.sakura.ne.jp/collisions/works/web/dice.html">http://realtimemachine.sakura.ne.jp/collisions/works/web/dice.html</a><br>
+　を参照させていただきました。この場を借りてお礼申し上げます。<br>
+
+<h2 id="others">その他</h2>
+<h3 id="aboutNaming">名前の由来について</h3>
+「どどんとふ」には、ほぼ同様の機能をRuby+Javascript(いわゆるAjax)で実装したD&amp;D3.5版用マップ管理ソフト「どどんと（Dangeons and Dragons Map Tool=>DDMT=>どどんと）」がありました。
+ただJavaScriptの表現の限界を感じていたため、4th発売を記念してGUI側Flashで再構成し、高速化と快適化を目指すこととしました。
+そこで名前には末尾にFlashのFを付けて「DDMTF」->「どどんとふ」となりました。
+あとは「どどんと」で懲りたので、検索でHITしやすい新単語を作りたかったというのもあります。
+
+
+<h2 id="caution">注意事項</h2>
+本ツールを使用・流用して起きた不具合によるあらゆる損害に対して、当方では一切保証いたしかねます。<br>
+あらかじめご了承ください。<br>
+
+
+<h2 id="history">履歴</h2>
+2011/03/14 Ver.1.30.00<br>
+Ver.1.29.07をベースに安定版を開発コード「PARANOIA」としてリリース<br>
+<br>
+2011/03/04 Ver.1.29.07<br>
+・ログイン画面でダブルクリックでのログイン時に正しいプレイルームに入れない障害を修正。<br>
+<br>
+2011/03/04 Ver.1.29.06<br>
+・ログイン画面でのプレイルーム削除処理の障害を修正。<br>
+<br>
+2011/03/04 Ver.1.29.05<br>
+・ログイン画面を更新し、プレイルームの大量管理を可能に。<br>
+<br>
+2011/02/15 Ver.1.29.04<br>
+・マップマスク作成・変更画面を改善。複数一括登録を可能に。<br>
+<br>
+2011/02/01 Ver.1.29.00.03<br>
+Ver.1.29.03をベースに安定版「Viva la Vida」を再リリース<br>
+<br>
+2011/02/04 Ver.1.29.03<br>
+・点呼機能が正しく動作していなかった障害を修正。<br>
+・ファイルアップロード機能でアップロードできるファイル拡張子を制限へ。<br>
+・チャットパレットでCtrl＋Shift＋左右キーでチャットウィンドウのタブを切り替え可能に（前はShift＋左右キーでしたが変更に）<br>
+<br>
+2011/02/01 Ver.1.29.00.02<br>
+Ver.1.29.02をベースに安定版「Viva la Vida」を再リリース<br>
+<br>
+2011/01/31 Ver.1.29.02<br>
+・プレイルーム変更時にパスワードが誤った値で設定される障害を修正。<br>
+<br>
+2011/01/30 Ver.1.29.00.01<br>
+Ver.1.29.01をベースに安定版「Viva la Vida」を再リリース<br>
+<br>
+2011/01/29 Ver.1.29.01<br>
+・チャットウィンドウでCtrlキー操作時に雑談チャットにログが表示される障害を修正。<br>
+・外部画像参照機能をプレイルーム設定画面からON/OFF可能に（デフォルトはOFF）。「No.xxx」のボタンからプレイルーム変更画面で設定できます。<br>
+・チャットウィンドウの名前欄に入力補完（サジェスチョン）機能を追加。<br>
+・マップ状態保存/切り替えの対象としてマップマーカーを追加。（これまではマップ＋マップマスクのみ）<br>
+<br>
+2011/01/26 Ver.1.29.00<br>
+Ver.1.28.16をベースに安定版を開発コード「Viva la Vida」としてリリース<br>
+<br>
+<!-- RELEASE_LINE -->
+<br>
+2011/01/26 Ver.1.28.16<br>
+・チャットウィンドウでHPなどの値をマイナス表示できなかった問題を修正。<br>
+・ダイスボットで（指定無し）が選択できなくなっていた問題を修正。JAMさんありがとぅ！<br>
+<br>
+2011/01/25 Ver.1.28.15<br>
+・リプレイモードが再生できない障害を修正。<br>
+・チャットログの保存を複数チャンネル方式に対応へ。<br>
+・チャットでのカットイン・立ち絵発動時に＠を前につけて「〜＠立ち絵」のように記述すると、＠以下が削除するように機能拡張。<br>
+　これでチャットパレットに「台詞＠笑顔」のように記述することで立ち絵の差し替えが可能になります。<br>
+・チャットログをテキスト形式でも保存可能に。<br>
+・イニシアティブ表の数値にマイナス値も設定可能に。<br>
+・チャットパレットでShitf＋左右でチャットウィンドウのタブ移動を可能に。<br>
+・ダイスボットの定義をsrc_ruby/diceBotInfo.rbに変更。データには変更なし。<br>
+・CGIスクリプトをRuby1.9用に修正。<br>
+<br>
+2011/01/21 Ver.1.28.14<br>
+・チャットパレットでダイス文字列の場合に色が反映されない問題を修正。<br>
+・チャットウィンドウのCtrl+左右キーでのタブ遷移を左右巡回へ。<br>
+・カードにマスカレイドスタイルのアクトカードの枚数が不足していたため修正。<br>
+<br>
+2011/01/16 Ver.1.28.13<br>
+・イニシアティブ表で数値を変更すると更新が行われなくなる不具合に対応。<br>
+・見学モードを追加。プレイルーム作成・変更時に見学の有無を指定でき、見学可の場合はパスワード有りでも見学はできるようになります。<br>
+・画像タグ名選択にタグ名入力入力による補完（サジェスチョン）機能を追加。清水さんありがとぅっ！！<br>
+・リプレイアップロード機能追加。ログイン画面の「＞＞拡張機能」「リプレイ投稿」でリプレイデータの投稿を可能に。<br>
+　事前にreplayDataUploadSpaceディレクトリに書き込み権限を与えてください（お試し新機能）<br>
+・前回ログイン時のダイスボット選択状態を自動記録して次回再現するように改善。<br>
+・チャットウィンドウの最大化ボタン追加。<br>
+・チャットパレットのウィンド位置が初期化時に不正になる障害を修正。<br>
+・チャットのタブを任意に増減できるように機能追加。プレイルームの設定画面（初期ルーム作成時か「ルーム」ボタンからの設定画面）で変更可能。<br>
+・迷宮キングダムの魅力休憩表の表記を修正。<br>
+<br>
+2010/12/17 Ver.1.28.12<br>
+・デフォルトの画像を大量追加。既にサーバ運用中の方はimage\defaultImageSet\taketomu28配下の画像を確認してください。<br>
+　たけとむ二十八号さんありがとうっ！！<br>
+・サーバ設置直後のプレイルームNo.0が正しく表示できない問題を修正。<br>
+・外部画像参照禁止処理の誤り修正。<br>
+<br>
+・カードにマスカレイドスタイルのアクトカードを追加。<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.23準拠へ。ハンターズムーンの特技指定表を追加。<br>
+・データ転送字のGZIP圧縮をデフォルト無効に<br>
+<br>
+2010/11/29 Ver.1.28.10<br>
+・ハンターズムーンの命中部位表の誤字修正<br>
+・カードの拡大表示部を表示位置・サイズ変更できるように改良。<br>
+・FirstCGI環境でも動作が可能となるようconfig.rbにオプション追加。<br>
+・Ruby1.9環境に対応。<br>
+<br>
+2010/11/15 Ver.1.28.09<br>
+・カードを伏せた時にカードテキストの引用が出来ないように改良。<br>
+・URLアップローダー機能を削除。どどんとふ動作サーバ以外のURL引用は×印と差し替えるように機能制限<br>
+<br>
+2010/11/13 Ver.1.28.08<br>
+・キャラクター移動時のデータ管理をVer.1.27以前のものに差し戻し。<br>
+・「カード置き場」を「手札置き場」と名前変更。<br>
+・山札からのカード抜き取り字の告知メッセージを修正。<br>
+・カードを伏せた時に背面で上下がバレないように改良<br>
+<br>
+2010/10/09 Ver.1.28.07<br>
+・ロード機能が正しく動作しない障害を修正。<br>
+<br>
+2010/10/09 Ver.1.28.06<br>
+・ファイルのアップローダー機能が一部環境で正しく動作しない障害を修正。<br>
+<br>
+2010/10/06 Ver.1.28.05<br>
+・ファイルのアップローダー機能を追加。チャットウィンドウの右端アイコンから実行。<br>
+　サーバを設置する人は実施前にfileUploadSpaceディレクトリに権限を忘れずに与えること。<br>
+・チャットパレットでCtrl+左右キーでタブ移動した際に左右を循環するように改善。<br>
+・不要なデバッグログを削除。<br>
+<br>
+2010/10/06 Ver.1.28.04<br>
+・Ver1.28.00以前のリプレイデータを再生できない障害を修正。<br>
+・チャットパレットでCtrl+左右キーでタブの移動を可能に<br>
+・チャットパレットで発言文字の色指定を可能に（デフォルトの白の場合はチャットと同じ色に）<br>
+<br>
+2010/10/01 Ver.1.28.03<br>
+・ログイン画面で選択プレイルームがマウス移動だけで変更されてしまう障害を解消。<br>
+・画像のタグ名が長すぎる場合にタグ欄が表示しきれない障害を解消。<br>
+<br>
+2010/09/30 Ver.1.28.02<br>
+・不要なデバッグログを削除。（指摘ありがとう飯綱さん！！）<br>
+・ログイン画面のプレイルームメンバー表示タイミングを改善<br>
+<br>
+2010/09/26 Ver.1.28.01<br>
+・画像削除時に縮小画像だけが削除され、オリジナルファイルが残る障害を修正。（指摘ありがとう飯綱さん！！）<br>
+・サーバからの応答データを軽量化。<br>
+・密かに暫定対応していたGoogleWave関連のファイルを削除。さらばGoogleWave。<br>
+・サーバ応答のGZIP圧縮の指定を src_ruby/config.rb に追加。<br>
+・削除させたくないプレイルームの指定を src_ruby/config.rb に追加。<br>
+<br>
+2010/09/14 Ver.1.28.00<br>
+Ver.1.27.04をベースに安定版を開発コード「NON-FICTION」としてリリース<br>
+<br>
+2010/09/05 Ver.1.27.04<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.22準拠へ。ゲヘナ・アナスタシアへ対応。<br>
+<br>
+2010/08/31 Ver.1.27.03<br>
+・カードゾーンへのカード譲渡時の表示メッセージ誤りを修正。<br>
+・投票・点呼で参加人数よりも呼数が少ない場合にチェック画面を自動で閉じるように改善。<br>
+・リプレイエディター機能に別セーブデータを追加できる「ロード挿入」ボタンを追加。<br>
+・GZIP圧縮をMySQL版にも対応。<br>
+<br>
+2010/08/27 Ver.1.27.02<br>
+・リプレイエディター機能にグリッド・座標文字の表示制御用の「設定挿入」ボタンを追加。<br>
+・フロアパネルで縦横サイズを変えても画像が元の比率保持のままだった障害を修正。<br>
+・CGIサーバの応答をGZIP圧縮することで転送効率アップ。（ちんみーさんありがとう！）<br>
+<br>
+2010/07/31 Ver.1.27.01<br>
+・ダイスボットにヒロインジェネレータ追加。「make heroine」「make heroine?」でランダム作成。<br>
+・ダイスボットにエムブリオマシン、パラサイトブラッド追加。<br>
+・ダイスボットにダイス目・達成値に(1+2)D6<=(3*2-1)のように計算入力可能に。C(計算式）で四則演算も可能に。（例：C(6/2*3)）<br>
+・カードを個別ロード時の選択条件に追加。<br>
+<br>
+2010/07/25 Ver.1.27.00<br>
+Ver.1.26.07をベースに安定版を開発コード「Idea」としてリリース<br>
+<br>
+2010/07/25 Ver.1.26.07<br>
+・ダイスボットのアースドーンが正しく動かなかった障害を修正。<br>
+・MySQL版で不要なログを出力していた箇所を修正。<br>
+<br>
+2010/07/21 Ver.1.26.06<br>
+・ダイスボットにアースドーン追加。akamanbowさんFacelessさんありがとぅ！！<br>
+・チャットログ保存時に「メイン」「雑談」を選択できるように機能追加。<br>
+・チャットの入力中にCtrl+左右カーソルキーで「メイン」「雑談」のタブ切り替えを可能に。<br>
+・チャットの入力中にCtrl+上下カーソルキーで発言履歴を表示するように改造。<br>
+・キャラクターの回転角度にヘクス用に左右に少しだけ回転するメニューを追加。<br>
+・アラーム機能にタイマー指定を追加。<br>
+・チャットのURL文字列にリンク開く機能を追加。<br>
+・ログイン画面の更新日時が正しく表示されなかった障害を修正。<br>
+<br>
+2010/07/04 Ver.1.26.05<br>
+・プレイルーム作成に失敗する不具合を修正。<br>
+・ログイン時に雑談タブに不要なメッセージが表示される不具合を修正。<br>
+<br>
+2010/07/03 Ver.1.26.04<br>
+・カードに山札から任意のカードを抜き取れる機能を追加。山札の右クリックメニューから実行可能。<br>
+・カードに手札置き場機能を追加。カード用マット（緑のフィールド）上で右クリックから作成可能。<br>
+・トランプ画像を変更。<br>
+・ロード時の一部対象選択に共有メモを追加。<br>
+・セーブ・ロード時にルーム名やパスワードも対象とするように改造。<br>
+・ダイスシンボルロール時にビジュアルダイスが非表示だとダイスが表示されない問題点を改善。<br>
+・セーブデータロード時にチャットログも全文ロードでき、その際カットイン等が暴発しないように改良。<br>
+<br>
+2010/06/15 Ver.1.26.03<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.19準拠へ。ダイスロールが正しく動作しない障害を修正。<br>
+・ダイスボットに特命転校生を追加。<br>
+<br>
+2010/06/14 Ver.1.26.02<br>
+・データベース（MySQL）利用版が正常に起動できない問題に対応。<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.18準拠へ。迷宮キングダムに対応。<br>
+・フォントサイズ変更時に正しいサイズで表示されない障害を修正。<br>
+<br>
+2010/06/12 Ver.1.26.01<br>
+プレイルームのデータ管理方法にデータベース（MySQL）を利用可能に。従来どおりの使用も可能です。<br>
+サーバ設置する方は「<a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a>」「<a href='#howToCheckSetting'>動作確認方法</a>」を参考に設定行ってください<br>
+<br>
+2010/06/09 Ver.1.26.00.01<br>
+Ver.1.26.00に開発途中機能が混入していたため修正版をリリース。<br>
+<br>
+2010/05/29 Ver.1.26.00<br>
+Ver.1.25.03をベースに安定版を開発コード「Ashiato Rhythm」としてリリース<br>
+<br>
+<br>
+2010/05/23 Ver.1.25.03<br>
+・リプレイ再生時にカードを表示できるように右上にボタン追加。<br>
+・ログイン画面に現在の総ログイン人数の表示を追加。<br>
+・画像選択画面に選択番号・表示件数の表示を追加。<br>
+・カード操作時にマップ同様に立ち絵が非表示になるように変更。<br>
+・リプレイ再生時に雑談チャットを表示しないように修正。<br>
+・録画時のログに雑談チャットを含めないように修正。<br>
+・フロアタイル配置時に出ていたログを削除。<br>
+<br>
+2010/05/11 Ver.1.25.02<br>
+・チャットにメイン・雑談と複数チャットを可能に。<br>
+・ガンメタル・ブレイズのシチュエーションカードにラバーズストリート対応版を追加。<br>
+・魔法タイマーの時間切れでイニシアティブ表の行背景が灰色になるよう改良。<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.17準拠へ。シノビガミ参の追加シーンに対応。<br>
+<br>
+2010/05/08 Ver.1.25.01<br>
+・簡易版モードを追加。 DodontoF.swf?mode=tiny で起動可能。<br>
+・ビジュアルダイスの演出を変更。<br>
+・ログイン直後のページめくり音を停止<br>
+・チャット末尾文字列からサイズ指定のカットインを呼び出すと余分なカットインが表示される障害を修正。<br>
+<br>
+2010/04/04 Ver.1.25.00.01<br>
+Ver.1.25.00に立ち絵が追加できない障害があったため修正版作成。<br>
+<br>
+2010/03/31 Ver.1.25.00<br>
+Ver.1.24.03をベースに安定版を開発コード「everywhere」としてリリース<br>
+<br>
+<br>
+2010/03/30 Ver.1.24.03<br>
+・サイズの小さい画像アップロード時にタグ名・パスワードが消えてしまう障害を修正。<br>
+・同一名称の立ち絵を追加した場合に追加されないように処理修正。<br>
+・立ち絵更新時に状態名選択がリセットされないように改善。<br>
+・画像一覧が表示に失敗する障害を修正。<br>
+<br>
+2010/03/27 Ver.1.24.02.01<br>
+・サムネイル一括作成時にタグ名・パスワードが消える障害を修正。<br>
+・コマ移動時に移動エフェクトを追加。<br>
+・コマ設置時に移動エフェクトが発動しないよう修正。<br>
+<br>
+2010/03/27 Ver.1.24.02<br>
+・フロアタイル設置機能を追加。「マップ」→「フロアタイル変更モード」を選択。<br>
+・共有メモ機能を追加。画面上部の「共有メモ」ボタンを押して作成。<br>
+・サムネイル画像の削除機能追加。<br>
+<br>
+2010/03/17 Ver.1.24.01<br>
+・ログイン時のメッセージ抑止を修正。ログアウトメッセージも抑止へ。<br>
+・動作検証用のcustomBot.htmlを修正<br>
+・画像の一覧表示に縮小画像（サムネイル）を表示するようにし、処理を軽量化。<br>
+【★重要】ダウンロードユーザー必見！【超重要★】<br>
+以下に、「どどんとふ」をダウンロードしてサイトに設置しているユーザーには大事なお知らせがあります。<br>
+必ず読んでください。必ずです。<br>
+サムネイル画像作成にあたり、
+　imageUploadSpace (ディレクトリ)<br>
+の配下に
+　imageUploadSpace/smallImages<br>
+というディレクトリを追加してください。（今回の媒体参照）<br>
+また追加したディレクトリの書き込み権限をimageUploadSpaceと同じに設定してください。<br>
+設定が完了し、どどんとふをバージョンアップしたら既存の画像に対するサムネイルを作成するために<br>
+(あなたのどどんとふへのURL)/DodontoF.swf?createSmallImage=on<br>
+というパスでどどんとふを起動して下さい。<br>
+後は画面の支持に従って下さい。<br>
+<br>
+2010/03/01 Ver.1.24.00<br>
+Ver.1.23.10をベースに安定版を開発コード「光の人」としてリリース<br>
+<br>
+<br>2010/03/01 Ver.1.23.10<br>
+・TORGドラマデッキNo.117の誤字を修正。<br>
+・ログイン時のメッセージ抑止を src_ruby/coonfig.rb の $isWelcomeMessageOn として追加。<br>
+<br>
+2010/02/18 Ver.1.23.09<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.16準拠へ。ハンターズムーンに対応。<br>
+・キャラクター移動時のエフェクトを削除（キャラクター追加時にエラーが発生する場合があるため）<br>
+<br>
+2010/02/16 Ver.1.23.08<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.15準拠へ。TORGに対応。<br>
+・チャットログのHTML保存時の改行を改善<br>
+・ダイスボットの乱数を改善<br>
+・キャラクター移動時にエフェクトを追加。<br>
+・キャラクターの向き表示機能を削除。以降は画像の回転で代用ください。<br>
+<br>
+2010/01/29 Ver.1.23.07<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.13準拠へ。ソード・ワールド2.0で運命変転やクリティカルレイに対応。<br>
+・立ち絵のデフォルトをサイズ調整をデフォルトに。またマウス上載せで非表示しないように変更。<br>
+・ダイスボットに不具合があったため、Choiseコマンドを未サポートへ差し戻し。<br>
+<br>
+2010/01/28 Ver.1.23.06<br>
+・ダイスボットコマンドに Choise[A,B,C] を追加対応。<br>
+・ダイス文字の後ろに全角空白入れての発言でロールされない障害を修正。<br>
+<br>
+2010/01/25 Ver.1.23.05<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.12準拠へ。ナイトウィザードに対応。<br>
+・ログイン画面でユーザー名を変更可能に。<br>
+・チャットパレットから発言者名・状態を変更可能へ。<br>
+・立ち絵をマップ操作時の邪魔にならないように、チャットウィンドウ上を操作しているときのみ表示に変更。<br>
+・「立ち絵のサイズを自動調整する」のデフォルトをOFFへ変更。<br>
+<br>
+<br>
+2010/01/17 Ver.1.23.04<br>
+・立ち絵に口パク機能を追加。立ち絵の状態名に「（他の状態名）@speak」と設定すると発言時に立ち絵が切り替わります。<br>
+・プレイルームの名前／パスワードを変更できるように機能追加。画面上部の「ルームNo.x」ボタンから起動。<br>
+・チャットパレットを改善(ありがとう超小兎さん！)。行をクリックで発言欄にコピー。ダブルクリックするとそのまま発言。<br>
+・ダイスボットをボーンズ＆カーズ Ver.1.2.10準拠へ。ガンドッグ・ゼロの各種表に対応。<br>
+・立ち絵の位置を変更した場合に、位置変更前の画像が残る障害を修正。<br>
+・サーバ処理を高速化。<br>
+<br>
+<br>
+2010/01/06 Ver.1.23.03<br>
+ダイスボットをボーンズ＆カーズ Ver.1.2.9準拠。ダークブレイズのクリティカル判定を修正。<br>
+また判定用ダイスボット表記に以下を追加。<br>
+判定　(DBx,y#m) (DB@x@y#m) (x:能力値, y:技能値, m:修正)<br>
+<br>
+2010/01/05 Ver.1.23.02<br>
+ダイスボットをボーンズ＆カーズ Ver.1.2.8準拠に更新。ダークブレイズに対応。<br>
+ダイスボット表記は以下の通り（OD Tools準拠）<br>
+判定　(DBxy#m) (x:能力値, y:技能値, m:修正)<br>
+掘り出し袋表　(BTx)　　(x:ダイス数)<br>
+<br>
+2009/12/27 Ver.1.23.01<br>
+「魔法タイマー追加」画面のイニシアティブ値に現状値が正しく設定されない障害を修正。<br>
+簡易マップ作成にペンの太さ指定を追加。<br>
+ダウンロード媒体へ基本添付する画像データを追加。なぎさん、斗之さん、ありがとう！<br>
+<br>
+2009/12/05 Ver.1.23.00<br>
+Ver.1.22.03をベースに安定版を開発コード「RGB」としてリリース<br>
+<br>
+2009/12/05 Ver.1.22.03<br>
+チャットで長い行数を送信するとスクロールが追随しない問題に対応。<br>
+<br>
+2009/11/21 Ver.1.22.02<br>
+プレイルームで101番以上の数値が指定できなかった障害を修正。<br>
+魔法範囲の枠を削除し表示を簡素化。<br>
+ログアウトをファイルメニューにも追加。<br>
+<br>
+2009/11/19 Ver.1.22.01<br>
+メニューの「マップ」に「マップマップ状態保存」「マップ切り替え」を追加。マップとマップマスクのみを差し替えて、マップを切り替えます。<br>
+「ファイルアップローダー」でFLVファイルもアップロード可能に（サイズ上限10M）。ただし使えるのはカットインのみ。<br>
+イニシアティブ表のカウンター変更時に正しく更新されない障害に対応。<br>
+<br>
+2009/10/17 Ver.1.22.00<br>
+Ver.1.21.04をベースに安定版を開発コード「Schwarzschild」としてリリース<br>
+<br>
+2009/11/10 Ver.1.21.04<br>
+ダイスボットを「ボーンズ＆カーズ」Ver1.2.6対応に更新。シノビガミ弐のシーン表を追加。<br>
+ダイスボットの出力の「＞」を「→」に差し替え<br>
+<br>
+2009/11/06 Ver.1.21.03<br>
+SWFファイルをキャラクターに指定した際に右クリックメニューが動かない障害を修正。<br>
+キャラクター画像の縦横比を維持して拡大するように改善。<br>
+キャラクター画像の背景色を透明に変更。<br>
+<br>
+2009/11/02 Ver.1.21.02<br>
+イニシアティブ表から魔法タイマーが変更・削除できない問題を解消。<br>
+　イニシアティブ表下部に変更／削除ボタン追加。
+　墓地ボタンを追加。イニシアティブ表からドラッグすると削除可能。<br>
+<br>
+2009/10/30 Ver.1.21.01<br>
+イニシアティブ表を大幅に改良。<br>
+キャラクターデータに汎用のカウンターを追加（現状、編集はイニシアティブ表からのみ対応）<br>
+<br>
+2009/10/17 Ver.1.21.00<br>
+Ver.1.20.08をベースに安定版を開発コード「WhiteAlbum」としてリリース<br>
+<br>
+2009/10/16 Ver.1.20.08<br>
+ボーンズ＆カーズVer.1.2.5に対応。T&amp;Tのバーサークに対応<br>
+マップマーカーの背景塗りつぶしで文字表示する際に文字をサイドカットするように改善<br>
+<br>
+2009/10/07 Ver.1.20.07<br>
+点呼／投票機能を追加(チャットのアイコンから実行)<br>
+カード捨て札をシャッフルせずに山に戻すメニューを追加。<br>
+URLの末尾に DodontoF.swf?loginRoom=2 のように追記することでプレイルーム選択をパスしてログインできるように改善<br>
+横に倒したカードを捨て山から戻せない障害を修正。<br>
+縮小表示したカードを捨て山から取り出せない障害を修正。<br>
+<br>
+2009/09/29 Ver.1.20.06<br>
+ダイスボットをボーンズ＆カーズ Ver.1.2.3にバージョンアップ。サタスペとアスルマギカに対応。<br>
+ダイスボット入力時の [x,y] を 「ｘ、ｙ」 と入力可能に機能拡張。<br>
+立ち絵が外部URL指定時に表示されなかった障害を修正。<br>
+画像削除画面にタグ名フィルタ機能を追加。<br>
+カードのテキスト引用時に正位置、逆位置を表示。上下両用カードの場合は上になっているテキストを先に。<br>
+立ち絵の無いキャラクターの発言で表示中の立ち絵が非表示にならないように修正。<br>
+<br>
+2009/09/25 Ver.1.20.05<br>
+一部プロバイダーで正しく動作しなかった障害を修正。<br>
+<br>
+2009/09/24 Ver.1.20.04<br>
+サタスペ用ダイスボットを仮実装<br>
+10-1d6のようなダイスが後ろになる算術に対応<br>
+FireFoxで応答エラーが多発する問題を暫定対処。<br>
+チャットのフォントサイズ・色が保持されない問題を対処。<br>
+<br>
+2009/09/24 Ver.1.20.03<br>
+欠番<br>
+<br>
+2009/09/13 Ver.1.20.02<br>
+リプレイデータ投稿機能が実装未完了のまま公開されていたため削除。<br>
+カード記載テキストをチャット上に出力する機能を「右クリックメニューから発言箇所にテキストを貼り付ける」に変更。<br>
+イニシアティブ表クリック時と「次へ」実施時ににキャラクターを画面中央に設定していたのを取り止め。ダブルクリックで中央表示するように変更。<br>
+<br>
+2009/09/11 Ver.1.20.01<br>
+カットインのファイル指定にYoutubeのURLを指定可能に。<br>
+処理軽量化のために、モーダルウィンドウ（他のウィンドウが操作出来ないよう半透明のフィルタが掛かる）を停止。<br>
+チャットHTMLログ保存時にHTMLの各行に改行を追加。<br>
+カードダブルクリック時にカード記載テキストをチャット上に（自分にだけ）出力するように機能追加。<br>
+ダイスボットでの全角->半角変換に「−」記号も対応。<br>
+<br>
+2009/09/04 Ver.1.20.00<br>
+Ver.1.19.04をベースに安定版 Ver.1.20.00 を開発コード「Grapefruit」としてリリース<br>
+<br>
+2009/09/04 Ver.1.19.04<br>
+カードを上下以外に左右にも回転できるように機能追加。<br>
+<br>
+2009/09/03 Ver.1.19.03<br>
+キャラクターを右クリックメニューから回転可能に。<br>
+ログオフ時に録画終了が実施されるように機能追加。<br>
+同じ名前のキャラクターを追加時にはエラーメッセージを表示するように改善<br>
+<br>
+2009/08/24 Ver.1.19.02<br>
+一部プロバイダで上手く動かない障害を修正。<br>
+ログインユーザー確認画面にプレイルーム名を表示するように機能追加。<br>
+ダイスボットの全角対応に＜,＞,＝の記号を追加。<br>
+キャラクター追加・変更画面のデザインを修正。<br>
+マップのキャラクタークリック時にイニシアティブ表の説明箇所がスクロールして表示されるように改善。<br>
+<br>
+2009/08/15 Ver.1.19.01<br>
+秘話機能を実装。チャットウィンドウの鍵型アイコンを押すと送信先設定が出来ます。（自分以外ログインしていないなら選択できません）<br>
+ダブルクロス用の感情表を実装（ETと入力でポジティブとネガティブの両方を振って、表になっている側に○を付けて表示）<br>
+ダイスボット文字列が全角でも使用できるように改善<br>
+一部環境(Linuxの64bit版Flash)で乱数に偏りがあったため乱数算出方法を変更。<br>
+<br>
+2009/08/05 Ver.1.19.0<br>
+Ver.1.18.5をベースにVer.1.19.0、開発コード「HoneyDawn」としてリリース<br>
+<br>
+2009/08/04 Ver.1.18.5<br>
+「ノベルゲーム風表示」の表示条件を「チャットウィンドウにマウスカーソルがある場合」に変更。（表示されていると通常操作が重くなるため）<br>
+<br>
+2009/08/02 Ver.1.18.4<br>
+チャット受信時の自動スクロールを改善<br>
+「ノベルゲーム風表示」時にチャットウィンドウ上でホイールを操作することでログがスクロールするように機能改善。<br>
+「ノベルゲーム風表示」ボタンの位置を左端に変更。実行時に確認画面を出すように変更。<br>
+<br>
+2009/07/26 Ver.1.18.3<br>
+チャットウィンドウの右端に「ノベルゲーム風表示」への切り替えボタンを追加。<br>
+　チャットログをノベルゲームのログのようにマップ・立ち絵の前に透過して表示するようになります。<br>
+　マウスカーソルをログに乗せると非表示になります。<br>
+　切り替えボタンの右隣の「自動ログ隠し」チェックを外すか、シフトキーもしくはCtrlキーを押しながらマウスカーソルを操作すれば非表示になりません。<br>
+デモンパラサイトの衝動表のダイスボットで「新衝動表」「誤動作表」「ミュータント衝動表」の対応が抜けていたため追加。（それぞれnurge1, aurge2, murge3 の形式で発動）<br>
+<br>
+2009/07/24 Ver.1.18.2<br>
+ダイスボットを「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.22対応に更新。ダブルクロス2nd,3rdに対応。<br>
+デフォルトイラストに結城ユキさんのドワーフ娘を追加。<br>
+<br>
+2009/07/24 Ver.1.18.1<br>
+カード画面の右クリックメニューに「メッセージカードの追加」コマンドを追加。<br>
+　メッセージカードを通常のカード風に追加することができます。<br>
+　削除はメッセージカードの右メニューから行います。<br>
+チャットログの背景色が変更できなくなっていた障害を修正。<br>
+<br>
+2009/07/11 Ver.1.18<br>
+Ver.1.17.1をVer.1.18、開発コード「POLAND」としてリリース<br>
+<br>
+2009/07/11 Ver.1.17.1<br>
+メニューの「表示」に「キャラクターの向きを表示」を追加。<br>
+立ち位置の違う立ち絵がある場合に、発言者以外を半透明にするよう処理変更。<br>
+ダイスボットのシークレットダイスに対応。<br>
+ダイスボットをボーンズ＆カーズ Ver.1.1.21ベースに更新。<br>
+<br>
+2009/07/05 Ver.1.17<br>
+セーブデータのロード時にマップやキャラクターと一部対象のみに選択出来るように機能追加。<br>
+マップマーカー上にキャラクターがいる場合に上下に展開して表示するよう機能追加。<br>
+立ち絵表示時の左右位置を変更できるように機能追加。<br>
+カットインのBGMをボリューム調整できるように機能改善<br>
+<br>
+2009/06/27 Ver.1.16<br>
+立ち絵のサイズが常に小さくなっていた障害を修正。<br>
+<br>
+2009/06/21 Ver.1.15<br>
+チャットの動作を高速化（＜前バージョンでの記載忘れ）<br>
+カットインの表示位置を画面上部、画面左右、どこに寄せるか指定できるように機能追加。<br>
+簡易マップ作成画面で白地図の場合に表示できない障害を修正。<br>
+<br>
+2009/06/14 Ver.1.14<br>
+画像ファイルのアップロードに失敗する障害を修正。<br>
+リプレイ動画再生時に一時停止できない障害を修正。<br>
+<br>
+2009/06/12 Ver.1.13<br>
+深淵の運命カードの背面の赤に対応。色味も修正。<br>
+ダイスボットを「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.16ベースに更新。（シノビガミの戦場表(BT)に対応）<br>
+カットイン動画の表示位置が高くなっていた障害を修正。<br>
+<br>
+2009/06/09 Ver.1.12<br>
+ダイスボットを「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.16ベースに更新。（SWロールの修正とシノビガミ対応）<br>
+リプレイエディターにHTML形式での保存機能を追加。<br>
+<br>
+2009/06/07 Ver.1.11<br>
+深淵の運命カードを更新。運命カードの種類に夢魔の占い札対応版を追加。<br>
+リプレイ再生時にチャットメッセージの読み飛ばし速度が狂っていた障害を修正。<br>
+ビジュアルダイスをロール後、新規ダイスを追加すると以前のダイスの個数にさらに追加してしまう障害を修正。<br>
+<br>
+2009/06/05 Ver.1.10<br>
+カードを上下で2分割し逆さまに文字を表示できるように機能拡張。(TORG、ガンメタルブレイズの表示を改善）<br>
+<br>
+2009/06/04 Ver.1.09<br>
+カードにガンメタルブレイズのシチュエーションカードを追加。<br>
+<br>
+2009/06/03 Ver.1.08<br>
+ダイスボットを「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.14ベースに更新。（ウォーハンマーロール修正対応）<br>
+リプレイエディターで1行目のデータが消える障害を修正。<br>
+ダイスロール時に立ち絵の指定文字が反映されるよう機能拡張。<br>
+カットインにBGMの再生機能を追加。<br>
+リプレイエディターに画像編集機能を追加。<br>
+リプレイファイルをURLで指定時に開始場所を指定できるように機能追加。<br>
+簡易マップ作成画面のプレビューを画面一杯に拡大できるように変更<br>
+ダイスシンボルで隠したダイスではダブルクリックからのダイスロールが出来ないように修正。<br>
+<br>
+2009/05/28 Ver.1.07<br>
+ダイスシンボルにダイス目を隠して設置するオプションを追加。<br>
+画像ファイルが削除できない障害を修正。<br>
+プレイルームが削除できない障害を修正。<br>
+<br>
+2009/05/23 Ver.1.06<br>
+画像選択画面の表示を高速化（2回目以降の表示のみ）<br>
+カットイン動画でボリュームを設定可能に。<br>
+リプレイエディターで立ち絵表示にコマ画像も表示するように改良。<br>
+<br>
+2009/05/19 Ver.1.05<br>
+リプレイエディターを追加。ログイン画面から「＞＞拡張機能」「リプレイエディター」で開いてください。<br>
+あるいは、URLで DodontoF.swf?isReplayEditMode=true と指定しても開きます。（こちらの方が早い）<br>
+キャラクター等の画像表示で無用な画像再読み込みをしている処理を修正。<br>
+簡易マップ作成画面で、スポイト使用後に鉛筆に切り替わるように変更。また右クリックメニューにスポイト機能を追加。<br>
+マップのマス目・座標文字の色をマップ変更画面から変更可能に。<br>
+マップマーカーの色とメッセージを変更可能に。<br>
+マップマスクの透明度を指定可能に。<br>
+チャットの末尾にカットイン名を記載するとカットインが発動するように機能追加。<br>
+<br>
+2009/05/04 Ver.1.04.01<br>
+ログイン画面での人数取得処理に障害があったため修正。<br>
+<br>
+2009/05/03 Ver.1.04<br>
+リプレイモードに再生位置のシーク機能と一時停止機能を追加。<br>
+リプレイモードで移動したキャラクターにマップを追随するように機能追加。<br>
+ダイスボットで全角スペースもメッセージの区切りに使用できるように変更。<br>
+ビジュアルダイスの表示場所をウィンドウサイズで固定に。<br>
+カットインの画像URL入力をキャラクター作成等と同様に画像選択式に変更。ただしFLV動画は以前と同様、直接どこかにアップロードし、URLを入力する必要があります。<br>
+「マップの下に隠す」をチェックするとログインしている他のユーザーでエラーが発生する障害を修正。<br>
+カードの文字を読みやすいように改善。<br>
+カード操作を軽量化。<br>
+カード操作でブラウザが落ちやすい障害に対応。<br>
+チャットパレットを複数タブ追加可能に拡張。<br>
+<br>
+2009/04/15 Ver.1.03.01<br>
+リプレイモードの画面構成を修正。<br>
+リプレイモードでキャラクターをドラッグできないように機能修正。<br>
+<br>
+2009/04/15 Ver.1.03<br>
+マウスホイールでのマップの拡大・縮小判定範囲をマップ上だけで有効に変更。<br>
+カードのプレビュー表示位置を画面右下から左上に変更。<br>
+サーバとクライアント(Flash)のバージョン不一致チェックを追加。（Flashが最新版読み出しに失敗する場合用）<br>
+ログイン画面の構成を変更。<br>
+ビジュアルダイスに右クリックメニューとして「削除」を追加。<br>
+ダイスシンボルをシンボルをダブルクリックでダイスロール可能に。<br>
+<br>
+2009/04/11 Ver.1.02<br>
+ダイスの管理に使用する「ダイスシンボル」を追加。<br>
+チャットが混雑時に欠落する問題に対応。<br>
+<br>
+2009/04/05 Ver.1.01.01<br>
+ウィンドウサイズを変更するとエラーが発生する障害を修正。<br>
+<br>
+2009/04/05 Ver.1.01<br>
+イニシアティブ表から直接キャラクターの「その他」情報を書き込めるように機能追加。<br>
+マップ用マーカー(マップ上の目印。任意のメッセージを書き込める)を追加。<br>
+キャラクター・魔法範囲の詳細情報をツールチップとして表示すように機能追加。<br>
+上記に伴いキャラクター追加・変更画面の構成を変更。<br>
+チャットの再送判定時間を調整<br>
+<br>
+2009/04/01 Ver.1.00<br>
+祝、Ver1.00！！<br>
+大々的に画面構成を変更し、一通りの動作確認を行ったのでバージョンを正式に1.00に。<br>
+変更内容は以下の通り。<br>
+画像にパスワードを付与し「隠し画像」にできるよう機能を追加。(パスワード管理方法は非常に簡易なため、過信せず重要なパスワードは使用しないようにしてください。)<br>
+また上記に合わせて画像表示関連の画面構成を一新。<br>
+アップロード画像のファイル名に日本語を使用した場合でもアップロード処理できるように機能修正<br>
+<br>
+2009/03/21 Ver.0.99.09<br>
+マップマスクに変更画面を追加。<br>
+キャラクターやマップの画像選択画面を軽量化。<br>
+<br>
+2009/03/20 Ver.0.99.08<br>
+アップロードに失敗する場合がある障害を修正。<br>
+マップマスクに名前表示機能を追加。<br>
+<br>
+2009/03/17 Ver.0.99.07<br>
+チャット送信失敗時の再送機能を追加。（送信失敗時にはチャットログの下に失敗メッセージと再送ボタンが表示されます）<br>
+<br>
+2009/03/09 Ver.0.99.06<br>
+コマと立ち絵が同じ名前の場合に正常に表示されない障害を修正。<br>
+<br>
+2009/03/07 Ver.0.99.05<br>
+チャットの反映速度を改善。ただし方式を変更したため今までのチャットログは表示されなくなります。（今後は従来どおりログが蓄積されます。）<br>
+<br>
+2009/03/06 Ver.0.99.04<br>
+マップマスク機能で「固定」が出来ない障害を修正。<br>
+「セーブ」が実行できない障害を修正。これに伴い、saveDataTempSpaceディレクトリを追加。詳細はREADMEを参照。<br>
+<br>
+2009/03/02 Ver.0.99.03<br>
+前回の表示状態保存で、ウィンドウを移動した場合の自動保存が失敗していたため修正。<br>
+またプレイヤー名を保存するように保存対象を追加。<br>
+<br>
+2009/03/01 Ver.0.99.02<br>
+表示情報を自動的に保存し、次回ログイン時に前回の状態へ戻すように機能追加。<br>
+保持する情報は以下の通り<br>
+　・ウィンドウの表示状態<br>
+　・チャットの文字サイズ・色<br>
+　・「表示」メニューのチェック全て<br>
+またこれに伴い、「表示」メニューに「表示状態初期化」を追加。保持してある表示方法を全て破棄します。<br>
+上記の保持情報で不具合があった場合（例えば画面サイズの関係でウィンドウが表示されなくなった場合等）に実行してください。<br>
+「表示」メニューに「立ち絵のサイズを自動調整する」を追加。「立ち絵が自動で拡大・縮小されると絵が荒くなるのを避けたい」という要望があったので機能追加。<br>
+<br>
+2009/02/27 Ver.0.99.01<br>
+画像の「タグ」フィルター機能を立ち絵画面、タグ編集画面にも追加。<br>
+「タグ」フィルター関連のGUI配置を改良。<br>
+<br>
+2009/02/26 Ver.0.99<br>
+各種ウィンドウに×ボタン（閉じるボタン）を追加。<br>
+画像に「タグ」をつけられるように機能拡張。<br>
+<br>
+【★重要】ダウンロードユーザー必見！【超重要★】<br>
+以下に、「どどんとふ」をダウンロードしてサイトに設置しているユーザーには大事なお知らせがあります。<br>
+必ず読んでください。必ずです。<br>
+上記の画像へのタグ付与対応に伴い、従来の画像ディレクトリ<br>
+　saveData/characterImages (ディレクトリ)<br>
+　saveData/mapImages (ディレクトリ)<br>
+が無くなりました。削除してください。<br>
+代わりに imageUploadSpace が出来ました。<br>
+移行の際には、インストール手順に従い imageUploadSpace ディレクトリに権限を付与した後、今までのキャラクター、マップ画像をそれぞれ画像アップローダーでアップロードする方法をオススメします。<br>
+また「<a href='#dodontoFSetting'>設置方法</a>」にセーブデータディレクトリの扱いについて追記がありますので、そちらもあわせて再読願います。<br>
+<br>
+<br>
+2009/02/19 Ver.0.98.19<br>
+へクスマップへの対応として、「表示」メニューに「マス目にキャラクターを合わせる」を追加。<br>
+<br>
+2009/02/15 Ver.0.98.18<br>
+ブレード・オブ・アルカナのタロットに対応。<br>
+マップのマス目を非表示にできるように機能追加。<br>
+チャットでシフトかコントロールキーを押しながらリターンキーを押すと改行文字が入力できるように変更。<br>
+チャットで文字の途中でリターンキーを押すと途中改行で送信されてしまう障害を修正。<br>
+チャットのログ保存時に改行が正しく入らない障害を修正。<br>
+<br>
+2009/02/14 Ver.0.98.17<br>
+キャラクターをマップマスクの下に隠す機能を追加（モンスターの事前配置用）。<br>
+チャットの背景色を変更可能に。これに伴いチャットの文字設定関連を個別画面へ集約。<br>
+カード機能に「全員に非公開でカードを引く」方法を追加。<br>
+<br>
+2009/02/11 Ver.0.98.16<br>
+カードを上下反転できるように機能追加。<br>
+チャットパレットにセーブ・ロード機能追加。<br>
+チャットのログを上から下へ流れるように仕様変更。<br>
+ログイン画面に参加者名を表示するように機能追加。<br>
+ダイスボットで振ったダイスの目をデフォルトで常に全表示するように変更。<br>
+SW2.0のダイスボットのクリティカル値省略時の値を10に変更。<br>
+捨て札からのカードシャッフル時に正しくシャッフルされていなかった障害を修正。<br>
+<br>
+2009/02/05 Ver.0.98.15<br>
+カード初期化方法を、任意のカードを組み合わせられるように変更。<br>
+深淵の運命カードに対応<br>
+<br>
+2009/02/01 Ver.0.98.14.1<br>
+新規作成プレイルームで「保存」機能が正しく動いていなかった障害の修正漏れを再修正。<br>
+最終更新時刻から１分経過すればプレイルームが削除できるように仕様変更。<br>
+<br>
+2009/01/31 Ver.0.98.14<br>
+チャットパレット機能を追加。<br>
+デフォルトの表示マップを変更。<br>
+バージョンロゴを変更。<br>
+ダイスボットでSW2.0のクリティカル表示が正しく表示されない障害を修正。<br>
+新規作成プレイルームで「保存」機能が正しく動いていなかった障害を修正。<br>
+ダイスボット・ビジュアルダイスの乱数精度を向上。<br>
+<br>
+2009/01/24 Ver.0.98.13<br>
+ダイスボットや定型文の事前登録用に「チャットパレット」を実装。「ビジュアルダイス」の下にボタンが追加されているので、それを押すとチャットパレットになります。<br>
+<br>
+2009/01/23 Ver.0.98.12.5<br>
+チャットの文字サイズを変更できるように機能変更。<br>
+アラームが鳴らない障害を修正。<br>
+マップのサイズ変更しても座標表示が正しく更新されない障害を修正。<br>
+<br>
+2009/01/23 Ver.0.98.12.4<br>
+ダイスボットでゲーム種別を選択しても設定が反映されない障害を修正。<br>
+マップの座標を非表示状態でマップ画像を変更すると座標が再表示されてしまう障害を修正。<br>
+ダイスボットの設定でPerlの判定を行う作業を不要に。<a href='#cgiServerSetting'>CGIサーバの用意</a>から不要となった作業を削除。(Facelessさんありがとう！)<br>
+<br>
+2009/01/18 Ver.0.98.12.3<br>
+ダイスボットを＠Pages、land.toと言ったレンタルサーバで動くように.haccessを修正。<br>
+上記に合わせ、各種サーバの設定方法を<a href='#cgiServerSetting'>CGIサーバの用意</a>に追記。<br>
+<br>
+2009/01/17 Ver.0.98.12.2<br>
+チャットのテキスト出力が逆順になるバグがあったため修正。<br>
+ログイン画面の「お知らせ」が表示されないバグがあったため修正。<br>
+また、READMEの「<a href='#othersSetting'>その他</a>」にセーブデータのパス変更方法を追記。<br>
+<br>
+2009/01/17 Ver.0.98.12.1<br>
+マップマスクがたまに消えてしまうバグを修正。<br>
+リプレイ機能に早送りボタンを追加。URLからのリプレイファイル指定を追加。<br>
+<br>
+2009/01/12 Ver.0.98.12<br>
+お試し用のログイン方法を追加。<br>
+DodontoF.swf?isSampleMode=true にログインすると、自分一人だけがログインできるプレイルームを一時的に作成。<br>
+このプレイルームは1時間以上操作が行われないと削除されます。<br>
+立ち絵の表示／非表示設定をチャットのアイコンからメニューの「表示」へ変更。<br>
+リプレイ機能の表示を変更。文字を大きくしヴィジュアルダイスウィンドウを非表示に。<br>
+<br>
+2009/01/09 Ver.0.98.11.8<br>
+立ち絵の「状態」文字をチャットの末尾に記載することで状態を変更できるように。<br>
+これでたとえばダイスボットで「自動成功」の文字があればクリティカル用の立ち絵を出す、といった小細工ができるようになります。<br>
+また、SW2.0でダイスボットが自動成功・失敗を表示できるよう処理変更。<br>
+<br>
+2009/01/08 Ver.0.98.11.7<br>
+サーバの更新チェックが切断された場合のチェック方式を変更。<br>
+サーバとの接続エラーをチャットログではなくチャットウィンドウのステータス欄(ウィンドウタイトルの右横)に表示するように変更。<br>
+チャットで改行キー押し続けで連続送信される問題を対処。また送信時に末尾の余分な改行を削除<br>
+<br>
+2009/01/07 Ver.0.98.11.6<br>
+ダイスボットが広告挿入型のサーバで上手く動かない問題に対応。<br>
+README.htmlの設置方法にファイルの権限について記載を追加。<br>
+<br>
+2009/01/06 Ver.0.98.11.5<br>
+ダイスボットが一部のCGIサーバ(Perl5.8以上をサポート)で動作しない問題を修正。<br>
+（上記に伴い、ダイスボットのCGIが変更になっています。サーバを自前で設置している人は「設置方法」を再確認してください。）<br>
+キャラクターや魔法範囲の変更時のソースコードを整理。<br>
+<br>
+2009/01/01 Ver.0.98.11.4<br>
+N◎VAのトランプを2組セットに変更。<br>
+カードの公開・非公開をカードのフチの色で表示するように変更。<br>
+カードの右クリックメニューを実行可能なものだけ表示するように変更。<br>
+キャラクターの「その他」の1行目をキャラクター名に続けてマップ上に表示するように変更。<br>
+<br>
+2008/12/23 Ver.0.98.11.3<br>
+カードを「山札」から引いて、「捨て札」に捨てるよう方式を変更。<br>
+「捨て札」から「山札」へシャッフルしてカードを戻すこともできます。<br>
+これでニューロデッキとトランプのシャッフルを個別に行うことができるようになりました。<br>
+<br>
+2008/12/23 Ver.0.98.11.2<br>
+小さい画像のアップロードに失敗する障害を修正。<br>
+<br>
+2008/12/23 Ver.0.98.11.1<br>
+カード表示に対応。デフォルトでは非表示なので「表示」＝＞「カード表示」を選択してください。<br>
+現状ではN◎VAのニューロデッキとトランプ、それにTORGドラマデッキに対応しています。<br>
+テキスト・画像を用意できれば任意に拡張が可能です。<br>
+<br>
+2008/12/19 Ver.0.98.10.2<br>
+チャットのログ保存機能を高速化。ただしFlashPlayer10が必須のためその旨を表示するように変更。<br>
+ダイスボットが小文字で 2d6 のように表記したときにロール結果が表示されないバグを修正。<br>
+<br>
+2008/12/19 Ver.0.98.10.1<br>
+DD4th対応の魔法範囲の種別をメニューに追加。<br>
+リプレイ機能の動作を軽くなるように修正。<br>
+<br>
+2008/12/17 Ver.0.98.9.1<br>
+リプレイ機能を追加。<br>
+画像アップローダーを複数ファイルの一括アップロードに対応。<br>
+<br>
+2008/12/12 Ver.0.98.8.2<br>
+キャラクター／マップ画像ではSWFを使用不可能に。<br>
+立ち絵で外部URL指定の場合は表示されない問題を修正。<br>
+外部ファイルでのカットイン再生に対応するため明示的に幅・高さを指定できるように変更。<br>
+<br>
+2008/12/09 Ver.0.98.8.1<br>
+立ち絵機能を追加。<br>
+カットイン管理画面の構成を変更。<br>
+カットインにFLVに加え静止画・SWFも使用可能に。<br>
+キャラクター／マップ画像にもSWFを使用可能に。<br>
+チャットの新着音(ページ送り音)を画面が非アクティブの場合のみ再生されるように機能変更。<br>
+<br>
+2008/12/05 Ver.0.98.7.19<br>
+カットイン動画処理を登録・送信するよう処理変更。これに伴い静止画カットインを一時削除。<br>
+Ruby実装の旧ダイスボット機能を削除し、Perlダイスボットに完全移行。<br>
+チャットの送信処理を高速化。<br>
+キャラクター重なり時の展開表示をサイズが2以上のキャラクターにも対応。<br>
+ダイスボットを「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.3 へ以降し、クトゥルフテックに対応。<br>
+<br>
+2008/12/03 Ver.0.98.7.18<br>
+READMEの記述を整理。<br>
+<br>
+2008/12/01 Ver.0.98.7.17<br>
+キャラクターが同じ座標に重なった場合、少しずらして表示。またその状態でカーソルがキャラクターの上に来ると展開表示されるよう機能追加。<br>
+ダイスボッツの有効・無効を設定できるようsrc_ruby/config.rb に $isDiceBotOn を追加。<br>
+チャットウィンドウでのタブの移動順序が名前＝＞チャットメッセージ欄になるように変更。<br>
+カットインの動画が正しい高さ・幅で表示されなかったバグを修正。<br>
+<br>
+2008/11/21 Ver.0.98.7.16<br>
+ログアウトボタン追加（メインメニュー右端）。ログアウトすればルーム人数もその瞬間に更新されます。<br>
+ログイン・ログアウト時には通知メッセージをチャットに表示するように変更。<br>
+ダイスボット使用時に使用ゲームシステムを表示するように変更。<br>
+<br>
+2008/11/20 Ver.0.98.7.15<br>
+ダイスボット機能修正。<br>
+デフォルトはボット無しで、各ゲーム毎に特化する用選択可能に。<br>
+各ゲーム毎の具体的は <u><a href="src_perl/readme_BC.txt">Facelessさんのボーンズ＆カーズのREADME</a></u>の「3.ボットの利用法」を参照してください。<br>
+＃Facelessさん本当にありがとう！！<br>
+ただしIRCボットとは以下の点が異なります。<br>
+　・「４．カード機能」はサポートされていません。ダイスのみです。<br>
+　・ダイス用の文字は文頭でのみ有効。<br>
+たとえば、ソードワールド2.0であれば、<br>
+「K20+1@9 攻撃！」のように行頭に「K(レート)+(修正)」と記載するとロールされます。（修正は省略可能)<br>
+ロール文字列に続けて通常の文字も書けます。<br>
+「攻撃！ K20+129」は無効です。<br>
+文頭にスペースがある場合も無効になります。<br>
+またダイス文字列と続く文字列の間には必ず半角スペースを入れてください。<br>
+<br>
+2008/11/19 Ver.0.98.7.14<br>
+ソードワールド2.0用にダイスボットを設定<br>
+<a href="http://faceless-tools.cocolog-nifty.com/blog/">Facelessさん</a>のIRC用ダイスボット「ボーンズ＆カーズ(bcdice.pl)」Ver.1.1.1を移植。<br>
+チャットに「K(レーティング)[(クリティカル値)]+(修正値)」の書式を入力し、「DiceBot送信(SW2.0)」ボタンを押すと威力表のロール結果が出力されます。<br>
+例）K20,K10+5,k30,k10+10,k10-1 k10+5+2<br>
+K20[10],K10+5[9],k30[10],k10[9]+10<br>
+注意：この機能をダウンロードした「どどんとふ」を元に自前のサーバで使用する場合は別途、<br>
+src_perl/customBot.pl ファイルの先頭にPerlのパスを指定してください。<br>
+<br>
+2008/11/19 Ver.0.98.7.13<br>
+動画のカットイン設定画面から設定項目を削減しシンプルに。<br>
+<s>ソードワールド2.0用にダイスボットを設定</s>（バグがあったため差し戻し）<br>
+<br>
+2008/11/16 Ver.0.98.7.12<br>
+カットイン動画をポップアップ方式へ変更。<br>
+サーバとの通信速度を向上。（特にチャット、キャラクター移動時の応答）<br>
+<br>
+2008/11/15 Ver.0.98.7.11<br>
+簡易マップ作成機能でマスが塗られない場合がある障害を修正。<br>
+<br>
+2008/11/15 Ver.0.98.7.10<br>
+ログイン画面でソートすると正しいログインルームが選択されない障害を修正。<br>
+ログイン中ユーザーがいてもプレイルームが削除できるように変更。<br>
+簡易マップ作成機能でマップが白一色に染まる障害を修正。<br>
+静止画カットインが正しく動かない障害を修正。<br>
+<br>
+2008/11/14 Ver.0.98.7.9<br>
+プレイルームが常に削除できてしまう障害を修正。<br>
+ログイン画面でパスワードのチェックボックスが操作できてしまう障害を修正。<br>
+<br>
+2008/11/14 Ver.0.98.7.8<br>
+簡易マップ作成機能の出力がズレる障害を修正。<br>
+ログイン画面の見た目を修正。<br>
+<br>
+2008/11/13 Ver.0.98.7.7<br>
+初回ログイン時にパスワードを登録可能に。これで仲間内だけに公開する非公開プレイが可能になりました。<br>
+誰もログインしていないで、最終更新から8時間が経過しているプレイルームを削除できるよう機能追加。<br>
+各種登録画面のボタン配置をある程度統一。<br>
+<br>
+2008/11/09 Ver.0.98.7.6<br>
+簡易マップがマップサイズ変更時に狂うバグを修正。<br>
+ついでに簡易マップ画面にスポイト機能を追加。<br>
+<br>
+2008/11/09 Ver.0.98.7.5<br>
+チャット、イニシアティブ表、ダイスの各ウィンドウをサイズ変更可能に。背景色も変更。<br>
+アイコンを変更。<br>
+<br>
+2008/11/08 Ver.0.98.7.4<br>
+ログイン画面で現在のログイン人数を表示するように機能追加。<br>
+<br>
+2008/11/08 Ver.0.98.7.3<br>
+チャット、イニシアティブ表、ダイス、座標の表示・非表示制御をメニュー組み込みに変更。<br>
+チャットの着信音をデフォルトOFFに。<br>
+ログイン中のメンバーを確認できるようメニューバーにボタンを追加。<br>
+<br>
+2008/11/03 Ver.0.98.7.2<br>
+チャット、イニシアティブ表、ダイスがチェックボックスで表示制御できなくなっていたバグを修正。<br>
+<br>
+2008/11/02 Ver.0.98.7.1<br>
+マップの縦横幅指定が逆に設定されてしまうバグを修正。<br>
+ロード機能が失敗する場合があるバグを修正。<br>
+<br>
+2008/11/01 Ver.0.98.7<br>
+セーブ・ロードのロード機能が動作しなくなっていたバグを修正。<br>
+ウィンドウ配置方法を根本から変更。（見た目にはあまり変わりません。）<br>
+カットイン作成画面に「動画」作成用のタブを追加。<br>
+任意のFLVファイル（ぶっちゃけニコニコ動画ファイル）の再生が可能です。<br>
+サンプルは無音ですが音もなります。<br>
+<br>
+2008/10/30 Ver.0.98.6.7<br>
+カットイン機能を強化。音を追加したりコマンドで再生可能にしたり。<br>
+あと、チャットでのダイス機能を微妙に修正。<br>
+<br>
+2008/10/29 Ver.0.98.6.6<br>
+カットイン機能を暫定追加。<br>
+<br>
+2008/10/28 Ver.0.98.6.5<br>
+目覚まし機能を任意のMP3が鳴らせる「アラーム」コマンドへ拡張。<br>
+<br>
+2008/10/27 Ver.0.98.6.4<br>
+画像アップローダーをFlashに統合<br>
+<br>
+2008/10/25 Ver.0.98.6.3<br>
+READMEをHTML化<br>
+<br>
+2008/10/25 Ver.0.98.6.2<br>
+目覚ましアラームの着信先を選択可能に。<br>
+<br>
+2008/10/25 Ver.0.98.6<br>
+目覚ましボタンを追加。<br>
+アラーム音は sound/alarm.mp3 固定。任意のMP3を上書きすることで音が変えられます。<br>
+<br>
+2008/10/24 Ver.0.98.5<br>
+メニューの「ファイル」にセーブ＆ロード機能追加<br>
+（もし表示されていない場合はリロードしてください）<br>
+　マップやキャラクター等作成・変更するものはほぼ全てセーブされます。<br>
+　別のプレイルームにロードすることもできます。<br>
+魔法タイマーを変更してからリロードするとタイマーが消えてしまうバグを修正。<br>
+<br>
+2008/10/21 Ver.0.98.4.3<br>
+イニシアティブ表をチェックボックスで非表示可能にできていなかったので修正。<br>
+魔法タイマーを変更可能に。<br>
+次回はセーブ＆ロード機能を実装予定。<br>
+<br>
+2008/10/20 Ver.0.98.4.2<br>
+イニシアティブ表をチェックボックスで非表示可能に。<br>
+<br>
+2008/10/18 Ver.0.98.4<br>
+「マップ」メニューに「簡易マップ作成」を追加。<br>
+「マップ変更」で白地図を選ぶこともでるようになりましたので、マス目を色塗りするだけの簡易ダンジョンが作成できるようになりました。<br>
+通信遅延に追加対応。<br>
+<br>
+2008/10/14 Ver.0.98.3<br>
+障害物として、とりあえずマップマスクを流用しやすいようにマップマスクの作成方法を簡素化。<br>
+色も付けられるように機能拡張。<br>
+次回は白地図のマス目を着色するだけのお手軽なダンジョン作成画面を実装予定。<br>
+<br>
+2008/10/12 Ver.0.98.2<br>
+キャラクター等の画像が存在しない場合にエラーを表示するよう修正。<br>
+<br>
+2008/10/10 Ver.0.98.1<br>
+各入力画面の数値入力をスピンボックスへ変更。<br>
+セーブデータに不正なキャラクターデータが混在した場合のエラー処理を追加。<br>
+[ソースコード]単体テスト作成方法変更。これに伴いActionScriptコンパイル時のオプションを変更。<br>
+<br>
+2008/10/07 Ver.0.98.0<br>
+BUG:「マウスを右クリックして魔法範囲の作成を指定した際に、その右クリックした場所に魔法範囲が現れない」を修正。<br>
+魔法範囲の残りラウンドを変更可能に。<br>
+魔法範囲で、円や円錐だけでなく、四角形を作成可能に。<br>
+<br>
+2008/10/06 Ver.0.97.9<br>
+キャラクター移動など更新時に全キャラクターの画像がちらつく問題に対応。<br>
+ウィンドウ周りの透過等、全体的構成を修正。<br>
+・機能：魔法で、範囲ではなく時間のみ管理（ヘイストやエンラージパースン等にて使用）<br>
+対応として「魔法タイマー」を追加。<br>
+・BUG：魔法範囲を作成後、それに変更を加えると残りラウンドの表示が勝手に変わってしまう<br>
+を修正。<br>
+<br>
+2008/10/05 Ver.0.97.8<br>
+キャラクター追加方法をドラッグでの張り付けに変更。<br>
+大量NPCにはこのほうが便利なはず・・・？<br>
+<br>
+2008/10/04 Ver.0.97.7<br>
+通信の遅延にお試し対処<br>
+<br>
+2008/10/04 Ver.0.97.6<br>
+ズーム時にキャラクターの座標が中央に来ないバグを修正。<br>
+バージョン表記の飛び番を修正。<br>
+ログイン画面の表示メッセージを loginMessage.txt で変更できるように。<br>
+またログイン画面の構成を変更。<br>
+<br>
+2008/10/01 Ver.0.97.5<br>
+Rubyソースコードのファイル構成を整理。これに伴いREADMEのファイル構成の記述を修正。<br>
+マップマスクを墓場に送らないように修正。<br>
+キャラクターをクリックでイニシアティブ表が、イニシアティブ表クリック時でキャラクターが点滅するよう機能追加。<br>
+魔法範囲に残りラウンド数のカウント機能を追加。<br>
+<br>
+2008/09/27 Ver.0.97.4<br>
+キャラクター画像の透明度を変更可能に。<br>
+チャット・ダイス・座標文字の表示を非表示可能に。<br>
+メニュー周りを変更。（キャラクター追加等のメニュー化)<br>
+<br>
+2008/09/26 Ver.0.97.3<br>
+マップマスクを追加。<br>
+WEBカメラ画像アップローダーを追加。<br>
+画像削除時のデバッグログを削除。<br>
+<br>
+2008/09/22 Ver.0.97.2<br>
+BMPファイルのような不正な画像が削除できない障害を修正。<br>
+メニュー周りを変更。（ズームをアイコン化など）<br>
+<br>
+2008/09/22 Ver.0.97.1<br>
+大々的に公開するべくREADMEやログイン画面等の見た目を修正。<br>
+キャラクター作成時にマウス座標が微妙にずれる問題に対応。<br>
+あと、この調子でバージョン上げると1.00に到達すると気づいたので細かく刻むことにする。<br>
+<br>
+2008/09/21 Ver.0.97<br>
+アップロード画像の削除機能を追加。<br>
+メニュー追加に伴いメニューバー周りを修正。<br>
+<br>
+2008/09/21 Ver.0.96<br>
+マップの変更画面をリストからURL選択ではなく一覧からクリック選択に変更。<br>
+「画像URLアップローダー」機能を追加。外部URLをローカル画像のように参照できるようにする機能です。<br>
+イニシアティブ表の「変更」ボタンからキャラクター情報変更画面が開くようにイニシアティブ表の構成を大幅に変更。<br>
+<br>
+<br>
+2008/09/19 Ver.0.95<br>
+キャラクターの追加・変更画面で画像の設定をリストからURL選択ではなく一覧からクリック選択に変更。<br>
+キャラクターの削除を高速化<br>
+<br>
+2008/09/08 Ver.0.94<br>
+とりあえずHP上に公開。<br>
+<br>
+<br>
+2008/09/06 Ver.0.93<br>
+D100をD%100と名称変更。D100とD10を同時に振るように動作変更。(D100が00、D10が0なら値は0になります)<br>
+チャット手打ちのダイスに＋−の修正値入力機能を追加。<br>
+<br>
+2008/09/03 Ver.0.92<br>
+D100実装。<br>
+ログ保存機能修正。<br>
+<br>
+2008/09/02 Ver.0.91<br>
+すっかり忘れてたチャットのログ保存機能を追加。<br>
+<br>
+2008/09/01 Ver.0.90<br>
+「どどんと」の機能もあらかた実装できたのでバージョン正式に付与。<br>
+あとはD100を実装したり、細々とした変更を予定しています。<br>
+<br>
+2008/07/05 Ver.-.--<br>
+「どどんとふ」仮作成開始。<br>
+以前作った「どどんと」を4th対応の名の下軽量化を目指してFlashで再実装。<br>
+名称は「新たなる開拓地を切り開く」という意味でFrontierを付与し、DnDMapFrontier略して「どどんとＦ」−＞「どどんとふ」となりました。<br>
+・・・うそです。FlashのFです。あと上記の説明はマクロスＦ見ながらでっち上げました。<br>
+</body>
+</html>
