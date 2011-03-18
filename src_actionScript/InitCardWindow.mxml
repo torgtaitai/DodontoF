@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:torgtaitai="*" 
+                width="500" height="400"
+                title="カード初期化画面" 
+                showCloseButton="true"
+                close="PopUpManager.removePopUp(this)"
+                >
+  
+  <mx:Box height="100%" width="100%">
+    <mx:Form>
+      <mx:HBox height="30" width="100%">
+        <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
+        <mx:FormItem label="デッキ個数:">
+          <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
+        </mx:FormItem>
+        <mx:FormItem label="ジョーカー枚数:">
+          <mx:NumericStepper id="jorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
+        </mx:FormItem>
+      </mx:HBox>
+      
+      <mx:Box id="checkBoxPlace" height="100%" width="100%" />
+    </mx:Form>
+    
+  </mx:Box>
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="シャッフルして初期配置へ" click="execute()" enabled="true" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.controls.Alert;
+    import mx.events.CloseEvent;
+       
+    static private var cardInfos:Array = new Array();
+    private var checkBoxes:Object = new Object();
+       
+    override protected function setup():void {
+        initCardTypes();
+    }
+    
+    //static private var cardTypeTrump:String = "trump_jorker3";
+    static private var cardTypeTrump:String = "trump_2";
+    
+    static private function isTrump(cardType:String):Boolean {
+        return ( cardType == cardTypeTrump );
+    }
+    
+    static public function setCardInfos(infos:Array):void {
+        cardInfos = new Array();
+        
+        for(var i:int = 0 ; i < infos.length ; i++) {
+            var cardInfo:Object = infos[i];
+            var cardType:String = cardInfo.type;
+            
+            cardInfos.push(cardInfo);
+        }
+    }
+    
+    static public function getCardName(mountName:String):String {
+        for(var i:int = 0 ; i < cardInfos.length ; i++) {
+            var cardInfo:Object = cardInfos[i];
+            var cardType:String = cardInfo.type;
+            var cardName:String = cardInfo.title;
+            
+            if( cardType == mountName ) {
+                return cardName;
+            }
+        }
+        
+        return "";
+    }
+       
+    private function initCardTypes():void {
+        for(var i:int = 0 ; i < cardInfos.length ; i++) {
+            var cardInfo:Object = cardInfos[i];
+            var cardType:String = cardInfo.type;
+            var cardName:String = cardInfo.title;
+
+            if( isTrump(cardType) ) {
+                continue;
+            }
+            
+            var checkBox:CheckBox = new CheckBox();
+            checkBox.id = cardType;
+            checkBox.label = cardName;
+               
+            checkBoxPlace.addChild( checkBox );
+            checkBoxes[cardType] = checkBox;
+        }
+    }
+       
+    private function changeTrumpCheck():void {
+        deckCount.enabled = trump.selected;
+        jorkerCount.enabled = trump.selected;
+    }
+       
+    private function checkAndAddCardInfos(cardInitInfos:Array, cardType:String):void {
+           
+        var checkBox:CheckBox = checkBoxes[cardType];
+           
+        if( checkBox == null ) {
+            return;
+        }
+        if( ! checkBox.selected ) {
+            return;
+        }
+           
+        cardInitInfos.push( {'mountName': cardType } );
+    }
+       
+    public function execute():void {
+        var thisObj:InitCardWindow = this;
+           
+        var result:Alert = Alert.show("現在使用しているカードは全て破棄されます。\nよろしいですか？", "カード初期化確認", 
+                                      Alert.OK | Alert.CANCEL, null, 
+                                      function(e : CloseEvent) : void {
+                                          if (e.detail == Alert.OK) {
+                                              thisObj.initCards();
+                                          }});           
+    }
+       
+    public function initCards():void {
+        try{
+            var cardInitInfos:Array = [];
+               
+            if( trump.selected ) {
+                cardInitInfos.push( {'mountName':cardTypeTrump,
+                            'useLineCount':(52 + jorkerCount.value),
+                            "deckCount": deckCount.value} );
+            }
+               
+            for(var i:int = 0 ; i < cardInfos.length ; i++) {
+                var cardInfo:Object = cardInfos[i];
+                var cardType:String = cardInfo.type;
+                
+                if( isTrump(cardType) ) {
+                    continue;
+                }
+                
+                checkAndAddCardInfos(cardInitInfos, cardType);
+            }
+               
+            DodontoF_Main.getInstance().initCards( cardInitInfos );
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+       
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

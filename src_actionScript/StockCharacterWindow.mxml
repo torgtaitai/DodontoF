@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <torgtaitai:CommonPopupWindow -->
+<mx:TitleWindow 
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="250"
+   y="50"
+   width="170"
+   height="160"
+   title="キャラクター置き場" 
+   showCloseButton="true"
+   
+   close="PopUpManager.removePopUp(this)"
+   creationComplete="setup()"
+   >
+
+  
+  <mx:Box height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+	<mx:Label text="{characterName}" />
+    <mx:Box height="100%" width="50" >
+      <mx:Image id="view" width="50" height="50" horizontalAlign="center" verticalAlign="middle" source="{characterImageUrl}"/>
+    </mx:Box>
+    
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:CheckBox width="70" id="isMany" label="複数作成" selected="false" click="setCharacterName()" />
+      <mx:HBox id="indexBox" height="25" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{isMany.selected}">
+        <mx:Label text="連番：" />
+	    <mx:TextInput id="index" width="25" text="1" change="setCharacterName()" />
+      </mx:HBox>
+    </mx:HBox>
+  </mx:Box>
+
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+
+    private static var characterParamsStatic:Object = new Object;
+
+    public static function setParams(characterParams:Object):void {
+        for (var key:String in characterParams) {
+            characterParamsStatic[key] = characterParams[key];
+        }
+    }
+
+    [Bindable]
+    private var characterName:String = "";
+    private var characterNameBase:String = "";
+    [Bindable]
+    private var characterImageUrl:String = "";
+    private var characterSize:int = 1;
+    private var characterHideState:Boolean = false;
+    [Bindable]
+    private var characterInitiative:int = 0;
+    private var characterInfo:String = "";
+
+    private function setup():void {
+        Log.loggingTuning("=>setup() Begin");
+        
+        DodontoF_Main.getInstance().setStockCharacterWindow(this);
+        
+        statusTextField.background = true;
+        statusTextField.backgroundColor = 0xFFFFDD;
+
+        var characterParams:Object = characterParamsStatic;
+        characterNameBase = characterParams.name;
+        setCharacterName();
+        characterImageUrl = characterParams.imageUrl;
+        characterSize = characterParams.size;
+        characterHideState = characterParams.isHide;
+        characterInitiative = characterParams.initiative;
+        characterInfo = characterParams.info;
+    
+        setDragEvent();
+    
+        Log.loggingTuning("=>setup() End");
+    }
+
+/*
+    override protected function isCentering():Boolean {
+        return false;
+    }
+*/
+    
+    private function setCharacterName():void {
+        if( isMany.selected ) {
+            characterName = (characterNameBase + "_" + index.text);
+        } else {
+            characterName = characterNameBase;
+        }
+    }
+
+    private function setDragEvent():void {
+        view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                view.startDrag();
+                event.stopPropagation();
+                this.status = "";
+            });
+    
+        view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                view.stopDrag();
+                
+                var map:Map = DodontoF_Main.getInstance().getMap();
+                var globalPoint:Point = localToGlobal( new Point(view.x + 75 , view.y + 75) );
+                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+                
+                var dorpMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+        
+                if( (dorpMapPoint.x >= 0) && (dorpMapPoint.y >= 0) ) {
+                    addCharacter(dorpMapPoint.x, dorpMapPoint.y);
+                }
+        
+                view.x = 0;
+                view.y = 0;
+            });
+    }
+
+    public function addCharacter(x:int, y:int):void {
+        try{
+            setCharacterName();
+            
+            var dogTag:String = (isMany.selected ? ("" + index.text) : "");
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.addCharacter(characterName,
+                                        characterImageUrl,
+                                        characterSize,
+                                        characterHideState,
+                                        characterInitiative,
+                                        characterInfo,
+                                        x,
+                                        y,
+                                        dogTag);
+            if( ! isMany.selected ) {
+                PopUpManager.removePopUp(this);
+            }
+        
+            index.text = "" + (parseInt(index.text) + 1);
+            
+            setCharacterName();
+        } catch(error:Error) {
+            this.status = error.message;
+            Log.loggingError("StockCharacterWindow.addCharacter", error);
+        }
+    }
+
+    ]]>
+  </mx:Script>
+      
+<!-- </torgtaitai:CommonPopupWindow> -->
+</mx:TitleWindow>

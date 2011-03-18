@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="150"
+   title="入力" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Box id="infoBox" width="100%" />
+    <mx:HBox width="100%" height="100%">
+      <mx:Label id="inputLabel" text="入力:" />
+      <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />
+    </mx:HBox>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="実行" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    
+    private var executeFunction:Function;
+    
+    public function init(infoTexts:Array, titleText:String, inputLabelText:String,
+                         executeFunction_:Function, initText:String = "", isPassword:Boolean = false):void {
+        this.title = titleText;
+        this.inputLabel.text = inputLabelText + ":";
+        input.text = initText;
+        input.displayAsPassword = isPassword;
+        executeFunction = executeFunction_;
+        
+        for(var i:int = 0 ; i < infoTexts.length ; i++) {
+            addInfoText(infoTexts[i]);
+        }
+        
+        height += (infoTexts.length * 15);
+    }
+    
+    private function addInfoText(infoText:String):void {
+        var info:Label = new Label();
+        info.percentWidth = 100;
+        info.text = infoText;
+        
+        infoBox.addChild(info);
+    }
+    
+    override protected function setup():void {
+    }
+
+    public function execute():void {
+        try {
+            executeFunction.call(null, input.text);
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

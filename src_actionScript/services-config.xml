@@ -1,0 +1,24 @@
+<services-config>
+  
+  <services>
+    <service id="remoting-service"
+             class="flex.messaging.services.RemotingService"
+             messageTypes="flex.messaging.messages.RemotingMessage">
+      <destination id="Main">
+        <channels>
+          <channel ref="ch-blazeds" />
+        </channels>
+        <properties>
+          <source>*</source>
+        </properties>
+      </destination>
+    </service>
+  </services>
+  
+  <channels>
+    <channel-definition id="ch-blazeds" class="mx.messaging.channels.AMFChannel">
+      <endpoint url="http://dodontof.appspot.com/messagebroker/amf" class="flex.messaging.endpoints.AMFEndpoint"/>
+    </channel-definition>
+  </channels>
+  
+</services-config>

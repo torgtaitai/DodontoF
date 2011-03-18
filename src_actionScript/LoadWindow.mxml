@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="430"
+   title="ロード" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+	<mx:RadioButtonGroup id="RadioGroup_Load"/>
+	<mx:RadioButton groupName="RadioGroup_Load"
+      id="loadAll"
+      label="全データをロードする（現在のデータは全て破棄されます）"
+      click="loadSelectBox.enabled = false"
+       selected="true"
+      />
+	<mx:RadioButton groupName="RadioGroup_Load"
+      id="loadSelected"
+      label="一部データのみをロードする"
+      click="loadSelectBox.enabled = true"
+      />
+    
+    <mx:HBox id="loadSelectBox" width="100%" height="100%" enabled="false" >
+      <mx:Spacer width="15" height="100%" />
+      <mx:Box width="100%" height="100%" >
+        <mx:CheckBox id="map" label="マップを変更する" />
+        <mx:Label text="以下は現状に該当データを追加します（現在のデータは保持されます）" />
+        <mx:CheckBox id="mapMask" label="マップマスク" />
+        <mx:CheckBox id="mapMarker" label="マップマーカー" />
+        <mx:CheckBox id="character" label="キャラクター" />
+        <mx:CheckBox id="magicRangeMarker" label="魔法範囲" />
+        <mx:CheckBox id="memo" label="共有メモ" />
+        <mx:CheckBox id="standingGraphicInfos" label="立ち絵" />
+        <mx:CheckBox id="cutIn" label="カットイン" />
+        <mx:CheckBox id="card" label="カード" />
+      </mx:Box>
+    </mx:HBox>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="実行" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    import mx.controls.Alert;
+    
+    override protected function setup():void {
+    }
+
+    private function getLoadParams():Object {
+        if( loadAll.selected ) {
+            return null;
+        }
+        
+        var targets:Array = new Array();
+        
+        if( map.selected ) {
+            targets.push("map");
+        }
+        if( mapMask.selected ) {
+            targets.push( MapMask.getTypeStatic() );
+        }
+        if( mapMarker.selected ) {
+            targets.push( MapMarker.getTypeStatic() );
+        }
+        if( character.selected ) {
+            targets.push( Character.getTypeStatic() );
+        }
+        if( magicRangeMarker.selected ) {
+            targets.push( MagicRange.getTypeStatic() );
+            targets.push( MagicRangeDD4th.getTypeStatic() );
+        }
+        if( memo.selected ) {
+            targets.push( Memo.getTypeStatic() );
+        }
+        if( card.selected ) {
+            targets.push( Card.getTypeStatic() );
+        }
+        
+        if( standingGraphicInfos.selected ) {
+            targets.push( "standingGraphicInfos" );
+        }
+        if( cutIn.selected ) {
+            targets.push( "cutIn" );
+        }
+        
+        var params:Object = {
+            'targets' : targets
+        };
+        
+        return params;
+    }
+    
+    public function execute():void {
+        try {
+            var resultFunction:Function = null;
+            
+            if( params == null ) {
+                resultFunction = function():void {
+                    DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
+                }
+            }
+            
+            var params:Object = getLoadParams();
+            DodontoF_Main.getInstance().getGuiInputSender().load(params, resultFunction);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

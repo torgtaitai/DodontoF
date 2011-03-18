@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="150"
+   title="リプレイ環境設定" 
+   showCloseButton="true"
+   >
+  
+  <mx:CheckBox id="grid" label="マス目を表示する" selected="true"
+               height="100%"
+               />
+  <mx:CheckBox id="position" label="座標文字を表示する" selected="true"
+               height="100%"
+               />
+<!--  
+  <mx:Label text="表示するチャットタブ名（スペース区切りで）：" width="100%" />
+  <mx:TextInput id="channelNames" text="メイン　雑談" width="100%" />
+-->
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="設定" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    import mx.controls.Alert;
+    
+    override protected function setup():void {
+    }
+    
+    private var resultCallBack:Function;
+    
+    public function setResultCallBack(func:Function):void {
+	resultCallBack = func;
+    }
+    
+    public function execute():void {
+        try {
+            
+            var replayConfig:Object = {
+                "grid" : grid.selected,
+                "position" : position.selected
+//              "channelNames" : channelNames.text.split(/[\s　]+/)
+            };
+            
+            resultCallBack(replayConfig);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   backgroundAlpha="1.0"
+   borderStyle="solid"
+   borderThickness="2"
+   headerColors="{headerColorsArray}"
+   close="closeAction()"
+   creationComplete="setupStart()"
+   >
+  <mx:Script>
+    <![CDATA[
+    import mx.collections.ArrayCollection;
+    //
+    [Bindable]
+    static public var headerColorsArray:Array = [0x00CC66, 0x00CC66];//[0x0099CC, 0x0099CC]
+    
+    import mx.managers.PopUpManager;
+
+    protected function setup():void {
+    }
+    
+    protected function isCentering():Boolean {
+        return true;
+    }
+    
+    private var resizeEventFunction:Function = null;
+    
+    public function setResizeEventFunction(f_:Function):void {
+        resizeEventFunction = f_;
+    }
+    
+    public function resizeEvent():void {
+        if( resizeEventFunction != null ) {
+            resizeEventFunction.call();
+        }
+    }
+        
+    private function setupStart():void {
+        Resizer.addResize(this,new Point(100,50));
+        
+        setup();
+        
+        statusTextField.background = true;
+        statusTextField.backgroundColor = 0xFFFFDD;
+        
+        if( isCentering() ) {
+            PopUpManager.centerPopUp(this);
+        }
+    }
+    
+    protected function closeAction():void {
+        teardown();
+        PopUpManager.removePopUp(this);
+    }
+    
+    protected function teardown():void {
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</mx:TitleWindow>

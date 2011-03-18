@@ -1,0 +1,810 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="イニシアティブ表"
+   width="10" height="300"
+   showCloseButton="true"
+   verticalScrollPolicy="off"
+  >
+  
+  <mx:HBox id="roundBaseBox"
+          width="100%" height="15"
+          horizontalAlign="center"
+          verticalGap="1"
+          >
+    <mx:Button id="prevButton" height="15" paddingLeft="2" paddingRight="2" label="戻る" click="previous()" />
+    <mx:Button id="nextButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="次へ" click="next()" />
+    
+    <mx:Spacer width="100%" />
+    
+    <mx:Button id="resetButton" height="15" width="60" paddingLeft="2" paddingRight="2" label="戦闘開始" click="reset()" />
+      
+    <mx:Spacer width="5" />
+    <mx:Button id="setConfigButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="設定" click="setConfig()" />
+    
+  </mx:HBox>
+  
+  <mx:DataGrid id="initiativeInfoListView"
+               width="100%"
+               height="100%"
+               dataProvider="{initiativeInfoList}"
+               sortableColumns="false"
+		       draggableColumns="false"
+               enabled="true"
+               editable="true"
+               click="clickInitiativeInfoListView()"
+               doubleClickEnabled="true"
+               doubleClick="doubleclickInitiativeInfoListView()"
+               showDataTips="true"
+               dataTipFunction="getCharacterInfoTip"
+               itemEditEnd="initiativeInfoListItemEditEndFunction(event)"
+               dragEnabled="true"
+               >
+	<mx:columns>
+	  <mx:DataGridColumn headerText="手番"
+                         dataField="currentTarget"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="5"
+                         width="10"
+                         />
+	  <mx:DataGridColumn headerText="イニシアティブ"
+                         editorDataField="value"
+                         dataField="initiativeInt"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="20"
+                         width="30">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn headerText="修正値(イニシアティブが同値の場合の比較に使用)"
+                         editorDataField="value"
+                         dataField="initiativeModify"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn headerText="名前"
+                         dataField="characterName"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="20"
+                         width="30"
+                         />
+      <!--
+	  <mx:DataGridColumn headerText="補足説明"
+                         dataField="state"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="20"
+                         width="30"
+                         />
+      -->
+      <!-- 一番手抜き名やり方で、カウンター10個羅列（あぁ…僕はなんてい卑しいんだ…）-->
+
+      
+	  <mx:DataGridColumn id="counterBegin"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter0"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter1"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter1"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter2"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter2"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter3"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter3"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter4"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter4"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter5"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter5"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter6"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter6"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter7"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter7"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter8"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter8"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counter9"
+                         visible="false"
+                         headerText=""
+                         editorDataField="value"
+                         dataField="counter9"
+                         textAlign="right"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="999" minimum="-999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn id="counterEnd" width="0" visible="false"/>
+      
+      
+      
+	  <mx:DataGridColumn headerText="その他"
+                         dataField="info"
+                         textAlign="left"
+                         editable="true"
+                         itemEditor="InitiativeWindowEditor"
+                         editorUsesEnterKey="true"
+                         width="100"
+                         />
+	</mx:columns>
+  </mx:DataGrid>
+  
+  <mx:HBox width="100%" height="15"
+          horizontalAlign="center"
+          verticalGap="1"
+          >
+    <mx:Button id="editButton" height="15" paddingLeft="2" paddingRight="2" label="変更" click="editListCharacter()" />
+    <mx:Spacer width="5" />
+    <mx:Button id="deleteButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="削除" click="removeListCharacter()" />
+  </mx:HBox>
+    
+  <mx:Script>
+    <![CDATA[
+      [Bindable]
+      private var initiativeInfoList:Array;
+      
+      import mx.events.DragEvent;
+      import mx.managers.DragManager;
+      import mx.events.ListEvent;
+      import mx.controls.dataGridClasses.DataGridColumn;
+      import mx.controls.NumericStepper;
+      import mx.controls.TextInput;
+      import mx.events.DataGridEvent;
+      import mx.collections.ArrayCollection;
+      import mx.core.Application;
+      import mx.managers.PopUpManager;
+      import mx.controls.Alert;
+      import flash.events.Event;
+      import flash.events.FocusEvent;
+      import mx.controls.TextArea;
+      import mx.containers.Box;
+      import mx.containers.HBox;
+      import mx.controls.Label;
+      import flash.events.KeyboardEvent;
+      import mx.effects.Glow;
+      import mx.controls.TextArea;
+      
+      private function getRoundTimer():RoundTimer {
+        var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+        Log.logging("InitiativeWindow init roundTimer", roundTimer);
+        return roundTimer;
+      }
+
+      override public function getSaveInfoKeyName():String {
+          return "InitiativeWindow";
+      }
+        
+      override public function setup():void {
+          initiativeInfoList = new Array();
+          instance = this;
+          setInitPosition();
+          
+          setResizeEventFunction( resizeInitiativeInfoBox );
+          resizeInitiativeInfoBox.call();
+          initContextMenu();
+          
+          if( ! defaultColors ){
+              // 初期値のカラーパターンを記憶
+              defaultColors = initiativeInfoListView.getStyle("alternatingItemColors");
+          }
+      }
+      
+      private var defaultColors:Array;
+      
+      private var characterMenu:ContextMenuItem;
+      
+      protected function initContextMenu():void {
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            characterMenu = MovablePiece.addMenuItem(menu, "対象の削除", getContextMenuItemRemoveCharacter, true);
+            this.contextMenu = menu;
+            
+            /*
+            initiativeInfoListView.addEventListener(mx.events.ListEvent.ITEM_ROLL_OVER,
+                                                    function(event:mx.events.ListEvent ):void {
+                    deleteButton.editable = false;
+                    
+                    if( event == null ) {
+                        return;
+                    }
+                    
+                    var info:Object = initiativeInfoList[event.rowIndex];
+                    if( info == null ) {
+                        return;
+                    }
+                    
+                    var piece:InitiativedMovablePiece = info["character"];
+                    if( piece == null ) {
+                        return;
+                    }
+                    
+                    deleteButton.editable = true;
+                    //characterMenu.visible = piece.canDeleteOnInitiativeList();
+                });
+            */
+      }
+      
+      
+      public function getDoropedInitiativedMovablePiece(event:DragEvent):InitiativedMovablePiece {
+          var index:int = initiativeInfoListView.calculateDropIndex(event);
+        
+          var info:Object = initiativeInfoList[ index ];
+          if( info == null ) {
+              return null;
+          }
+          
+          var piece:InitiativedMovablePiece = info["character"];
+          return piece;
+      }
+      
+      private function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {
+          var info:Object = initiativeInfoList[ initiativeInfoListView.selectedIndex ];
+          if( info == null ) {
+              return;
+          }
+          
+          var piece:MagicTimer = info["character"] as MagicTimer;
+          if( piece == null ) {
+              return;
+          }
+          
+          piece.popUpDeleteWindow();
+      }
+      
+      public function resizeInitiativeInfoBox():void {
+      }
+      
+      private function getCounterNames():Array {
+          return getRoundTimer().getCounterNames();
+      }
+      
+      private function initColumns():void {
+          var counterNames:Array = getCounterNames();
+          
+          var counterBeginIndex:int = -1;
+          for(var i:int = 0 ; i < initiativeInfoListView.columns.length ; i++) {
+              var column:DataGridColumn = initiativeInfoListView.columns[i];
+              
+              if( column == counterEnd ) {
+                  break;
+              }
+              
+              if( column == counterBegin ) {
+                  counterBeginIndex = i;
+              }
+              
+              if( counterBeginIndex == -1 ) {
+                  continue;
+              }
+              
+              var counterIndex:int = i - counterBeginIndex;
+              
+              column.headerText = "" + counterIndex;
+              
+              if( counterIndex >= counterNames.length ) {
+                  column.visible = false;
+                  column.width = 0;
+                  continue;
+              }
+              
+              column.visible = true;
+              column.headerText = counterNames[counterIndex];
+          }
+      }
+      
+      public function getListCharacter():InitiativedPiece {
+          var info:Object = initiativeInfoList[ initiativeInfoListView.selectedIndex ];
+          if( info == null ) {
+              return null;
+          }
+          
+          var piece:InitiativedPiece = info["character"] as InitiativedPiece;
+          return piece;
+      }
+      
+      public function removeListCharacter():void {
+          var piece:InitiativedPiece = getListCharacter();
+          if( piece == null ) {
+              return;
+          }
+          
+          if( ! piece.canDeleteOnInitiativeList() ) {
+              return;
+          }
+          
+          piece.popUpDeleteWindow();
+      }
+      
+      public function editListCharacter():void {
+          var piece:InitiativedPiece = getListCharacter();
+          if( piece == null ) {
+              return;
+          }
+          piece.popUpChangeWindow();
+      }
+      
+      public function refresh():void {
+          Log.loggingTuning("InitiativeWindow.refresh Begin");
+          
+          //編集中なら更新パス
+          if( initiativeInfoListView.itemEditorInstance != null ) {
+              return;
+          }
+          
+          var initiativedPieces:Array = getRoundTimer().getSortedInitiativedPiece();
+          
+          this.clear(getRoundTimer().getCurrentRound(),
+                     getRoundTimer().getCurrentInitiative());
+          
+          this.initColumns();
+          
+          var colors:Array = new Array();
+          
+          for(var i:int = 0 ; i < initiativedPieces.length ; i++) {
+              var piece:InitiativedPiece = initiativedPieces[i];
+              Log.logging("piece is ", piece);
+              Log.logging("refreshInitiativeList roundTimer.addCharacter()");
+              
+              var isCurrent:Boolean = ( piece.getInitiative() == getRoundTimer().getCurrentInitiative() );
+              this.addCharacter(piece, isCurrent);
+              if( piece.isDead() ) {
+                  colors.push(0xaaaaaa);
+              } else {
+                  colors.push(defaultColors[i % 2]);
+              }
+          }
+          
+          Log.logging("roundBaseBox.height", roundBaseBox.height);
+          Log.logging("this.height", this.height);
+          
+          initiativeInfoListView.setStyle("alternatingItemColors", colors);
+          initiativeInfoListView.validateNow();
+          setDebeteButtonState();
+          
+          Log.loggingTuning("InitiativeWindow.refresh End");
+      }
+      
+      private function getCurrentTargetMarker(piece:InitiativedPiece, isCurrent:Boolean):String {
+          if( ! isCurrent ) {
+              return "";
+          }
+          
+          if(piece.isDead() ) {
+              return "×";
+          }
+          
+          return "●";
+      }
+      
+      public function addCharacter(piece:InitiativedPiece, isCurrent:Boolean):void {
+          Log.logging("addCharacter begin");
+          
+          var counterNames:Array = getCounterNames();
+          var characterInfo:Object = new Object();
+          
+          characterInfo["currentTarget"] = getCurrentTargetMarker(piece, isCurrent);
+          characterInfo["initiativeInt"] = Utils.getInitiativeInt(piece.getInitiative());
+          characterInfo["initiativeModify"] = Utils.getInitiativeModify(piece.getInitiative());
+          characterInfo["characterName"] = piece.getName();
+          characterInfo["state"] = piece.getAdditionalInfos().join(", ");
+          characterInfo["info"] = piece.getInfo();
+          characterInfo["character"] = piece;
+          
+          for(var i:int ; i < counterNames.length ; i++) {
+              var counterName:String = counterNames[i];
+              characterInfo["counter" + i] = piece.getCounter(counterName);
+          }
+          
+          initiativeInfoList.push(characterInfo);
+          
+          piece.setClickEvent( function():void{
+                  selectTargetInfo(characterInfo);
+              });
+          
+          Log.logging("addCharacter end");
+      }
+      
+      private function selectTargetInfo(targetInfo:Object):void {
+          for(var i:int = 0 ; i < initiativeInfoList.length ; i++) {
+              var characterInfo:Object = initiativeInfoList[i];
+              
+              if( targetInfo == characterInfo ) {
+                  initiativeInfoListView.selectedIndex = i;
+                  return;
+              }
+          }
+      }
+      
+      private function getCharacterInfoTip(characterInfo:Object):String {
+          var piece:InitiativedPiece = characterInfo["character"];
+          if( piece == null ) {
+              return "";
+          }
+          
+          /*
+          var toolTip:mx.core.IToolTip = mx.managers.ToolTipManager.currentToolTip;
+          if( toolTip == null ) {
+              return "";
+          }
+          
+          var toolTipX:Number = this.x - toolTip.measuredWidth;
+          if( toolTip < 0 ) {
+              toolTipX = this.x + this.width;
+          }
+          toolTip.x = toolTipX;
+          */
+          
+          return piece.getToolTipMessage();
+      }
+      
+      private function getSelectedCharacterInfo():Object {
+          var index:int = initiativeInfoListView.selectedIndex;
+          if(index == -1) {
+              return null;
+          }
+          
+          var characterInfo:Object = initiativeInfoList[index];
+          return characterInfo;
+      }
+      
+      private function getSelectedInitiativedPiece():InitiativedPiece {
+          var characterInfo:Object = getSelectedCharacterInfo();
+          if( characterInfo == null ) {
+              return null;
+          }
+          
+          var piece:InitiativedPiece = characterInfo["character"];
+          return piece;
+      }
+      
+      private function doubleclickInitiativeInfoListView():void {
+          var piece:InitiativedPiece = getSelectedInitiativedPiece();
+          if( piece == null ) {
+              return;
+          }
+          
+          piece.pickupToCenter();
+      }
+      
+      private function clickInitiativeInfoListView():void {
+          var piece:InitiativedPiece = getSelectedInitiativedPiece();
+          if( piece == null ) {
+              return;
+          }
+          
+          piece.pickup();
+          setDebeteButtonState();
+      }
+      
+      private function setDebeteButtonState():void {
+          var piece:InitiativedPiece = getSelectedInitiativedPiece();
+          var magicTimer:MagicTimer = piece as MagicTimer;
+          deleteButton.enabled = (magicTimer != null);
+      }
+      
+      public function clear(currentRound:int, currentInitiative:Number):void {
+          //roundTimerRound.htmlText = "ラウンド：" + currentRound + "<br />";
+          //roundTimerInitiative.htmlText = "イニシアティブ：" + currentInitiative;
+          this.title = "ラウンド：" + currentRound + "／イニシアティブ：" + currentInitiative;
+          setAllButtonsStatus(true);
+          
+          initiativeInfoList = new Array();
+      }
+      
+      private static var instance:InitiativeWindow;
+      
+      public static function getInstance():InitiativeWindow {
+          return instance;
+      }
+      
+      public function setInitPosition():void {
+          if( loadPosition() ) {
+              return;
+          }
+          
+          this.width = DodontoF_Main.getInstance().getDiceBox().width;
+          
+          var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
+          var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
+          var diceBoxHeigth:int = DodontoF_Main.getInstance().getDiceBox().height;
+          var heightPadding:int = 10;
+          
+          if( diceBoxHeigth == 0 ) {
+              heightPadding = 0;
+          }
+          
+          this.x = screenWidth - this.width;
+          this.y = DodontoF_Main.getInstance().getDodontoF().getMainBarHeight();
+          this.height = screenHeigth - diceBoxHeigth - heightPadding - this.y;
+      }
+      
+      private function setAllButtonsStatus(isEnable:Boolean):void {
+          resetButton.enabled = isEnable;
+          nextButton.enabled = isEnable;
+          
+          if( getRoundTimer().getHistoryCount() == 0 ) {
+              prevButton.enabled = false;
+          } else {
+              prevButton.enabled = isEnable;
+          }
+      }
+
+      private function previous():void {
+          setAllButtonsStatus(false);
+          getRoundTimer().previous();
+      }
+
+      private function next():void {
+          setAllButtonsStatus(false);
+          getRoundTimer().next();
+      }
+      
+      public function setConfig():void {
+          var window:InputTextWindow = DodontoF.popup(InputTextWindow, false) as InputTextWindow;
+          
+          var inputFunction:Function = function(text:String):void {
+              getRoundTimer().sendCounterNames(text.split(/[\s　]+/));
+          };
+          
+          window.init(["カウンターに使用するパラメータ名をスペース区切りで入力してください",
+                       "(注)変更は同一プレイルームの全員に影響します。",
+                       "　例）HP MP AC 侵食率 ポシビリティ"],
+                      "カウンター名入力",
+                      "カウンター名一覧",
+                      inputFunction,
+                      getCounterNames().join(" ")
+                      );
+      }
+      
+      private function reset():void {
+          setAllButtonsStatus(false);
+          getRoundTimer().reset();
+      }
+      
+      private function initiativeInfoListItemEditEndFunction(event:DataGridEvent):void {
+          Log.logging("initiativeInfoListItemEditEndFunction called.");
+          
+          //キャンセル操作（ESCキーでのキャンセル）なら送信しないようチェック
+          if( event.reason == mx.events.DataGridEventReason.CANCELLED ) {
+              return;
+          }
+          
+          sendCharacterInfo(event);
+          
+          //次回のリフレッシュで必ず値を更新するように更新時刻を0にリセット
+          //DodontoF_Main.getInstance().getGuiInputSender().getSender().resetLastUpdateTimeOfInitiativeTimer();
+      }
+      
+      private function sendCharacterInfo(event:DataGridEvent):void {
+          Log.logging("sendCharacterInfo called.");
+          
+          var characterInfo:Object = initiativeInfoList[event.rowIndex];
+          if( characterInfo == null ) {
+              return;
+          }
+          
+          var piece:InitiativedPiece = characterInfo["character"];
+          var changed:Boolean = false;
+          
+          if( setInitiative(event, characterInfo, piece) ) {
+              changed = true;
+          }
+          
+          if( setCounter(event, characterInfo, piece) ) {
+              changed = true;
+          }
+          
+          if( event.dataField == "info" ) {
+              var editor:InitiativeWindowEditor = InitiativeWindowEditor(event.currentTarget.itemEditorInstance);
+              var info:String = editor.text;
+              Log.logging("info", info);
+              if( info != piece.getInfo() ) {
+                  piece.setInfo( info );
+                  changed = true;
+              }
+          }
+          
+          Log.loggingTuning("changed", changed);
+          if( changed ) {
+              DodontoF_Main.getInstance().getGuiInputSender().getSender().changeCharacter( piece.getJsonData() );
+          }
+      }
+      
+      private function setCounter(event:DataGridEvent, characterInfo:Object, piece:InitiativedPiece):Boolean {
+          var counterHeaderName:String = event.dataField;
+          
+          var matchResult:Object = /^counter(\d+)/.exec(counterHeaderName);
+          if( matchResult == null ) {
+              return false;
+          }
+          
+          var counterIndex:int = parseInt(matchResult[1]);
+          var count:int = characterInfo[counterHeaderName];
+          
+          var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
+          var newCount:int = stepper.value;
+          
+          if( newCount == count ) {
+              return false;
+          }
+          
+          var counterNames:Array = getCounterNames();
+          var counterName:String = counterNames[counterIndex];
+          piece.setCounter(counterName, newCount);
+          
+          return true;
+      }
+      
+      private function setInitiative(event:DataGridEvent, characterInfo:Object, piece:InitiativedPiece):Boolean {
+          if( (event.dataField != "initiativeInt") &&
+              (event.dataField != "initiativeModify") ) {
+              return false;
+          }
+          
+          var initiativeInt:int = characterInfo["initiativeInt"];
+          var initiativeModify:int = characterInfo["initiativeModify"];
+          
+          var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
+          if(event.dataField == "initiativeInt") {
+              initiativeInt = stepper.value;
+          }
+          if(event.dataField == "initiativeModify") {
+              initiativeModify = stepper.value;
+          }
+          
+          var initiative:Number = Utils.getInitiative(initiativeInt, initiativeModify);
+          
+          if( initiative == piece.getInitiative() ) {
+              return false;
+          }
+          
+          piece.setInitiative( initiative );
+          return true;
+      }
+      
+    ]]>
+  </mx:Script>
+
+</torgtaitai:ResizableWindow>

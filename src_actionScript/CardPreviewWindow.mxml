@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="カードピックアップ"
+   x="10"
+   y="40"
+   width="200"
+   height="20"
+   showCloseButton="false"
+   backgroundColor="#FFFFFF"
+   borderStyle="solid"
+   backgroundAlpha="0.5"
+   >
+  
+  <mx:Script>
+    <![CDATA[
+        //
+        private var cardPreview:CardPickup = null;
+        
+        override public function setup():void {
+            cardPreview = new CardPickup(Card.getJsonData("", "", 0, 0));
+            
+            cardPreview.getView().visible = false;
+            cardPreview.setTitleVisible( false );
+            
+            this.titleBar.addChild(cardPreview.getView());
+            
+            titleTextField.textColor = 0;
+            
+            loadPosition();
+            this.height = resizerMinHeigth();
+            
+            setResizeEventFunction( function():void { setCardPreviewPosition() });
+        }
+        
+        override public function getSaveInfoKeyName():String {
+            return "CardPreviewWindow";
+        }
+        
+        override protected function resizerMinWidth():int {
+            return 10;
+        }
+        
+        override protected function resizerMinHeigth():int {
+            return 20;
+        }
+        
+        override public function isVerticalResizable():Boolean {
+            return false;
+        }
+        
+        public function displayCardPreview(card:Card):void {
+            cardPreview.setCard( card );
+            setCardPreviewPosition();
+            
+            cardPreview.getView().visible = true;
+        }
+        
+        public function hideCardPreview():void {
+            cardPreview.getView().visible = false;
+        }
+        
+        public function setCardPreviewPosition():void {
+            var cardView:Sprite = cardPreview.getView();
+            cardView.x = 0;
+            cardView.y = 0;
+            
+            var cardWidth:int = cardPreview.getWidth() * Map.getSquareLength();
+            var windowWidth:int = this.width;
+            var rate:Number = (windowWidth / cardWidth);
+            
+            cardPreview.setRate(rate);
+        }
+        
+        
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

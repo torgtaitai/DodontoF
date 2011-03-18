@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="350"
+   title="立ち絵設定" 
+   showCloseButton="true"
+   >
+  <mx:HBox width="100%" height="100%">
+    
+    <mx:Box width="100%" height="100%">
+	  <mx:DataGrid id="effectInfosList"
+                   width="100%"
+                   height="100%"
+                   dataProvider="{ DodontoF_Main.getInstance().standingGraphicInfos }"
+                   editable="false"
+		           draggableColumns="false"
+                   >
+	    <mx:columns>
+		  <mx:DataGridColumn headerText="名前"
+                             dataField="name"
+                             textAlign="center"
+                             width="50"/>
+		  <mx:DataGridColumn headerText="状態"
+                             dataField="state"
+                             textAlign="center"
+                             width="50"/>
+		  <mx:DataGridColumn headerText="位置"
+                             dataField="leftIndex"
+                             textAlign="center"
+                             width="20"/>
+		  <mx:DataGridColumn headerText="画像／動画ファイル"
+                             dataField="source"
+                             textAlign="center"
+                             width="100"/>
+	    </mx:columns>
+	  </mx:DataGrid>
+      
+      <mx:HBox id="editBox" width="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Button label="追加" click="addEffect()" />
+        <mx:Button label="変更" click="changeEffect()" />
+        <mx:Button label="削除"  click="removeEffect()" />
+        <mx:Spacer width="100%" />
+        <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
+      </mx:HBox>
+      
+    </mx:Box>
+    
+  </mx:HBox>
+  <mx:Script>
+    <![CDATA[
+    import mx.collections.ArrayCollection;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Alert;
+    import mx.events.CloseEvent;
+    
+    
+    override protected function setup():void {
+        try {
+            Resizer.addResize(this,new Point(100,50));
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+    private function getEffectInfoAndIndex():Array {
+        status = "";
+    
+        var index:int = effectInfosList.selectedIndex;
+        if( index == -1 ) {
+            status = "立ち絵を選択してください。";
+            return [null, index];
+        }
+    
+        return [DodontoF_Main.getInstance().standingGraphicInfos[index], index];
+    }
+
+    private function getEffectInfo():Object {
+        return getEffectInfoAndIndex()[0];
+    }
+
+    private function addEffect():void {
+        status = "";
+    
+        DodontoF.popup(AddStandingGraphicsWindow, true);
+    }
+
+    private function checkQuestionForRemoveEffect(info:Object, index:int):void {
+        var message:String = "";
+        message += "キャラクター名：" + info.name + "\n";
+        message += "状態：" + info.state + "\n";
+        message += "画像ファイル名：" + info.source + "\n";
+        message += "\n";
+        message += "上記の立ち絵を削除してよろしいですか？";
+        Alert.show(message, "立ち絵削除確認", 
+                   Alert.OK | Alert.CANCEL, null, 
+                   function(e : CloseEvent) : void {
+                       if (e.detail == Alert.OK) {
+                           removeEffectAfterCheck(info, index);
+                       }});
+    }
+
+    private function removeEffect():void {
+        status = "";
+    
+        var results:Array = getEffectInfoAndIndex();
+        var effectInfo:Object = results[0];
+        var index:int = results[1];
+    
+        if( effectInfo == null ) {
+            return;
+        }
+    
+        if( effectInfo.effectId == null ) {
+            return;
+        }
+    
+        checkQuestionForRemoveEffect(effectInfo, index);
+    }
+
+    private function removeEffectAfterCheck(effectInfo:Object, index:int):void {
+        DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
+    
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.removeEffect(effectInfo.effectId);
+    }
+
+
+    private function changeEffect():void {
+        status = "";
+    
+        var results:Array = getEffectInfoAndIndex();
+        var effectInfo:Object = results[0];
+        var index:int = results[1];
+    
+        if( effectInfo == null ) {
+            return;
+        }
+    
+        if( effectInfo.effectId == null ) {
+            return;
+        }
+    
+        var window:ChangeStandingGraphicsWindow =
+        DodontoF.popup(ChangeStandingGraphicsWindow, true) as ChangeStandingGraphicsWindow;
+        window.init(effectInfo, index);
+    }
+
+
+    ]]>
+  </mx:Script>
+
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="500"
+   height="300"
+   close="PopUpManager.removePopUp(this)"
+   >
+  
+  <mx:Form>
+	<mx:FormItem label="名前:">
+	  <mx:TextInput id="magicRangeName" text="" />
+	</mx:FormItem>
+	<mx:FormItem label="範囲種別:">
+      <mx:ComboBox id="magicRangeType" width="100%" editable="false">
+      <mx:dataProvider>{MagicRangeDD4th.rangeTypes}</mx:dataProvider> 
+      </mx:ComboBox>
+	</mx:FormItem>
+	<mx:FormItem label="範囲(マス):">
+	  <mx:NumericStepper id="magicRangeRadius" minimum="1" maximum="100" value="1" stepSize="1" />
+	</mx:FormItem>
+	<mx:FormItem label="色:">
+    <mx:ColorPicker id="magicRangeColorPicker" showTextField="true" selectedColor="0x000000" />
+	</mx:FormItem>
+	<mx:FormItem label="持続時間:">
+	  <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" />
+	</mx:FormItem>
+	<mx:FormItem label="その他:">
+	  <mx:TextInput id="magicRangeInfo" text="" />
+	</mx:FormItem>
+  </mx:Form>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="追加" click="this.execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    
+    private static var characterPositionX:int;
+    private static var characterPositionY:int;
+    
+    public static function setCharacterPosition(x:int = 1, y:int = 1):void {
+        characterPositionX = x;
+        characterPositionY = y;
+    }
+    
+    override protected function setup():void {
+        init();
+    }
+    
+    protected function init():void {
+        title="魔法範囲追加(D&D4版)" ;
+    }
+    
+    public function execute():void {
+         addMagicRange();
+    }
+    
+    private function addMagicRange():void {
+        try{
+            var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.addMagicRangeDD4th(magicRangeName.text,
+                                         getFeets(),
+                                         magicRangeType.selectedItem.data,
+                                         ("0x" + magicRangeColorPicker.selectedColor.toString(16)),
+                                         magicRangeTimeRange.value,
+                                         roundTimer.getCurrentRound(),
+                                         roundTimer.getCurrentInitiative(),
+                                         magicRangeInfo.text,
+                                         characterPositionX,
+                                         characterPositionY);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    protected function getFeets():int {
+        var radius:int = magicRangeRadius.value;
+        var feets:int = radius * 5;
+        return feets;
+    }
+    
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

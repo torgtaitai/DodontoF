@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="620"
+   height="200"
+   title="対象サーバ選択" 
+   >
+  
+  <mx:Label text="接続対象の「どどんとふ」サーバURLを入力してください" />
+  <torgtaitai:SuggestComboBox id="serverUrl" 
+                              width="100%"
+                              />
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="実行" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+
+    import mx.managers.PopUpManager;
+    
+    override protected function setup():void {
+        
+        var serverUrls:Array = ["http://www.dodontof.com/DodontoF/",
+                                "http://www.dodontof.com/DodontoF_New/"];
+        
+        serverUrl.dataProvider = serverUrls;
+    }
+    
+    
+    private var resultFunction:Function = null;
+    
+    public function setResultFunction(func:Function):void {
+        resultFunction = func;
+    }
+    
+    public function execute():void {
+        resultFunction(serverUrl.text);
+        PopUpManager.removePopUp(this);
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

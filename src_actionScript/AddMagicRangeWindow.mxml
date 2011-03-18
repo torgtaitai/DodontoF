@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="500"
+   height="300"
+   title="魔法範囲追加" 
+   showCloseButton="true"
+   >
+  
+  <mx:Form>
+	<mx:FormItem label="名前:">
+	  <mx:TextInput id="magicRangeName" text="" />
+	</mx:FormItem>
+	<mx:FormItem label="半径(5ft.単位):">
+	  <mx:NumericStepper id="magicRangeFeets" minimum="5" maximum="100" value="5" stepSize="5" />
+	</mx:FormItem>
+	<mx:FormItem label="範囲種別:">
+      <mx:ComboBox id="magicRangeType" width="100%" editable="false">
+        <mx:Object data="circle" label="円" />
+        <mx:Object data="corn1" label="円錐型(右上)" />
+        <mx:Object data="corn2" label="円錐型(右)" />
+        <mx:Object data="corn3" label="円錐型(右下)" />
+        <mx:Object data="corn4" label="円錐型(下)" />
+        <mx:Object data="corn5" label="円錐型(左下)" />
+        <mx:Object data="corn6" label="円錐型(左)" />
+        <mx:Object data="corn7" label="円錐型(左上)" />
+        <mx:Object data="corn8" label="円錐型(上)" />
+        <mx:Object data="square" label="四角" />
+      </mx:ComboBox>
+	</mx:FormItem>
+	<mx:FormItem label="色:">
+    <mx:ColorPicker id="magicRangeColorPicker" showTextField="true" selectedColor="0x000000" />
+	</mx:FormItem>
+	<mx:FormItem label="持続時間:">
+	  <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" />
+	</mx:FormItem>
+	<mx:FormItem label="その他:">
+	  <mx:TextInput id="magicRangeInfo" text="" />
+	</mx:FormItem>
+  </mx:Form>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button label="追加" click="this.addMagicRange()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    
+    private static var characterPositionX:int;
+    private static var characterPositionY:int;
+    
+    public static function setCharacterPosition(x:int = 1, y:int = 1):void {
+        characterPositionX = x;
+        characterPositionY = y;
+    }
+    
+    override protected function setup():void {
+    }
+    
+    
+    public function addMagicRange():void {
+        try{
+            var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.addMagicRange(magicRangeName.text,
+                                         magicRangeFeets.value,
+                                         magicRangeType.selectedItem.data,
+                                         ("0x" + magicRangeColorPicker.selectedColor.toString(16)),
+                                         magicRangeTimeRange.value,
+                                         roundTimer.getCurrentRound(),
+                                         roundTimer.getCurrentInitiative(),
+                                         magicRangeInfo.text,
+                                         characterPositionX,
+                                         characterPositionY);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

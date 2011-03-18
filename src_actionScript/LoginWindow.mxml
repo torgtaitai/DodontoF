@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="700"
+   height="470"
+   title="ログイン" 
+   >
+  
+  <mx:Box id="infoBox" width="100%" height="140" >
+    <mx:TextArea id="loginMessage" htmlText="ロード中・・・" width="100%" height="100%" editable="false" />
+  </mx:Box>
+  
+  <mx:Box id="mainBox" width="100%" height="100%" 
+          paddingTop="0" paddingBottom="0" 
+          paddingRight="0" paddingLeft="0" 
+          >
+    <mx:TabNavigator id="playRoomStateTabs" width="100%" height="20"
+                     change="getPlayRoomStates()"
+                     paddingTop="0" paddingBottom="0" 
+                     paddingRight="0" paddingLeft="0" 
+                     >
+    </mx:TabNavigator>
+    
+    <mx:Box width="100%" height="100%" >
+	  <mx:DataGrid id="playRoomStateInfo"
+                   width="100%"
+                   height="100%"
+                   dataProvider="{playRoomStates}"
+                   editable="false"
+		           draggableColumns="true"
+                   click="clickPlayRoomStateInfo()"
+                   itemRollOver="rollOverPlayRoomStateInfo(event)"
+                   doubleClickEnabled="true"
+                   doubleClick="login( getSelectedRoomNumber() )"
+                   enabled="false"
+                   >
+		<mx:columns>
+		  <mx:DataGridColumn headerText="No."
+                             dataField="index"
+                             textAlign="center"
+                             width="35"/>
+		  <mx:DataGridColumn headerText="プレイルーム名"
+                             dataField="playRoomName"
+                             textAlign="center"
+                             width="250"/>
+		  <mx:DataGridColumn headerText="入室人数"
+                             dataField="loginUserCount"
+                             textAlign="center"
+                             width="60"/>
+		  <mx:DataGridColumn headerText="パスワード"
+                             dataField="passwordLockState"
+                             textAlign="center"
+                             width="60"/>
+		  <mx:DataGridColumn headerText="見学"
+                             dataField="canVisit"
+                             textAlign="center"
+                             width="40"/>
+		  <mx:DataGridColumn headerText="最終更新時刻"
+                             dataField="lastUpdateTime"
+                             textAlign="center"
+                             width="140"/>
+		</mx:columns>
+	  </mx:DataGrid>
+    </mx:Box>
+    
+    <mx:HBox width="100%" height="22" >
+      <mx:Label text="あなたのお名前：" />
+      <mx:TextInput id="yourName" text="ななしさん" width="100%" height="100%" editable="true"
+                    change="savePlayerInfo()"
+                    />
+      
+      <mx:Label text="現在の総ログイン人数：" />
+      <mx:Label id="currentAllLoginCount" text="0" width="50" height="100%" />
+      
+      <mx:TextInput id="adminPassword" text="管理用パスワード" width="0" height="0" enabled="false"
+                    />
+    </mx:HBox>
+    
+    <mx:HBox id="extendBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
+      <mx:Spacer width="100%" />
+      <mx:Button label="指定プレイルームを削除" click="this.removePlayRoom( roomNumberInput.text )" />
+      <mx:Spacer width="20" />
+      <mx:Button label="リプレイ編集" click="editReplayData();" />
+      <mx:Button label="リプレイ投稿" click="uploadReplayData();" />
+      <mx:Button label="リプレイ再生" click="replaySessionRecord();" />
+    </mx:HBox>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="createNewPlayRoomButton" label="新規プレイルーム作成" click="createPlayRoom()"  enabled="false" />
+      <mx:Spacer width="50%" />
+	  <mx:Label text="プレイルームNo." />
+      <mx:TextInput id="roomNumberInput" text="0" width="50" />
+      <mx:Button id="loginButton" label="ログイン" click="login( parseInt(roomNumberInput.text) )" enabled="false" />
+      <mx:Spacer width="50%" />
+      <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()"  enabled="false" />
+    </mx:HBox>
+    
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    [Bindable]
+    private var playRoomStates:ArrayCollection = new ArrayCollection();
+    
+    private var playRoomGetRangeMax:int = 10;
+    private var playRoomGetRange:int = 10;
+    private var maxRoom:int = 0;
+    private var minRoom:int = 0;
+    
+    import mx.collections.ArrayCollection;
+    import mx.containers.TitleWindow;
+    import mx.controls.Alert;
+    import mx.core.IFlexDisplayObject;
+    import mx.events.CloseEvent;
+    import mx.events.ListEvent;
+    import mx.events.DataGridEvent;
+    import mx.managers.PopUpManager;
+    
+    private var guiInputSender:GuiInputSender;
+    private var isReplay:Boolean;
+    private var thisObj:LoginWindow;
+    private var autoLoginRoom:int = 0;
+    
+    override protected function setup():void {
+        thisObj = this;
+        autoLoginRoom = DodontoF_Main.getInstance().getLoginRoom();
+        
+        if( autoLoginRoom >= 0 ) {
+            this.visible = false;
+            minRoom = autoLoginRoom;
+            maxRoom = autoLoginRoom;
+        }
+        
+        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        
+        var replayDataUrl:String = DodontoF_Main.getInstance().getReplayDataUrl();
+        var isReplayer:Boolean = DodontoF_Main.getInstance().isReplayer();
+        isReplay = ( (replayDataUrl != null) || isReplayer ) ;
+        
+        if( isReplay ) {
+            this.mainBox.visible = false;
+            this.mainBox.height = 0;
+            this.infoBox.percentHeight = 100;
+            
+            if( isReplay ) {
+                replaySessionRecord(replayDataUrl);
+            }
+            
+            return;
+        }
+        
+        this.requestLoginInfo();
+        loadPlayerInfo();
+        
+        setAdminMode();
+    }
+    
+    private function setAdminMode():void {
+        if( DodontoF_Main.getInstance().isMode("admin") ) {
+            adminPassword.percentHeight = 100;
+            adminPassword.percentWidth = 100;
+            adminPassword.enabled = true;
+        }
+    }
+
+    private function clickPlayRoomStateInfo():void {
+        var index:int = getSelectedRoomNumber();
+        if( index == -1 ) {
+            return;
+        }
+        roomNumberInput.text = getRoomNumberStringByIndex(index);
+    }
+    
+    private function rollOverPlayRoomStateInfo(event:ListEvent):void {
+        var index:int = event.rowIndex
+        
+        var loginUsers:Array = playRoomStates[index].loginUsers as Array;
+        playRoomStateInfo.toolTip = null;
+        playRoomStateInfo.toolTip = "ログインユーザー：" + loginUsers.join("  ");
+    }
+
+    private function savePlayerInfo():void {
+        ChatWindow.savePlayerInfo(yourName.text);
+    }
+    
+    private function loadPlayerInfo():void {
+        var info:Object = ChatWindow.getPlayerInfo();
+        if( info == null ) {
+            return;
+        }
+        
+        var name:String = info["characterName"];
+        if( name == null ) {
+            return;
+        }
+        
+        yourName.text = name;
+    }
+    
+    
+    private function requestLoginInfo():void {
+        //guiInputSender.requestLoginInfo(minRoom.value, getMaxRoomValue(), this.requestLoginInfoResult);
+        guiInputSender.requestLoginInfo(this.requestLoginInfoResult);
+    }
+    
+    private function getSelectedRoomNumber():int {
+        var index:int = playRoomStateInfo.selectedIndex;
+        if(index == -1) {
+            return -1;
+        }
+        
+        return playRoomStates[index].index
+    }
+
+    private function getRoomNumberStringByIndex(index:int):String {
+        return "" + playRoomStates[index].index;
+    }
+    
+    private function getSelectedRoomName():String {
+        var index:int = getSelectedRoomNumber();
+        if( index == -1 ) {
+            return "";
+        }
+        return "" + playRoomStates[index].playRoomName;
+    }
+    
+    private var extendMode:Boolean = false;
+    
+    public function extend():void {
+        extendMode = ( ! extendMode);
+        
+        if( extendMode ) {
+            extendButton.label = "＜＜拡張機能を隠す";
+            extendBox.height = 30;
+            extendBox.visible = true;
+        } else {
+            extendButton.label = "＞＞拡張機能";
+            extendBox.height = 0;
+            extendBox.visible = false;
+        }
+    }
+    
+    private function isInvalidVersion(serverVersion:String):Boolean {
+        var clientVersion:String = Config.getInstance().getVersion();
+        if( clientVersion == serverVersion ) {
+            return false;
+        }
+        
+        var message:String = "";
+        message += "サーバCGIとクライアントFlashのバージョンが異なります。\n";
+        message += "Flashの読み込みに失敗していると思われます。\n";
+        message += "ブラウザをリロードしてFlashの再読み込みを行ってください。\n";
+        message += "サーババージョン　　　：" + serverVersion + "\n";
+        message += "クライアントバージョン：" + clientVersion + "\n";
+        
+        Alert.show(message);
+        
+        return true;
+    }
+
+    public function getPlayRoomStatesByRoomNumber(roomNumber:int, isForce:Boolean):void {
+        var index:int = roomNumber / playRoomGetRangeMax;
+        getPlayRoomStatesByIndex(index, isForce);
+    }
+    
+    public function getPlayRoomStates():void {
+        var index:int = playRoomStateTabs.selectedIndex;
+        getPlayRoomStatesByIndex(index);
+    }
+    
+    public function getPlayRoomStatesByIndex(index:int, isForce:Boolean = false):void {
+        if( ! isForce ) {
+            if( playRoomStatesList[index] != null ) {
+                playRoomStates = playRoomStatesList[index];
+                return;
+            }
+        }
+        
+        enableLoginButton(false);
+        
+        var min:int = index * playRoomGetRangeMax;
+        var max:int = min + playRoomGetRangeMax - 1;
+        guiInputSender.getPlayRoomStates(min, max, this.getPlayRoomStatesResult);
+    }
+    
+    private var playRoomStatesList:Object = new Object();
+    
+    public function getPlayRoomStatesResult(obj:Object):void {
+        Log.loggingTuning("=>getPlayRoomStatesResult(event:Event) Begin");
+        try {
+            var result:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            
+            var minRoomNumber:int = result.minRoom as int;
+            var index:int = minRoomNumber / playRoomGetRangeMax;
+            
+            var jsonData:Array = result.playRoomStates as Array;
+            playRoomStates = new ArrayCollection(jsonData);
+            
+            playRoomStatesList[index] =playRoomStates;
+        } catch(e:Error) {
+            Log.loggingException("requestLoginInfoResult", e);
+            Alert.show("error in requestLoginInfoResult\n" + 
+                       "error.message : " + e.message + "\n" + 
+                       "exception : " + e + "\n" + 
+                       "stackTrace : " + e.getStackTrace());
+        }
+        Log.loggingTuning("=>getPlayRoomStatesResult(event:Event) End");
+        enableLoginButton();
+    }
+    
+    public function requestLoginInfoResult(obj:Object):void {
+        Log.loggingTuning("=>requestLoginInfoResult(event:Event) Begin");
+        try {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            
+            if( isInvalidVersion( jsonData.version ) ) {
+                return;
+            }
+            
+            var warningMessage:String = Messages.getMessageFromWarningInfo(jsonData.warning);
+            if( warningMessage != "" ) {
+                Alert.show(warningMessage);
+                return;
+            }
+            
+            playRoomGetRangeMax = jsonData.playRoomGetRangeMax;
+            setMaxPlayRoomNumber(jsonData.playRoomMaxNumber);
+            
+            if( ! isReplay ) {
+                loginMessage.htmlText = jsonData.loginMessage;
+            }
+            
+            InitCardWindow.setCardInfos( jsonData.cardInfos );
+            
+            DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId );
+            DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout as int );
+            Config.getInstance().setDiceBotCgiUrl( jsonData.diceBoxCgiUrl );
+            
+            if( autoLoginRoom >= 0 ) {
+                Log.loggingTuning("autoLoginRoom", autoLoginRoom);
+                
+                login( autoLoginRoom );
+                return;
+            }
+            
+            currentAllLoginCount.text = "" + jsonData.allLoginCount;
+            
+            enableLoginButton();
+            extendButton.enabled = true;
+            
+            getPlayRoomStates();
+        } catch(e:Error) {
+            Log.loggingException("requestLoginInfoResult", e);
+            Alert.show("error in requestLoginInfoResult\n" + 
+                       "error.message : " + e.message + "\n" + 
+                       "exception : " + e + "\n" + 
+                       "stackTrace : " + e.getStackTrace());
+        }
+        
+        Log.loggingTuning("=>requestImageListResult(event:Event) End");
+    }
+          
+    private function setMaxPlayRoomNumber(playRoomMaxNumber:int):void {
+        guiInputSender.setPlayRoomMaxNumber(playRoomMaxNumber);
+        
+        var tabCount:int = (playRoomMaxNumber / playRoomGetRangeMax) + 1;
+        for(var i:int = 0 ; i < tabCount ; i++) {
+            var box:Box = new Box();
+            box.label = "" + (i * playRoomGetRangeMax) + "-";
+            playRoomStateTabs.addChild( box );
+        }
+    }
+    
+    public function removePlayRoom(roomNumberString:String):void {
+        try{
+            var roomNumber:int = guiInputSender.checkRoomNumber( parseInt(roomNumberString) );
+            var roomName:String = getSelectedRoomName();
+            
+            var message:String = "No." + roomNumber + "：" + roomName + "を削除しますか？";
+            removePlayRoomWithMessage(roomNumber, message);
+        } catch(error:Error) {
+            status = error.message;
+        }
+    }
+
+    public function removePlayRoomWithMessage(roomNumber:int,
+                                              message:String,
+                                              ignoreLoginUser:Boolean = false):void {
+        try{
+            var result:Alert = Alert.show(message, "削除確認", 
+                                          Alert.OK | Alert.CANCEL, null, 
+                                          function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
+                                                  guiInputSender.removePlayRoom(roomNumber, removePlayRoomResult, ignoreLoginUser);
+                                              }});
+        } catch(error:Error) {
+            status = error.message;
+        }
+    }
+
+    public function removePlayRoomResult(event:Event):void {
+        try{
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            
+            var resultText:String = jsonData.resultText;
+            Log.logging("resultText", resultText)
+            var roomNumber:int = jsonData.roomNumber;
+            Log.logging("roomNumber", roomNumber)
+            
+            if( resultText == "OK" ) {
+                getPlayRoomStatesByRoomNumber(roomNumber, true);
+            } else if( resultText == "userExist" ) {
+                this.askDeleteWhenUserExist(roomNumber);
+            } else {
+                var message:String = Messages.getMessage(resultText);
+                Alert.show(message);
+            }
+        } catch(error:Error) {
+            status = error.message;
+        }
+    }
+
+    private function askDeleteWhenUserExist(roomNumber:int):void {
+        var message:String = "ログインしているユーザーがまだいるようです。\n削除してよいですか？";
+        var ignoreLoginUser:Boolean = true;
+        removePlayRoomWithMessage(roomNumber, message, ignoreLoginUser);
+    }
+    
+    private function login(roomNumber:int):void {
+        try{
+            enableLoginButton(false);
+            var adminPasswordText:String = (adminPassword.enabled ? adminPassword.text : null);
+            guiInputSender.checkRoomStatus(roomNumber, adminPasswordText, checkRoomStatusResult);
+        } catch(error:Error) {
+            status = error.message;
+            enableLoginButton();
+        }
+    }
+    
+    private function getEnterPlayRoomFunction(roomNumber:int, roomName:String,
+                                              chatChannelNames:Array):Function {
+        var thisObj:LoginWindow = this;
+        
+        var enterPlayRoomFunction:Function = function(password:String = "", visiterMode:Boolean = false):void {
+            
+            Log.logging("enterPlayRoomFunction begin");
+            guiInputSender.setSaveDataDirIndex(roomNumber);
+            
+            Log.logging("LoginWindow, getEnterPlayRoomFunction setPlayRoomPassword", password);
+            DodontoF_Main.getInstance().setPlayRoomPassword(password);
+            DodontoF_Main.getInstance().setVisiterMode(visiterMode);
+            
+            var startFlag:Boolean = ( roomNumber != -1 );
+            DodontoF_Main.getInstance().start(startFlag);
+            
+            PopUpManager.removePopUp(thisObj);
+            Log.logging("enterPlayRoomFunction end");
+        }
+        
+        return enterPlayRoomFunction;
+    }
+    
+    private function enableLoginButton(b:Boolean = true):void {
+        loginButton.enabled = b;
+        playRoomStateInfo.enabled = b;
+        createNewPlayRoomButton.enabled = b;
+    }
+    
+    public function checkRoomStatusResult(obj:Object):void {
+        Log.logging("LoginWindow.checkRoomStatusResult begin");
+        try{
+            enableLoginButton();
+            
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            var isRoomExist:Boolean = jsonData.isRoomExist;
+            Log.logging("isRoomExist", isRoomExist);
+            
+            var roomNumber:int = jsonData.roomNumber;
+            var roomName:String = jsonData.roomName;
+            var chatChannelNames:Array = jsonData.chatChannelNames;
+            var canUseExternalImage:Boolean = jsonData.canUseExternalImage;
+            var canVisit:Boolean = jsonData.canVisit;
+            var isPasswordLocked:Boolean = jsonData.isPasswordLocked;
+            var diceBotInfos:Array = jsonData.diceBotInfos;
+            
+            Log.logging("roomNumber", roomNumber);
+            Log.logging("roomName", roomName);
+            Log.logging("chatChannelNames", chatChannelNames);
+            Log.logging("canUseExternalImage", canUseExternalImage);
+            Log.logging("canVisit", canVisit);
+            Log.logging("isPasswordLocked", isPasswordLocked);
+            Log.logging("diceBotInfos", diceBotInfos);
+            
+            DodontoF_Main.getInstance().setMentenanceModeOn( jsonData.isMentenanceModeOn );
+            DodontoF_Main.getInstance().setWelcomeMessageOn( jsonData.isWelcomeMessageOn );
+            DodontoF_Main.getInstance().setDiceBotInfos( diceBotInfos );
+            DodontoF_Main.getInstance().setUseExternalImage( canUseExternalImage );
+            
+            var enterPlayRoomFunction:Function = getEnterPlayRoomFunction(roomNumber, roomName, chatChannelNames);
+            
+            if( ! isRoomExist ) {
+                var createPlayRoomWindow:CreatePlayRoomWindow = DodontoF.popup(CreatePlayRoomWindow, true) as CreatePlayRoomWindow;
+                createPlayRoomWindow.initParams(roomNumber, enterPlayRoomFunction);
+                
+                return;
+            }
+            
+            //パスワード無しで見学無しならそのままログイン
+            if( ! isPasswordLocked ) {
+                if( ! canVisit ) {
+                    enterPlayRoomFunction();
+                    return;
+                }
+            }
+            
+            //パスワードか見学ありの場合
+            var window:InputPlayRoomPasswordWindow = DodontoF.popup(InputPlayRoomPasswordWindow, true) as InputPlayRoomPasswordWindow;
+            window.init(roomNumber, roomName, canVisit, isPasswordLocked, enterPlayRoomFunction);
+        } catch(error:Error) {
+            status = error.message;
+        }
+    }
+    
+    private function createPlayRoom():void {
+        enableLoginButton(false);
+        
+        var createPlayRoomWindow:CreatePlayRoomWindow = DodontoF.popup(CreatePlayRoomWindow, true) as CreatePlayRoomWindow;
+        createPlayRoomWindow.initParams(-1, function(roomIndex:int):void {
+                //プレイルームを作り終わったらそのルームナンバーへＵＲＬから直接ログイン
+                loginByRoomNumber(roomIndex);
+            });
+    }
+    
+    private function loginByRoomNumber(roomIndex:int):void {
+        if( roomIndex == -1 ) {
+            return;
+        }
+        
+        var currentUrl:String = mx.core.Application.application.url;
+        var targetUrl:String = currentUrl;
+        
+        if( currentUrl.indexOf("loginRoom=") == -1 ) {
+            if( currentUrl.indexOf("?") == -1) {
+                targetUrl += "?";
+            } else {
+                targetUrl += "&";
+            }
+            targetUrl += "loginRoom=" + roomIndex;
+        }
+        
+        Log.loggingTuning("targetUrl", targetUrl);
+        
+        var request:URLRequest = new URLRequest( targetUrl );
+        navigateToURL( request, "_self" );
+    }
+    
+    
+    private function editReplayData():void {
+        DodontoF_Main.getInstance().editReplayData();
+    }
+    
+    private function uploadReplayData():void {
+        DodontoF.popup(ReplayUploadWindow, true);
+    }
+    
+    
+    private function replaySessionRecord(replayDataUrl:String = null):void {
+        getEnterPlayRoomFunction(-1, "リプレイルーム", null).call();
+    
+        if( replayDataUrl == null ) {
+            DodontoF_Main.getInstance().replayFromSessionRecord();
+        } else {
+            DodontoF_Main.getInstance().replayFromDataUrl(replayDataUrl);
+        }
+    }
+
+    //private function disableEditing(event:DataGridEvent):void {
+    //    if(event.columnIndex==1) {
+    //        event.preventDefault();
+    //    }
+    //}
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

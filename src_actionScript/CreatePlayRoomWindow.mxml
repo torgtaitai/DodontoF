@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="215"
+   title="プレイルーム作成" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    
+	<mx:Label text="新規プレイルームを作成します。" />
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+	  <mx:Label text="プレイルーム名:" />
+      <mx:TextInput id="playRoomName" width="100%" text="" />
+    </mx:HBox>
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+	  <mx:Label text="パスワード(空ならパスワード無し):" />
+      <mx:TextInput id="playRoomPassword" width="100%" text=""
+                    displayAsPassword="true"
+                    />
+    </mx:HBox>
+    
+    <mx:Spacer width="100%" height="5" />
+    
+    <mx:Box id="extendBox" height="0" width="100%" visible="false" >
+      
+      <mx:HBox id="canUseExternalImageBox" height="25" width="100%"
+               toolTip="外部画像の許可を行うと画像指定時に外部URLが使用出来るようになります。指定していない場合に外部URLを画像に使用すると×マークに指し換わります。"
+               >
+        <mx:Label text="外部URLの許容:" />
+	    <mx:RadioButtonGroup id="canUseExternalImageRadioGroup" />
+	    <mx:RadioButton groupName="canUseExternalImageRadioGroup"
+                        id="canUseExternalImage" 
+                        value="canUseExternalImage" 
+                        label="外部URL使用可"
+                        />
+	    <mx:RadioButton groupName="canUseExternalImageRadioGroup"
+                        selected="true"
+                        id="canNotUseExternalImage"
+                        value="canNotUseExternalImage"
+                        label="外部URL使用不可"
+                        />
+      </mx:HBox>
+      
+      <mx:HBox id="visiterBox" height="25" width="100%"
+               toolTip="見学可にすると、パスワード有りでも見学者ならログインできるようになります。見学者はチャットの「見学用」タブでの発言のみが許可され、名前は「（名前）＠見学」になります。チャット発言意外の、マップやキャラ等の操作は一切できません。"
+               >
+        <mx:Label text="見学者の可否:" />
+	    <mx:RadioButtonGroup id="canVisitRadioGroup" />
+	    <mx:RadioButton groupName="canVisitRadioGroup"
+                        id="canVisit" 
+                        value="canVisit" 
+                        label="見学可"
+                        click="changeVisitMode(true)"
+                        />
+	    <mx:RadioButton groupName="canVisitRadioGroup"
+                        selected="true"
+                        id="canNotVisit"
+                        value="canNotVisit"
+                        label="見学不可"
+                        click="changeVisitMode(false)"
+                        />
+      </mx:HBox>
+      
+      <mx:Spacer width="100%" height="5" />
+      
+      <mx:Label text="使用するチャットのタブ:" />
+      <mx:Label text="半角・全角スペースでタブ名を区切ってください。（例：「雑談　打ち合わせ　メモ用」）" />
+      <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+        <mx:Label id="publicChannelLabel" text="" />
+        <mx:TextInput id="chatChannelNamesText" width="100%" text="雑談" />
+        <mx:Label id="visiterChannlelLabel" width="0" text="見学用" />
+      </mx:HBox>
+      
+    </mx:Box>
+      
+    <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()" />
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="作成" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+    </mx:Box>
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Alert;
+
+    protected var resultFunction:Function;
+    protected var playRoomIndex:int;
+    
+    public function initParams(playRoomIndex_:int, resultFunction_:Function = null):void {
+        playRoomIndex = playRoomIndex_;
+        resultFunction = resultFunction_;
+        playRoomName.text = "仮プレイルーム（削除可能）";
+        playRoomName.toolTip = "プレイルーム名を設定しない場合、仮使用とみなして削除されます。\n正式に利用する場合には正しく名前をつけましょう。";
+    }
+    
+    override protected function setup():void {
+        try {
+            init();
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    protected function init():void {
+        publicChannelLabel.text = DodontoF_Main.getInstance().publicChatChannelName;
+    }
+    
+    protected function getChatChannelNames():Array {
+        var parts:Array = chatChannelNamesText.text.split(/[\s　]+/);
+        
+        var chatChannelNames:Array = new Array();
+        chatChannelNames.push( DodontoF_Main.publicChatChannelName );
+        
+        for(var i:int = 0 ; i < parts.length ; i++) {
+            var name:String = parts[i];
+            if( name == "" ) {
+                continue;
+            }
+            
+            chatChannelNames.push(name);
+        }
+        
+        if( canVisit.selected ) {
+            chatChannelNames.push("見学用");
+        }
+        
+        return chatChannelNames;
+    }
+    
+    protected function execute():void {
+        Log.loggingTuning("=>createPlayRoom Begin");
+        
+        var chatChannelNames:Array = getChatChannelNames();
+        
+        try {
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.createPlayRoom(playRoomName.text,
+                                          playRoomPassword.text,
+                                          chatChannelNames,
+                                          canUseExternalImage.selected,
+                                          canVisit.selected,
+                                          playRoomIndex,
+                                          executeResult);
+        } catch(error:Error) {
+            this.status = "execute error : " + error.message;
+        }
+        
+        Log.loggingTuning("=>createPlayRoom End");
+    }
+    
+    public function executeResult(event:Event):void {
+        try{
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            var resultText:String = jsonData.resultText;
+            
+            var chatChannelNames:Array = getChatChannelNames();
+            
+            if( resultText == "OK" ) {
+                DodontoF_Main.getInstance().setPlayRoomPassword(playRoomPassword.text);
+                
+                PopUpManager.removePopUp(this);
+                
+                if( resultFunction != null ) {
+                    if( playRoomIndex == -1 ) {
+                        resultFunction(jsonData.playRoomIndex);
+                    } else {
+                        resultFunction(playRoomPassword.text);
+                    }
+                }
+            } else {
+                status = "server error : "+ resultText;
+                Alert.show(resultText);
+            }
+        } catch(error:Error) {
+            status = "executeResult error : " + error.message;
+        }
+    }
+    
+    
+    private var extendMode:Boolean = false;
+    
+    public function extend():void {
+        extendMode = ( ! extendMode);
+        
+        var extendHeight:int = 105 + visiterBox.height + canUseExternalImageBox.height;
+        
+        if( extendMode ) {
+            extendButton.label = "＜＜拡張機能を隠す";
+            extendBox.height = extendHeight;
+            this.height += extendHeight;
+            extendBox.visible = true;
+        } else {
+            extendButton.label = "＞＞拡張機能";
+            extendBox.height = 0;
+            this.height -= extendHeight;
+            extendBox.visible = false;
+        }
+    }
+    
+    public function changeVisitMode(canVisitValue:Boolean):void {
+        if( canVisitValue ) {
+            visiterChannlelLabel.width = 50;
+        } else {
+            visiterChannlelLabel.width = 0;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="690"
+   height="500"
+   title="キャラクター..." 
+   showCloseButton="true"
+   >
+  
+  <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
+  
+  <mx:HBox id="inputBox"
+           height="200" width="100%" horizontalAlign="center" 
+           verticalGap="0"
+           horizontalGap="0"
+           >
+    <mx:Box height="100%" width="300" horizontalAlign="center"
+            verticalGap="0"
+            horizontalGap="0"
+            >
+      <mx:Form width="100%"
+               >
+        <mx:FormItem label="名前:">
+	      <mx:TextInput id="characterName" width="170" />
+        </mx:FormItem>
+        
+	    <mx:FormItem id="characterImageUrlItem" label="画像のURL:">
+          <mx:TextInput id="characterImageUrl" width="170" change="printPreview();" editable="true" enabled="false" />
+        </mx:FormItem>
+      </mx:Form>
+      
+      <mx:HBox id="underNameBox"
+               height="25" width="100%"
+               verticalGap="0"
+               horizontalGap="0"
+               horizontalAlign="left"
+               >
+	    <mx:Label text="イニシアティブ:" />
+        <mx:NumericStepper id="characterInitiative" minimum="0" maximum="99" value="0" stepSize="1" />
+        
+        <mx:Spacer height="100%" width="10" />
+        
+	    <mx:Label text="修正値:"
+                  toolTip="イニシアティブが同値の場合の比較に使用します"/>
+        <mx:NumericStepper id="characterInitiativeModify" minimum="0" maximum="99" value="0" stepSize="1"
+                           toolTip="イニシアティブが同値の場合の比較に使用します"/>
+      </mx:HBox>
+      
+      <mx:HBox id="characterSizeBox" height="30" width="100%" horizontalAlign="left">
+	    <mx:Label text="サイズ:" />
+        <mx:NumericStepper id="characterSize" minimum="1" maximum="10" value="1" />
+      </mx:HBox>
+      
+      <mx:HBox id="hideCheckBox" height="30" width="100%" horizontalAlign="center">
+        <mx:CheckBox id="isHide" label="" selected="false"
+                     height="100%"
+                     />
+        <mx:Text text="マップマスクの下へ隠す&#013;(イニシアティブ表では非表示に)" />
+      </mx:HBox>
+      
+      <!--
+      <mx:Spacer width="100%" height="100%" />
+      
+      <mx:HBox height="0" width="100%"
+               id="standingGraphicsIsAlreadySetBox"
+               verticalGap="0"
+               horizontalGap="0"
+               horizontalAlign="center"
+               visible="false"
+               >
+      <mx:Text id="standingGraphicsIsAlreadySet" text="立ち絵は設定されているため&#013;簡易立ち絵表示は無効です。" />
+      </mx:HBox>
+      <mx:HBox height="40" width="100%"
+               id="leftIndexBox"
+               verticalGap="0"
+               horizontalGap="0"
+               horizontalAlign="center"
+               toolTip="立ち絵が未設定のため、このコマの画像が立ち絵に使用されます。"
+               >
+        <mx:Text id="leftIndexLabel" text="簡易立ち絵表示位置：&#013;(1:左端, 12:右端)" />
+        <mx:HSlider id="leftIndex"
+                    width="150"
+                    liveDragging="true"
+                    showTrackHighlight="false"
+                    maximum="12"
+                    minimum="1"
+                    value="1"
+                    snapInterval="1"
+                    />
+      </mx:HBox>
+      
+      <mx:Button label="立ち絵設定" height="20"
+                 fontWeight="nomal"
+                 click="DodontoF.popup(StandingGraphicsManageWindow, true)"
+                 />
+      -->
+    </mx:Box>
+    
+    <mx:HBox id="otherInfos" height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+      
+      <mx:Box height="100%" width="40%" horizontalAlign="center" verticalAlign="middle">
+        
+        <mx:Button label="カウンター設定" click="DodontoF_Main.getInstance().getInitiativeWindow().setConfig();PopUpManager.removePopUp(this)" />
+      
+        <mx:DataGrid id="counterListView"
+               width="100%"
+               height="100%"
+               sortableColumns="false"
+		       draggableColumns="false"
+               enabled="true"
+               editable="false"
+               toolTip="編集はイニシアティブ表から行ってください"
+               >
+	      <mx:DataGridColumn 
+             dataField="counterName"
+             textAlign="right"
+             editable="false"
+             width="30"
+             />
+          
+	      <mx:DataGridColumn 
+             editorDataField="value"
+             dataField="counterValue"
+             textAlign="right"
+             editable="true"
+             width="10">
+            <mx:itemEditor>
+              <mx:Component>
+                <mx:NumericStepper maximum="999" minimum="0" />
+              </mx:Component>
+            </mx:itemEditor>
+          </mx:DataGridColumn>
+        </mx:DataGrid>
+        
+      </mx:Box>
+      
+      <mx:Box height="100%" width="60%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Label text="その他:" width="100%" />
+	    <mx:TextArea id="characterInfo" text="" width="100%" height="100%" />
+      </mx:Box>
+      
+    </mx:HBox>
+  </mx:HBox>
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="追加" click="this.setCharacterOnButton()"
+               enabled="{ (characterImageUrl.text != '') }" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    private var counterInfoList:Array = new Array();
+    
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.controls.Image;
+    import mx.controls.Alert;
+    
+    private var loadingMessage:String = "ロード中・・・";
+    private var previewImage:Image = new Image();
+    
+    override protected function setup():void {
+        imageSelecter.addPreview(previewImage, 200);
+        
+        characterImageUrl.text = loadingMessage;
+        
+        initCounters();
+        init();
+        
+        imageSelecter.setImageClickEventFunction(imageClickEvent);
+        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+        imageSelecter.setDefaultTags( getDefaultTags() );
+        imageSelecter.initImage( isLoadInitImageList() );
+        
+        //initStanding();
+    }
+    
+    /*
+    private function initStanding():void {
+        var states:Array = DodontoF_Main.getInstance().getChatWindow().getStandingGraphics().findAllStates( characterName.text );
+        if( states.length == 0 ) {
+            return;
+        }
+        
+        standingGraphicsIsAlreadySetBox.visible = true;
+        standingGraphicsIsAlreadySetBox.height = leftIndexBox.height;
+        
+        leftIndexBox.visible = false;
+        leftIndexBox.height = 0;
+    }
+    */
+    
+    protected function isLoadInitImageList():Boolean {
+        return true;
+    }
+    
+    protected function getDefaultTags():Array {
+        //return [ImageTag.getCharacterTag(), ImageTag.getAllTag()];
+        return [
+                ImageTag.getNoneTag(),
+                ImageTag.getCharacterTag(),
+                ImageTag.getAllTag(),
+                ];
+    }
+    
+    private function initCounters():void {
+        var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
+        
+        for(var i:int = 0 ; i < counterNames.length ; i++) {
+            var counterName:String = counterNames[i];
+            
+            var counterInfo:Object = {
+                counterName : counterName,
+                counterValue : 0 };
+            
+            counterInfoList.push(counterInfo);
+        }
+        
+        refreshCounterInfo();
+    }
+    
+    protected function initCounterValues(character:Character):void {
+        counterInfoList = new Array();
+            
+        var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
+        
+        for(var i:int = 0 ; i < counterNames.length ; i++) {
+            var name:String = counterNames[i];
+            var value:int = character.getCounter(name);
+            
+            var counterInfo:Object = {
+                counterName : name,
+                counterValue : value };
+            
+            counterInfoList.push(counterInfo);
+        }
+        
+        refreshCounterInfo();
+    }
+
+    protected function refreshCounterInfo():void {
+        counterListView.dataProvider = new Array();
+        counterListView.dataProvider = counterInfoList;
+        counterListView.columns[0].headerText = "カウンター名";
+        counterListView.columns[1].headerText = "値";
+    }
+    
+    protected function init():void {
+    }
+       
+    public function imageClickEvent(imageName:String):void {
+        characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( imageName );
+        printPreview();
+    }
+    
+    
+    public function imageLoadComplete():void {
+        if( characterImageUrl.text == loadingMessage ) {
+            characterImageUrl.text =  "";
+        }
+        
+        characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( characterImageUrl.text );
+        characterImageUrl.enabled = true;
+    }
+    
+    public function setCharacterOnButton():void {
+        try{
+            var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+            var initiative:Number = Utils.getInitiative(characterInitiative.value, characterInitiativeModify.value);
+            var counters:Object = new Object();
+            for(var i:int = 0 ; i < counterInfoList.length ; i++) {
+                var info:Object = counterInfoList[i];
+                var name:String = info["counterName"];
+                var value:int = info["counterValue"];
+                counters[name] = value;
+            }
+            
+            setCharacter(
+                         characterName.text,
+                         imageUrl,
+                         characterSize.value,
+                         isHide.selected,
+                         initiative,
+                         characterInfo.text,
+                         counters);
+               
+            PopUpManager.removePopUp(this);
+
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+    public function setCharacter(name:String, imageUri:String,
+                                 size:int, isHide:Boolean,
+                                 initiative:Number, info:String,
+                                 counters:Object):void {
+    }
+       
+    protected function printPreview():void {
+        Log.logging("printPreview characterImageUrl.text", characterImageUrl.text);
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+        Log.logging("imageUrl", imageUrl);
+        previewImage.source = imageUrl;
+    }
+       
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:torgtaitai="*" 
+                width="600" height="300"
+                title="メッセージカード追加画面" 
+                showCloseButton="true"
+                close="PopUpManager.removePopUp(this)"
+                >
+  
+  <mx:HBox height="100%" width="100%">
+    
+    <mx:Box height="100%" width="120">
+      <mx:Spacer height="30" width="100%" />
+      <mx:Box id="cardBackPreviewPlace" height="100%" width="100%" />
+    </mx:Box>
+    
+    <mx:Box height="100%" width="120">
+      <mx:Spacer height="30" width="100%" />
+      <mx:Box id="cardPreviewPlace" height="100%" width="100%" />
+    </mx:Box>
+    
+    <mx:Box height="100%" width="100%">
+      <mx:HBox height="30%" width="100%">
+        <mx:Box height="100%" width="70">
+          <mx:Label text="背面:" />
+          <mx:NumericStepper id="imageNameBackSize" minimum="5" maximum="64"  value="18"
+                             change="printPreview(imageNameBackSize, imageNameBack.text, previewCardBack)"
+                             />
+        </mx:Box>
+	    <mx:TextArea id="imageNameBack"
+                     text="ななしさん へ"
+                     height="100%" width="100%"
+                     change="printPreview(imageNameBackSize, imageNameBack.text, previewCardBack)"
+                     />
+      </mx:HBox>
+      
+      <mx:HBox height="70%" width="100%">
+        <mx:Box height="100%" width="70">
+          <mx:Label text="メッセージ:" />
+          <mx:NumericStepper id="imageNameSize" minimum="5" maximum="64" value="18"
+                             change="printPreview(imageNameSize, imageName.text, previewCard)"
+                             />
+        </mx:Box>
+        <mx:TextArea id="imageName"
+                     text="サンプルメッセージ"
+                     height="100%" width="100%"
+                     change="printPreview(imageNameSize, imageName.text, previewCard)"
+                     />
+      </mx:HBox>
+    </mx:Box>
+  </mx:HBox>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="メッセージカードの追加" click="execute()" enabled="true" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.controls.Alert;
+    import mx.events.CloseEvent;
+    
+    private var previewCard:Card = null;
+    private var previewCardBack:Card = null;
+    
+    override protected function setup():void {
+        previewCard = addPreviewCard( cardPreviewPlace );
+        previewCardBack = addPreviewCard( cardBackPreviewPlace );
+        
+        previewCard.reverseCardLocal(false);
+        previewCard.setOwnerName("表面");
+        previewCardBack.setOwnerName("裏面");
+        
+        printPreview(imageNameSize, imageName.text, previewCard);
+        printPreview(imageNameBackSize, imageNameBack.text, previewCardBack);
+    }
+    
+    private var createPoint:Point = new Point();
+    
+    public function setCreatePoint(point:Point):void {
+        createPoint = point;
+    }
+    
+    private function addPreviewCard( place:Box ):Card {
+        var cardInfo:Object = Card.getJsonData("", "", 0, 30);
+        var card:Card = new Card( cardInfo );
+        card.analyzeChangedCharacter( cardInfo );
+        card.getView().y += 30;
+        place.addChild( card.getView() );
+        
+        return card
+    }
+    
+    private function printPreview(stepper:NumericStepper, text:String, card:Card):void {
+        var html:String = getHtml( stepper.value, text);
+        
+        if( card.getBack() ) {
+            card.setImageNameBack(html);
+        } else {
+            card.setImageName(html);
+        }
+        
+        card.loadViewImage();
+    }
+    
+    private function getHtml(fontSize:int, text:String):String {
+        return "<font size='" + (fontSize * 4) + "'>" + text + "</font>";
+    }
+    
+    public function execute():void {
+        var imageNameText:String = getHtml( imageNameSize.value, imageName.text );
+        var imageNameBackText:String = getHtml( imageNameBackSize.value, imageNameBack.text );
+        
+        DodontoF_Main.getInstance().getGuiInputSender().getSender()
+        .addMessageCard(imageNameText, imageNameBackText, createPoint.x, createPoint.y);
+        
+        PopUpManager.removePopUp(this);
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

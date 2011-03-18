@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="350"
+   height="150"
+   title="墓場" 
+   > 
+
+  <mx:Form>
+	<mx:FormItem label="名前:">
+	  <mx:ComboBox id="characterInfo" width="200" editable="false" />
+	</mx:FormItem>
+  </mx:Form>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="復活" click="this.resurrectCharacter()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+
+    override protected function setup():void {
+        loadGraveyardInfo();
+    }
+    
+    private function loadGraveyardInfo():void {
+        executeButton.enabled = false;
+        characterInfo.enabled = false;
+        characterInfo.text = "ロード中・・・";
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.requestGraveyard(this.requestGraveyardResult);
+    }
+
+    public function requestGraveyardResult(event:Object):void {
+        Log.logging("requestGraveyardResult(event:Event) begin");
+        try {
+            var graveyardChracterDataList:Object = SharedDataReceiver.getJsonDataFromResultEvent( event );
+            Log.logging("graveyardChracterDataList", graveyardChracterDataList);
+        
+            var graveyardArray:Array = new Array();
+            for(var i:int = 0 ; i < graveyardChracterDataList.length ; i++) {
+                var graveyardChracterData:Object = graveyardChracterDataList[i];
+                Log.logging("graveyardChracterData", graveyardChracterData);
+            
+                var data:Object = new Object();
+                Log.logging("graveyardChracterData.label", graveyardChracterData.name);
+                Log.logging("graveyardChracterData.imgId", graveyardChracterData.imgId);
+                data.label = graveyardChracterData.name;
+                data.data = graveyardChracterData.imgId;
+                graveyardArray.push(data);
+            }
+            
+            characterInfo.dataProvider = graveyardArray;
+            characterInfo.selectedIndex = -1;
+            characterInfo.enabled = true;
+            
+            executeButton.enabled = true;
+        } catch(e:Error) {
+            Log.logging("exception : " + e);
+        }
+        Log.logging("requestGraveyardResult(event:Event) end");
+    }
+
+    public function resurrectCharacter():void {
+        try{
+            var selectedItemData:String = characterInfo.selectedItem.data;
+            Log.logging("selectedItemData", selectedItemData );
+            Log.logging("characterInfo.selectedItem", characterInfo.selectedItem );
+            Log.logging("characterInfo.selectedItem.data", characterInfo.selectedItem.data );
+            Log.logging("characterInfo.selectedItem.label", characterInfo.selectedItem.label );
+            Log.logging("characterInfo.text", characterInfo.text );
+        
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.resurrectCharacter( characterInfo.selectedItem.data );
+            
+            //PopUpManager.removePopUp(this);
+            loadGraveyardInfo();
+
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

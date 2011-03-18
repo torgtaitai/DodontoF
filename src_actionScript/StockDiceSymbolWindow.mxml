@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- <torgtaitai:CommonPopupWindow -->
+<mx:TitleWindow 
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="250"
+   y="50"
+   width="260"
+   height="160"
+   title="ダイスシンボル生成" 
+   showCloseButton="true"
+   
+   close="PopUpManager.removePopUp(this)"
+   creationComplete="setup()"
+   >
+  
+  <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Box id="ctrlBox" height="100%" width="170" >
+      <mx:Form height="100%" width="100%">
+	    <mx:FormItem label="ダイス目:">
+          <mx:NumericStepper id="number" minimum="1" maximum="100" value="1" change="changeView()" />
+        </mx:FormItem>
+        
+	    <mx:FormItem label="ダイス種別:">
+          <mx:ComboBox id="maxNumber"  fontWeight="nomal" editable="false" change="changeView()" >
+            <mx:ArrayCollection>
+              <mx:Object label="D4" data="4"/>
+              <mx:Object label="D6" data="6"/>
+              <mx:Object label="D8" data="8"/>
+              <mx:Object label="D10" data="10"/>
+              <mx:Object label="D12" data="12"/>
+              <mx:Object label="D20" data="20"/>
+            </mx:ArrayCollection>
+          </mx:ComboBox>
+        </mx:FormItem>
+        
+        <!-- <mx:FormItem label="ダイス目を隠して置く:"> -->
+        <mx:CheckBox id="isHide" label="ダイス目を隠して置く" selected="false" />
+        
+      </mx:Form>
+    </mx:Box>
+    
+    <mx:Box  width="50" height="50" >
+      <mx:Image id="view" width="50" height="50" source=""/>
+    </mx:Box>
+
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    private var viewStartPoint:Point = new Point();
+    
+    private function setup():void {
+        Log.loggingTuning("=>setup() Begin");
+        
+        statusTextField.background = true;
+        statusTextField.backgroundColor = 0xFFFFDD;
+        
+        maxNumber.selectedIndex = 1;
+        changeView();
+        viewStartPoint.x = view.x;
+        viewStartPoint.y = view.y;
+        
+        setDragEvent();
+    
+        Log.loggingTuning("=>setup() End");
+    }
+    
+    private function changeView():void {
+        number.maximum = maxNumber.selectedItem.data;
+        number.callLater(function():void {
+                var source:String = DiceInfo.getDiceImageUrlGlobal(maxNumber.selectedItem.data, number.value);
+                source = Config.getInstance().getUrlString(source);
+                view.source = source;
+            });
+    }
+    
+    private function setDragEvent():void {
+        view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                view.startDrag();
+                event.stopPropagation();
+                this.status = "";
+            });
+        
+        view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                view.stopDrag();
+        
+                var map:Map = DodontoF_Main.getInstance().getMap();
+                var globalPoint:Point = localToGlobal( new Point(view.x + ctrlBox.width + 25, view.y + 25 + 25) );
+                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+                
+                var dorpMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+                
+                if( (dorpMapPoint.x >= 0) && (dorpMapPoint.y >= 0) ) {
+                    addDice(dorpMapPoint);
+                }
+                
+                view.x = viewStartPoint.x;
+                view.y = viewStartPoint.y;
+            });
+    }
+    
+    public function addDice(point:Point):void {
+        try{
+            
+            var owner:String = null;
+            if( isHide.selected ) {
+                owner = DodontoF_Main.getInstance().getUniqueId();
+            }
+            
+            var ownerName:String = DodontoF_Main.getInstance().getChatWindow().getChatCharacterName();
+            
+            var jsonData:Object = DiceSymbol.getJsonData(maxNumber.selectedItem.data,
+                                                         number.value,
+                                                         owner,
+                                                         ownerName,
+                                                         point.x,
+                                                         point.y);
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().addCharacter(jsonData, "ownerName");
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+    ]]>
+  </mx:Script>
+      
+<!-- </torgtaitai:CommonPopupWindow> -->
+</mx:TitleWindow>

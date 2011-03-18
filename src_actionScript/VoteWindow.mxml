@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="350"
+   height="140"
+   title="点呼／投票画面" 
+   showCloseButton="false"
+   >
+  
+  <mx:HBox height="25" width="100%"
+           verticalGap="0"
+           horizontalGap="0"
+           horizontalAlign="center"
+           >
+	<mx:Label text="対象人数:" />
+    <mx:NumericStepper id="voteMaxCounter" minimum="0" stepSize="1" />
+	<mx:Label id="voteMaxCountLabel" text="" />
+    
+    <mx:Spacer width="20" />
+    
+    <mx:RadioButton groupName="voteMode" id="callTheRoll" label="点呼" click="checkVoteMode()" selected="true" />
+    <mx:RadioButton groupName="voteMode" id="vote"        label="投票" click="checkVoteMode()"/>
+  </mx:HBox>
+  
+  <mx:HBox id="questionBox" height="25" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
+      <mx:Label text="投票用質問：" />
+      <mx:TextInput id="question" width="100%" text="" />
+  </mx:HBox>
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="実行" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+             
+    import mx.managers.PopUpManager;
+    import mx.controls.Alert;
+    
+    override protected function setup():void {
+        checkVoteMode();
+        
+        var loginCount:int = DodontoF_Main.getInstance().getDodontoF().getLoginUserCount();
+        if( loginCount <= 1 ) {
+            status = "ログインユーザーが１名のため点呼は実施できません。";
+            executeButton.enabled = false;
+        }
+        
+        //点呼最大人数の設定。自分自身は対象外なので -1 する。
+        var voteMaxCount:int = DodontoF_Main.getInstance().getDodontoF().getLoginUserCount() - 1;
+        
+        voteMaxCounter.value = voteMaxCount;
+        voteMaxCounter.maximum = voteMaxCount;
+        voteMaxCountLabel.text = " / " + voteMaxCount;
+        
+    }
+    
+    private var voter:Voter;
+    
+    public function setVoter(v:Voter):void {
+        voter = v;
+    }
+    
+    private function checkVoteMode():void {
+        questionBox.visible = vote.selected;
+    }
+    
+    private function execute():void {
+        var count:int = voteMaxCounter.value;
+        var questionText:String = question.text;
+        if( callTheRoll.selected ) {
+            questionText = "";
+        }
+        
+        voter.executeByParam(voteMaxCounter.value, callTheRoll.selected, questionText);
+        PopUpManager.removePopUp(this);
+    }
+
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

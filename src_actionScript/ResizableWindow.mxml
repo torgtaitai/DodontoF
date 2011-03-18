@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   backgroundAlpha="1.0"
+   backgroundColor="#F4FBFF"
+   borderStyle="solid"
+   borderThickness="2"
+   borderThicknessBottom="0"
+   close="toggleVisible()"
+   creationComplete="onThis_creationComplete();"
+   >
+  <mx:Script>
+    <![CDATA[
+        
+        import mx.controls.Alert;
+        import mx.core.IFlexDisplayObject;
+        import mx.events.DragEvent;
+        import flash.events.MouseEvent;
+        
+        protected var ignoreSavePosition:String = "ignoreSavePosition";
+        
+        public function getSaveInfoKeyName():String {
+            return "";
+        }
+        
+        override protected function getHeaderHeight():Number {
+            return 16;
+        }
+        
+        private var changeVisibleEvent:Function = null;
+        
+        public function setChangeVisibleEvent(function_:Function):void {
+            changeVisibleEvent = function_;
+        }
+        
+        public function isVerticalResizable():Boolean {
+            return true;
+        }
+        
+        private function sendChnageVisibleEvent():void {
+            if( changeVisibleEvent == null ) {
+                return;
+            }
+            changeVisibleEvent.call(this, this.visible);
+        }
+        
+        protected function resizerMinWidth():int {
+            return 100;
+        }
+        
+        protected function resizerMinHeigth():int {
+            return 50;
+        }
+        
+        private var canSavePosition:Boolean = false;
+        
+        private function onThis_creationComplete():void {
+            Resizer.addResize(this, new Point( resizerMinWidth(), resizerMinHeigth() ));
+            
+            if( getSaveInfoKeyName() == "" ) {
+                Alert.show("セーブキー名称が未定義です");
+            }
+            
+            setup();
+            canSavePosition = true;
+            Utils.setSkin(this);
+            
+            titleBar.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
+        }
+        
+        public function setup():void {
+        }
+        
+        public function setVisibleState(v:Boolean):void {
+            this.visible = v;
+            
+            savePosition();
+            
+            sendChnageVisibleEvent();
+        }
+        
+        public function toggleVisible():void {
+            setVisibleState( ! this.visible );
+        }
+        
+        public function loadPosition():Boolean {
+            if( getSaveInfoKeyName() == ignoreSavePosition ) {
+                return false;
+            }
+            
+            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyName() );
+            if( info == null ) {
+                return false;
+            }
+            
+            this.x = info.x;
+            this.y = info.y;
+            this.width = info.width;
+            this.height = info.height;
+            setVisibleState( info.visible );
+            
+            sendChnageVisibleEvent();
+            
+            return true;
+        }
+        
+        private var resizeEventFunction:Function = null;
+        
+        public function setResizeEventFunction(f_:Function):void {
+            resizeEventFunction = f_
+        }
+        
+        public function resizeEvent():void {
+            savePosition();
+            if( resizeEventFunction != null ) {
+                resizeEventFunction.call();
+            }
+        }
+        
+        private var moveEventFunction:Function = null;
+        
+        public function setMoveEventFunction(f_:Function):void {
+            moveEventFunction = f_
+        }
+        
+        public function mouseUp(event:MouseEvent) : void {
+            savePosition();
+            if( moveEventFunction !=  null ) {
+                moveEventFunction.call();
+            }
+        }
+        
+        public function setSavePositionEnable(b:Boolean):void {
+            canSavePosition = b;
+        }
+        
+        private function savePosition():void {
+            if( getSaveInfoKeyName() == ignoreSavePosition ){
+                return;
+            }
+            
+            if( ! canSavePosition ) {
+                return;
+            }
+            
+            var info:Object = getWindowInfoSaveData(this);
+            Config.getInstance().saveInfo( getSaveInfoKeyName(), info );
+        }
+        
+        private function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+            var windowInfo:Object = new Object();
+            
+            windowInfo.x = window.x;
+            windowInfo.y = window.y;
+            windowInfo.width = window.width;
+            windowInfo.height = window.height;
+            windowInfo.visible = window.visible;
+            
+            return windowInfo;
+        }
+        
+        
+    ]]>
+  </mx:Script>
+  
+</mx:TitleWindow>

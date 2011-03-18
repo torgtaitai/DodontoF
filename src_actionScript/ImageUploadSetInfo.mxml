@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+        xmlns:torgtaitai="*" 
+        alpha="1"
+        creationComplete="setup();"
+        >
+  
+  <mx:HBox height="20" width="100%" horizontalAlign="left" verticalAlign="middle">
+    <mx:Label text="対応画像:JPEG/GIF/PNG/SWF（アニメGIFは1コマ目のみを表示）"/>
+    <mx:Spacer width="100%" />
+    <mx:Label id="passwordStatus" text="" width="100%" textAlign="right" />
+    <mx:Button height="20" label="隠し画像パスワード設定" fontWeight="nomal" click="createPasswordWindow()" />
+  </mx:HBox>
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+	<mx:Label text="付与するタグ（半角・全角スペースで区切り）：" />
+	<mx:TextInput id="tagText" text="" width="100%" />
+    <mx:ComboBox id="imageType" fontWeight="nomal"  width="120" editable="false" change="imageTypeChanged()" >
+    </mx:ComboBox>
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.events.FlexEvent;
+    import mx.controls.Image;
+    
+    private var passwordText:String = "";
+    
+    public function imageTypeChanged():void {
+        tagText.text = imageType.selectedItem.label + "　";
+    }
+    
+    private function setup():void {
+        var tags:Array = ImageTag.getDefinedTagList();
+        
+        var imageTag:ImageTag = new ImageTag();
+        imageTag.setImageTypes(imageType, new Object(), tags);
+    }
+    
+    public function getTagText():String {
+        return tagText.text;
+    }
+    
+    public function setTagText(text:String):void {
+        tagText.text = text;
+    }
+    
+    public function getPassword():String {
+        return passwordText;
+    }
+    
+    public function setPassword(password:String):void {
+        passwordText = password;
+        checkPasswordStatus();
+    }
+    
+    public function getTagInfo():Object {
+        var tagInfo:Object = TagManagerWindow.getTagInfo(tagText.text, passwordText);
+        return tagInfo;
+    }
+    
+    private function createPasswordWindow():void {
+        var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
+        var infoTexts:Array = ["隠し画像用パスワード（空文字場合は誰でも参照可能）",
+                               "このパスワードは管理・通信上暗号化されません。",
+                               "他者に参照される恐れがあるため、重要なパスワードの利用は避け",
+                               "簡易な文字を利用してください。"];
+        window.init(infoTexts, "隠し画像用パスワード入力", "パスワード入力", setPassword);
+    }
+    
+    private function checkPasswordStatus():void {
+        passwordStatus.text = (passwordText == "" ? "パスワードなし" : "パスワードあり");
+    }
+    
+    
+    ]]>
+  </mx:Script>
+  
+</mx:Box>

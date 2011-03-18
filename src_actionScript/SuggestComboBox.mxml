@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
+             editable="true">
+	<mx:Script>
+
+	<![CDATA[
+
+	import flash.events.Event;
+    import mx.events.FlexEvent;
+	import mx.controls.ComboBase;
+	import mx.controls.ComboBox;
+	import mx.events.DropdownEvent;
+	
+	// サジェスチョン時の要素フィルター用文字列
+	protected var filteringText:String;
+	
+	/** 
+	 * サジェスト処理を実装したフィルタリングメソッド.
+	 * 
+	 * このメソッドはcollectionのfilterFunctionにバインドされることを前提とする.
+	 * 
+	 * コンポーネントが定義しているitemToLabelメソッド経由でitemの表示文字列を受け取り、
+	 * 実行時点のfilteringTextとマッチしていないものをフィルタリングする.
+	 * 
+	 * @param	item:	フィルタリング対象となるcollectionの要素
+	 * @return			フィルタリング結果. 表示対象の場合にtrueを返す
+	 */
+	protected function suggestionFilter(item:Object):Boolean {
+        
+		// フィルター文字列が未入力の場合はフィルタリングしない
+		if (filteringText.length <= 0) {
+            return true;
+        }
+        
+		// フィルタ文字列 が文中に存在するかのチェック
+        var label:String = itemToLabel(item);
+        var index:int = label.indexOf(filteringText);
+        
+		return (index != -1);
+	}
+    
+	/**
+	 * テキスト入力イベントハンドラ.
+	 * 
+	 * 現在の入力値をfilteringTextに代入し、collectionをrefresh()する.
+	 * この際、refresh()内部でバインドされたsuggestionFilter()が実行される.
+	 *
+	 * @param	event:	テキスト入力イベント
+	 */
+	override protected function textInput_changeHandler(event:Event):void {
+		this.close();
+        
+		super.textInput_changeHandler(event);
+        
+		filteringText = this.text;
+		collection.refresh();
+		this.text = filteringText;	// refresh後、textの値が消去されるためfilteringTextの値をバックする
+        
+		this.open();
+	}
+	
+	/**
+	 * データプロバイダ変更イベントハンドラ.
+	 * 
+	 * dataProviderによって生成されたcollectionにsuggestionFilterをバインディングする.
+	 * ただし、すでにcollectionに何らかのfilterFunctionが設定されている場合は何もしない.
+	 *
+	 * @param	event
+	 */
+	// データプロバイダ変更イベントハンドラ. 
+	override protected function collectionChangeHandler(event:Event):void {
+		super.collectionChangeHandler(event);
+        
+		if(collection.filterFunction == null) {
+            collection.filterFunction = suggestionFilter;
+        }
+	}
+    
+
+    override protected function downArrowButton_buttonDownHandler(event:FlexEvent):void {
+        filteringText = "";
+        collection.refresh();
+        
+        super.downArrowButton_buttonDownHandler(event);
+    }
+    
+    
+	]]>
+	</mx:Script>
+</mx:ComboBox>

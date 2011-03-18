@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="500"
+   height="350"
+   title="チャットパレット編集画面" 
+   showCloseButton="true"
+   >
+  
+  <mx:Label text="チャットパレット文字列:" />
+  <mx:TextArea id="lines" text="" width="100%" height="100%"/>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="編集" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    static private var spliter:String = "\r";
+    
+    private var editFunction:Function = null;
+    
+    public function initParams(array:Array, func:Function):void {
+        lines.text = array.join( spliter );
+        editFunction = func;
+    }
+    
+    override protected function setup():void {
+    }
+    
+    public function execute():void {
+        editChatPalette();
+    }
+    
+    private function editChatPalette():void {
+        try{
+            var text:String = lines.text.replace(/\r+$/, '');
+            editFunction( text.split(spliter) );
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

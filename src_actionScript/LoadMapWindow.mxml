@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="120"
+   title="マップ切り替え" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:HBox id="loadSelectBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Label text="マップとマップマスクを差し替えて、マップを切り替えます" />
+    </mx:HBox>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="切り替え実行" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    
+    override protected function setup():void {
+    }
+    
+    private static var loadPieceTypes:Array = [MapMask.getTypeStatic(),
+                                               MapMarker.getTypeStatic()];
+    
+    private function getLoadParams():Object {
+        
+        var removeCharacterDataList:Array = new Array();
+        var targets:Array = ["map"];
+        
+        for(var i:int = 0 ; i < loadPieceTypes.length ; i++) {
+            var type:String = loadPieceTypes[i];
+            targets.push( type );
+            setRemoveCharacterDataList(removeCharacterDataList, type);
+        }
+        
+        var params:Object = {
+            'targets' : targets,
+            'removeCharacterDataList' : removeCharacterDataList
+        };
+        
+        return params;
+    }
+    
+    private function setRemoveCharacterDataList(list:Array, type:String):void {
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        var pieces:Array = map.getPieciesByType( type );
+        
+        for(var i:int = 0 ; i < pieces.length ; i++) {
+            var piece:Piece = pieces[i];
+            list.push( SharedDataSender.getRemoveInfo( piece.getId(), piece.isGotoGraveyard() ) );
+        }
+    }
+    
+    public function execute():void {
+        try {
+            var params:Object = getLoadParams();
+            DodontoF_Main.getInstance().getGuiInputSender().loadMap(params);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

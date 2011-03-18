@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="ダイス"
+   width="270" height="140"
+   showCloseButton="true"
+   >
+  
+  <mx:Tile id="diceList" width="100%" height="100%"
+           paddingLeft="0"
+           paddingRight="0"
+           >
+    <mx:Button label="削除"
+               click="dice.clearDice()"
+               width="50" height="50"
+               paddingLeft="0"
+               paddingRight="0"
+               fontSize="10"
+               />
+    <mx:Image id="d4" click="createDice('d4')" width="50" height="50"/>
+    <mx:Image id="d6" click="createDice('d6')" width="50" height="50"/>
+    <mx:Image id="d8" click="createDice('d8')" width="50" height="50"/>
+    <mx:Image id="d10" click="createDice('d10')" width="50" height="50"/>
+    <mx:Image id="d12" click="createDice('d12')" width="50" height="50"/>
+    <mx:Image id="d20" click="createDice('d20')" width="50" height="50"/>
+    <mx:Image id="d100" click="createDice('d100');createDice('d100-10')" width="50" height="50"/>
+  </mx:Tile>
+  
+  <mx:Script>
+
+    <![CDATA[
+    
+    import mx.core.Application;
+    import flash.geom.Point;
+    import mx.controls.TextInput;
+    import mx.containers.HBox;
+    import mx.core.UIComponent;
+    
+    
+    public function setInitPosition():void {
+        if( loadPosition() ) {
+            return;
+        }
+        
+        var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
+        var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
+        
+        this.x = screenWidth - this.width;
+        this.y = screenHeigth - this.height;
+    }
+    
+    override public function getSaveInfoKeyName():String {
+        return "DiceBox";
+    }
+        
+    private var dice:Dice = null;
+    
+    override public function setup():void {
+        setInitPosition();
+        initDice();
+        
+        d4.source = DiceInfo.getDiceMaxNumberImage('d4');
+        d6.source = DiceInfo.getDiceMaxNumberImage('d6');
+        d8.source = DiceInfo.getDiceMaxNumberImage('d8');
+        d10.source = DiceInfo.getDiceMaxNumberImage('d10');
+        d12.source = DiceInfo.getDiceMaxNumberImage('d12');
+        d20.source = DiceInfo.getDiceMaxNumberImage('d20');
+        d100.source = DiceInfo.getDiceMaxNumberImage('d100');
+    }
+    
+    private function initDice():void {
+        //DodontoF_Main.getInstance().getDodontoF().diceRollPlace);
+        var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+        dice = new Dice(chatWindow.getDiceRollPlace(), chatWindow);
+    }
+    
+    public function createDice(diceType:String, imgId:String = null, resultFunction:Function = null):void {
+        //dice.addDice(diceType, this.x, this.y, imgId, resultFunction);
+        dice.addDice(diceType, imgId, resultFunction);
+    }
+    
+    public function clearDice():void {
+        dice.clearDice();
+    }
+    
+    ]]>
+    
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

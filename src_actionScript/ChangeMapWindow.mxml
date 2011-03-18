@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="200"
+   y="30"
+   width="770"
+   height="500"
+   title="マップ変更" 
+   showCloseButton="true"
+   >
+  
+  <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
+  
+  <mx:HBox height="100" width="100%" horizontalAlign="center" verticalAlign="top">
+    
+    <mx:Box height="100%" width="100%" verticalAlign="middle">
+      <mx:HBox height="25" width="100%">
+        <mx:Label text="画像のURL" />
+        <mx:TextInput id="mapImageUrl" width="100%" editable="true" change="printPreview()" />
+	  </mx:HBox>
+      
+      <mx:HBox height="25" width="100%" horizontalAlign="left" verticalAlign="middle">
+        <mx:CheckBox id="checkBoxWhiteMap" label="白地図を作る" selected="false" change="checkWhiteMap()"/>
+	    <mx:Label text="縦マス数:" />
+        <mx:NumericStepper id="mapHeight" minimum="1" maximum="100" value="25" change="printPreview()" />
+	    <mx:Label text="横マス数:" />
+        <mx:NumericStepper id="mapWidth" minimum="1" maximum="100" value="25" change="printPreview()" />
+	    <mx:Label text="マス目・座標文字の色:" />
+        <mx:ColorPicker id="gridColorPicker" showTextField="true" selectedColor="0x000000" change="printPreview()" />
+      </mx:HBox>
+      
+      <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Button id="executeButton" label="設定" click="this.changeMap()" enabled="false" />
+        <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      </mx:HBox>
+    </mx:Box>
+    
+  </mx:HBox>
+    
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Image;
+    
+    private var previewLoader:PreviewLoader = new PreviewLoader();
+    
+    override protected function setup():void {
+        imageSelecter.addPreview(previewLoader);
+        
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        
+        mapHeight.value = map.getHeight();
+        mapWidth.value = map.getWidth();
+        mapImageUrl.text = map.getImageUrl();
+        gridColorPicker.selectedColor = map.getGridColor();
+        printPreview();
+           
+        checkBoxWhiteMap.selected = (mapImageUrl.text == "");
+        mapImageUrl.enabled = (mapImageUrl.text != "");
+           
+        imageSelecter.setImageClickEventFunction(imageClickEvent);
+        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+        imageSelecter.setDefaultTags( [ImageTag.getMapTag(), ImageTag.getAllTag()] );
+        imageSelecter.initImage( false );
+    }
+       
+    public function imageClickEvent(imageName:String):void {
+        if( checkBoxWhiteMap.selected ){
+            return;
+        }
+           
+        mapImageUrl.text = imageSelecter.getImageUrlChanger().getShort( imageName );
+        printPreview();
+    }
+             
+    public function imageLoadComplete():void {
+        executeButton.enabled = true;
+    }
+       
+    private function changeMap():void {
+        try{
+            var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( mapImageUrl.text );
+        
+            if( checkBoxWhiteMap.selected ) {
+                imageUrl = "";
+            }
+        
+            var map:Map = DodontoF_Main.getInstance().getMap();
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.changeMap(imageUrl, mapWidth.value, mapHeight.value, gridColorPicker.selectedColor, map.getMarks());
+        
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+    private function printPreview():void {
+        Log.logging("printPreview mapImageUrl.text", mapImageUrl.text);
+        var xCount:int = mapWidth.value;
+        var yCount:int = mapHeight.value;
+        
+        Log.logging("mapImageUrl.text", mapImageUrl.text);
+        Log.logging("xCount", xCount);
+        Log.logging("yCount", yCount);
+        
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( mapImageUrl.text );
+        Log.logging("imageUrl getLonged", imageUrl);
+        
+        previewLoader.loadImageWidthHeight(imageUrl, xCount, yCount, 6);
+        previewLoader.drawGrid( gridColorPicker.selectedColor );
+    }
+
+
+    private function checkWhiteMap():void {
+        var isWhiteMap:Boolean = ( ! checkBoxWhiteMap.selected);
+        mapImageUrl.enabled = isWhiteMap;
+    }
+
+    ]]>
+  </mx:Script>
+
+</torgtaitai:CommonPopupWindow>

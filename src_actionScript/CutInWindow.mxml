@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="700"
+   height="500"
+   title="" 
+   visible="false"
+   showCloseButton="true"
+   close="closeWindow()"
+   >
+  <mx:Script>
+    <![CDATA[
+    import flash.display.DisplayObject;
+    import mx.controls.VideoDisplay;
+    import mx.core.UIComponent;
+    import mx.managers.PopUpManager;
+    import flash.utils.Timer;
+    import flash.events.TimerEvent;
+    import flash.events.MouseEvent;
+    import mx.controls.Alert;
+
+    private var stopFunction:Function = null;
+    private var closeTimer:Timer = null;
+    private var position:String = "center";
+    private var thisObj:CutInWindow;
+    
+    override protected function setup():void {
+        thisObj = this;
+    
+        this.doubleClickEnabled = true;
+        this.mouseEnabled = true;
+        this.addEventListener(MouseEvent.DOUBLE_CLICK, function():void {thisObj.closeWindow();});
+    }
+
+    public function centerPouUp():void {
+        PopUpManager.centerPopUp(this);
+        
+        var xPadding:int = 5;
+        var upPaddign:int =35;
+        
+        var parts:Array = position.split(",");
+        for(var i:int = 0 ; i < parts.length ; i++) {
+            var positionPart:String = parts[i];
+            
+            if( positionPart == "up" ) {
+                this.y = upPaddign;
+                continue;
+            }
+            
+            if( positionPart == "right" ) {
+                this.x = ((this.x + (this.width / 2))*2 - this.width - xPadding);
+                continue;
+            }
+            
+            if( positionPart == "left" ) {
+                this.x = xPadding;
+                continue;
+            }
+        }
+    }
+
+
+    public function setSize(width_:int, height_:int):void {
+        this.width = width_ + 28;
+        this.height = height_ + 50;
+    
+        this.centerPouUp();
+        this.visible = true;
+    
+        if( closeTimer != null ) {
+            this.closeTimer.start();
+        }
+    }
+
+    public function addCutIn(component:DisplayObject,
+                             titleText:String,
+                             displaySeconds:int,
+                             position:String):void {
+        this.addChild(component);
+        
+        this.title = titleText;
+        if( position != null ) {
+            this.position = position;
+        }
+        
+        if( displaySeconds != 0 ) {
+            this.closeTimer = new Timer((displaySeconds * 1000), 1);
+            this.closeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function completeHandler(e:TimerEvent):void {
+                    closeWindow();
+                });
+        }
+
+    }
+
+    public function setCutInStopFunction(stopFunction_:Function):void {
+        stopFunction = stopFunction_;
+    }
+
+    public function closeWindow():void {
+        if( stopFunction != null ) {
+            try {
+                stopFunction.call();
+            } catch(error:Error) {
+            }
+        }
+        
+        PopUpManager.removePopUp(this);
+    }
+
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="690"
+   height="430"
+   title="画像タグ名管理" 
+   showCloseButton="true"
+   >
+  <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
+  
+  <torgtaitai:ImageUploadSetInfo id="imageUploadSetInfo"
+                                 width="100%" horizontalAlign="center" verticalAlign="middle" />
+  
+  <mx:HBox height="50" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="変更内容を保存" click="this.execute()" enabled="false" />
+    <mx:Spacer width="30" />
+    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  
+  <mx:Script>
+    <![CDATA[
+
+    import mx.events.CloseEvent;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.collections.ArrayCollection;
+    import mx.controls.Alert;
+    import mx.controls.Image;
+    
+    private var tagInfos:Object = new Object();
+    private var tagTextOriginal:String = new String();
+    private var characterImageUrlText:String = "";
+    private var previewImage:Image = new Image();
+    
+    override protected function setup():void {
+        imageSelecter.addPreview(previewImage, 200);
+        
+        Log.loggingTuning("=>setup() Begin");
+        
+        imageSelecter.setImageClickEventFunction(imageClickEvent);
+        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+        imageSelecter.setDefaultTags( [ImageTag.getAllTag()] );
+        imageSelecter.initImage();
+        
+        Log.loggingTuning("=>setup() End");
+    }
+       
+    public function imageClickEvent(imageName:String):void {
+        clickImage(imageName);
+    }
+    
+    public function imageLoadComplete():void {
+        tagInfos = imageSelecter.getTagInfos();
+        executeButton.enabled = true;
+    }
+    
+    
+    private function clickImage(targetUrl:String):void {
+        Log.logging("TagManagerWindow.clickImage begin");
+        
+        if( characterImageUrlText == targetUrl ) {
+            Log.logging("TagManagerWindow.clickImage same target");
+            return;
+        }
+        
+        if( characterImageUrlText == "" ) {
+            Log.logging("TagManagerWindow.clickImage init target");
+            changeTargetImage(targetUrl);
+            return;
+        }
+        
+        if( tagTextOriginal == imageUploadSetInfo.getTagText() ) {
+            Log.logging("TagManagerWindow.clickImage edit is finished.");
+            changeTargetImage(targetUrl);
+            return;
+        }
+        
+        Alert.show("「変更内容を保存」を実施していません。\n現在の変更内容を破棄しますがよろしいですか？？", "確認", 
+                   Alert.OK | Alert.CANCEL, null,
+                   function(e : CloseEvent) : void {
+                       if (e.detail == Alert.OK) {
+                           changeTargetImage(targetUrl)
+                       }});
+        
+        Log.logging("TagManagerWindow.clickImage end");
+    }
+             
+    private function changeTargetImage(targetUrl:String):void {
+        Log.logging("TagManagerWindow.changeTargetImage begin");
+        
+        characterImageUrlText = targetUrl;
+        
+        tagTextOriginal = findTagInfoTagText(characterImageUrlText);
+        imageUploadSetInfo.setTagText( tagTextOriginal );
+        
+        imageUploadSetInfo.setPassword( findTagInfoPassword(characterImageUrlText) );
+        
+        printPreview();
+        
+        Log.logging("TagManagerWindow.changeTargetImage end");
+    }
+    
+    private function getTagText(array:Array):String {
+        return array.join("　");
+    }
+    
+    private function findTagInfoTagText(targetSource:String):String {
+        Log.logging("targetSource", targetSource);
+        return getTagText( findTagInfos(targetSource)["tags"] );
+    }
+    
+    private function findTagInfoPassword(targetSource:String):String {
+        Log.logging("targetSource", targetSource);
+        return findTagInfos(targetSource)["password"];
+    }
+    
+    private function findTagInfos(targetSource:String):Object {
+        Log.logging('findTagInfos targetSource', targetSource);
+        var tagInfo:Object = tagInfos[targetSource];
+        
+        tagInfo ||= new Object();
+        tagInfo['tags'] ||= [];
+        tagInfo['password'] ||= "";
+        
+        tagInfos[targetSource] = tagInfo;
+        
+        return tagInfo;
+    }
+    
+    static public function getTagInfo(text:String, password:String):Object {
+        var tagInfo:Object = new Object();
+        tagInfo["tags"] = getTags(text);
+        tagInfo['password'] = password;
+        
+        return tagInfo;
+    }
+    
+    static public function getTags(text:String):Array {
+        return ImageTag.getTags(text);
+    }
+             
+    public function execute():void {
+        try{
+            if( characterImageUrlText == "" ) {
+                return;
+            }
+            
+            
+            var tagInfo:Object = findTagInfos(characterImageUrlText);
+            
+            tagInfo["tags"] = getTags( imageUploadSetInfo.getTagText() );
+            tagInfo["password"] = imageUploadSetInfo.getPassword();
+            
+            tagTextOriginal = getTagText( tagInfo["tags"] );
+            imageUploadSetInfo.setTagText( tagTextOriginal );
+            
+            var params:Object = { source: characterImageUrlText,
+                                  tagInfo: tagInfo };
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().changeImageTags(params);
+            
+            imageSelecter.tagNameChanged();
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+             
+    public function setCharacter(name:String, imageUri:String,
+                                 size:int, isHide:Boolean,
+                                 initiative:Number, info:String):void {
+    }
+
+    protected function printPreview():void {
+        previewImage.source = characterImageUrlText;
+    }
+
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

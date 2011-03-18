@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   alpha="1"
+   width="700"
+   height="470"
+   title="立ち絵追加" 
+   showCloseButton="true"
+   >
+
+  <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
+  
+  <mx:Box height="170" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Label text="下記で設定した「キャラクター名」「状態」でチャットで発言すると立ち絵が表示されます。" />
+    <mx:Form>
+      <mx:FormItem label="キャラクター名：">
+        <mx:TextInput id="characterName" width="100%" text="" />
+      </mx:FormItem>
+      <mx:FormItem label="状態：" >
+        <mx:TextInput id="state" width="100%" text="" />
+      </mx:FormItem>
+      <mx:FormItem label="画像ファイル名(jpg,gif,png,swf)：" >
+        <mx:TextInput id="source" width="100%" text="" change="printPreview()" />
+      </mx:FormItem>
+      <mx:FormItem label="表示位置（1：左端、12：右端）：">
+          <mx:HSlider id="leftIndex"
+                      width="150"
+                      liveDragging="true"
+                      showTrackHighlight="false"
+                      maximum="12"
+                      minimum="1"
+                      value="1"
+                      snapInterval="1"
+                      />
+      </mx:FormItem>
+    </mx:Form>
+  </mx:Box>
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="追加" click="execute()" enabled="{source.text != ''}" />
+    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Image;
+    import mx.controls.Alert;
+    
+    private var loadingMessage:String = "ロード中・・・";
+    private var previewImage:Image = new Image();
+    
+    override protected function setup():void {
+        try {
+            imageSelecter.addPreview(previewImage, 200);
+            
+            if( source.text == "" ) {
+                source.text = loadingMessage;
+            }
+            printPreview();
+            
+            imageSelecter.setImageClickEventFunction(imageClickEvent);
+            imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+            imageSelecter.setDefaultTags( [ImageTag.getStandingGraphicsTag(), ImageTag.getAllTag(), ImageTag.getCharacterTag()] );
+            imageSelecter.initImage( isLoadInitImageList() );
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    protected function isLoadInitImageList():Boolean {
+        return true;
+    }
+    
+    public function imageClickEvent(imageName:String):void {
+        source.text = imageSelecter.getImageUrlChanger().getShort( imageName );
+        printPreview();
+    }
+    
+    public function imageLoadComplete():void {
+        if( source.text == loadingMessage ) {
+            source.text =  "";
+        }
+        
+        source.text = imageSelecter.getImageUrlChanger().getShort( source.text );
+        source.enabled = true;
+    }
+    
+    protected function printPreview():void {
+        Log.logging("printPreview source.text", source.text);
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( source.text );
+        Log.logging("imageUrl", imageUrl);
+        previewImage.source = imageUrl;
+    }
+    
+    
+    protected function getEffectParams():Object {
+        if( characterName.text == "" ) {
+            return null;
+        }
+        if( state.text == "" ) {
+            return null;
+        }
+        if( source.text == "" ) {
+            return null;
+        }
+        
+        var sourceText:String = imageSelecter.getImageUrlChanger().getLong( source.text );
+        
+        var params:Object = {
+            "type" : StandingGraphics.getTypeStatic(),
+            "name": characterName.text,
+            "state": state.text,
+            "source": sourceText,
+            "leftIndex": leftIndex.value
+        };
+    
+        getEffectParamsExt(params);
+    
+        return params;
+    }
+
+    protected function getEffectParamsExt(params:Object):void {
+    }
+
+
+    protected function execute():void {
+        var params:Object = getEffectParams();
+        if( params == null ) {
+            return;
+        }
+    
+        DodontoF_Main.getInstance().standingGraphicInfos.addItem(params);
+    
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.addEffect(params);
+    
+        state.text = "";
+        source.text = "";
+    }
+
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

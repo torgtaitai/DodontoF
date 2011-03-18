@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="250"
+   y="50"
+   width="330"
+   height="250"
+   title="マスク作成" 
+   
+   showCloseButton="true"
+   >
+
+  
+  <mx:Box height="100%" width="200" horizontalAlign="center" verticalAlign="middle">
+    <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Box height="100%" width="50%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Form>
+          
+	      <mx:FormItem label="名前:">
+            <mx:TextInput id="maskName" width="50" text=""/>
+	      </mx:FormItem>
+          
+	      <mx:FormItem label="色:">
+            <mx:ColorPicker id="mapMaskColorPicker" showTextField="true" selectedColor="0x000000"
+                            change="changeView()" />
+	      </mx:FormItem>
+          
+	      <mx:FormItem label="高さ:">
+            <mx:NumericStepper id="mapMaskHeigth" minimum="1" maximum="100" value="3" change="changeView()" enabled="{draggable}" />
+	      </mx:FormItem>
+          
+	      <mx:FormItem label="幅:">
+            <mx:NumericStepper id="mapMaskWidth" minimum="1" maximum="100" value="3" change="changeView()" enabled="{draggable}" />
+	      </mx:FormItem>
+
+	      <mx:FormItem label="透過度:">
+            <mx:HSlider id="alphaSlider" width="70" minimum="0.2" maximum="1" value="1" enabled="{draggable}"
+                        change="view.alpha = alphaSlider.value"
+                        />
+	      </mx:FormItem>
+        </mx:Form>
+        
+        <mx:CheckBox id="isMany" label="複数作成" selected="true" height="15" visible="{isCreate}" />
+        <mx:HBox id="changeExecuteSpace" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{! isCreate}" >
+          <mx:Button id="changeButton" label="変更" click="changeMapMask()" />
+          <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+        </mx:HBox>
+        
+      </mx:Box>
+      <mx:Box height="100%" width="50%" horizontalAlign="center" verticalAlign="middle" >
+        <mx:Spacer id="view" height="100%" width="100%" />
+      </mx:Box>
+    </mx:HBox>
+    
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+
+    [Bindable]
+    private var mapMaskCount:int = 1;
+    
+    [Bindable]
+    protected var isCreate:Boolean = true;
+    
+    [Bindable]
+    protected var draggable:Boolean = true;
+    
+    private static var squareLength:int = Map.getSquareLength();
+    
+    override protected function setup():void {
+        Log.loggingTuning("=>setup() Begin");
+        
+        changeView();
+        setDragEvent();
+        setMaxMaskName();
+        
+        Log.loggingTuning("=>setup() End");
+    }
+    
+    protected function setMaxMaskName():void {
+        mapMaskCount = getMaxExistMapMaskCount() + 1;
+        maskName.text = "" + mapMaskCount;
+    }
+    
+    private function getMaxExistMapMaskCount():int {
+        var maxNumber:int = 0;
+        
+        var mapMaskList:Array  = DodontoF_Main.getInstance().getMap().getExistPieces();
+        for(var i:int = 0 ; i < mapMaskList.length ; i++) {
+            var mapMask:MapMask = mapMaskList[i] as MapMask;
+            if( mapMask == null ) {
+                continue;
+            }
+            
+            var number:int = getNumberFromName(mapMask.getName());
+            if( maxNumber < number ) {
+                maxNumber = number
+            }
+        }
+        
+        return maxNumber;
+    }
+    
+    private function getNumberFromName(text:String):int {
+        Log.loggingTuning("getNumberFromName text", text);
+        var result:Object = /(\d+)$/.exec(text);
+        if( result == null ) {
+            Log.loggingTuning("getNumberFromName null");
+            return 0;
+        }
+        
+        var numberString:String = result[1];
+        Log.loggingTuning("numberString", numberString);
+        var number:int = parseInt(numberString);
+        Log.loggingTuning("number", number);
+        
+        return number;
+    }
+    
+    private function changeView():void {
+        var maxSize:int = mapMaskHeigth.value;
+        if( maxSize < mapMaskWidth.value ) {
+            maxSize = mapMaskWidth.value;
+        }
+        
+        view.graphics.clear();
+        view.graphics.lineStyle(1, getColor());
+        view.graphics.beginFill(getColor(), 1.0);
+        var rate:Number = maxSize * 0.5;
+        if( rate > 2.5 ) {
+            rate = 2.5;
+        }
+        view.graphics.drawRect(0,
+                               5,
+                               squareLength * mapMaskWidth.value / maxSize * rate,
+                               squareLength * mapMaskHeigth.value / maxSize * rate);
+        view.graphics.endFill();
+    }
+    
+    private function getColor():int {
+        return parseInt("0x" + mapMaskColorPicker.selectedColor.toString(16));
+    }
+    
+    protected function setDragEvent():void {
+        view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                view.startDrag();
+                event.stopPropagation();
+                this.status = "";
+            });
+        
+        view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                view.stopDrag();
+            
+                var map:Map = DodontoF_Main.getInstance().getMap();
+                var globalPoint:Point = localToGlobal( new Point(view.x + 175 , view.y + 55) );
+                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+                
+                var dropMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+                
+                Log.logging("dropMapPoint.x", dropMapPoint.x);
+                Log.logging("dropMapPoint.y", dropMapPoint.y);
+                
+                if( (dropMapPoint.x >= 0) && (dropMapPoint.y >= 0) ) {
+                    addMapMask(dropMapPoint.x, dropMapPoint.y);
+                }
+                
+                view.x = 0;
+                view.y = 0;
+            });
+    }
+    
+    public function changeMapMask():void {
+    }
+    
+    public function addMapMask(x:int, y:int):void {
+        try{
+            Log.logging("addMapMask called");
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.addMapMask(mapMaskWidth.value,
+                                      mapMaskHeigth.value,
+                                      maskName.text, 
+                                      getColor(),
+                                      alphaSlider.value,
+                                      x,
+                                      y);
+            if( ! isMany.selected ) {
+                PopUpManager.removePopUp(this);
+            }
+            mapMaskCount++;
+            maskName.text = "" + mapMaskCount;
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="チャットパレット"
+   width="220" height="220"
+   visible="false"
+   showCloseButton="true"
+   rollOver="changeLogVisible(event, true)"
+   rollOut="changeLogVisible(event, false)"
+
+   >
+  
+  <mx:Box id="chatPalet" width="100%" height="100%">
+    <mx:HBox width="100%" height="20">
+      <mx:Button label="セーブ" click="save()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="ロード" click="load()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Spacer width="20"/>
+      <mx:Button id="addPaletTabButton" label="タブ追加" click="addPaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button id="deletePaletTabButton" label="タブ削除" click="deletePaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+    </mx:HBox>
+    
+    <mx:TabNavigator id="tabSpace" width="100%" height="100%" >
+    </mx:TabNavigator>
+    
+  </mx:Box>
+  
+  <mx:Script>
+
+    <![CDATA[
+    
+    import mx.core.Application;
+    import flash.geom.Point;
+    import mx.controls.TextInput;
+    import mx.containers.HBox;
+    import mx.controls.Button;
+    
+    static  private var paletteCountParTab:int = 20;
+    private var defaultTabCount:int = 5;
+    private var paletteInputs:Array = new Array();
+    private var tabs:Array = new Array();
+    
+    static public function getPaletteCountParTab():int {
+        return paletteCountParTab;
+    }
+    
+    public function setInitPosition():void {
+        if( loadPosition() ) {
+            return;
+        }
+        
+        var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
+        var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
+        
+        this.x = screenWidth - (this.width * 2);
+        this.y = screenHeigth - (this.height * 2);
+    }
+    
+    override public function getSaveInfoKeyName():String {
+        return "ChatPalet";
+    }
+    
+    override public function setup():void {
+        setInitPosition();
+        initChatPalet();
+    }
+    
+    private function initChatPalet():void {
+        chatPalet.verticalScrollPolicy = "off";//ScrollPolicy.OFF;
+        paletteInputs = new Array();
+        
+        for(var i:int = 0; i < defaultTabCount ; i++) {
+            addPaletTab();
+        }
+        
+        paletteInputs[0].text = "2d6+1 ダイスボット登録例";
+    }
+    
+    private function addPaletTab():void {
+        addPaletTabButton.enabled = false;
+        
+        var tab:Box = new Box();
+        tab.percentWidth=100;
+        tab.percentHeight=100;
+        
+        initAddedTab(tab);
+        
+        tabSpace.addChild(tab);
+        tabs.push( tab );
+        tab.label="" + tabs.length;
+        
+        addPaletTabButton.enabled = true;
+    }
+    
+    private function deletePaletTab(isForce:Boolean = false):void {
+        if( ! isForce ) {
+            if( tabs.length <= 1 ) {
+                return;
+            }
+        }
+        
+        deletePaletTabButton.enabled = false;
+        
+        var tab:Box = tabs.pop();
+        tabSpace.removeChild(tab);
+        
+        /*
+        for(var i:int = 0 ; i < paletteCountParTab ; i++) {
+            paletteInputs.pop();
+        }
+        */
+        
+        deletePaletTabButton.enabled = true;
+    }
+    
+    private function initAddedTab(tab:Box):void {
+        
+        for(var i:int = 0; i < paletteCountParTab ; i++) {
+            
+            var index:int = tabs.length * paletteCountParTab + i;
+            var input:TextInput = paletteInputs[index];
+            
+            if( input == null ) {
+                input = new TextInput();
+                input.percentWidth = 100;
+                paletteInputs.push(input);
+            }
+            
+            var button:Button = new Button();
+            button.label = "送信";
+            button.setStyle("paddingLeft", 0);
+            button.setStyle("paddingRight", 0);
+            button.addEventListener(MouseEvent.CLICK, getSendChatMessageFunction(input));
+            
+            var box:HBox = new HBox();
+            box.percentWidth = 100;
+            
+            box.addChild(button);
+            box.addChild(input);
+            tab.addChild(box);
+        }
+    }
+    
+    private function getSendChatMessageFunction(input:TextInput):Function {
+        var resultFunction:Function = function(event:Event):void {
+            var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+            chatWindow.sendChatMessage(chatWindow.getSelectedChatChannleIndex(),
+                                       input.text );
+        };
+        
+        return resultFunction;
+    }
+    
+    
+    private var saveDataExt:String = "cpd";
+    private var fileReferenceForSave:FileReference = new FileReference();
+    private var fileReferenceForLoad:FileReference = new FileReference();
+    
+    public function save():void {
+        var chatPaletteStrings:Array = new Array();
+        
+        for(var i:int = 0 ; i < (tabs.length * paletteCountParTab) ; i++) {
+            var input:TextInput = paletteInputs[i] as TextInput;
+            chatPaletteStrings.push( input.text );
+        }
+        
+        var historyString:String = Utils.getJsonString(chatPaletteStrings);
+        fileReferenceForSave.save(historyString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+    }
+    
+    public function load():void {
+        fileReferenceForLoad= new FileReference();
+        fileReferenceForLoad.addEventListener(Event.SELECT, loadSelect);
+        
+        var filters:Array = new Array();
+        filters.push(new FileFilter("チャットパレットセーブデータ(*." + saveDataExt + ")", "*." + saveDataExt));
+        
+        fileReferenceForLoad.browse(filters);
+    }
+    
+    public function loadSelect(e:Event):void {
+        fileReferenceForLoad.addEventListener(Event.COMPLETE, loadComplete);
+        fileReferenceForLoad.load();
+    }
+    
+    public function loadComplete(e:Event):void {
+        var data:ByteArray = fileReferenceForLoad.data as ByteArray;
+        var dataString:String = data.toString();
+        
+        var chatPaletteStrings:Array = SharedDataReceiver.getJsonDataFromString(dataString) as Array;
+        
+        while( tabs.length > 0 ) {
+            var isForce:Boolean = true;
+            deletePaletTab(isForce);
+        }
+        
+        for(var i:int = 0 ; i < chatPaletteStrings.length ; i++) {
+            if( (i % paletteCountParTab) == 0 ) {
+                addPaletTab();
+            }
+            
+            var input:TextInput = paletteInputs[i] as TextInput;
+            input.text = chatPaletteStrings[i];
+        }
+    }
+    
+    
+    private function changeLogVisible(event:MouseEvent, visible:Boolean):void {
+        DodontoF_Main.getInstance().getChatWindow().changeLogVisible(event, visible);
+    }
+    
+             ]]>
+      
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

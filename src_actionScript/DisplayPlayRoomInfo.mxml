@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="300"
+   title="プレイルーム情報表示" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Text id="playRoomInfo" height="100%" text="" />
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Spacer width="100%" />
+      <mx:Button id="changePlarRoomInfoButton" label="プレイルーム情報変更" click="changePlarRoomInfo()" />
+    </mx:HBox>
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+
+    public function init(message:String):void {
+        playRoomInfo.text = message;
+    }
+    override protected function setup():void {
+        try {
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    protected function changePlarRoomInfo():void {
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        var roomNumber:int = guiInputSender.getRoomNumber();
+        var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
+        var password:String = DodontoF_Main.getInstance().getPlayRoomPassword();
+        var chatChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
+        var canUseExternalImage:Boolean = DodontoF_Main.getInstance().canUseExternalImage();
+        var canVisit:Boolean = DodontoF_Main.getInstance().canVisit();
+        
+        var window:ChangePlayRoomWindow = DodontoF.popup(ChangePlayRoomWindow, true) as ChangePlayRoomWindow;
+        window.initParams(roomNumber);
+        window.setPlayRoomInfo(playRoomName, password, chatChannelNames, canUseExternalImage, canVisit);
+        
+        PopUpManager.removePopUp(this);
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mx:Application
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   pageTitle="どどんとふ"
+   applicationComplete="setup()"
+   layout="absolute"
+   >
+  
+  <mx:ApplicationControlBar 
+     id="mainMenu"
+     dock="true" horizontalGap="0"
+     fillAlphas="[0.9, 0.9]"
+     enabled="false"
+     >
+    <mx:HBox id="mainMenuBody" width="100%" height="100%" visible="true">
+      <mx:MenuBar id="mainMenuBar"
+                  height="100%" 
+                  dataProvider="{menuArray}" 
+                  labelField="label"
+                  itemClick="selectMenu(event)"
+                  />
+      <mx:Spacer width="20" />
+      <mx:Image id="zoomInButton" source="{zoomInIcon}" click="dodontoF_Main.zoom(true)" />
+      <mx:Image id="zoomOutButton" source="{zoomOutIcon}" click="dodontoF_Main.zoom(false)" />
+      <mx:Spacer width="20" />
+      
+      <mx:Button id="displayPlayRoomInfoButton" label="ルームx：0名" click="displayPlayRoomInfo()" enabled="false"/>
+      
+      <mx:Button id="sharedMemo"
+                label="共有メモ"
+                click="popup(AddMemoWindow, true)"
+                 />
+      
+      <!--
+      <mx:Label text="キャラクター透明度" />
+      <mx:HSlider id="characterAlphaSlider" 
+                  showTrackHighlight="true"
+                  width="50"
+                  minimum="0" maximum="1" value="1"
+                  change="dodontoF_Main.getMap().getCharacterLayer().alpha = characterAlphaSlider.value"
+                  labels="['0', '1']"
+                  labelOffset="0"
+                  />
+      -->
+      <mx:Spacer width="100%" />
+
+      <!--
+      <mx:ColorPicker id="titleColorPicker" showTextField="true" selectedColor="0x3333FF"
+                      toolTip="タイトルバー色"
+                      change="var array:Array = [titleColorPicker.selectedColor, titleColorPicker.selectedColor];
+                             CommonPopupWindow.headerColorsArray = array;"
+      />
+      -->
+      
+      <mx:Button id="graveyard"
+                label="墓場"
+                click="popup(GraveyardWindow, true)"
+                dragEnter="graveyardDragEnterHandler(event);" 
+                dragOver="graveyardDragOver(event)"
+                dragDrop="graveyardDragDropHandler(event)"
+                dragExit="graveyardDragExitHandler(event)"
+                />
+      
+      <mx:Button id="mentenanceModeButton" label="メンテナンスモード" click="changeMentenanceMode();" toggle="true" visible="false" />
+      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" toolTip="ログアウト" />
+      
+    </mx:HBox>
+    
+    <mx:HBox id="speedBox" width="0" height="100%" visible="false">
+      <mx:Label text="再生位置" />
+      <mx:HSlider id="replaySeekSlider" 
+                  showTrackHighlight="true"
+                  width="100%"
+                  minimum="0" maximum="100" value="0"
+                  toolTip="{replaySeekSlider.value}"
+                  change="DodontoF_Main.getInstance().changeReplayPoint(replaySeekSlider.value)"
+                  />
+      
+      <mx:Spacer width="10" />
+      <mx:Image id="pauseAndPlay" width="25" height="25" source="{pauseIcon}" click="DodontoF_Main.getInstance().pauseAndPlay()" />
+      <mx:Spacer width="10" />
+      
+      <mx:Label text="早送り倍率" />
+      <mx:HSlider id="replaySpeedSlider" 
+                  showTrackHighlight="true"
+                  width="150"
+                  minimum="0.1" maximum="10" value="1"
+                  toolTip="{replaySpeedSlider.value}"
+                  change="DodontoF_Main.getInstance().setReplaySpeed(replaySpeedSlider.value)"
+                  labels="['0.1', '10']"
+                  labelOffset="0"
+                  />
+      
+      <mx:Button id="displayCard"
+                 paddingLeft="2" paddingRight="2" 
+                 label="カード"
+                 toggle="true" 
+                 click="selectMenuByManuName('isCardVisible', displayCard.selected)"
+                 />
+    </mx:HBox>
+    
+  </mx:ApplicationControlBar>
+  
+  <mx:Glow id="_glowEffect" duration="1500" 
+           alphaFrom="1.0" alphaTo="0.0" 
+           blurXFrom="70.0" blurXTo="0.0" 
+           blurYFrom="70.0" blurYTo="0.0" 
+           color="0xFFFF00"/>
+  
+  <torgtaitai:DodontoF_Main id="dodontoF_Main" x="0" y="0"/>
+  <mx:Spacer id="diceRollPlace_" width="100%" height="100%" x="0" y="0"/>
+
+
+  <mx:Script>
+    <![CDATA[
+
+    [Bindable]
+    private var menuArray:Array;
+    
+    private var loginUserInfo:Array;
+    
+    import mx.controls.DataGrid;
+    import mx.managers.DragManager;
+    import mx.events.DragEvent;
+    import mx.controls.ComboBox;
+    import mx.events.CloseEvent;
+    import mx.collections.ArrayCollection;
+    import flash.net.FileReference;
+    import mx.containers.TitleWindow;
+    import mx.controls.Alert;
+    import mx.core.IFlexDisplayObject;
+    import mx.core.UIComponent;
+    import mx.events.MenuEvent;
+    import mx.managers.PopUpManager;
+    import mx.controls.ToolTip;
+    
+    protected static var thisObj:DodontoF;
+    
+    [Embed(source='image/icons/zoom_in.png')]
+    [Bindable]
+    private static var zoomInIcon:Class;
+    
+    [Embed(source='image/icons/zoom_out.png')]
+    [Bindable]
+    private static var zoomOutIcon:Class;
+    
+    [Embed(source='image/icons/door_out.png')]
+    [Bindable]
+    private static var logoutIcon:Class;
+    
+    [Embed(source='image/icons/control_pause_blue.png')]
+    [Bindable]
+    private static var pauseIcon:Class;
+    
+    [Embed(source='image/icons/control_pause.png')]
+    [Bindable]
+    private static var pauseDisableIcon:Class;
+
+    [Embed(source='image/icons/control_play_blue.png')]
+    [Bindable]
+    private static var playIcon:Class;
+    
+    [Embed(source='image/icons/control_play.png')]
+    [Bindable]
+    private static var playDisableIcon:Class;
+    
+    
+    private var standingGraphicLayer:UIComponent = new UIComponent();
+    private var chatLogLayer:UIComponent = new UIComponent();
+    
+    public function getStandingGraphicLayer():UIComponent {
+        return standingGraphicLayer;
+    }
+    
+    private function initStandigGraphicsLayer():void {
+        /*
+        standingGraphicLayer.addEventListener(MouseEvent.ROLL_OVER, function(event:MouseEvent):void {
+                setStandingGraphicVisible(false);
+            });
+        standingGraphicLayer.addEventListener(MouseEvent.ROLL_OUT, function(event:MouseEvent):void {
+                setStandingGraphicVisible(true);
+            });
+        */
+    }
+    
+    public function setStandingGraphicVisible(visible:Boolean):void {
+        standingGraphicLayer.visible = visible;
+    }
+    
+    public function getGlowEffect():Glow {
+        return _glowEffect;
+    }
+    
+    private function initLayer():void {
+        this.addChild(standingGraphicLayer);
+        this.addChild(chatLogLayer);
+        
+        NovelticMode.addEventListenerOfMouseOverForChatLogLayer(chatLogLayer);
+    }
+    
+    private function setup():void {
+        thisObj = this;
+        dodontoF_Main.setDodontoF(this);
+        
+        if( ! Config.getInstance().isAdobeAir() ) {
+            initForSetup();
+            return;
+        }
+        
+        var window:InputServerUrl = popup(InputServerUrl, true) as InputServerUrl;
+        
+        window.setResultFunction( function(url:String):void {
+                Config.getInstance().setServerUrl(url);
+                initForSetup();
+            });
+        
+    }
+    
+    private function initForSetup():void {
+        menuArray = new Array();
+        loginUserInfo = new Array();
+        
+        if( TEST::isTest ) {
+            dodontoF_Main = new DodontoF_MainTest();
+        }
+        
+        dodontoF_Main.init();
+        
+        initZoomRate();
+        initToolTip();
+        initLayer();
+        setPauseIcon();
+        initMenuXml();
+        initStandigGraphicsLayer();
+        
+        replaySeekSlider.snapInterval = 1;
+        
+        Map.setDodontoF(this);
+        SharedDataReceiver.setDodontoF(this);
+        MovablePiece.setDodontoF(this);
+        
+        start();
+        
+        Utils.setSkin(this);
+        
+        setLogMode();
+    }
+    
+    private function setLogMode():void {
+        if( dodontoF_Main.isErrorLogMode() ) {
+            Log.initLogWindow();
+            Log.setError();
+            return;
+        }
+        
+        if( dodontoF_Main.isTuningLogMode() ) {
+            Log.initLogWindow();
+            Log.setTuning();
+            return;
+        }
+        
+        if( dodontoF_Main.isDebugLogMode() ){
+            Log.initLogWindow();
+            Log.setDebug();
+            return;
+        }
+    }
+    
+    private function initZoomRate():void {
+        /*
+        var zoomRate:Number = dodontoF_Main.getGlobalZoomRate();
+        
+        this.scaleX = zoomRate;
+        this.scaleY = zoomRate;
+        */
+    }
+    
+    private function initToolTip():void {
+        //StyleManager.getStyleDeclaration("ToolTip").setStyle("fontStyle", "regular");
+        StyleManager.getStyleDeclaration("ToolTip").setStyle("fontSize", "12");
+        //StyleManager.getStyleDeclaration("ToolTip").setStyle("fontFamily", "Arial");
+        //StyleManager.getStyleDeclaration("ToolTip").setStyle("color", "#FFFFFF");
+        //StyleManager.getStyleDeclaration("ToolTip").setStyle("backgroundColor", "#33CC99");
+        ToolTip.maxWidth = 450;
+    }
+    
+    private function start():void {
+        dodontoF_Main.login();
+    }
+    
+    public static function popup(className:Class, modal:Boolean = false):IFlexDisplayObject {
+        modal = false;
+        var window:IFlexDisplayObject = PopUpManager.createPopUp(thisObj, className, modal);
+        return window;
+    }
+    
+    public function startWindows():void {
+        mainMenu.enabled = true;
+        dodontoF_Main.setInitiativeWindow( popup(InitiativeWindow, false), "isInitiativeListVisible" );
+        dodontoF_Main.setChatWindow( popup(ChatWindow, false), "isChatVisible");
+        dodontoF_Main.setChatPaletteWindow( popup(ChatPalette2, false), "isChatPaletteVisible" );
+        dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
+        
+        dodontoF_Main.initWindowForTiny();
+    }
+    
+    private function openUrl(urlString:String):void {
+        var url:URLRequest = new URLRequest(urlString);
+        navigateToURL(url);
+    }
+    
+    private function emptyImplement():void {
+        Alert.show( "次回実装予定。" );
+    }
+    
+    private function selectMenu(event:MenuEvent):void {
+        var menuName:String = event.item.data;
+        var toggled:Boolean = false;
+        if( event.item != null ) {
+            toggled = event.item.toggled;
+        }
+        selectMenuByManuName(menuName, toggled);
+    }
+    
+    public function selectMenuByManuName(menuName:String, toggled:Boolean):void {
+        if( menuName == "save" ) {
+            popup(SaveWindow, true);
+        } else if( menuName == "load" ) {
+            popup(LoadWindow, true);
+        } else if( menuName == "saveLog" ) {
+            DodontoF_Main.getInstance().getChatWindow().saveChatLogHtml();
+        } else if( menuName == "startSessionRecording" ) {
+            findItem("startSessionRecording", menuArray).enabled = false;
+            findItem("stopSessionRecording", menuArray).enabled = true;
+            refreshMainMenu();
+            
+            dodontoF_Main.startSessionRecording();
+        } else if( menuName == "stopSessionRecording" ) {
+            findItem("startSessionRecording", menuArray).enabled = true;
+            findItem("stopSessionRecording", menuArray).enabled = false;
+            refreshMainMenu();
+            
+            dodontoF_Main.stopSessionRecording();
+        } else if( menuName == "logout" ) {
+            dodontoF_Main.logout();
+        } else if( menuName == "initLocalSaveData" ) {
+            initLocalSaveData();
+        } else if( menuName == "isChatVisible" ) {
+            ChatWindow.getInstance().setVisibleState( toggled );
+        } else if( menuName == "isDiceVisible" ) {
+            dodontoF_Main.setDiceBoxVisible( toggled );
+        } else if( menuName == "isChatPaletteVisible" ) {
+            dodontoF_Main.setChatPaletteVisible( toggled );
+        } else if( menuName == "isInitiativeListVisible" ) {
+            InitiativeWindow.getInstance().setVisibleState( toggled );
+        } else if( menuName == "isChatVisible" ) {
+            ChatWindow.getInstance().setVisibleState( toggled );
+        } else if( menuName == "isCardVisible" ) {
+            var visibleCard:Boolean = toggled;
+            dodontoF_Main.getMap().setVisibleCardLayer( visibleCard );
+            Config.getInstance().saveViewStateInfo();
+        } else if( menuName == "isStandingGraphicVisible" ) {
+            var standingState:Boolean = toggled;
+            dodontoF_Main.getChatWindow().setStandingGraphicsDisplayState( standingState );
+            Config.getInstance().saveViewStateInfo();
+        } else if( menuName == "isMapVisible" ) {
+            var visibleMap:Boolean = toggled;
+            dodontoF_Main.getMap().setVisible( visibleMap );
+            Config.getInstance().saveViewStateInfo();
+        } else if( menuName == "isPositionVisible" ) {
+            var visible:Boolean = toggled;
+            dodontoF_Main.getMap().setVisibleGridPositionLayer( visible );
+            Config.getInstance().saveViewStateInfo();
+        } else if( menuName == "isGridVisible" ) {
+            var visibleMapGrid:Boolean = toggled;
+            dodontoF_Main.getMap().setVisibleGridLayer( visibleMapGrid );
+            Config.getInstance().saveViewStateInfo();
+            /*
+        } else if( menuName == "isDirectionVisible" ) {
+            var visibleCharacterDirection:Boolean = toggled;
+            dodontoF_Main.setVisibleDirectionLayer( visibleCharacterDirection );
+            Config.getInstance().saveViewStateInfo();
+            */
+        } else if( menuName == "isSnapMovablePiece" ) {
+            var isSnapMovablePiece:Boolean = toggled;
+            Config.getInstance().setSnapMovablePiece( isSnapMovablePiece );
+        } else if( menuName == "isAdjustImageSize" ) {
+            var isAdjustStandingGraphics:Boolean = toggled;
+            Config.getInstance().setAdjustImageSizeMode(isAdjustStandingGraphics);
+        } else if( menuName == "addCharacter" ) {
+            AddCharacterWindow.setCharacterPosition();
+            var characterWindow:CharacterWindow = popup(AddCharacterWindow, true) as CharacterWindow;
+            dodontoF_Main.setCharacterWindow(characterWindow);
+        } else if( menuName == "addMagicRange" ) {
+            AddMagicRangeWindow.setCharacterPosition();
+            popup(AddMagicRangeWindow, true);
+        } else if( menuName == "addMagicRangeDD4th" ) {
+            AddMagicRangeDD4thWindow.setCharacterPosition();
+            popup(AddMagicRangeDD4thWindow, true);
+        } else if( menuName == "addMagicTimer" ) {
+            popup(AddMagicTimerWindow, true);
+        } else if( menuName == "graveyard" ) {
+            popup(GraveyardWindow, true);
+        } else if( menuName == "clearCards" ) {
+            dodontoF_Main.clearCards();
+        } else if( menuName == "openInitCardWindow" ) {
+            popup(InitCardWindow, true);
+        } else if( menuName == "changeMap" ) {
+            popup(ChangeMapWindow, true);
+        } else if( menuName == "changeFloorTile" ) {
+            popup(ChangeFloorTileWindow, true);
+        } else if( menuName == "saveMap" ) {
+            popup(SaveMapWindow, true);
+        } else if( menuName == "loadMap" ) {
+            popup(LoadMapWindow, true);
+        } else if( menuName == "addMapMask" ) {
+            popup(AddMapMaskWindow, false);
+        } else if( menuName == "createMapEasy" ) {
+            popup(CreateMapEasyWindow, true);
+        } else if( menuName == "setRulerMode" ) {
+            dodontoF_Main.setRulerMode();
+        } else if( menuName == "imageFileUploader" ) {
+            openImageFileUploader();
+        } else if( menuName == "imageUrlUploader" ) {
+            openUrlUploader();
+        } else if( menuName == "webcameraCaptureUploader" ) {
+            openWebcameraCaptureUploader();
+        } else if( menuName == "deleteImage" ) {
+            popup(ImageManageWindow, true);
+            /*
+              } else if( menuName == "movieFileUploader" ) {
+              popup(MoviewUploadWindow, true);
+              } else if( menuName == "deleteMovie" ) {
+              popup(MovieManageWindow, true);
+            */
+        } else if( menuName == "openImageTagManager" ) {
+            popup(TagManagerWindow, true);
+        } else if( menuName == "version" ) {
+            popup(VersionWindow, true);
+        } else if( menuName == "manual" ) {
+            openUrl("README.html");
+        } else if( menuName == "tutorialReplay" ) {
+            openUrl("http://www.dodontof.com/DodontoF/DodontoF.swf?replay=..%2fDownload%2ftutorial%2fTutorialOfDodontoF_20110116.rec");
+        } else if( menuName == "officialSite" ) {
+            openUrl("http://www.dodontof.com/");
+        } else if( menuName == "initLogWindow" ) {
+            Log.initLogWindow();
+        } else if( menuName == "debugLog" ) {
+            Log.setDebug();
+        } else if( menuName == "tuningLog" ) {
+            Log.setTuning();
+        } else if( menuName == "errorLog" ) {
+            Log.setError();
+        } else if( menuName == "fatalErrorLog" ) {
+            Log.setFatalError();
+            /*
+        } else if( menuName == "pass" ) {
+            return;
+            */
+        } else {
+            Log.loggingError("menuName is invalid", menuName);
+        }
+    }
+    
+    
+    public function setPauseAndPlayIconDisable():void {
+        pauseAndPlay.enabled = false;
+        if( pauseAndPlay.source == pauseIcon ) {
+            pauseAndPlay.source = pauseDisableIcon;
+        }
+        if( pauseAndPlay.source == playIcon ) {
+            pauseAndPlay.source = playDisableIcon;
+        }
+    }
+    
+    public function setPlayIcon():void {
+        pauseAndPlay.enabled = true;
+        pauseAndPlay.source = playIcon;
+        pauseAndPlay.toolTip = "再生";
+    }
+    
+    public function setPauseIcon():void {
+        pauseAndPlay.enabled = true;
+        pauseAndPlay.source = pauseIcon;
+        pauseAndPlay.toolTip = "一時停止";
+    }
+    
+    
+    public function initLocalSaveData():void {
+        var result:Alert = Alert.show("ウィンドウ位置等の表示情報を初期化しますか？\n(初期化した場合再ログインが必要です)",
+                                      "表示初期化確認", 
+                                      (Alert.OK | Alert.CANCEL),
+                                      null, 
+                                      function(e : CloseEvent) : void {
+                                          if (e.detail != Alert.OK) {
+                                              return;
+                                          }
+                                          
+                                          Config.getInstance().setToDefaultInfo();
+                                          Alert.show("保存していた表示情報を初期化しました。\n" + 
+                                                     "お手数ですが再度ログインし直してしてください。");
+                                          thisObj.dodontoF_Main.logoutExecute();
+                                      });
+    }
+    
+    public function openImageFileUploader(function_:Function = null):void {
+        var window:ImageUploadWindow = popup(ImageUploadWindow, true) as ImageUploadWindow;
+        window.setCloseEvent(function_);
+    }
+
+    public function openUrlUploader(function_:Function = null):void {
+        var window:ImageUrlUploadWindow = popup(ImageUrlUploadWindow, true) as ImageUrlUploadWindow;
+        window.setCloseEvent(function_);
+    }
+    
+    public function openWebcameraCaptureUploader(function_:Function = null):void {
+        var window:WebCameraCaptureWindow = popup(WebCameraCaptureWindow, true) as WebCameraCaptureWindow;
+        window.setCloseEvent(function_);
+    }
+    
+    public function getMainBarHeight():int {
+        return mainMenuBar.height + 10;
+    }
+    public function getScreenWidth():int {
+        return stage.stageWidth;
+    }
+
+    public function getScreenHeight():int {
+        return stage.stageHeight;
+    }
+    
+    private function checkChatVisible(event:Event):void {
+        //    event.target.
+    }
+    
+    
+    public function setLoginUserInfo(loginUserInfoNew:Array):void {
+        loginUserInfo = loginUserInfoNew;
+        updateDisplayLoginUserInfoButtonLabel();
+        updateChatWindowSendtoLabel();
+    }
+    
+    private function updateDisplayLoginUserInfoButtonLabel():void {
+        var roomName:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
+        var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
+        
+        displayPlayRoomInfoButton.label = roomName + "：" + loginUserInfo.length + "名";
+        displayPlayRoomInfoButton.toolTip = playRoomName;
+        displayPlayRoomInfoButton.enabled = true;
+    }
+    
+    private function updateChatWindowSendtoLabel():void {
+        var sendto:ComboBox = dodontoF_Main.getChatWindow().sendto;
+        
+        var preData:String = null;
+        if( sendto.selectedItem != null ) {
+            preData = sendto.selectedItem.data;
+        }
+        
+        var dataProvider:Array = [];
+        
+        var option_all:Object = {
+            label : "（全員）",
+            data : null};
+        dataProvider.push(option_all);
+        
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
+            var info:Object = loginUserInfo[i];
+            
+            if( info.userId == dodontoF_Main.getUniqueId() ) {
+                continue;
+            }
+            
+            var option:Object = {
+                label : info.userName,// + ":" + info.userId,
+                data : info.userId};
+            dataProvider.push(option);
+        }
+        
+        sendto.dataProvider = dataProvider;
+        
+        Utils.selectComboBox(sendto, preData);
+    }
+    
+    public function getLoginUserCount():int {
+        return loginUserInfo.length;
+    }
+    
+    private function displayPlayRoomInfo():void {
+        var window:DisplayPlayRoomInfo = popup(DisplayPlayRoomInfo, true) as DisplayPlayRoomInfo;
+        
+        var message:String = "";
+        var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
+        message += "【" + playRoomName + "】\n";
+        message += "\n";
+        message += "ログイン中メンバー一覧：\n";
+        
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
+            var userInfo:Object = loginUserInfo[i];
+            message += userInfo["userName"] + "（ユーザーＩＤ：" + userInfo["userId"] + "）\n";
+        }
+        
+        window.init(message);
+    }
+    
+    public function getUserNameByUniqueId(targetUniqueId:String):String {
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
+            var userInfo:Object = loginUserInfo[i];
+            if( userInfo.userId == targetUniqueId ) {
+                return userInfo.userName;
+            }
+        }
+        
+        return "???";
+    }
+    
+    public function findItem(targetData:String, array:Array):Object {
+        if( array == null ) {
+            return null;
+        }
+        
+        for(var i:int = 0 ; i < array.length ; i++) {
+            var item:Object = array[i];
+            if( item.data == targetData ) {
+                return item;
+            }
+            
+            if( item.children ) {
+                var children:Array = item.children;
+                var result:Object = findItem(targetData, children);
+                if( result != null ) {
+                    return result;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    public function findMainMenuItem(key:String):Object {
+        var result:Object = findItem(key, menuArray);
+        return result;
+    }
+    
+    public function getMainMenuToggle(key:String):Boolean {
+        var result:Object = findItem(key, menuArray);
+        if( result == null ) {
+            return false;
+        }
+        
+        return result.toggled
+    }
+    
+    public function changeMainMenuToggle(targetData:String, value:Boolean):void {
+        var result:Object = findItem(targetData, menuArray);
+        if( result == null ) {
+            Log.loggingError("targetData is invalid menu item data", targetData);
+            return;
+        }
+        result.toggled = value;
+        
+        refreshMainMenu();
+    }
+    
+    private function refreshMainMenu():void {
+        var menuArrayLocal:Array = menuArray;
+        menuArray = new Array();
+        menuArray = menuArrayLocal;
+    }
+    
+    private function initMenuXml():void {
+        menuArray = dodontoF_Main.getMenuXml();
+    }
+    
+    private function changeMentenanceMode():void {
+        dodontoF_Main.setMentenanceModeOn( mentenanceModeButton.selected );
+    }
+    
+    private function graveyardDragEnterHandler(event:DragEvent):void {
+        //if(myTree.indexToItemRenderer(myTree.calculateDropIndex(event)) != null) {
+        var Initiator : * = event.currentTarget;
+        DragManager.acceptDragDrop(Initiator);
+    }
+    
+    /*
+    private function graveyardDragEnterHandler(event:DragEvent):void {
+        var piece:InitiativedMovablePiece = dodontoF_Main.getInitiativeWindow().getDoropedInitiativedMovablePiece(event);
+        
+        if( piece == null ) {
+            return;
+        }
+        
+        Alert.show(piece.getName());
+    }
+    */
+    
+    private function graveyardDragOver(event:DragEvent):void {
+        DragManager.showFeedback(DragManager.MOVE);
+        /*
+        if (borderColorSet == false) {                 
+            tempBorderColor = 
+                event.currentTarget.getStyle('borderColor');
+            borderColorSet = true;
+        }
+        event.currentTarget.setStyle('borderColor', 'green');
+        */
+        
+        //if(myTree.indexToItemRenderer(myTree.calculateDropIndex(event)).data.@type == "target") {
+    }
+    
+    public function graveyardDragDropHandler(event:DragEvent):void {    
+        // dataForFormat() always returns an Array 
+        // for the list-based controls 
+        // in case multiple items were selected.
+        var dragObj:Array = event.dragSource.dataForFormat("items") as Array; 
+        var piece:InitiativedPiece = dragObj[0]["character"]
+        piece.sendDelete();
+    }
+    
+    //private var borderColorSet:Boolean = false;
+    //private var tempBorderColor:uint;
+    
+    // http://livedocs.adobe.com/flex/3_jp/html/help.html?content=dragdrop_7.html
+    private function graveyardDragExitHandler(event:DragEvent):void {
+        //event.currentTarget.setStyle('borderColor', tempBorderColor);
+        //borderColorSet = true;
+    }
+    
+    ]]>
+  </mx:Script>
+</mx:Application>
+
+

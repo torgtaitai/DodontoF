@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="500"
+   height="300"
+   title="魔法タイマー追加" 
+   showCloseButton="true"
+   >
+
+  <mx:Form>
+	<mx:FormItem label="名前:">
+	  <mx:TextInput id="magicTimerName" text="" />
+	</mx:FormItem>
+	<mx:FormItem label="持続時間:">
+      <mx:HBox width="100%" height="100%">
+	    <mx:NumericStepper id="magicTimerTimeRange" minimum="1" maximum="99" value="1" />
+        <mx:Label text = "ラウンド" />
+      </mx:HBox>
+	</mx:FormItem>
+	<mx:FormItem label="効果開始ラウンド:">
+	  <mx:NumericStepper id="magicTimerCreateRound" minimum="1" maximum="99" />
+	</mx:FormItem>
+	<mx:FormItem label="効果開始イニシアティブ:">
+	  <mx:NumericStepper id="magicTimerInitiative" minimum="0" maximum="99"  value="0" stepSize="0.01" />
+	</mx:FormItem>
+	<mx:FormItem label="その他:">
+	  <mx:TextInput id="magicTimerInfo" text="" />
+	</mx:FormItem>
+  </mx:Form>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="追加" click="this.setMagicTimerOnButton()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.events.FlexEvent;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    
+    override protected function setup():void {
+        init();
+    }
+
+    protected function init():void {
+        var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+    
+        magicTimerCreateRound.value = roundTimer.getCurrentRound(),
+        magicTimerInitiative.value = roundTimer.getCurrentInitiative();
+    }
+
+
+    public function setMagicTimer(magicTimerNameText:String,
+                                  magicTimerTimeRangeValue:int,
+                                  magicTimerCreateRoundValue:int,
+                                  magicTimerInitiativeValue:Number,
+                                  magicTimerInfoText:String):void {
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.addMagicTimer(magicTimerNameText,
+                                     magicTimerTimeRangeValue,
+                                     magicTimerCreateRoundValue,
+                                     magicTimerInitiativeValue,
+                                     magicTimerInfoText);
+    }
+
+    public function setMagicTimerOnButton():void {
+        try{
+            var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+        
+            setMagicTimer(magicTimerName.text,
+                          magicTimerTimeRange.value,
+                          magicTimerCreateRound.value,
+                          magicTimerInitiative.value,
+                          magicTimerInfo.text);
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+            Log.loggingError("exception : " + error);
+            Log.loggingError("stackTrace : " + error.getStackTrace());
+        }
+    }
+
+
+    ]]>
+
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="700"
+   height="400"
+   title="リプレイ録画データ投稿所" 
+   showCloseButton="true"
+   >
+  
+  <mx:Text text="リプレイ録画データ投稿所へようこそ！ここではあなたのリプレイデータの投稿が可能です。" />
+<!--
+  <mx:Text text="カッコいい・恥ずかしい・うれしかったそんなプレイが録画できましたら" />
+  <mx:Text text="サクっと投稿してみましょう！" />
+-->
+  
+  <mx:DataGrid id="replayDataListGrid"
+               width="100%"
+               height="100%"
+               dataProvider="{replayDataList}"
+               editable="false"
+		       draggableColumns="true"
+               click="selectReplayDataList()"
+               >
+<!--
+               doubleClickEnabled="true"
+               doubleClick="playReplayData()"
+-->
+	<mx:columns>
+	  <mx:DataGridColumn headerText="タイトル"
+                         dataField="title"
+                         textAlign="center"
+                         width="50"/>
+	  <mx:DataGridColumn headerText="URL"
+                         dataField="url"
+                         textAlign="center"
+                         width="50"/>
+	</mx:columns>
+  </mx:DataGrid>
+      
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:TextInput id="selectedTitle" text="タイトル" width="150" editable="false" />
+    <mx:TextInput id="selectedUrl" text="再生URL" width="100%" editable="false" />
+  </mx:HBox>
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Spacer width="100%" />
+    <mx:Button label="リプレイ再生" click="playReplayData()" toolTip="上記のURLを貼り付ければ、リプレイを直接再生することが出来ます。&#13;他の人にリプレイを見せるにはこのURLを教えるのが手軽でオススメです。" />
+    <mx:Spacer width="100%" />
+    <mx:Button label="データ削除"  click="removeReplayData()" />
+  </mx:HBox>
+  
+  
+  <mx:Label text="リプレイデータの投稿は以下から" />
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="selectButton" label="リプレイデータ選択" click="selectReplayData()" />
+    <mx:Label text="タイトル:" />
+	<mx:TextInput id="replayDataTitle" width="100%" />
+    <mx:Button id="uploadButton" enabled="false" label="投稿（リプレイデータアップロード）" click="uploadReplayData()" />
+  </mx:HBox>
+  
+  <mx:HBox  height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+    <mx:Label text="実行結果：" />
+    <mx:Label id="result" width="100%" text="" fontWeight="bold" />
+    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    import mx.controls.Alert;
+    import mx.collections.ArrayCollection;
+    import mx.events.CloseEvent;
+    
+    [Bindable]
+    private var replayDataList:ArrayCollection = new ArrayCollection();
+    
+    private var guiInputSender:GuiInputSender;
+    
+    override protected function setup():void {
+        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        requestReplayDataList();
+    }
+    
+    public function selectReplayDataList():void {
+        var index:int = replayDataListGrid.selectedIndex;
+        
+        var replayData:Object = replayDataList[index];
+        if( replayData == null ) {
+            selectedTitle.text = "";
+            selectedUrl.text = "";
+            return;
+        }
+        
+        selectedTitle.text = replayData.title;
+        selectedUrl.text = replayData.url;
+    }
+    
+    public function removeReplayData():void {
+        var index:int = replayDataListGrid.selectedIndex;
+        
+        var replayData:Object = replayDataList[index];
+        if( replayData == null ) {
+            return;
+        }
+        
+        var targetReplayData:Object = {
+            "title": replayData.title,
+            "url": replayData.url
+        };
+        Log.loggingTuning("ReplayUploadWindow.removeReplayData replayData", replayData);
+        
+        var message:String = "タイトル：" + replayData.title  + "\nのリプレイデータを削除します。よろしいですか？";
+        var result:Alert = Alert.show(message, "リプレイデータ削除確認", 
+                                      Alert.OK | Alert.CANCEL, null, 
+                                      function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
+                                              guiInputSender.removeReplayData(targetReplayData,
+                                                                              requestReplayDataListResult);
+                                          }});
+    }
+    
+    public function playReplayData():void {
+        var index:int = replayDataListGrid.selectedIndex;
+        
+        var replayData:Object = replayDataList[index];
+        if( replayData == null ) {
+            return;
+        }
+        
+        var request:URLRequest = new URLRequest(replayData.url);
+        navigateToURL(request);
+    }
+    
+    private var fileReferenceForUpload:FileReference = null;
+    
+    public function selectReplayData():void {
+        
+        if( fileReferenceForUpload == null ) {
+            fileReferenceForUpload  = new FileReference();
+            fileReferenceForUpload.addEventListener(Event.SELECT, fileSelectHandler);
+        }
+        
+        var filters:Array = new Array();
+        filters.push(new FileFilter("リプレイデータ(*.rec)","*.rec"));
+        
+        fileReferenceForUpload.browse(filters);
+    }
+    
+    private function fileSelectHandler(event:Event):void {
+        uploadButton.enabled = true;
+    }
+    
+    private function uploadReplayData():void {
+        if( replayDataTitle.text == "" ) {
+            Alert.show("タイトルを入力してください。")
+            return;
+        }
+        
+        selectButton.enabled = false;
+        uploadButton.enabled = false;
+        result.text = "アップロード中……";
+        
+        var params:Object = {
+            'replayDataName' : replayDataTitle.text,
+            'ownUrl' : Utils.getOwnUrl()
+        };
+        
+        var sender:SharedDataSender = guiInputSender.getSender();
+        sender.sendFileUpload(fileReferenceForUpload, "uploadReplayData", params);
+        
+        fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadReplayDataResult);
+    }
+    
+    public function uploadReplayDataResult(dataEvent:DataEvent):void {
+        Log.loggingTuning("=>uploadReplayDataResult(event:Event) Begin");
+        try {
+            selectButton.enabled = true;
+            
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            Log.loggingTuning("jsonData", jsonData);
+            
+            result.text = (jsonData.resultText);
+            
+            if( result.text == "OK" ) {
+                replayDataTitle.text = "";
+                replayDataList = new ArrayCollection( jsonData.replayDataList );
+            }
+        } catch(e:Error) {
+            Log.loggingError("exception : " + e);
+        }
+        Log.loggingTuning("=>uploadReplayDataResult(event:Event) End");
+    }
+    
+    
+    private function requestReplayDataList():void {
+        var sender:SharedDataSender = guiInputSender.getSender();
+        Log.loggingTuning("requestReplayDataList calling...");
+        sender.requestReplayDataList( this.requestReplayDataListResult );
+        Log.loggingTuning("requestReplayDataList called.");
+    }
+    
+    public function requestReplayDataListResult(obj:Object):void {
+        Log.loggingTuning("=>requestReplayDataListResult(obj) Begin");
+        
+        Log.loggingTuning("obj", obj);
+        try {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            Log.loggingTuning("jsonData", jsonData);
+            Log.loggingTuning("jsonData.replayDataList", jsonData.replayDataList);
+            replayDataList = new ArrayCollection( jsonData.replayDataList );
+            
+        } catch(e:Error) {
+            Log.loggingError("exception : " + e);
+        }
+        
+        Log.loggingTuning("=>requestReplayDataListResult(event:Event) End");
+    }
+        
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

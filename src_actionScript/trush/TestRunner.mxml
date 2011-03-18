@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="*"
+  xmlns:flexunit="flexunit.flexui.*"
+  creationComplete="onCreationComplete()">
+  <mx:Script>
+import flexunit.framework.TestSuite;
+
+private function onCreationComplete():void {
+
+  var testSuite:TestSuite = new TestSuite();
+
+  TestGuiInputSender.addSuite(testSuite);
+  TestActionScript.addSuite(testSuite);
+  TestRoundTimer.addSuite(testSuite);
+
+  testRunner.test = testSuite;
+  testRunner.startTest();
+}
+
+  </mx:Script>
+  <flexunit:TestRunnerBase id="testRunner" width="100%" height="100%"/>
+
+</mx:Application>

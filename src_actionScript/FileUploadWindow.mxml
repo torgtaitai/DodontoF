@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="220"
+   title="ファイルアップローダー" 
+   showCloseButton="true"
+   >
+  
+  <mx:Text text="ファイルをアップロードできます。" />
+  <mx:Text text="アップロードすると、ファイルのURLがチャットに発言されるので、" />
+  <mx:Text text="そのリンクからみんなでファイルをダウンロードすることができます。" />
+  <mx:Text text="アップロードしたファイルは1時間経つと自動的に削除されます。" />
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="uploadButton" enabled="true" label="アップロード実行" click="uploadReplayData()" />
+    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:HBox  height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+    <mx:Label text="実行結果：" />
+    <mx:Label id="result" width="100%" text="" fontWeight="bold" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    import mx.controls.Alert;
+    import mx.collections.ArrayCollection;
+    
+    
+    override protected function setup():void {
+    }
+    
+    private var fileReferenceForUpload:FileReference = null;
+    
+    private function uploadReplayData():void {
+        
+        if( fileReferenceForUpload == null ) {
+            fileReferenceForUpload  = new FileReference();
+            fileReferenceForUpload.addEventListener(Event.SELECT, fileSelectHandler);
+        }
+        
+        var data:Array = [["画像", "*.jpg;*.jpeg;*.gif;*.png;*.bmp"],
+                          ["文書", "*.pdf;*.doc;*.txt;*.html;*.htm;*.xls"],
+                          ["圧縮ファイル", "*.zip;*.lzh;*.rar"],
+                          ["動画・音声", "*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav"]];
+        
+        var filters:Array = new Array();
+        for(var i:int = 0 ; i < data.length ; i++) {
+            var types:String = data[i][1];
+            var name:String = data[i][0] + "(" + types + ")";
+            var filter:FileFilter = new FileFilter(name, types);
+            filters.push( filter );
+        }
+        fileReferenceForUpload.browse(filters);
+    }
+    
+    private function fileSelectHandler(event:Event):void {
+        uploadButton.enabled = false;
+        
+        result.text = "アップロード中";
+        
+        var params:Object = {
+            'baseUrl' : Utils.getOwnBaseUrl()
+        };
+        
+        var sender:SharedDataSender = DodontoF_Main.getInstance().getGuiInputSender().getSender();
+        sender.sendFileUpload(fileReferenceForUpload, "uploadFile", params);
+        
+        fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
+    }
+    
+    public function uploadImageFileResult(dataEvent:DataEvent):void {
+        Log.loggingTuning("=>uploadImageFileResult(event:Event) Begin");
+        try {
+            uploadButton.enabled = true;
+            
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            Log.loggingTuning("jsonData", jsonData);
+            result.text = (jsonData.resultText);
+            
+            if( result.text == "OK") {
+                var fileName:String = jsonData.uploadFileInfo.fileName;
+                var url:String = jsonData.uploadFileInfo.fileUploadUrl;
+                DodontoF_Main.getInstance().getChatWindow().
+                    sendSystemMessage("がファイルをアップロードしました"
+                                      + "\r  ファイル名：" + fileName
+                                      + "\r  URL:" + url);
+                PopUpManager.removePopUp(this);
+            }
+        } catch(e:Error) {
+            Log.loggingError("exception : " + e);
+            result.text = "exception : " + e;
+        }
+        Log.loggingTuning("=>uploadImageFileResult(event:Event) End");
+    }
+        
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

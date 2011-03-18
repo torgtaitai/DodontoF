@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="210"
+   title="動画カットイン" 
+   showCloseButton="true"
+   >
+<!--
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:torgtaitai="*" 
+                alpha="1"
+                creationComplete="setup()"
+                >
+-->
+  <mx:HBox width="100%" height="100%">
+    
+    <mx:Box width="100%" height="100%">
+      <mx:HBox width="100%">
+        <mx:Button label="送信" click="sendCutIn()" />
+        <mx:Spacer width="100%" />
+        <mx:Button label="プレビュー(自分のみ)" click="previewCutIn()" />
+      </mx:HBox>
+      
+	  <mx:DataGrid id="cutInInfosList"
+                   width="100%"
+                   height="100%"
+                   dataProvider="{ CutInBase.cutInInfos }"
+                   editable="false"
+		           draggableColumns="false"
+                   doubleClickEnabled="true"
+                   doubleClick="sendCutIn()"
+                   >
+	    <mx:columns>
+		  <mx:DataGridColumn headerText="タイトル"
+                             dataField="message"
+                             textAlign="center"
+                             width="100"/>
+		  <mx:DataGridColumn headerText="画像／動画ファイル名"
+                             dataField="source"
+                             textAlign="center"
+                             width="100"/>
+		  <mx:DataGridColumn headerText="秒"
+                             dataField="displaySeconds"
+                             textAlign="center"
+                             width="20"/>
+	    </mx:columns>
+	  </mx:DataGrid>
+      
+      <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Button id="openEditBoxButton" label="編集＞＞"  click="openEditBox()" />
+        <mx:Spacer width="100%" />
+        <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
+      </mx:HBox>
+      
+      <mx:HBox id="editBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Button label="追加" click="addCutInEffect()" />
+        <mx:Button label="変更" click="changeCutInEffect()" />
+        <mx:Button label="削除"  click="removeCutInEffect()" />
+      </mx:HBox>
+    </mx:Box>
+    
+  </mx:HBox>
+  <mx:Script>
+    <![CDATA[
+    import mx.collections.ArrayCollection;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Alert;
+    import mx.events.CloseEvent;
+    
+    private var cutIn:CutInMovie = new CutInMovie();
+
+    override protected function setup():void {
+        Log.loggingTuning("=>setup() Begin");
+        try {
+            Resizer.addResize(this,new Point(100,50));
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+        Log.loggingTuning("=>setup() End");
+    }
+
+    private function getCutInInfoAndIndex():Array {
+        status = "";
+    
+        var index:int = cutInInfosList.selectedIndex;
+        if( index == -1 ) {
+            status = "カットインを選択してください。";
+            return [null, index];
+        }
+    
+        return [CutInBase.cutInInfos[index], index];
+    }
+
+    private function getCutInInfo():Object {
+        return getCutInInfoAndIndex()[0];
+    }
+
+    private function previewCutIn():void {
+        var cutInInfo:Object = getCutInInfo();
+        if( cutInInfo == null ) {
+            return;
+        }
+    
+        var commandText:String = cutIn.getCutInMessage(cutInInfo);
+        cutIn.effect(commandText);
+    }
+
+    private function sendCutIn():void {
+        var cutInInfo:Object = getCutInInfo();
+        if( cutInInfo == null ) {
+            return;
+        }
+    
+        var commandText:String = cutIn.getCutInMessage(cutInInfo);
+        ChatWindow.getInstance().sendChatMessage_public(commandText);
+    }
+
+    private function addCutInEffect():void {
+        status = "";
+    
+        DodontoF.popup(CutInMovieCreateWindow, true);
+    }
+
+    private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object, index:int):void {
+        var message:String = "";
+        message += "タイトル：" + cutInInfo.message + "\n";
+        message += "画像／動画ファイル名：" + cutInInfo.source + "\n";
+        message += "\n";
+        message += "上記のカットイン動画を削除してよろしいですか？";
+        Alert.show(message, "カットイン削除確認", 
+                   Alert.OK | Alert.CANCEL, null, 
+                   function(e : CloseEvent) : void {
+                       if (e.detail == Alert.OK) {
+                           removeCutInEffectAfterCheck(cutInInfo, index);
+                       }});
+    }
+
+    private function removeCutInEffect():void {
+        status = "";
+    
+        var results:Array = getCutInInfoAndIndex();
+        var cutInInfo:Object = results[0];
+        var index:int = results[1];
+    
+        if( cutInInfo == null ) {
+            return;
+        }
+    
+        if( cutInInfo.effectId == null ) {
+            return;
+        }
+    
+        checkQuestionForRemoveCutInfEffect(cutInInfo, index);
+    }
+
+    private function removeCutInEffectAfterCheck(cutInInfo:Object, index:int):void {
+        DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
+    
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.removeEffect(cutInInfo.effectId);
+    }
+
+
+    private function changeCutInEffect():void {
+        status = "";
+    
+        var results:Array = getCutInInfoAndIndex();
+        var cutInInfo:Object = results[0];
+        var index:int = results[1];
+    
+        if( cutInInfo == null ) {
+            return;
+        }
+    
+        if( cutInInfo.effectId == null ) {
+            return;
+        }
+    
+        var window:CutInMovieChangeWindow =
+        DodontoF.popup(CutInMovieChangeWindow, true) as CutInMovieChangeWindow;
+        window.init(cutInInfo, index);
+    }
+
+    private function openEditBox():void {
+        var editBoxHeigth:int = 30;
+    
+        if( editBox.height == 0 ) {
+            this.height += editBoxHeigth;
+            editBox.height = editBoxHeigth;
+            openEditBoxButton.label = "＜＜編集"
+                } else {
+            this.height -= editBoxHeigth;
+            editBox.height = 0;
+            openEditBoxButton.label = "編集＞＞"
+        }
+    }
+
+    ]]>
+  </mx:Script>
+
+<!-- </mx:Box> -->
+</torgtaitai:CommonPopupWindow>

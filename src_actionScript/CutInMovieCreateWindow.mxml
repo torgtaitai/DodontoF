@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="690"
+   height="500"
+   title="カットイン作成" 
+   showCloseButton="true"
+   >
+<!--    width="430"
+   height="300"
+-->
+  
+  <mx:Box width="100%" height="100%">
+    
+    <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
+    
+    <!--<mx:HBox height="170" width="100%"> -->
+    <mx:HBox height="200" width="100%">
+      <mx:Form height="100%" width="50%">
+	    <mx:FormItem label="カットインタイトル:">
+          <mx:TextInput id="message" width="200" text="" />
+        </mx:FormItem>
+        
+	    <mx:FormItem label="画像／動画ファイル:" >
+          <mx:TextInput id="imageSource" width="200" text=""  change="printPreview()"
+                        toolTip="指定可能なファイル形式は jpg,gif,png,swf,flv&#13;そしてYoutubeへのURLです。"/>
+        </mx:FormItem>
+        
+	    <mx:FormItem label="表示時間[秒]" >
+          <mx:NumericStepper id="displaySeconds" minimum="0" maximum="300" value="0" stepSize="0.1"
+                             toolTip="0で無限時間（ウィンドウの自動閉じ無し）&#13;flvなら再生が完了した時点でも閉じます" />
+        </mx:FormItem>
+	    <mx:Label text="0で無限。flvなら再生が完了した時点でも閉じます" />
+        
+	    <mx:FormItem label="音声ボリューム" >
+          <mx:HSlider id="volume"
+                      width="150"
+                      liveDragging="true"
+                      showTrackHighlight="true"
+                      maximum="1"
+                      minimum="0"
+                      value="0.1"
+                      snapInterval="0.01"
+                      />
+        </mx:FormItem>
+      </mx:Form>
+      
+      <mx:Box height="100%" width="50%">
+        
+	    <mx:FormItem label="BGM(空欄ならBGM無し):" >
+          <mx:TextInput id="soundSourceEdit" width="150" text="" />
+        </mx:FormItem>
+        
+	    <mx:FormItem label="表示位置:" >
+          <mx:ComboBox id="positionCoboBox"  fontWeight="nomal" editable="false" toolTip="カットインの表示位置を指定します。">
+            <mx:Object label="中央"     data="center" />
+            <mx:Object label="上部中央" data="up" />
+            <mx:Object label="上部右"   data="up,right" />
+            <mx:Object label="上部左"   data="up,left" />
+            <mx:Object label="中央右"   data="right" />
+            <mx:Object label="中央左"   data="left" />
+          </mx:ComboBox>
+        </mx:FormItem>
+        
+        <mx:Spacer height="10" width="100%" />
+        
+        <mx:HBox width="100%">
+	      <mx:Label text="横:" />
+          <mx:NumericStepper id="imageWidth" minimum="0" maximum="1000" value="0" stepSize="1" />
+	      <mx:Label text="縦:" />
+          <mx:NumericStepper id="imageHeight" minimum="0" maximum="1000" value="0" stepSize="1" />
+	      <mx:Label text="（0なら自動設定）" />
+        </mx:HBox>
+        
+        <mx:Spacer height="10" width="100%" />
+        
+        <mx:Button label="プレビュー(自分のみ)" click="previewCutIn()" />
+        
+      </mx:Box>
+    </mx:HBox>
+    
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="追加" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+    
+    
+  </mx:Box>
+  <mx:Script>
+    <![CDATA[
+    import mx.controls.Alert;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Image;
+    import mx.core.UIComponent;
+    
+    private var cutIn:CutInMovie = new CutInMovie();
+    private var previewImage:Image = new Image();
+    private var previewBox:Box = new Box();
+    private var previewImageInfo:TextInput = new TextInput();
+    
+    private function initPreview():void {
+        previewBox.setStyle("paddingBottom", 0);
+        previewBox.setStyle("paddingTop", 0);
+        previewBox.setStyle("horizontalGap", "0");
+        previewBox.setStyle("verticalGap", "0");
+        
+        previewImageInfo.editable = false;
+        previewImageInfo.width = 200;
+        previewImageInfo.height = 0;
+        previewImageInfo.visible = false;
+        previewImageInfo.text = "動画はここに表示できません。\n「プレビュー」ボタンから確認してください。";
+        previewBox.addChild(previewImageInfo);
+        
+        previewImage.height = 200;
+        previewImage.width = 200;
+        previewImage.visible = true;
+        previewBox.addChild(previewImage);
+    }
+    
+    override protected function setup():void {
+        initPreview();
+        imageSelecter.addPreview(previewBox, 200);
+        imageSelecter.setMoviewFileSelectable(true);
+        
+        imageSource.enabled = false;
+        imageSource.text = loadingMessage;
+        
+        imageSelecter.setImageClickEventFunction(imageClickEvent);
+        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+        imageSelecter.setDefaultTags( getDefaultTags() );
+        imageSelecter.initImage( isLoadInitImageList() );
+    }
+    
+    
+    protected function getDefaultTags():Array {
+        return [ImageTag.getNoneTag(), ImageTag.getAllTag()];
+    }
+    
+    protected function isLoadInitImageList():Boolean {
+        return false;
+    }
+    
+    public function imageClickEvent(imageName:String):void {
+        imageSource.text = imageSelecter.getImageUrlChanger().getShort( imageName );
+        printPreview();
+    }
+    
+    private var loadingMessage:String = "ロード中・・・";
+    
+    public function imageLoadComplete():void {
+        if( imageSource.text == loadingMessage ) {
+            imageSource.text =  "";
+        }
+        
+        imageSource.text = imageSelecter.getImageUrlChanger().getShort( imageSource.text );
+        imageSource.enabled = true;
+    }
+    
+    protected function printPreview():void {
+        Log.logging("printPreview imageSource.text", imageSource.text);
+        
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
+        
+        if( CutInMovie.isMovie(imageSource.text) ) {
+            imageUrl = Config.getInstance().getFileImageUrl();
+            /*
+            previewImageInfo.visible = true;
+            previewImageInfo.height = 200;
+            previewImage.visible = false;
+            previewImage.height = 0;
+            return;
+            */
+        }
+        
+        previewImageInfo.visible = false;
+        previewImageInfo.height = 0;
+        previewImage.visible = true;
+        previewImage.height = 200;
+        
+        Log.logging("imageUrl", imageUrl);
+        previewImage.source = imageUrl;
+    }
+    
+    protected function getCommandParams():Object {
+        if( message.text == "" ) {
+            Alert.show("タイトルを入力してください");
+            return null;
+        }
+        if( imageSource.text == "" ) {
+            Alert.show("画像／動画ファイル名を入力してください\n");
+            return null;
+        }
+        
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
+        var soundSource:String = soundSourceEdit.text;
+        var position:String = positionCoboBox.selectedItem.data;
+        
+        var params:Object = {
+            "message": message.text,
+            "source": imageUrl,
+            "soundSource": soundSource,
+            "volume": volume.value,
+            "width": imageWidth.value,
+            "height": imageHeight.value,
+            "position" : position,
+            "displaySeconds": displaySeconds.value};
+    
+        getCommandParamsExt(params);
+    
+        return params;
+    }
+
+    protected function getCommandParamsExt(params:Object):void {
+    }
+    
+    
+    protected function execute():void {
+        var params:Object = getCommandParams();
+        if( params == null ) {
+            return;
+        }
+        
+        CutInBase.cutInInfos.addItem(params);
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.addEffect(params);
+        
+        PopUpManager.removePopUp(this)
+    }
+
+    private function previewCutIn():void {
+
+        var params:Object = getCommandParams();
+        if( params == null ) {
+            return;
+        }
+        
+        var commandText:String = cutIn.getCutInMessage(params);
+        cutIn.effect(commandText);
+    }
+
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

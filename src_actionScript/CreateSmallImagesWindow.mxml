@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="600"
+   height="450"
+   title="ログイン" 
+   >
+  
+  <mx:Box width="100%" height="100%" >
+      <mx:TextArea id="message" htmlText="ロード中・・・" width="100%" height="100%" />
+  </mx:Box>
+
+
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="getImageButton" label="データ取得" click="collectSmallImage()" enabled="false" />
+    <mx:Button id="uploadButton" label="アップロード" click="upload()" enabled="false" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import flash.events.Event;
+    import flash.events.IOErrorEvent;
+    
+    override protected function setup():void {
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.getSender().requestImageTagInfosAndImageList(this.requestImageTagInfosAndImageListResult);
+    }
+    
+    private function collectSmallImage():void {
+        getImageButton.enabled = false;
+        
+        message.text += "進行度を示す . が止まったら「アップロード」ボタンを押してください。 . 一つが１ファイルです。\n";
+        
+        for(var i:int = 0 ; i < noSmallImageUrlList.length ; i++) {
+            var imageUrl:String = noSmallImageUrlList[i];
+            
+            var loader:Loader = new Loader();
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, getCompleteHandlerOnImageLoader(imageUrl));
+            loader.addEventListener(IOErrorEvent.IO_ERROR, countLoadImage);
+            loader.addEventListener(Event.UNLOAD, countLoadImage);
+            var request:URLRequest = new URLRequest(imageUrl);
+            loader.load( request );
+        }
+    }
+    
+    private function countLoadImage(event:Event = null):void {
+        Log.logging("uploadInfos.length", uploadInfos.length);
+        uploadButton.enabled = true;
+        if( event == null ) {
+            message.text += ".";
+        } else {
+            message.text += "x";
+        }
+    }
+    
+    private function getCompleteHandlerOnImageLoader(imageFileName:String):Function {
+        return function(event:Event):void {
+            Log.logging("getCompleteHandlerOnImageLoader event begin");
+            
+            var loaderInfo:LoaderInfo = event.currentTarget as LoaderInfo;
+            var imageLoader:Loader = loaderInfo.loader as Loader;
+            
+            var smallImageData:ByteArray = getSmallImageByteArray(imageLoader);
+            imageFileName = Config.getInstance().getOriginalUrlString(imageFileName);
+            var tagInfo:Object = tagInfos[imageFileName];
+            var info:Array = [imageFileName, smallImageData, tagInfo];
+            uploadInfos.push( info );
+            
+            countLoadImage();
+            Log.logging("getCompleteHandlerOnImageLoader event end");
+        }
+    }
+    
+    private var noSmallImageUrlList:Array = new Array();
+    
+    public function requestImageTagInfosAndImageListResult(event:Event):void {
+        var result:Object = SharedDataReceiver.getJsonDataFromResultEvent( event );
+        
+        tagInfos = result.tagInfos;
+        
+        noSmallImageUrlList = new Array();
+        message.text = "";
+        
+        var allUrlList:Object = result.imageList;
+        
+        for(var i:int = 0 ; i < allUrlList.length ; i++) {
+            var imageUrl:String = allUrlList[i];
+            imageUrl = Config.getInstance().getUrlString(imageUrl);
+            if( ! hasSmallImage(imageUrl) ) {
+                if( ! Utils.isMovie(imageUrl) ) {
+                    //message.text += imageUrl + "\n";
+                    noSmallImageUrlList.push(imageUrl);
+                    getImageButton.enabled = true;
+                }
+            }
+        }
+        
+        message.text += "サムネイル作成対象件数（予定） : " + noSmallImageUrlList.length + "\n\n";
+        if( noSmallImageUrlList.length == 0 ) {
+            getImageButton.enabled = false;
+            message.text += "全画像のサムネイル作成が完了しました。お疲れ様でした。\n";
+            return;
+        }
+        message.text += "この件数が0件なら全て完了です。\n0でなくても何らかの理由で実施できない場合もあります。\n大体0件になればOKと考えておいてください。\n\n";
+        message.text += "まずは「データ取得」ボタンを押してください。処理が重い場合がありますのでご注意ください。\n";
+    }
+    
+    private var uploadInfos:Array = new Array();
+    
+    private function upload():void {
+        uploadButton.enabled = false;
+        
+        message.text += "\nアップロード中。　上記と同様に進行度を . で示しています。\n通常は上記と同じ数の.が表示されます。\n進行が停止したら処理完了です。お疲れ様でした。\n";
+        
+        while( uploadInfos.length > 0 ) {
+            var info:Array = uploadInfos.shift() as Array;
+            uploadLoop(info);
+        }
+    }
+    
+    private function uploadLoop(info:Array):void {
+        Log.logging("upload begin");
+        
+        var imageFileName:String = info.shift() as String;
+        var smallImageData:ByteArray = info.shift() as ByteArray;
+        var tagInfo:Object = info.shift() as Object;
+        
+        uploadSmallImage(imageFileName, smallImageData, tagInfo);
+        
+        Log.logging("upload end");
+    }
+    
+    private function uploadSmallImage(imageFileName:String, 
+                                      smallImageData:ByteArray, tagInfo:Object):void {
+        Log.logging("ImageUploadWindow.uploadSmallImage begin");
+        
+        Log.logging("Utils.getEncodedJsonString(tagInfo)", Utils.getEncodedJsonString(tagInfo));
+        
+        var params:Object = [["string", "imageFileName", imageFileName],
+                             ["string", "tagInfo", Utils.getEncodedJsonString(tagInfo)],
+                             //["binary", "imageData", imageData, "image/png", imageFileName],
+                             ["binary", "smallImageData", smallImageData, "image/png", imageFileName + ".png"]];
+        
+        Log.logging( "uploadSmallImage passed." );
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.uploadImageData(params, uploadImageFileResult, ioErrorHandler);
+    }
+    
+    private function ioErrorHandler(event:Event):void {
+        message.text += "x";
+    }
+    
+    public function uploadImageFileResult(event:Event):void {
+        try {
+            //var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            message.text += ".";
+        } catch(e:Error) {
+            Log.loggingException("uploadImageFileResult", e);
+        }
+    }
+        
+    private function getSmallImageByteArray(imageLoader:Loader):ByteArray {
+        var rates:Object = ImageUploadWindow.getSmallImageRates(imageLoader);
+        imageLoader.width *= rates.widthRate;
+        imageLoader.height *= rates.heightRate;
+        
+        var bitmap:Bitmap = new Bitmap();
+        var bitmapData:BitmapData = new BitmapData(imageLoader.width, imageLoader.height);
+        var matrix:Matrix = new Matrix();
+        matrix.scale(rates.widthRate, rates.heightRate);
+        bitmap.bitmapData = bitmapData;
+        bitmapData.draw(imageLoader, matrix);
+        
+        return getSmallImageData(bitmap);
+    }
+    
+    private function getSmallImageData(bitmap:Bitmap):ByteArray {
+        var pngEncoder:PNGEncoder = new PNGEncoder();
+        var bytes:ByteArray = pngEncoder.encode(bitmap.bitmapData);
+        
+        return bytes;
+    }
+    
+    
+    private var tagInfos:Object = new Object();
+    
+    private function hasSmallImage(imageUrl:String):Boolean {
+        imageUrl = Config.getInstance().getOriginalUrlString(imageUrl);
+        
+        if( tagInfos == null ) {
+            return false;
+        }
+        
+        var tagInfo:Object = tagInfos[imageUrl];
+        if( tagInfo == null ) {
+            return false;
+        }
+        
+        var smallImageUrl:String = tagInfo["smallImage"];
+        if( smallImageUrl == null ) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

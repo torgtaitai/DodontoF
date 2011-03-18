@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="チャットパレット"
+   width="220" height="220"
+   visible="false"
+   showCloseButton="true"
+   rollOver="changeLogVisible(event, true)"
+   rollOut="changeLogVisible(event, false)"
+
+   >
+  
+  <mx:Box id="chatPalet" width="100%" height="100%">
+    <mx:TabNavigator id="tabSpace" width="100%" height="100%" >
+    </mx:TabNavigator>
+    
+    <mx:HBox width="100%" height="20">
+      <mx:Button label="編集" click="edit()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Spacer width="20"/>
+      <mx:Button label="セーブ" click="save()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="ロード" click="load()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Spacer width="20"/>
+      <mx:Button id="addPaletTabButton" label="タブ追加" click="addPaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button id="deletePaletTabButton" label="タブ削除" click="deletePaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+    </mx:HBox>
+    
+  </mx:Box>
+  
+  <mx:Script>
+
+    <![CDATA[
+             
+    import mx.events.FlexEvent;
+    import mx.controls.Alert;
+    import mx.controls.ColorPicker;
+    import mx.core.Application;
+    import flash.geom.Point;
+    import mx.controls.TextInput;
+    import mx.containers.HBox;
+    import mx.controls.ComboBox;
+    import mx.controls.Button;
+    import mx.controls.List;
+    import mx.controls.Label;
+    import mx.controls.Text;
+    import mx.events.ColorPickerEvent;
+    
+    private var defaultTabCount:int = 5;
+    private var tabEditors:Array = new Array();
+    private var tabs:Array = new Array();
+    
+    public function setInitPosition():void {
+        if( loadPosition() ) {
+            return;
+        }
+        
+        var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
+        var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
+        
+        this.x = 100;
+        this.y = 100;
+        this.width = 350;
+    }
+    
+    override public function getSaveInfoKeyName():String {
+        return "ChatPalet";
+    }
+    
+    override public function setup():void {
+        setInitPosition();
+        initChatPalet();
+    }
+    
+    private function initChatPalet():void {
+        chatPalet.verticalScrollPolicy = "off";//ScrollPolicy.OFF;
+        tabEditors = new Array();
+        
+        for(var i:int = 0; i < defaultTabCount ; i++) {
+            addPaletTab();
+        }
+        
+        tabEditors[0].list.dataProvider = ["2d6+1 ダイスボット登録例"];
+    }
+    
+    private function addPaletTab():void {
+        addPaletTabButton.enabled = false;
+        
+        
+        var tab:Box = tabs[tabSpace.numChildren] as Box;
+        if( tab == null ) {
+            tab = new Box();
+            tab.percentWidth=100;
+            tab.percentHeight=100;
+            
+            var tabIndex:int = (tabSpace.numChildren + 1);
+            initAddedTab(tab, tabIndex);
+            
+            tabs.push( tab );
+        }
+        
+        tabSpace.addChild(tab);
+        
+        addPaletTabButton.enabled = true;
+    }
+    
+    private function deletePaletTab(isForce:Boolean = false):void {
+        if( tabSpace.numChildren <= 0 ) {
+            return;
+        }
+        
+        deletePaletTabButton.enabled = false;
+        
+        var tab:Box = tabs[ tabSpace.numChildren - 1];
+        tabSpace.removeChild(tab);
+        
+        deletePaletTabButton.enabled = true;
+    }
+    
+    private function createInputList(input:TextInput, name:TextInput,
+                                     state:ComboBox, colorPicker:ColorPicker,
+                                     changeNameFunction:Function):List {
+        
+        var inputList:List = new List();
+        inputList.percentWidth = 100;
+        inputList.percentHeight = 100;
+        
+        inputList.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+                var text:String = inputList.selectedItem as String;
+                input.text = text;
+            });
+        
+        inputList.doubleClickEnabled = true;
+        inputList.addEventListener(MouseEvent.DOUBLE_CLICK, function(event:Event):void {
+                var text:String = inputList.selectedItem as String;
+                
+                var sendFunc:Function = getSendChatMessageFunction(input, name, state, colorPicker);
+                sendFunc( null );
+            });
+        
+        var tabInfo:Object = {
+            changeNameFunction : changeNameFunction,
+            name : name,
+            input : input,
+            colorPicker : colorPicker,
+            list : inputList};
+        tabEditors.push(tabInfo);
+                    
+        
+        return inputList;
+    }
+    
+    private function createCharacterNameBox(name:TextInput, state:ComboBox, colorPicker:ColorPicker):Box {
+        var box:HBox = new HBox();
+        box.percentWidth = 100;
+        
+        var nameLabel:Label = new Label();
+        nameLabel.text = "名前：";
+        
+        box.addChild(nameLabel);
+        box.addChild(name);
+        box.addChild(state);
+        box.addChild(colorPicker);
+        
+        colorPicker.toolTip = "指定文字色が白（FFFFFF）の場合はチャットウィンドウの文字色で発言します。";
+        box.toolTip = "名前が空欄の場合、チャットウィンドウの名前で発言します";
+        
+        return box;
+    }
+    
+    private function createSendBox(input:TextInput, name:TextInput, state:ComboBox, colorPicker:ColorPicker):Box {
+        input.percentWidth = 100;
+        input.addEventListener(FlexEvent.ENTER, getSendChatMessageFunction(input, name, state, colorPicker));
+        
+        var button:Button = new Button();
+        button.label = "送信";
+        button.setStyle("paddingLeft", 0);
+        button.setStyle("paddingRight", 0);
+        button.addEventListener(MouseEvent.CLICK, getSendChatMessageFunction(input, name, state, colorPicker));
+        
+        var box:HBox = new HBox();
+        box.percentWidth = 100;
+        box.addChild(input);
+        box.addChild(button);
+
+        return box;
+    }
+    
+    private function initNameTextInput(name:TextInput, state:ComboBox, tab:Box, tabIndex:int):Function {
+        name.width = 70;
+        
+        var changeNameFunction:Function = getChangeNameFunction(name, state, tab, tabIndex);
+        name.addEventListener(Event.CHANGE, changeNameFunction);
+        
+        changeNameFunction();
+        
+        return changeNameFunction;
+    }
+    
+    private function getChangeNameFunction(name:TextInput, state:ComboBox, tab:Box, tabIndex:int):Function {
+        return function(e:Event = null):void {
+            var stateList:Array = ChatWindow.getInstance().getStandingGraphics().findAllStates(name.text);
+            
+            if( stateList.length == 0 ) {
+                state.visible = false;
+                state.width = 0;
+            } else {
+                state.visible = true;
+                state.explicitWidth = NaN;
+            }
+            
+            var dataProvider:Array = [];
+            for(var i:int = 0 ; i < stateList.length ; i++) {
+                var option:Object = {
+                    data : stateList[i],
+                    label : stateList[i]};
+                dataProvider.push(option);
+            }
+            
+            state.dataProvider = dataProvider;
+            
+            tab.label = name.text;
+            if( tab.label == "" ) {
+                tab.label = "" + tabIndex;
+            }
+        }
+    };
+    
+    private function initAddedTab(tab:Box, tabIndex:int):void {
+        var name:TextInput = new TextInput();
+        var state:ComboBox = new ComboBox();
+        
+        var colorPicker:ColorPicker = new ColorPicker();
+        colorPicker.selectedItem = 0xFFFFFF;
+        
+        var changeNameFunction:Function = initNameTextInput(name, state, tab, tabIndex);
+        
+        var nameBox:Box = createCharacterNameBox(name, state, colorPicker);
+        
+        var input:TextInput = new TextInput();
+        var sendBox:Box = createSendBox(input, name, state, colorPicker);
+        
+        var inputList:List = createInputList(input, name, state, colorPicker, changeNameFunction);
+        
+        tab.addChild(nameBox);
+        tab.addChild(sendBox);
+        tab.addChild(inputList);
+        
+        tab.addEventListener(KeyboardEvent.KEY_DOWN, keyDownInChatMessage);
+        
+        
+        colorPicker.addEventListener(ColorPickerEvent.CHANGE, function(event:ColorPickerEvent):void {
+                inputList.setStyle('color', event.color);
+                input.setStyle('color', event.color);
+            });
+    }
+    
+    public function keyDownInChatMessage(event:KeyboardEvent):void {
+        
+        if( event.shiftKey && event.ctrlKey ) {
+            if( ChatWindow.getInstance().shiftChatChannel(event) ) {
+                return;
+            }
+        }
+        
+        if( event.ctrlKey ) {
+            if( shiftTab(event) ) {
+                return;
+            }
+        }
+    }
+    
+    private function shiftTab(event:KeyboardEvent):Boolean {
+        var result:Boolean = false;
+        
+        Utils.shiftTabFocus(tabSpace, event, function(index:int):void {
+                var input:TextInput = tabEditors[index].input as TextInput;
+                focusManager.setFocus(input);
+                result = true;
+            });
+        
+        return result;
+    }
+    
+    private function getSendChatMessageFunction(input:TextInput, name:TextInput, state:ComboBox,
+                                                colorPicker:ColorPicker):Function {
+        var resultFunction:Function = function(event:Event):void {
+            
+            var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+            var data:ChatSendData = new ChatSendData(chatWindow.getSelectedChatChannleIndex(),
+                                                     input.text, name.text, state.text);
+            data.setColor(colorPicker.selectedColor);
+            
+            chatWindow.sendChatMessageByChatSendData(data);
+            input.callLater(function():void{input.text = ""});
+        };
+        
+        return resultFunction;
+    }
+    
+    public function edit():void {
+        var inputList:List = tabEditors[tabSpace.selectedIndex].list as List;
+        
+        var array:Array = []
+        if( inputList.dataProvider != null ) {
+            array = inputList.dataProvider.source;
+        }
+        
+        var window:EditChatPaletteWindow = DodontoF.popup(EditChatPaletteWindow, true) as EditChatPaletteWindow;
+        window.initParams(array, function(lines:Array):void {
+                inputList.dataProvider = lines;
+            });
+    }
+    
+    private var typeName:String = "ChatPalette2";
+    
+    private var saveDataExt:String = "cpd";
+    private var fileReferenceForSave:FileReference = new FileReference();
+    private var fileReferenceForLoad:FileReference = new FileReference();
+    
+    public function save():void {
+        var saveData:Object = new Object();
+        
+        saveData.typeName = typeName;
+        saveData.tabInfos = [];
+        
+        for(var i:int = 0 ; i < tabSpace.numChildren ; i++) {
+            var lines:Array = [];
+            var inputList:List = tabEditors[i].list as List;
+            if( inputList.dataProvider != null ) {
+                lines = inputList.dataProvider.source;
+            }
+            
+            var tabInfo:Object = new Object();
+            tabInfo.lines = lines;
+            tabInfo.name = tabEditors[i].name.text;
+            tabInfo.color = tabEditors[i].colorPicker.selectedColor;
+            saveData.tabInfos.push(tabInfo);
+        }
+        
+        var jsonString:String = Utils.getJsonString(saveData);
+        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+    }
+    
+    public function load():void {
+        fileReferenceForLoad= new FileReference();
+        fileReferenceForLoad.addEventListener(Event.SELECT, loadSelect);
+        
+        var filters:Array = new Array();
+        filters.push(new FileFilter("チャットパレットセーブデータ(*." + saveDataExt + ")", "*." + saveDataExt));
+        
+        fileReferenceForLoad.browse(filters);
+    }
+    
+    public function loadSelect(e:Event):void {
+        fileReferenceForLoad.addEventListener(Event.COMPLETE, loadComplete);
+        fileReferenceForLoad.load();
+    }
+    
+    public function loadComplete(e:Event):void {
+        var data:ByteArray = fileReferenceForLoad.data as ByteArray;
+        var dataString:String = data.toString();
+        
+        var saveData:Object = Utils.getJsonDataFromString(dataString) as Object;
+        
+        while( tabSpace.numChildren > 0 ) {
+            var isForce:Boolean = true;
+            deletePaletTab(isForce);
+        }
+        
+        if( saveData.typeName != typeName ) {
+            loadOnChatPalette1(saveData);
+            return;
+        }
+        
+        var tabInfos:Object = saveData.tabInfos;
+        
+        for(var i:int = 0 ; i < tabInfos.length ; i++) {
+            addPaletTab();
+            
+            var tabInfo:Object = tabInfos[i];
+            tabEditors[i].list.dataProvider = tabInfo.lines;
+            tabEditors[i].name.text = tabInfo.name;
+            
+            if( tabInfo.color != null ) {
+                tabEditors[i].colorPicker.selectedColor = tabInfo.color;
+            }
+            
+            tabEditors[i].changeNameFunction();
+        }
+    }
+    
+    private function loadOnChatPalette1(saveData:Object):void {
+        var chatPaletteStrings:Array = saveData as Array;
+        var paletteCountParTab:int = ChatPalette.getPaletteCountParTab();
+        
+        var tabCount:int = (chatPaletteStrings.length / paletteCountParTab);
+        
+        var lines:Array = [];
+        for(var i:int = 0 ; i < tabCount ; i++) {
+            lines = [];
+            addPaletTab();
+            
+            for(var j:int = 0 ; j < paletteCountParTab ; j++) {
+                var line:String = chatPaletteStrings[ i * paletteCountParTab + j ];
+                lines.push( line );
+            }
+            
+            var inputList:List = tabEditors[i].list as List;
+            inputList.dataProvider = lines;
+        }
+    }
+    
+    private function changeLogVisible(event:MouseEvent, visible:Boolean):void {
+        DodontoF_Main.getInstance().getChatWindow().changeLogVisible(event, visible);
+    }
+    
+             ]]>
+      
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

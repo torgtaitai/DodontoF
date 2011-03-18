@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="250"
+   y="50"
+   width="390"
+   height="200"
+   title="マーカー作成" 
+   
+   showCloseButton="true"
+   >
+  
+  <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Box height="100%" width="230" verticalAlign="middle">
+
+      <mx:HBox width="100%" height="25"
+               verticalGap="0"
+               horizontalGap="0"
+             >
+        
+	    <mx:Label text="高さ:" />
+        <mx:NumericStepper id="mapMarkerHeigth" minimum="1" maximum="100" value="1" change="changeView()" />
+        
+        <mx:Spacer width="10" height="10"/>
+        
+	    <mx:Label text="幅:" />
+        <mx:NumericStepper id="mapMarkerWidth" minimum="1" maximum="100" value="1" change="changeView()" />
+      </mx:HBox>
+      
+      
+      <mx:HBox width="100%" height="25"
+               verticalGap="0"
+               horizontalGap="0"
+               >
+        
+        <mx:Label text="背景色:" />
+        <mx:ColorPicker id="colorPicker" showTextField="true" selectedColor="0xBBBB00"
+                        change="changeView()" />
+        
+        <mx:Spacer width="10" height="10"/>
+        
+        <mx:CheckBox id="isPaint" label="塗りつぶす" selected="false" height="100%"
+                     change="changeView()" />
+        
+        <mx:CheckBox id="isMany" label="複数作成" selected="false" height="100%"
+                     visible="{isCreate}" />
+      </mx:HBox>
+      
+      <mx:Label text="メッセージ:" />
+      
+      <mx:TextArea id="message" text="" width="100%" height="100%" change="clearStatus()"/>
+      
+        <mx:HBox id="changeExecuteSpace" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{! isCreate}" >
+        <mx:Button id="executeButton" label="追加" click="execute()" />
+        <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      </mx:HBox>
+      
+    </mx:Box>
+    
+    <mx:Box height="100%" width="100%" horizontalAlign="center" verticalAlign="middle" >
+      <mx:Spacer id="view" height="100%" width="100%" />
+    </mx:Box>
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+
+    [Bindable]
+    protected var isCreate:Boolean = true;
+    
+    override protected function setup():void {
+        init();
+        changeView();
+        setDragEvent();
+    }
+    
+    private function changeView():void {
+        var maxRate:Number = 2.5;
+        changeViewLocal(isPaint.selected, mapMarkerHeigth.value, mapMarkerWidth.value,
+                        colorPicker.selectedColor, maxRate);
+    }
+    
+    private function changeViewLocal(isFill:Boolean , height:int, width:int,
+                                     color:uint, maxRate:Number):void {
+        var viewSquareLength:int = Map.getSquareLength();
+        
+        var maxSize:int = height;
+        if( maxSize < width ) {
+            maxSize = width;
+        }
+        
+        view.graphics.clear();
+        view.graphics.lineStyle(5, color);
+        
+        var fillColor:uint = (isFill ? color : 0xFFFFFF);
+        view.graphics.beginFill(fillColor, 1.0);
+        
+        var rate:Number = maxSize;
+        if( rate > maxRate ) {
+            rate = maxRate;
+        }
+        
+        view.graphics.drawRect(0,
+                               5,
+                               viewSquareLength * width / maxSize * rate,
+                               viewSquareLength * height / maxSize * rate);
+        
+        view.graphics.endFill();
+    }
+    
+    protected function setDragEvent():void {
+        view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                view.startDrag();
+                event.stopPropagation();
+                this.status = "";
+            });
+        
+        view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                view.stopDrag();
+            
+                var map:Map = DodontoF_Main.getInstance().getMap();
+                var globalPoint:Point = localToGlobal( new Point(view.x + 250 , view.y + 25) );
+                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+                
+                var dropMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+                
+                Log.logging("dropMapPoint.x", dropMapPoint.x);
+                Log.logging("dropMapPoint.y", dropMapPoint.y);
+                
+                if( (dropMapPoint.x >= 0) && (dropMapPoint.y >= 0) ) {
+                    addMapMarker(dropMapPoint.x, dropMapPoint.y);
+                }
+                
+                view.x = 0;
+                view.y = 0;
+            });
+    }
+    
+    
+    protected function init():void {
+    }
+    
+    protected function clearStatus():void {
+        this.status = "";
+    }
+    
+    public function execute():void {
+        addMapMarker(10, 10);
+    }
+    
+    private function addMapMarker(x:int, y:int):void {
+        try{
+            clearStatus();
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.addMapMarker(message.text, colorPicker.selectedColor, 
+                                        isPaint.selected,
+                                        mapMarkerWidth.value, mapMarkerHeigth.value, 
+                                        x, y);
+            
+            if( ! isMany.selected ) {
+                PopUpManager.removePopUp(this);
+            }
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

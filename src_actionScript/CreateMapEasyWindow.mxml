@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   x="0"
+   y="0"
+   width="610"
+   height="400"
+   title="簡易マップ作成" 
+   showCloseButton="true"
+   >
+  
+  <mx:HBox width="100%" height="100%">
+    <mx:Box width="100" height="100%">
+      <mx:HBox width="100%">
+	    <mx:Label text="色:" />
+        <mx:ColorPicker id="mapMaskColorPicker" showTextField="true" selectedColor="0x000000" />
+      </mx:HBox>
+      
+      <mx:Label text="ペン太さ:" />
+      <mx:NumericStepper id="paintSize" minimum="1" maximum="99" value="1" stepSize="1" change="changePaintSize()"/>
+      
+      <mx:RadioButton groupName="paindMode" id="paint"   label="鉛筆"     click="selectPaintMode()" selected="true" />
+      <mx:RadioButton groupName="paindMode" id="eraser"  label="消しゴム" click="selectPaintMode()" />
+      <mx:RadioButton groupName="paindMode" id="syringe" label="スポイト" click="selectPaintMode()" />
+      
+      <mx:Button label="決定" click="sendMapDraw()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:Box>
+    <mx:Box width="100%" height="100%">
+      <torgtaitai:PaintablePreviewLoader id="previewLoader" width="100%" height="100%" />
+    </mx:Box>
+  </mx:HBox>
+  
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Alert;
+    import com.adobe.serialization.json.JSON;
+    
+    private var thisObj:CreateMapEasyWindow;
+    
+    override protected function setup():void {
+        thisObj = this;
+        
+        Resizer.addResize(this, new Point(100,50));
+        selectPaintMode();
+        
+        resizeWindow();
+        setResizeEventFunction(resizeWindow);
+        
+        previewLoader.setSyringeAfter( function():void { thisObj.paint.selected = true} );
+    }
+    
+    public function resizeWindow():void {
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        var mapWidth:int = map.getWidth();
+        var mapHeight:int = map.getHeight();
+        var imageUrl:String = map.getImageUrl();
+        var mapMarks:Array = map.getMarks();
+        
+        if( imageUrl == "" ) {
+            imageUrl = "image/whiteBack.png";
+        }
+        
+        var widthCount:int = (this.width - 200) / Map.getSquareLength() + 1;
+        var heightCount:int = (this.height - 50) / Map.getSquareLength() + 1;
+        var count:int = Math.max(widthCount, heightCount);
+        
+        previewLoader.setLoadImageCompleate( function():void {
+                thisObj.previewLoader.clearSquares();
+                thisObj.previewLoader.drawGrid();
+                thisObj.previewLoader.drawSquare( mapMarks, thisObj.getColor, thisObj.setColor );
+            });
+        
+        previewLoader.loadImageWidthHeight(imageUrl, mapWidth, mapHeight, widthCount);//count);
+    }
+
+    private function getColor():int {
+        return parseInt("0x" + mapMaskColorPicker.selectedColor.toString(16));
+    }
+
+    private function setColor(color_:int):void {
+        Log.logging("CreateMapEasyWindow.setClolr=>color", color_);
+        mapMaskColorPicker.selectedColor = color_;
+    }
+    
+    
+    private function changePaintSize():void {
+        previewLoader.setPaintSize(paintSize.value);
+    }
+    
+    private function selectPaintMode():void {
+        var isErase:Boolean = eraser.selected;
+        previewLoader.setEraser(isErase);
+        mapMaskColorPicker.enabled = ( ! isErase);
+        
+        var isSyringe:Boolean = syringe.selected;
+        previewLoader.setSyringe(isSyringe);
+        
+        paintSize.enabled = ( ! isSyringe);
+    }
+
+    private function sendMapDraw():void {
+        var mapMarks:Array = previewLoader.getResult();
+        //    logAny(mapMarks);
+    
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.changeMap(map.getImageUrl(), map.getWidth(), map.getHeight(), map.getGridColor(), mapMarks);
+    
+        PopUpManager.removePopUp(this);
+    }
+
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

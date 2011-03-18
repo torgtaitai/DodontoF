@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="200"
+   title="目覚ましアラーム送信" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Form>
+	  <mx:FormItem label="送信先:">
+        <mx:ComboBox id="userNameComboBox" width="100%" dataProvider="{userNameComboBoxArray}" />
+      </mx:FormItem>
+	  <mx:FormItem label="効果音:">
+        <mx:TextInput id="soundFileNameInput" width="100%" text="./sound/alarm.mp3"/>
+	  </mx:FormItem>
+	  <mx:FormItem label="発動は" >
+        <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+          <mx:NumericStepper id="seconds" value="0" maximum="86400" />
+          <mx:Label text="秒後"/>
+        </mx:HBox>
+	  </mx:FormItem>
+    </mx:Form>
+    <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="saveButton" label="実行" click="sendWakeUpSound()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+
+
+    [Bindable]
+    private var userNameComboBoxArray:Array = new Array();
+
+    private static var chatWindow:ChatWindow;
+
+    public static function setChatWindow(chatWindow_:ChatWindow):void {
+        chatWindow = chatWindow_;
+    }
+
+    override protected function setup():void {
+        try {
+            userNameComboBoxArray = chatWindow.getUserNames();
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+
+    public function sendWakeUpSound():void {
+        Log.loggingTuning("=>alarm Begin");
+        
+        var userName:String = userNameComboBox.selectedItem as String;
+        chatWindow.sendSound(userName, soundFileNameInput.text, seconds.value);
+        PopUpManager.removePopUp(this);
+    
+        Log.loggingTuning("=>alarm End");
+    }
+
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

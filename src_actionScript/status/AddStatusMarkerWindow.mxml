@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="150"
+   title="状態マーカー作成" 
+   showCloseButton="true"
+   >
+  
+  <mx:Label text="状態名:" />
+  <mx:TextArea id="message" text="" width="100%" height="100%"/>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="追加" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    private var positionX:int;
+    private var positionY:int;
+    
+    public function setPosition(x:int = 1, y:int = 1):void {
+        positionX = x;
+        positionY = y;
+    }
+    
+    override protected function setup():void {
+        init();
+    }
+    
+    protected function init():void {
+    }
+    
+    public function execute():void {
+        addStatusMarker();
+    }
+    
+    private function addStatusMarker():void {
+        try{
+            var jsonData:Object = StatusMarker.getJsonData(message.text, positionX, positionY);
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().addCharacter(jsonData, "ownerName");
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

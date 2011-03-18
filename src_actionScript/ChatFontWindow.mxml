@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="230"
+   title="チャット文字設定" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Form>
+      
+	  <mx:FormItem label="文字色:">
+      <mx:ColorPicker id="chatMessageColorPicker" showTextField="true" selectedColor="0x000000"
+                      change="printSample()"
+                      toolTip="チャット文字色設定" />
+      </mx:FormItem>
+      
+	  <mx:FormItem label="背景色:">
+      <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0x000000"
+                      change="printSample()"
+                      toolTip="チャット背景色設定" />
+      </mx:FormItem>
+	  <mx:FormItem label="文字サイズ:">
+        <mx:ComboBox id="chatFontSizeComboBox" editable="true" prompt="8"
+                     change="printSample()"
+                     toolTip="チャット文字サイズ" />
+      </mx:FormItem>
+
+    </mx:Form>
+    <mx:Box id="sampleBase" height="30" width="100%" >
+      <mx:TextArea id="sample" height="100%" width="100%" text="どどんとふ" />
+    </mx:Box>
+    
+    <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="設定" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+       
+    private var chatWindow:ChatWindow;
+    private var defaultFontSize:int;
+       
+    public function init(chatWindow_:ChatWindow,
+                         chatFontColor:String,
+                         chatBackgroundColor:String,
+                         chatFontSize:int):void {
+        chatWindow = chatWindow_;
+        chatMessageColorPicker.selectedColor = parseInt("0x" + chatFontColor);
+        chatBackgroundColorPicker.selectedColor = parseInt("0x" + chatBackgroundColor);
+        defaultFontSize = chatFontSize;
+        setDefaultFontSize();
+    }
+       
+    override protected function setup():void {
+        Log.loggingTuning("=>setup() Begin");
+        try {
+            setChatFontComboBoxDefault();
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+        Log.loggingTuning("=>setup() End");
+    }
+       
+    private function setChatFontComboBoxDefault():void {
+        var fontSizeList:Array = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+           
+        var fontSizeOptionList:Array = [];
+        for(var i:int = 0 ; i < fontSizeList.length ; i++) {
+            var fontSize:int = fontSizeList[i];
+               
+            var option:Object = new Object();
+            option.label = "" + fontSize;
+               
+            fontSizeOptionList.push(option);
+        }
+           
+        chatFontSizeComboBox.dataProvider = fontSizeOptionList;
+        setDefaultFontSize();
+    }
+
+    private function setDefaultFontSize():void {
+        chatFontSizeComboBox.prompt = "" + defaultFontSize;
+        printSample();
+    }
+    
+    static public function getColor(colorPicker:ColorPicker):String {
+        return Utils.getColorString(colorPicker.selectedColor);
+    }
+       
+    private function printSample():void {
+        var color:String = getColor(chatMessageColorPicker);
+        sampleBase.setStyle('color', '0x' + color);
+           
+        var backgroundColor:String = getColor(chatBackgroundColorPicker);
+        sample.setStyle('backgroundColor', '0x' + backgroundColor);
+           
+        var fontSize:int = parseInt( chatFontSizeComboBox.text );
+        sample.setStyle("fontSize", fontSize);
+    }
+       
+    public function execute():void {
+        var color:String = getColor(chatMessageColorPicker);
+        chatWindow.setChatFontColor(color);
+           
+        var backgroundColor:String = getColor(chatBackgroundColorPicker);
+        chatWindow.setChatBackgroundColor(backgroundColor);
+           
+        var fontSize:int = parseInt( chatFontSizeComboBox.text );
+        chatWindow.setChatFontSize(fontSize);
+        
+        chatWindow.saveChatInfos();
+
+        PopUpManager.removePopUp(this);
+    }
+       
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

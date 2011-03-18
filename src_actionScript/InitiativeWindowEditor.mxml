@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	 horizontalAlign="center" verticalGap="2"
+	 backgroundAlpha="1.0" backgroundColor="#ffff80" alpha="1.0"
+	 borderColor="#c0c0c0" borderStyle="outset"
+	 paddingBottom="4" paddingTop="4" paddingLeft="4" paddingRight="4"
+	 dataChange="onDataChanged()"
+	 creationComplete="onCreationCompleted()">
+
+	
+	<mx:TextArea id="editor" width="100%" height="100%" />
+	<mx:Button label="閉じる" click="commitData()" />
+      
+      
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.DataGrid;
+			
+
+			// 表示するy座標を修正
+			private function onCreationCompleted():void
+			{
+				var bottom:int = y + height;
+				
+				if(owner.height - bottom < 0){
+					y = y - (bottom - owner.height) - 10;
+				}
+			}
+			
+			// デフォルトの動作だと強制的に行数に合わせて
+			// heightが上書きされてしまうので、自身でさらに上書き
+			override protected function measure():void
+			{
+				super.measure();
+				
+				// 強制的に高さを確保
+				height = 100;
+			}
+			
+			// itemEditorに渡ってきたdataをTextAreaに転送
+			private function onDataChanged():void
+			{
+				editor.text = data.info;
+			}
+			
+			// 親dataを更新して自分自身を破棄させる
+			private function commitData():void
+			{
+				data.info = editor.text;
+				//DataGrid(owner).destroyItemEditor();
+                focusManager.setFocus( DodontoF_Main.getInstance().getInitiativeWindow().nextButton );
+			}
+			
+			// 親コンポーネントでitemEditorの破棄が実行されると
+			// コールされるので実装
+			public function get text():String
+			{
+				return editor.text;
+			}
+			
+			
+		]]>
+	</mx:Script>
+
+</mx:VBox>

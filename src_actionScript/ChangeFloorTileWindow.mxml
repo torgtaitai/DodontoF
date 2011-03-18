@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="500"
+   height="250"
+   title="フロアタイル変更" 
+   showCloseButton="true"
+   >
+  
+  <mx:VBox height="100%" width="100%" minHeight="0" minWidth="0"
+           horizontalAlign="center" verticalAlign="top">
+    
+    <mx:HBox height="25" width="100%" minHeight="0" minWidth="0"
+             horizontalAlign="left" verticalAlign="middle">
+	  <mx:Label text="縦マス数:" />
+      <mx:NumericStepper id="tileHeight" minimum="1" maximum="100" value="25" change="printPreview()" />
+	  <mx:Label text="横マス数:" />
+      <mx:NumericStepper id="tileWidth" minimum="1" maximum="100" value="25" change="printPreview()" />
+      
+      <!-- <mx:HBox height="25" width="100%" visible="false">
+        <mx:Label text="画像のURL" />
+        <mx:TextInput id="tileImageUrl" width="100%" editable="true" change="printPreview()" />
+	  </mx:HBox>
+        -->
+    </mx:HBox>
+    
+    <torgtaitai:ImageSelecter id="imageSelecter"
+                              height="100%" width="100%" minHeight="0" minWidth="0"
+                              />
+  </mx:VBox>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.controls.Image;
+    
+    private var previewLoader:PreviewLoader = new PreviewLoader();
+    private var tileImageUrl_text:String;
+    static private var previewImageSize:int = 150;
+    private var thisObj:ChangeFloorTileWindow;
+    
+    override protected function setup():void {
+        thisObj = this;
+        
+        previewLoader.toolTip = Messages.getMessage("dragMeForFloorTile");
+        imageSelecter.addPreview(previewLoader, previewImageSize);
+        
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        
+        tileHeight.value = 10;
+        tileWidth.value = 10;
+        tileImageUrl_text = "image/defaultImageSet/floorTiles/floorTile_001.jpg";
+        printPreview();
+        
+        imageSelecter.setImageClickEventFunction(imageClickEvent);
+        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
+        imageSelecter.setDefaultTags( [ImageTag.getFloorTileTag(), ImageTag.getAllTag()] );
+        imageSelecter.initImage( false );
+        
+        setDragEvent();
+        
+        setEditMode(true);
+        
+        /*
+        setResizeEventFunction(function():void {
+                thisObj.title = "width:" + thisObj.width + " height:" + thisObj.height;
+            });
+        */
+        imageSelecter.imageSelectBox.setStyle("horizontalAlign", "left");
+    }
+    
+    private function setEditMode(b:Boolean):void {
+        getMap().setFloorTileEditMode(b);
+        
+        var floorTiles:Array = getMap().getPieciesByType(FloorTile.getTypeStatic());
+        for(var i:int = 0 ; i < floorTiles.length ; i++) {
+            var tile:FloorTile = floorTiles[i] as FloorTile;
+            tile.setEditMode(b);
+        }
+    }
+    
+    public function imageClickEvent(imageName:String):void {
+        //tileImageUrl_text = imageSelecter.getImageUrlChanger().getShort( imageName );
+        tileImageUrl_text = imageName;
+        printPreview();
+    }
+    
+    public function imageLoadComplete():void {
+    }
+    
+    private function printPreview():void {
+        Log.logging("printPreview tileImageUrl_text", tileImageUrl_text);
+        var xCount:int = tileWidth.value;
+        var yCount:int = tileHeight.value;
+        
+        Log.logging("tileImageUrl_text", tileImageUrl_text);
+        Log.logging("xCount", xCount);
+        Log.logging("yCount", yCount);
+        
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( tileImageUrl_text );
+        Log.logging("imageUrl getLonged", imageUrl);
+        
+        var size:int = previewImageSize/Map.getSquareLength();
+        previewLoader.loadImageWidthHeight(imageUrl, xCount, yCount, size);
+        previewLoader.drawGrid( getMap().getGridColor() );
+    }
+    
+    
+    private function setDragEvent():void {
+        var view:PreviewLoader = previewLoader;
+        
+        view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                view.startDrag();
+                event.stopPropagation();
+                this.status = "";
+            });
+        
+        view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                thisObj.viewDroped(view);
+                view.x = 0;
+                view.y = 0;
+            });
+    }
+    
+    private function viewDroped(view:PreviewLoader):void {
+        view.stopDrag();
+        
+        var localPoint:Point = new Point(view.x + 16, view.y + 72);
+        /*
+        Log.logging("localPoint.x", localPoint.x);
+        Log.logging("window.width", thisObj.width);
+        Log.logging("localPoint.y", localPoint.y);
+        Log.logging("window.height", thisObj.height);
+        */
+        
+        if( (0 < localPoint.x) && ((localPoint.x + view.width ) < thisObj.width) &&
+            (0 < localPoint.y) && ((localPoint.y + view.height) < thisObj.height) ) {
+            return;
+        }
+        Log.logging("create");
+        
+        var map:Map = DodontoF_Main.getInstance().getMap();
+                var globalPoint:Point = localToGlobal( new Point(localPoint.x, localPoint.y) );
+        var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+        
+        var dorpMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+                var obj:Object = FloorTile.getJsonData(tileImageUrl_text,
+                                                       tileWidth.value, tileHeight.value,
+                                                       0,
+                                                       dorpMapPoint.x, dorpMapPoint.y);
+        guiInputSender.getSender().addCharacter(obj);
+    }
+    
+    protected function getMap():Map {
+        return DodontoF_Main.getInstance().getMap();
+    }
+    
+    override protected function teardown():void {
+        setEditMode(false);
+    }
+    
+    ]]>
+  </mx:Script>
+
+</torgtaitai:CommonPopupWindow>

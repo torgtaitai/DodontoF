@@ -1,0 +1,1932 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="チャット"
+   width="220"
+   height="220"
+   showCloseButton="true"
+   rollOver="changeLogVisible(event, true)"
+   >
+<!--
+   rollOut="changeLogVisible(event, false)"
+-->
+  
+  <mx:Box height="100%" width="100%"
+                    paddingTop="0"
+                    paddingBottom="0" 
+          >
+    
+    <mx:VDividedBox id="chatMessageLogBoxDivder" width="100%" height="100%" mouseDown="blockEvent(event)"
+                    paddingTop="0"
+                    paddingBottom="0" 
+                    >
+      
+      <mx:TabNavigator id="chatMessageLogBoxTab" width="100%" height="100%"
+                       paddingTop="0"
+                       paddingBottom="0" 
+                       change="changeChannel()"
+                       >
+      </mx:TabNavigator>
+      
+      <mx:Box id="chatControlBox" width="100%" height="75" verticalGap="1" >
+        <mx:HBox id="nameBox" width="100%" height="25">
+	      <mx:Label text="名前"/>
+          <torgtaitai:SuggestComboBox id="chatCharacterName" 
+                       change="changedChatCharacterName()"
+                       tabIndex="1"
+                       width="100%"
+                       minWidth="0"
+                       rowCount="10"
+                       />
+          
+          <mx:ComboBox id="standingGraphicsStates"
+                       tabIndex="2"
+                       rowCount="10"
+                       />
+          
+          <mx:Image id="secretTalkButton" source="{keyIcon}"
+                    click="visibleSecretTalk()"
+                    toolTip="秘話機能有効化"
+                    />
+          <mx:ComboBox id="sendto"
+                       toolTip="送信先：（全員）以外ならその相手にだけ送信されます"
+                       change="changeSendto()"
+                       rowCount="10"
+                       visible="false"
+                       width="0"
+                       />
+          
+          <mx:HBox width="100%" height="100%">
+            
+            <mx:HBox id="diceBotGameTypeBox" height="200">
+              <mx:ComboBox id="diceBotGameType"
+                           toolTip="{diceBotHelpText}"
+                           change="setDiceBotHelpText();"
+                           rowCount="10"
+                           >
+<!--
+                <mx:Object label="ダイスボット(指定無し)"      gameType=""                    prefix="" />
+                <mx:Object label="アースドーン"                gameType="EarthDawn"           prefix="\d+e\d+" />
+                <mx:Object label="アリアンロッド"              gameType="Arianrhod"           prefix="" />
+                <mx:Object label="アルスマギカ"                gameType="ArsMagica"           prefix="ArS" />
+                <mx:Object label="ウォーハンマー"              gameType="Warhammer"           prefix="WH" />
+                <mx:Object label="エルリック！"                gameType="Elric!"              prefix="" />
+                <mx:Object label="エムブリオマシン"            gameType="EmbryoMachine"       prefix="(EM\t+|HLT|MFT|SFT)" />
+                <mx:Object label="カオスフレア"                gameType="Chaos Flare"         prefix="" />
+                <mx:Object label="ガンドッグ"                  gameType="Gundog"              prefix="" />
+                <mx:Object label="ガンドッグ・ゼロ"            gameType="GundogZero"          prefix="(.DPT|.FT)" />
+                <mx:Object label="クトゥルフ"                  gameType="Cthulhu"             prefix="" />
+                <mx:Object label="クトゥルフテック"            gameType="CthulhuTech"         prefix="" />
+                <mx:Object label="ゲヘナ・アナスタシス"        gameType="GehennaAn"           prefix="(\d+G\d+|\d+GA\d+)" />
+                <mx:Object label="サタスペ"                    gameType="Satasupe"            prefix="(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)" />
+                <mx:Object label="シノビガミ"                  gameType="ShinobiGami"         prefix="(BT|ET|FT|ST|WT|CST|MST|DST|TST|NST|KST)" />
+                <mx:Object label="シャドウラン"                gameType="ShadowRun"           prefix="" />
+                <mx:Object label="シャドウラン第４版"          gameType="ShadowRun4"          prefix="" />
+                <mx:Object label="ソードワールド"              gameType="SwordWorld"          prefix="K\d+" />
+                <mx:Object label="ソードワールド2.0"           gameType="SwordWorld2.0"       prefix="K\d+" />
+                <mx:Object label="ダークブレイズ"              gameType="DarkBlaze"           prefix="(DB\d+|DB@|BT\d+)" />
+                <mx:Object label="ダブルクロス2nd,3rd"         gameType="DoubleCross"         prefix="(\d+dx|ET)" />
+                <mx:Object label="デモンパラサイト"            gameType="Demon Parasite"      prefix="((N|A|M)?URGE\d+|OUURGE\d|OCURGE)" />
+                <mx:Object label="トーグ"                      gameType="TORG"                prefix="(TG|RT|Result|IT|Initimidate||TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage||BT|bonus|total)" />
+                <mx:Object label="特命転校生"                  gameType="TokumeiTenkousei"    prefix="" />
+                <mx:Object label="トンネルズ＆トロールズ"      gameType="Tunnels &amp; Trolls"  prefix="(\d+H?BS)" />
+                <mx:Object label="ナイトウィザード"            gameType="NightWizard"         prefix="\d+NW" />
+                <mx:Object label="ナイトメアハンター=ディープ" gameType="NightmareHunterDeep" prefix="" />
+                <mx:Object label="ファンタズムアドベンチャー"  gameType="PhantasmAdventure"   prefix="" />
+                <mx:Object label="パラサイトブラッド"          gameType="ParasiteBlood"      prefix="(N|A|M)?URGE\d+" />
+                <mx:Object label="ハンターズムーン"            gameType="HuntersMoon"         prefix="(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)" />
+                <mx:Object label="ペンドラゴン"                gameType="Pendragon"           prefix="" />
+                <mx:Object label="迷宮キングダム"              gameType="MeikyuKingdom"       prefix="\d+MK|LRT|ORT|CRT|ART|TBT|CBT|SBT|VBT|THT|CHT|SHT|VHT|KDT|KCT|KMT|CAT|FWT|CFT|TT|NT|ET|T1T|T2T|T3T|T4T|T5T|NAME" />
+                <mx:Object label="ルーンクエスト"              gameType="RuneQuest"           prefix="" />
+                <mx:Object label="ロールマスター"              gameType="RoleMaster"          prefix="" />
+                <mx:Object label="ワープス"                    gameType="WARPS"               prefix="" />
+                <mx:Object label="比叡山炎上"                  gameType="Hieizan"             prefix="" />
+                <mx:Object label="無限のファンタジア"          gameType="Infinite Fantasia"   prefix="" />
+                <mx:Object label="Chill"                       gameType="Chill"               prefix="SR\d+" />
+-->
+              </mx:ComboBox>
+              
+              <mx:Image id="novelticModeButton" source="{novelticModeIcon}" click="changeNovelticMode()" />
+              <mx:CheckBox id="isHideNovelticWindow" label="自動ログ隠し" fontSize="10"
+                           toolTip="シフトキー・Ctrlキーを押しながらのマウス操作でもログは隠れなくなります。"
+                           width="0" selected="true" visible="false" />
+              <mx:Image id="chatFontSetButton" source="{chatFontIcon}" click="setChatFontWindow()" toolTip="チャット文字設定" />
+              <mx:Image id="soundStatusImage" click="changeSoundState()" />
+              <mx:Image id="voteImage" source="{voteIcon}" click="chatMessageTrader.vote()" toolTip="点呼／投票" />
+              <mx:Image id="sendSoundButton" click="sendOrStopSound()"  />
+              <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="カットイン設定" />
+              <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
+              <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="ファイルアップローダー" />
+      
+            </mx:HBox>
+          </mx:HBox>
+          
+        </mx:HBox>
+        
+        <mx:Box width="100%" height="100%">
+          
+          <mx:HBox width="100%" height="100%">
+	        <mx:Label text="発言"/>
+            <mx:Box id="chatMessageBase" width="100%" height="100%">
+              <mx:TextArea id="chatMessageInput" width="100%" height="100%" text=""
+                           keyDown="keyDownInChatMessage(event)"
+                           keyUp="keyUpInChatMessage(event)"
+                           tabIndex="3"
+                           />
+            </mx:Box>
+            
+            <mx:Box id="sendButtonBox" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
+              <mx:Button id="sendMessageButton" label="送信" height="18" width="60" click="sendChatMessageLocal()" />
+              <mx:Button label="ログ保存" height="18" width="60" click="saveChatLogHtml()" paddingLeft="2" paddingRight="2" />
+            </mx:Box>
+          </mx:HBox>
+          
+        </mx:Box>
+      </mx:Box>
+      
+    </mx:VDividedBox>
+  </mx:Box>
+  
+  <mx:Style>
+.nocheckTabStyle { fill-colors: #FFF04B, #FFFFCC; }
+
+.maximizeRestoreButton
+{
+	up-skin:        	Embed("/image/icons/maximize_up.png");
+	over-skin:      	Embed("/image/icons/maximize_over.png");
+	down-skin:      	Embed("/image/icons/maximize_up.png");
+	selected-up-skin:   Embed("/image/icons/restore_up.png");
+	selected-over-skin: Embed("/image/icons/restore_over.png");
+	selected-down-skin: Embed("/image/icons/restore_up.png");
+}
+
+  </mx:Style> 
+
+  <mx:Script>
+    <![CDATA[
+
+        [Embed(source='image/icons/page_white_get.png')]
+        [Bindable]
+        private static var fileUploadIcon:Class;
+    
+        [Embed(source='image/icons/key.png')]
+        [Bindable]
+        private static var keyIcon:Class;
+    
+        [Embed(source='image/icons/sound.png')]
+        [Bindable]
+        private static var soundOnIcon:Class;
+    
+        [Embed(source='image/icons/font.png')]
+        [Bindable]
+        private static var chatFontIcon:Class;
+    
+        [Embed(source='image/icons/sound_mute.png')]
+        [Bindable]
+        private static var soundOffIcon:Class;
+    
+        [Embed(source='image/icons/bell.png')]
+        [Bindable]
+        private static var sendSoundIcon:Class;
+    
+        [Embed(source='image/icons/cancel.png')]
+        [Bindable]
+        private static var stopSoundIcon:Class;
+    
+        [Embed(source='image/icons/film.png')]
+        [Bindable]
+        private static var cutInIcon:Class;
+        
+        [Embed(source='image/icons/user_comment.png')]
+        [Bindable]
+        private static var voteIcon:Class;
+
+        [Embed(source='image/icons/user_edit.png')]
+        [Bindable]
+        private static var standingGraphicsEditIcon:Class;
+        
+        [Embed(source='image/icons/book_open.png')]
+        [Bindable]
+        private static var novelticModeIcon:Class;
+        
+        [Bindable]
+        private var diceBotHelpText:String;
+        
+        
+        import mx.containers.dividedBoxClasses.BoxDivider;
+        import flash.events.Event;
+        import flash.net.URLRequest;
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.Text;
+        import mx.core.Application;
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+        import mx.managers.ToolTipManager;
+        import mx.utils.StringUtil;
+        import mx.core.UIComponent;
+
+        private static var instance:ChatWindow;
+        
+        private var thisObj:ChatWindow;
+        private var isActive:Boolean = true;
+        private var isSoundOn:Boolean = true
+        private var standingGraphics:StandingGraphics = new StandingGraphics();
+        private var fileReferenceForDownload:FileReference = null;
+        private var chatFontColor:String = "000000";
+        private var chatBackgroundColor:String = "FFFFFF";
+        private var chatFontSize:int = 11;
+        private var chatMessageTrader:ChatMessageTrader;
+        private var novelticMode:NovelticMode = null;
+        
+        private var diceRollPlace:UIComponent = new UIComponent();
+        
+        public static function getInstance():ChatWindow {
+            return instance;
+        }
+        
+        public function getDiceRollPlace():UIComponent {
+            return diceRollPlace;
+        }
+        
+        public function getChatFontColorValue():int {
+            return parseInt(getChatFontColor());
+        }
+        
+        public function getChatFontColor():String {
+            return chatFontColor;
+        }
+        
+        public function getChatFontSize():int {
+            return chatFontSize;
+        }
+        
+        public function getStandingGraphics():StandingGraphics {
+            return standingGraphics;
+        }
+        
+        public function isSoundOnMode():Boolean {
+            return isSoundOn;
+        }
+        
+        public function get publicChatChannelBox():ChatMessageLogBox {
+            return getChatChannle(0);
+        }
+        
+        public function get chatMessageLogBox():ChatMessageLogBox {
+            return publicChatChannelBox;
+        }
+        
+        public function printStandingGraphics(senderName:String,
+                                              chatMessage:String,
+                                              effectable:Boolean,
+                                              standingGraphicFilterImages:Array):Object {
+            var window:UIComponent = this;
+            
+            return standingGraphics.print(senderName,
+                                          chatMessage,
+                                          effectable,
+                                          standingGraphicFilterImages,
+                                          window.x, window.y, window.width);
+        }
+        
+        static public function getPlayerInfo():Object {
+            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForPlayerInfo() );
+            return info;
+        }
+        
+        private function loadPlayerInfo():void {
+            var info:Object = getPlayerInfo();
+            if( info == null ) {
+                return;
+            }
+            
+            var characterName:String = info["characterName"];
+            Log.logging("loadPlayerInfo characterName", characterName);
+            chatCharacterName.text = characterName;
+            chatCharacterName.validateNow();
+            Log.logging("loadPlayerInfo end, chatCharacterName.text", chatCharacterName.text);
+        }
+        
+        
+        private var initLoaded:Boolean = false;
+        
+        private function loadChatInfo():void {
+            initLoaded = true;
+            
+            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForChatFont() );
+            
+            Log.logging("loadChatInfo info", info);
+            
+            if( info == null ) {
+                return;
+            }
+            
+            setChatFontSize( info["chatFontSize"] );
+            setChatFontColor( info["chatFontColor"] );
+            setChatBackgroundColor( info["chatBackgroundColor"] );
+            
+            var numberString:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
+            setDiceBotGameType( info[getDiceBotGameTypeKeyName()] );
+            
+            Log.logging("loadChatInfo info", info);
+            Log.logging("diceBot", info[getDiceBotGameTypeKeyName()]);
+        }
+        
+        public function setDiceBotGameType(gameType:String):void {
+            Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+        }
+        
+        private function getDiceBotGameTypeKeyName():String { 
+            var numberString:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
+            var keyName:String = numberString + "_diceBotGameType";
+            return keyName;
+        }
+        
+        public function saveChatInfos():void {
+            Log.logging("initLoaded", initLoaded);
+            
+            if( ! initLoaded ) {
+                return;
+            }
+            
+            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForChatFont() );
+            if( info == null ) {
+                info = new Object();
+            }
+            
+            info["chatFontSize"] = chatFontSize;
+            info["chatFontColor"] = chatFontColor;
+            info["chatBackgroundColor"] = chatBackgroundColor;
+            info[getDiceBotGameTypeKeyName()] = getGameType();
+            
+            Log.logging("saveChatInfos", info);
+            
+            Config.getInstance().saveInfo(getSaveInfoKeyNameForChatFont(), info);
+        }
+        
+        
+        public function setInitPosition():void {
+            if( loadPosition() ) {
+                return;
+            }
+            
+            var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
+            var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
+            var diceBoxWidth:int = DodontoF_Main.getInstance().getDiceBoxWidth();
+            
+            this.x = 0;
+            this.y = screenHeigth - this.height;
+            this.width = screenWidth - diceBoxWidth - 10;
+        }
+    
+        override public function getSaveInfoKeyName():String {
+            return "ChatWindow";
+        }
+        
+        private function getSaveInfoKeyNameForChatFont():String {
+            return "ChatWindow:Font";
+        }
+        
+        static private function getSaveInfoKeyNameForPlayerInfo():String {
+            return "ChatWindow:PlayerInfo";
+        }
+        
+        override protected function getHeaderHeight():Number {
+            return 14;
+        }
+        
+        
+        public function setChannelNames(changedChannelNames:Array):void {
+            
+            if( changedChannelNames.length == 0 ) {
+                Log.loggingError("チャンネル数が0で設定されています。正しいチャンネル設定を行ってください");
+                return;
+            }
+            
+            changedChannelNames = getChannelNamesWhenReplayMode(changedChannelNames);
+            
+            removeChanells(changedChannelNames);
+            addChannels(changedChannelNames);
+            renameChanells(changedChannelNames);
+            
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                selectChatChannel(lastChatChannel);
+            }
+        }
+        
+        private function getChannelNamesWhenReplayMode(names:Array):Array {
+            
+            if( ! DodontoF_Main.getInstance().isReplayMode() ) {
+                return names;
+            }
+            
+            var result:Array = new Array();
+            for(var i:int = 0 ; i < names.length ; i++) {
+                var name:String = names[i];
+                
+                if( DodontoF_Main.getInstance().getReplay().isIgnoreChannelName(name) ) {
+                    continue;
+                }
+                
+                result.push(name);
+            }
+            
+            return result;
+        }
+        
+        private function addChannels(changedChannelNames:Array):void {
+            for(var i:int = channels.length ; i < changedChannelNames.length ; i++) {
+                addChannel(changedChannelNames[i]);
+            }
+        }
+        private function removeChanells(changedChannelNames:Array):void {
+            while( channels.length > changedChannelNames.length ) {
+                var box:ChatMessageLogBox = channels.pop() as ChatMessageLogBox;
+                chatMessageLogBoxTab.removeChild(box);
+            }
+        }
+        private function renameChanells(changedChannelNames:Array):void {
+            for(var i:int = 0 ; i < changedChannelNames.length ; i++) {
+                var box:ChatMessageLogBox = getChatChannle(i);
+                box.setLabel(changedChannelNames[i]);
+            }
+        }
+        
+        private var channels:Array = new Array();
+        
+        private function initChannels():Array {
+            channels = [];
+            publicChatChannelBox.init(novelticMode);
+            
+            var changedChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
+            for(var i:int = 0 ; i < changedChannelNames.length ; i++) {
+                addChannel(changedChannelNames[i]);
+            }
+            
+            return channels;
+        }
+        
+        public function addChannel(labelName:String):void {
+            var box:ChatMessageLogBox = new ChatMessageLogBox();
+            box.label = labelName
+            box.init(novelticMode);
+            
+            chatMessageLogBoxTab.addChild(box);
+            chatMessageLogBoxTab.validateNow();
+            
+            channels.push(box);
+        }
+        
+        public function get publicChatChannel():int {
+            return getChatChannelIndex(publicChatChannelBox);
+        }
+        
+        public function get lastChatChannel():int {
+            return (channels.length - 1);
+        }
+        
+        public function get chatChannelCount():int {
+            return channels.length;
+        }
+        
+        private function getChatChannelIndex(target:ChatMessageLogBox):int {
+            var returnIndex:int = 0;
+            
+            eachChatChannel_with_index(function(i:ChatMessageLogBox, index:int):void {
+                    if( target == i ) {
+                        returnIndex = index;
+                    }
+                });
+            
+            return  returnIndex;
+        }
+        
+        public function getSelectedChatChannleIndex():int {
+            return chatMessageLogBoxTab.selectedIndex;
+        }
+        
+        public function getSelectedChatChannle():ChatMessageLogBox {
+            return getChatChannle(getSelectedChatChannleIndex());
+        }
+        
+        private var dummyBox:ChatMessageLogBoxDummy = new ChatMessageLogBoxDummy();
+        
+        public function getChatChannle(channel:int):ChatMessageLogBox {
+            var box:ChatMessageLogBox = channels[channel] as ChatMessageLogBox;
+            if( box == null ) {
+                return dummyBox;
+            }
+            
+            return box;
+        }
+        
+        public function eachChatChannel_with_index(action:Function):void {
+            for(var i:int = 0 ; i < channels.length ; i++) {
+                var chatChannel:ChatMessageLogBox = getChatChannle(i);
+                action( chatChannel, i );
+            }
+        }
+        
+        public function eachChatChannel(action:Function):void {
+            eachChatChannel_with_index(function(i:ChatMessageLogBox, index:int):void {
+                    action(i);
+                });
+        }
+        
+        public function changeChannel():void {
+            getSelectedChatChannle().resetLabelCount();
+            
+            var channel:int = getSelectedChatChannleIndex();
+            chatMessageLogBoxTab.getTabAt(channel).styleName = undefined;
+        }
+        
+        public function setChatChannelVisible(channel:int, b:Boolean):void {
+            chatMessageLogBoxTab.getTabAt(channel).visible = b;
+        }
+        
+        public function selectChatChannel(channel:int):void {
+            chatMessageLogBoxTab.selectedIndex = channel;
+        }
+        
+        public function invisibleChatTab():void {
+            for(var i:int = 0 ; i < channels.length ; i++) {
+                var channel:int = i;
+                var tab:Button = chatMessageLogBoxTab.getTabAt(channel);
+                
+                if( tab == null ) {
+                    continue;
+                }
+                
+                tab.height = 0;
+                tab.width = 0;
+            }
+        }
+        
+        private var controlsHolder:HBox;
+        private var maximizeRestoreButton:Button;
+        
+        override protected function createChildren():void {
+            super.createChildren();
+            
+            if ( ! headerDivider) {
+                headerDivider = new Sprite();
+                titleBar.addChild(headerDivider);
+            }
+            
+            if ( ! controlsHolder ) {
+                controlsHolder = new HBox();
+                controlsHolder.setStyle("paddingRight", getStyle("paddingRight"));
+                controlsHolder.setStyle("horizontalAlign", "right");
+                controlsHolder.setStyle("verticalAlign", "middle");
+                controlsHolder.setStyle("horizontalGap", 3);
+                rawChildren.addChild(controlsHolder);
+                Log.logging("controlsHolder created.");
+                
+                if( ! statusTextField ) {
+                    rawChildren.setChildIndex(controlsHolder, 1);
+                }
+            }
+            
+            if ( ! maximizeRestoreButton ) {
+                maximizeRestoreButton = new Button();
+                maximizeRestoreButton.width = 14;
+                maximizeRestoreButton.height = 14;
+                maximizeRestoreButton.styleName = "maximizeRestoreButton";
+                controlsHolder.addChild(maximizeRestoreButton);
+                Log.logging("maximizeRestoreButton created.");
+            }
+            
+            addMaixizeEventListeners();
+        }
+        
+        private function addMaixizeEventListeners():void {
+            maximizeRestoreButton.addEventListener(MouseEvent.CLICK, onClickMaximizeRestoreButton);
+        }
+        
+        private var originalHeigth:int = 100;
+        private var originalYPosition:int = 0;
+        
+        private function onClickMaximizeRestoreButton(event:MouseEvent=null):void {
+            
+            if (windowState == WINDOW_STATE_DEFAULT) {
+                originalHeigth = this.height;
+                originalYPosition = this.y;
+                
+                var heightPadding:int = DodontoF_Main.getInstance().getDodontoF().getMainBarHeight();
+                this.height = DodontoF_Main.getInstance().getScreenHeight() - heightPadding;
+                this.y = heightPadding;
+                
+                windowState = WINDOW_STATE_MAXIMIZED;
+                maximizeRestoreButton.selected = true;
+                setSavePositionEnable(false);
+                
+            } else if (windowState == WINDOW_STATE_MAXIMIZED) {
+                this.height = originalHeigth;
+                this.y = originalYPosition;
+                windowState = WINDOW_STATE_DEFAULT;
+                maximizeRestoreButton.selected = false;
+                setSavePositionEnable(true);
+                
+                this.validateNow();
+                var channel:int = getSelectedChatChannleIndex();
+                var isScrollFoced:Boolean = true;
+                scrollChatMessageLogIfPositionIsLast(channel, isScrollFoced);
+            }
+        }
+        
+        public static const MINIMIZED_HEIGHT:Number = 22;
+        public static const WINDOW_STATE_DEFAULT:Number = -1;
+        public static const WINDOW_STATE_MINIMIZED:Number = 0;
+        public static const WINDOW_STATE_MAXIMIZED:Number = 1;
+        
+        public var windowState:Number = WINDOW_STATE_DEFAULT; // Corresponds to one of the WINDOW_STATE variables.
+        private var headerDivider:Sprite;
+        
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+            
+            // Shift the divider one pixel up if minimized so there isn't a gap between the left and right borders.
+            // The bottom border is removed if minimized.
+            var deltaY:Number = windowState == WINDOW_STATE_MINIMIZED ? -1 : 0;
+            var graphics:Graphics = headerDivider.graphics;
+            graphics.clear();
+            graphics.lineStyle(1, getStyle("borderColor"));
+            graphics.moveTo(1, titleBar.height + deltaY);
+            graphics.lineTo(titleBar.width, titleBar.height + deltaY);
+            
+            controlsHolder.y = titleBar.y;
+            controlsHolder.width = unscaledWidth - 30;
+            controlsHolder.height = titleBar.height;
+            
+            statusTextField.width = unscaledWidth - 200;
+            
+            titleTextField.width = titleBar.width - getStyle("paddingLeft") - getStyle("paddingRight");
+        }
+        
+        override public function set status(text:String):void {
+            super.status = text + "            ";
+        }
+        
+        override public function setup():void {
+            titleBar.addChild(diceRollPlace);
+            
+            chatMessageLogBox.checkNovelMode();
+            initChannels();
+            
+            novelticMode = new NovelticMode(this);
+            chatMessageTrader= new ChatMessageTrader(this);
+            
+            instance = this;
+            thisObj = this;
+            
+            initDiceBotInfos();
+            
+            setInitPosition();
+            setSoundStateImage();
+            
+            diceBotGameType.visible = isDiceBotOn;
+            if( ! isDiceBotOn ) {
+                diceBotGameType.width = 0;
+            }
+            ToolTipManager.showDelay = 0;
+            ToolTipManager.hideDelay = Infinity;
+            
+            setDiceBotHelpText();
+            
+            this.addEventListener(Event.ACTIVATE, function():void {instance.isActive = true;});
+            this.addEventListener(Event.DEACTIVATE, function():void {instance.isActive = false;});
+            this.addEventListener(MouseEvent.MOUSE_WHEEL, wheelEvent);
+            this.chatMessageInput.addEventListener(MouseEvent.MOUSE_WHEEL, wheelEvent);
+            
+            loadPlayerInfo();
+            changedChatCharacterName();
+            setSendSoundButtonOn();
+            
+            novelticMode.init();
+            loadChatInfo();
+            setChatFontSize( chatFontSize );
+            
+            setResizeEventFunction( novelticMode.resizeAndMoveWindow );
+            setMoveEventFunction( novelticMode.resizeAndMoveWindow );
+            
+            changeVisiterMode();
+        }
+        
+        private function initDiceBotInfos():void {
+            var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
+            diceBotGameType.dataProvider = diceBotInfos;
+        }
+        
+        private function wheelEvent(event:MouseEvent):void {
+            if( novelticMode.isNovelticModeOn() )  {
+                novelticMode.wheelEvent(event);
+                return;
+            }
+            
+            ChatWindow.wheelScrollComponent(getSelectedChatChannle(), event);
+        }
+        
+        public static function wheelScrollComponent(box:Box, event:MouseEvent):void {
+            box.verticalScrollPosition -= (event.delta * 3);
+        }
+        
+        public function clearForReplay():void {
+            standingGraphics.clear();
+            clearChatMessageLog();
+        }
+        
+        public function setStandingGraphics(infos:ArrayCollection):void {
+            standingGraphics.clear();
+            for(var i:int = 0 ; i < infos.length ; i++) {
+                var info:Object = infos[i];
+                standingGraphics.add(info);
+            }
+            refreshChatCharacterName();
+        }
+        
+        public function getChatCharacterName():String {
+            return chatCharacterName.text;
+        }
+        
+        public function refreshChatCharacterName():void {
+            Log.logging("refreshChatCharacterName() begin, chatCharacterName.text", chatCharacterName.text);
+            
+            var tmpChatCharacterName:String = chatCharacterName.text;
+            
+            var names:Array = standingGraphics.findAllNames();
+            
+            var dataProvider:Array = [];
+            for(var i:int = 0 ; i < names.length ; i++) {
+                var option:Object = {
+                    data : names[i],
+                    label : names[i]};
+                dataProvider.push(option);
+            }
+            chatCharacterName.dataProvider = dataProvider;
+            chatCharacterName.validateNow();
+            
+            chatCharacterName.text = tmpChatCharacterName;
+            Log.logging("refreshChatCharacterName() end, chatCharacterName.text", chatCharacterName.text);
+        }
+        
+        private function savePlayerInfoOnLocal():void {
+            Log.logging("savePlayerInfoOnLocal");
+            savePlayerInfo(chatCharacterName.text);
+        }
+        
+        static public function savePlayerInfo(name:String):void {
+            Log.logging("savePlayerInfo static");
+            
+            var info:Object = {
+                characterName: name
+            };
+            
+            Config.getInstance().saveInfo(getSaveInfoKeyNameForPlayerInfo(), info);
+            
+            Log.logging("savePlayerInfo characterName", info);
+        }
+        
+        private function changedChatCharacterName():void {
+            Log.logging("changedChatCharacterName() begin");
+            
+            var name:String = chatCharacterName.text;
+            var stateList:Array = standingGraphics.findAllStates(name);
+            
+            Log.logging("changedChatCharacterName name", name);
+            
+            if( stateList.length == 0 ) {
+                standingGraphicsStates.visible = false;
+                standingGraphicsStates.width = 0;
+            } else {
+                standingGraphicsStates.visible = true;
+                standingGraphicsStates.explicitWidth = NaN;
+            }
+            
+            var dataProvider:Array = [];
+            for(var i:int = 0 ; i < stateList.length ; i++) {
+                var option:Object = {
+                    data : stateList[i],
+                    label : stateList[i]};
+                dataProvider.push(option);
+            }
+            var preState:String = Utils.getComboBoxText(standingGraphicsStates);
+            standingGraphicsStates.dataProvider = dataProvider;
+            Utils.selectComboBox(standingGraphicsStates, preState);
+            
+            savePlayerInfoOnLocal();
+            
+            Log.logging("changedChatCharacterName() end, chatCharacterName.text", chatCharacterName.text);
+        }
+
+        private function setDiceBotHelpText():void {
+            saveChatInfos();
+            
+            var result:String = "";
+            result += "【ダイスボット】(Faceless氏の「ボーンズ＆カーズ」を流用)\n";
+            result += "チャットの先頭にダイス用の文字を入力するとロールが可能（全角文字でもOK）。\n";
+            result += "入力例）２ｄ６＋１　攻撃！\n";
+            result += "出力例）2d6+1　攻撃！\n";
+            result += "　　　　  diceBot: (2d6) → 7\n";
+            result += "上記のようにダイス文字の後ろに空白を入れて発言も可能。\n";
+            result += "以下、使用例をザックリと。\n";
+            result += "　3d6+1>=9 ：3d6+1で目標値9以上かの判定\n";
+            result += "　1d100<=50 ：D100の下方ロール\n";
+            result += "　3u6[6] ：ダイスが6の場合に振り足しして合計する(上方無限)\n";
+            result += "　3B6 ：3d6を振って、ダイス目をバラバラのまま出力する。（合計しない）\n";
+            result += "　10b6>=4 ：10d6を振り、4以上のダイス目の個数を数える。\n";
+            result += "　(8/2)D(4+6)<=(5*3)：個数・ダイス・達成値には四則演算も使用可能。\n";
+            result += "　C(10-4*3/2+2)：C(計算式）で計算だけの実行も可能。\n";
+            //result += "Choise[A,B,C] ：A,B,Cをランダムで選択。敵の攻撃目標選択等に\n";
+            //result += "　例）diceBot : (CHOISE[PC1,PC2]) → PC1\n";
+            result += "======================================\n";
+
+            var gameType:String = getGameType();
+        
+            if( (gameType == "SwordWorld") || (gameType == "SwordWorld2.0") ) {
+                result += "【ソードワールド、ソードワールド2.0専用】\n";
+                result += "K20+3：レーティング（威力）表で20を参照し+3する。\n";
+                result += "　例）KeyNo.20+3 → 2D:5 → 3+3 → 6\n";
+                result += "K10+5[9]／K10+5@9：「[値]」あるいは「@値」でクリティカル値指定\n";
+                result += "　例）KeyNo.10[9]+5 → 2D:9,5 → 7+5 → 12 → 1回転\n";
+                result += "K20$+1／K10+5$9／k10-5@9$+2／k10[9]+10$9：「$修正値」を付けることでダイス目を修正（運命変転やクリティカルレイ用）\n";
+            } else if( gameType == "EarthDawn" ) {
+                result += "【アースドーン専用】\n";
+                result += "13e8+1d10：[ステップ]e[目標値]+[カルマダイス]\n";
+                result += "　例）EarthDawn : ステップ13,目標値8:1d12(11)+2d10(5,5)=21:結果:最良成功。\n";
+            } else if( gameType == "GehennaAn" ) {
+                result += "【ゲヘナ・アナスタシア専用】\n";
+                result += "・通常判定　(nGt+m)  (n:ダイス数, t:目標値, m:修正値)\n";
+                result += "・戦闘判定　(nGAt+m) (n:ダイス数, t:目標値, m:修正値)\n";
+                result += "　例）1G2+3 2ga3 3GA4+5";
+            } else if( gameType == "EmbryoMachine") {
+                result += '・判定ロール(EMt+m@c#f) (t:目標値, m:修正値, c:クリティカル値, f;ファンブル値)\n';
+                result += "・命中部位表　(HLT)\n";
+                result += "・白兵攻撃ファンブル表　(MFT)\n";
+                result += "・射撃攻撃ファンブル表　(SFT)\n";
+            } else if( gameType == "Warhammer" ) {
+                result += "【ウォーハンマー専用】\n";
+                result += "whH10 ：クリティカル表結果出力。「WH部位 クリティカル値」の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。\n";
+                result += "　例）Warhammer :腕部CT表(29+5) → 09:大動脈に傷が及んだ。コンマ数秒の内に損傷した肩から血を噴出して倒れる。ショックと失血により、ほぼ即死する。サドンデス×\n";
+                result +="wh60 ：命中判定。「WH(命中値)@(種別)」の形で指定します。\n";
+                result +="部位は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。\n";
+                result +="「2H(二足)」「2W(有翼二足)」「4(四足)」「4H(半人四足)」「4W(有翼四足)」「W(鳥類)」となります。\n";
+                result +="命中判定を行って、当たれば部位も表示します。\n";
+                result +="なお、種別指定を省略すると「二足」、「@」だけにすると全種別の命中部位を表示します。(コマンドを忘れた時の対応です)\n";
+                result +="　例）以下、各種出力例\n";
+                result +="wh60\n";
+                result +="Warhammer : (WH60) → 1 → 成功(成功度5) 二足:頭部\n";
+                result +="Wh43@4W\n";
+                result +="Warhammer : (WH43) → 1 → 成功(成功度4) 有翼四足:頭部\n";
+                result +="WH65@\n";
+                result +="Warhammer : (WH65) → 2 → 成功(成功度6) 二足:右腕 有翼二足:右腕 四足:胴体 半人四足:右腕 有翼四足:右翼 鳥:右翼\n";
+
+            } else if( gameType == "Chill" ) {
+                result += "【Chill専用】\n";
+                result += "SR7 ：ストライク・ランク・チャートに従って自動でダイスロールを行い、負傷とスタミナロスを計算します\n";
+                result += "　例）Chill : (SR7:4d10, 1d10) → 20, 2 → スタミナ損失20, 負傷2\n";
+
+            } else if(( gameType == "Demon Parasite" ) || ( gameType == "ParasiteBlood" )) {
+                result += "【デモンパラサイト・パラサイトブラッド専用】\n";
+                /*
+                result += "URGEx →”URGE衝動レベル”の形で指定します。\n";
+                result += "衝動表に従って自動でダイスロールを行い、結果を表示します。\n";
+                result += "ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。\n";
+                result += "”nURGE衝動レベル”と頭にNを付けると「新衝動表」、頭にAを付けると「誤作動表」\n";
+                result += "頭にMを付けると「ミュータント衝動表」になります。\n";
+                result += "　例）URGE1　nurge2　AURGE3　murge4　Surge5\n";
+                */
+                result += "・デモンパラサイト　衝動表　　 (URGEx) (xは衝動段階)\n";
+                result += "・　　〃　　　　　新衝動表　　(NURGEx)\n";
+                result += "・　　〃　　　　　誤作動表　　(AURGEx)\n";
+                result += "・　　〃ミュータント衝動表　　(MURGEx)\n";
+                result += "・　〃鬼御魂(戦闘外)衝動表　 (OUURGEx)\n";
+                result += "・　〃鬼御魂(戦闘中)衝動表　 (OCURGEx)\n";
+                result += "例）URGE1　nurge2　AURGE3　murge4　Surge5 OUURGE1 ocurge2\n";
+            } else if( gameType == "ShinobiGami" ) {
+                result += "【シノビガミ専用】\n";
+                result += "BT→戦場表を振る\n";
+                result += "ET→感情表を振る\n";
+                result += "FT→ファンブル表を振る\n";
+                result += "ST→シーン表を振る\n";
+                result += "WT→変調表を振る\n";
+                result += "CST→都市シーン表を振る\n";
+                result += "MST→館シーン表を振る\n";
+                result += "DST→出島シーン表を振る\n";
+                result += "TST→トラブルシーン表を振る\n";
+                result += "NST→日常シーン表を振る\n";
+                result += "KST→回想シーン表を振る\n";
+            } else if( gameType == "DoubleCross" ) {
+                result += "【ダブルクロス専用】\n";
+                result += "xDX@c→\"(個数)DX(修正)@(クリティカル値)\"で指定します。\n";
+                result += "　例）10dx　　　10dx+5@8　　　5DX10+7-3@7\n";
+                result += "ET→感情表を振る\n";
+                result += "　例）DoubleCross : 感情表(6-89) → ○憧憬(どうけい) - 不快感(ふかいかん)\n";
+            } else if( gameType == "ArsMagica" ) {
+                result += "【アルスマギカ専用】\n";
+                result += "\"ArS(ボッチダイス)+(修正)\"　アルスマギカのストレスダイス専用コマンドです。判定にも使えます。\n";
+                result += "ボッチダイスと修正は省略可能です。(ボッチダイスを省略すると1として扱います)\n";
+                result += "botchダイスの0の数が2以上の時は、数えて表示します。\n";
+                result += "（注意！） botchの判断が発生したときには、そのダイスを含めてロールした全てのダイスを[]の中に並べて表示します。\n";
+                result += "　例) (1R10[5]) → 0[0,1,8,0,8,1] → Botch!\n";
+                result += "　　最初の0が判断基準で、その右側5つがボッチダイスです。1*2,8*2,0*1なので1botchという訳です。\n";
+            } else if( gameType == "Tunnels & Trolls" ) {
+                result += "【トンネルズ＆トロールズ専用】\n";
+                result += "T&T バーサーク　　　　　(nBS+x)  (n:ダイス数, x:修正)\n";
+                result += "T&T ハイパーバーサーク　(nHBS+x) (n:ダイス数, x:修正)\n";
+            } else if( gameType == "Satasupe" ) {
+                result += "【サタスペ専用】\n";
+                result += "nR>=x[y,z]　(n:最大ロール数, x:目標値, y:目標成功数, z:ファンブル値)\n";
+                result += "　例）3R>=7[1,2]\n";
+                result += "　　　Satasupe : (3R>=7[1,2]) → 0[1,3]+1[5,2] → 成功度1\n";
+                result += "表一覧：表は TAGT3 のように後ろに数字を書くことで複数回ロールします\n";
+                result += "タグ決定表　　　　　　　(TAGT)\n";
+                result += "情報イベント表　　　　　(～IET)\n";
+                result += "　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)\n";
+                result += "情報ハプニング表　　　　(～IHT)\n";
+                result += "　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)\n";
+                result += "命中判定ファンブル表　　(FumbleT)\n";
+                result += "致命傷表　　　　　　　　(FatalT)\n";
+                result += "アクシデント表　　　　　(AccidentT)\n";
+                result += "汎用アクシデント表　　　(GeneralAT)\n";
+                result += "その後表　　　　　　　　(AfterT)\n";
+                result += "ロマンスファンブル表　　(RomanceFT)\n";
+                result += "NPCの年齢と好みを一括出力　(NPCT)\n";
+            } else if( gameType == "DarkBlaze" ) {
+                result += "【ダークブレイズ専用】\n";
+                result += "判定　　(DBx,y#m) (x:能力値, y:技能値, m:修正)\n";
+                result += "掘り出し袋表　　(BTx) (x:ダイス数)\n";
+            } else if( gameType == "GundogZero" ) {
+                result += "【ガンドッグ・ゼロ専用】\n";
+                result += "・ダメージペナルティ表　　(～DPTx) (x:修正)\n";
+                result += "　　射撃DP表(SDPT)、格闘DP表(MDPT)、車両DP表(VDPT)、汎用DP表(GDPT)\n";
+                result += "・ファンブル表　　　　　　(～FTx)  (x:修正)\n";
+                result += "　　射撃F表(SFT)、格闘F表(MFT)、投擲F表(TFT)\n";
+            } else if( gameType == "NightWizard" ) {
+                result += "【ナイトウィザード専用】\n";
+                result += "・判定ロール (nNW+m@x#y) \n";
+                result += "　　(n:基本値+常時, m:否常時+状態異常, x:クリティカル値, y:ファンブル値)\n";
+            } else if( gameType == "TORG" ) {
+                result += "【トーグ専用】\n";
+                result += "・判定　(TGm)\n";
+                result += "　TORG専用の判定コマンドです。\n";
+                result += "　\"TG(技能基本値)\"でロールします。Rコマンドに読替されます。\n";
+                result += "　振り足しを自動で行い、20の出目が出たときには技能無し値も並記します。\n";
+                result += "・各種表　\"(表コマンド)(数値)\"で振ります。\n";
+                result += "　・一般結果表 成功度出力「RTx or RESULTx」\n";
+                result += "　・威圧/威嚇 対人行為結果表「ITx or INTIMIDATEx or TESTx」\n";
+                result += "　・挑発/トリック 対人行為結果表「TTx or TAUNTx or TRICKx or CTx」\n";
+                result += "　・間合い 対人行為結果表「MTx or MANEUVERx」\n";
+                result += "　・オーズ（一般人）ダメージ　「ODTx or ORDSx or ODAMAGEx」\n";
+                result += "　・ポシビリティー能力者ダメージ「DTx or DAMAGEx」\n";
+                result += "　・ボーナス表「BTx+y or BONUSx+y or TOTALx+y」 xは数値, yは技能基本値\n";
+            } else if( gameType == "HuntersMoon" ) {
+                result += "【ハンターズムーン専用】\n";
+                result += "・各種表\n";
+                result += "　・遭遇表　(ET)\n";
+                result += "　・都市ロケーション表　(CLT)\n";
+                result += "　・閉所ロケーション表　(SLT)\n";
+                result += "　・炎熱ロケーション表　(HLT)\n";
+                result += "　・冷暗ロケーション表　(FLT)\n";
+                result += "　・部位ダメージ決定表　(DLT)\n";
+                result += "　・モノビースト行動表　(MAT)\n";
+                result += "　・異形アビリティー表　(SATx) (xは個数)\n";
+                result += "　・指定特技(社会)表　　(TST)\n";
+                result += "　・指定特技(頭部)表　　(THT)\n";
+                result += "　・指定特技(腕部)表　　(TAT)\n";
+                result += "　・指定特技(胴部)表　　(TBT)\n";
+                result += "　・指定特技(脚部)表　　(TLT)\n";
+                result += "　・指定特技(環境)表　　(TET)\n";
+            } else if( gameType == "MeikyuKingdom" ) {
+                result += "【迷宮キングダム専用】\n";
+                result += "・判定　(nMK+m)\n";
+                result += "　　迷宮キングダム判定用コマンドです。Rコマンドに読替されます。\n";
+                result += "　　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。\n";
+                result += "　絶対成功と絶対失敗も自動判定します。\n";
+                result += "・各種表\n　　";
+                result += "生活散策表 LRT／";
+                result += "治安散策表 ORT／";
+                result += "文化散策表 CRT／";
+                result += "軍事散策表 ART／";
+                result += "才覚休憩表 TBT／";
+                result += "魅力休憩表 CBT／";
+                result += "探索休憩表 SBT／";
+                result += "武勇休憩表 VBT／";
+                result += "才覚ハプニング表 THT／";
+                result += "魅力ハプニング表 CHT／";
+                result += "探索ハプニング表 SHT／";
+                result += "武勇ハプニング表 VHT／";
+                result += "王国災厄表 KDT／";
+                result += "王国変動表 KCT／";
+                result += "王国変動失敗表 KMT／";
+                result += "痛打表 CAT／";
+                result += "致命傷表 FWT／";
+                result += "戦闘ファンブル表 CFT／";
+                result += "道中表 TT／";
+                result += "交渉表 NT／";
+                result += "感情表 ET／";
+                result += "お宝表１ T1T／";
+                result += "お宝表２ T2T／";
+                result += "お宝表３ T3T／";
+                result += "お宝表４ T4T／";
+                result += "お宝表５ T5T／";
+                result += "名前表 NAMEx (xは個数)";
+            } else {
+                result += "その他、ゲーム固有の判定がある場合はこの場所に記載されます。\n";
+            }
+        
+            diceBotHelpText = result;
+        }
+
+        private static var isDiceBotOn:Boolean = true;
+        public static function setDiceBotOn(b:Boolean):void {
+            isDiceBotOn = b;
+        }
+    
+        private var isChatMessageInputing:Boolean = false;
+        public function onChatMessageInput(event:TextEvent):void {
+            Log.logging("event.text", event.text);
+            isChatMessageInputing = true;
+        }
+        
+        public function keyUpInChatMessage(event:KeyboardEvent):void {
+            if( ! readyToSend ) {
+                return;
+            }
+            
+            sendChatMessage(getSelectedChatChannleIndex(), chatMessageCash);
+            readyToSend = false;
+        }
+        
+        private var chatMessageCash:String = "";
+        private var readyToSend:Boolean = false;
+        
+        public function keyDownInChatMessage(event:KeyboardEvent):void {
+            
+            if( event.ctrlKey ) {
+                if( printHistory(event) ) {
+                    return;
+                }
+                if( shiftChatChannel(event) ) {
+                    Log.logging("shift");
+                    return;
+                }
+            }
+            
+            if( readyToSend ) {
+                return;
+            }
+        
+            if( event.keyCode != Keyboard.ENTER ) {
+                return;
+            }
+        
+            if( event.shiftKey || event.ctrlKey ) {
+                insertRetun();
+                return;
+            }
+            
+            readyToSend = true;
+            chatMessageCash = chatMessageInput.text;
+            
+            chatMessageInput.callLater(function():void {
+                    chatMessageInput.text = "";
+                });
+            
+            chatInputHistory.push(chatMessageCash);
+            chatInputHistoryCurrentIndex = chatInputHistory.length;
+            newestChatInput = "";
+            
+            //event.stopPropagation();
+        }
+        
+        private var newestChatInput:String = "";
+        private var chatInputHistory:Array = [];
+        private var chatInputHistoryCurrentIndex:int = 0;
+        
+        private function printHistory(event:KeyboardEvent):Boolean {
+            if( event.keyCode == Keyboard.UP ) {
+                
+                if( chatInputHistoryCurrentIndex == chatInputHistory.length ) {
+                    if( newestChatInput == "" ) {
+                        newestChatInput = chatMessageInput.text;
+                    }
+                }
+                
+                chatInputHistoryCurrentIndex -= 1;
+            } else if( event.keyCode == Keyboard.DOWN ) {
+                chatInputHistoryCurrentIndex += 1;
+            } else {
+                return false;
+            }
+            
+            if( chatInputHistoryCurrentIndex < 0 ) {
+                chatInputHistoryCurrentIndex = 0;
+                return false;
+            }
+            
+            if( chatInputHistoryCurrentIndex > chatInputHistory.length ) {
+                chatInputHistoryCurrentIndex = chatInputHistory.length;
+                return false;
+            }
+            
+            var oldInput:String = "";
+            if( chatInputHistoryCurrentIndex < chatInputHistory.length ) {
+                oldInput = chatInputHistory[chatInputHistoryCurrentIndex];
+            } else {
+                oldInput = newestChatInput;
+            }
+            
+            chatMessageInput.text = oldInput;
+            return true;
+        }
+        
+        public function shiftChatChannel(event:KeyboardEvent):Boolean {
+            Log.logging("shiftChatChannel");
+            var result:Boolean = false;
+            
+            Utils.shiftTabFocus(chatMessageLogBoxTab, event, function(index:int):void {
+                result = true;
+            });
+            
+            return result;
+        }
+        
+        private function insertRetun():void {
+            insertWord("\n", chatMessageInput);
+        }
+        
+        public function addTextToChatMessageInput(text:String):void {
+            chatMessageInput.text += text;
+        }
+        
+        static public function insertWord(word:String, textArea:TextArea):void {
+            var text:String  = textArea.text;
+            var start:int = textArea.selectionBeginIndex;
+            var last:int  = text.length;
+            
+            textArea.text = text.substring(0, start) + word + text.substring(start, last);
+            
+            // カーソルを正しく移動する
+            //textArea.focus();
+            var newIndex:int = start + word.length;
+            textArea.setSelection(newIndex, newIndex);
+        }
+    
+        private function getGameType():String { 
+            return diceBotGameType.selectedItem.gameType;
+        }
+        
+        public function sendChatMessageLocal():void {
+            sendChatMessage(getSelectedChatChannleIndex(), chatMessageInput.text);
+            chatMessageInput.callLater(function():void { chatMessageInput.text = ""; });
+        }
+        
+        /*
+        private var sendManyCount:int = 0;
+        public function sendChatMessageLocalMany():void {
+            var message:String = chatMessageInput.text;
+            sendManyCount = 1;
+            
+            var seconds:int = 1;
+            var count:int = 1000;
+            var timer : Timer = new Timer(seconds * 1000, count);
+            timer.addEventListener(TimerEvent.TIMER, function(event:TimerEvent) : void {
+                    sendChatMessage(message + " " + sendManyCount++);
+                });
+            timer.start();
+        }
+        */
+        
+        public function sendChatMessageForDiceRollResult(channel:int, chatMessage:String):void {
+            var isCheckDiceRoll:Boolean = false
+            sendChatMessage(channel, chatMessage, isCheckDiceRoll);
+        }
+        
+        public function changeChatChannelNumberForSystemLog(channel:int):int {
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                channel = this.lastChatChannel;
+            }
+            return channel;
+        }
+        
+        public function changeCharacterNameWhenVisiter(name:String):String {
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                name += "＠見学";
+            }
+            return name;
+        }
+        
+        public function sendChatMessage_selected(chatMessage:String):void {
+            var channel:int = getSelectedChatChannleIndex();
+            
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                channel = this.lastChatChannel;
+            }
+            
+            sendChatMessage(channel, chatMessage);
+        }
+        
+        public function sendChatMessage_public(chatMessage:String):void {
+            var channel:int = publicChatChannel;
+            
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                channel = this.lastChatChannel;
+            }
+            
+            sendChatMessage(channel, chatMessage);
+        }
+        
+        public function sendChatMessage(channel:int, chatMessage:String, isCheckDiceRoll:Boolean = true):void {
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                channel = this.lastChatChannel;
+                selectChatChannel(channel);
+            }
+            
+            var data:ChatSendData = new ChatSendData(channel, chatMessage);
+            sendChatMessageByChatSendData(data, isCheckDiceRoll);
+        }
+        
+        public function sendChatMessageByChatSendData(data:ChatSendData, isCheckDiceRoll:Boolean = true):void {
+            if( data.getMessage() == "" ) {
+                return;
+            }
+            
+            if( isCheckDiceRoll ) {
+                var prefix:String = diceBotGameType.selectedItem.prefix;
+                var diceRoolMessage:String = getDiceRollText(data.getMessage(), prefix);
+                
+                if( diceRoolMessage != null ) {
+                    data.setMessage(diceRoolMessage);
+                    var gameType:String = getGameType();
+                    sendDiceBotChatMessage(data, gameType);
+                    return;
+                }
+            }
+            
+            chatMessageTrader.sendMessage(data);
+        }
+        
+        public function chatMessageTrader_sendMessage_selectedChat(chatMessage:String):void {
+            var channel:int = getSelectedChatChannleIndex();
+            chatMessageTrader_sendMessage(channel, chatMessage);
+        }
+        
+        public function chatMessageTrader_sendMessage_publicChatChannel(chatMessage:String):void {
+            chatMessageTrader_sendMessage(publicChatChannel, chatMessage);
+        }
+        
+        public function chatMessageTrader_sendMessage(channel:int, chatMessage:String):void {
+            var data:ChatSendData = new ChatSendData(channel, chatMessage);
+            
+            chatMessageTrader.sendMessage(data);
+        }
+        
+        private function getDiceRollText(targetText:String, prefix:String):String {
+            var targetText:String = Utils.changeZenkakuToHankakuOnDiceBot(targetText);
+            
+            if( ! isDiceBotOn ) {
+                return null;
+            }
+            
+            var patterns:Array = new Array();
+            patterns.push("\\d+D\\d*"); //加算ロール　(xDn)
+            patterns.push("\\d+B\\d+"); //バラバラロール　(xBn)
+            patterns.push("\\d+R\\d+"); //個数振り足しロール　(xRn)
+            patterns.push("\\d+U\\d+"); //上方無限ロール　(xUn)
+            patterns.push("C\\("); //計算用(Cコマンド)
+            patterns.push("\\([\\d\\+\\-\\*\\/]+\\)"); //ダイスの個数部分計算用
+            patterns.push("\\d+U\\d+"); //上方無限ロール　(xUn)
+            patterns.push("(\\d+|\\[\\d+...\\d+\\])D(\\d+|\\[\\d+...\\d+\\])"); //ランダム数値の埋め込み　([n...m]D[x...y])
+            patterns.push("\\d+[\\+\\-\\*\\/]"); //a+xDn のような加減算用
+            //patterns.push("choise\\["); //ランダム選択　(choise[A, B, C])
+            patterns.push("make"); //ランダムジェネレータ用
+            patterns.push(prefix);
+            
+            for(var i:int = 0; i < patterns.length ; i++) {
+                var targetPattern:String = patterns[i];
+                if(targetPattern == "" ) {
+                    break;
+                }
+                
+                if( isMatchGamePreFixByTargetPattern( targetText, targetPattern ) ) {
+                    return targetText;
+                }
+                
+                if( isMatchGamePreFixByTargetPattern( targetText, ("S" + targetPattern) ) ) {
+                    return targetText;
+                }
+            }
+            
+            return null;
+        }
+        
+        private function isMatchGamePreFixByTargetPattern(targetText:String, targetPattern:String):Boolean {
+            var patternRegExp:RegExp = new RegExp("^" + targetPattern, "i");
+            var index:int = targetText.search( patternRegExp );
+            return ( index == 0 );
+        }
+        
+        private function sendDiceBotChatMessage(chatSendData:ChatSendData, gameType:String = ""):void {
+            chatMessageInput.text = "";
+            
+            chatSendData.replaceMessage("　", " ");
+            var randomSeed:int = Dice.getRandomNumber(0xffff);
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.sendDiceBotChatMessage(chatSendData,
+                                                  randomSeed, gameType,
+                                                  sendDiceBotChatMessageResult);
+        }
+    
+        
+        private function getDiceBotParam(str:String):String {
+            if( str == "" ) {
+                return null;
+            }
+            return str;
+        }
+        
+        public function sendDiceBotChatMessageResult(event:Event):void {
+            Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) Begin");
+        
+            try {
+                var loader:URLLoader = URLLoader(event.target);
+                var resultText:String = loader.data;
+                
+                //                                                  channel name  state  sendto color message       isSecret
+                var diceResultRegExp:RegExp = /##>customBot BEGIN<##(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.+?)\t(.+?)(##>isSecretDice<##(.*))?##>customBot END<##/ms;
+                var diceResult:Object = diceResultRegExp.exec(resultText);
+                
+                var channel:int = parseInt( getDiceBotParam(diceResult[1]) );
+                var name:String = getDiceBotParam(diceResult[2]);
+                var state:String = getDiceBotParam(diceResult[3]);
+                var sendto:String = getDiceBotParam(diceResult[4]);
+                var color:String = getDiceBotParam(diceResult[5]);
+                
+                var diceRolledText:String = diceResult[6];
+                var isSecretMarker:String = diceResult[7];
+                var diceRolledText2:String = diceResult[8];
+                
+                if( diceRolledText == null ) {
+                    Log.loggingError("diceRolledText is null");
+                    return;
+                }
+                
+                diceRolledText = diceRolledText.replace(/＞/g, '→');
+                
+                if( diceRolledText2 != null ) {
+                    diceRolledText2 = diceRolledText2.replace(/＞/g, '→');
+                }
+                
+                var data:ChatSendData = new ChatSendData(channel, diceRolledText, name, state, sendto);
+                data.setColorString(color);
+                data.setDiceRollResult();
+                
+                if( isSecretMarker == null ) {
+                    Log.logging("通常ダイスロール結果");
+                    sendDiceRollResultMessage(data);
+                } else {
+                    Log.logging("シークレットダイスロール結果");
+                    chatMessageTrader.sendMessage(data);
+                    
+                    data.setMessage(diceRolledText + diceRolledText2);
+                    SecretDiceWindow.printMessage(data);
+                }
+                
+            } catch(e:Error) {
+                Log.loggingException("ChatWindow.sendDiceBotChatMessageResult()", e);
+            }
+        
+            Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) End");
+        }
+        
+        public function sendDiceRollResultMessageForChatWindowUser(diceRolledText:String):void {
+            var channel:int = getSelectedChatChannleIndex();
+            var data:ChatSendData = new ChatSendData(channel, diceRolledText);
+            data.setDiceRollResult();
+            sendDiceRollResultMessage(data);
+        }
+        
+        public function sendDiceRollResultMessage(data:ChatSendData):void {
+            chatMessageTrader.sendMessage(data);
+        }
+        
+        
+        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true):void {
+            chatMessageTrader.sendSystemMessage(messageBase, isPrintName);
+        }
+        
+        public function addLocalMessage(message:String):void {
+            chatMessageTrader.addLocalMessage(message);
+        }
+        
+        public function sendChatMessageMany():void {
+            var chatMessage:String = chatMessageInput.text;
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.sendChatMessageMany(chatCharacterName.text, chatMessage, chatFontColor);
+        }
+        
+        private var userNames:Object = new Array();
+        
+        public function setUserNames(name:String):void {
+            userNames[name] = true;
+        }
+        
+        public function setChatFontSize(size:int, isReplayMode:Boolean = false):void {
+            chatFontSize = size;
+            
+            chatMessageInput.setStyle("fontSize", chatFontSize);
+            
+            if( isReplayMode ) {
+                return;
+            }
+            
+            printChatLog();
+        }
+
+        public function addMessageToChatLog(channel:int,
+                                            senderName:String,
+                                            chatMessage:String,
+                                            color:String,
+                                            time:Number,
+                                            chatSenderUniqueId:String,
+                                            isReplayChatMessage:Boolean = false):void {
+            chatMessageTrader.addMessageToChatLog(channel,
+                                                  senderName, 
+                                                  chatMessage,
+                                                  color,
+                                                  time,
+                                                  chatSenderUniqueId,
+                                                  isReplayChatMessage);
+        }
+        
+        public function addMessageToChatLogParts(channel:int,
+                                                 senderName:String,
+                                                 chatMessage:String,
+                                                 color:String,
+                                                 time:Number,
+                                                 chatSenderUniqueId:String,
+                                                 messageIndex:int = -1,
+                                                 sendto:String = null,
+                                                 isReplayChatMessage:Boolean = false):void {
+            
+            chatMessageTrader.addMessageToChatLogParts(channel,
+                                                       senderName,
+                                                       chatMessage,
+                                                       color,
+                                                       time,
+                                                       chatSenderUniqueId,
+                                                       messageIndex,
+                                                       sendto,
+                                                       isReplayChatMessage);
+        }
+        
+        public function printAddedMessageToChatMessageLog():void {
+            chatMessageTrader.printAddedMessageToChatMessageLog();
+        }
+        
+        public function initForFirstRefresh(isWelcomeMessageOn:Boolean):void {
+            if( isWelcomeMessageOn ) {
+                sendSystemMessage("がログインしました。");
+            }
+            
+            //初回ログイン用スクロール
+            scrollChatMessageLogIfPositionIsLast(getSelectedChatChannleIndex(), true);
+            
+            isFirstLoadFinished = true;
+        }
+        
+        public function scrollChatMessageLogIfPositionIsLast(channel:int, isForceScroll:Boolean):void {
+            if( DodontoF_Main.getInstance().isReplayMode() ) {
+                return;
+            }
+            
+            if( novelticMode.isNovelticModeOn() ) {
+                chatMessageLogBox.validateNow_All();
+                novelticMode.scrollChatMessageLogIfPositionIsLast(isForceScroll);
+                return;
+            }
+            
+            getChatChannle(channel).scrollChatBox(chatFontSize, isForceScroll);
+        }
+        
+        public function scrollChatBox(component:Box, isForceScroll:Boolean = false):void {
+            ChatMessageLogBox.scrollChatBox_static(chatFontSize, component, isForceScroll);
+        }
+        
+        public function isScrollPositionBottom(channel:int):Boolean {
+            if( getSelectedChatChannleIndex() != channel ) {
+                return true;
+            }
+            
+            return getChatChannle(channel).isScrollPositionBottom();
+        }
+        
+        private function printChatLog():void {
+            var channel:int = publicChatChannel;
+            getChatChannle(channel).resizeChatLog(chatFontSize, novelticMode);
+            
+            chatMessageTrader.printAddedMessageToChatMessageLog();
+            scrollChatMessageLogIfPositionIsLast(publicChatChannel, true);
+        }
+    
+        private var allUserName:String = '＜全員＞';
+    
+        private function getAlarmStringPrefix(userName:String):String {
+            return "[アラーム発生：" + userName + "]:";
+        }
+    
+
+        private function getAlarmString(userName:String, soundFileName:String, seconds:int):String {
+            var text:String = getAlarmStringPrefix(userName) + soundFileName;
+            if( seconds > 0 ) {
+                text += ":" + seconds + "秒後";
+            }
+            return text;
+        }
+    
+        public function isToMyAlarm(chatMessage:String):Boolean {
+            Log.logging("chatMessage", chatMessage);
+            Log.logging("getAlarmStringPrefix(allUserName)", getAlarmStringPrefix(allUserName));
+            Log.logging("chatMessage", chatMessage);
+            
+            if( (chatMessage.indexOf( getAlarmStringPrefix(allUserName)) == 0) ||
+                (chatMessage.indexOf( getAlarmStringPrefix(chatCharacterName.text))) == 0) {
+                return true;
+            }
+            return false;
+        }
+    
+        public function getUserNames():Array {
+            var userNameArray:Array = new Array();
+        
+            userNameArray.push(allUserName);
+        
+            for(var key:String in userNames) {
+                if( key == "" ) {
+                    continue;
+                }
+                userNameArray.push(key);
+            }
+        
+            return userNameArray;
+        }
+    
+        private function printUpdateDateString(time:Number):void {
+            Log.logging("chat time", time);
+            var lastChatDate:Date = new Date(time * 1000);
+            var dateString:String = StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}", 
+                                                          lastChatDate.fullYear,
+                                                          lastChatDate.month,
+                                                          lastChatDate.date,
+                                                          lastChatDate.hours,
+                                                          lastChatDate.minutes,
+                                                          lastChatDate.seconds)
+            Log.logging("dateString", dateString);
+            //this.status = "更新：" + dateString;
+        }
+        
+        
+        public function saveChatLogHtml():void {
+            var window:SaveChatLogWindow = DodontoF.popup(SaveChatLogWindow, true) as SaveChatLogWindow;
+            window.init(this);
+        }
+        
+        public function saveTargetChannelChatLogHtml(channel:int, isHtmlFormat:Boolean):void {
+            var allChatLogList:Array = getChatChannle(channel).getAllChatLogList();
+            if( isHtmlFormat ) {
+                saveChatLogHtmlByChatLogList(allChatLogList);
+            } else {
+                var chatLogText:String = Utils.htmlToText(allChatLogList.join('\n'));
+                saveChatLogHtmlFromString(chatLogText, "txt");
+            }
+        }
+        
+        static public function saveChatLogHtmlByChatLogList(chatLogList:Array):void {
+            
+            if( ! DodontoF_Main.isFileRefecenseLoadMethodSupportVersion() ) {
+                Alert.show("この機能を使用するにはFlashPlayerのバージョン10以上が必要です。");
+            }
+            
+            
+            var chatLogHtml:String = "";
+            chatLogHtml += "<?xml version='1.0' encoding='UTF-8'?>\n";
+            chatLogHtml += "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n";
+            chatLogHtml += "<html xmlns='http://www.w3.org/1999/xhtml' lang='ja'>\n";
+            chatLogHtml += "  <head>\n";
+            chatLogHtml += "    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />\n";
+            chatLogHtml += "    <title>チャットログ</title>\n";
+            chatLogHtml += "  </head>\n";
+            chatLogHtml += "  <body>\n";
+            
+            for(var i:int = 0 ; i < chatLogList.length ; i++) {
+                var line:String = chatLogList[i];
+                chatLogHtml += line.replace(/\r/g, "<br>\n") + "<br>\n";
+            }
+            
+            chatLogHtml += "  </body>\n";
+            chatLogHtml += "</html>";
+            
+            saveChatLogHtmlFromString(chatLogHtml);
+        }
+        
+        static private function saveChatLogHtmlFromString(chatLogHtml:String, ext:String = "html"):void {
+            var fileReferenceForDownload:FileReference = new FileReference();
+            
+            var dateString:String = DodontoF_Main.getDateString();
+            var saveFileName:String = "chatLog_" + dateString + "." + ext;
+            fileReferenceForDownload.save(chatLogHtml, saveFileName);
+        }
+    
+    
+        public function requestSaveChatLogResult(event:Event):void {
+            Log.loggingTuning("=>requestSaveChatLogResult(event:Event) Begin");
+        
+            try {
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                var chatLogFileName:String = jsonData.chatLogFileName;
+                Log.logging("chatLogFileName", chatLogFileName);
+            
+                var request:URLRequest = new URLRequest(chatLogFileName);
+                navigateToURL(request);
+            } catch(e:Error) {
+                Log.loggingException("ChatWindow.requestSaveChatLogResult()", e);
+            }
+
+            Log.loggingTuning("=>requestSaveChatLogResult(event:Event) End");
+        }
+        
+        [Embed(source="sound/page.mp3")]
+        [Bindable]
+        private var addMessageSound:Class;
+
+        private var isSoundPlaying:Boolean = false;
+        
+        //どどんとふ起動後の初期手続きが完了したかのチェック用。
+        private var isFirstLoadFinished:Boolean = false;
+    
+        public function playAddMessageSound(senderName:String):void {
+            if( ! isFirstLoadFinished ) {
+                return;
+            }
+            
+            if( ! isSoundOn ) {
+                return;
+            }
+        
+            if( isActive ) {
+                return;
+            }
+            
+            if( senderName == chatCharacterName.text ) {
+                return;
+            }
+        
+            if( isSoundPlaying ) {
+                return;
+            }
+            
+            isSoundPlaying = true;
+            var sound:Sound = new addMessageSound() as Sound; 
+            sound.play();
+            isSoundPlaying = false;
+        }
+    
+        public function openCreateStandingGraphicsWindow():void {
+            DodontoF.popup(StandingGraphicsManageWindow, true);
+        }
+        
+        private function uploadFile():void {
+            DodontoF.popup(FileUploadWindow, true);
+        }
+        
+        public function openCreateCutInWindow():void {
+            DodontoF.popup(CutInMovieManageWindow, false);
+        }
+        
+        private var soundChannel:SoundChannel;
+    
+        private function sendOrStopSound():void {
+            if( stopSound() ) {
+                return;
+            }
+            
+            AlarmWindow.setChatWindow(this);
+            DodontoF.popup(AlarmWindow, true);
+        }
+    
+        public function sendSound(userName:String, soundFileName:String, seconds:int):void {
+            var alarmString:String = getAlarmString(userName, soundFileName, seconds);
+            chatMessageTrader_sendMessage(publicChatChannel, alarmString);
+        }
+    
+        private function stopSound():Boolean {
+            if( soundChannel == null ) {
+                return false;
+            }
+        
+            setSendSoundButtonOn();
+            soundChannel.stop();
+            soundChannel = null;
+            return true;
+        }
+        
+        private function setSendSoundButtonOn():void {
+            sendSoundButton.source = sendSoundIcon;
+            sendSoundButton.toolTip = "目覚ましアラーム送信";
+        }
+        
+        private function setSendSoundButtonOff():void {
+            sendSoundButton.source = stopSoundIcon;
+            sendSoundButton.toolTip = "目覚ましアラーム停止";
+        }
+        
+        private function getSecondsFromAlarmText(text:String):int {
+            if( text == null ) {
+                return 0;
+            }
+            
+            var secondsText:String = text.substring(0,(text.length - 2));
+            var seconds:int = parseInt(secondsText);
+            return seconds;
+        }
+        
+        public function playSound(message:String):void {
+            if( ! isSoundOn ) {
+                return;
+            }
+            
+            var soundInfo:Array = message.split("]:");
+            var messagePart:String = soundInfo[1];
+            var soundInfo2:Array = messagePart.split(":");
+            
+            var soundFileName:String = soundInfo2[0];
+            var seconds:int = getSecondsFromAlarmText(soundInfo2[1]);
+            
+            soundFileName = Config.getInstance().getUrlString(soundFileName);
+            Log.logging("soundFileName", soundFileName);
+            
+            playSoundLater(soundFileName, seconds);
+        }
+        
+        private function playSoundLater(soundFileName:String, seconds:int):void {
+            var timer : Timer = new Timer(seconds * 1000, 1);
+            
+            timer.addEventListener(TimerEvent.TIMER, function(event:TimerEvent) : void {
+                    stopSound();
+                    setSendSoundButtonOff();
+                    
+                    var sound:Sound = new Sound( new URLRequest(soundFileName) );
+                    soundChannel = sound.play(0, 1);
+                    soundChannel.addEventListener(Event.SOUND_COMPLETE,
+                                                  soundCompleteHandler);
+                });
+            timer.start();
+        }
+        
+        private function soundCompleteHandler(event:Event):void {
+            sendOrStopSound();
+        }
+    
+        //親コンポーネントへのイベント通知をブロックしたい場合に以下の関数を呼び出す。
+        private function blockEvent(event:MouseEvent):void {
+            event.stopPropagation();
+        }
+        
+        
+        public function setSoundState(b:Boolean):void {
+            isSoundOn = b;
+            setSoundStateImage();
+        }
+        
+        private function changeSoundState():void {
+            setSoundState( ! isSoundOn );
+        }
+        
+        private function setSoundStateImage():void {
+            if( isSoundOn ) {
+                soundStatusImage.source = soundOnIcon;
+                soundStatusImage.toolTip = "音再生あり";
+            } else {
+                soundStatusImage.source = soundOffIcon;
+                soundStatusImage.toolTip = "音再生なし";
+            }
+        }
+    
+        public function setStandingGraphicsDisplayState(b:Boolean):void {
+            standingGraphics.setDisplayState( b );
+            refreshChatCharacterName();
+        }
+    
+        private function setChatFontWindow():void {
+            var chatFontWindow:ChatFontWindow = DodontoF.popup(ChatFontWindow, true) as ChatFontWindow;
+            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize);
+        }
+    
+        public function setChatFontColor(color:String):void {
+            chatFontColor = color;
+            chatMessageBase.setStyle('color', '0x' + color);
+        }
+    
+        public function getChatBackgroundColor():String {
+            return chatBackgroundColor;
+        }
+        
+        public function setChatBackgroundColor(color:String):void {
+            chatBackgroundColor = color;
+            eachChatChannel(function(i:ChatMessageLogBox):void { i.setBackGroundColor(color); });
+            chatMessageInput.setStyle('backgroundColor', '0x' + color);
+            novelticMode.setChatBackgroundColor(color);
+        }
+        
+        public function getChatMessageLogList():Array {
+            return chatMessageLogBox.getChatMessageLogList();
+        }
+        
+        public function clearChatMessageLog():void {
+            chatMessageLogBox.clearChatMessageLog();
+        }
+        
+        public function addChatLogText(channel:int):Boolean {
+            var isCurrentChannel:Boolean = (channel == getSelectedChatChannleIndex());
+            var isAdded:Boolean = getChatChannle(channel).addChatLogText(novelticMode, chatFontSize, isCurrentChannel);
+            if( ! isAdded ) {
+                return false;
+            }
+            
+            if( ! isCurrentChannel ) {
+                chatMessageLogBoxTab.getTabAt(channel).styleName = "nocheckTabStyle";
+            }
+            return true;
+        }
+        
+        public function changeNovelticMode():void {
+            var toChangeModeName:String = (novelticMode.isNovelticModeOn() ? 
+                                           "通常のチャットログ表示モード" :
+                                           "ノベルゲーム風表示モード");
+            var message:String = toChangeModeName + "に切り替えますか？\n(切り替えには時間がかかります。";
+            
+            var changeFunction:Function = function(e : CloseEvent) : void {
+                if (e.detail != Alert.OK) {
+                    return;
+                }
+                novelticMode.changeNovelticMode();
+            }
+            
+            Alert.show(message,
+                       "チャット表示切替確認", 
+                       (Alert.OK | Alert.CANCEL),
+                       null, 
+                       changeFunction);
+        }
+        
+        private function visibleSecretTalk():void {
+            nameBox.removeChild(secretTalkButton);
+            sendto.visible = true;
+            sendto.width = 100;
+        }
+        
+        private function changeWindowColorAndTitle(titleTail:String, color:String):void {
+            var titleString:String = "チャット";
+            if( titleTail != "" ) {
+                titleString += (" -> " + titleTail);
+            }
+            this.title = titleString;
+            
+            setStyle("backgroundColor", color);
+        }
+        
+        private function changeDefaultWindowColorAndTitle():void {
+            changeWindowColorAndTitle("", "#F4FBFF");
+        }
+        
+        private function changeSendto():void {
+            
+            if( sendto.selectedItem.data != null ) {
+                changeWindowColorAndTitle(sendto.selectedItem.label, "#FFFF99");
+            } else {
+                changeDefaultWindowColorAndTitle();
+            }
+        }
+        
+        public function changeLogVisible(event:MouseEvent, visible:Boolean):void {
+            novelticMode.setLogVisible(event, visible);
+        }
+        
+        
+        public function changeVisiterMode():void {
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                changeWindowColorAndTitle("見学モード","#FFFFCC");
+            } else {
+                changeDefaultWindowColorAndTitle();
+            }
+        }
+        
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

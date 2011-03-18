@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="270"
+   height="180"
+   title="ログ保存" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:HBox id="loadSelectBox" width="100%" height="25" horizontalAlign="center" verticalAlign="middle">
+      <mx:RadioButtonGroup id="textTypeGroup"/>
+	  <mx:RadioButton groupName="textTypeGroup"
+                      id="htmlFormat"
+                      label="HTMLとして保存"
+                      selected="true"
+                      />
+      
+	  <mx:RadioButton groupName="textTypeGroup"
+                      id="textFormat"
+                    label="テキストとして保存"
+                      />
+      </mx:HBox>
+    <mx:Tile id="saveButtonBox" 
+             height="100%" width="100%"
+             horizontalAlign="center" verticalAlign="middle"
+             >
+    </mx:Tile>
+    
+    <mx:Spacer width="20" />
+  <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  
+  </mx:Box>
+  
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.utils.StringUtil;
+    
+    private var chatWindow:ChatWindow;
+    
+    /*
+    override protected function setup():void {
+    }
+    */
+    
+    public function init(chatWindow_:ChatWindow):void {
+        this.chatWindow = chatWindow_;
+        
+        var channelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
+        for(var i:int = 0 ; i < channelNames.length ; i++) {
+            var button:Button = new Button();
+            button.label = channelNames[i];
+            saveButtonBox.addChild(button);
+            
+            button.addEventListener(MouseEvent.CLICK, getSaveChannelFunction(i));
+        }
+    }
+    
+    public function getSaveChannelFunction(channel:int):Function {
+        var thisObject:CommonPopupWindow = this;
+        
+        return function saveChannel():void {
+            chatWindow.saveTargetChannelChatLogHtml(channel, htmlFormat.selected);
+            PopUpManager.removePopUp(thisObject);
+        }
+    }
+    
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

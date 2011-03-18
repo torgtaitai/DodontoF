@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:as3unit="org.libspark.as3unit.components.*"
+   xmlns:torgtaitai="*"
+   layout="absolute"
+   creationComplete="creationCompleteHandler()">
+  
+  <mx:Script>
+	<![CDATA[
+			private function creationCompleteHandler():void {
+				as3unit.run(DodontoFTest);
+			}
+		]]>
+  </mx:Script>
+  
+  <as3unit:AS3Unit id="as3unit"/>
+  <torgtaitai:DodontoF_Main />
+  
+</mx:Application>

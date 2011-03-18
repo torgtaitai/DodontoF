@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mx:Application
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   pageTitle="どどんとふ"
+   creationComplete="setup()"
+   layout="absolute"
+   >
+  
+  <mx:Script>
+    <![CDATA[
+        import mx.controls.Alert;
+
+        private function setup():void {
+            var fullVersionString:String = flash.system.Capabilities.version; //WIN 10,0,1,5
+            var versionNoString:String = fullVersionString.split(" ")[1].split(",")[0];//10
+            var showString:String = "「どどんとふ」の利用にはFlash Playerのバージョンアップが必要です。";
+            if( parseInt(versionNoString) > 9 ) {
+                showString = "どどんとふReay!(Flash Ver." + versionNoString + ")";//(Flash Ver.10)
+            }
+            Alert.show( showString );
+        }
+        
+    ]]>
+  </mx:Script>
+</mx:Application>
+
+

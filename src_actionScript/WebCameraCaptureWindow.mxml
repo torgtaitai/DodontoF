@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="480"
+   height="440"
+   verticalAlign="middle"
+   horizontalAlign="center"
+   title="WEBカメラ撮影" 
+   showCloseButton="true"
+   close="closeWindow()"
+>
+  
+  <mx:Label text="WEBカメラで撮影した画像をキャラクター画像として直接アップロードできます。" />
+  <mx:Label text="お手持ちのフィギュアやイラストの取り込みにご利用ください。" />
+  <mx:Panel id="previewPanle" x="33" y="40" width="340" height="280" layout="absolute">
+    <mx:VideoDisplay y="0" x="0" width="320" height="240" id="display"/>
+    <mx:Image x="0" y="0" id="imgPreview" />
+  </mx:Panel>
+  
+  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button label="撮影" id="btnShoot" click="clickShoot()"/>
+    <mx:Button label="アップロード" id="btnSave" enabled="false" click="clickSave()"/>
+    <mx:Button label="閉じる" click="closeWindow()" />
+    <mx:Spacer width="50"/>
+  </mx:HBox>
+  
+  <mx:Script>
+        <![CDATA[
+
+//本ソースは以下のサイトを参照に作成いたしました。
+//この場を借りてお礼申し上げます。
+//http://blog.asial.co.jp/343
+
+    import mx.managers.PopUpManager;
+    import mx.controls.Image;
+    import mx.controls.Alert;
+    import flash.media.Camera;
+    import PNGEncoder;
+
+    private var camera:Camera;
+    private var bitmap:Bitmap;
+    
+    private var closeEvent:Function = null;
+        
+    public function setCloseEvent(function_:Function):void {
+        closeEvent = function_;
+    }
+        
+    public function closeWindow():void {
+        if( closeEvent != null ) {
+            closeEvent.call();
+        }
+            
+        PopUpManager.removePopUp(this);
+    }
+    
+    
+    override protected function setup():void {
+        initCamera();
+    }
+        
+    // カメラの初期化
+    public function initCamera():void {
+        camera = Camera.getCamera();
+        if (camera) {
+            camera.setMode(640, 480, 10, true);
+            display.attachCamera(camera);
+            previewPanle.status = "撮影中...";
+        } else {
+            Alert.show("カメラが検出できません");
+        }
+    }
+        
+    // 撮影ボタン
+    public function clickShoot():void {
+        if (imgPreview.source) {
+            previewPanle.status = "撮影中...";
+            btnShoot.label = "撮影";
+            btnSave.enabled = false;
+            imgPreview.source = null;
+        } else {
+            previewPanle.status = "この画像をアップロードしますか？";
+            btnShoot.label = "取消";
+            btnSave.enabled = true;
+                
+            // 表示されている画像を取得して動画の上に貼り付ける。。
+            bitmap = new Bitmap();
+            var bitmapData:BitmapData = new BitmapData(display.width, display.height);
+            bitmap.bitmapData = bitmapData;
+            bitmapData.draw(display);
+            imgPreview.source = bitmap;
+        }
+    }
+        
+    // 保存ボタン
+    public function clickSave():void {
+        var pngEncoder:PNGEncoder = new PNGEncoder();
+        var bytes:ByteArray = pngEncoder.encode(bitmap.bitmapData);
+            
+        var request:URLRequest = new URLRequest();
+            
+        request.url = "./WebCameraCaptureImageUploader.rb";
+        request.contentType = "application/octet-stream";
+        request.method = URLRequestMethod.POST;
+        request.data = bytes;
+            
+        var loader: URLLoader = new URLLoader();
+        loader.addEventListener(Event.COMPLETE, function(event:Event):void {
+                btnShoot.label = "撮影";
+                imgPreview.source = null;
+                bitmap = null;
+                
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                Log.loggingTuning("loader end");
+                Log.loggingTuning("jsonData.resultText", jsonData.resultText);
+                previewPanle.status = "転送結果：" + jsonData.resultText;
+            });
+            
+        loader.load(request);
+        btnSave.enabled = false;
+        previewPanle.status = "転送中・・・";;
+    }
+        
+        ]]>
+    </mx:Script>
+</torgtaitai:CommonPopupWindow>
