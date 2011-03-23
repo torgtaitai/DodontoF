@@ -216,7 +216,7 @@ package {
                 "isDiceBotOn" : true,
                 "uniqueId" : getUniqueIdOnWave(),
                 "refreshTimeout" : 10,
-                "version" : "Ver.1.30.00(2011/03/14)",
+                "version" : "Ver.1.30.01(2011/03/23)",
                 "playRoomMaxNumber" : 1
             };
             

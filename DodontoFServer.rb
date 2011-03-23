@@ -43,7 +43,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.00(2011/03/14)"
+$version = "Ver.1.30.01(2011/03/23)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -567,9 +567,9 @@ class DodontoFServer
     saveData['lastUpdateTimes'] = lastUpdateTimes;
     saveData['refreshIndex'] = refreshIndex;
     saveData['loginUserInfo'] = loginUserInfo;
-    saveData['cardMount'] = {}
-    saveData['cardTrushMount'] = {}
-    saveData['isFirstChatRefresh'] = isFirstChatRefresh
+    if( isFirstChatRefresh )
+      saveData['isFirstChatRefresh'] = isFirstChatRefresh
+    end
     
     logging("==>End refresh");
     

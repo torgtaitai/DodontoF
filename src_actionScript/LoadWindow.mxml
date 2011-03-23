@@ -99,15 +99,15 @@
     
     public function execute():void {
         try {
-            var resultFunction:Function = null;
+            var params:Object = getLoadParams();
             
+            var resultFunction:Function = null;
             if( params == null ) {
                 resultFunction = function():void {
                     DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
                 }
             }
             
-            var params:Object = getLoadParams();
             DodontoF_Main.getInstance().getGuiInputSender().load(params, resultFunction);
             
             PopUpManager.removePopUp(this);

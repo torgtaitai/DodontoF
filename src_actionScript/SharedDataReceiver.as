@@ -70,7 +70,7 @@ package {
             }
             
             if( isHistoryOn ) {
-                history.push(jsonData);
+                addHistory(jsonData);
             }
             
             if( sender.clearRetry() ) {
@@ -80,6 +80,31 @@ package {
             }
             
             refreshNext();
+        }
+        
+        private function addHistory(jsonData_original:Object):void {
+            var jsonData:Object = Utils.clone(jsonData_original);
+            
+            delete jsonData.loginUserInfo;
+            delete jsonData.refreshIndex;
+            delete jsonData.lastUpdateTimes;
+            
+            Log.logging("history jsonData", jsonData);
+            
+            if( ! hasKey(jsonData) ) {
+                Log.logging("jsonData has NO key.");
+                return;
+            }
+            
+            Log.logging("jsonData has key, so push history!!");
+            history.push(jsonData);
+        }
+        
+        private function hasKey(params:Object):Boolean {
+            for(var key: String in params){
+                return true;
+            }
+            return false;
         }
         
         private var retryConnectedCount:int = 0;
