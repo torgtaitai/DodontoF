@@ -79,7 +79,14 @@
             addPaletTab();
         }
         
-        tabEditors[0].list.dataProvider = ["2d6+1 ダイスボット登録例"];
+        var lines:Array = ["チャットパレット入力例：",
+                           "2d6+1 ダイスロール",
+                           "１ｄ２０＋{敏捷}＋｛格闘｝　格闘！",
+                           "//敏捷=10",
+                           "//格闘＝１"];
+        
+        var tabEditorInfo:Object = tabEditors[0];
+        setLines(lines, tabEditorInfo);
     }
     
     private function addPaletTab():void {
@@ -120,30 +127,33 @@
                                      state:ComboBox, colorPicker:ColorPicker,
                                      changeNameFunction:Function):List {
         
+        var changer:ChatPaletteChanger = new ChatPaletteChanger();
+        
         var inputList:List = new List();
         inputList.percentWidth = 100;
         inputList.percentHeight = 100;
         
         inputList.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-                var text:String = inputList.selectedItem as String;
-                input.text = text;
+                //input.text = inputList.selectedItem as String;
+                input.text = changer.getText( inputList.selectedIndex );
             });
         
         inputList.doubleClickEnabled = true;
         inputList.addEventListener(MouseEvent.DOUBLE_CLICK, function(event:Event):void {
-                var text:String = inputList.selectedItem as String;
-                
                 var sendFunc:Function = getSendChatMessageFunction(input, name, state, colorPicker);
                 sendFunc( null );
             });
         
-        var tabInfo:Object = {
+        
+        var tabEditorInfo:Object = {
             changeNameFunction : changeNameFunction,
             name : name,
             input : input,
             colorPicker : colorPicker,
-            list : inputList};
-        tabEditors.push(tabInfo);
+            list : inputList,
+            changer : changer };
+        
+        tabEditors.push(tabEditorInfo);
                     
         
         return inputList;
@@ -298,7 +308,8 @@
     }
     
     public function edit():void {
-        var inputList:List = tabEditors[tabSpace.selectedIndex].list as List;
+        var tabEditorInfo:Object = tabEditors[tabSpace.selectedIndex];
+        var inputList:List = tabEditorInfo.list as List;
         
         var array:Array = []
         if( inputList.dataProvider != null ) {
@@ -307,8 +318,17 @@
         
         var window:EditChatPaletteWindow = DodontoF.popup(EditChatPaletteWindow, true) as EditChatPaletteWindow;
         window.initParams(array, function(lines:Array):void {
-                inputList.dataProvider = lines;
+                setLines(lines, tabEditorInfo);
             });
+    }
+    
+    private function setLines(lines:Array, tabEditorInfo:Object):void {
+        var inputList:List = tabEditorInfo.list as List;
+        var changer:ChatPaletteChanger = tabEditorInfo.changer as ChatPaletteChanger;
+        
+        inputList.dataProvider = lines;
+        changer.setTexts(lines);
+        changer.analize();
     }
     
     private var typeName:String = "ChatPalette2";
@@ -378,14 +398,16 @@
             addPaletTab();
             
             var tabInfo:Object = tabInfos[i];
-            tabEditors[i].list.dataProvider = tabInfo.lines;
-            tabEditors[i].name.text = tabInfo.name;
+            var tabEditorInfo:Object = tabEditors[i];
+            
+            setLines(tabInfo.lines, tabEditorInfo);
+            tabEditorInfo.name.text = tabInfo.name;
             
             if( tabInfo.color != null ) {
-                tabEditors[i].colorPicker.selectedColor = tabInfo.color;
+                tabEditorInfo.colorPicker.selectedColor = tabInfo.color;
             }
             
-            tabEditors[i].changeNameFunction();
+            tabEditorInfo.changeNameFunction();
         }
     }
     
@@ -405,8 +427,8 @@
                 lines.push( line );
             }
             
-            var inputList:List = tabEditors[i].list as List;
-            inputList.dataProvider = lines;
+            var tabEditorInfo:Object = tabEditors[i];
+            setLines(lines, tabEditorInfo);
         }
     }
     

@@ -8,7 +8,11 @@
    showCloseButton="true"
    >
   
-  <mx:Label text="チャットパレット文字列:" />
+  <mx:HBox height="30" width="100%" >
+    <mx:Label text="チャットパレット文字列:" />
+    <mx:Spacer width="100%" />
+    <mx:Button id="helpSpace" label="？" click="Alert.show(getHelpMessage())"/>
+  </mx:HBox>
   <mx:TextArea id="lines" text="" width="100%" height="100%"/>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
@@ -21,6 +25,7 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
+    import mx.controls.Alert;
     
     static private var spliter:String = "\r";
     
@@ -32,6 +37,25 @@
     }
     
     override protected function setup():void {
+        setHelpMessage();
+    }
+    
+    private function getHelpMessage():String {
+        var message:String = "チャットパレットの使い方：\n"
+        + "登録したいメッセージをここに入力しましょう。\n"
+        + "1行1メッセージに対応します。\n"
+        + "文中に\n"
+        + "//予約語＝値\n"
+        + "と書いておくと、｛予約語｝という記述で文字と値の差し替えが出来ます。\n"
+        + "キャラクターの能力値やスキルの管理に便利かと思います。\n"
+        + "予約語の宣言は文中どこでも構いません（他のタブには影響しません）。\n"
+        + " // や = や {} といった記号や数値は全角・半角どちらでもOKです。";
+        
+        return message;
+    }
+        
+    private function setHelpMessage():void {
+        helpSpace.toolTip = getHelpMessage();
     }
     
     public function execute():void {

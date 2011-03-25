@@ -43,7 +43,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.01(2011/03/23)"
+$version = "Ver.1.30.02(2011/03/25)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -1562,13 +1562,14 @@ class DodontoFServer
   
   def deleteOldUploadFile()
     oneHour = (1 * 60 * 60)
-    deleteOldFile($fileUploadDir, oneHour)
+    deleteOldFile($fileUploadDir, oneHour, File.join($fileUploadDir, "dummy.txt"))
   end
   
-  def deleteOldFile(saveDir, limitSecond)
+  def deleteOldFile(saveDir, limitSecond, excludeFileName = nil)
     begin
       limitTime = (Time.now.to_i - limitSecond)
       fileNames = Dir.glob(File.join(saveDir, "*"))
+      fileNames.delete_if{|i| i == excludeFileName }
       
       fileNames.each do |fileName|
         fileName = fileName.untaint
