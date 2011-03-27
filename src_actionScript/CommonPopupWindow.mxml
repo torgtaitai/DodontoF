@@ -11,8 +11,9 @@
    >
   <mx:Script>
     <![CDATA[
+    
     import mx.collections.ArrayCollection;
-    //
+    
     [Bindable]
     static public var headerColorsArray:Array = [0x00CC66, 0x00CC66];//[0x0099CC, 0x0099CC]
     

@@ -120,20 +120,19 @@
     
     private var loginUserInfo:Array;
     
-    import mx.controls.DataGrid;
-    import mx.managers.DragManager;
-    import mx.events.DragEvent;
-    import mx.controls.ComboBox;
-    import mx.events.CloseEvent;
-    import mx.collections.ArrayCollection;
     import flash.net.FileReference;
+    import mx.collections.ArrayCollection;
     import mx.containers.TitleWindow;
     import mx.controls.Alert;
+    import mx.controls.ComboBox;
+    import mx.controls.DataGrid;
     import mx.core.IFlexDisplayObject;
     import mx.core.UIComponent;
+    import mx.events.CloseEvent;
+    import mx.events.DragEvent;
     import mx.events.MenuEvent;
+    import mx.managers.DragManager;
     import mx.managers.PopUpManager;
-    import mx.controls.ToolTip;
     
     protected static var thisObj:DodontoF;
     
@@ -277,12 +276,9 @@
     }
     
     private function initToolTip():void {
-        //StyleManager.getStyleDeclaration("ToolTip").setStyle("fontStyle", "regular");
-        StyleManager.getStyleDeclaration("ToolTip").setStyle("fontSize", "12");
-        //StyleManager.getStyleDeclaration("ToolTip").setStyle("fontFamily", "Arial");
-        //StyleManager.getStyleDeclaration("ToolTip").setStyle("color", "#FFFFFF");
-        //StyleManager.getStyleDeclaration("ToolTip").setStyle("backgroundColor", "#33CC99");
-        ToolTip.maxWidth = 450;
+        var fontSize:int = 12;
+        var maxWidth:int = 450;
+        Utils.setToolTipStyle(fontSize, maxWidth);
     }
     
     private function start():void {
@@ -314,7 +310,7 @@
         Alert.show( "次回実装予定。" );
     }
     
-    private function selectMenu(event:MenuEvent):void {
+    public function selectMenu(event:MenuEvent):void {
         var menuName:String = event.item.data;
         var toggled:Boolean = false;
         if( event.item != null ) {
@@ -566,15 +562,15 @@
         dataProvider.push(option_all);
         
         for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
-            var info:Object = loginUserInfo[i];
+            var userInfo:Object = loginUserInfo[i];
             
-            if( info.userId == dodontoF_Main.getUniqueId() ) {
+            if( userInfo.userId == dodontoF_Main.getUniqueId() ) {
                 continue;
             }
             
             var option:Object = {
-                label : info.userName,// + ":" + info.userId,
-                data : info.userId};
+                label : userInfo.userName,// + ":" + userInfo.userId,
+                data : userInfo.userId};
             dataProvider.push(option);
         }
         
@@ -583,8 +579,28 @@
         Utils.selectComboBox(sendto, preData);
     }
     
-    public function getLoginUserCount():int {
-        return loginUserInfo.length;
+    public function getLoginUserCount(isIncludeVisiter:Boolean):int {
+        if( isIncludeVisiter ) {
+            return loginUserInfo.length;
+        }
+        
+        return getLoginUserCountExcludeVisiter();
+    }
+    
+    public function getLoginUserCountExcludeVisiter():int {
+        var count:int = 0;
+        
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
+            var userInfo:Object = loginUserInfo[i];
+            
+            if( userInfo.isVisiter ) {
+                continue;
+            }
+            
+            count++;
+        }
+        
+        return count;
     }
     
     private function displayPlayRoomInfo():void {

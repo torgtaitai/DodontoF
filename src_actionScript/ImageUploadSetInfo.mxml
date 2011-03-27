@@ -9,13 +9,13 @@
     <mx:Label text="対応画像:JPEG/GIF/PNG/SWF（アニメGIFは1コマ目のみを表示）"/>
     <mx:Spacer width="100%" />
     <mx:Label id="passwordStatus" text="" width="100%" textAlign="right" />
-    <mx:Button height="20" label="隠し画像パスワード設定" fontWeight="nomal" click="createPasswordWindow()" />
+    <mx:Button height="20" label="隠し画像パスワード設定" fontWeight="normal" click="createPasswordWindow()" />
   </mx:HBox>
   
   <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
 	<mx:Label text="付与するタグ（半角・全角スペースで区切り）：" />
 	<mx:TextInput id="tagText" text="" width="100%" />
-    <mx:ComboBox id="imageType" fontWeight="nomal"  width="120" editable="false" change="imageTypeChanged()" >
+    <mx:ComboBox id="imageType" fontWeight="normal"  width="120" editable="false" change="imageTypeChanged()" >
     </mx:ComboBox>
   </mx:HBox>
   

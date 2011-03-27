@@ -43,7 +43,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.02(2011/03/25)"
+$version = "Ver.1.30.03(2011/03/27)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -560,9 +560,10 @@ class DodontoFServer
     
     uniqueId = refreshData['uniqueId'];
     userName = refreshData['userName'];
+    isVisiter = refreshData['isVisiter'];
     loginUserInfoSaveFile = @saveDirInfo.getTrueSaveFileName($loginUserInfo)
     
-    loginUserInfo = updateLoginUserInfo(loginUserInfoSaveFile, userName, uniqueId)
+    loginUserInfo = updateLoginUserInfo(loginUserInfoSaveFile, userName, uniqueId, isVisiter)
     
     saveData['lastUpdateTimes'] = lastUpdateTimes;
     saveData['refreshIndex'] = refreshIndex;
@@ -578,7 +579,7 @@ class DodontoFServer
     return saveData
   end
   
-  def updateLoginUserInfo(trueSaveFileName, userName = '', uniqueId = '')
+  def updateLoginUserInfo(trueSaveFileName, userName = '', uniqueId = '', isVisiter = false)
     logging(uniqueId, 'updateLoginUserInfo uniqueId')
     logging(userName, 'updateLoginUserInfo userName')
     
@@ -601,7 +602,7 @@ class DodontoFServer
     getDataFunction.call(trueSaveFileName) do |saveData|
       
       unless(isGetOnly)
-        changeUserInfo(saveData, uniqueId, nowSeconds, userName)
+        changeUserInfo(saveData, uniqueId, nowSeconds, userName, isVisiter)
       end
       
       saveData.delete_if do |existUserId, userInfo|
@@ -614,6 +615,9 @@ class DodontoFServer
           "userName" => userInfo['userName'],
           "userId" => userId, 
         }
+        
+        data['isVisiter'] = true  if( userInfo['isVisiter'] )
+        
         result << data
       end
     end
@@ -630,7 +634,7 @@ class DodontoFServer
     return ( diffSeconds > $loginTimeOut )
   end
   
-  def changeUserInfo(saveData, uniqueId, nowSeconds, userName)
+  def changeUserInfo(saveData, uniqueId, nowSeconds, userName, isVisiter)
     return if( uniqueId.empty? )
     
     isLogout = false
@@ -640,10 +644,14 @@ class DodontoFServer
     
     return if( isLogout )
     
-    saveData[uniqueId] = {
+    userInfo = {
       'userName'=>userName,
       'timeSeconds'=>nowSeconds,
     }
+    
+    userInfo['isVisiter'] = true  if( isVisiter )
+    
+    saveData[uniqueId] = userInfo
   end
   
   def addTextsCharacterImageList(imageList, *texts)

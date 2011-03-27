@@ -22,7 +22,7 @@
         </mx:FormItem>
         
 	    <mx:FormItem label="ダイス種別:">
-          <mx:ComboBox id="maxNumber"  fontWeight="nomal" editable="false" change="changeView()" >
+          <mx:ComboBox id="maxNumber"  fontWeight="normal" editable="false" change="changeView()" >
             <mx:ArrayCollection>
               <mx:Object label="D4" data="4"/>
               <mx:Object label="D6" data="6"/>

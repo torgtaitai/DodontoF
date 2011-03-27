@@ -6,17 +6,14 @@
 	<![CDATA[
 
 	import flash.events.Event;
-	import flash.events.FocusEvent;
     import mx.events.FlexEvent;
-	import mx.events.CollectionEvent;
-	import mx.events.CollectionEventKind;
 	import mx.controls.ComboBase;
 	import mx.controls.ComboBox;
 	import mx.events.DropdownEvent;
 	
 	// サジェスチョン時の要素フィルター用文字列
-	protected var filteringText:String = "";
-		
+	protected var filteringText:String;
+	
 	/** 
 	 * サジェスト処理を実装したフィルタリングメソッド.
 	 * 
@@ -51,17 +48,17 @@
 	 * @param	event:	テキスト入力イベント
 	 */
 	override protected function textInput_changeHandler(event:Event):void {
-		close();
+		this.close();
         
-		super.textInput_changeHandler(event);        
-		filteringText = prompt = this.text;
-		
+		super.textInput_changeHandler(event);
+        
+		filteringText = this.text;
 		collection.refresh();
-		//open();
-		textInput.selectRange(filteringText.length, filteringText.length);
-		filteringText = "";
+		this.text = filteringText;	// refresh後、textの値が消去されるためfilteringTextの値をバックする
+        
+		this.open();
 	}
-		
+	
 	/**
 	 * データプロバイダ変更イベントハンドラ.
 	 * 
@@ -72,25 +69,22 @@
 	 */
 	// データプロバイダ変更イベントハンドラ. 
 	override protected function collectionChangeHandler(event:Event):void {
-		if(event is CollectionEvent) {
-			super.collectionChangeHandler(event);
-			var ce:CollectionEvent = CollectionEvent(event);
-			if(ce.kind == CollectionEventKind.REFRESH && filteringText.length > 0) {
-				open(); // テキスト変更によるイベントはウィンドウを開く
-			}
-			if(collection.filterFunction == null) {
-				collection.filterFunction = suggestionFilter;
-			}
-		}
+		super.collectionChangeHandler(event);
+        
+		if(collection.filterFunction == null) {
+            collection.filterFunction = suggestionFilter;
+        }
 	}
     
+
     override protected function downArrowButton_buttonDownHandler(event:FlexEvent):void {
-		// 表示リストのフィルタリングを初期化
-		//collection.refresh() // ここでrefreshを実施するとドロップダウンが表示されなくなる不具合発生.PEND
-            
-		super.downArrowButton_buttonDownHandler(event);
+        filteringText = "";
+        collection.refresh();
+        
+        super.downArrowButton_buttonDownHandler(event);
     }
-		
+    
+    
 	]]>
 	</mx:Script>
 </mx:ComboBox>

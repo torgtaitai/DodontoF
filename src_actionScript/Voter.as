@@ -170,14 +170,19 @@ package {
                 return result;
             }
             
-            if( params.isCallTheRoll ) {
-                answerWindow = Alert.show("準備が出来たらOKを押してください", "点呼", 
-                                          Alert.OK | Alert.NONMODAL, null, 
-                                          getSendVoteReplay(params));
-            } else {
-                answerWindow = Alert.show(params.question, "投票", 
-                                          Alert.YES | Alert.NO | Alert.NONMODAL, null, 
-                                          getSendVoteReplay(params));
+            
+            //見学者には投票権無し。現実は非常だ…
+            if( ! DodontoF_Main.getInstance().isVisiterMode() ) {
+                
+                if( params.isCallTheRoll ) {
+                    answerWindow = Alert.show("準備が出来たらOKを押してください", "点呼", 
+                                              Alert.OK | Alert.NONMODAL, null, 
+                                              getSendVoteReplay(params));
+                } else {
+                    answerWindow = Alert.show(params.question, "投票", 
+                                              Alert.YES | Alert.NO | Alert.NONMODAL, null, 
+                                              getSendVoteReplay(params));
+                }
             }
             
             return result;

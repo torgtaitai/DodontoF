@@ -27,7 +27,6 @@ package {
     import mx.collections.ArrayCollection;
     import mx.containers.Box;
     import mx.controls.Alert;
-    import mx.core.Application;
     import mx.core.IFlexDisplayObject;
     import mx.events.CloseEvent;
     import mx.managers.BrowserManager;
@@ -394,7 +393,7 @@ package {
             }
             
             //今のＵＲＬに再ログイン
-            var url:String = mx.core.Application.application.url;
+            var url:String = Utils.getOwnRawUrl();;
             url = url.replace(/loginRoom=\d+\&?/, '');
             url = url.replace(/\?$/, '');
             url = url.replace(/\&$/, '');
@@ -1024,12 +1023,14 @@ package {
                 ]},
     
     {label:"ヘルプ", data:"pass",
-     children: [
-        {label:"バージョン", data:"version"},
-        {label:"マニュアル", data:"manual"},
-        {label:"チュートリアル動画", data:"tutorialReplay"},
-        {label:"オフィシャルサイトへ", data:"officialSite"}
-                ]}
+            children: [
+                       {label:"バージョン", data:"version"},
+                       {label:"マニュアル", data:"manual"},
+                       {label:"チュートリアル動画", data:"tutorialReplay"},
+                       {label:"オフィシャルサイトへ", data:"officialSite"}
+                       ]
+            },
+    
     /*
     ,{label:"ログ", data:"pass", 
      children: [
@@ -1044,4 +1045,5 @@ package {
                     ];
         }
 	}
+    
 }

@@ -2,21 +2,24 @@
 
 package {
     
-    import flash.display.Loader;
-    import mx.controls.ComboBox;
-    import mx.collections.ArrayCollection;
-    import mx.controls.Alert;
-    import mx.core.Application;
-    import mx.utils.URLUtil;
-    import mx.core.UIComponent;
     import com.adobe.serialization.json.JSON;
-    import flash.utils.Timer;
-    import flash.events.TimerEvent;
-    import flash.utils.ByteArray;
-    import mx.containers.TabNavigator;
+    import flash.display.Loader;
     import flash.events.KeyboardEvent;
+    import flash.events.TimerEvent;
     import flash.ui.Keyboard;
+    import flash.utils.ByteArray;
+    import flash.utils.Timer;
+    import mx.collections.ArrayCollection;
+    import mx.containers.TabNavigator;
+    import mx.controls.Alert;
+    import mx.controls.ComboBox;
     import mx.controls.Label;
+    import mx.controls.ToolTip;
+    //import mx.core.FlexGlobals;
+    import mx.core.UIComponent;
+    import mx.styles.CSSStyleDeclaration;
+    import mx.styles.StyleManager;
+    import mx.utils.URLUtil;
     
     public class Utils {
         
@@ -156,6 +159,11 @@ package {
             return url;
         }
         
+        public static function getOwnRawUrl():String {
+            //return FlexGlobals.topLevelApplication.application.url;
+            return mx.core.Application.application.url;
+        }
+        
         public static function isOwnHostUrl(url:String):Boolean {
             var httpExp:RegExp = /^http/;
             var httpExpResult:Object = httpExp.exec(url);
@@ -165,7 +173,7 @@ package {
             
             var targetServerName:String = URLUtil.getServerName(url);
             
-            var ownUrl:String = mx.core.Application.application.url;
+            var ownUrl:String = getOwnRawUrl();
             var ownServerName:String = URLUtil.getServerName(ownUrl);
             
             var result:Boolean = (ownServerName == targetServerName);
@@ -174,7 +182,7 @@ package {
         }
         
         public static function getOwnBaseUrl():String {
-            var url:String = mx.core.Application.application.url;
+            var url:String = getOwnRawUrl();
             Log.logging("getOwnUrlBase url", url);
             
             var regExp:RegExp = /(.+\/)/i;
@@ -191,7 +199,7 @@ package {
         }
         
         public static function getOwnUrl():String {
-            var url:String = mx.core.Application.application.url;
+            var url:String = getOwnRawUrl();
             Log.logging("url", url);
             var regExp:RegExp = /(.+\.swf)/i;
             var regResult:Object = regExp.exec(url);
@@ -394,6 +402,21 @@ package {
             label = null;
             
             return result;
+        }
+        
+        static public function setToolTipStyle(fontSize:int, maxWidth:int):void {
+            var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleDeclaration("ToolTip");
+            //var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleManager(null).getStyleDeclaration("ToolTip");
+            
+            toolTipStyle.setStyle("fontSize", fontSize);
+            /*
+            toolTipStyle.setStyle("fontStyle", "regular");
+            toolTipStyle.setStyle("fontFamily", "Arial");
+            toolTipStyle.setStyle("color", "#FFFFFF");
+            toolTipStyle.setStyle("backgroundColor", "#33CC99");
+            */
+            
+            ToolTip.maxWidth = maxWidth;
         }
         
     }

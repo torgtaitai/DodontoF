@@ -42,19 +42,19 @@
     override protected function setup():void {
         checkVoteMode();
         
-        var loginCount:int = DodontoF_Main.getInstance().getDodontoF().getLoginUserCount();
+        var loginCount:int = DodontoF_Main.getInstance().getDodontoF().getLoginUserCount(false);
+        
         if( loginCount <= 1 ) {
-            status = "ログインユーザーが１名のため点呼は実施できません。";
+            status = "点呼を実施するには少なくとももう一人参加者が必要です。";
             executeButton.enabled = false;
         }
         
         //点呼最大人数の設定。自分自身は対象外なので -1 する。
-        var voteMaxCount:int = DodontoF_Main.getInstance().getDodontoF().getLoginUserCount() - 1;
+        var voteMaxCount:int = loginCount - 1;
         
         voteMaxCounter.value = voteMaxCount;
         voteMaxCounter.maximum = voteMaxCount;
         voteMaxCountLabel.text = " / " + voteMaxCount;
-        
     }
     
     private var voter:Voter;

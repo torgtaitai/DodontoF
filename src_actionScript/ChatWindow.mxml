@@ -748,7 +748,11 @@
         }
         
         public function getChatCharacterName():String {
-            return chatCharacterName.text;
+            var name:String = chatCharacterName.text;
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                name += "＠見学";
+            }
+            return name;
         }
         
         public function refreshChatCharacterName():void {
@@ -1210,13 +1214,6 @@
                 channel = this.lastChatChannel;
             }
             return channel;
-        }
-        
-        public function changeCharacterNameWhenVisiter(name:String):String {
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                name += "＠見学";
-            }
-            return name;
         }
         
         public function sendChatMessage_selected(chatMessage:String):void {

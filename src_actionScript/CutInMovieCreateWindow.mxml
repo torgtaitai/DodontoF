@@ -53,7 +53,7 @@
         </mx:FormItem>
         
 	    <mx:FormItem label="表示位置:" >
-          <mx:ComboBox id="positionCoboBox"  fontWeight="nomal" editable="false" toolTip="カットインの表示位置を指定します。">
+          <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false" toolTip="カットインの表示位置を指定します。">
             <mx:Object label="中央"     data="center" />
             <mx:Object label="上部中央" data="up" />
             <mx:Object label="上部右"   data="up,right" />

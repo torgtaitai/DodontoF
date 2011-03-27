@@ -416,7 +416,12 @@ package {
                 "lastUpdateTimes": this.lastUpdateTimes,
                 "refreshIndex": this.refreshIndex,
                 "uniqueId": this.uniqueId,
-                "userName": userName};
+                "userName": userName
+            };
+            
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                jsonData["isVisiter"] = true;
+            }
             
             if( DodontoF_Main.getInstance().getMentenanceModeOn() ) {
                 jsonData.uniqueId = -1;

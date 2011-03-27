@@ -75,25 +75,35 @@
       
       <mx:TextInput id="adminPassword" text="管理用パスワード" width="0" height="0" enabled="false"
                     />
+      
+      <mx:MenuBar id="helpMenuBar"
+                  height="100%" 
+                  dataProvider="{menuArray}" 
+                  labelField="label"
+                  itemClick="selectMenu(event)"
+                  />
     </mx:HBox>
     
     <mx:HBox id="extendBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
       <mx:Spacer width="100%" />
       <mx:Button label="指定プレイルームを削除" click="this.removePlayRoom( roomNumberInput.text )" />
       <mx:Spacer width="20" />
-      <mx:Button label="リプレイ編集" click="editReplayData();" />
-      <mx:Button label="リプレイ投稿" click="uploadReplayData();" />
-      <mx:Button label="リプレイ再生" click="replaySessionRecord();" />
+      <mx:Button label="リプレイ編集" click="editReplayData();" fontWeight="normal" />
+      <mx:Button label="リプレイ投稿" click="uploadReplayData();" fontWeight="normal" />
+      <mx:Button label="リプレイ再生" click="replaySessionRecord();" fontWeight="normal" />
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="createNewPlayRoomButton" label="新規プレイルーム作成" click="createPlayRoom()"  enabled="false" />
+      <mx:Button id="createNewPlayRoomButton" label="新規プレイルーム作成"
+                 click="createPlayRoom()"  enabled="false"
+                 fontWeight="normal"
+      />
       <mx:Spacer width="50%" />
 	  <mx:Label text="プレイルームNo." />
       <mx:TextInput id="roomNumberInput" text="0" width="50" />
       <mx:Button id="loginButton" label="ログイン" click="login( parseInt(roomNumberInput.text) )" enabled="false" />
       <mx:Spacer width="50%" />
-      <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()"  enabled="false" />
+      <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()"  enabled="false" fontWeight="normal" />
     </mx:HBox>
     
   </mx:Box>
@@ -113,9 +123,11 @@
     import mx.controls.Alert;
     import mx.core.IFlexDisplayObject;
     import mx.events.CloseEvent;
-    import mx.events.ListEvent;
     import mx.events.DataGridEvent;
+    import mx.events.ListEvent;
+    import mx.events.MenuEvent;
     import mx.managers.PopUpManager;
+    
     
     private var guiInputSender:GuiInputSender;
     private var isReplay:Boolean;
@@ -153,7 +165,29 @@
         this.requestLoginInfo();
         loadPlayerInfo();
         
+        menuArray = getMenu();
+        
         setAdminMode();
+    }
+    
+    [Bindable]
+    private var menuArray:Array;
+    
+    private function getMenu():Array {
+        return [
+                {label:"ヘルプ", data:"pass",
+                        children: [
+                                   {label:"バージョン", data:"version"},
+                                   {label:"マニュアル", data:"manual"},
+                                   {label:"チュートリアル動画", data:"tutorialReplay"},
+                                   {label:"オフィシャルサイトへ", data:"officialSite"}
+                                   ]
+                        }
+                ];
+	}
+    
+    private function selectMenu(event:MenuEvent):void {
+        DodontoF_Main.getInstance().getDodontoF().selectMenu(event);
     }
     
     private function setAdminMode():void {
@@ -169,7 +203,8 @@
         if( index == -1 ) {
             return;
         }
-        roomNumberInput.text = getRoomNumberStringByIndex(index);
+        
+        roomNumberInput.text = "" + index;
     }
     
     private function rollOverPlayRoomStateInfo(event:ListEvent):void {
@@ -213,10 +248,6 @@
         return playRoomStates[index].index
     }
 
-    private function getRoomNumberStringByIndex(index:int):String {
-        return "" + playRoomStates[index].index;
-    }
-    
     private function getSelectedRoomName():String {
         var index:int = getSelectedRoomNumber();
         if( index == -1 ) {
@@ -536,7 +567,7 @@
             return;
         }
         
-        var currentUrl:String = mx.core.Application.application.url;
+        var currentUrl:String = Utils.getOwnRawUrl();
         var targetUrl:String = currentUrl;
         
         if( currentUrl.indexOf("loginRoom=") == -1 ) {

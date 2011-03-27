@@ -60,7 +60,6 @@ package {
         
         public function getName():String {
             var nameString:String = getValue(name, getChatWindw().getChatCharacterName());
-            nameString = ChatWindow.getInstance().changeCharacterNameWhenVisiter(nameString);
             return nameString;
         }
         
