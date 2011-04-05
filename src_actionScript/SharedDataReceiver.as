@@ -246,7 +246,7 @@ package {
             if( jsonData.chatMessageDataLog &&
                 sender.checkLastUpdateTimes('chatMessageDataLog', jsonData.lastUpdateTimes) ) {
                 Log.logging("analyzeChatMessageDataLog(jsonData.chatMessageDataLog) begin");
-                this.analyzeChatMessageDataLog(jsonData.chatMessageDataLog);
+                jsonData.chatMessageDataLog = this.analyzeChatMessageDataLog(jsonData.chatMessageDataLog);
                 isFirstChatRefreshFlag = false;
             }
             
@@ -328,14 +328,13 @@ package {
             DodontoF_Main.getInstance().setEffects( tmp );
         }
         
-        private function analyzeChatMessageDataLog(chatMessageDataLogObj:Object):void {
-            Log.logging("chatMessageDataLogObj", chatMessageDataLogObj);
+        private function analyzeChatMessageDataLog(chatMessageDataLogObj:Object):Object {
+            var result:Array = new Array();
             
             var chatMessageDataLog:Array = chatMessageDataLogObj as Array;
             Log.logging("chatMessageDataLog", chatMessageDataLog);
             
             var lastWrittenTime:Number = this.chatMessageDataLastWrittenTime;
-            Log.logging("lastWrittenTime", lastWrittenTime);
             
             for(var i:int = 0 ; i < chatMessageDataLog.length ; i++) {
                 var chatMessageDataSet:Object = chatMessageDataLog[i];
@@ -361,15 +360,20 @@ package {
                 var sendto:String = chatMessageData['sendto'];
                 var channel:int = chatMessageData['channel'];
                 
-                DodontoF_Main.getInstance().getChatWindow()
+                var isValidMessage:Boolean = ChatWindow.getInstance()
                     .addMessageToChatLogParts(channel,
                                               senderName, chatMessage,
                                               color, writtenTime, chatSenderUniqueId,
                                               messageIndex, sendto);
+                if( isValidMessage ) {
+                    result.push(chatMessageDataSet);
+                }
             }
-            DodontoF_Main.getInstance().getChatWindow().printAddedMessageToChatMessageLog();
+            ChatWindow.getInstance().printAddedMessageToChatMessageLog();
             
             this.chatMessageDataLastWrittenTime = lastWrittenTime;
+            
+            return result;
         }
         
         private function analyzeMap(mapData:Object):void {

@@ -174,15 +174,14 @@ package {
                                                  messageIndex:int = -1,
                                                  sendto:String = null,
                                                  isReplayChatMessage:Boolean = false
-                                                 ):void {
-            
+                                                 ):Boolean {
             Log.logging("addMessageToChatLog called");
             
             //自分の発言が戻ってきた場合は表示無し
             if( (senderName != systemMessageSenderName) && (senderName != "") ) {
                 if( getOwnUniqueId() == chatSenderUniqueId ) {
                     Log.logging("it's own message");
-                    return;
+                    return false;
                 }
             }
             
@@ -191,14 +190,14 @@ package {
                     var messageData:Object = [channel, senderName, chatMessage, color, time, chatSenderUniqueId];
                     DodontoF_Main.getInstance().addRestChatMessageForReplay(messageData);
                     Log.logging("it's replay log.");
-                    return;
+                    return false;
                 }
             }
             
             if( ! isPrintableMessageOnSecretMessage(chatSenderUniqueId, sendto) ) {
                 //指定外のユーザーのためログ表示無し
                 Log.logging("it's NOT printable message");
-                return;
+                return false;
             }
             
             
@@ -207,7 +206,7 @@ package {
             senderName = effectResult.senderName;
             if( chatMessage == null ) {
                 Log.logging("effectResult.chatMessage is null");
-                return;
+                return false;
             }
             
             senderName = escapeHtml(senderName);
@@ -232,8 +231,9 @@ package {
             //printUpdateDateString(time);
             chatWindow.playAddMessageSound(senderName);
             chatWindow.setUserNames(senderName);
-        
+            
             Log.logging("addMessageToChatLog end");
+            return true;
         }
         
         static public function isValidSendTo(sendto:String):Boolean {

@@ -1469,17 +1469,17 @@
                                                  chatSenderUniqueId:String,
                                                  messageIndex:int = -1,
                                                  sendto:String = null,
-                                                 isReplayChatMessage:Boolean = false):void {
+                                                 isReplayChatMessage:Boolean = false):Boolean {
             
-            chatMessageTrader.addMessageToChatLogParts(channel,
-                                                       senderName,
-                                                       chatMessage,
-                                                       color,
-                                                       time,
-                                                       chatSenderUniqueId,
-                                                       messageIndex,
-                                                       sendto,
-                                                       isReplayChatMessage);
+            return chatMessageTrader.addMessageToChatLogParts(channel,
+                                                              senderName,
+                                                              chatMessage,
+                                                              color,
+                                                              time,
+                                                              chatSenderUniqueId,
+                                                              messageIndex,
+                                                              sendto,
+                                                              isReplayChatMessage);
         }
         
         public function printAddedMessageToChatMessageLog():void {
