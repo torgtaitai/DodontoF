@@ -996,6 +996,10 @@ package {
         {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
         {label:"魔法タイマー追加", data:"addMagicTimer"},
         {label:"墓場", data:"graveyard"},
+        /*
+        {type:"separator"},
+        {label:"キャラクター待合室", data:"characterWaitingRoom"},
+        */
                 ]},
     
     {label:"カード", data:"pass",

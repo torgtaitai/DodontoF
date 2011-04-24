@@ -19,6 +19,7 @@
                      change="getPlayRoomStates()"
                      paddingTop="0" paddingBottom="0" 
                      paddingRight="0" paddingLeft="0" 
+                     enabled="false"
                      >
     </mx:TabNavigator>
     
@@ -86,7 +87,7 @@
     
     <mx:HBox id="extendBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
       <mx:Spacer width="100%" />
-      <mx:Button label="指定プレイルームを削除" click="this.removePlayRoom( roomNumberInput.text )" />
+      <mx:Button label="指定プレイルームを削除" click="this.removePlayRoom()" />
       <mx:Spacer width="20" />
       <mx:Button label="リプレイ編集" click="editReplayData();" fontWeight="normal" />
       <mx:Button label="リプレイ投稿" click="uploadReplayData();" fontWeight="normal" />
@@ -249,7 +250,7 @@
     }
 
     private function getSelectedRoomName():String {
-        var index:int = getSelectedRoomNumber();
+        var index:int = playRoomStateInfo.selectedIndex;
         if( index == -1 ) {
             return "";
         }
@@ -301,14 +302,15 @@
     }
     
     public function getPlayRoomStatesByIndex(index:int, isForce:Boolean = false):void {
+        enableLoginButton(false);
+        
         if( ! isForce ) {
             if( playRoomStatesList[index] != null ) {
                 playRoomStates = playRoomStatesList[index];
+                enableLoginButton(true);
                 return;
             }
         }
-        
-        enableLoginButton(false);
         
         var min:int = index * playRoomGetRangeMax;
         var max:int = min + playRoomGetRangeMax - 1;
@@ -403,9 +405,11 @@
         }
     }
     
-    public function removePlayRoom(roomNumberString:String):void {
+    public function removePlayRoom():void {
         try{
-            var roomNumber:int = guiInputSender.checkRoomNumber( parseInt(roomNumberString) );
+            var roomNumber:int = getSelectedRoomNumber();
+            guiInputSender.checkRoomNumber( roomNumber );
+            
             var roomName:String = getSelectedRoomName();
             
             var message:String = "No." + roomNumber + "：" + roomName + "を削除しますか？";
@@ -495,6 +499,7 @@
         loginButton.enabled = b;
         playRoomStateInfo.enabled = b;
         createNewPlayRoomButton.enabled = b;
+        playRoomStateTabs.enabled = b;
     }
     
     public function checkRoomStatusResult(obj:Object):void {

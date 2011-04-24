@@ -1018,6 +1018,16 @@ package {
             this.sendCommandData(params);
         }
         
+        public function shuffleForNextRandomDungeon(mountName:String, mountId:String):void {
+            var jsonData:Object = {
+                "mountName": mountName,
+                "mountId": mountId
+            };
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("shuffleForNextRandomDungeon", [["params", jsonParams]]);
+            this.sendCommandData(params);
+        }
+        
         public function clearCards():void {
             var jsonData:Object = {
                 "types": [Card.getTypeStatic(), CardMount.getTypeStatic()]
@@ -1144,7 +1154,7 @@ package {
         public function shuffleCards( mountName:String, id_:String, isShuffle:Boolean ):void {
             var jsonData:Object = {
                 "mountName": mountName,
-                "imgId": id_,
+                "mountId": id_,
                 "isShuffle": isShuffle
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
@@ -1163,12 +1173,13 @@ package {
             this.sendCommandData(params);
         }
         
-        public function getMountCardInfos(mountName:String, resultFunction:Function):void {
+        public function getMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
             var cardName:String = InitCardWindow.getCardName(mountName);
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + cardName + "」の山札を参照しています。");
             
             var jsonData:Object = {
-                "mountName": mountName
+                "mountName": mountName,
+                "mountId": mountId
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
             var params:String = this.getParamString("getMountCardInfos", [["data", jsonParams]]);

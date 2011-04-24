@@ -19,10 +19,10 @@ package {
     import mx.containers.Box;
     import mx.effects.Glow;
     
-    public class CardTrushMount extends CardMount {
+    public class RandomDungeonCardTrushMount extends CardTrushMount {
         
         public static function getTypeStatic():String {
-            return "CardTrushMount";
+            return "RandomDungeonCardTrushMount";
         }
         
         override public function getType():String {
@@ -48,32 +48,12 @@ package {
             return characterJsonData;
         }
         
-        public function CardTrushMount(params:Object) {
+        public function RandomDungeonCardTrushMount(params:Object) {
             super(params);
-        }
-        
-        override protected function setParams(params:Object):void {
-            super.setParams(params);
         }
         
         override public function getTitleText():String {
             return "捨て札：" + getCardCount() + "枚";
-        }
-        
-        override protected function isOwner():Boolean {
-            return false;
-        }
-        
-        override protected function isSetViewForevroungOnMouseClicked():Boolean {
-            return false;
-        }
-        
-        public function hitTestObject(card:Card):Boolean {
-            return view.hitTestObject(card.getView());
-        }
-        
-        override protected function isPrintCardText():Boolean {
-            return false;
         }
         
         override protected function initContextMenu():void {
@@ -81,45 +61,17 @@ package {
             menu.hideBuiltInItems();
             
             addMenuItem(menu, "一番上のカードを場に戻す", getContextMenuItemCardReturn);
-            addMenuItem(menu, "捨て札を山札に積んでシャッフルする", getContextMenuItemCardShuffle, true);
-            addMenuItem(menu, "捨て札をそのまま山札に積んで、シャッフルしない", getContextMenuItemCardNoShuffle, true);
+            addMenuItem(menu, "Aのみ山に戻して次のダンジョンタイルを準備する", getContextShuffleForNextRandomDungeon, true);
             
             view.contextMenu = menu;
         }
         
-        protected function getContextMenuItemCardReturn(event:ContextMenuEvent):void {
+        private function getContextShuffleForNextRandomDungeon(event:ContextMenuEvent):void {
             try {
-                returnCard();
+                sender.shuffleForNextRandomDungeon(this.getMountName(), this.getId());
             } catch(e:Error) {
                 Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
             }
-        }
-        
-        private function returnCard():void {
-            sender.returnCard( getMountName(),
-                               this.getX(),
-                               this.getY(),
-                               getId() );
-        }
-        
-        private function getContextMenuItemCardShuffle(event:ContextMenuEvent):void {
-            try {
-                shuffleCards(true);
-            } catch(e:Error) {
-                Log.loggingException("CardTrushMount.getContextMenuItemCardShuffle()", e);
-            }
-        }
-        
-        private function getContextMenuItemCardNoShuffle(event:ContextMenuEvent):void {
-            try {
-                shuffleCards(false);
-            } catch(e:Error) {
-                Log.loggingException("CardTrushMount.getContextMenuItemCardNoShuffle()", e);
-            }
-        }
-        
-        private function shuffleCards(isShuffle:Boolean):void {
-            sender.shuffleCards( this.getMountName(), this.getId(), isShuffle );
         }
         
    }

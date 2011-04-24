@@ -253,15 +253,15 @@ package {
             Log.logging("jsonData.characters", jsonData.characters);
             Log.logging("jsonData.lastUpdateTimes", jsonData.lastUpdateTimes);
             
+            if( jsonData.roundTimeData &&
+                sender.checkLastUpdateTimes('time', jsonData.lastUpdateTimes) ) {
+                this.analyzeTime(jsonData.roundTimeData);
+            }
+            
             if( jsonData.characters &&
                 sender.checkLastUpdateTimes('characters', jsonData.lastUpdateTimes) ) {
                 
                 this.analyzeCharacterData(jsonData.characters);
-            }
-            
-            if( jsonData.roundTimeData &&
-                sender.checkLastUpdateTimes('time', jsonData.lastUpdateTimes) ) {
-                this.analyzeTime(jsonData.roundTimeData);
             }
             
             if( jsonData.mapData &&
@@ -503,41 +503,33 @@ package {
             return history;
         }
         
+        private static var pieceClassList:Array = [MagicRange,
+                                                   MagicRangeDD4th,
+                                                   MapMask,
+                                                   MapMarker,
+                                                   Memo,
+                                                   FloorTile,
+                                                   DiceSymbol,
+                                                   MagicTimer,
+                                                   CardZone,
+                                                   Card,
+                                                   CardMount,
+                                                   RandomDungeonCardMount,
+                                                   CardTrushMount,
+                                                   RandomDungeonCardTrushMount,
+                                                   Character ];
+        
         private function createPieceFromCharacterData(characterData:Object):Piece {
             var piece:Piece = null;
             
-            if( characterData.type == MagicRange.getTypeStatic() ) {
-                piece = new MagicRange(characterData);
-            } else if( characterData.type == MagicRangeDD4th.getTypeStatic() ) {
-                piece = new MagicRangeDD4th(characterData);
-            } else if( characterData.type == MapMask.getTypeStatic() ) {
-                piece = new MapMask(characterData);
-            } else if( characterData.type == MapMarker.getTypeStatic() ) {
-                piece = new MapMarker(characterData);
-            } else if( characterData.type == Memo.getTypeStatic() ) {
-                piece = new Memo(characterData);
-            } else if( characterData.type == FloorTile.getTypeStatic() ) {
-                piece = new FloorTile(characterData);
-            } else if( characterData.type == DiceSymbol.getTypeStatic() ) {
-                piece = new DiceSymbol(characterData);
-            } else if( characterData.type == MagicTimer.getTypeStatic() ) {
-                piece = new MagicTimer(characterData);
-            } else if( characterData.type == CardZone.getTypeStatic() ) {
-                piece = new CardZone(characterData);
-            } else if( characterData.type == Card.getTypeStatic() ) {
-                piece = new Card(characterData);
-            } else if( characterData.type == CardMount.getTypeStatic() ) {
-                piece = new CardMount(characterData);
-            } else if( characterData.type == CardTrushMount.getTypeStatic() ) {
-                piece = new CardTrushMount(characterData);
-            } else if( characterData.type == Character.getTypeStatic() ) {
-                piece = new Character(characterData);
-                /*
-            } else if( characterData.type == StatusMarker.getTypeStatic() ) {
-                piece = new StatusMarker(characterData);
-                */
-            } else {
-                var message:String = "SharedDataReceiver.createCharacterFromCharacterData() Unknown characterData receivered.";
+            for each(var pieceClass:Object in pieceClassList) {
+                if( characterData.type == pieceClass.getTypeStatic() ) {
+                    piece = new pieceClass(characterData);
+                }
+            }
+            
+            if( piece == null ) {
+                var message:String = "SharedDataReceiver.createCharacterFromCharacterData Unknown characterData : ";
                 Log.loggingError( message + "imgId", characterData.imgId);
                 Log.loggingError( message + "type", characterData.type);
                 return null;

@@ -50,7 +50,7 @@
     
     public function closeWindow():void {
         try {
-            map.getCardLayer().removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+            layer.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             layer.removeEventListener(DragEvent.DRAG_ENTER, dragEnter);
         } catch(e:Error) {
         }
@@ -76,9 +76,12 @@
     
     private var cardMount:CardMount;
     
-    public function setMountName(cardMount_:CardMount):void {
+    public function setCardMount(cardMount_:CardMount):void {
         cardMount = cardMount_;
-        DodontoF_Main.getInstance().getGuiInputSender().getMountCardInfos(cardMount.getMountName(), printMountCardInfos);
+        DodontoF_Main.getInstance().getGuiInputSender()
+            .getMountCardInfos( cardMount.getMountName(),
+                                cardMount.getId(),
+                                printMountCardInfos);
     }
     
     public function printMountCardInfos(event:Event):void {
@@ -131,8 +134,6 @@
         
         return card;
     }
-    
-    private var startPosition:Point = new Point();
     
     private function getCardComponent(card:Card):UIComponent {
         var component:UIComponent = new UIComponent();

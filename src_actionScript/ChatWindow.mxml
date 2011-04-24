@@ -1622,7 +1622,7 @@
             
             for(var i:int = 0 ; i < chatLogList.length ; i++) {
                 var line:String = chatLogList[i];
-                chatLogHtml += line.replace(/\r/g, "<br>\n") + "<br>\n";
+                chatLogHtml += line.replace(/\r/g, "<br>\r\n") + "<br>\r\n";
             }
             
             chatLogHtml += "  </body>\n";

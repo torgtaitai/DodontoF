@@ -9,7 +9,9 @@
    >
   
   <mx:Box width="100%" height="100%">
-    <mx:Box id="infoBox" width="100%" />
+    <mx:Box id="infoBox" width="100%"
+            verticalGap="2" horizontalGap="2" 
+            />
     <mx:HBox width="100%" height="100%">
       <mx:Label id="inputLabel" text="入力:" />
       <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />

@@ -130,15 +130,19 @@ package {
             return findExistCharacterById(characterData.imgId);
         }
         
-        public function getTargetTypes(targetType:String):Array {
+        public function getTargetTypes(targetTypes:Array):Array {
             var results:Array = new Array();
             
             for(var i:int = 0 ; i < existPieces.length ; i++) {
                 var piece:Piece = existPieces[i];
-                if( piece.getType() != targetType ) {
-                    continue;
+                
+                for each( var type:String in targetTypes ) {
+                    if( piece.getType() != type ) {
+                        continue;
+                    }
+                    
+                    results.push(piece);
                 }
-                results.push(piece);
             }
             
             return results;
@@ -1038,7 +1042,8 @@ package {
                 return null;
             }
             
-            var trushMounts:Array = getTargetTypes(CardTrushMount.getTypeStatic());
+            var trushMounts:Array = getTargetTypes( [CardTrushMount.getTypeStatic(),
+                                                     RandomDungeonCardTrushMount.getTypeStatic()] );
             
             for(var i:int = 0 ; i < trushMounts.length ; i++) {
                 var trushMount:CardTrushMount = trushMounts[i];

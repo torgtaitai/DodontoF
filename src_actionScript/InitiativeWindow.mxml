@@ -84,19 +84,12 @@
       	                 minWidth="20"
                          width="30"
                          />
-      <!--
-	  <mx:DataGridColumn headerText="補足説明"
-                         dataField="state"
-                         textAlign="left"
-                         editable="false"
-      	                 minWidth="20"
-                         width="30"
-                         />
-      -->
-      <!-- 一番手抜き名やり方で、カウンター10個羅列（あぁ…僕はなんてい卑しいんだ…）-->
-
       
-	  <mx:DataGridColumn id="counterBegin"
+      <!-- 一番手抜き名やり方で、カウンター10個羅列（あぁ…僕はなんてい卑しいんだ…）-->
+      
+      
+      
+      <mx:DataGridColumn id="counter0"
                          visible="false"
                          headerText=""
                          editorDataField="value"
@@ -112,6 +105,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox0"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox0"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor0}" enabled="{data.checkBoxEnable0}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter1"
                          visible="false"
                          headerText=""
@@ -128,6 +139,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox1"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox1"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor1}" enabled="{data.checkBoxEnable1}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter2"
                          visible="false"
                          headerText=""
@@ -144,6 +173,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox2"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox2"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor2}" enabled="{data.checkBoxEnable2}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter3"
                          visible="false"
                          headerText=""
@@ -160,6 +207,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox3"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox3"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor3}" enabled="{data.checkBoxEnable3}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter4"
                          visible="false"
                          headerText=""
@@ -176,6 +241,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox4"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox4"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor4}" enabled="{data.checkBoxEnable4}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter5"
                          visible="false"
                          headerText=""
@@ -192,6 +275,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox5"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox5"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor5}" enabled="{data.checkBoxEnable5}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter6"
                          visible="false"
                          headerText=""
@@ -208,6 +309,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox6"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox6"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor6}" enabled="{data.checkBoxEnable6}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter7"
                          visible="false"
                          headerText=""
@@ -224,6 +343,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox7"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox7"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor7}" enabled="{data.checkBoxEnable7}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter8"
                          visible="false"
                          headerText=""
@@ -240,6 +377,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox8"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox8"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor8}" enabled="{data.checkBoxEnable8}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counter9"
                          visible="false"
                          headerText=""
@@ -256,6 +411,24 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
+      <mx:DataGridColumn id="checkBox9"
+                         visible="false"
+                         headerText=""
+                         editorDataField="selected"
+                         dataField="checkBox9"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="15"
+                         width="25"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox iconColor="{data.columnColor9}" enabled="{data.checkBoxEnable9}" />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+         
 	  <mx:DataGridColumn id="counterEnd" width="0" visible="false"/>
       
       
@@ -305,6 +478,8 @@
       import flash.events.KeyboardEvent;
       import mx.effects.Glow;
       import mx.controls.TextArea;
+      import mx.controls.CheckBox;
+      import mx.styles.CSSStyleDeclaration;
       
       private function getRoundTimer():RoundTimer {
         var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
@@ -396,6 +571,25 @@
       public function resizeInitiativeInfoBox():void {
       }
       
+      public function getCheckBoxInfos():Array {
+          var checkBoxInfos:Array = [];
+          
+          var counterNames:Array = getCounterNames();
+          
+          for(var i:int = 0 ; i < counterNames.length ; i++) {
+              var counterName:String = counterNames[i];
+              
+              var columnInfo:Object = getColumnInfo(counterName, checkBoxInfos.length);
+              if( ! columnInfo.isCheckBox ) {
+                  continue;
+              }
+              
+              checkBoxInfos.push(columnInfo);
+          }
+          
+          return checkBoxInfos;
+      }
+      
       private function getCounterNames():Array {
           return getRoundTimer().getCounterNames();
       }
@@ -403,15 +597,18 @@
       private function initColumns():void {
           var counterNames:Array = getCounterNames();
           
+          var checkBoxIndex:int = 0;
           var counterBeginIndex:int = -1;
-          for(var i:int = 0 ; i < initiativeInfoListView.columns.length ; i++) {
-              var column:DataGridColumn = initiativeInfoListView.columns[i];
+          var columns:Array = initiativeInfoListView.columns;
+          for(var i:int = 0 ; i < columns.length ; i++) {
+              var column:DataGridColumn = columns[i];
+              var checkBoxColumn:DataGridColumn = columns[i + 1];
               
               if( column == counterEnd ) {
                   break;
               }
               
-              if( column == counterBegin ) {
+              if( column == counter0 ) {
                   counterBeginIndex = i;
               }
               
@@ -419,19 +616,86 @@
                   continue;
               }
               
-              var counterIndex:int = i - counterBeginIndex;
+              var index:int = i - counterBeginIndex;
+              if( (index % 2) != 0 ) {
+                  continue;
+              }
               
-              column.headerText = "" + counterIndex;
+              var counterIndex:int = index / 2;
               
               if( counterIndex >= counterNames.length ) {
                   column.visible = false;
                   column.width = 0;
+                  checkBoxColumn.visible = false;
+                  checkBoxColumn.width = 0;
                   continue;
               }
               
-              column.visible = true;
-              column.headerText = counterNames[counterIndex];
+              var counterName:String = counterNames[counterIndex];
+              var columnInfo:Object = getColumnInfo(counterName, checkBoxIndex);
+              
+              var mainColumn:DataGridColumn = null;
+              var subColumn:DataGridColumn = null;
+              if( columnInfo.isCheckBox ) {
+                  checkBoxIndex++;
+                  
+                  subColumn = column;
+                  mainColumn = checkBoxColumn;
+              } else {
+                  subColumn = checkBoxColumn;
+                  mainColumn = column;
+              }
+              
+              subColumn.visible = false;
+              mainColumn.visible = true;
+              mainColumn.headerText = columnInfo.title;
+              //mainColumn.setStyle("backgroundColor", columnInfo.color);
+              
+              var headerStyle:CSSStyleDeclaration = new CSSStyleDeclaration;
+              headerStyle.setStyle("color", columnInfo.color);
+              mainColumn.setStyle("headerStyleName", headerStyle);
           }
+      }
+      
+      
+      private function getDefaultColor(index:int):String {
+          var colors:Array = [0xD40045,
+                              0x99CF15,
+                              0x0F218B,
+                              0xFF7F00,
+                              0x008678,
+                              0x56007D,
+                              0xFE4118,
+                              0x33A23D,
+                              0x281285,
+                              0xFFE600,
+                              0x055D87,
+                              0xAF0065];
+          
+          return colors[ (index % colors.length) ];
+      }
+      
+      private function getColumnInfo(counterName:String, index:int = 0):Object {
+          var columnInfo:Object = {
+              "counterName": counterName,
+              "isCheckBox": false,
+              "title": counterName,
+              "color": null
+          };
+          
+          var matchResult:Object = /^(\*|＊)?([^#]+)?$/.exec(counterName);
+          if( matchResult == null ) {
+              return columnInfo;
+          }
+          
+          columnInfo.isCheckBox = (matchResult[1] != null);
+          columnInfo.title = matchResult[2];
+          
+          if( columnInfo.isCheckBox ) {
+              columnInfo.color = getDefaultColor(index);
+          }
+          
+          return columnInfo;
       }
       
       public function getListCharacter():InitiativedPiece {
@@ -532,9 +796,21 @@
           characterInfo["info"] = piece.getInfo();
           characterInfo["character"] = piece;
           
+          var checkBoxIndex:int = 0;
           for(var i:int ; i < counterNames.length ; i++) {
               var counterName:String = counterNames[i];
-              characterInfo["counter" + i] = piece.getCounter(counterName);
+              var count:int = piece.getCounter(counterName);
+              var columnInfo:Object = getColumnInfo(counterName, checkBoxIndex);
+              
+              if( columnInfo.isCheckBox ) {
+                  checkBoxIndex++;
+                  var b:Boolean = (count != 0);
+                  characterInfo["checkBox" + i] = b;
+                  characterInfo["checkBoxEnable" + i] = piece.hasStatus();
+                  characterInfo["columnColor" + i] = columnInfo.color;
+              } else {
+                  characterInfo["counter" + i] = count
+              }
           }
           
           initiativeInfoList.push(characterInfo);
@@ -689,8 +965,9 @@
           };
           
           window.init(["カウンターに使用するパラメータ名をスペース区切りで入力してください",
-                       "(注)変更は同一プレイルームの全員に影響します。",
-                       "　例）HP MP AC 侵食率 ポシビリティ"],
+                       "先頭に ＊（全角・半角どちらでも可）を付けて記述するとチェック欄になります。",
+                       "　　　例）　HP　MP　AC　侵食率　ポシビリティ　*毒　＊転倒",
+                       "(注)この設定は同一プレイルームの全員に影響します。"],
                       "カウンター名入力",
                       "カウンター名一覧",
                       inputFunction,
@@ -736,6 +1013,10 @@
               changed = true;
           }
           
+          if( setCheckBox(event, characterInfo, piece) ) {
+              changed = true;
+          }
+          
           if( event.dataField == "info" ) {
               var editor:InitiativeWindowEditor = InitiativeWindowEditor(event.currentTarget.itemEditorInstance);
               var info:String = editor.text;
@@ -772,6 +1053,32 @@
           
           var counterNames:Array = getCounterNames();
           var counterName:String = counterNames[counterIndex];
+          piece.setCounter(counterName, newCount);
+          
+          return true;
+      }
+      
+      private function setCheckBox(event:DataGridEvent, characterInfo:Object, piece:InitiativedPiece):Boolean {
+          var checkBoxHeaderName:String = event.dataField;
+          
+          var matchResult:Object = /^checkBox(\d+)/.exec(checkBoxHeaderName);
+          if( matchResult == null ) {
+              return false;
+          }
+          
+          var checkBoxIndex:int = parseInt(matchResult[1]);
+          var checked:Boolean = characterInfo[checkBoxHeaderName];
+          
+          var checkBox:CheckBox = CheckBox(event.currentTarget.itemEditorInstance);
+          var newChecked:Boolean = checkBox.selected;
+          
+          if( newChecked == checked ) {
+              return false;
+          }
+          
+          var counterNames:Array = getCounterNames();
+          var counterName:String = counterNames[checkBoxIndex];
+          var newCount:int = (newChecked ? 1 : 0);
           piece.setCounter(counterName, newCount);
           
           return true;

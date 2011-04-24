@@ -43,8 +43,9 @@
             fileReferenceForUpload.addEventListener(Event.SELECT, fileSelectHandler);
         }
         
-        var data:Array = [["画像", "*.jpg;*.jpeg;*.gif;*.png;*.bmp"],
-                          ["文書", "*.pdf;*.doc;*.txt;*.html;*.htm;*.xls"],
+        var data:Array = [["全サポートファイル種別", "*.jpg;*.jpeg;*.gif;*.png;*.bmp;*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf;*.zip;*.lzh;*.rar;*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav"],
+                          ["画像", "*.jpg;*.jpeg;*.gif;*.png;*.bmp"],
+                          ["文書", "*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf"],
                           ["圧縮ファイル", "*.zip;*.lzh;*.rar"],
                           ["動画・音声", "*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav"]];
         

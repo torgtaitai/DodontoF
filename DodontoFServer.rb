@@ -43,7 +43,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.04(2011/04/06)"
+$version = "Ver.1.30.05.01(2011/04/24)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -458,6 +458,7 @@ class DodontoFServer
       ['initCards', hasNoReturn],
       ['returnCard', hasNoReturn],
       ['shuffleCards', hasNoReturn],
+      ['shuffleForNextRandomDungeon', hasNoReturn],
       ['dumpTrushCards', hasNoReturn],
       ['clearCharacterByType', hasNoReturn],
       ['resurrectCharacter', hasNoReturn],
@@ -2483,8 +2484,16 @@ class DodontoFServer
     "CardMount"
   end
   
+  def getRandomDungeonCardMountType
+    "RandomDungeonCardMount";
+  end
+  
   def getCardTrushMountType
     "CardTrushMount"
+  end
+  
+  def getRandomDungeonCardTrushMountType
+    "RandomDungeonCardTrushMount"
   end
   
   def getRotation(isUpDown)
@@ -2553,8 +2562,10 @@ class DodontoFServer
     
     clearCharacterByTypeLocal(getCardType)
     clearCharacterByTypeLocal(getCardMountType)
+    clearCharacterByTypeLocal(getRandomDungeonCardMountType)
     clearCharacterByTypeLocal(getCardZoneType)
     clearCharacterByTypeLocal(getCardTrushMountType)
+    clearCharacterByTypeLocal(getRandomDungeonCardTrushMountType)
     
     jsData = getRequestData('initCardsData')
     initCardData = getJsonDataFromText(jsData)
@@ -2590,13 +2601,13 @@ class DodontoFServer
         logging("isUpDown", isUpDown)
         imageNameBack = cardsList.shift
         
-        cardsList = getInitCardSet(cardsList, cardTypeInfo)
-        cardMounts[mountName] = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack)
+        cardsList, isSorted = getInitCardSet(cardsList, cardTypeInfo)
+        cardMounts[mountName] = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
         
-        cardMountData = getCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown)
+        cardMountData = createCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList.length)
         characters << cardMountData
         
-        cardTrushMountData = getCardTrushMountData(isText, mountName, index)
+        cardTrushMountData = getCardTrushMountData(isText, mountName, index, cardTypeInfo)
         characters << cardTrushMountData
       end
     end
@@ -2605,7 +2616,7 @@ class DodontoFServer
   end
   
   
-  def getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack)
+  def getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
     cardMount = []
     
     cardsList.each do |imageName|
@@ -2619,7 +2630,13 @@ class DodontoFServer
       cardMount << cardData
     end
     
-    return cardMount.sort_by{rand}
+    if( isSorted )
+      cardMount = cardMount.reverse
+    else
+      cardMount = cardMount.sort_by{rand}
+    end
+    
+    return cardMount
   end
   
   
@@ -2651,6 +2668,11 @@ class DodontoFServer
   
   #トランプのジョーカー枚数、使用デッキ数の指定
   def getInitCardSet(cardsList, cardTypeInfo)
+    if( isRandomDungeonTrump(cardTypeInfo) )
+      cardsListTmp = getInitCardSetForRandomDungenTrump(cardsList, cardTypeInfo)
+      return cardsListTmp, true
+    end
+    
     useLineCount = cardTypeInfo['useLineCount']
     useLineCount ||= cardsList.size
     logging(useLineCount, 'useLineCount')
@@ -2659,13 +2681,76 @@ class DodontoFServer
     deckCount ||= 1
     logging(deckCount, 'deckCount')
     
-    
     cardsListTmp = []
     deckCount.to_i.times do
       cardsListTmp += cardsList[0...useLineCount]
     end
     
-    return cardsListTmp
+    return cardsListTmp, false
+  end
+  
+  def getInitCardSetForRandomDungenTrump(cardList, cardTypeInfo)
+    logging("getInitCardSetForRandomDungenTrump start")
+    
+    logging(cardList.length, "cardList.length")
+    logging(cardTypeInfo, "cardTypeInfo")
+    
+    useCount = cardTypeInfo['cardCount']
+    jorkerCount = cardTypeInfo['jorkerCount']
+    
+    useLineCount = 13 * 4 + jorkerCount
+    cardList = cardList[0...useLineCount]
+    logging(cardList.length, "cardList.length")
+    
+    aceList = []
+    noAceList = []
+    
+    cardList.each_with_index do |card, index|
+      if( (index % 13) == 0 )
+        if( aceList.length < 4 )
+          aceList << card
+          next
+        end
+      end
+      
+      noAceList << card
+    end
+    
+    logging(aceList, "aceList");
+    logging(aceList.length, "aceList.length");
+    logging(noAceList.length, "noAceList.length");
+    
+    cardTypeInfo['aceList'] = aceList.clone
+    
+    result = []
+    
+    aceList = aceList.sort_by{rand}
+    result << aceList.shift
+    logging(aceList, "aceList shifted");
+    logging(result, "result");
+    
+    noAceList = noAceList.sort_by{rand}
+    
+    while( result.length < useCount )
+      result << noAceList.shift
+      break if( noAceList.length <= 0 )
+    end
+    
+    result = result.sort_by{rand}
+    logging(result, "result.sorted");
+    logging(noAceList, "noAceList is empty? please check");
+    
+    while(aceList.length > 0)
+      result << aceList.shift
+    end
+    
+    while(noAceList.length > 0)
+      result << noAceList.shift
+    end
+    
+    logging(result, "getInitCardSetForRandomDungenTrump end, result")
+    
+    return result
   end
   
   
@@ -2689,7 +2774,7 @@ class DodontoFServer
   end
   
   
-  def getCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown)
+  def createCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, allCardCount)
     cardMountData = getCardData(isText, imageNameBack, imageNameBack, mountName)
     
     cardMountData['type'] = getCardMountType
@@ -2699,10 +2784,22 @@ class DodontoFServer
     cardMountData['x'] = 30 + index * 150
     cardMountData['y'] = 30;
     
+    if( isRandomDungeonTrump(cardTypeInfo) )
+      cardCount = cardTypeInfo['cardCount']
+      cardMountData['type'] = getRandomDungeonCardMountType
+      cardMountData['cardCountDisplayDiff'] = allCardCount - cardCount
+      cardMountData['useCount'] = cardCount
+      cardMountData['aceList'] = cardTypeInfo['aceList']
+    end
+    
     return cardMountData
   end
   
-  def getCardTrushMountData(isText, mountName, index)
+  def isRandomDungeonTrump(cardTypeInfo)
+    ( cardTypeInfo['mountName'] == 'randomDungeonTrump' )
+  end
+  
+  def getCardTrushMountData(isText, mountName, index, cardTypeInfo)
     cardTitle = $card.getCardTitleName(mountName);
     trushPrintName = "<font size=\"40\">#{cardTitle}用<br>カード捨て場</font>"
     
@@ -2710,7 +2807,13 @@ class DodontoFServer
     
     cardTrushMountData = getCardData(isText, trushPrintName, trushPrintName, mountName)
     
-    cardTrushMountData['type'] = getCardTrushMountType
+    cardTrushMountData['type'] = 
+      if( isRandomDungeonTrump(cardTypeInfo) )
+        getRandomDungeonCardTrushMountType
+      else
+        getCardTrushMountType
+      end
+      
     cardTrushMountData['cardCount'] = 0
     cardTrushMountData['mountName'] = mountName
     cardTrushMountData['x'] = 30 + index * 150
@@ -2730,12 +2833,8 @@ class DodontoFServer
     logging(mountName, "mountName")
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      saveData['cardTrushMount'] ||= {}
-      trushMount = saveData['cardTrushMount']
-      logging(trushMount, 'trushMount')
       
-      trushMount[mountName] ||= []
-      trushCards = trushMount[mountName]
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
       
       cardData = trushCards.pop
       logging(cardData, "cardData")
@@ -2751,8 +2850,9 @@ class DodontoFServer
       characters = saveData['characters']
       characters.push( cardData )
       
-      trushMountData = characters.find{|i| i['imgId'] === params['imgId'] }
+      trushMountData = findCardData( characters, params['imgId'] )
       logging(trushMountData, "returnCard trushMountData")
+      
       return if( trushMountData.nil?) 
       
       trushMountData['cardCount'] = trushCards.size
@@ -2770,7 +2870,7 @@ class DodontoFServer
     
     mountName = drawCardData['mountName']
     logging(mountName, 'mountName')
-
+    
     result = {
       "result" => "NG"
     }
@@ -2781,6 +2881,14 @@ class DodontoFServer
       
       cards = cardMount[mountName]
       cards ||= []
+      
+      cardMountData = findCardMountData(saveData, drawCardData['imgId'])
+      return if( cardMountData.nil? )
+      
+      cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
+      unless( cardCountDisplayDiff.nil? )
+        return if( cardCountDisplayDiff >= cards.length )
+      end
       
       cardData = cards.pop
       if( cardData.nil? )
@@ -2799,11 +2907,6 @@ class DodontoFServer
       saveData['characters'] ||= []
       characters = saveData['characters']
       characters << cardData
-      
-      cardMountData = characters.find{|i| i['imgId'] === drawCardData['imgId'] }
-      if( cardMountData.nil?) 
-        return
-      end
       
       logging(cards.size, 'cardMount[mountName].size')
       setCardCountAndBackImage(cardMountData, cards)
@@ -2856,7 +2959,7 @@ class DodontoFServer
       characters = saveData['characters']
       characters << cardData
       
-      cardMountData = characters.find{|i| i['imgId'] === data['mountId'] }
+      cardMountData = findCardMountData(saveData, data['mountId'])
       if( cardMountData.nil?) 
         logging(data['mountId'], "not found data['mountId']")
         return
@@ -2873,6 +2976,14 @@ class DodontoFServer
     }
     
     return result
+  end
+  
+  def findCardMountData(saveData, mountId)
+    characters = saveData['characters']
+    return nil if( characters.nil? )
+    
+    cardMountData = characters.find{|i| i['imgId'] === mountId }
+    return cardMountData
   end
   
   
@@ -2899,12 +3010,8 @@ class DodontoFServer
     logging(mountName, 'mountName')
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      saveData['cardTrushMount'] ||= {}
-      trushMount = saveData['cardTrushMount']
-      logging(trushMount, 'trushMount')
       
-      trushMount[mountName] ||= []
-      trushCards = trushMount[mountName]
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
       
       characters = saveData['characters']
       
@@ -2953,53 +3060,38 @@ class DodontoFServer
     logging("shuffleCard Begin")
     
     jsData = getRequestData('data')
-    shuffleCardData = getJsonDataFromText(jsData)
-    logging(shuffleCardData, 'shuffleCardData')
+    params = getJsonDataFromText(jsData)
+    mountName = params['mountName']
+    trushMountId = params['mountId']
+    isShuffle = params['isShuffle']
     
-    imgId = shuffleCardData['imgId']
-    logging(imgId, 'imgId')
-    
-    mountName = shuffleCardData['mountName']
-    logging(imgId, 'mountName')
+    logging(mountName, 'mountName')
+    logging(trushMountId, 'trushMountId')
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      saveData['cardTrushMount'] ||= {}
-      trushMount = saveData['cardTrushMount']
       
-      trushMount[mountName] ||= []
-      trushCards = trushMount[mountName]
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
       
       saveData['cardMount'] ||= {}
       cardMount = saveData['cardMount']
       cardMount[mountName] ||= []
       mountCards = cardMount[mountName]
       
-      logging(trushCards, 'shuffleCards trushCards');
       while( trushCards.size > 0 )
         cardData = trushCards.pop
-        logging(cardData, "shuffleCards cardData")
-        cardData['isOpen'] = false
-        cardData['isBack'] = true
-        cardData['owner'] = ""
-        cardData['ownerName'] = ""
-        
+        initTrushCardForReturnMount(cardData)
         mountCards << cardData
       end
       
       characters = saveData['characters']
       
-      trushMountData = characters.find{|i| i['imgId'] === shuffleCardData['imgId'] }
-      logging(trushMountData, "dumpTrushCards trushMountData")
+      trushMountData = findCardData( characters, trushMountId )
       return if( trushMountData.nil?) 
       trushMountData['cardCount'] = trushCards.size
-
-      cardMountData = characters.find do |i| 
-        ((i['type'] === getCardMountType) && (i['mountName'] == mountName))
-      end
-      logging(cardMountData, "dumpTrushCards cardMountData")
+      
+      cardMountData = findCardMountDataByType(characters, mountName, getCardMountType)
       return if( cardMountData.nil?) 
       
-      isShuffle = shuffleCardData['isShuffle']
       if( isShuffle )
         isUpDown = cardMountData['isUpDown']
         mountCards = getShuffledMount(mountCards, isUpDown)
@@ -3011,7 +3103,103 @@ class DodontoFServer
       setCardCountAndBackImage(cardMountData, mountCards)
     end
     
-    logging("drawCard End")
+    logging("shuffleCard End")
+  end
+  
+  
+  def shuffleForNextRandomDungeon
+    logging("shuffleForNextRandomDungeon Begin")
+    
+    jsParams = getRequestData('params')
+    params = getJsonDataFromText(jsParams)
+    mountName = params['mountName']
+    trushMountId = params['mountId']
+    
+    logging(mountName, 'mountName')
+    logging(trushMountId, 'trushMountId')
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName) 
+      logging(trushCards.length, "trushCards.length")
+     
+      saveData['cardMount'] ||= {}
+      cardMount = saveData['cardMount']
+      cardMount[mountName] ||= []
+      mountCards = cardMount[mountName]
+      
+      characters = saveData['characters']
+      cardMountData = findCardMountDataByType(characters, mountName, getRandomDungeonCardMountType)
+      return if( cardMountData.nil?) 
+      
+      aceList = cardMountData['aceList']
+      logging(aceList, "aceList")
+      
+      aceCards = []
+      aceCards += deleteAceFromCards(trushCards, aceList)
+      aceCards += deleteAceFromCards(mountCards, aceList)
+      aceCards += deleteAceFromCards(characters, aceList)
+      aceCards = aceCards.sort_by{rand}
+      
+      logging(aceCards, "aceCards")
+      logging(trushCards.length, "trushCards.length")
+      logging(mountCards.length, "mountCards.length")
+      
+      useCount = cardMountData['useCount']
+      if( (mountCards.size + 1) < useCount )
+        useCount = (mountCards.size + 1)
+      end
+      
+      mountCards = mountCards.sort_by{rand}
+      
+      insertPoint = rand(useCount)
+      logging(insertPoint, "insertPoint")
+      mountCards[insertPoint, 0] = aceCards.shift
+      
+      while( aceCards.length > 0 )
+        mountCards[useCount, 0] = aceCards.shift
+        logging(useCount, "useCount")
+      end
+      
+      mountCards = mountCards.reverse
+      
+      cardMount[mountName] = mountCards
+      saveData['cardMount'] = cardMount
+      
+      newDiff = mountCards.size - useCount
+      newDiff = 3 if( newDiff < 3 )
+      logging(newDiff, "newDiff")
+      cardMountData['cardCountDisplayDiff'] = newDiff
+      
+      
+      trushMountData = findCardData( characters, trushMountId )
+      return if( trushMountData.nil?) 
+      trushMountData['cardCount'] = trushCards.size
+      
+      setCardCountAndBackImage(cardMountData, mountCards)
+    end
+    
+    logging("shuffleForNextRandomDungeon End")
+  end
+  
+  def deleteAceFromCards(cards, aceList)
+    result = cards.select {|i| aceList.include?( i['imageName']) }
+    cards.delete_if{|i| aceList.include?( i['imageName']) }
+    
+    return result
+  end
+  
+  def findCardData(characters, cardId)
+    cardData = characters.find{|i| i['imgId'] === cardId }
+    return cardData
+  end
+  
+  def findCardMountDataByType(characters, mountName, cardMountType)
+    cardMountData = characters.find do |i| 
+      ((i['type'] === cardMountType) && (i['mountName'] == mountName))
+    end
+    
+    return cardMountData
   end
   
   def getShuffledMount(mountCards, isUpDown)
@@ -3023,12 +3211,31 @@ class DodontoFServer
     return mountCards
   end
   
+  def initTrushCardForReturnMount(cardData)
+    cardData['isOpen'] = false
+    cardData['isBack'] = true
+    cardData['owner'] = ""
+    cardData['ownerName'] = ""
+  end
+  
+  
+  def findTrushMountAndTrushCards(saveData, mountName)
+    saveData['cardTrushMount'] ||= {}
+    trushMount = saveData['cardTrushMount']
+    
+    trushMount[mountName] ||= []
+    trushCards = trushMount[mountName]
+    
+    return trushMount, trushCards
+  end
+  
   def getMountCardInfos
     jsData = getRequestData('data')
     requestData = getJsonDataFromText(jsData)
     logging(requestData, 'getMountCardInfos requestData')
     
     mountName = requestData['mountName']
+    mountId = requestData['mountId']
     
     cards = []
     
@@ -3038,7 +3245,22 @@ class DodontoFServer
       
       cards = cardMount[mountName]
       cards ||= []
+      
+      cardMountData = findCardMountData(saveData, mountId)
+      cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
+      
+      logging(cardCountDisplayDiff, "cardCountDisplayDiff")
+      logging(cards.length, "before cards.length")
+      
+      unless( cardCountDisplayDiff.nil? )
+        unless( cards.empty? )
+          cards = cards[cardCountDisplayDiff .. -1]
+        end
+      end
+      
     end
+    
+    logging(cards.length, "getMountCardInfos cards.length")
     
     return cards
   end

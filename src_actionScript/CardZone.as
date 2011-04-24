@@ -140,7 +140,7 @@ package {
             sender.changeCharacter( getJsonData() );
             
 
-            var cards:Array = getMap().getTargetTypes(Card.getTypeStatic());
+            var cards:Array = getMap().getTargetTypes( [Card.getTypeStatic()] );
             
             for(var i:int = 0 ; i < cards.length ; i++) {
                 var card:Card = cards[i] as Card;

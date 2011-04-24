@@ -16,6 +16,7 @@ package {
     import mx.core.UIComponent;
     import mx.binding.utils.BindingUtils;
     import mx.utils.ArrayUtil;
+    import mx.controls.Image;
     
     
     public class Character extends InitiativedMovablePiece {
@@ -34,37 +35,9 @@ package {
             return view.hitTestObject(comp);
         }
         
-        /*
-        public function updateStatusMarker(isMove:Boolean = false):void {
-            var statusMarkers:Array = getMap().findExistPiecesByTypeName( StatusMarker.getTypeStatic() );
-            addInfos = new Array();
-            
-            for(var i:int = 0 ; i < statusMarkers.length ; i++) {
-                var marker:StatusMarker = statusMarkers[i] as StatusMarker;
-                if( marker.getTargetId() != this.getId() ) {
-                    continue;
-                }
-                
-                if( isMove ) {
-                    marker.dropedByTargetCharacter(getX(), getY());
-                }
-                
-                addInfos.push(marker.getStatusName());
-            }
-            
-            setToolTip();
-        }
-        
-        private var addInfos:Array = new Array();
-        
-        override public function getAdditionalInfos():Array {
-            return addInfos;
-        }
-        */
-        
+
         override protected function droped():void {
             //var isMove:Boolean = true;
-            //updateStatusMarker(isMove);
         }
         
         public static function getTypeStatic():String {
@@ -233,6 +206,10 @@ package {
             }
         }
         
+        override public function hasStatus():Boolean {
+            return true;
+        }
+        
         override protected function getMapLayer():UIComponent {
             if( this.isHide ) {
                 return getMap().getHideCharacterLayer();
@@ -253,14 +230,113 @@ package {
             setHide( params.isHide );
             setRotation( params.rotation );
             setDogTag( params.dogTag );
-            //updateStatusMarker();
             
             loadViewImage();
+            updateStatusMarker();
             
             setNameTag();
             setCenterTextFields();
             
             Log.loggingTuning("=>analyzeChangedCharacterChanged Characteris changed End");
+        }
+        
+        static private var allMarkerImageUrls:Array
+            = [
+               "./image/statusMarker/mark0.png",
+               "./image/statusMarker/mark1.png",
+               "./image/statusMarker/mark2.png",
+               "./image/statusMarker/mark3.png",
+               "./image/statusMarker/mark4.png",
+               "./image/statusMarker/mark5.png",
+               "./image/statusMarker/mark6.png",
+               "./image/statusMarker/mark7.png",
+               "./image/statusMarker/mark8.png",
+               "./image/statusMarker/mark9.png",
+               "./image/statusMarker/mark10.png",
+               "./image/statusMarker/mark11.png",
+               ];
+        
+        private function updateStatusMarker():void {
+            if( view == null ) {
+                return;
+            }
+            
+            var newMarkerImageUrls:Array = getNewMarkerImageUrls();
+            
+            if( isSameArray(newMarkerImageUrls, statusMarkerUrls) ) {
+                return;
+            }
+            
+            refreshMarkerImage(newMarkerImageUrls);
+        }
+        
+        private function isSameArray(array1:Array, array2:Array):Boolean {
+            if( array1.length != array2.length ) {
+                return false;
+            }
+            
+            for(var i:int = 0 ; i < array1.length ; i++) {
+                if( array1[i] != array2[i] ) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        private function getNewMarkerImageUrls():Array {
+            var newMarkerImageUrls:Array = [];
+            
+            var infos:Array = getStatusInfos();
+            for(var i:int = 0 ; i < infos.length ; i++) {
+                if( i >= allMarkerImageUrls.length ) {
+                    break;
+                }
+                
+                var info:Object = infos[i];
+                
+                var counterName:String = info.counterName;
+                var count:int = getCounter(counterName);
+                if( count == 0 ) {
+                    continue;
+                }
+                
+                var imageUrl:String = allMarkerImageUrls[i];
+                imageUrl = Config.getInstance().getUrlString(imageUrl);
+                
+                newMarkerImageUrls.push(imageUrl);
+            }
+            
+            return newMarkerImageUrls;
+        }
+        
+        private var statusMarkerBase:UIComponent = null;
+        private var statusMarkerUrls:Array = [];
+        
+        private function refreshMarkerImage(newMarkerImageUrls:Array):void {
+            if( statusMarkerBase != null ) {
+                view.removeChild( statusMarkerBase );
+            }
+            
+            statusMarkerBase = new UIComponent();
+            statusMarkerUrls = [];
+            
+            for each(var imageUrl:String in newMarkerImageUrls) {
+                var marker:Image = new Image();
+                marker.source = imageUrl;
+                marker.width = 11;
+                marker.height = 11;
+                
+                var markerIndex:int = statusMarkerUrls.length;
+                marker.x = (markerIndex % 5) * marker.width - 2;
+                marker.y = (this.getHeight() * Map.getSquareLength())
+                    - ((Math.floor(markerIndex / 5) + 1) * marker.height) + 2;
+                
+                statusMarkerBase.addChild(marker);
+                statusMarkerUrls.push(imageUrl);
+            }
+            
+            view.addChild( statusMarkerBase );
         }
         
         private function setDogTag(dogTag_:String):void {
@@ -290,6 +366,7 @@ package {
         private function setCenterTextFieldXPosition(textField:TextField):void {
             var width:int = getWidth() * getSquareLength();
             textField.x = ( (1.0 * width / 2) - (textField.width / 2) );
+            textField.alpha = 0.7;
         }
         
         private function setLeftBottomTextFieldPosition(textField:TextField):void {

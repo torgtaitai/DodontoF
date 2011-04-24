@@ -21,6 +21,12 @@ class Card
     },
     
     
+    { 'type' => 'randomDungeonTrump',
+      'title' => 'ランダムダンジョン・トランプ',
+      'fileName' => 'cards/trump_2.txt',
+    },
+    
+    
     { 'type' => 'torg',
       'title' => 'TORG：ドラマデッキ',
       'fileName' => 'cards/torg.txt',

@@ -209,5 +209,6 @@ package {
         public function move(x:Number, y:Number, isForce:Boolean = false):Boolean {return false;}
         public function isOnlyOwnMap():Boolean {return false;}
         public function remove():void {}
+        public function hasStatus():Boolean {return false;}
    }
 }

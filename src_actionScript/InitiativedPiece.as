@@ -24,5 +24,6 @@ package {
         function pickupOnInitiative():void;
         function canDeleteOnInitiativeList():Boolean;
         function sendDelete():void;
+        function hasStatus():Boolean;
     }
 }

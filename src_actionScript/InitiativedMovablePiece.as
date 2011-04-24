@@ -16,6 +16,7 @@ package {
     import mx.managers.PopUpManager;
     import mx.containers.Box;
     import mx.effects.Glow;
+    import mx.events.ToolTipEvent;
     
     public class InitiativedMovablePiece extends MovablePiece implements InitiativedPiece {
         
@@ -49,6 +50,8 @@ package {
             thisObj = this;
             
             super(params);
+            
+            view.addEventListener(ToolTipEvent.TOOL_TIP_CREATE, createCustomTip);
         }
         
         public function setCounters(obj:Object):void {
@@ -120,6 +123,28 @@ package {
             Log.loggingTuning("=>analyzeChangedCharacterChanged Initiatived changed End");
         }
         
+        
+        public function getStatusInfos():Array {
+            var window:InitiativeWindow = DodontoF_Main.getInstance().getInitiativeWindow();
+            if( window == null ) {
+                return [];
+            }
+            
+            return window.getCheckBoxInfos();
+        }
+        
+        private function createCustomTip(event:ToolTipEvent):void {
+            var toolTip:PieceToolTip = new PieceToolTip();
+            toolTip.setPiece(this);
+            event.toolTip = toolTip;
+        }
+        
+        private function positionTip(event:ToolTipEvent):void{
+            event.toolTip.x = event.currentTarget.x + event.currentTarget.width + 10;
+            event.toolTip.y = event.currentTarget.y;
+        }
+        
+        
         public function setToolTip():void {
             view.toolTip = getToolTipMessage();
         }
@@ -177,6 +202,10 @@ package {
         }
         
         public function canDeleteOnInitiativeList():Boolean {
+            return false;
+        }
+        
+        public function hasStatus():Boolean {
             return false;
         }
    }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+	alpha="1" implements="mx.core.IToolTip"
+	borderStyle="solid" dropShadowEnabled="true"
+	backgroundColor="#FCFCCB"
+    verticalGap="1" horizontalGap="1" 
+                        >
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Text;
+			[Bindable]
+			private var piece:InitiativedMovablePiece;
+            
+			public function get text():String { 
+				return null; 
+			} 
+            
+			public function set text(value:String):void {
+			}
+            
+            public function setPiece(_piece:InitiativedMovablePiece):void {
+                piece = _piece;
+            }
+            
+            public function setStatusText():void {
+                if( statusSpace.numChildren > 1 ) {
+                    return;
+                }
+                
+                if( piece == null ) {
+                    return;
+                }
+                
+                var infos:Array = piece.getStatusInfos();
+                for(var i:int = 0 ; i < infos.length ; i++) {
+                    var info:Object = infos[i];
+                    
+                    var count:int = piece.getCounter(info.counterName);
+                    if( count == 0 ) {
+                        continue;
+                    }
+                    
+                    var status:Text = new Text();
+                    status.text = info.title;
+                    status.setStyle("color", info.color);
+                    statusSpace.addChild(status);
+                }
+            }
+            
+            
+		]]>
+	</mx:Script>
+	<mx:Text id="bodyText" text="{piece.getToolTipMessage()}" />
+    <mx:HBox id="statusSpace" creationComplete="setStatusText()" />
+</mx:Box>

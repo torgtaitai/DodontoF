@@ -66,11 +66,12 @@ package {
         
         override protected function setParams(params:Object):void {
             this.cardCount = params.cardCount;
+            
             super.setParams(params);
         }
         
         override public function getTitleText():String {
-            return "山札:" + this.cardCount + "枚";
+            return "山札:" + getCardCount() + "枚";
         }
         
         override protected function isOwner():Boolean {
@@ -156,7 +157,7 @@ package {
         
         private function openSelectCardWindow():void {
             var window:SelectCardWindow = DodontoF.popup(SelectCardWindow, true) as SelectCardWindow;
-            window.setMountName(this);
+            window.setCardMount(this);
         }
         
     }

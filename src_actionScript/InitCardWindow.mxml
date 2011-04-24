@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
-                width="500" height="400"
+                width="500" height="340"
                 title="カード初期化画面" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"
                 >
   
   <mx:Box height="100%" width="100%">
-    <mx:Form>
-      <mx:HBox height="30" width="100%">
-        <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
-        <mx:FormItem label="デッキ個数:">
-          <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
-        </mx:FormItem>
-        <mx:FormItem label="ジョーカー枚数:">
-          <mx:NumericStepper id="jorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
-        </mx:FormItem>
-      </mx:HBox>
       
-      <mx:Box id="checkBoxPlace" height="100%" width="100%" />
-    </mx:Form>
+    <mx:HBox height="30" width="100%">
+      <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
+      <mx:Label text="デッキ個数:" />
+      <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
+      <mx:Label text="ジョーカー枚数:" />
+      <mx:NumericStepper id="jorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
+    </mx:HBox>
+    
+    <mx:Box id="checkBoxPlace" height="100%" width="100%" />
+    
+    <mx:HBox height="30" width="100%">
+      <mx:CheckBox id="randomDungeonTrumpCheck" label="ランダムダンジョン用トランプ（アリアンロッド等）" selected="false" change="changeRandomDungeonTrumpCheck()" />
+    </mx:HBox>
+    <mx:HBox height="30" width="100%">
+      <mx:Spacer width="20" />
+      <mx:Label text="Aを含めた枚数:" />
+      <mx:NumericStepper id="randomDungeonCardCount" minimum="1" maximum="{49 + randomDungeonJorkerCount.value}" value="1" enabled="false" />
+      <mx:Label text="ジョーカー枚数:" />
+      <mx:NumericStepper id="randomDungeonJorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
+    </mx:HBox>
     
   </mx:Box>
   
@@ -46,6 +54,7 @@
     
     //static private var cardTypeTrump:String = "trump_jorker3";
     static private var cardTypeTrump:String = "trump_2";
+    static private var randomDungeonTrump:String = "randomDungeonTrump";
     
     static private function isTrump(cardType:String):Boolean {
         return ( cardType == cardTypeTrump );
@@ -86,6 +95,10 @@
                 continue;
             }
             
+            if( cardType == randomDungeonTrump ) {
+                continue;
+            }
+            
             var checkBox:CheckBox = new CheckBox();
             checkBox.id = cardType;
             checkBox.label = cardName;
@@ -100,6 +113,11 @@
         jorkerCount.enabled = trump.selected;
     }
        
+    private function changeRandomDungeonTrumpCheck():void {
+        randomDungeonCardCount.enabled = randomDungeonTrumpCheck.selected;
+        randomDungeonJorkerCount.enabled = randomDungeonTrumpCheck.selected;
+    }
+       
     private function checkAndAddCardInfos(cardInitInfos:Array, cardType:String):void {
            
         var checkBox:CheckBox = checkBoxes[cardType];
@@ -110,7 +128,7 @@
         if( ! checkBox.selected ) {
             return;
         }
-           
+        
         cardInitInfos.push( {'mountName': cardType } );
     }
        
@@ -124,27 +142,43 @@
                                               thisObj.initCards();
                                           }});           
     }
-       
+    
+    private function getCardInitInfos():Array {
+        var cardInitInfos:Array = [];
+        
+        if( trump.selected ) {
+            cardInitInfos.push( {'mountName':cardTypeTrump,
+                                 'useLineCount':(52 + jorkerCount.value),
+                                 "deckCount": deckCount.value} );
+        }
+        
+        if( randomDungeonTrumpCheck.selected ) {
+            cardInitInfos.push( {'mountName': randomDungeonTrump,
+                                 'cardCount': randomDungeonCardCount.value,
+                                 'jorkerCount': randomDungeonJorkerCount.value} );
+        }
+        
+        for(var i:int = 0 ; i < cardInfos.length ; i++) {
+            var cardInfo:Object = cardInfos[i];
+            var cardType:String = cardInfo.type;
+            
+            if( isTrump(cardType) ) {
+                continue;
+            }
+            
+            if( cardType == randomDungeonTrump ) {
+                continue;
+            }
+            
+            checkAndAddCardInfos(cardInitInfos, cardType);
+        }
+        
+        return cardInitInfos;
+    }
+    
     public function initCards():void {
         try{
-            var cardInitInfos:Array = [];
-               
-            if( trump.selected ) {
-                cardInitInfos.push( {'mountName':cardTypeTrump,
-                            'useLineCount':(52 + jorkerCount.value),
-                            "deckCount": deckCount.value} );
-            }
-               
-            for(var i:int = 0 ; i < cardInfos.length ; i++) {
-                var cardInfo:Object = cardInfos[i];
-                var cardType:String = cardInfo.type;
-                
-                if( isTrump(cardType) ) {
-                    continue;
-                }
-                
-                checkAndAddCardInfos(cardInitInfos, cardType);
-            }
+            var cardInitInfos:Array = getCardInitInfos();
                
             DodontoF_Main.getInstance().initCards( cardInitInfos );
             PopUpManager.removePopUp(this);

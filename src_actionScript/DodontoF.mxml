@@ -398,6 +398,10 @@
             popup(AddMagicTimerWindow, true);
         } else if( menuName == "graveyard" ) {
             popup(GraveyardWindow, true);
+/*
+        } else if( menuName == "characterWaitingRoom" ) {
+            popup(CharacterWaitingRoomWindow, true);
+*/
         } else if( menuName == "clearCards" ) {
             dodontoF_Main.clearCards();
         } else if( menuName == "openInitCardWindow" ) {

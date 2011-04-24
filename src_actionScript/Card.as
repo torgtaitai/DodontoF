@@ -415,7 +415,7 @@ package {
                 return null;
             }
             
-            var cardZones:Array = getMap().getTargetTypes(CardZone.getTypeStatic());
+            var cardZones:Array = getMap().getTargetTypes([CardZone.getTypeStatic()]);
             
             for(var i:int = 0 ; i < cardZones.length ; i++) {
                 var cardZone:CardZone = cardZones[i];

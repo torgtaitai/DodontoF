@@ -50,15 +50,14 @@ package {
             sender.loadMap(params);
         }
         
-        public function checkRoomNumber(roomNumber:int):int {
+        public function checkRoomNumber(roomNumber:int):void {
             if( (roomNumber < 0) || (roomNumber > playRoomMaxNumber) ) {
                 throw new Error("ルームNo.は0〜" + playRoomMaxNumber + "の値を設定してください。");
             }
-            return roomNumber;
         }
         
         public function checkRoomStatus(roomNumber:int, adminPassword:String, resultFunction:Function):void {
-            var roomNumber:int = checkRoomNumber(roomNumber);
+            checkRoomNumber(roomNumber);
             sender.checkRoomStatus(roomNumber, adminPassword, resultFunction);
         }
         
@@ -663,8 +662,8 @@ package {
             sender.removeEffect(effectId);
         }
         
-        public function getMountCardInfos(mountName:String, resultFunction:Function):void {
-            sender.getMountCardInfos(mountName, resultFunction);
+        public function getMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
+            sender.getMountCardInfos(mountName, mountId, resultFunction);
         }
         
     }
