@@ -29,6 +29,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "魔法範囲";
+        }
+        
         public static function getJsonData(name:String,
                                            feets:int,
                                            type:String,
@@ -185,7 +189,7 @@ package {
             }
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getMagicRangeLayer();
         }
         
@@ -193,7 +197,7 @@ package {
             return "image/centerMarker.png";
         }
         
-        private function loadViewImage():void {
+        override public function loadViewImage():void {
             var size:int = 1;
             var halfSquareLength:Number = getSquareLength() / 2;
             var diffPoint:Point = new Point(halfSquareLength,

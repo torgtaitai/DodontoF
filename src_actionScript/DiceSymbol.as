@@ -29,6 +29,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "ダイスシンボル";
+        }
+        
         
         public static function getJsonData(maxNumber:int,
                                            number:int,
@@ -91,6 +95,10 @@ package {
         
         override public function isGotoGraveyard():Boolean {
             return true;
+        }
+        
+        override public function getName():String {
+            return getToolTipMessage();
         }
         
         override protected function initContextMenu():void {
@@ -174,7 +182,7 @@ package {
         }
         */
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getCharacterLayer();
         }
         

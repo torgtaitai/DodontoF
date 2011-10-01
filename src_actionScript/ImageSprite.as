@@ -16,15 +16,18 @@ package {
     import flash.events.IOErrorEvent;
     import mx.controls.Alert;
     import mx.controls.Image;
-    
+    import mx.core.UIComponentCachePolicy;
+
     public class ImageSprite extends UIComponent {
         
         private var upperLayer:UIComponent = new UIComponent();
+        private var innerLayer:UIComponent = new UIComponent();
         
         private var image:Image = new Image();
-        private var squareLength:int = Map.getSquareLength();
+        
         private var widthSize:Number;
         private var heightSize:Number;
+        static private var squareLength:int = Map.getSquareLength();
         
         private var isDrowRound:Boolean = true;
         private var isDrowBack:Boolean = true;
@@ -42,7 +45,9 @@ package {
         private var base:UIComponent = new UIComponent();
         
         public function ImageSprite() {
+            this.cachePolicy = UIComponentCachePolicy.ON;
             this.addChild( this.base );
+            this.addChild( this.innerLayer );
             
             this.base.useHandCursor = true;
             
@@ -71,11 +76,11 @@ package {
             this.base.addChild(obj);
         }
         
-        public function setBackGroundColor(c:int = -1):void {
-            if( c == -1 ) {
-                c = backColorDefault;
+        public function setBackGroundColor(value:int = -1):void {
+            if( value == -1 ) {
+                value = backColorDefault;
             }
-            backColor = c;
+            this.backColor = value;
         }
         
         public function setLineColor(c:int = -1):void {
@@ -117,11 +122,11 @@ package {
             loadImageWidthHeight(name, url, widthSize_, heightSize_, diffPoint);
         }
         
-        private function getRotationDiffPoint(rotation:int,
-                                              widthSize_:Number,
-                                              heightSize_:Number):Point {
-            var x:Number = widthSize_ * this.squareLength / 2.0 ;
-            var y:Number = heightSize_ * this.squareLength / 2.0 ;
+        static public function getRotationDiffPoint(rotation:int,
+                                                    widthSize_:Number,
+                                                    heightSize_:Number):Point {
+            var x:Number = widthSize_ * squareLength / 2.0 ;
+            var y:Number = heightSize_ * squareLength / 2.0 ;
             
             var radian:Number = rotation * Math.PI / 180;
             var cos:Number = Math.cos(radian);
@@ -207,7 +212,10 @@ package {
             
         }
         
-        public function setRoundColor(value:int):void {
+        public function setRoundColor(value:int = -1):void {
+            if( value == -1 ) {
+                value = roundColorDefault;
+            }
             this.roundColor = value;
         }
         
@@ -216,18 +224,7 @@ package {
             upperLayer.contextMenu = menu;
         }
         
-        public function addUpperLayer(component:UIComponent):void {
-            this.upperLayer.addChild(component);
-        }
-        
-        public function removeUpperLayer(component:UIComponent):void {
-            try {
-                this.upperLayer.removeChild(component);
-            } catch (e:Error) {
-            }
-        }
-        
-        private function snapImagePosition(event:Event = null):void {
+        public function snapImagePosition():void {
             image.x = 0;
             image.y = 0;
             
@@ -263,8 +260,8 @@ package {
         private function zoomImage():void {
             paintUpperLayer();
             
-            image.width = this.squareLength * widthSize;
-            image.height = this.squareLength * heightSize;
+            image.width = squareLength * widthSize;
+            image.height = squareLength * heightSize;
             
             snapImagePosition();
             
@@ -277,5 +274,15 @@ package {
         public function setResultFunction(f:Function):void {
             resultFunction = f;
         }
+        
+        
+        public function addChildInner(obj:DisplayObject):void {
+            innerLayer.addChild(obj);
+        }
+        
+        public function removeChildInner(obj:DisplayObject):void {
+            innerLayer.removeChild(obj);
+        }
+        
     }
 }

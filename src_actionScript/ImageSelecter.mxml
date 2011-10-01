@@ -47,9 +47,17 @@
                horizontalAlign="center" verticalAlign="middle">
         <mx:Label text="タグ名：" fontWeight="bold"/>
         <torgtaitai:SuggestComboBox id="tagName" fontWeight="normal"
-                     width="260" change="tagNameChanged()" enabled="false" />
+                     width="100%" change="tagNameChanged()" enabled="false" />
         <mx:Label id="indexPrintLabel" text="0/0" />
         <mx:Button label="隠し画像" height="20" fontWeight="normal" click="createPasswordWindow()" />
+      </mx:HBox>
+      
+      <mx:HBox id="tagDispalyBox" 
+               visible="false"
+               width="100%" minHeight="0" minWidth="0"
+               horizontalAlign="center" verticalAlign="middle">
+        <mx:Label text="選択画像に含まれるタグ：" fontWeight="normal"/>
+        <mx:TextInput id="tagList" editable="false" width="100%" text="" />
       </mx:HBox>
       
       <!--
@@ -381,6 +389,10 @@
            return imageUrls;
        }
        
+       public function setTagDisplayVisible(b:Boolean):void {
+           tagDispalyBox.visible = b;
+       }
+       
        public function imageClickEvent(event:MouseEvent):void {
            var imageBox:Box = event.currentTarget as Box;
            var imageInfo:Object = findImageInfoFromBox(imageBox);
@@ -389,6 +401,10 @@
            changeBackgroundColor( imageBox );
            imageClickEventFunction( imageUrl );
            printIndex( parseInt(imageInfo.displayIndex) );
+           
+           if( tagDispalyBox.visible ) {
+               tagList.text = getTags( Config.getInstance().getOriginalUrlString(imageUrl) ).join("　");
+           }
        }
        
        private function printIndex(index:int):void {
@@ -510,7 +526,7 @@
            return password;
        }
        
-       private function getTags(imageUrl:String):Array {
+       public function getTags(imageUrl:String):Array {
            if( tagInfos == null ) {
                return new Array();
            }

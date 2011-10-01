@@ -108,13 +108,16 @@ package {
         
         public function getAndCheckAddCharacterParams(characterName:String, imageUrl:String,
                                                       size:int, isHide:Boolean,
-                                                      initiative:Number, info:String):Object {
-            Log.logging("addCharacter start");
+                                                      initiative:Number, info:String,
+                                                      counters:Object, statusAlias:Object):Object {
+            Log.logging("getAndCheckAddCharacterParams start");
             Log.logging("characterName", characterName);
             Log.logging("imageUrl", imageUrl);
             Log.logging("size", size);
             Log.logging("initiative", initiative);
             Log.logging("info", info);
+            Log.logging("counters", counters);
+            Log.logging("statusAlias", statusAlias);
             
             if( characterName.length == 0 ) {
                 throw new Error("名前を入力してください。");
@@ -132,9 +135,16 @@ package {
                 throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
             
+            if( counters == null ) {
+                throw new Error("カウンター値が不正です。");
+            }
+            
+            if( statusAlias == null ) {
+                throw new Error("ステータスエイリアスが不正です。");
+            }
+            
             Log.logging("createLoop");
             
-            Log.logging("sender.addCharacter called");
             var createName:String = characterName;
             
             var characterParams:Object = new Object;
@@ -144,22 +154,24 @@ package {
             characterParams.isHide = isHide;
             characterParams.initiative = initiative;
             characterParams.info = info;
+            characterParams.counters = counters;
+            characterParams.statusAlias = statusAlias;
             
             return characterParams;
         }
         
         public function addCharacter(name:String, imageUri:String,
                                      size:int, isHide:Boolean,
-                                     initiative:int, info:String,
+                                     initiative:Number, info:String,
                                      characterPositionX:int, characterPositionY:int,
-                                     dogTag:String):void {
+                                     dogTag:String, counters:Object, statusAlias:Object):void {
             
             var characterJsonData:Object =
                 Character.getJsonData(name, imageUri,
                                       size, isHide,
                                       initiative, info, 0,
                                       characterPositionX, characterPositionY,
-                                      dogTag);
+                                      dogTag, counters, statusAlias);
             sender.addCharacter(characterJsonData);
             
             Log.logging("addCharacter end");
@@ -353,7 +365,7 @@ package {
                                         name:String, imageUri:String,
                                         size:int, isHide:Boolean,
                                         initiative:Number, info:String,
-                                        counters:Object):void {
+                                        counters:Object, statusAlias:Object):void {
             Log.logging("changeCharacter start");
             Log.logging("name", name);
             Log.logging("imageUri", imageUri);
@@ -376,21 +388,15 @@ package {
             if( ( initiative < 0 ) ) {
                 throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
-            /*
-            var characterJsonData:Object =
-                character.getJsonDataForChange(name,
-                                               imageUri,
-                                               size,
-                                               initiative,
-                                               info);
-            */
+            
             character.setName(name);
             character.setImageUrl(imageUri);
             character.setSize(size);
             character.setHide(isHide);
             character.setInitiative(initiative);
             character.setInfo(info);
-            //character.setCounters(counters);
+            character.setCounters(counters);
+            character.setStatusAlias(statusAlias);
             
             sender.changeCharacter( character.getJsonData() );
             
@@ -535,12 +541,16 @@ package {
             sender.requestGraveyard(requestGraveyardResult);
         }
         
+        public function getWaitingRoomInfo(resultFunction:Function):void {
+            sender.getWaitingRoomInfo(resultFunction);
+        }
+        
         public function getPlayRoomStates(minRoom:int, maxRoom:int, resultFunction:Function):void {
             sender.getPlayRoomStates(minRoom, maxRoom, resultFunction);
         }
         
-        public function requestLoginInfo(resultFunction:Function):void {
-            sender.requestLoginInfo(resultFunction);
+        public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
+            sender.getLoginInfo(resultFunction, uniqueId);
         }
         
         public function sendDiceBotChatMessage(chatSendData:ChatSendData,
@@ -601,11 +611,14 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       gameType:String,
+                                       viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             checkPlayRoom(playRoomName, playRoomPassword, chatChannelNames);
             sender.createPlayRoom(playRoomName, playRoomPassword, chatChannelNames, 
-                                  canUseExternalImage, canVisit, playRoomIndex, resultFunction);
+                                  canUseExternalImage, canVisit, gameType, viewStates, 
+                                  playRoomIndex, resultFunction);
         }
         
         public function changePlayRoom(playRoomName:String,
@@ -613,11 +626,14 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       gameType:String,
+                                       viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             checkPlayRoom(playRoomName, playRoomPassword, chatChannelNames);
             sender.changePlayRoom(playRoomName, playRoomPassword, chatChannelNames,
-                                  canUseExternalImage, canVisit, playRoomIndex, resultFunction);
+                                  canUseExternalImage, canVisit, gameType, viewStates, 
+                                  playRoomIndex, resultFunction);
         }
         
         public function setSaveDataDirIndex(roomNumber:int):void {
@@ -642,8 +658,8 @@ package {
             sender.removeCharacters(pieces);
         }
         
-        public function removePlayRoom(roomNumber:int, resultFunction:Function, ignoreLoginUser:Boolean):void {
-            sender.removePlayRoom(roomNumber, resultFunction, ignoreLoginUser);
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
+            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser);
         }
         
         public function removeReplayData(replayData:Object, resultFunction:Function):void {
@@ -662,8 +678,12 @@ package {
             sender.removeEffect(effectId);
         }
         
-        public function getMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
-            sender.getMountCardInfos(mountName, mountId, resultFunction);
+        public function getMountCardInfos(mountNameForDisplay:String, mountName:String, mountId:String, resultFunction:Function):void {
+            sender.getMountCardInfos(mountNameForDisplay, mountName, mountId, resultFunction);
+        }
+        
+        public function getTrushMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
+            sender.getTrushMountCardInfos(mountName, mountId, resultFunction);
         }
         
     }

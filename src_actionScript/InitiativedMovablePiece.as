@@ -24,11 +24,38 @@ package {
         protected var info:String = "";
         protected var initiative:Number = 0;
         protected var counters:Object = new Object();
+        protected var statusAlias:Object = new Object();
         
         //private var initiativeItem:mx.containers.Box;
         private var clickEvent:Function = null;
         private var thisObj:InitiativedMovablePiece;
 
+        public static function getJsonData(type:String,
+                                           name:String,
+                                           initiative:Number,
+                                           info:String,
+                                           counters:Object,
+                                           statusAlias:Object,
+                                           createPositionX:Number,
+                                           createPositionY:Number, 
+                                           draggable:Boolean,
+                                           rotation:Number = 0):Object {
+            
+            var jsonData:Object = MovablePiece.getJsonData(type,
+                                                           createPositionX,
+                                                           createPositionY,
+                                                           draggable,
+                                                           rotation);
+            
+            jsonData.name = name;
+            jsonData.initiative = initiative;
+            jsonData.info = info;
+            jsonData.counters = counters;
+            jsonData.statusAlias = statusAlias;
+            
+            return jsonData;
+        }
+        
         override public function getJsonData():Object {
             var jsonData:Object = super.getJsonData();
             
@@ -36,16 +63,18 @@ package {
             jsonData.initiative = getInitiative();
             jsonData.info = getInfo();
             jsonData.counters = counters;
+            jsonData.statusAlias = statusAlias;
             
             return jsonData;
         }
         
         
         public function InitiativedMovablePiece(params:Object) {
-            name = params.name;
-            initiative = params.initiative;
-            info = params.info;
+            this.name = params.name;
+            this.initiative = params.initiative;
+            this.info = params.info;
             setCounters( params.counters );
+            setStatusAlias( params.statusAlias );
             
             thisObj = this;
             
@@ -55,14 +84,24 @@ package {
         }
         
         public function setCounters(obj:Object):void {
+            this.counters = getObjectFromParamObject(obj);
+        }
+        
+        public function setStatusAlias(obj:Object):void {
+            Log.logging("setStatusAlias obj", obj);
+            this.statusAlias = getObjectFromParamObject(obj);
+            Log.logging("setStatusAlias statusAlias", statusAlias);
+        }
+        
+        public function getObjectFromParamObject(obj:Object):Object {
             if( obj == null ) {
-                counters = new Object();
+                return new Object();
             } else {
-                counters = obj;
+                return obj;
             }
         }
         
-        public function getName():String {
+        override public function getName():String {
             return name;
         }
         
@@ -93,6 +132,25 @@ package {
             counters[key] = value;
         }
         
+        public function getStatusName(key:String):String {
+            Log.logging("getStatusName key", key);
+            
+            var checkBoxInfo:Object = InitiativeWindow.getCheckBoxInfoFromCounterName(key);
+            Log.logging("checkBoxInfo", checkBoxInfo);
+            
+            var name:String = statusAlias[checkBoxInfo.title];
+            if( name == null ) {
+                name = "";
+            }
+            
+            Log.logging("getStatusName name", name);
+            return name;
+        }
+        
+        public function getStatusAlias():Object {
+            return Utils.clone(this.statusAlias);
+        }
+        
         public function getInitiative():Number {
             return initiative;
         }
@@ -117,6 +175,7 @@ package {
             this.initiative = params.initiative;
             this.info = params.info;
             setCounters( params.counters );
+            setStatusAlias( params.statusAlias );
             
             setToolTip();
             
@@ -208,5 +267,6 @@ package {
         public function hasStatus():Boolean {
             return false;
         }
+        
    }
 }

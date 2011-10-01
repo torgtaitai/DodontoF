@@ -1,28 +1,28 @@
 text,upDown
-<p align='center'><font size="42" color="#FF9999"><i><br><br><br><br><br>N◎VA<br>ニューロデッキ</i></font><p>
-<p align='center'><font size="72"><br>カ<br>ブ<br>キ</font><p>
-<p align='center'><font size="72"><br>バ<br>サ<br>ラ</font><p>
-<p align='center'><font size="72"><br>タ<br>タ<br>ラ</font><p>
-<p align='center'><font size="72"><br>ミ<br>ス<br>ト<br>レ<br>ス</font><p>
-<p align='center'><font size="72"><br>カ<br>ブ<br>ト</font><p>
-<p align='center'><font size="72"><br>カ<br>リ<br>ス<br>マ</font><p>
-<p align='center'><font size="72"><br>マ<br>ネ<br>キ<br>ン</font><p>
-<p align='center'><font size="72"><br>カ<br><br>ゼ</font><p>
-<p align='center'><font size="72"><br>フ<br>ェ<br>イ<br>ト</font><p>
-<p align='center'><font size="72"><br>ク<br>ロ<br>マ<br>ク</font><p>
-<p align='center'><font size="72"><br>エ<br>グ<br>ゼ<br>グ</font><p>
-<p align='center'><font size="72"><br>カ<br>タ<br>ナ</font><p>
-<p align='center'><font size="72"><br>ク<br>グ<br>ツ</font><p>
-<p align='center'><font size="72"><br>カ<br><br>ゲ</font><p>
-<p align='center'><font size="72"><br>チ<br>ャ<br>ク<br>ラ</font><p>
-<p align='center'><font size="72"><br>レ<br>ッ<br>ガ<br>｜</font><p>
-<p align='center'><font size="72"><br>カ<br>ブ<br>ト<br>ワ<br>リ</font><p>
-<p align='center'><font size="72"><br>ハ<br>イ<br>ラ<br>ン<br>ダ<br>｜</font><p>
-<p align='center'><font size="72"><br>マ<br>ヤ<br>カ<br>シ</font><p>
-<p align='center'><font size="72"><br>ト<br>｜<br>キ<br>｜</font><p>
-<p align='center'><font size="72"><br>イ<br><br>ヌ</font><p>
-<p align='center'><font size="72"><br>ニ<br>ュ<br>｜<br>ロ</font><p>
-<p align='center'><font size="72"><br>ヒ<br>ル<br>コ</font><p>
-<p align='center'><font size="72"><br>ア<br>ラ<br>シ</font><p>
-<p align='center'><font size="72"><br>カ<br>ゲ<br>ム<br>シ<br>ャ</font><p>
-<p align='center'><font size="72"><br>ア<br>ヤ<br>カ<br>シ<br> </font><p>
+<p align='center'><font size="42" color="#FF9999"><i><br><br><br><br><br>N◎VA<br>ニューロデッキ</i></font><p>			裏向きのニューロカード
+<p align='center'><font size="72"><br>カ<br>ブ<br>キ</font><p>			カブキ
+<p align='center'><font size="72"><br>バ<br>サ<br>ラ</font><p>			バサラ
+<p align='center'><font size="72"><br>タ<br>タ<br>ラ</font><p>			タタラ
+<p align='center'><font size="72"><br>ミ<br>ス<br>ト<br>レ<br>ス</font><p>			ミストレス
+<p align='center'><font size="72"><br>カ<br>ブ<br>ト</font><p>			カブト
+<p align='center'><font size="72"><br>カ<br>リ<br>ス<br>マ</font><p>			カリスマ
+<p align='center'><font size="72"><br>マ<br>ネ<br>キ<br>ン</font><p>			マネキン
+<p align='center'><font size="72"><br>カ<br><br>ゼ</font><p>			カゼ
+<p align='center'><font size="72"><br>フ<br>ェ<br>イ<br>ト</font><p>			フェイト
+<p align='center'><font size="72"><br>ク<br>ロ<br>マ<br>ク</font><p>			クロマク
+<p align='center'><font size="72"><br>エ<br>グ<br>ゼ<br>グ</font><p>			エグゼグ
+<p align='center'><font size="72"><br>カ<br>タ<br>ナ</font><p>			カタナ
+<p align='center'><font size="72"><br>ク<br>グ<br>ツ</font><p>			クグツ
+<p align='center'><font size="72"><br>カ<br><br>ゲ</font><p>			カゲ
+<p align='center'><font size="72"><br>チ<br>ャ<br>ク<br>ラ</font><p>			チャクラ
+<p align='center'><font size="72"><br>レ<br>ッ<br>ガ<br>｜</font><p>			レッガー
+<p align='center'><font size="72"><br>カ<br>ブ<br>ト<br>ワ<br>リ</font><p>			カブトワリ
+<p align='center'><font size="72"><br>ハ<br>イ<br>ラ<br>ン<br>ダ<br>｜</font><p>			ハイランダー
+<p align='center'><font size="72"><br>マ<br>ヤ<br>カ<br>シ</font><p>			マヤカシ
+<p align='center'><font size="72"><br>ト<br>｜<br>キ<br>｜</font><p>			トーキー
+<p align='center'><font size="72"><br>イ<br><br>ヌ</font><p>			イヌ
+<p align='center'><font size="72"><br>ニ<br>ュ<br>｜<br>ロ</font><p>			ニューロ
+<p align='center'><font size="72"><br>ヒ<br>ル<br>コ</font><p>			ヒルコ
+<p align='center'><font size="72"><br>ア<br>ラ<br>シ</font><p>			アラシ
+<p align='center'><font size="72"><br>カ<br>ゲ<br>ム<br>シ<br>ャ</font><p>			カゲムシャ
+<p align='center'><font size="72"><br>ア<br>ヤ<br>カ<br>シ<br> </font><p>			アヤカシ

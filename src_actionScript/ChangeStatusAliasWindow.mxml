@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="650"
+   height="400"
+   title="イニシアティブ表のチェックボックスへの名前付与画面" 
+   showCloseButton="true"
+   >
+
+  <mx:DataGrid id="statusAliasDataGrid"
+               width="100%"
+               height="100%"
+               dataProvider="{statusAliasData}"
+               sortableColumns="false"
+		       draggableColumns="false"
+               enabled="true"
+               editable="true"
+               showDataTips="true"
+               dragEnabled="false"
+               >
+    <mx:columns>
+      <mx:DataGridColumn id="key"
+                         headerText="ヘッダー名"
+                         dataField="key"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="20"
+                         width="30"
+                         />
+      <mx:DataGridColumn id="value"
+                         headerText="チェックボックスへの名前"
+                         dataField="value"
+                         textAlign="left"
+                         editable="true"
+      	                 minWidth="20"
+                         width="30"
+                         />
+	</mx:columns>
+  </mx:DataGrid>
+  
+  
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Button id="executeButton" label="変更" click="execute()" />
+    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+    [Bindable]
+    private var statusAliasData:Array = new Array();
+    
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.controls.Image;
+    import mx.controls.Alert;
+    
+    private var characterWindow:CharacterWindow;
+    
+    override protected function setup():void {
+        initDataGrid();
+    }
+    
+    private function initDataGrid():void {
+        statusAliasData = new Array();
+        
+        var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
+        
+        for(var i:int = 0 ; i < counterNames.length; i++) {
+            var counterName:String = counterNames[i];
+            var checkBoxInfo:Object = InitiativeWindow.getCheckBoxInfoFromCounterName(counterName);
+            
+            if( ! checkBoxInfo.isCheckBox ) {
+                continue;
+            }
+            
+            var key:String = checkBoxInfo.title;
+            if( key == "" ) {
+                continue;
+            }
+            
+            var value:String = this.characterWindow.statusAlias[key];
+            if( value == null ) {
+                value = "";
+            }
+            
+            Log.logging("key", key);
+            Log.logging("value", value);
+            
+            var data:Object = {
+                "key": key,
+                "value": value };
+            
+            statusAliasData.push(data);
+        }
+        
+        Log.logging("initDataGrid end statusAliasData", statusAliasData);
+    }
+    
+    public function setCharacterWindow(window:CharacterWindow):void {
+        this.characterWindow = window;
+    }
+    
+    private function execute():void {
+        try{
+            characterWindow.statusAlias = getStatusAliasFromDataGrid();
+            characterWindow.initCounterValues();
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    private function getStatusAliasFromDataGrid():Object {
+        var statusAlias:Object = new Object();
+        
+        for(var i:int = 0 ; i < statusAliasData.length; i++) {
+            var data:Object = statusAliasData[i];
+            var key:String = data["key"];
+            var value:String = data["value"];
+            if( value == "" ) {
+                continue;
+            }
+            
+            statusAlias[key] = value;
+        }
+        
+        return statusAlias;
+    }
+    
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

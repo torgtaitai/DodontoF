@@ -26,7 +26,7 @@ $saveDataMaxCount = 1000;
 $playRoomGetRangeMax = 100
 
 #墓場に保存されるキャラクターの最大数
-$graveyardLimit = 30;
+$graveyardLimit = 30
 
 #チャットの過去ログ大量保管を許可するかの設定
 $IS_SAVE_LONG_CHAT_LOG = true
@@ -38,7 +38,7 @@ $chatMessageDataLogAllLineMax = 500
 $UPLOAD_IMAGE_MAX_SIZE = 10.0
 
 #保持する画像の上限数(上限を超えた場合古いものから削除)
-$UPLOAD_IMAGE_MAX_COUNT = 500
+$UPLOAD_IMAGE_MAX_COUNT = 2000
 
 #アップロード可能なリプレイデータのファイルサイズ上限(MB)
 $UPLOAD_REPALY_DATA_MAX_SIZE = 5.0
@@ -75,7 +75,7 @@ $oldSaveFileDelteSeconds = 180
 
 #ログアウトと判定される応答途絶時間(秒)
 #下記秒数以上ブラウザから応答が無い場合はログアウトしたと判定。
-$loginTimeOut = $refreshTimeout * 1.5
+$loginTimeOut = $refreshTimeout * 1.5 + 10
 
 #プレイルームを削除してもよい経過時間(秒)
 $deletablePassedSeconds = 60
@@ -97,6 +97,7 @@ $isWelcomeMessageOn = true
 
 #ダイスボットスクリプトへのパス
 $diceBoxCgiUrl = "customBot.pl"
+# $diceBoxCgiUrl = "src_bcdice/customBot.rb"
 
 #セーブデータの管理方法(nil/"mysql")
 $dbType = nil
@@ -126,3 +127,11 @@ $isFirstCgi = false
 #mod_rubyを使用する場合にはtrueに設定。通常のCGIであればfalseのまま。
 $isModRuby = false
 
+#画面に使用するスキン画像 nil なら指定無し
+$skinImage = nil;
+
+#マップ左上に性能管理を表示するかの指定。(参照：https://github.com/mrdoob/Hi-ReS-Stats）
+$isPaformanceMonitor = false;
+
+#画面の更新速度。nilなら従来通りFlexの初期固定値(30)のまま。
+$fps = 60

@@ -48,18 +48,18 @@
         Resizer.addResize(this, new Point(100,50));
         selectPaintMode();
         
-        resizeWindow();
+        resizeWindow( true );
         setResizeEventFunction(resizeWindow);
         
         previewLoader.setSyringeAfter( function():void { thisObj.paint.selected = true} );
     }
     
-    public function resizeWindow():void {
+    public function resizeWindow(isInit:Boolean = false):void {
         var map:Map = DodontoF_Main.getInstance().getMap();
         var mapWidth:int = map.getWidth();
         var mapHeight:int = map.getHeight();
         var imageUrl:String = map.getImageUrl();
-        var mapMarks:Array = map.getMarks();
+        var mapMarks:Array = (isInit ? map.getMarks() : previewLoader.getResult());
         
         if( imageUrl == "" ) {
             imageUrl = "image/whiteBack.png";

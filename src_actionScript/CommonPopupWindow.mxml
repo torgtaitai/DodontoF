@@ -2,7 +2,7 @@
 <mx:TitleWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   backgroundAlpha="1.0"
+   backgroundAlpha="{Config.windowAlpha}"
    borderStyle="solid"
    borderThickness="2"
    headerColors="{headerColorsArray}"
@@ -42,6 +42,10 @@
         Resizer.addResize(this,new Point(100,50));
         
         setup();
+        
+        this.addEventListener(MouseEvent.MOUSE_UP, function():void {
+                DodontoF_Main.getInstance().getMap().stopDrag();
+            } );
         
         statusTextField.background = true;
         statusTextField.backgroundColor = 0xFFFFDD;

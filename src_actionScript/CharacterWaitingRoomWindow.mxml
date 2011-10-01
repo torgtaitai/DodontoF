@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="680"
+   height="420"
+   title="キャラクター待合室" 
+   showCloseButton="true"
+   close="closeWindow()"
+   >
+  
+  <mx:Box id="baseBox"
+          width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+    
+    <mx:Label text="マップのキャラクターを待合室に置いたり、置いたキャラクターをマップに戻すことが出来ます。" />
+    <mx:Tile id="preview" 
+             height="100%" width="100%"
+             paddingTop="20" paddingBottom="10" 
+             paddingRight="10" paddingLeft="10" 
+             verticalGap="30" horizontalGap="10" 
+             direction="horizontal" 
+             borderStyle="solid" 
+             tileWidth="50"
+             tileHeight="50"
+             />
+    
+    <mx:ProgressBar id="imageProgressBar" indeterminate="true"
+                    width="100%" height="20" minHeight="0" minWidth="0"
+                    mode="manual" />
+    </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.core.UIComponent;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import flash.text.TextField;
+    
+    static private var thisObj:CharacterWaitingRoomWindow;
+    
+    static public function isOpened():Boolean {
+        return (thisObj != null);
+    }
+    
+    static public function getInstance():CharacterWaitingRoomWindow {
+        return thisObj;
+    }
+    
+    private var map:Map;
+    private var dragDropForExit:DragDrop = new DragDrop();
+    private var dragDropForEnter:DragDrop = new DragDrop();
+    private var squareLength:Number;
+    
+    override protected function setup():void {
+        thisObj = this;
+        
+        map = DodontoF_Main.getInstance().getMap();
+        squareLength = Map.getSquareLength();
+        
+        dragDropForExit.addDropEvent( map.getOverMapLayer() );
+        
+        dragDropForEnter.addDropEvent( this );
+        
+        getWaitingRoomInfo();
+    }
+    
+    public function closeWindow():void {
+        try {
+            thisObj = null;
+            dragDropForExit.removeDropEvent();
+            dragDropForEnter.removeDropEvent();
+        } catch(e:Error) {
+            Log.loggingException("CharacterWaitingRoomWindow closeWindow", e);
+        }
+        
+        PopUpManager.removePopUp(this);
+    }
+    
+    
+    public function dragEvent(event:MouseEvent, character:Character):void {
+        var value:Object = {
+            "character" : character };
+        
+        dragDropForEnter.dragStartHandler(event,
+                                          character.getView(),
+                                          squareLength, squareLength,
+                                          value, enterAction);
+    }
+    
+    static public function getWaitingRoomInfo():void {
+        if( thisObj == null ) {
+            return;
+        }
+        thisObj.getWaitingRoomInfo();
+    }
+    
+    public function getWaitingRoomInfo():void {
+        while( preview.numChildren > 0 ) {
+            preview.removeChildAt(0);
+        }
+        
+        DodontoF_Main.getInstance().getGuiInputSender().getWaitingRoomInfo(getWaitingRoomInfoResult);
+    }
+    
+    public function getWaitingRoomInfoResult(event:Event):void {
+        Log.loggingTuning("=>getWaitingRoomInfoResult(event:Event) Begin");
+        try {
+            imageProgressBar.height = 0;
+            imageProgressBar.visible = false;
+            
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            var characters:Array = jsonData as Array;
+            
+            Log.logging("characters", characters);
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var data:Object = characters[i];
+                addCharacterImageOnWaithingRoom(data);
+            }
+        } catch(e:Error) {
+            Log.loggingException("CharacterWaitingRoomWindow.getWaitingRoomInfoResult", e);
+        }
+        Log.loggingTuning("=>getWaitingRoomInfoResult(event:Event) End");
+    }
+    
+    private function getNameTextField(name:String):TextField {
+        var nameTextField:TextField = new TextField();
+        
+        nameTextField.text = name;
+        Character.initTextField(nameTextField);
+        Character.initNameTextField(nameTextField, squareLength);
+        
+        return nameTextField;
+    }
+    
+    private function addCharacterImageOnWaithingRoom(data:Object):void {
+        var image:ImageSprite = new ImageSprite();
+        var url:String = Config.getInstance().getUrlString(data.imageName);
+        var size:int = 1;
+        image.loadImage(data.name, url, size);
+        
+        var nameTextField:TextField = getNameTextField(data.name);
+        image.addChild(nameTextField);
+        
+        var value:Object = {
+            "characterId" : data.imgId,
+            "component" : image };
+        dragDropForExit.setDropEventWidthHeigth(image, squareLength, squareLength, value, exitAction);
+        
+        preview.addChild(image);
+    }
+    
+    private function enterAction(obj:Object):void {
+        var character:Character = obj.character;
+        var characterId:String = character.getId();
+        
+        DodontoF_Main.getInstance().getGuiInputSender().getSender()
+        .enterWaitingRoomCharacter(characterId, function(event:Event):void {
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                if( jsonData.result == "OK" ) {
+                    //getWaitingRoomInfo();
+                    character.remove();
+                    addCharacterImageOnWaithingRoom(character.getJsonData());
+                }
+            });
+    }
+    
+    private function exitAction(obj:Object):void {
+        var characterId:String = obj.characterId;
+        var component:UIComponent = obj.component;
+        
+        var base:UIComponent = DodontoF_Main.getInstance().getDodontoF();
+        var mousePoint:Point = new Point(base.mouseX, base.mouseY);
+        var point:Point = dragDropForExit.getLayer().globalToLocal(mousePoint);
+        
+        var length:int = Map.getSquareLength();
+        var x:int = point.x / length;
+        var y:int = point.y / length;
+        
+        addCharacter(characterId, x, y, component);
+    }
+    
+    private function addCharacter(characterId:String, x:int, y:int, component:UIComponent):void {
+        DodontoF_Main.getInstance().getGuiInputSender().getSender()
+        .exitWaitingRoomCharacter(characterId, x, y, function(event:Event):void {
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                if( jsonData.result == "OK" ) {
+                    //getWaitingRoomInfo();
+                    preview.removeChild(component);
+                }
+            });
+    }
+    
+    
+             ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

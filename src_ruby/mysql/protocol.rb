@@ -335,7 +335,7 @@ class Mysql
         until self.class.eof_packet?(data = read)
           rec = fields.map do
             s = self.class.lcs2str!(data)
-            s && charset.force_encoding(s)
+            s && Charset.convert_encoding(s, charset.encoding)
           end
           all_recs.push rec
         end
@@ -510,10 +510,10 @@ class Mysql
           v = self.class.net2value(data, f.type, unsigned)
           if v.is_a? Numeric or v.is_a? Mysql::Time
             v
-          elsif f.type == Field::TYPE_BIT or f.flags & Field::BINARY_FLAG != 0
+          elsif f.type == Field::TYPE_BIT or f.charsetnr == Charset::BINARY_CHARSET_NUMBER
             Charset.to_binary(v)
           else
-            charset.force_encoding(v)
+            Charset.convert_encoding(v, charset.encoding)
           end
         end
       end
@@ -563,13 +563,15 @@ class Mysql
       len = nil
       begin
         Timeout.timeout @read_timeout do
-          header = @sock.read(4)
+          header = @sock.sysread(4)
           len1, len2, seq = header.unpack("CvC")
           len = (len2 << 8) + len1
           raise ProtocolError, "invalid packet: sequence number mismatch(#{seq} != #{@seq}(expected))" if @seq != seq
           @seq = (@seq + 1) % 256
-          ret.concat @sock.read(len)
+          ret.concat @sock.sysread(len)
         end
+      rescue EOFError
+        raise ClientError::ServerGoneError, 'The MySQL server has gone away'
       rescue Timeout::Error
         raise ClientError, "read timeout"
       end while len == MAX_PACKET_LENGTH
@@ -616,6 +618,8 @@ class Mysql
         Timeout.timeout @write_timeout do
           @sock.flush
         end
+      rescue Errno::EPIPE
+        raise ClientError::ServerGoneError, 'The MySQL server has gone away'
       rescue Timeout::Error
         raise ClientError, "write timeout"
       end
@@ -663,7 +667,6 @@ class Mysql
         rest_scramble_buff = data.unpack("CZ*Va8CvCva13Z13")
         raise ProtocolError, "unsupported version: #{protocol_version}" unless protocol_version == VERSION
         raise ProtocolError, "invalid packet: f0=#{f0}" unless f0 == 0
-        raise ProtocolError, "invalid packet: f1=#{f1.inspect}" unless f1 == "\0\0\0\0\0\0\0\0\0\0\0\0\0"
         scramble_buff.concat rest_scramble_buff
         self.new protocol_version, server_version, thread_id, server_capabilities, server_charset, server_status, scramble_buff
       end

@@ -35,7 +35,7 @@ package {
         
         private var thisObj:SharedDataSender = null;
         protected var map:Map = null;
-        protected var saveDataDirIndex:int = 0;
+        protected var saveDataDirIndex:int = -1;
         
         protected var lastUpdateTimes:Object = getInitLastUpdateTimes();
         protected var receiver:SharedDataReceiver = newReceiverForInitialize();
@@ -311,7 +311,7 @@ package {
             var jsonData:Object = {"imgId" : resurrectCharacterId};
             var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = getParamString("resurrectCharacter", [["resurrectCharacterData", jsonParams]]);
+            var params:String = getParamString("resurrectCharacter", [["params", jsonParams]]);
             this.sendCommandData(params);
         }
         
@@ -516,7 +516,7 @@ package {
                                     ownerName:String,
                                     x:int, y:int):void {
             var owner:String = "";
-            drawCardInLocal(CardZone.getJsonData, owner, x, y);
+            drawCardOnLocal(CardZone.getJsonData, owner, MovablePiece.getDefaultId(), x, y);
             
             var jsonData:Object = {
                 "owner" : ownerId,
@@ -602,7 +602,6 @@ package {
         }
         
         public function changeCharacter(characterJsonData:Object):void {
-            Log.logging("characterJsonData", characterJsonData);
             var jsonParams:String = getEncodedJsonString(characterJsonData);
             Log.logging("jsonParams : " + jsonParams);
             
@@ -611,9 +610,10 @@ package {
             sendCommandData(params);
         }
         
-        public function sendDiceBotChatMessage(chatSendData:ChatSendData,
-                                               randomSeed:int, gameType:String,
+        /*
+        public function sendDiceBotChatMessage(chatSendData:ChatSendData, randomSeed:int, gameType:String,
                                                callBack:Function):void {
+            Log.logging("SharedDataSender.sendDiceBotChatMessage begin");
             var request:URLRequest = new URLRequest();
             request.url = Config.getInstance().getDiceBotCgiUrl();
             request.method = URLRequestMethod.POST;
@@ -633,11 +633,32 @@ package {
             var loader:URLLoader = new URLLoader();
             loader.addEventListener(Event.COMPLETE, callBack);
             loader.load(request);
+            Log.logging("SharedDataSender.sendDiceBotChatMessage end");
+        }
+        */
+        
+        public function sendDiceBotChatMessage(chatSendData:ChatSendData, randomSeed:int, gameType:String,
+                                               callBack:Function):void {
+            var jsonData:Object = {
+                "channel" : chatSendData.getChannel(),
+                "name" : chatSendData.getName(),
+                "state" : chatSendData.getState(),
+                "sendto" : chatSendData.getSendto(),
+                "color" : chatSendData.getColor(),
+                "message" : chatSendData.getMessage(),
+                "randomSeed" : randomSeed,
+                "gameType" : gameType};
+            
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            Log.logging("jsonParams : " + jsonParams);
+            
+            var params:String = this.getParamString("sendDiceBotChatMessage", [["params", jsonParams]]);
+            this.sendCommandData(params, callBack);
         }
         
         public function sendChatMessage(jsonData:Object):void {
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("sendChatMessage", [["chatMessageData", jsonParams]]);
+            var params:String = this.getParamString("sendChatMessage", [["params", jsonParams]]);
             
             this.sendCommandData(params);
         }
@@ -650,7 +671,7 @@ package {
                 "color" : color
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("sendChatMessageMany", [["chatMessageData", jsonParams]]);
+            var params:String = this.getParamString("sendChatMessageMany", [["params", jsonParams]]);
             this.sendCommandData(params);
         }
         
@@ -676,6 +697,8 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       gameType:String,
+                                       viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             var jsonData:Object = {
@@ -684,10 +707,12 @@ package {
                 "chatChannelNames": chatChannelNames,
                 "canUseExternalImage": canUseExternalImage,
                 "canVisit": canVisit,
+                "gameType": gameType,
+                "viewStates": viewStates,
                 "playRoomIndex": playRoomIndex
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("createPlayRoom", [["createPlayRoomData", jsonParams]]);
+            var params:String = this.getParamString("createPlayRoom", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
         
@@ -696,6 +721,8 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       gameType:String,
+                                       viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             var jsonData:Object = {
@@ -703,10 +730,12 @@ package {
                 "playRoomPassword": playRoomPassword,
                 "chatChannelNames": chatChannelNames,
                 "canUseExternalImage": canUseExternalImage,
-                "canVisit": canVisit
+                "canVisit": canVisit,
+                "gameType": gameType,
+                "viewStates": viewStates
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("changePlayRoom", [["changePlayRoomData", jsonParams]]);
+            var params:String = this.getParamString("changePlayRoom", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
         
@@ -728,6 +757,11 @@ package {
             this.sendCommandData(params, resultFunction);
         }
         
+        public function getWaitingRoomInfo(resultFunction:Function):void {
+            var params:String = this.getParamString("getWaitingRoomInfo", []);
+            this.sendCommandData(params, resultFunction);
+        }
+        
         public function getPlayRoomStates(minRoom:int, maxRoom:int, resultFunction:Function):void {
             var jsonData:Object = {"minRoom": minRoom,
                                    "maxRoom" : maxRoom };
@@ -736,8 +770,11 @@ package {
             this.sendCommandData(params, resultFunction);
         }
         
-        public function requestLoginInfo(resultFunction:Function):void {
-            var params:String = this.getParamString("getLoginInfo", [[]]);
+        public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
+            var jsonData:Object = {"uniqueId": uniqueId};
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("getLoginInfo", [["params", jsonParams]]);
+            
             this.sendCommandData(params, resultFunction);
         }
 
@@ -962,14 +999,14 @@ package {
             return map.getExistPiecesCount();
         }
         
-        public function removePlayRoom(roomNumber:int, resultFunction:Function, ignoreLoginUser:Boolean):void {
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
             var jsonData:Object = {
-                "roomNumber": roomNumber,
+                "roomNumbers": roomNumbers,
                 "ignoreLoginUser": ignoreLoginUser
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = this.getParamString("removePlayRoom", [["removePlayRoomData", jsonParams]]);
+            var params:String = this.getParamString("removePlayRoom", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
         
@@ -1014,7 +1051,7 @@ package {
                 "cardTypeInfos": cardTypes
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("initCards", [["initCardsData", jsonParams]]);
+            var params:String = this.getParamString("initCards", [["params", jsonParams]]);
             this.sendCommandData(params);
         }
         
@@ -1038,20 +1075,9 @@ package {
         }
         
         
-        private function drawCardZoneInLocal(owner:String,
-                                             x:int,
-                                             y:int):void {
-            
-            var text:String = "<p align='center'><font size=\"72\">LOADING...</font><p>";
-            var cardJsonData:Object = Card.getJsonData(text, text, x, y);
-            
-            cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
-            cardJsonData.owner = owner;
-            receiver.addCharacterInOwnMap(cardJsonData);
-        }
-        
-        private function drawCardInLocal(getJsonDataFunction:Function,
+        private function drawCardOnLocal(getJsonDataFunction:Function,
                                          owner:String,
+                                         imgId:String,
                                          x:int,
                                          y:int):void {
             
@@ -1060,6 +1086,8 @@ package {
             
             cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
             cardJsonData.owner = owner;
+            cardJsonData.imgId = imgId;
+            
             receiver.addCharacterInOwnMap(cardJsonData);
         }
         
@@ -1067,11 +1095,13 @@ package {
                                   owner:String,
                                   ownerName:String,
                                   mountName:String,
+                                  newCardImgId:String,
                                   x:int,
                                   y:int,
-                                  id_:String ):void {
+                                  imgId:String,
+                                  count:int):void {
             
-            drawCardInLocal(Card.getJsonData, owner, x, y);
+            drawCardOnLocal(Card.getJsonData, owner, newCardImgId, x, y);
             
             var jsonData:Object = {
                 "isOpen": isOpen,
@@ -1080,10 +1110,11 @@ package {
                 "ownerName":ownerName,
                 "x": x,
                 "y": y,
-                "imgId": id_
+                "imgId": imgId,
+                "count": count
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("drawCard", [["drawCardData", jsonParams]]);
+            var params:String = this.getParamString("drawCard", [["params", jsonParams]]);
             
             var resultFunction:Function = function(event:Event):void {
                 var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
@@ -1108,6 +1139,24 @@ package {
             return cardJsonData;
         }
         
+        public function exitWaitingRoomCharacter(characterId:String, x:int, y:int, resultFunction:Function):void {
+            var jsonData:Object = {
+                "characterId" : characterId,
+                "x" : x,
+                "y" : y};
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("exitWaitingRoomCharacter", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+
+        public function enterWaitingRoomCharacter(characterId:String, resultFunction:Function):void {
+            var jsonData:Object = {
+                "characterId" : characterId};
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("enterWaitingRoomCharacter", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+
         public function drawTargetCard( cardJsonData:Object,
                                         ownerId:String,
                                         ownerName:String,
@@ -1131,7 +1180,31 @@ package {
                 "y": y
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("drawTargetCard", [["data", jsonParams]]);
+            var params:String = this.getParamString("drawTargetCard", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+        
+        public function drawTargetTrushCard( cardJsonData:Object,
+                                             ownerId:String,
+                                             ownerName:String,
+                                             mountId:String,
+                                             mountName:String,
+                                             targetCardId:String,
+                                             x:int,
+                                             y:int,
+                                             resultFunction:Function):void {
+            cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
+            receiver.addCharacterInOwnMap(cardJsonData);
+            
+            var jsonData:Object = {
+                "mountName" : mountName,
+                "targetCardId" : targetCardId,
+                "x": x,
+                "y": y,
+                "mountId" : mountId
+            };
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("drawTargetTrushCard", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
         
@@ -1146,7 +1219,7 @@ package {
                 "imgId": id_
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("returnCard", [["data", jsonParams]]);
+            var params:String = this.getParamString("returnCard", [["params", jsonParams]]);
             this.sendCommandData(params);
         }
         
@@ -1158,7 +1231,7 @@ package {
                 "isShuffle": isShuffle
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("shuffleCards", [["data", jsonParams]]);
+            var params:String = this.getParamString("shuffleCards", [["params", jsonParams]]);
             this.sendCommandData(params);
         }
         
@@ -1173,16 +1246,28 @@ package {
             this.sendCommandData(params);
         }
         
-        public function getMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
-            var cardName:String = InitCardWindow.getCardName(mountName);
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + cardName + "」の山札を参照しています。");
+        public function getMountCardInfos(mountNameForDisplay:String, mountName:String, mountId:String, resultFunction:Function):void {
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + mountNameForDisplay + "」の山札を参照しています。");
             
             var jsonData:Object = {
                 "mountName": mountName,
                 "mountId": mountId
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getMountCardInfos", [["data", jsonParams]]);
+            var params:String = this.getParamString("getMountCardInfos", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+        
+        public function getTrushMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
+            var cardName:String = InitCardWindow.getCardName(mountName);
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + cardName + "」の捨て札を参照しています。");
+            
+            var jsonData:Object = {
+                "mountName": mountName,
+                "mountId": mountId
+            };
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("getTrushMountCardInfos", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
     }

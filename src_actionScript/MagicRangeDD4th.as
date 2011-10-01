@@ -16,6 +16,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "魔法範囲D&D4版";
+        }
+        
         public static function getJsonData(name:String,
                                            feets:int,
                                            type:String,
@@ -74,7 +78,7 @@ package {
             initDrawSquareDD4th();
         }
         
-        private function loadViewImage():void {
+        override public function loadViewImage():void {
             var size:int = 0;
             if( this.getRangeType() == closeBurst.data ) {
                 size = 1;

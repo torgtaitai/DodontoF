@@ -1,6 +1,7 @@
 #!/usr/local/bin/ruby -Ku
 #--*-coding:utf-8-*--
 $LOAD_PATH << File.dirname(__FILE__) + "/src_ruby"
+$LOAD_PATH << File.dirname(__FILE__) + "/src_bcdice"
 
 #CGI通信の主幹クラス用ファイル
 #ファイルアップロード系以外は全てこのファイルへ通知が送られます。
@@ -24,6 +25,7 @@ require 'uri'
 require 'fileutils'
 require 'tempfile'
 require 'json/jsonParser'
+require 'customDiceBot.rb'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -43,7 +45,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.05.01(2011/04/24)"
+$version = "Ver.1.33.05(2011/09/25)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -160,7 +162,13 @@ class DodontoFServer
     @content_type = content_type
     @saveDirInfo = saveDirInfo
     
-    @saveDirInfo.init(getRequestData("saveDataDirIndex"), $saveDataMaxCount, $SAVE_DATA_DIR)
+    initSaveFiles( getRequestData("saveDataDirIndex") )
+    
+    @isAddMarker = true
+  end
+  
+  def initSaveFiles(roomNumber)
+    @saveDirInfo.init(roomNumber, $saveDataMaxCount, $SAVE_DATA_DIR)
     
     @saveFiles = {}
     $saveFiles.each do |saveDataKeyName, saveFileName|
@@ -168,7 +176,10 @@ class DodontoFServer
       logging(saveFileName, "saveFileName")
       @saveFiles[saveDataKeyName] = @saveDirInfo.getTrueSaveFileName(saveFileName)
     end
+    
   end
+  
+  attr :isAddMarker
   
   #override
   def getSaveFileLockReadOnly(saveFileName)
@@ -354,24 +365,6 @@ class DodontoFServer
     return JsonBuilder.new.build(jsonData)
   end
   
-  def escapeHtmlDataFromJson(jsonData)
-    if( jsonData.kind_of?(String) )
-      escapedString = CGI.escapeHTML(jsonData)
-      jsonData.gsub!(/\A.*\z/, escapedString);
-    elsif( jsonData.kind_of?(Hash) )
-      jsonData.each do |key, value|
-        escapeHtmlDataFromJson(value)
-      end
-    elsif( jsonData.kind_of?(Array) )
-      jsonData.each do |item|
-        escapeHtmlDataFromJson(item)
-      end
-    else
-      # do nothing
-    end
-    
-  end
-  
   def getJsonDataFromText(text)
     self.class.getJsonDataFromText(text)
   end
@@ -416,7 +409,7 @@ class DodontoFServer
     commandName = getRequestData('Command')
     
     if( commandName.nil? or commandName.empty? )
-      return getTestResponseText
+      return getResponseTextWhenNoCommandName
     end
     
     hasReturn = "hasReturn";
@@ -447,8 +440,14 @@ class DodontoFServer
       ['getImageTagsAndImageList', hasReturn], 
       ['addCharacter', hasReturn],
       ['getMountCardInfos', hasReturn],
+      ['getTrushMountCardInfos', hasReturn],
       ['drawTargetCard', hasReturn],
+      ['drawTargetTrushCard', hasReturn],
       ['drawCard', hasReturn],
+      ['getWaitingRoomInfo', hasReturn], 
+      ['exitWaitingRoomCharacter', hasReturn],
+      ['enterWaitingRoomCharacter', hasReturn], 
+      ['sendDiceBotChatMessage', hasReturn],
       
       ['logout', hasNoReturn], 
       ['addCard', hasNoReturn],
@@ -491,6 +490,70 @@ class DodontoFServer
     
   end
   
+  def getResponseTextWhenNoCommandName
+    response = analyzeWebInterface 
+    
+    if( response.nil? )
+      response =  getTestResponseText
+    end
+    
+    return response
+  end
+  
+  def analyzeWebInterface
+    result = { 'result'=> 'NG' }
+    
+    begin
+      result = analyzeWebInterfaceCatched
+    rescue => e
+      result['result'] = e.inspect + "$@ : " + $@.join("\n")
+    end
+    
+    return result
+  end
+  
+  def analyzeWebInterfaceCatched
+    commandName = getRequestData('webif')
+    if( isInvalidRequestParam(commandName) )
+      return nil
+    end
+    
+    marker = getRequestData('marker')
+    if( isInvalidRequestParam(marker) )
+      @isAddMarker = false
+    end
+    
+    roomNumber = getRequestData('room').to_i
+    password = getRequestData('password')
+    visiterMode = true
+    
+    result = { 'result'=> 'NG' }
+    checkResult = checkLoginPassword(roomNumber, password, visiterMode)
+    if( checkResult['resultText'] != "OK" )
+      result['result'] = result['resultText']
+      return result
+    end
+    
+    initSaveFiles(roomNumber)
+    
+    response = 
+    case commandName
+    when 'chat'
+      getWebIfChatText
+    when 'talk'
+      sendWebIfChatText
+    else
+      'no data'
+    end
+    
+    return response
+  end
+
+  def isInvalidRequestParam(param)
+    return ( param.nil? or param.empty? )
+  end
+  
+  
   def getTestResponseText
     "「どどんとふ」の動作環境は正常に起動しています。";
   end
@@ -513,6 +576,74 @@ class DodontoFServer
       end
     end
   end
+
+  
+  def getWebIfChatText
+    logging("getWebIfChatText begin")
+    saveData = {}
+    
+    secondsParam = getRequestData('sec')
+    targetTime = getTargetTimeForGetWebIfChatText(secondsParam)
+    loggingForce(secondsParam, "secondsParam")
+    loggingForce(targetTime, "targetTime")
+    
+    lastUpdateTimes = {'chatMessageDataLog' => targetTime}
+    getCurrentSaveData(lastUpdateTimes) do |targetSaveData, saveFileTypeName|
+      saveData.merge!(targetSaveData)
+    end
+    
+    logging("getCurrentSaveData end saveData", saveData)
+
+    saveData['result'] = 'OK'
+    
+    return saveData
+  end
+  
+  def getTargetTimeForGetWebIfChatText(secondsParam)
+    case secondsParam
+    when "all"
+      return 0
+    when nil
+      return Time.now.to_i - $oldMessageTimeout
+    end
+    
+    return Time.now.to_i - secondsParam.to_i
+  end
+
+  
+  def sendWebIfChatText
+    logging("sendWebIfChatText begin")
+    saveData = {}
+    
+    name = getRequestData('name')
+    name ||= ''
+    message = getRequestData('message')
+    message ||= ''
+    channel = getRequestData('channel').to_i
+    
+    loggingForce(name, "name")
+    loggingForce(message, "message")
+    loggingForce(channel, "channel")
+    
+    chatData = {
+      "senderName" => name,
+      "message" => message,
+      "color" => "000000",
+      "uniqueId" => '0',
+      "messageIndex" => 0,
+      "channel" => channel,
+    }
+    logging("sendWebIfChatText chatData", chatData)
+    
+    sendChatMessageByChatData(chatData)
+    
+    result = {}
+    result['result'] = 'OK'
+    return result
+  end
+  
+
+  
   
   def refresh
     logging("==>Begin refresh");
@@ -550,6 +681,7 @@ class DodontoFServer
       
       logging(saveData, "saveData is empty?");
       break unless( saveData.empty? )
+      
       logging("saveData is empty!");
       
       logging("sleep...");
@@ -937,6 +1069,11 @@ class DodontoFServer
   def getLoginInfo()
     logging("getLoginInfo begin")
     
+    params = getParamsFromRequestData()
+    
+    uniqueId = params['uniqueId'];
+    uniqueId ||= Time.now.to_f.to_s;
+    
     allLoginCount = getAllLoginCount()
     loginMessage = getLoginMessage()
     cardInfos = $card.collectCardTypeAndTypeName()
@@ -945,7 +1082,7 @@ class DodontoFServer
       "loginMessage" => loginMessage,
       "cardInfos" => cardInfos,
       "isDiceBotOn" => $isDiceBotOn,
-      "uniqueId" => Time.now.to_f.to_s,
+      "uniqueId" => uniqueId,
       "refreshTimeout" => $refreshTimeout,
       "version" => $version,
       "playRoomMaxNumber" => ($saveDataMaxCount - 1),
@@ -953,6 +1090,9 @@ class DodontoFServer
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
       "allLoginCount" => allLoginCount,
+      "skinImage" => $skinImage,
+      "isPaformanceMonitor" => $isPaformanceMonitor,
+      "fps" => $fps,
     }
     
     logging(result, "result")
@@ -1004,19 +1144,16 @@ class DodontoFServer
     resultText = "OK"
     playRoomIndex = -1
     begin
-      jsonData = getRequestData('createPlayRoomData')
-      logging(jsonData, "jsonData")
+      params = getParamsFromRequestData()
+      logging(params, "params")
       
-      createPlayRoomData = getJsonDataFromText(jsonData)
-      logging(createPlayRoomData, "createPlayRoomData")
+      playRoomName = params['playRoomName']
+      playRoomPassword = params['playRoomPassword']
+      chatChannelNames = params['chatChannelNames']
+      canUseExternalImage = params['canUseExternalImage']
+      canVisit = params['canVisit']
+      playRoomIndex = params['playRoomIndex']
       
-      playRoomName = createPlayRoomData['playRoomName']
-      playRoomPassword = createPlayRoomData['playRoomPassword']
-      chatChannelNames = createPlayRoomData['chatChannelNames']
-      canUseExternalImage = createPlayRoomData['canUseExternalImage']
-      canVisit = createPlayRoomData['canVisit']
-      playRoomIndex = createPlayRoomData['playRoomIndex']
-      loggingForce(playRoomIndex, "playRoomIndex")
       if( playRoomIndex == -1 )
         playRoomIndex = findEmptyRoomNumber()
         raise Exception.new("空きプレイルームが見つかりませんでした") if(playRoomIndex == -1)
@@ -1031,6 +1168,9 @@ class DodontoFServer
       playRoomChangedPassword = getChangedPassword(playRoomPassword)
       logging(playRoomChangedPassword, 'playRoomChangedPassword')
       
+      viewStates = params['viewStates']
+      logging("viewStates", viewStates)
+      
       trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
       changeSaveData(trueSaveFileName) do |saveData|
         saveData['playRoomName'] = playRoomName
@@ -1038,6 +1178,9 @@ class DodontoFServer
         saveData['chatChannelNames'] = chatChannelNames
         saveData['canUseExternalImage'] = canUseExternalImage
         saveData['canVisit'] = canVisit
+        saveData['gameType'] = params['gameType']
+        
+        addViewStatesToSaveData(saveData, viewStates)
       end
     rescue => e
       loggingException(e)
@@ -1056,6 +1199,11 @@ class DodontoFServer
     return result
   end
   
+  def addViewStatesToSaveData(saveData, viewStates)
+    viewStates['key'] = Time.now.to_f.to_s
+    saveData['viewStateInfo'] = viewStates
+  end
+  
   def getChangedPassword(pass)
     return nil if( pass.empty? )
     
@@ -1069,30 +1217,30 @@ class DodontoFServer
     resultText = "OK"
     
     begin
-      jsonData = getRequestData('changePlayRoomData')
-      logging(jsonData, "jsonData")
+      params = getParamsFromRequestData()
+      logging(params, "params")
       
-      changePlayRoomData = getJsonDataFromText(jsonData)
-      logging(changePlayRoomData, "changePlayRoomData")
-      
-      playRoomName = changePlayRoomData['playRoomName']
-      playRoomPassword = changePlayRoomData['playRoomPassword']
-      chatChannelNames = changePlayRoomData['chatChannelNames']
-      canUseExternalImage = changePlayRoomData['canUseExternalImage']
-      canVisit = changePlayRoomData['canVisit']
-      logging(playRoomName, 'playRoomName')
+      playRoomPassword = params['playRoomPassword']
+      playRoomChangedPassword = getChangedPassword(playRoomPassword)
       logging('playRoomPassword is get')
       
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
+      viewStates = params['viewStates']
       
       trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
       
       changeSaveData(trueSaveFileName) do |saveData|
-        saveData['playRoomName'] = playRoomName
+        saveData['playRoomName'] = params['playRoomName']
         saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = chatChannelNames
-        saveData['canUseExternalImage'] = canUseExternalImage
-        saveData['canVisit'] = canVisit
+        saveData['chatChannelNames'] = params['chatChannelNames']
+        saveData['canUseExternalImage'] = params['canUseExternalImage']
+        saveData['canVisit'] = params['canVisit']
+        saveData['gameType'] = params['gameType']
+        
+        preViewStateInfo = saveData['viewStateInfo']
+        unless( isSameViewState(viewStates, preViewStateInfo) )
+          addViewStatesToSaveData(saveData, viewStates)
+        end
+        
       end
     rescue => e
       loggingException(e)
@@ -1106,6 +1254,22 @@ class DodontoFServer
     
     return result
   end
+  
+  def isSameViewState(viewStates, preViewStateInfo)
+    result = true
+    
+    preViewStateInfo ||= {}
+    
+    viewStates.each do |key, value|
+      unless( value == preViewStateInfo[key] )
+        result = false
+        break
+      end
+    end
+    
+    return result
+  end
+  
   
   def checkRemovePlayRoom(roomNumber, ignoreLoginUser)
     roomNumberRange = (roomNumber..roomNumber)
@@ -1134,30 +1298,44 @@ class DodontoFServer
     logging(spendTimes, "spendTimes")
     logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
     if( spendTimes < $deletablePassedSeconds )
-      return "プレイルームの最終アクセス時間から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+      return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
     end
     
     return "OK"
   end
   
   def removePlayRoom()
-    removePlayRoomData = getRequestDataJsonData('removePlayRoomData')
-    logging(removePlayRoomData, 'removePlayRoomData')
+    params = getParamsFromRequestData()
     
-    roomNumber = removePlayRoomData['roomNumber'].to_i
-    logging(roomNumber, 'roomNumber')
-    
-    ignoreLoginUser = removePlayRoomData['ignoreLoginUser']
+    roomNumbers = params['roomNumbers']
+    ignoreLoginUser = params['ignoreLoginUser']
     logging(ignoreLoginUser, 'ignoreLoginUser')
     
-    resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser)
-    if( resultText == "OK" )
-      @saveDirInfo.removeSaveDir(roomNumber)
+    deletedRoomNumbers = []
+    #部屋に人がまだる場合はこの配列に入れて、後で確認を取ってから削除します。
+    askDeleteRoomNumbers = []
+    errorMessages = []
+    
+    roomNumbers.each do |roomNumber|
+      roomNumber = roomNumber.to_i
+      logging(roomNumber, 'roomNumber')
+      
+      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser)
+      case resultText
+      when "OK"
+        @saveDirInfo.removeSaveDir(roomNumber)
+        deletedRoomNumbers << roomNumber
+      when "userExist"
+        askDeleteRoomNumbers << roomNumber
+      else
+        errorMessages << resultText
+      end
     end
     
     result = {
-      "resultText" => resultText,
-      "roomNumber" => roomNumber
+      "deletedRoomNumbers" => deletedRoomNumbers,
+      "askDeleteRoomNumbers" => askDeleteRoomNumbers,
+      "errorMessages" => errorMessages,
     }
     logging(result, 'result')
     
@@ -1370,10 +1548,14 @@ class DodontoFServer
     logging(loginData, 'loginData')
     
     roomNumber = loginData['roomNumber']
-    logging(roomNumber, 'roomNumber')
     password = loginData['password']
     visiterMode = loginData['visiterMode']
     
+    checkLoginPassword(roomNumber, password, visiterMode)
+  end
+  
+  def checkLoginPassword(roomNumber, password, visiterMode)
+    logging("checkLoginPassword roomNumber", roomNumber)
     @saveDirInfo.setSaveDataDirIndex(roomNumber)
     dirName = @saveDirInfo.getDirName()
     
@@ -1709,6 +1891,10 @@ class DodontoFServer
         changeMapSaveData(mapData)
       when "characterData", "mapMask", "mapMarker", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", getCardType()
         loadCharacterDataList(saveDataAll, target)
+      when "characterWaitingRoom"
+        logging("characterWaitingRoom called")
+        waitingRoom = getLoadData(saveDataAll, 'characters', 'waitingRoom', [])
+        setWaitingRoomInfo(waitingRoom)
       when "standingGraphicInfos"
         effects = getLoadData(saveDataAll, 'effects', 'effects', [])
         effects = effects.delete_if{|i| (i["type"] != target)}
@@ -1722,14 +1908,6 @@ class DodontoFServer
         loggingForce(target, "invalid load target type")
       end
     end
-  end
-  
-  def removeAllCharacters
-    logging("removeAllCharacters")
-    
-    isRemoveTarget = true
-    isGotoGraveyard = false
-    removeCharacters{|i| [isRemoveTarget, isGotoGraveyard] }
   end
   
   def loadSaveFileDataAll(saveDataAll)
@@ -2073,7 +2251,7 @@ class DodontoFServer
   
   
   def getGraveyardCharacterData()
-    logging("getGraveyardInfo start.")
+    logging("getGraveyardCharacterData start.")
     result = []
     
     getSaveData(@saveFiles['characters']) do |saveData|
@@ -2084,6 +2262,25 @@ class DodontoFServer
     end
     
     return result;
+  end
+  
+  def getWaitingRoomInfo()
+    logging("getWaitingRoomInfo start.")
+    result = []
+    
+    getSaveData(@saveFiles['characters']) do |saveData|
+      waitingRoom = getWaitinigRoomFromSaveData(saveData)
+      result = waitingRoom
+    end
+    
+    return result;
+  end
+  
+  def setWaitingRoomInfo(data)
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      waitingRoom = getWaitinigRoomFromSaveData(saveData)
+      waitingRoom.concat(data)
+    end
   end
   
   def getImageList()
@@ -2121,19 +2318,91 @@ class DodontoFServer
     end
   end
   
+  
+  def sendDiceBotChatMessage
+    logging('sendDiceBotChatMessage')
+    
+    params = getParamsFromRequestData()
+    
+    name = params['name']
+    state = params['state']
+    message = params['message']
+    color = params['color']
+    channel = params['channel']
+    sendto = params['sendto']
+    gameType = params['gameType']
+    
+    rollResult, isSecret = rollDice(message, gameType)
+    debug(rollResult, 'rollResult')
+    debug(isSecret, 'isSecret')
+    
+    secretResult = ""
+    if( isSecret )
+      secretResult = message + rollResult
+    else
+      message = message + rollResult
+    end
+    
+    senderName = name
+    senderName << ("\t" + state) unless( state.empty? )
+    
+    chatData = {
+      "senderName" => senderName,
+      "message" => message,
+      "color" => color,
+      "uniqueId" => '0',
+      "messageIndex" => 0,
+      "channel" => channel
+    }
+    
+    unless( sendto.nil? )
+      chatData['sendto'] = sendto
+    end
+    
+    logging(chatData, 'sendDiceBotChatMessage chatData')
+    
+    sendChatMessageByChatData(chatData)
+    
+    
+    result = nil
+    if( isSecret )
+      params['isSecret'] = isSecret
+      params['message'] = secretResult
+      result = params
+    end
+    
+    return result
+  end
+  
+  def rollDice(message, gameType)
+    logging(message, 'rollDice message')
+    logging(gameType, 'rollDice gameType')
+    
+    bot = CgiDiceBot.new
+    result = bot.roll(message, gameType)
+    
+    result.gsub!(/＞/, '→')
+    result.sub!(/\r?\n?\Z/, '')
+    
+    logging(result, 'rollDice result')
+    
+    return result, bot.isSecret
+  end
+  
   def sendChatMessageMany
     100.times{ sendChatMessage }
   end
   
   def sendChatMessage
+    chatData = getParamsFromRequestData()
+    sendChatMessageByChatData(chatData)
+  end
+  
+  def sendChatMessageByChatData(chatData)
+    
     chatMessageData = nil
     
     changeSaveData(@saveFiles['chatMessageDataLog']) do |saveData|
-      
-      jsonData = getRequestData('chatMessageData')
-      logging(jsonData, "jsonData")
-      chatMessageData = getJsonDataFromText(jsonData)
-      logging(chatMessageData, "chatMessageData")
       
       chatMessageDataLog = saveData['chatMessageDataLog']
       chatMessageDataLog ||= []
@@ -2141,7 +2410,7 @@ class DodontoFServer
       deleteOldChatMessageData(chatMessageDataLog);
       
       now = Time.now.to_f
-      chatMessageData = [now, chatMessageData]
+      chatMessageData = [now, chatData]
       
       chatMessageDataLog.push(chatMessageData)
       chatMessageDataLog.sort!
@@ -2156,6 +2425,8 @@ class DodontoFServer
   end
   
   def saveAllChatMessage(chatMessageData)
+    logging(chatMessageData, 'saveAllChatMessage chatMessageData')
+    
     if( chatMessageData.nil? )
       return
     end
@@ -2416,13 +2687,16 @@ class DodontoFServer
     changeSaveData(@saveFiles['characters']) do |saveData|
       saveData['characters'] ||= []
       characters = saveData['characters']
+      waitingRoom = getWaitinigRoomFromSaveData(saveData)
       
       characterDataList.each do |characterData|
         logging(characterData, "characterData")
         
         characterData['imgId'] = createCharacterImgId()
         
-        failedName = isAlreadyExistCharacter?(characters, characterData)
+        allCharacters = (characters + waitingRoom)
+        failedName = isAlreadyExistCharacter?( allCharacters, characterData )
+        
         if( failedName )
           result["addFailedCharacterNames"] << failedName
           next
@@ -2567,9 +2841,9 @@ class DodontoFServer
     clearCharacterByTypeLocal(getCardTrushMountType)
     clearCharacterByTypeLocal(getRandomDungeonCardTrushMountType)
     
-    jsData = getRequestData('initCardsData')
-    initCardData = getJsonDataFromText(jsData)
-    cardTypeInfos = initCardData['cardTypeInfos']
+    
+    params = getParamsFromRequestData()
+    cardTypeInfos = params['cardTypeInfos']
     logging(cardTypeInfos, "cardTypeInfos")
     
     changeSaveData(@saveFiles['characters']) do |saveData|
@@ -2604,12 +2878,15 @@ class DodontoFServer
         cardsList, isSorted = getInitCardSet(cardsList, cardTypeInfo)
         cardMounts[mountName] = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
         
-        cardMountData = createCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList.length)
+        cardMountData = createCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList)
         characters << cardMountData
         
         cardTrushMountData = getCardTrushMountData(isText, mountName, index, cardTypeInfo)
         characters << cardTrushMountData
       end
+      
+      waitForRefresh = 0.2
+      sleep( waitForRefresh )
     end
     
     logging("initCards End");
@@ -2774,7 +3051,7 @@ class DodontoFServer
   end
   
   
-  def createCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, allCardCount)
+  def createCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cards)
     cardMountData = getCardData(isText, imageNameBack, imageNameBack, mountName)
     
     cardMountData['type'] = getCardMountType
@@ -2784,10 +3061,14 @@ class DodontoFServer
     cardMountData['x'] = 30 + index * 150
     cardMountData['y'] = 30;
     
+    unless( cards.first.nil? )
+      cardMountData['nextCardId'] = cards.first['imgId']
+    end
+    
     if( isRandomDungeonTrump(cardTypeInfo) )
       cardCount = cardTypeInfo['cardCount']
       cardMountData['type'] = getRandomDungeonCardMountType
-      cardMountData['cardCountDisplayDiff'] = allCardCount - cardCount
+      cardMountData['cardCountDisplayDiff'] = cards.length - cardCount
       cardMountData['useCount'] = cardCount
       cardMountData['aceList'] = cardTypeInfo['aceList']
     end
@@ -2800,34 +3081,73 @@ class DodontoFServer
   end
   
   def getCardTrushMountData(isText, mountName, index, cardTypeInfo)
-    cardTitle = $card.getCardTitleName(mountName);
-    trushPrintName = "<font size=\"40\">#{cardTitle}用<br>カード捨て場</font>"
+    imageName, imageNameBack, isText = getCardTrushMountImageName(mountName)
+    cardTrushMountData = getCardData(isText, imageName, imageNameBack, mountName)
     
-    isText = true
-    
-    cardTrushMountData = getCardData(isText, trushPrintName, trushPrintName, mountName)
-    
-    cardTrushMountData['type'] = 
-      if( isRandomDungeonTrump(cardTypeInfo) )
-        getRandomDungeonCardTrushMountType
-      else
-        getCardTrushMountType
-      end
-      
+    cardTrushMountData['type'] = getCardTrushMountTypeFromCardTypeInfo(cardTypeInfo)
     cardTrushMountData['cardCount'] = 0
     cardTrushMountData['mountName'] = mountName
     cardTrushMountData['x'] = 30 + index * 150
     cardTrushMountData['y'] = 230;
+    cardTrushMountData['isBack'] = false
     
     return cardTrushMountData
+  end
+  
+  def setTrushMountDataCardsInfo(saveData, cardMountData, cards)
+    characters = getCharactersFromSaveData(saveData)
+    mountName = cardMountData['mountName']
+    
+    imageName, imageNameBack, isText = getCardTrushMountImageName(mountName, cards)
+    
+    cardMountImageData = findCardMountDataByType(characters, mountName, getCardTrushMountType)
+    return if( cardMountImageData.nil? )
+    
+    cardMountImageData['cardCount'] = cards.size
+    cardMountImageData["imageName"] = imageName
+    cardMountImageData["imageNameBack"] = imageName
+    cardMountImageData["isText"] = isText
+  end
+  
+  def getCardTrushMountImageName(mountName, cards = [])
+    cardData = cards.last
+    
+    imageName = ""
+    imageNameBack = ""
+    isText = true
+    
+    if( cardData.nil? )
+      cardTitle = $card.getCardTitleName( mountName )
+      
+      isText = true
+      imageName = "<font size=\"40\">#{cardTitle}用<br>カード捨て場</font>"
+      imageNameBack = imageName
+    else
+      isText = cardData["isText"]
+      imageName = cardData["imageName"]
+      imageNameBack = cardData["imageNameBack"]
+      
+      if( cardData["owner"] == "nobody" )
+        imageName = imageNameBack
+      end
+    end
+    
+    return imageName, imageNameBack, isText
+  end
+  
+  def getCardTrushMountTypeFromCardTypeInfo(cardTypeInfo)
+    if( isRandomDungeonTrump(cardTypeInfo) )
+      return getRandomDungeonCardTrushMountType
+    end
+    
+    return getCardTrushMountType
   end
   
   
   def returnCard
     logging("returnCard Begin");
     
-    jsData = getRequestData('data')
-    params = getJsonDataFromText(jsData)
+    params = getParamsFromRequestData()
     
     mountName = params['mountName']
     logging(mountName, "mountName")
@@ -2855,7 +3175,7 @@ class DodontoFServer
       
       return if( trushMountData.nil?) 
       
-      trushMountData['cardCount'] = trushCards.size
+      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
     end
     
     logging("returnCard End");
@@ -2864,52 +3184,19 @@ class DodontoFServer
   def drawCard
     logging("drawCard Begin")
     
-    jsData = getRequestData('drawCardData')
-    drawCardData = getJsonDataFromText(jsData)
-    logging(drawCardData, 'drawCardData')
-    
-    mountName = drawCardData['mountName']
-    logging(mountName, 'mountName')
+    params = getParamsFromRequestData()
+    logging(params, 'params')
     
     result = {
       "result" => "NG"
     }
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      cardMount = saveData['cardMount']
-      cardMount ||= {}
+      count = params['count']
       
-      cards = cardMount[mountName]
-      cards ||= []
-      
-      cardMountData = findCardMountData(saveData, drawCardData['imgId'])
-      return if( cardMountData.nil? )
-      
-      cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
-      unless( cardCountDisplayDiff.nil? )
-        return if( cardCountDisplayDiff >= cards.length )
+      count.times do
+        drawCardDataOne(params, saveData)
       end
-      
-      cardData = cards.pop
-      if( cardData.nil? )
-        return
-      end
-      
-      cardData['x'] = drawCardData['x']
-      cardData['y'] = drawCardData['y']
-      
-      isOpen = drawCardData['isOpen']
-      cardData['isOpen'] = isOpen
-      cardData['isBack'] = false
-      cardData['owner'] = drawCardData['owner']
-      cardData['ownerName'] = drawCardData['ownerName']
-      
-      saveData['characters'] ||= []
-      characters = saveData['characters']
-      characters << cardData
-      
-      logging(cards.size, 'cardMount[mountName].size')
-      setCardCountAndBackImage(cardMountData, cards)
       
       result["result"] = "OK"
     end
@@ -2919,49 +3206,111 @@ class DodontoFServer
     return result
   end
   
+  def drawCardDataOne(params, saveData)
+    cardMount = getCardMountFromSaveData(saveData)
+    
+    mountName = params['mountName']
+    cards = getCardsFromCardMount(cardMount, mountName)
+    
+    cardMountData = findCardMountData(saveData, params['imgId'])
+    return if( cardMountData.nil? )
+    
+    cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
+    unless( cardCountDisplayDiff.nil? )
+      return if( cardCountDisplayDiff >= cards.length )
+    end
+    
+    cardData = cards.pop
+    return if( cardData.nil? )
+    
+    cardData['x'] = params['x']
+    cardData['y'] = params['y']
+    
+    isOpen = params['isOpen']
+    cardData['isOpen'] = isOpen
+    cardData['isBack'] = false
+    cardData['owner'] = params['owner']
+    cardData['ownerName'] = params['ownerName']
+    
+    characters = getCharactersFromSaveData(saveData)
+    characters << cardData
+    
+    logging(cards.size, 'cardMount[mountName].size')
+    setCardCountAndBackImage(cardMountData, cards)
+  end
+  
 
+  def drawTargetTrushCard
+    logging("drawTargetTrushCard Begin");
+    
+    params = getParamsFromRequestData()
+    
+    mountName = params['mountName']
+    logging(mountName, "mountName")
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
+      
+      cardData = removeFromArray(trushCards) {|i| i['imgId'] === params['targetCardId']}
+      logging(cardData, "cardData")
+      return if( cardData.nil? )
+      
+      cardData['x'] = params['x']
+      cardData['y'] = params['y']
+      
+      characters = getCharactersFromSaveData(saveData)
+      characters.push( cardData )
+      
+      trushMountData = findCardData( characters, params['mountId'] )
+      logging(trushMountData, "returnCard trushMountData")
+      
+      return if( trushMountData.nil?) 
+      
+      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
+    end
+    
+    logging("drawTargetTrushCard End");
+    
+    return {"result" => "OK"}
+  end
+  
   def drawTargetCard
     logging("drawTargetCard Begin")
     
-    jsData = getRequestData('data')
-    data = getJsonDataFromText(jsData)
-    logging(data, 'data')
+    params = getParamsFromRequestData()
+    logging(params, 'params')
     
-    mountName = data['mountName']
+    mountName = params['mountName']
     logging(mountName, 'mountName')
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      cardMount = saveData['cardMount']
-      cardMount ||= {}
-      
-      cards = cardMount[mountName]
-      cards ||= []
-      
-      
-      cardData = cards.find{|i| i['imgId'] === data['targetCardId'] }
+      cardMount = getCardMountFromSaveData(saveData)
+      cards = getCardsFromCardMount(cardMount, mountName)
+      cardData = cards.find{|i| i['imgId'] === params['targetCardId'] }
       
       if( cardData.nil? )
-        logging(data['targetCardId'], "not found data['targetCardId']")
+        logging(params['targetCardId'], "not found params['targetCardId']")
         return
       end
       
       cards.delete(cardData)
       
-      cardData['x'] = data['x']
-      cardData['y'] = data['y']
+      cardData['x'] = params['x']
+      cardData['y'] = params['y']
       
       cardData['isOpen'] = false
       cardData['isBack'] = false
-      cardData['owner'] = data['owner']
-      cardData['ownerName'] = data['ownerName']
+      cardData['owner'] = params['owner']
+      cardData['ownerName'] = params['ownerName']
       
       saveData['characters'] ||= []
       characters = saveData['characters']
       characters << cardData
       
-      cardMountData = findCardMountData(saveData, data['mountId'])
+      cardMountData = findCardMountData(saveData, params['mountId'])
       if( cardMountData.nil?) 
-        logging(data['mountId'], "not found data['mountId']")
+        logging(params['mountId'], "not found params['mountId']")
         return
       end
       
@@ -2971,18 +3320,13 @@ class DodontoFServer
     
     logging("drawTargetCard End")
     
-    result = {
-      "result" => "OK"
-    }
-    
-    return result
+    return {"result" => "OK"}
   end
   
   def findCardMountData(saveData, mountId)
-    characters = saveData['characters']
-    return nil if( characters.nil? )
-    
+    characters = getCharactersFromSaveData(saveData)
     cardMountData = characters.find{|i| i['imgId'] === mountId }
+    
     return cardMountData
   end
   
@@ -3023,8 +3367,8 @@ class DodontoFServer
       trushCards << cardData
       logging(characters.size, "characters.size after")
       
-      trushMountCharacter = characters.find{|i| i['imgId'] === dumpTrushCardsData['trushMountId'] }
-      if( trushMountCharacter.nil?) 
+      trushMountData = characters.find{|i| i['imgId'] === dumpTrushCardsData['trushMountId'] }
+      if( trushMountData.nil?) 
         return
       end
       
@@ -3032,7 +3376,8 @@ class DodontoFServer
       logging(mountName, 'mountName')
       logging(trushMount[mountName], 'trushMount[mountName]')
       logging(trushMount[mountName].size, 'trushMount[mountName].size')
-      trushMountCharacter['cardCount'] = trushMount[mountName].size
+      
+      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
     end
     
     logging("dumpTrushCards End")
@@ -3059,8 +3404,7 @@ class DodontoFServer
   def shuffleCards
     logging("shuffleCard Begin")
     
-    jsData = getRequestData('data')
-    params = getJsonDataFromText(jsData)
+    params = getParamsFromRequestData()
     mountName = params['mountName']
     trushMountId = params['mountId']
     isShuffle = params['isShuffle']
@@ -3072,10 +3416,8 @@ class DodontoFServer
       
       trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
       
-      saveData['cardMount'] ||= {}
-      cardMount = saveData['cardMount']
-      cardMount[mountName] ||= []
-      mountCards = cardMount[mountName]
+      cardMount = getCardMountFromSaveData(saveData)
+      mountCards = getCardsFromCardMount(cardMount, mountName)
       
       while( trushCards.size > 0 )
         cardData = trushCards.pop
@@ -3083,11 +3425,11 @@ class DodontoFServer
         mountCards << cardData
       end
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       trushMountData = findCardData( characters, trushMountId )
       return if( trushMountData.nil?) 
-      trushMountData['cardCount'] = trushCards.size
+      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
       
       cardMountData = findCardMountDataByType(characters, mountName, getCardMountType)
       return if( cardMountData.nil?) 
@@ -3174,7 +3516,7 @@ class DodontoFServer
       
       trushMountData = findCardData( characters, trushMountId )
       return if( trushMountData.nil?) 
-      trushMountData['cardCount'] = trushCards.size
+      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
       
       setCardCountAndBackImage(cardMountData, mountCards)
     end
@@ -3230,21 +3572,17 @@ class DodontoFServer
   end
   
   def getMountCardInfos
-    jsData = getRequestData('data')
-    requestData = getJsonDataFromText(jsData)
-    logging(requestData, 'getMountCardInfos requestData')
+    params = getParamsFromRequestData()
+    logging(params, 'getTrushMountCardInfos params')
     
-    mountName = requestData['mountName']
-    mountId = requestData['mountId']
+    mountName = params['mountName']
+    mountId = params['mountId']
     
     cards = []
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      cardMount = saveData['cardMount']
-      cardMount ||= {}
-      
-      cards = cardMount[mountName]
-      cards ||= []
+      cardMount = getCardMountFromSaveData(saveData)
+      cards = getCardsFromCardMount(cardMount, mountName)
       
       cardMountData = findCardMountData(saveData, mountId)
       cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
@@ -3261,6 +3599,23 @@ class DodontoFServer
     end
     
     logging(cards.length, "getMountCardInfos cards.length")
+    
+    return cards
+  end
+  
+  def getTrushMountCardInfos
+    params = getParamsFromRequestData()
+    logging(params, 'getTrushMountCardInfos params')
+    
+    mountName = params['mountName']
+    mountId = params['mountId']
+    
+    cards = []
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
+      cards = trushCards
+    end
     
     return cards
   end
@@ -3340,39 +3695,134 @@ class DodontoFServer
   end
   
 
-  def resurrectCharacter
+  def getParamsFromRequestData()
+    preParams = getRequestData('params')
+    params = getJsonDataFromText(preParams)
+    return params
+  end
+  
+  def enterWaitingRoomCharacter
+    params = getParamsFromRequestData()
+    characterId = params['characterId']
+    
+    logging(characterId, "enterWaitingRoomCharacter characterId")
+    
+    result = {"result" => "NG"}
     changeSaveData(@saveFiles['characters']) do |saveData|
+      characters = getCharactersFromSaveData(saveData)
       
-      jsResurrectCharacterData = getRequestData('resurrectCharacterData')
-      resurrectCharacterData = getJsonDataFromText(jsResurrectCharacterData)
-      logging(resurrectCharacterData, "resurrectCharacterData")
+      enterCharacterData = removeFromArray(characters) {|i| (i['imgId'] == characterId) }
+      return result if( enterCharacterData.nil? )
       
-      resurrectCharacterId = resurrectCharacterData['imgId']
-      logging(resurrectCharacterId, "resurrectCharacterId")
+      waitingRoom = getWaitinigRoomFromSaveData(saveData)
+      waitingRoom << enterCharacterData
+    end
+    
+    result["result"] = "OK"
+    return result
+  end
+  
+  
+  def resurrectCharacter
+    params = getParamsFromRequestData()
+    resurrectCharacterId = params['imgId']
+    logging(resurrectCharacterId, "resurrectCharacterId")
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      graveyard = getGraveyardFromSaveData(saveData)
       
-      graveyard = saveData['graveyard']
-      graveyard ||= []
-      
-      index = nil
-      graveyard.each_with_index do |i, targetIndex|
-        logging(i, "characterData");
-        if( i['imgId'] == resurrectCharacterId )
-          index = targetIndex
-        end
+      characterData = removeFromArray(graveyard) do |character|
+        character['imgId'] == resurrectCharacterId
       end
       
-      logging(index, "resurrected index:")
+      logging(characterData, "resurrectCharacter CharacterData");
+      return if( characterData.nil? )
       
-      if( index )
-        characterData = graveyard.delete_at(index)
-        logging(characterData, "resurrectedCharacterData");
-        
-        saveData['characters'] ||= []
-        characters = saveData['characters']
-        characters << characterData
-      end
+      characters = getCharactersFromSaveData(saveData)
+      characters << characterData
     end
   end
+  
+  def getGraveyardFromSaveData(saveData)
+    return getArrayInfoFromHash(saveData, 'graveyard')
+  end
+  
+  def getWaitinigRoomFromSaveData(saveData)
+    return getArrayInfoFromHash(saveData, 'waitingRoom')
+  end
+  
+  def getCharactersFromSaveData(saveData)
+    return getArrayInfoFromHash(saveData, 'characters')
+  end
+  
+  def getCardsFromCardMount(cardMount, mountName)
+    return getArrayInfoFromHash(cardMount, mountName)
+  end
+  
+  def getArrayInfoFromHash(hash, key)
+    hash[key] ||= []
+    return hash[key]
+  end
+  
+  def getCardMountFromSaveData(saveData)
+    return getHashInfoFromHash(saveData, 'cardMount')
+  end
+  
+  def getHashInfoFromHash(hash, key)
+    hash[key] ||= {}
+    return hash[key]
+  end
+  
+
+
+  def exitWaitingRoomCharacter
+    params = getParamsFromRequestData()
+    targetCharacterId = params['characterId']
+    x = params['x']
+    y = params['y']
+    logging(targetCharacterId, 'exitWaitingRoomCharacter targetCharacterId')
+    
+    result = {"result" => "NG"}
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      waitingRoom = getWaitinigRoomFromSaveData(saveData)
+      
+      characterData = removeFromArray(waitingRoom) do |character|
+        character['imgId'] == targetCharacterId
+      end
+      
+      logging(characterData, "exitWaitingRoomCharacter CharacterData");
+      return result if( characterData.nil? )
+      
+      characterData['x'] = x
+      characterData['y'] = y
+      
+      characters = getCharactersFromSaveData(saveData)
+      characters << characterData
+    end
+    
+    result["result"] = "OK"
+    return result
+  end
+  
+  
+  def removeFromArray(array)
+    index = nil
+    array.each_with_index do |i, targetIndex|
+      logging(i, "i")
+      logging(targetIndex, "targetIndex")
+      b = yield(i)
+      logging(b, "yield(i)")
+      if( b )
+        index = targetIndex
+      end
+    end
+    
+    return nil if( index.nil? )
+    
+    item = array.delete_at(index)
+    return item
+  end
+  
   
   def changeRoundTime
     changeSaveData(@saveFiles['time']) do |saveData|
@@ -3431,12 +3881,12 @@ class DodontoFServer
   end
   
   def getResponse
-    jsonDataForResponse = analyzeCommand
-    #escapeHtmlDataFromJson(jsonDataForResponse)
-    
-    return getTextFromJsonData(jsonDataForResponse)
+    response = analyzeCommand
+    return getTextFromJsonData(response)
   end
+  
 end
+
 
 def getErrorResponseText(e)
   errorMessage = ""
@@ -3497,7 +3947,10 @@ def printResult(server)
   begin
     result = server.getResponse
     
-    result = "#D@EM>#" + result + "#<D@EM#";
+    if( server.isAddMarker )
+      result = "#D@EM>#" + result + "#<D@EM#";
+    end
+    
     logging(result.length.to_s, "CGI response original length")
     
     if ( isGzipTarget(result) )
@@ -3528,9 +3981,13 @@ def printResult(server)
   
   output = $stdout
   output.binmode if( defined?(output.binmode) )
-  unless( header.empty? )
+  
+  if( header.empty? )
+    output.print( "\n" )
+  else
     output.print( header + "\n")
   end
+  
   output.print( text )
   
   logging("========================================>CGI end.")

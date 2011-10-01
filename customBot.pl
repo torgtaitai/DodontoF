@@ -23,7 +23,9 @@ if( $isPerl_5_8 ) {
 use strict;
 use warnings;
 use utf8;                               # このソースはUTF-8で書かれています
-my $verision = "1.2.23";                # B&Cのバージョン
+my $verision = "1.2.45";                # B&Cのバージョン
+
+# ======================= モジュールなど =============================
 
 use lib "src_perl";
 use torgtaitaiIRC;
@@ -46,7 +48,7 @@ if( ($#ARGV + 1) > 0 ) {
     if( ($#ARGV + 1) > 1 ) {
         #$rand_seed = $ARGV[1];
         $game_type = $ARGV[1];
-    }
+     }
 } else {
     my $cgi = new CGI;
     
@@ -54,7 +56,7 @@ if( ($#ARGV + 1) > 0 ) {
         print $cgi->header(-charset=>'UTF-8');
     } else {
         print $cgi->header();
-    }
+     }
     
     $torgtaitaiMessage = $cgi->param('message');
     $game_type = $cgi->param('gameType');
@@ -123,7 +125,7 @@ if( $isPerl_5_8 ) {
     binmode STDOUT, ":encoding(".CHARCODE.")";	# 標準出力も指定
     binmode STDERR, ":encoding(".CHARCODE.")";	# エラー出力も指定
 }
-
+ 
 if( $isPerl_5_8 ) {
     require "Encode.pm";
 }
@@ -155,7 +157,6 @@ my $OPEN_DICE = 'Open Dice!';       # シークレットダイスの出目表示
 my $OPEN_PLOT = 'Open Plot!';       # プロットの表示コマンド
 my $ADD_PLOT = 'PLOT';              # プロットの入力コマンド
 my $READY_CMD = '#HERE';            # 自分の居るチャンネルの宣言コマンド
-#my $RND_GNR_PREFIX = 'カモン！';    # ランダムジェネレータコマンドの接頭語
 my $RND_GNR_PREFIX = 'make ';    # ランダムジェネレータコマンドの接頭語
 
 my $server = "localhost";               # サーバー
@@ -197,25 +198,7 @@ my $ircn = "perldice";                  # IRCネーム
 my $DodontoFlg = 1;     # どどんとふらぐ(0=IRC, 1=どどんとふ)
 #my $irc = new Net::IRC;
 
-my %card_ttl;
-my @card_val = ('0',
-    'S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13',
-    'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12','H13',
-    'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13',
-    'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13',
-    'J1',);
-my $card_reg = '[DHSCJdhscj][\d]+'; #カード指定文字列の正規表現
-my @card_re = @card_val;
-my $CARD_MAX = (scalar @card_val)-1;
-my $card_m = $CARD_MAX;
-my $card_buried = 0;
-my %deal_cards = ('card_played' => '');
-my @card_spell = (
-'A','B','C','D','E','F','G','H','I','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z',
-'a','b','c','d','e','f','g','h','i','j','k','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-'0','1','2','3','4','5','6','7','8','9','+','-','*','/',
-    );  # 64種類の記号
-my %card_channel;
+#削除（カード関連）
 
 my $master = "";
 my $modeflg = $SEND_MODE;
@@ -266,12 +249,7 @@ foreach my $arg_wk (@ARGV) {   # コンソールからのパラメータ指定�
             &game_set($prm);
         } elsif($cmd eq "m") { # メッセージ設定(出力)
             $NOTICE_SW = int($prm);
-        } elsif($cmd eq "e") { # エクストラカードの読み込み
-            my $dummy = &card_setup($prm);
-            if($dummy ne '_OK_') {
-                &debug_out("${dummy}\n");
-                die;
-            }
+#削除(カード関連)
         } elsif($cmd eq "i") { # IRCサーバの文字コード変更
             $IRC_CODE = $prm;
         }
@@ -507,17 +485,7 @@ sub on_msg {
             }
         }
         # カードモード設定
-        elsif($arg =~ /^set[\s]+(cardplace|CP)$/i) {
-             if(($nick_e eq $master) || ($master eq "")) {
-                if ($tnick =~ /(\d+)/) {
-                    $card_place = int($1);
-                    foreach my $chan_o (@CHAN_TO) {
-                        &send_msg($self,$chan_o, "カード置き場無しに変更しました") if(!$card_place);
-                        &send_msg($self,$chan_o, "カード置き場ありに変更しました") if($card_place);
-                    }
-                }
-            }
-        }
+#削除(カード関連)
         # 呪文モード設定
         elsif($arg =~ /^set[\s]+(shortspell|SS)$/i) {
              if(($nick_e eq $master) || ($master eq "")) {
@@ -543,47 +511,14 @@ sub on_msg {
             }
         }
         # カード読み込み
-        elsif($arg =~ /^set[\s]+(cardset|CS)$/i) {
-             if(($nick_e eq $master) || ($master eq "")) {
-                my $card_msgs = &card_setup("$tnick");
-                if($card_msgs ne '_OK_') {
-                    &send_msg($self,$nick_e, "$card_msgs");
-                } else {
-                    &send_msg($self,$nick_e, "カードセットの読み込み成功しました");
-                }
-            }
-        }
+#削除(カード関連)
     }
 
 # ポイントカウンター関係
-    if($arg =~ /^#/) {
-        my $out_chan = &get_plot_channel("$nick_e");
-        if($out_chan ne "1") {
-            $arg .= "->${tnick}" if($tnick);
-            ($output_msg, my $mode) = &point_counter_command($arg, $nick_e, $out_chan, 1);
-            if($output_msg ne "1") {
-                if($mode) { # Talkで返事
-                    &send_msg($self, $nick_e, $output_msg);
-                } else {    # publicで返事
-                    &send_msg($self, $out_chan, $output_msg);
-                }
-            }
-        } else {
-            &send_msg($self, $nick_e, "表示チャンネルが登録されていません");
-        }
-    }
+#削除
 
 # プロット入力処理
-    if($arg =~ /${ADD_PLOT}[:：](.+)/i) {
-        my $plot = $1;
-        my $out_chan = &get_plot_channel("$nick_e");
-        if($out_chan ne "1") {
-            &add_secret_roll($plot, $nick_e, $out_chan, 1);
-            &send_msg($self,$out_chan, "${nick_e} さんがプロットしました");
-        } else {
-            &send_msg($self,$nick_e, "プロット出力先が登録されていません");
-        }
-    }
+#削除
 
 
 # ボット終了命令
@@ -603,203 +538,7 @@ sub on_msg {
     }
 
 # 簡易オンラインヘルプ
-    elsif($arg =~ /^help$/i) {
-        &send_msg($self,$nick_e, "・加算ロール　　　　　　　　(xDn) (n面体ダイスをx個)");
-        &send_msg($self,$nick_e, "・バラバラロール　　　　　　(xBn)");
-        &send_msg($self,$nick_e, "・個数振り足しロール　　　　(xRn[振り足し値])");
-        &send_msg($self,$nick_e, "・上方無限ロール　　　　　　(xUn[境界値])");
-        &send_msg($self,$nick_e, "・シークレットロール　　　　(Sダイスコマンド)");
-        &send_msg($self,$nick_e, "・シークレットをオープンする(${OPEN_DICE})");
-        &send_msg($self,$nick_e, "・四則計算(端数切捨て)　　　(C(式))");
-        sleep 2;
-        if($game_type =~ /SwordWorld/) {
-            &send_msg($self,$nick_e, '・SW　レーティング表　　　　　(Kx[c]+m$f) (x:キー, c:クリティカル値, m:ボーナス, f:出目修正)');
-        } elsif($game_type eq "Chill") {
-            &send_msg($self,$nick_e, "・CHILL　ストライクランク　 　(SRx)");
-        } elsif($game_type eq "Demon Parasite") {
-            &send_msg($self,$nick_e, "・デモンパラサイト　衝動表　　 (URGEx) (xは衝動段階)");
-            &send_msg($self,$nick_e, "・　　〃　　　　　新衝動表　　(NURGEx)");
-            &send_msg($self,$nick_e, "・　　〃　　　　　誤作動表　　(AURGEx)");
-            &send_msg($self,$nick_e, "・　　〃ミュータント衝動表　　(MURGEx)");
-        sleep 1;
-            &send_msg($self,$nick_e, "・　〃鬼御魂(戦闘外)衝動表　 (OUURGEx)");
-            &send_msg($self,$nick_e, "・　〃鬼御魂(戦闘中)衝動表　 (OCURGEx)");
-        } elsif($game_type eq "Warhammer") {
-            &send_msg($self,$nick_e, "・ウォーハンマークリティカル表(WHpx) (pは部位(HABL)でxはクリティカル値)");
-            &send_msg($self,$nick_e, "・ウォーハンマー命中判定　  　(WHx\@p) (xは技能値, pは対象(\@のみで全種))");
-        } elsif($game_type eq "Cthulhu") {
-            &send_msg($self,$nick_e, "・クトゥルフ　抵抗ロール　  　(RES(x1-x2)) (x1は自分の能力値, x2は相手の能力値)");
-        } elsif($game_type eq "DoubleCross") {
-            &send_msg($self,$nick_e, "・ダブルクロス　判定ロール  　(xDX\@c) (cはクリティカル値)");
-            &send_msg($self,$nick_e, "・ダブルクロス　感情表　　　　(ET)");
-        } elsif($game_type eq "ShinobiGami") {
-            &send_msg($self,$nick_e, "・シノビガミ　シーン表　　　　(ST)");
-            &send_msg($self,$nick_e, "・シノビガミ　都市シーン表　　(CST)");
-            &send_msg($self,$nick_e, "・シノビガミ　館シーン表　　　(MST)");
-            &send_msg($self,$nick_e, "・シノビガミ　出島シーン表　　(DST)");
-            &send_msg($self,$nick_e, "・シノビガミ　トラブルシーン表(TST)");
-        sleep 1;
-            &send_msg($self,$nick_e, "・シノビガミ　日常シーン表　　(NST)");
-            &send_msg($self,$nick_e, "・シノビガミ　回想シーン表　　(KST)");
-            &send_msg($self,$nick_e, "・シノビガミ　ファンブル表　　(FT)");
-            &send_msg($self,$nick_e, "・シノビガミ　感情表　　　　　(ET)");
-            &send_msg($self,$nick_e, "・シノビガミ　変調表　　　　　(WT)");
-            &send_msg($self,$nick_e, "・シノビガミ　戦場表　　　　　(BT)");
-        } elsif($game_type eq "Satasupe") {
-            &send_msg($self,$nick_e, '・サタスペ　判定ロール  　(nR>=x[y,z]) (n:最大ロール数, x:目標値, y:目標成功数, z:ファンブル値)');
-            &send_msg($self,$nick_e, '・タグ決定表　　　　　　　(TAGT)');
-            &send_msg($self,$nick_e, '・情報イベント表　　　　　(～IET)');
-            &send_msg($self,$nick_e, '　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)');
-            &send_msg($self,$nick_e, '・情報ハプニング表　　　　(～IHT)');
-            &send_msg($self,$nick_e, '　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・命中判定ファンブル表　　(FumbleT)');
-            &send_msg($self,$nick_e, '・致命傷表　　　　　　　　(FatalT)');
-            &send_msg($self,$nick_e, '・アクシデント表　　　　　(AccidentT)');
-            &send_msg($self,$nick_e, '・汎用アクシデント表　　　(GeneralAT)');
-            &send_msg($self,$nick_e, '・その後表　　　　　　　　(AfterT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・ロマンスファンブル表　　(RomanceFT)');
-            &send_msg($self,$nick_e, '・NPCの年齢と好みを一括出力　(NPCT)');
-        } elsif($game_type eq "ArsMagica") {
-            &send_msg($self,$nick_e, '・ArsMagica ストレスダイス(ArSx) (x:ボッチダイス)');
-        } elsif($game_type eq "Tunnels & Trolls") {
-            &send_msg($self,$nick_e, '・T&T バーサーク　　　　　(nBS+x)  (n:ダイス数, x:修正)');
-            &send_msg($self,$nick_e, '・T&T ハイパーバーサーク　(nHBS+x) (n:ダイス数, x:修正)');
-        } elsif($game_type eq "DarkBlaze") {
-            &send_msg($self,$nick_e, '・ダークブレイズ　判定　　(DBxy#m) (x:能力値, y:技能値, m:修正)');
-            &send_msg($self,$nick_e, '・掘り出し袋表　　　　　　(BTx)　　(x:ダイス数)');
-        } elsif($game_type eq "GundogZero") {
-            &send_msg($self,$nick_e, '・ダメージペナルティ表　　(～DPTx) (x:修正)');
-            &send_msg($self,$nick_e, '　　射撃DP表(SDPT)、格闘DP表(MDPT)、車両DP表(VDPT)、汎用DP表(GDPT)');
-            &send_msg($self,$nick_e, '・ファンブル表　　　　　　(～FTx)  (x:修正)');
-            &send_msg($self,$nick_e, '　　射撃F表(SFT)、格闘F表(MFT)、投擲F表(TFT)');
-        } elsif($game_type eq "NightWizard") {
-            &send_msg($self,$nick_e, '・判定ロール　　　　　　　(nNW+m@x#y) (n:基本値+常時, m:否常時+状態異常, x:クリティカル値, y:ファンブル値)');
-        } elsif($game_type eq "TORG") {
-            &send_msg($self,$nick_e, '・判定ロール　　　　　　　(TGm) (m:基本技能値)');
-            &send_msg($self,$nick_e, '・一般結果表 成功度　　　 (RTx)');
-            &send_msg($self,$nick_e, '・威圧/威嚇 結果表　　　　(ITx)');
-            &send_msg($self,$nick_e, '・挑発/トリック 結果表　　(TTx)');
-            &send_msg($self,$nick_e, '・間合い 結果表　　　　　 (MTx)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・オーズ(一般人)ダメージ　(ODTx)');
-            &send_msg($self,$nick_e, '・能力者ダメージ　　　　　(DTx)');
-            &send_msg($self,$nick_e, '・ボーナス表　　　　　　　(BTx+y) (x:数値, y:技能基本値)');
-        } elsif($game_type eq "HuntersMoon") {
-            &send_msg($self,$nick_e, '・ハンターズムーン　　遭遇表　(ET)');
-            &send_msg($self,$nick_e, '・　　　　都市ロケーション表　(CLT)');
-            &send_msg($self,$nick_e, '・　　　　閉所ロケーション表　(SLT)');
-            &send_msg($self,$nick_e, '・　　　　炎熱ロケーション表　(HLT)');
-            &send_msg($self,$nick_e, '・　　　　冷暗ロケーション表　(FLT)');
-            &send_msg($self,$nick_e, '・　　　　部位ダメージ決定表　(DLT)');
-            &send_msg($self,$nick_e, '・　　　　モノビースト行動表　(MAT)');
-            &send_msg($self,$nick_e, '・　　　　異形アビリティー表　(SATx) (x:個数)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(社会)表　　(TST)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(頭部)表　　(THT)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(腕部)表　　(TAT)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(胴部)表　　(TBT)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(脚部)表　　(TLT)');
-            &send_msg($self,$nick_e, '・　　　　指定特技(環境)表　　(TET)');
-        } elsif($game_type eq "MeikyuKingdom") {
-            &send_msg($self,$nick_e, '・迷宮キングダム　　　名前表　(NAMEx) (x:個数)');
-            &send_msg($self,$nick_e, '・　　　　　　　　生活散策表　(LRT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　治安散策表　(ORT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　文化散策表　(CRT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　軍事散策表　(ART)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　　　　才覚休憩表　(TBT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　魅力休憩表　(CBT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　探索休憩表　(SBT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　武勇休憩表　(VBT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　才覚ハプニング表　(THT)');
-            &send_msg($self,$nick_e, '・　　　　　魅力ハプニング表　(CHT)');
-            &send_msg($self,$nick_e, '・　　　　　探索ハプニング表　(SHT)');
-            &send_msg($self,$nick_e, '・　　　　　武勇ハプニング表　(VHT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　　　　王国災厄表　(KDT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　王国変動表　(KCT)');
-            &send_msg($self,$nick_e, '・　　　　　　王国変動失敗表　(KMT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　　　　　　痛打表　(CAT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　致命傷表　(FWT)');
-            &send_msg($self,$nick_e, '・　　　　　戦闘ファンブル表　(CFT)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　　　　　　　道中表　(TT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　　交渉表　(NT)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　　感情表　(ET)');
-        sleep 1;
-            &send_msg($self,$nick_e, '・　　　　　　　　　　お宝表１　(T1T)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　お宝表２　(T2T)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　お宝表３　(T3T)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　お宝表４　(T4T)');
-            &send_msg($self,$nick_e, '・　　　　　　　　　　お宝表５　(T5T)');
-        } elsif($game_type eq "EarthDawn") {
-            &send_msg($self,$nick_e, '・アースドーン　ステップロール　(xEn+カルマ) [x:ステップ, n:目標値]');
-        } elsif($game_type eq "EmbryoMachine") {
-            &send_msg($self,$nick_e, '・判定ロール　　　　　　　(EMt+m@c#f) (t:目標値, m:修正値, c:クリティカル値, f;ファンブル値)');
-            &send_msg($self,$nick_e, '・　　　　　　命中部位表　(HLT)');
-            &send_msg($self,$nick_e, '・　白兵攻撃ファンブル表　(MFT)');
-            &send_msg($self,$nick_e, '・　射撃攻撃ファンブル表　(SFT)');
-        } elsif($game_type eq "GehennaAn") {
-            &send_msg($self,$nick_e, '・通常判定　　　　　　　　(nGt+m)  (n:ダイス数, t:目標値, m:修正値)');
-            &send_msg($self,$nick_e, '・戦闘判定　　　　　　　　(nGAt+m) (n:ダイス数, t:目標値, m:修正値)');
-        }
-        &send_msg($self,$nick_e, "  ---");
-        sleep 1;
-        &send_msg($self,$nick_e, "・プロット表示　　　　　　　　(${OPEN_PLOT})");
-        &send_msg($self,$nick_e, "・プロット記録　　　　　　　　(Talkで ${ADD_PLOT}:プロット)");
-        &send_msg($self,$nick_e, "  ---");
-        sleep 2;
-        &send_msg($self,$nick_e, "・ポイントカウンタ値登録　　　(#[名前:]タグn[/m]) (識別名、最大値省略可,Talk可)");
-        &send_msg($self,$nick_e, "・カウンタ値操作　　　　　　　(#[名前:]タグ+n) (もちろん-nもOK,Talk可)");
-        &send_msg($self,$nick_e, "・識別名変更　　　　　　　　　(#RENAME!名前1->名前2) (Talk可)");
-        sleep 1;
-        &send_msg($self,$nick_e, "・同一タグのカウンタ値一覧　　(#OPEN!タグ)");
-        &send_msg($self,$nick_e, "・自キャラのカウンタ値一覧　　(Talkで#OPEN![タグ]) (全カウンタ表示時、タグ省略)");
-        &send_msg($self,$nick_e, "・自キャラのカウンタ削除　　　(#[名前:]DIED!) (デフォルト時、識別名省略)");
-        &send_msg($self,$nick_e, "・全自キャラのカウンタ削除　　(#ALL!:DIED!)");
-        &send_msg($self,$nick_e, "・カウンタ表示チャンネル登録　(${READY_CMD})");
-        &send_msg($self,$nick_e, "  ---");
-        sleep 2;
-        &send_msg($self,$nick_e, "・カード機能ヘルプ　　　　　　(c-help)");
-        &send_msg($self,$nick_e, "  -- END ---");
-    }
-    elsif($arg =~ /^c-help$/i) {
-        &send_msg($self,$nick_e, "・カードを引く　　　　　　　(c-draw[n]) (nは枚数)");
-        &send_msg($self,$nick_e, "・オープンでカードを引く　　(c-odraw[n])");
-        &send_msg($self,$nick_e, "・カードを選んで引く　　　　(c-pick[c[,c]]) (cはカード。カンマで複数指定可)");
-        &send_msg($self,$nick_e, "・捨てたカードを手札に戻す　(c-back[c[,c]])");
-        &send_msg($self,$nick_e, "・置いたカードを手札に戻す　(c-back1[c[,c]])");
-        sleep 1;
-        &send_msg($self,$nick_e, "・手札と場札を見る　　　　　(c-hand) (Talk可)");
-        &send_msg($self,$nick_e, "・カードを出す　　　　　　　(c-play[c[,c]]");
-        &send_msg($self,$nick_e, "・カードを場に出す　　　　　(c-play1[c[,c]]");
-        &send_msg($self,$nick_e, "・カードを捨てる　　　　　　(c-discard[c[,c]]) (Talk可)");
-        &send_msg($self,$nick_e, "・場のカードを選んで捨てる　(c-discard1[c[,c]])");
-        &send_msg($self,$nick_e, "・山札からめくって捨てる　  (c-milstone[n])");
-        sleep 1;
-        &send_msg($self,$nick_e, "・カードを相手に一枚渡す　　(c-pass[c]相手) (カード指定が無いときはランダム)");
-        &send_msg($self,$nick_e, "・場のカードを相手に渡す　　(c-pass1[c]相手) (カード指定が無いときはランダム)");
-        &send_msg($self,$nick_e, "・カードを相手の場に出す　　(c-place[c[,c]]相手)");
-        &send_msg($self,$nick_e, "・場のカードを相手の場に出す(c-place1[c[,c]]相手)");
-        sleep 1;
-        &send_msg($self,$nick_e, "・場のカードをタップする　　(c-tap1[c[,c]]相手)");
-        &send_msg($self,$nick_e, "・場のカードをアンタップする(c-untap1[c[,c]]相手)");
-        &send_msg($self,$nick_e, "  ---");
-        sleep 2;
-        &send_msg($self,$nick_e, "・カードを配る　　　　　　　(c-deal[n]相手)");
-        &send_msg($self,$nick_e, "・カードを見てから配る　　　(c-vdeal[n]相手)");
-        &send_msg($self,$nick_e, "・カードのシャッフル　　　　(c-shuffle)");
-        &send_msg($self,$nick_e, "・捨てカードを山に戻す　　　(c-rshuffle)");
-        &send_msg($self,$nick_e, "・全員の場のカードを捨てる　(c-clean)");
-        sleep 1;
-        &send_msg($self,$nick_e, "・相手の手札と場札を見る　　(c-vhand) (Talk不可)");
-        &send_msg($self,$nick_e, "・枚数配置を見る　　　　　　(c-check)");
-        &send_msg($self,$nick_e, "・復活の呪文　　　　　　　　(c-spell[呪文]) (c-spellで呪文の表示)");
-        &send_msg($self,$nick_e, "  -- END ---");
-    }
+#削除
 
 }
 sub on_public {
@@ -818,43 +557,15 @@ sub on_public {
         my $output_msgs = &random_heroine_generator($arg);
         &send_msg($self, $channel, $output_msgs) if($output_msgs ne '1');
     }
-
-# プロットの表示
-    if($arg =~ /(^|\s+)${OPEN_PLOT}(\s+|$)/i) {
-        my @output_msgs = &open_secret_roll($nick_e, $channel, 1);
-        foreach my $msgs (@output_msgs){
-            &send_msg($self, $channel, $msgs) if($msgs);
-            sleep 1;
-        }
-        &add_plot_channel($nick_e, $channel);   # プロット表示チャンネルをセット
-    }
 # シークレットロールの表示
-    if($arg =~ /(^|\s+)${OPEN_DICE}(\s+|$)/i) {
-        my @output_msgs = &open_secret_roll($nick_e, $channel, 0);
-        foreach my $msgs (@output_msgs){
-            &send_msg($self, $channel, $msgs) if($msgs);
-            sleep 1;
-        }
-    }
-# ポイントカウンター関係
-    if($arg =~ /^${READY_CMD}(\s+|$)/i) {
-        &add_plot_channel($nick_e, $channel);   # チャンネルをセット
-        &send_msg($self, $nick_e, "表示チャンネルを設定しました");
-    } elsif($arg =~ /^#/) {
-        ($output_msg, $secret_flg) = &point_counter_command($arg, $nick_e, $channel, 0);
-        if($secret_flg) {
-            &send_msg($self, $nick_e, $output_msg) if($output_msg ne "1");
-        } else {
-            &send_msg($self, $channel, $output_msg) if($output_msg ne "1");
-        }
-    }
+#削除
 
 # ダイスロールの処理
     ($output_msg, $secret_flg) = &dice_command($arg, $nick_e);
     if($secret_flg) {   # 隠しロール
         if($output_msg ne "1") {
             &broadmsg($self, $output_msg, $nick_e);
-            &add_secret_roll($output_msg, $nick_e, $channel, 0);
+#削除
         }
     } else {
         &send_msg($self,$channel, $output_msg) if($output_msg ne "1");
@@ -990,9 +701,9 @@ sub dice_command {  # ダイスコマンドの分岐処理
 
     if($arg =~ /[KDBRU][\d]/) {
     # ソードワールドのレーティング表ロール検出
-        if($arg =~ /(^|\s)S?K[\d\+\-]+/i) {
+        if($arg =~ /(^|\s)(S)?K[\d\+\-]+/i) {
             $output_msg = &rating("$arg", "$nick_e");
-            if($arg =~ /SK[\d+-]+/) {  # 隠しロール
+            if($2) {  # 隠しロール
                 $secret_flg = 1 if($output_msg ne '1');
             }
         }
@@ -1037,6 +748,14 @@ sub dice_command {  # ダイスコマンドの分岐処理
                 $output_msg = &embryo_machine_check("$arg", "$nick_e");
             } elsif($game_type eq "GehennaAn") {
                 $output_msg = &gehenna_an_check("$arg", "$nick_e");
+            } elsif($game_type eq "Nechronica") {
+                $output_msg = &nechronica_check("$arg", "$nick_e");
+            } elsif($game_type eq "MeikyuDays") {
+                $output_msg = &mayoday_check("$arg", "$nick_e");
+            } elsif($game_type eq "BarnaKronika") {
+                $output_msg = &barna_kronika_check("$arg", "$nick_e");
+            } elsif($game_type eq "RokumonSekai2") {
+                $output_msg = &rokumon2_check("$arg", "$nick_e");
             } else {
                 $output_msg = &rdice("$arg", "$nick_e");
             }
@@ -1057,7 +776,7 @@ sub dice_command {  # ダイスコマンドの分岐処理
     if($game_type eq "Satasupe") {
         if($arg =~ /((^|\s)(\d+)(S)?R[>=]+(\d+)(\[(\d+)?(,\d+)?\])?($|\s))/i) { # 判定ロール
             $output_msg = &satasupe_check("\U$1", "$nick_e");
-            if($1 =~ /SR/i) {   # 隠しロール
+            if($4) {   # 隠しロール
                 $secret_flg = 1 if($output_msg ne '1');
             }
         } else {
@@ -1065,17 +784,17 @@ sub dice_command {  # ダイスコマンドの分岐処理
     }
     if($game_type eq "Chill") {
         # ストライクランク計算
-        if($arg =~ /SR(\d+)($|\s)/i) {
+        if($arg =~ /(^|\s)(S)?SR(\d+)($|\s)/i) {
             $output_msg = &strike_rank("$arg", "$nick_e");
-            if($arg =~ /SSR(\d+)/i) {   # 隠しロール
+            if($2) {   # 隠しロール
                 $secret_flg = 1 if($output_msg ne '1');
             }
         }
     }
     # ウォーハンマー攻撃コマンド
-    if($arg =~ /(WH\d+(@[\dWH]*)?)($|\s)/) {
-        $output_msg = &wh_att("$1", "$nick_e");
-        if($arg =~ /S(WH\d+(@[\dWH]+)?)/) {    # 隠しロール
+    if($arg =~ /(^|\s)(S)?(WH\d+(@[\dWH]*)?)($|\s)/) {
+        $output_msg = &wh_att("$3", "$nick_e");
+        if($2) {    # 隠しロール
                 $secret_flg = 1 if($output_msg ne '1');
         }
     }
@@ -1090,69 +809,56 @@ sub dice_command {  # ダイスコマンドの分岐処理
     }
 
 # 表関係
-    if($arg =~ /((\w)?URGE(\s*)(\d+))($|\s)/i) {    # デモンパ系衝動表
+    if($arg =~ /((^|\s)(S)?(\w)?URGE(\s*)(\d+))($|\s)/i) {    # デモンパ系衝動表
         if($game_type eq "Demon Parasite") {        # デモンパ
             $output_msg = &dp_urge("\U$1", "$nick_e");
         } elsif($game_type eq "ParasiteBlood") {    # パラブラ
             $output_msg = &pb_urge("\U$1", "$nick_e");
         }
-        if($arg =~ /S(\w)?URGE(\s*)(\d+)/i) {   # 隠しロール
+        if($3) {   # 隠しロール
             $secret_flg = 1 if($output_msg ne '1');
         }
     }
-    if($arg =~ /(WH[HABTLW]\d+)($|\s)/i) {  # ウォーハンマークリティカル表
+    if($arg =~ /((^|\s)(S)?WH[HABTLW]\d+)($|\s)/i) {  # ウォーハンマークリティカル表
         $output_msg = &wh_crit("\U$1", "$nick_e");
-        if($arg =~ /S(WH[HABTLW]\d+)/i) {   # 隠しロール
+        if($3) {   # 隠しロール
             $secret_flg = 1 if($output_msg ne '1');
         }
     }
-    if($arg =~ /(RES[\-\d]+)($|\s)/i) { # CoC抵抗表コマンド
+    if($arg =~ /((^|\s)(S)?RES[\-\d]+)($|\s)/i) { # CoC抵抗表コマンド
         $output_msg = &coc_res("\U$1", "$nick_e");
-        if($arg =~ /S(RES[\-\d]+)/i) {  # 隠しロール
+        if($3) {  # 隠しロール
             $secret_flg = 1 if($output_msg ne '1');
         }
     }
-    if($arg =~ /((^|\s)(\w)*ST($|\s))/i) {  # シーン表
-        $output_msg = &sinobigami_scene_table("\U$1", "$nick_e");
-        if($1 =~ /S[CMDTNK]?ST/i) {    # 隠しロール
-            $secret_flg = 1 if($output_msg ne '1');
+
+    if($game_type eq "ShinobiGami") {
+        if($arg =~ /((^|\s)(S)?([CMDTNKG]|TK|GA|KY|JB)?[SFEGWB]T($|\s))/i) {
+            $output_msg = &shinobigami_table("\U$1", "$nick_e");
+            if($3) {    # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
         }
     }
-    if($arg =~ /((^|\s)(S)?FT($|\s))/i) {   # ファンブル表
-        $output_msg = &sinobigami_fumble_table("$nick_e");
-        if($1 =~ /SFT/i) {  # 隠しロール
-            $secret_flg = 1 if($output_msg ne '1');
-        }
-    }
-    if($arg =~ /((^|\s)(S)?ET($|\s))/i) {   # 感情表
-        if($game_type eq "ShinobiGami") {
-            $output_msg = &sinobigami_emotion_table("$nick_e");
-        } elsif($game_type eq "DoubleCross") {
-            $output_msg = &dx_emotion_table("$nick_e");
-        }
-        if($1 =~ /SET/i) {  # 隠しロール
-            $secret_flg = 1 if($output_msg ne '1');
-        }
-    }
-    if($arg =~ /((^|\s)(S)?WT($|\s))/i) {   # 変調表
-        $output_msg = &sinobigami_wrong_table("$nick_e");
-        if($1 =~ /SWT/i) {  # 隠しロール
-            $secret_flg = 1 if($output_msg ne '1');
-        }
-    }
-    if($arg =~ /((^|\s)(S)?BT(\d+)?($|\s))/i) {   # 戦場表
-        if($game_type eq "ShinobiGami") {
-            $output_msg = &sinobigami_battlefield_table("$nick_e");
-        } elsif ($game_type eq "DarkBlaze") {   # 掘り出し袋表
+    elsif ($game_type eq "DarkBlaze") {
+        if($arg =~ /((^|\s)(S)?BT(\d+)?($|\s))/i) {   # 掘り出し袋表
             my $dice = 1;
             $dice = $4 if($4);
             $output_msg = &dark_blaze_horidasibukuro_table($dice, "$nick_e");
         }
-        if($1 =~ /SBT/i) {  # 隠しロール
+        if($3) {  # 隠しロール
             $secret_flg = 1 if($output_msg ne '1');
         }
     }
-    if($game_type eq "GundogZero") {
+    elsif($game_type eq "DoubleCross") {
+        if($arg =~ /((^|\s)(S)?ET($|\s))/i) {   # 感情表
+            $output_msg = &dx_emotion_table("$nick_e");
+            if($3) {  # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
+       }
+    }
+    elsif($game_type eq "GundogZero") {
         if($arg =~ /(^|\s)(S)?((\w)(DP|F)T([\+\-\d]*))($|\s)/i) {
             $output_msg = &gundogzero_table($3, "$nick_e");
             if($2) {    # 隠しロール
@@ -1177,7 +883,7 @@ sub dice_command {  # ダイスコマンドの分岐処理
         }
     }
     elsif($game_type eq "MeikyuKingdom") {
-        if($arg =~ /(^|\s)(S)?(([LOCA]RT)|[TCSV]BT|[TCSV]HT|K[DCM]T|CAT|FWT|CFT|TT|NT|ET|T\dT|NAME\d*)(\s|$)/i) {
+        if($arg =~ /(^|\s)(S)?(([LOCAF]RT)|[TCSVF]BT|[TCSV]HT|K[DCM]T|CAT|FWT|CFT|TT|NT|ET|T\dT|NAME\d*|MPT|DFT\d*|IDT\d*|([WLRS]|RW|RU)IT|\dRET|PNT\d*|MLT\d*|IFT)(\s|$)/i) {
             $output_msg = &mayokin_table($3, "$nick_e");
             if($2) {    # 隠しロール
                 $secret_flg = 1 if($output_msg ne '1');
@@ -1192,48 +898,58 @@ sub dice_command {  # ダイスコマンドの分岐処理
             }
         }
     }
+    elsif($game_type eq "MagicaLogia") {
+        if($arg =~ /((^|\s)(S)?([SFWAC]|FC|BG|DA|FA|WI|RT)T($|\s))/i) {
+            $output_msg = &magicalogia_table("\U$1", "$nick_e");
+            if($3) {    # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
+        }
+    }
+    elsif($game_type eq "MeikyuDays") {
+        if($arg =~ /(^|\s)(S)?([D]RT|[D]BT|[D]HT|[DMPL]CT|DNT|KST|CAT|FWT|CFT|DNT|APT|MPT|T\dT)(\s|$)/i) {
+            $output_msg = &mayoday_table($3, "$nick_e");
+            if($2) {    # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
+        }
+    }
+    elsif($game_type eq "Peekaboo") {
+        if($arg =~ /(^|\s)(S)?(((S|PS|O)E|[IS]B)T)(\s|$)/i) {
+            $output_msg = &peekaboo_table($3, "$nick_e");
+            if($2) {    # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
+        }
+    }
+    elsif($game_type eq "MonotoneMusium") {
+        if($arg =~ /(^|\s)(S)?((O|[W]?D)T)(\s|$)/i) {
+            $output_msg = &monotone_musium_table($3, "$nick_e");
+            if($2) {    # 隠しロール
+                $secret_flg = 1 if($output_msg ne '1');
+            }
+        } elsif($arg =~ /2D6([\+\*\-][\d\+\*\-]+)?[>=]/) {
+            $output_msg = &monotone_musium_check("$arg", "$nick_e");
+            if($output_msg ne '1') {
+                $secret_flg = 0;
+                if($arg =~ /S2D6/) {    # 隠しロール
+                    $secret_flg = 1;
+                }
+            }
+        }
+
+    }
 
     if($arg =~ /((^|\s)(S)?choise\[[^,]+(,[^,]+)+\]($|\s))/i) {   # 選択コマンド
         $output_msg = &choise_random($1, "$nick_e");
-        if($1 =~ /Schoise/i) {  # 隠しロール
+        if($3) {  # 隠しロール
             $secret_flg = 1 if($output_msg ne '1');
         }
     }
 
     return ($output_msg, $secret_flg);
 }
-sub point_counter_command {
-    my $arg = $_[0];
-    my $p_nick = $_[1];
-    my $p_chan = $_[2];
-    my $mode = $_[3];
-    my $output = "1";
-
-    if($arg =~ /^#/){
-        if($arg =~ /^#OPEN!/i) {
-            $output = &get_point_list($arg, $p_nick, $p_chan, $mode);
-        } elsif($arg =~ /^#(.*)DIED!/i) {
-            $output = &delete_point_list($arg, $p_nick);
-            if($output) {
-                $output = "${p_nick}: $output のカウンタが削除されました";
-                $mode = 1;  # 出力は常にTalk側
-            }
-        } elsif($arg =~ /^#RENAME!/i) {
-            $output = &rename_point_counter($arg, $p_nick);
-            if($output ne "1") {
-                $output = "${p_nick}: $output";
-                $mode = 0;  # 出力は常にPublic側
-            }
-        } else {
-            $output = &set_point_counter($arg, $p_nick, $p_chan, $mode);
-            if($output ne "1") {
-                $output = "${p_nick}: $output";
-            }
-        }
-    }
-
-    return ($output, $mode);
-}
+#削除
 
 #=========================================================================
 #**                           ランダマイザ
@@ -1383,12 +1099,20 @@ sub dice {  # 加算ダイスロール
         }
         if($ulflg ne "") {  # 成功度判定処理
             $output .= &check_suc($total_n, $dice_n, $ulflg, $diff, $dice_cnt, $dice_max, $n1, $n_max);
+            if($game_type eq "MagicaLogia") { 
+                if ($dice_cnt == 2 && $dice_max == 6) {
+                    $output =~ /\[([\d,]+)\]/;
+                    my $dice_str = $1;
+                    my @dice_arr = split(/,/, $dice_str);
+                    $output .= &magicalogia_check_gain_ME($dice_arr[0], $dice_arr[1]);
+                }
+            }
         }
         if($game_type eq "NightmareHunterDeep") {   # 宿命表示
             $output .= " ＞ 宿命獲得" if($n1 && $dice_max == 6);
         } elsif($game_type eq "Tunnels & Trolls"){
             $output .= " ＞ 悪意".$n_max if(($n_max > 0) && ($dice_max == 6));
-        }elsif($game_type eq "TokumeiTenkousei") { #エキストラパワーポイント獲得
+        } elsif($game_type eq "TokumeiTenkousei") { #エキストラパワーポイント獲得
             $output .= " ＞ ".($n1 * 5)."EPP獲得" if($n1 && $dice_max == 6);
         }
         if(($dice_cnt == 0) || ($dice_max == 0)) { $output = '1'; }
@@ -2738,7 +2462,7 @@ sub gehenna_an_check {
             }
             $dice_now += 1 if($i >= $diff);
         }
-        $dice_now *= 2 if($luck_flg);
+        $dice_now *= 2 if($luck_flg && $dice_n > 1);
         $output = "${dice_now}[${dice_str}]";
         $total_n = $dice_now + $mod;
         if($mod > 0) {
@@ -2764,21 +2488,276 @@ sub gehenna_an_check {
     }
     return $output;
 }
+
+####################           ネクロニカ         ########################
+sub nechronica_check {
+    my ($string, $nick_t) = @_;
+    my $output = '1';
+
+    if($string =~ /(^|\s)S?((\d+)[rR]10([\+\-\d]+)?(\[(\d+)\])?)(\s|$)/i) {
+        $string = $2;
+        my $ulflg = ">=";
+        my $dice_n = 1;
+        my $diff = 6;
+        my $mod = 0;
+        my $total_n = 0;
+        my $mode = 0;   # 0=判定モード, 1=戦闘モード
+        $dice_n = $3 if($3);
+        $mod = parren_killer("(0".$4.")") if($4);
+        $mode = $6 if($5);
+        
+        # $total, $dice_str, $cnt1, $cnt_max, $n_max, $cnt_suc, $cnt_re
+        my ($dice_now, $dice_str, $n1, $cnt_max, $n_max) = &roll($dice_n, 10, 1);
+        $total_n = $n_max + $mod;
+        $output = "${nick_t}: ($string) ＞ [${dice_str}]";
+        if($mod < 0) {
+            $output .= "${mod}";
+        } elsif($mod > 0) {
+            $output .= "+${mod}";
+        }
+        $n1 = 0;
+        $cnt_max = 0;
+        my @dice = split /,/, $dice_str;
+        for(my $i=0; $i<scalar @dice; $i++) {
+            $dice[$i] += $mod;
+            $n1 += 1 if($dice[$i] <= 1);
+            $cnt_max += 1 if($dice[$i] >= 10);
+        }
+        $dice_str = join ",", @dice;
+        $output .= "  ＞ ${total_n}[${dice_str}]";        
+        # $total_n, $dice_n, $ulflg, $diff, $dice_cnt, $dice_max, $n1, $n_max
+        $output .= &check_suc($total_n, $n_max, $ulflg, $diff, $dice_n, 10, $n1, $n_max);
+#        if($dice_n > 1 && $n1 >= 1 && $total_n <= $diff) { # β版の実装
+#            $output .= " ＞ 損傷${n1}";
+#        }
+        if($mode) {
+            my $hit_loc = &nechronica_hit_location_table($total_n);
+            if($hit_loc ne '1') {
+                $output .= " ＞ ".$hit_loc;
+            }
+        }
+    }
+    return $output;
+}
+
+####################           迷宮デイズ         ########################
+sub mayoday_check {
+    my $string = $_[0];
+    my $output = "1";
+
+    if($string =~ /(^|\s)S?((\d+)[rR]6([\+\-\d]*)(([>=]+)(\d+))?)(\s|$)/i) {
+        $string = $2;
+        my $dice_c = $3;
+        my $bonus = 0;
+        my $ulflg = "";
+        my $diff = 0;
+        $bonus = parren_killer("(0".$4.")") if($4);
+        $ulflg = $6 if($6);
+        $diff = $7 if($7);
+        my $dice_now = 0;
+        my $dice_str = "";
+        my $n_max = 0;
+        my $total_n = 0;
+
+        my @DICE_DAT = &roll($dice_c, 6, ($sort_flg & 1));
+        $dice_str = $DICE_DAT[1];
+        my @dice_num = split(/,/, $DICE_DAT[1]);
+        $dice_now = $dice_num[$dice_c - 2] + $dice_num[$dice_c - 1];
+        $total_n = $dice_now + $bonus;
+        $dice_str = "[".$dice_str."]";
+        $output = "${dice_now}${dice_str}";
+        if($bonus > 0) {
+            $output .= "+${bonus}";
+        } elsif($bonus < 0) {
+            $output .= "${bonus}";
+        }
+        if($modeflg > 0) {
+            if($output =~ /[^\d\[\]]+/) {
+                $output = "$_[1]: ($string) ＞ $output ＞ $total_n";
+            } else {
+                $output = "$_[1]: ($string) ＞ $total_n";
+            }
+        } else {
+            $output = "$_[1]: ($string) ＞ $total_n";
+        }
+        if($ulflg ne "") {  # 成功度判定処理
+            $output .= &check_suc($total_n, $dice_now, $ulflg, $diff, 2, 6, 0, 0);
+        }
+    }
+    return $output;
+}
+
+####################        バルナ・クロニカ      ########################
+sub barna_kronika_check {
+    my ($string, $nick_t) = @_;
+    my $output = '1';
+
+    if($string =~ /(^|\s)S?((\d+)[rR]6(\[([,\d]+)\])?)(\s|$)/i) {
+        $string = $2;
+        my $dice_n = 1;
+        my $total_n = 0;
+        my $mode = 0;       # 0=判定モード, 1=戦闘モード
+        my $cc = 0;         # 0=通常, 1～6=クリティカルコール
+        $dice_n = $3 if($3);
+        ($mode, $cc) = split ",",$5 if($4);
+        my($dice_str, $suc, $set, $at_str) = &barna_kronika_roll($dice_n, $mode, $cc);
+        $output = "${nick_t}: ($string) ＞ [${dice_str}] ＞ ";
+        if($mode) {
+            $output .= $at_str;
+        } else {
+            if($suc > 1) {
+                $output .= "成功数${suc}";
+            } else {
+                $output .= "失敗";
+            }
+            $output .= ",セット${set}" if($set > 0);
+        }
+    }
+    return $output;
+}
+
+sub barna_kronika_roll {
+    my ($dice_n, $mode, $cc) = @_;
+    my $output = '';
+    my $suc = 0;
+    my $set = 0;
+    my $at_str = '';
+    my @dice_cnt = (0, 0, 0, 0, 0, 0);
+
+    for(my $i = 0; $i < $dice_n; $i++) {
+        my $idx = int(rand 6);
+        $dice_cnt[$idx]++;
+        $suc = $dice_cnt[$idx] if($dice_cnt[$idx] > $suc);
+    }
+    for(my $i = 0; $i < 6; $i++) {
+        my $dc = $dice_cnt[$i];
+        if($dc > 0) {
+            for(my $cnt = 0; $cnt < $dc; $cnt++) {
+                $output .= ($i + 1).',';
+            }
+            if($mode) {
+                if($cc) {
+                    if($cc == ($i + 1)) {
+                        $at_str .= &barna_kronika_hit_location_table($i + 1).":攻撃値".($dc * 2).",";
+                    }
+                } else {
+                    if($dc > 1) {
+                        $at_str .= &barna_kronika_hit_location_table($i + 1).":攻撃値".$dc.",";
+                    }
+                }
+            }
+            $set++ if($dc > 1);
+        }
+    }
+    if($cc) {
+        my $c_cnt = scalar $dice_cnt[$cc - 1];
+        $suc = $c_cnt * 2;
+        if($c_cnt) {
+            $set = 1;
+        } else {
+            $set = 0;
+        }
+    }
+    if($mode && $suc < 2) {
+        $at_str = "失敗";
+    }
+    $output =~ s/,$//;
+    $at_str =~ s/,$//;
+    return ($output, $suc, $set, $at_str);
+}
+
+####################          六門世界2nd.        ########################
+sub rokumon2_check {
+    my ($string, $nick_t) = @_;
+    my $mod = 0;
+    my $target = 0;
+    my $abl = 0;
+    my $output = '1';
+    
+    if($string =~ /3R6([\+\-\d]*)<=(\d+)\[(\d+)\]/i) {
+        $mod = &parren_killer("(0".$1.")") if($1);
+        $target = $2;
+        $abl = $3;
+        my($dstr, $suc, $sum) = &rokumon2_roll($mod, $target, $abl);
+        $output = "${sum}[${dstr}] ＞ $suc ＞ 評価".&rokumon2_suc_rank($suc);
+        $output .= "(+${suc}d6)" if($suc);
+    }
+    $output = "${nick_t}: (${string}) ＞ ${output}";
+
+    return $output;
+}
+
+sub rokumon2_roll {
+    my($mod, $target, $abl) = @_;
+    my $suc = 0;
+    
+    my($dtotal, $dicestr, $dummy) = &roll(3 + abs($mod), 6 , 1);
+    my @dice = split /,/, $dicestr;
+    for(my $i = 0; $i < abs($mod); $i++) {
+        if($mod < 0) {
+            shift @dice;
+        } else {
+            pop @dice;
+        }
+    }
+    my $cnt5 = 0;
+    my $cnt2 = 0;
+    my $sum = 0;
+    foreach my $die1 (@dice) {
+        $cnt5++ if($die1 >= 5);
+        $cnt2++ if($die1 <= 2);
+        $suc++  if($die1 <= $abl);
+        $sum += $die1;
+    }
+    if($sum < $target) {
+        $suc += 2;
+    } elsif($sum == $target) {
+        $suc += 1;
+    }
+    $suc = 0 if($cnt5 >= 3);
+    $suc = 5 if($cnt2 >= 3);
+    return $dicestr, $suc, $sum;
+}
+
+sub rokumon2_suc_rank {
+    my @suc_rank = ('E','D','C','B','A','S');
+    return $suc_rank[$_[0]];
+}
+
+####################    モノトーン・ミュージアム  ########################
+sub monotone_musium_check {
+    my ($string, $nick_t) = @_;
+    my $mod = 0;
+    my $target = 0;
+    my $crit = 12;
+    my $fumble = 2;
+    my $output = '1';
+    
+    if($string =~ /(^|\s)2D6([\+\-\d]*)>=(\d+)(\[(\d+)?(,(\d+))?\])?(\s|$)/i) {
+        $mod = &parren_killer("(0".$2.")") if($2);
+        $target = $3;
+        $crit = $5 if($5);
+        $fumble = $7 if($7);
+        my($total, $dice_str, $dummy) = &roll(2, 6, $sort_flg && 1);
+        $output = "${total}[${dice_str}]";
+        if($total >= $crit) {
+            $output .= " ＞ 自動成功";
+        } elsif($total <= $fumble) {
+            $output .= " ＞ 自動失敗";
+        } elsif($total >= $target) {
+            $output .= " ＞ 成功";
+        } else {
+            $output .= " ＞ 失敗";
+        }
+    }
+    $output = "${nick_t}: (${string}) ＞ ${output}";
+
+    return $output;
+}
+
+
 ####################        その他ダイス関係      ########################
-sub open_secret_roll {
 #削除
-}
-
-sub add_secret_roll {
-#削除
-}
-
-sub add_plot_channel {
-#削除
-}
-sub get_plot_channel {
-#削除
-}
 
 #=========================================================================
 #**                     ゲーム固有コマンド処理
@@ -3610,7 +3589,6 @@ sub dp_urge_get {
 ####################         パラブラ衝動表        ########################
 sub pb_urge {   # パラサイトブラッドの衝動表
     return '1' if($game_type ne "ParasiteBlood");  # 他ゲーム中の暴発防止
-    my @URGE;
 
     my $string = $_[0];
     if($string =~/(\w*)URGE\s*(\d+)/i) {
@@ -3618,17 +3596,21 @@ sub pb_urge {   # パラサイトブラッドの衝動表
         my $urgelv = ($2);
         if(!$1) {
             $urge_type = 1;
+        } elsif($1 =~ /A/i) {    # 誤作動表
+            $urge_type = 2;
         } else {    # あり得ない文字
             $urge_type = 1;
         }
         if(($urgelv < 1) || ($urgelv > 5)) {
             return '衝動段階は1から5です';
         } elsif($urge_type) {
-            @URGE = &get_pb_urge_table($urge_type);
             my ($dice_now, $dice_str) = &roll(2, 6);
-            my $output = $urgelv.'-'.$dice_now.':'.$URGE[$urgelv - 1][$dice_now - 2];
+            my $output = &get_pb_urge_table($urgelv, $dice_now, $urge_type);
+            $output = $urgelv.'-'.$dice_now.':'.$output;
             if($urge_type <= 1) {
                 $output = $_[1].': 衝動表'.$output;
+            } elsif($urge_type <= 2) {
+                $output = $_[1].': 誤作動表'.$output;
             }
             return $output;
         }
@@ -3638,15 +3620,17 @@ sub pb_urge {   # パラサイトブラッドの衝動表
 }
 
 sub get_pb_urge_table {
+    my ($level, $dice, $urge_type) = @_;
     my @URGE;
-    my $urge_type = $_[0];
 
     if($urge_type <= 1) { # 衝動表
         @URGE = &get_pb_normal_urge_table;
+    } elsif($urge_type <= 2) { # AASとサイボーグの誤作動表
+        @URGE = &get_pb_aas_urge_table;
     } else {  # エラートラップ
         @URGE = &get_pb_normal_urge_table;
     }
-    return @URGE;
+    return $URGE[$level - 1 ][$dice - 2];
 }
 
 sub get_pb_normal_urge_table {
@@ -3668,7 +3652,7 @@ sub get_pb_normal_urge_table {
         '『賛美/20』最も近くの対象を主と思いこむ。1時間または自身か対象が[気絶・戦闘不能・死亡]するまで、対象のあらゆる命令を聞く。',
         '『茫然/20』思考が停止。そのターンの終了まで[タイミング:攻撃]を行えない。',
         '『苦痛/20』"悪魔寄生体"が体内で暴れる。苦痛を感じ、【エナジー】を10消費。',
-        '『落涙/10』過去の悲しい想い出が去来し、涙が溢れる。そのターンの終了まで[タイミング:通常]を行えない。',
+        '『落涙/10』過去の悲しい想い出が去来し、涙が溢れる。そのターンの終了まで[タイミング:準備]を行えない。',
         '『限界/10』溢れる力が限界を超え、全身の血管が破裂。【エナジー】を5消費。',
         '『辛抱/10』突如全身が〈悪魔化〉しようとしたが、意思の力で抑制。【エナジー】を5消費。〈悪魔化〉時は影響なし。',
         '『忍耐/ 0』衝動に耐えた。影響なし。',
@@ -3716,6 +3700,83 @@ sub get_pb_normal_urge_table {
         '『発現/30』通常時であれば、即座に《悪魔化》する。特異な外見が60ターン(10分)目立ち、その間、命中判定とダメージに+5。',
         '『絶望/30』全身が絶望に満たされ、全てを破壊したくなる。次のターンの終了まで、ダメージに+15。',
         );
+    my @URGE = (\@URGE1, \@URGE2, \@URGE3, \@URGE4, \@URGE5);
+    return @URGE;
+}
+
+#**パラサイトブラッドの誤作動表(2d6)
+sub get_pb_aas_urge_table {
+    my(@URGE1, @URGE2, @URGE3, @URGE4, @URGE5);
+#**第１段階
+    @URGE1 = (
+        '『緊急停止/20』機能異常の警報と共に、機能が緊急停止。次のターンのターン終了時まで［行動不能］となる。' ,
+        '『動作不調/10』駆動系に異常発生。このターンのターン終了まで［行動不能］となる。' ,
+        '『腕部停止/10』腕部機能に異常発生。このターンのターン終了まで［タイミング：攻撃］を失う。' ,
+        '『視覚異常/10』センサー系に異常。60ターン（10分）の間、［暗闇］となる。' ,
+        '『機能制動/0』機能が一瞬停止するが、以後正常に動作。影響なし。' ,
+        '『機能安定/0』機能がむしろ安定した。影響なし。' ,
+        '『不良調整/0』機能に違和感を覚えるが誤差の範囲内。影響なし。' ,
+        '『機能暴発/10』兵装の調子が悪化。次のターンのターン終了まで、［タイミング：準備］の《兵装》が使用できない。' ,
+        '『離脱機能/10』異常発生。即座に［戦闘移動］を行い、最も近い敵から遠ざかるように移動する。' ,
+        '『排熱暴走/10』排熱機能に異常。次のターンのターン終了まで［着火］状態となる。特殊ダメージは本人のものを使用する。' ,
+        '『電装異常/20』電装系に異常。即座に【負荷】が2点蓄積する。',
+    );
+#**第２段階
+    @URGE2 = (
+        '『安全機能/20』セーフティが誤動作。このターンのターン終了まで判定の達成値に-5。' ,
+        '『筋肉萎縮/20』人工筋肉に異常発生。60ターン（10分）の間、【肉体】判定の達成値に-2。' ,
+        '『出力低下/20』駆動部に異常発生。60ターン（10分）の間、【機敏】判定の達成値に-2。' ,
+        '『感覚異常/10』感覚機能に異常発生。60ターン（10分）の間、【感覚】判定の達成値に-2。' ,
+        '『視界不良/10』視覚機能に異常発生。60ターン（10分）の間、【幸運】判定の達成値に-2。' ,
+        '『機能安定/0』機能がむしろ安定した。影響なし。' ,
+        '『不良調整/0』機能に違和感を覚えるが誤差の範囲内。影響なし。',
+        '『援護不通/10』援護ソフトが誤作動。60ターン（10分）の間、【知力】判定の達成値に-2。' ,
+        '『発声不調/20』通話機能に異常。60ターン（10分）の間、声を出しても雑音だらけになって意味が通じず、さらに【精神】判定の達成値に-2。' ,
+        '『装甲軟化/20』防御機能に異常。次のターンのターン終了まで、防御力に-5。' ,
+        '『装備異常/20』精密動作に異常発生。装備している［通常アイテム］の武器がランダムでひとつ、［装備］から外れる。' ,
+    );
+#**第３段階
+    @URGE3 = (
+        '『動力漏電/20』動力が漏電し始める。【負荷】が2点蓄積する。' ,
+        '『脚部異常/20』脚部に異常発生。次のターンのターン終了まで［戦闘移動］［全力移動］の距離が半分になる。' ,
+        '『足下転倒/20』バランサーに異常発生。［転倒］状態となる。' ,
+        '『出力向上/20』突然出力が上昇する。次のターンのターン終了まで、特殊ダメージに+1d。' ,
+        '『機能制動/10』一瞬違和感を覚えるが、以後正常に動作。影響なし。' ,
+        '『障壁減衰/10』電力が減衰する。【電力】を5消費する。' ,
+        '『身体向上/10』格闘機能が向上。次のターンのターン終了まで、肉弾ダメージに+1d。' ,
+        '『精度向上/20』火器管制機能が向上。次のターンのターン終了まで、射撃ダメージに+1d。' ,
+        '『反射鋭化/20』反応速度が加速した。次のターンのターン終了まで、【行動値】に+5。' ,
+        '『友軍誤認/20』警戒装置が誤動。最も近い［距離：移動10m/対象：1体］に通常肉弾攻撃を行う。' ,
+        '『電子賦活/20』電磁障壁が突如復帰。【電力】が10回復する。' ,
+    );
+#**第４段階
+    @URGE4 = (
+        '『照準誤認/20』照準機能に異常発生。最も近い［距離：移動10m/対象：1体］に通常肉弾攻撃を行う。判定は自動的にクリティカルとなる。' ,
+        '『攻撃特化/20』攻撃機能が異常動作。次のターンのターン終了まで、ダメージに+2d。ただし、その間［タイミング：瞬間］を行えない。' ,
+        '『機内窒息/20』呼吸機能に異常。次のターンのターン終了まで［窒息］状態となる。' ,
+        '『自動援護/20』援護機能が自動的に作動する。即座に［タイミング：準備］を1回行う。',
+        '『音声遮断/10』聴覚機能に異常発生。次のターンのターン終了まで一切の物音が聞こえず、回避判定の達成値に-5。' ,
+        '『電流加速/10』突然電磁障壁が効率的に流れる。【電力】が10回復。' ,
+        '『精密射撃/20』照準機能が向上。60ターン（10分間）の間、ダメージに+5。' ,
+        '『緊急措置/20』突然、緊急時の対策機能が発動する。【負荷】が2蓄積し、【電力】が20回復する。' ,
+        '『荷電暴走/20』電流の流れに異常が発生。【HP】を10消費し、次のターンのターン終了までダメージに+10。' ,
+        '『状況分析/20』周辺解析ソフトが高速で動作。60ターン（10分間）の間、命中判定の達成値に+5。' ,
+        '『機能再生/20』兵装に誤作動。取得済みの使用不能になった《兵装》を1つ指定し、再び使用できるようになる。' ,
+    );
+#**第５段階
+    @URGE5 = (
+        '『機能停止/30』機能が作動しなくなる。このターンのターン終了まで、【負荷】を蓄積させる行動が取れなくなる。' ,
+        '『機関暴走/30』放熱機関が暴走する。本人を中心として［対象：半径5m全て］が次のターンのターン終了まで［着火］状態となる。特殊ダメージはこの表を振ったPCのものを使用する。' ,
+        '『電力低下/20』出力が上がらない。【電力】が20減少する。' ,
+        '『急速修復/20』電磁障壁と生命維持装置が高速処理を始める。【HP】が20回復。' ,
+        '『駆動不調/20』駆動系に動作不良。次のターンのターン終了まで、判定の達成値に-5。' ,
+        '『機体清冽/20』機能が初期化され、異常から復帰。［気絶・死亡・戦闘不能］以外の状態変化がすべて解除される。' ,
+        '『機体減速/20』運動機能が暴走。次のターンのターン終了まで【行動値】に-10（最低1）。' ,
+        '『排毒噴出/20』排気機構が誤作動。［対象：半径5m全て］が次のターンのターン終了まで［猛毒］状態となる。' ,
+        '『緊急駆動/20』機動性が向上。次のターンのターン終了まで判定の達成値に+5。' ,
+        '『負荷軽減/30』急激に負荷が解消される。【負荷】が2点回復する。' ,
+        '『出力過剰/30』全出力が過剰なまでに上昇する。次のターンのターン終了までダメージに+10。' ,
+    );
     my @URGE = (\@URGE1, \@URGE2, \@URGE3, \@URGE4, \@URGE5);
     return @URGE;
 }
@@ -4115,7 +4176,33 @@ sub dx_feel_table {
     return ($dice_now, $output);
 }
 
+
 ####################           シノビガミ          ########################
+#** テーブル振り分け
+sub shinobigami_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    
+    if($game_type eq "ShinobiGami") {
+        if($string =~ /((\w)*ST)/i) {  # シーン表
+            $output = &sinobigami_scene_table("\U$1", "$nick");
+        }
+        elsif($string =~ /(FT)/i) {   # ファンブル表
+            $output = &sinobigami_fumble_table("$nick");
+        }
+        elsif($string =~ /(ET)/i) {   # 感情表
+            $output = &sinobigami_emotion_table("$nick");
+        }
+        elsif($string =~ /([G]?WT)/i) {   # 変調表
+            $output = &sinobigami_wrong_table("\U$1", "$nick");
+        }
+        elsif($string =~ /(BT)/i) {   # 戦場表
+            $output = &sinobigami_battlefield_table("$nick");
+        }
+    }
+    return $output;
+}
+
 #** シーン表
 sub sinobigami_scene_table {
     my $string = "\U$_[0]";
@@ -4124,119 +4211,197 @@ sub sinobigami_scene_table {
     my $type = "";
     my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
 
-    if($game_type eq "ShinobiGami") {
-        if($string =~ /CST/i) {
-            $type = '都市';
-        } elsif($string =~ /MST/i) {
-            $type = '館';
-        } elsif($string =~ /DST/i) {
-            $type = '出島';
-        } elsif($string =~ /TST/i) {
-            $type = 'トラブル';
-        } elsif($string =~ /NST/i) {
-            $type = '日常';
-        } elsif($string =~ /KST/i) {
-            $type = '回想';
-        }
-        if($type eq '都市') {
-            @table = (
-                'シャワーを浴び、浴槽に疲れた身体を沈める。時には、癒しも必要だ。',
-                '閑静な住宅街。忍びの世とは関係のない日常が広がっているようにも見えるが……それも錯覚なのかもしれない',
-                '橋の上にたたずむ。川の対岸を結ぶ境界点。さて、どちらに行くべきか……？',
-                '人気のない公園。野良猫が一匹、遠くからあなたを見つめているような気がする。',
-                '至福の一杯。この一杯のために生きている……って、いつも言ってるような気がするなぁ。',
-                '無機質な感じのするオフィスビル。それは、まるで都市の墓標のようだ。',
-                '古びた劇場。照明は落ち、あなたたちのほかに観客の姿は見えないが……。',
-                '商店街を歩く。人ごみに混じって、不穏な気配もちらほら感じるが……。',
-                'ビルの谷間を飛び移る。この街のどこかに、「アレ」は存在するはずなのだが……。',
-                '見知らぬ天井。いつの間にか眠っていたのだろうか？それにしてもここはどこだ？',
-                '廃屋。床には乱雑に壊れた調度品や器具が転がっている。',
-            );
-        } elsif($type eq '館') {
-            @table = (
-                'どことも知れぬ暗闇の中。忍びの者たちが潜むには、おあつらえ向きの場所である。',
-                '洋館の屋根の上。ここからなら、館の周りを一望できるが……。',
-                '美しい庭園。丹精こめて育てられたであろう色とりどりの花。そして、綺麗に刈り込まれた生垣が広がっている。',
-                'あなたは階段でふと足を止めた。何者かの足音が近づいているようだ。',
-                'あなたに割り当てられた寝室。ベッドは柔らかく、調度品も高級なものばかりだが……。',
-                'エントランスホール。古い柱時計の時報が響く中、館の主の肖像画が、あなたを見下ろしている。',
-                '食堂。染み一つないテーブルクロスに覆われた長い食卓。その上は年代物の燭台や花で飾られている。',
-                '長い廊下の途中。この屋敷は広すぎて、迷子になってしまいそうだ。',
-                '戯れに遊戯室へ入ってみた。そこには撞球台やダーツの的、何組かのトランプが散らばっているポーカーテーブルがあった。',
-                'かび臭い図書室。歴代の館の主たちの記録や、古今東西の名著が、ぎっしりと棚に並べられている。',
-                '一族の納骨堂がある。冷気と瘴気に満ちたその場所に、奇妙な叫びが届く。遠くの鳥のさえずりか？それとも死者の恨みの声か……？',
-            );
-        } elsif($type eq '出島') {
-            @table = (
-                '迷宮街。いつから囚われてしまったのだろう？何重にも交差し、曲がりくねった道を歩き続ける。このシーンの登場人物は《記憶術》で判定を行わなければならない。成功すると、迷宮の果てで好きな忍具を一つ獲得する。失敗すると、行方不明の変調を受ける。',
-                '幻影城。訪れた者の過去や未来の風景を見せる場所。このシーンの登場人物は、《意気》の判定を行うことができる。成功すると、自分の持っている【感情】を好きな何かに変更することができる。',
-                '死者たちの行進。無念の死を遂げた者たちが、仲間を求めて彷徨らっている。このシーンの登場人物は《死霊術》で判定を行わなければならない。失敗すると、ランダムに変調を一つを受ける。',
-                'スラム。かろうじて生き延びている人たちが肩を寄せ合い生きているようだ。ここなら辛うじて安心できるかも……。',
-                '落書きだらけのホテル。その周囲には肌を露出させた女や男たちが、媚態を浮かべながら立ち並んでいる。',
-                '立ち並ぶ廃墟。その影から、人とも怪物ともつかぬ者の影が、あなたの様子をじっとうかがっている。',
-                '薄汚い路地裏。巨大な黒犬が何かを貪っている。あなたの気配を感じて黒犬は去るが、そこに遺されていたのは……。',
-                '昏い酒場。バーテンが無言でグラスを磨き続けている。あなたの他に客の気配はないが……。',
-                '地面を覆う無数の瓦礫。その隙間から暗黒の瘴気が立ち昇る。このシーンの登場人物は《生存術》で判定を行わなければならない。失敗すると、好きな【生命力】を１点失う。',
-                '熱気溢れる市場。武器や薬物などを売っているようだ。商人たちの中には、渡来人の姿もある。このシーンの登場人物は、《経済力》で判定を行うことができる。成功すると、好きな忍具を一つ獲得できる。',
-                '目の前に渡来人が現れる。渡来人はあなたに興味を持ち、襲い掛かってくる。このシーンの登場人物は《刀術》で判定を行わなければならない。成功すると、渡来人を倒し、好きな忍具を一つ獲得する。失敗すると、３点の接近戦ダメージを受ける。',
-            );
-        } elsif($type eq 'トラブル') {
-            @table = (
-                '同行者とケンカしてしまう。うーん、気まずい雰囲気。',
-                'バシャ！　同行者のミスでずぶ濡れになってしまう。……冷たい。',
-                '敵の気配に身を隠す。……すると、同行者の携帯が着信音を奏で始める。「……えへへへへ」じゃない！',
-                '同行者の空気の読めない一言。場が盛大に凍り付く。まずい。何とかしないと。',
-                '危機一髪！　同行者を死神の魔手から救い出す。……ここも油断できないな。',
-                '同行者が行方不明になる。アイツめ、どこへ逃げたッ！',
-                'ずて────ん！　あいたたたた……同行者がつまずいたせいで、巻き込まれて転んでしまった。',
-                '同行者のせいで、迷子になってしまう。困った。どこへ行くべきか。',
-                '「どこに目つけてんだ、てめぇ！」同行者がチンピラにからまれる。うーん、助けに入るべきか。',
-                '！　油断していたら、同行者に自分の恥ずかしい姿を見られてしまう。……一生の不覚！',
-                '同行者が不意に涙を流す。……一体、どうしたんだろう？',
-            );
-        } elsif($type eq '日常') {
-            @table = (
-                'っくしゅん！　……うーん、風邪ひいたかなあ。お見舞いに来てくれたんだ。ありがとう。',
-                '目の前のアイツは、見違えるほどドレスアップしていた。……ゆっくりと大人な時間が過ぎていく。',
-                'おいしそうなスイーツを食べることになる。たまには甘いものを食べて息抜き息抜き♪',
-                'ふわわわわ、いつの間にか寝ていたようだ。……って、あれ？　お前、いつからそこにいたッ!!',
-                '買い物帰りの友人と出会う。方向が同じなので、しばらく一緒に歩いていると、思わず会話が盛り上がる。',
-                'コンビニ。商品に手を伸ばしたら、同時にその商品をとろうとした別の人物と手が触れあう。なんという偶然！',
-                'みんなで食卓を囲むことになる。鍋にしようか？　それとも焼き肉？　お好み焼きなんかもい～な～♪',
-                'どこからか楽しそうな歌声が聞こえてくる。……って、あれ？　何でお前がこんなところに？',
-                '野良猫に餌をやる。……猫はのどを鳴らし、すっかりあなたに甘えているようだ。',
-                '「……！　……？　……♪」テレビは、なにやら楽しげな場面を映している。あら。もう、こんな時間か。',
-                '面白そうなゲーム！　誰かと対戦することになる。GMは、「戦術」からランダムに特技1つを選ぶ。このシーンに登場しているキャラクターは、その特技の判定を行う。成功した場合、同じシーンに登場しているキャラクターを1人を選び、そのキャラクターの自分に対する【感情】を好きなものに変更する（何の【感情】も持っていない場合、好きな【感情】を芽生えさせる）。',
-            );
-        } elsif($type eq '回想') {
-            @table = (
-                '闇に蔓延する忍びの気配。あのときもそうだった。手痛い失敗の記憶。今度こそ、うまくやってみせる。',
-                '甘い口づけ。激しい抱擁。悲しげな瞳……一夜の過ちが思い返される。',
-                '記憶の中でゆらめくセピア色の風景。……見覚えがある。そう、私はここに来たことがあるはずだッ!!',
-                '目の前に横たわる死体。地面に広がっていく。あれは、私のせいだったのだろうか……？',
-                'アイツとの大切な約束を思い出す。守るべきだった約束。果たせなかった約束。',
-                '助けを求める右手が、あなたに向かってまっすぐ伸びる。あなたは、必死でその手を掴もうとするが、あと一歩のところで、その手を掴み損ねる……。',
-                'きらきらと輝く笑顔。今はもう喪ってしまった、大事だったアイツの笑顔。',
-                '恐るべき一撃！　もう少しで命を落とすところだった……。しかし、あの技はいまだ見切れていない。',
-                '幼い頃の記憶。仲の良かったあの子。そういえば、あの子は、どこに行ってしまったのだろう。もしかして……。',
-                '「……ッ!!」激しい口論。ひどい別れ方をしてしまった。あんなことになると分かっていたら……。',
-                '懐の中のお守りを握りしめる。アイツにもらった、大切な思い出の品。「兵糧丸」を1つ獲得する。',
-            );
-        } else {
-            @table = (
-                '血の臭いがあたりに充満している。何者かの戦いがあった気配。　いや？まだ戦いは続いているのだろうか？',
-                'これは……夢か？　もう終わったはずの過去。しかし、それを忘れることはできない。',
-                '眼下に広がる街並みを眺める。ここからなら街を一望できるが……。',
-                '世界の終わりのような暗黒。暗闇の中、お前達は密やかに囁く。',
-                '優しい時間が過ぎていく。影の世界のことを忘れてしまいそうだ。',
-                '清廉な気配が漂う森の中。鳥の囀りや、そよ風が樹々を通り過ぎる音が聞こえる。',
-                '凄まじい人混み。喧噪。影の世界のことを知らない無邪気な人々の手柄話や無駄話が騒がしい。',
-                '強い雨が降り出す。人々は、軒を求めて、大慌てて駆けだしていく。',
-                '大きな風が吹き荒ぶ。髪の毛や衣服が大きく揺れる。何かが起こりそうな予感……',
-                '酔っぱらいの怒号。客引きたちの呼び声。女たちの嬌声。いつもの繁華街の一幕だが。',
-                '太陽の微笑みがあなたを包み込む。影の世界の住人には、あまりにまぶしすぎる。',
-            );
-        }
+    if($string =~ /CST/i) {
+        $type = '都市';
+    } elsif($string =~ /MST/i) {
+        $type = '館';
+    } elsif($string =~ /DST/i) {
+        $type = '出島';
+    } elsif($string =~ /TST/i) {
+        $type = 'トラブル';
+    } elsif($string =~ /NST/i) {
+        $type = '日常';
+    } elsif($string =~ /TKST/i) {
+        $type = '東京';
+    } elsif($string =~ /KST/i) {
+        $type = '回想';
+    } elsif($string =~ /GST/i) {
+        $type = '戦国';
+    } elsif($string =~ /GAST/i) {
+        $type = '学校';
+    } elsif($string =~ /KYST/i) {
+        $type = '京都';
+    } elsif($string =~ /JBST/i) {
+        $type = '神社仏閣';
+    }
+    if($type eq '都市') {
+        @table = (
+            'シャワーを浴び、浴槽に疲れた身体を沈める。時には、癒しも必要だ。',
+            '閑静な住宅街。忍びの世とは関係のない日常が広がっているようにも見えるが……それも錯覚なのかもしれない',
+            '橋の上にたたずむ。川の対岸を結ぶ境界点。さて、どちらに行くべきか……？',
+            '人気のない公園。野良猫が一匹、遠くからあなたを見つめているような気がする。',
+            '至福の一杯。この一杯のために生きている……って、いつも言ってるような気がするなぁ。',
+            '無機質な感じのするオフィスビル。それは、まるで都市の墓標のようだ。',
+            '古びた劇場。照明は落ち、あなたたちのほかに観客の姿は見えないが……。',
+            '商店街を歩く。人ごみに混じって、不穏な気配もちらほら感じるが……。',
+            'ビルの谷間を飛び移る。この街のどこかに、「アレ」は存在するはずなのだが……。',
+            '見知らぬ天井。いつの間にか眠っていたのだろうか？それにしてもここはどこだ？',
+            '廃屋。床には乱雑に壊れた調度品や器具が転がっている。',
+        );
+    } elsif($type eq '館') {
+        @table = (
+            'どことも知れぬ暗闇の中。忍びの者たちが潜むには、おあつらえ向きの場所である。',
+            '洋館の屋根の上。ここからなら、館の周りを一望できるが……。',
+            '美しい庭園。丹精こめて育てられたであろう色とりどりの花。そして、綺麗に刈り込まれた生垣が広がっている。',
+            'あなたは階段でふと足を止めた。何者かの足音が近づいているようだ。',
+            'あなたに割り当てられた寝室。ベッドは柔らかく、調度品も高級なものばかりだが……。',
+            'エントランスホール。古い柱時計の時報が響く中、館の主の肖像画が、あなたを見下ろしている。',
+            '食堂。染み一つないテーブルクロスに覆われた長い食卓。その上は年代物の燭台や花で飾られている。',
+            '長い廊下の途中。この屋敷は広すぎて、迷子になってしまいそうだ。',
+            '戯れに遊戯室へ入ってみた。そこには撞球台やダーツの的、何組かのトランプが散らばっているポーカーテーブルがあった。',
+            'かび臭い図書室。歴代の館の主たちの記録や、古今東西の名著が、ぎっしりと棚に並べられている。',
+            '一族の納骨堂がある。冷気と瘴気に満ちたその場所に、奇妙な叫びが届く。遠くの鳥のさえずりか？それとも死者の恨みの声か……？',
+        );
+    } elsif($type eq '出島') {
+        @table = (
+            '迷宮街。いつから囚われてしまったのだろう？何重にも交差し、曲がりくねった道を歩き続ける。このシーンの登場人物は《記憶術》で判定を行わなければならない。成功すると、迷宮の果てで好きな忍具を一つ獲得する。失敗すると、行方不明の変調を受ける。',
+            '幻影城。訪れた者の過去や未来の風景を見せる場所。このシーンの登場人物は、《意気》の判定を行うことができる。成功すると、自分の持っている【感情】を好きな何かに変更することができる。',
+            '死者たちの行進。無念の死を遂げた者たちが、仲間を求めて彷徨らっている。このシーンの登場人物は《死霊術》で判定を行わなければならない。失敗すると、ランダムに変調を一つを受ける。',
+            'スラム。かろうじて生き延びている人たちが肩を寄せ合い生きているようだ。ここなら辛うじて安心できるかも……。',
+            '落書きだらけのホテル。その周囲には肌を露出させた女や男たちが、媚態を浮かべながら立ち並んでいる。',
+            '立ち並ぶ廃墟。その影から、人とも怪物ともつかぬ者の影が、あなたの様子をじっとうかがっている。',
+            '薄汚い路地裏。巨大な黒犬が何かを貪っている。あなたの気配を感じて黒犬は去るが、そこに遺されていたのは……。',
+            '昏い酒場。バーテンが無言でグラスを磨き続けている。あなたの他に客の気配はないが……。',
+            '地面を覆う無数の瓦礫。その隙間から暗黒の瘴気が立ち昇る。このシーンの登場人物は《生存術》で判定を行わなければならない。失敗すると、好きな【生命力】を１点失う。',
+            '熱気溢れる市場。武器や薬物などを売っているようだ。商人たちの中には、渡来人の姿もある。このシーンの登場人物は、《経済力》で判定を行うことができる。成功すると、好きな忍具を一つ獲得できる。',
+            '目の前に渡来人が現れる。渡来人はあなたに興味を持ち、襲い掛かってくる。このシーンの登場人物は《刀術》で判定を行わなければならない。成功すると、渡来人を倒し、好きな忍具を一つ獲得する。失敗すると、３点の接近戦ダメージを受ける。',
+        );
+    } elsif($type eq 'トラブル') {
+        @table = (
+            '同行者とケンカしてしまう。うーん、気まずい雰囲気。',
+            'バシャ！　同行者のミスでずぶ濡れになってしまう。……冷たい。',
+            '敵の気配に身を隠す。……すると、同行者の携帯が着信音を奏で始める。「……えへへへへ」じゃない！',
+            '同行者の空気の読めない一言。場が盛大に凍り付く。まずい。何とかしないと。',
+            '危機一髪！　同行者を死神の魔手から救い出す。……ここも油断できないな。',
+            '同行者が行方不明になる。アイツめ、どこへ逃げたッ！',
+            'ずて────ん！　あいたたたた……同行者がつまずいたせいで、巻き込まれて転んでしまった。',
+            '同行者のせいで、迷子になってしまう。困った。どこへ行くべきか。',
+            '「どこに目つけてんだ、てめぇ！」同行者がチンピラにからまれる。うーん、助けに入るべきか。',
+            '！　油断していたら、同行者に自分の恥ずかしい姿を見られてしまう。……一生の不覚！',
+            '同行者が不意に涙を流す。……一体、どうしたんだろう？',
+        );
+    } elsif($type eq '日常') {
+        @table = (
+            'っくしゅん！　……うーん、風邪ひいたかなあ。お見舞いに来てくれたんだ。ありがとう。',
+            '目の前のアイツは、見違えるほどドレスアップしていた。……ゆっくりと大人な時間が過ぎていく。',
+            'おいしそうなスイーツを食べることになる。たまには甘いものを食べて息抜き息抜き♪',
+            'ふわわわわ、いつの間にか寝ていたようだ。……って、あれ？　お前、いつからそこにいたッ!!',
+            '買い物帰りの友人と出会う。方向が同じなので、しばらく一緒に歩いていると、思わず会話が盛り上がる。',
+            'コンビニ。商品に手を伸ばしたら、同時にその商品をとろうとした別の人物と手が触れあう。なんという偶然！',
+            'みんなで食卓を囲むことになる。鍋にしようか？　それとも焼き肉？　お好み焼きなんかもい～な～♪',
+            'どこからか楽しそうな歌声が聞こえてくる。……って、あれ？　何でお前がこんなところに？',
+            '野良猫に餌をやる。……猫はのどを鳴らし、すっかりあなたに甘えているようだ。',
+            '「……！　……？　……♪」テレビは、なにやら楽しげな場面を映している。あら。もう、こんな時間か。',
+            '面白そうなゲーム！　誰かと対戦することになる。GMは、「戦術」からランダムに特技1つを選ぶ。このシーンに登場しているキャラクターは、その特技の判定を行う。成功した場合、同じシーンに登場しているキャラクターを1人を選び、そのキャラクターの自分に対する【感情】を好きなものに変更する（何の【感情】も持っていない場合、好きな【感情】を芽生えさせる）。',
+        );
+    } elsif($type eq '回想') {
+        @table = (
+            '闇に蔓延する忍びの気配。あのときもそうだった。手痛い失敗の記憶。今度こそ、うまくやってみせる。',
+            '甘い口づけ。激しい抱擁。悲しげな瞳……一夜の過ちが思い返される。',
+            '記憶の中でゆらめくセピア色の風景。……見覚えがある。そう、私はここに来たことがあるはずだッ!!',
+            '目の前に横たわる死体。地面に広がっていく。あれは、私のせいだったのだろうか……？',
+            'アイツとの大切な約束を思い出す。守るべきだった約束。果たせなかった約束。',
+            '助けを求める右手が、あなたに向かってまっすぐ伸びる。あなたは、必死でその手を掴もうとするが、あと一歩のところで、その手を掴み損ねる……。',
+            'きらきらと輝く笑顔。今はもう喪ってしまった、大事だったアイツの笑顔。',
+            '恐るべき一撃！　もう少しで命を落とすところだった……。しかし、あの技はいまだ見切れていない。',
+            '幼い頃の記憶。仲の良かったあの子。そういえば、あの子は、どこに行ってしまったのだろう。もしかして……。',
+            '「……ッ!!」激しい口論。ひどい別れ方をしてしまった。あんなことになると分かっていたら……。',
+            '懐の中のお守りを握りしめる。アイツにもらった、大切な思い出の品。「兵糧丸」を1つ獲得する。',
+        );
+    } elsif($type eq '東京') {
+        @table = (
+            'お台場、臨界副都心。デート中のカップルや観光客が溢れている。',
+            '靖国神社。東京の中とも思えぬ、緑で満ちた場所だ。今は観光客もおらず、奇妙に静かだ……。',
+            '東京大学の本部キャンパス。正門から伸びる銀杏並木の道を学生や教職員がのんびりと歩いている。道の向こうには安田講堂が見える。',
+            '山手線の中。乗車率200％を超える、殺人的な通勤ラッシュ真っ最中。この中でできることは限られている……。',
+            '霞が関。この場に集う情報は、忍者にとっても価値が高いものだ。道を行く人々の中にも、役人や警察官が目につく。',
+            '渋谷駅前の雑踏。大型屋外ヴィジョンが見下ろす中で、大勢の若者たちが行き交っている。',
+            '夜の新宿歌舞伎町。酔っぱらったサラリーマン、華やかな夜の蝶、明らかに筋ものと判る男、外国人などの様々な人間と、どこか危険な雰囲気に満ちている。',
+            '新宿都庁。摩天楼が林立するビル街の下、背広姿の人々が行き交う。',
+            '神田古書街。多くの古書店が軒を連ねている。軒先に積まれた本の山にさえ、追い求める謎や、深遠な知識が埋もれていそうな気がする。',
+            '山谷のドヤ街。日雇い労働者が集う管理宿泊施設の多いこの場所は、身を隠すにはうってつけだ。',
+            '東京スカイツリーの上。この場所からならば東京の町が一望できる。',
+        );
+    } elsif($type eq '戦国') {
+        @table = (
+            '炎上する山城。人々の悲鳴や怒号がこだましている。どうやら、敵対する武将による焼き討ちらしい。今ならば、あるいは……。',
+            '荒れ果てた村。カラスの不吉な鳴き声が聞こえてくる中で、やせ細った村人たちが、うつろな瞳でこちらを伺っている。',
+            '人気のない山道。ただ鳥の声だけが響いている。通りがかった人を襲うのには、好都合かもしれない。',
+            '乾いた骸の転がる合戦後。生き物の姿はなく、草の一本さえも生えていない。落ち武者たちの恨みがましい声が聞こえてきそうだ……。',
+            '不気味な気配漂う森の中。何か得体のしれぬものが潜んでいそうだ。',
+            '荒れ果てた廃寺。ネズミがカサカサと這いまわる本堂の中を、残された本尊が見下ろしている。',
+            '街道沿いの宿場町。戦から逃げてきたらしい町人や、商売の種を探す商人、目つきの鋭い武士などが行き交い、賑わっている。',
+            '城の天守閣のさらに上。強く吹く風が、雲を流していく。',
+            '館の天井裏。この下では今、何が行われているのか……。',
+            '合戦場に設けられた陣内。かがり火がたかれ、武者たちが酒宴を行っている。',
+            '戦の真っただ中にある合戦場。騎馬にまたがった鎧武者が駆け抜けていく。勝者となるのは、いずれの陣営だろうか。',
+        );
+    } elsif($type eq '学校') {
+        @table = (
+            '清廉な気配が漂う森の中。鳥のさえずりやそよ風が木々を通りすぎる音が聞こえる。',
+            '学校のトイレ。……なんだか少しだけ怖い気がする。',
+            '誰もいない体育館。バスケットボールがころころと転がっている。',
+            '校舎の屋上。一陣の風が吹き、衣服をたなびかせる。',
+            '校庭。体操服姿の生徒たちが走っている。',
+            '廊下。休憩時間か放課後か。生徒たちが、楽しそうにはしゃいでいる。',
+            '学食のカフェテリア。生徒たちがまばらに席につき、思い思い談笑している。',
+            '静かな授業中の風景。しかし、忍術を使って一般生徒に気取られない会話をしている忍者たちもいる。',
+            '校舎と校舎をつなぐ渡り廊下。あなた以外の気配はないが……。',
+            '特別教室。音楽室や理科室にいるのってなんか楽しいよね。',
+            'プール。水面が、ゆらゆら揺れている。',
+        );
+    } elsif($type eq '京都') {
+        @table = (
+            '夜の街並み。神社仏閣はライトアップされ、にぎやかな酔客が通りを埋める。昼間とはまた違った景色が広がっている。',
+            '京都駅ビル。その屋上は、京都市で最も高く、周囲を一望できる。',
+            '旅館で一休み。……のはずが、四方山話に花が咲く。',
+            '鴨川のあたりを歩いている。カップルが均等に距離を置いて座っているのが面白い。',
+            '京都はどこにでもおみやげ物屋があるなぁ。さて、あいつに何を買ってやるべきか……？',
+            '「神社仏閣シーン表(JBST)」で決定。',
+            '新京極でお買い物。アーケードには、新旧様々な店が建ち並ぶ。',
+            '大学が近くにあるのかな？　安い定食屋や古本屋、ゲームセンターなどが軒を連ねる学生街。京都はたくさん大学があるなぁ。',
+            '静かな竹林。凛とした気配が漂う。',
+            '祇園。時折、しずしずと歩く舞妓さんとすれ違う。雰囲気のある町並みだ。',
+            '一般公開された京都御所の中を歩く。昼間だというのに人通りはあまりなく、何だか少し寂しい気持ち。',
+        );
+    } elsif($type eq '神社仏閣') {
+        @table = (
+            '清明神社。一条戻り橋を越えたところにある小さな社。陰陽師に憧れる女性たちの姿が目立つ。',
+            '東寺。東寺真言宗総本山。密教独特の厳しい気配が漂う。',
+            '平安神宮。大鳥居を白無垢の花嫁行列がくぐり抜けていくのが見える。どうやら結婚式のようだ。',
+            '慈照寺――通称、銀閣寺。室町後期の東山文化を代表する建築である。錦鏡池を囲む庭園には、物思いにふける観光客の姿が……。',
+            '鹿苑寺――通称、金閣寺。室町前期の北山文化を代表する建築である。鏡湖池に映る逆さ金閣には、強力な「魔」を封印していると言うが……？',
+            '三十三間堂。荘厳な本堂に立ち並ぶ千一体の千手観音像は圧巻。',
+            '清水寺。清水坂を越え、仁王門を抜けると、本堂――いわゆる清水の舞台にたどり着く。そこからは、音羽の滝や子安塔が見える。',
+            '八坂神社。祇園さんの名前で知られるにぎやかな神社。舞妓さんの姿もちらほら。',
+            '伏見稲荷。全国約四万社の稲荷神社の総本宮。稲荷山に向かって立ち並ぶ約一万基の鳥居は、まるで異界へと続いているかのようだ……。',
+            '化野念仏寺。無数の石塔、石仏が立ち並ぶ景色は、どこか荒涼としている……。',
+            '六道珍皇寺。小野篁が冥界に通ったとされる井戸のある寺。この辺りは「六道の辻」と呼ばれ、不思議な伝説が数多く残っている。',
+        );
+    } else {
+        @table = (
+            '血の臭いがあたりに充満している。何者かの戦いがあった気配。　いや？まだ戦いは続いているのだろうか？',
+            'これは……夢か？　もう終わったはずの過去。しかし、それを忘れることはできない。',
+            '眼下に広がる街並みを眺める。ここからなら街を一望できるが……。',
+            '世界の終わりのような暗黒。暗闇の中、お前達は密やかに囁く。',
+            '優しい時間が過ぎていく。影の世界のことを忘れてしまいそうだ。',
+            '清廉な気配が漂う森の中。鳥の囀りや、そよ風が樹々を通り過ぎる音が聞こえる。',
+            '凄まじい人混み。喧噪。影の世界のことを知らない無邪気な人々の手柄話や無駄話が騒がしい。',
+            '強い雨が降り出す。人々は、軒を求めて、大慌てて駆けだしていく。',
+            '大きな風が吹き荒ぶ。髪の毛や衣服が大きく揺れる。何かが起こりそうな予感……',
+            '酔っぱらいの怒号。客引きたちの呼び声。女たちの嬌声。いつもの繁華街の一幕だが。',
+            '太陽の微笑みがあなたを包み込む。影の世界の住人には、あまりにまぶしすぎる。',
+        );
     }
     my ($total_n, $dice_dmy) = &roll(2, 6);
     my $tn = $total_n - 2;
@@ -4247,8 +4412,8 @@ sub sinobigami_scene_table {
 sub sinobigami_fumble_table {
     my $output = '1';
     my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
+    my $type = '';
 
-    if($game_type eq "ShinobiGami") {
     @table = (
         '何か調子がおかしい。そのサイクルの間、すべての行為判定にマイナス１の修正がつく。',
         'しまった！　好きな忍具を１つ失ってしまう。',
@@ -4257,7 +4422,6 @@ sub sinobigami_fumble_table {
         '敵の陰謀か？　罠にかかり、ランダムに選んだ変調１つを受ける。変調は、変調表で決定すること。',
         'ふう。危ないところだった。特に何も起こらない。',
         );
-    }
     my ($total_n, $dice_dmy) = &roll(1, 6);
     my $tn = $total_n - 1;
     $output = "$_[0]: ファンブル表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
@@ -4268,7 +4432,6 @@ sub sinobigami_emotion_table {
     my $output = '1';
     my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
 
-    if($game_type eq "ShinobiGami") {
     @table = (
         '共感（プラス）／不信（マイナス）',
         '友情（プラス）／怒り（マイナス）',
@@ -4277,7 +4440,6 @@ sub sinobigami_emotion_table {
         '憧憬（プラス）／劣等感（マイナス）',
         '狂信（プラス）／殺意（マイナス）',
         );
-    }
     my ($total_n, $dice_dmy) = &roll(1, 6);
     my $tn = $total_n - 1;
     $output = "$_[0]: 感情表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
@@ -4285,22 +4447,34 @@ sub sinobigami_emotion_table {
 }
 #** 変調表
 sub sinobigami_wrong_table {
+    my $string = $_[0];
     my $output = '1';
     my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
+    my $type = '';
 
-    if($game_type eq "ShinobiGami") {
-    @table = (
-        '故障:すべての忍具が使用不能。１サイクルの終了時に、《絡繰術》で判定を行い、成功するとこの効果は無効化される。',
-        'マヒ:修得済み特技がランダムに１つ使用不能になる。１サイクルの終了時に、《身体操術》で成功するとこの効果は無効化される。',
-        '重傷:次の自分の手番に行動すると、ランダムな特技分野１つの【生命力】に１点ダメージ。１サイクルの終了時に、《生存術》で成功すると無効化される。',
-        '行方不明:その戦闘終了後、メインフェイズ中に行動不可。１サイクルの終了時に、《経済力》で成功すると無効化される。',
-        '忘却:修得済み感情がランダムに１つ使用不能。１サイクルの終了時に、《記憶術》で成功すると無効化される。',
-        '呪い:修得済み忍法がランダムに１つ使用不能。１サイクルの終了時に、《呪術》で成功すると無効化される。',
-        );
+    if($string =~ /GWT/) {
+        $type = '戦国';
+        @table = (
+            '催眠:戦闘に参加した時、戦闘開始時、もしくはこの変調を受けた時に【生命力】を1点減少しないと、戦闘から脱落する。サイクル終了時に〈意気〉判定し成功すると無効化。',
+            '火達磨:ファンブル値が1上昇し、ファンブル時に1点の近接ダメージを受ける。シーン終了時に無効化。',
+            '猛毒:戦闘に参加した時、ラウンドの終了時にサイコロを1つ振る(飢餓と共用)。奇数だったら【生命力】を1減少。サイクル終了時に〈毒術〉判定し成功すると無効化。',
+            '飢餓:戦闘に参加した時、ラウンドの終了時にサイコロを1つ振る(猛毒と共用)。偶数だったら【生命力】を1減少。サイクル終了時に〈兵糧術〉判定し成功すると無効化。',
+            '残刃:回復判定、忍法、背景、忍具の効果による【生命力】回復無効。サイクル終了時に〈拷問術〉判定し成功すると無効化。',
+            '野望:命中判定に+1、それ以外の判定に-1。サイクル終了時に〈憑依術〉判定し成功すると無効化。',
+            );
+    } else {
+        @table = (
+            '故障:すべての忍具が使用不能。１サイクルの終了時に、《絡繰術》で判定を行い、成功するとこの効果は無効化される。',
+            'マヒ:修得済み特技がランダムに１つ使用不能になる。１サイクルの終了時に、《身体操術》で成功するとこの効果は無効化される。',
+            '重傷:次の自分の手番に行動すると、ランダムな特技分野１つの【生命力】に１点ダメージ。１サイクルの終了時に、《生存術》で成功すると無効化される。',
+            '行方不明:その戦闘終了後、メインフェイズ中に行動不可。１サイクルの終了時に、《経済力》で成功すると無効化される。',
+            '忘却:修得済み感情がランダムに１つ使用不能。１サイクルの終了時に、《記憶術》で成功すると無効化される。',
+            '呪い:修得済み忍法がランダムに１つ使用不能。１サイクルの終了時に、《呪術》で成功すると無効化される。',
+            );
     }
     my ($total_n, $dice_dmy) = &roll(1, 6);
     my $tn = $total_n - 1;
-    $output = "$_[0]: 変調表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    $output = "$_[1]: ${type}変調表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
     return $output;
 }
 #** 戦場表
@@ -4308,7 +4482,6 @@ sub sinobigami_battlefield_table {
     my $output = '1';
     my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
 
-    if($game_type eq "ShinobiGami") {
     @table = (
         '平地:特になし。',
         '水中:海や川や、プール、血の池地獄など。この戦場では、回避判定に-2の修正がつく。',
@@ -4317,7 +4490,6 @@ sub sinobigami_battlefield_table {
         '雑踏:人混みや教室、渋滞中の車道など。この戦場では、行為判定のとき、2D6の目がプロット値+1以下だとファンブルする。',
         '極地:宇宙や深海、溶岩、魔界など。ラウンドの終わりにＧＭが1D6を振り、経過ラウンド以下なら全員1点ダメージ。ここから脱落したものは変調表を適用する。',
         );
-    }
     my ($total_n, $dice_dmy) = &roll(1, 6);
     my $tn = $total_n - 1;
     $output = "$_[0]: 戦場表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
@@ -5218,7 +5390,7 @@ sub get_torg_bonus {
     my $bonus = &get_torg_table_result( $value, @bonus_table );
     
     if( $value > 20 ) {
-        my $over_value_bonus = int(($value - 20) / 5);
+        my $over_value_bonus = int(($value - 20) / 5) + 1;
         $bonus += $over_value_bonus;
     }
     
@@ -5628,6 +5800,30 @@ sub mayokin_table {
         $output = $names;
         $total_n = $count;
     }
+    # 地名決定表
+    elsif($string =~ /PNT(\d*)/i) {
+        my $count = 1;
+        $count = $1 if($1);
+        $type = '地名';
+        $output = &mk_pn_decide_table($count);
+        $total_n = $count;
+    }
+    # 風景決定表
+    elsif($string =~ /MLT(\d*)/i) {
+        my $count = 1;
+        $count = $1 if($1);
+        $type = '地名';
+        $output = &mk_ls_decide_table($count);
+        $total_n = $count;
+    }
+    # デバイスファクトリー
+    elsif($string =~ /DFT(\d*)/i) {
+        my $count = 1;
+        $count = $1 if($1);
+        $type = 'デバイスファクトリー';
+        $output = &mk_device_factory_table($count);
+        $total_n = $count;
+    }
     # 散策表(2d6)
     elsif($string =~ /LRT/i) {
         $type = '生活散策';
@@ -5645,6 +5841,10 @@ sub mayokin_table {
         $type = '軍事散策';
         ($total_n, $dummy) = &roll(2, 6);
         $output = &mk_army_research_table($total_n);
+    } elsif($string =~ /FRT/i) {
+        $type = 'お祭り';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &mk_festival_table($total_n);
     }
     # 休憩表(2D6)
     elsif($string =~ /TBT/i) {
@@ -5663,6 +5863,10 @@ sub mayokin_table {
         $type = '武勇休憩';
         ($total_n, $dummy) = &roll(2, 6);
         $output = &mk_valor_break_table($total_n);
+    } elsif($string =~ /FBT/i) {
+        $type = 'お祭り休憩';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &mk_festival_break_table($total_n);
     }
     # ハプニング表(2D6)
     elsif($string =~ /THT/i) {
@@ -5683,7 +5887,11 @@ sub mayokin_table {
         $output = &mk_valor_happening_table($total_n);
     }
     # お宝表
-    elsif($string =~ /T1T/i) {
+    elsif($string =~ /MPT/i) {
+        $type = '相場';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &mk_market_price_table($total_n);
+    } elsif($string =~ /T1T/i) {
         $type = 'お宝１';
         ($total_n, $dummy) = &roll(1, 6);
         $output = &mk_treasure1_table($total_n);
@@ -5703,6 +5911,66 @@ sub mayokin_table {
         $type = 'お宝５';
         ($total_n, $dummy) = &roll(1, 6);
         $output = &mk_treasure5_table($total_n);
+    }
+    # アイテム表
+    elsif($string =~ /RWIT/i) {
+        $type = 'レア武具アイテム';
+        $total_n = &d66(1);
+        $output = &mk_rare_weapon_item_table($total_n);
+    } elsif($string =~ /RUIT/i) {
+        $type = 'レア一般アイテム';
+        $total_n = &d66(1);
+        $output = &mk_rare_item_table($total_n);
+    } elsif($string =~ /WIT/i) {
+        $type = '武具アイテム';
+        $total_n = &d66(2);
+        $output = &mk_weapon_item_table($total_n);
+    } elsif($string =~ /LIT/i) {
+        $type = '生活アイテム';
+        $total_n = &d66(2);
+        $output = &mk_life_item_table($total_n);
+    } elsif($string =~ /RIT/i) {
+        $type = '回復アイテム';
+        $total_n = &d66(2);
+        $output = &mk_rest_item_table($total_n);
+    } elsif($string =~ /SIT/i) {
+        $type = '探索アイテム';
+        $total_n = &d66(2);
+        $output = &mk_search_item_table($total_n);
+    } elsif($string =~ /IFT/i) {
+        $type = 'アイテム特性';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &mk_item_features_table($total_n);
+    } elsif($string =~ /IDT/i) {
+        $type = 'アイテムカテゴリ決定';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_item_decide_table($total_n);
+    }
+    # ランダムエンカウント表
+    elsif($string =~ /1RET/i) {
+        $type = '1Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount1_table($total_n);
+    } elsif($string =~ /2RET/i) {
+        $type = '2Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount2_table($total_n);
+    } elsif($string =~ /3RET/i) {
+        $type = '3Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount3_table($total_n);
+    } elsif($string =~ /4RET/i) {
+        $type = '4Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount4_table($total_n);
+    } elsif($string =~ /5RET/i) {
+        $type = '5Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount5_table($total_n);
+    } elsif($string =~ /6RET/i) {
+        $type = '6Lvランダムエンカウント';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &mk_random_encount6_table($total_n);
     }
     
     # その他表
@@ -5916,6 +6184,44 @@ sub mk_valor_break_table {
     );
     $output = $table[$num - 2] if($table[$num - 2]);
     return $output;
+}
+
+#**お祭り休憩表(2D6)
+sub mk_festival_break_table {
+    my $num = shift;
+    my @table = (
+[ 2, 'お祭りに向かう旅人たちとすれ違う。1D6MGが手に入る【宿屋】か【夜店】があれば、さらにもう1D6MGが手に入る' ],
+[ 3, 'なんでこんなときに、ダンジョンに行かなきゃいけないんだ！　「あ、電報でーす」このマップの支配者から、お祭りによせて祝辞の電報がやってくる。そうか、おまえのせいかッ!!　マップの支配者の名前が分かり、そのキャラクターへの《敵意》が1D6点上がる' ],
+[ 4, '「そういえば、国のみんなが何かいってたなぁ……」回想シーン。好きな散策表を1つ選び、2D6を振る。表に照らし合わせた結果を処理する' ],
+[ 5, 'あー。早く帰って、お祭りを楽しみたーい！　この時点でキャンプを終了し、すぐに次の部屋へ移動すれば、このクォーターは、時間の経過が起こらない' ],
+[ 6, 'どこからか美味しそうな匂いが漂ってくる。「あ、うまそう」死んだふりをしていた民が起き上がる。今回の冒険で消費していた《配下》が1D6人回復する' ],
+[ 7, '雰囲気がいつもと違うせいかな。なんかあの人がステキに見える。好きなキャラクター1人を選ぶ。そのキャラクターへの《好意》を1点上げる' ],
+[ 8, 'あ、こんなところにまで屋台が！　あてくじ屋さんだ。1MG減らして、好きなアイテムカテゴリを選び、さらにそのカテゴリの中からランダムにアイテム1個を選ぶ。そのアイテムをもらえる（レアアイテムは飾ってあるが、絶対当たらない）' ],
+[ 9, 'お祭りを目指す交易商人と出会う。「あ、王様。これから王国行くんすよ」宮廷の持つ好きな素材を何個でも、同じ数の別の素材と交換してくれる' ],
+[ 10, 'せっかくお祭りなんだし、肩肘はってないで、ノリノリでGO!!　このゲーム中は食事をするたびに《民の声》が1点回復する' ],
+[ 11, '「あ、この歌は……」祭囃子がキミの封印されていたモンスターにまつわる過去の記憶を呼び戻す。好きなモンスター1種類を選ぶ。そのモンスター全般への《敵意》が1点上がる' ],
+[ 12, 'みんなのワクワクがアイテムに乗り移った？　ランダムに自分のアイテムスロット1つを選ぶ。そこにレベルのあるアイテムがあった場合、そのレベルが1上がる' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**お祭り表(2D6)
+sub mk_festival_table {
+    my $num = shift;
+    my @table = (
+[ 2, '祈願祭。国や重要人物の無病息災を祈ったり、戦いの勝利などを祈る祭り。災害や飢饉、流行り病が起こった付近で行われる。シナリオの目的をクリアしていれば、《民》が1D6人上昇する' ],
+[ 3, '血祭り。戦いに向け、士気を向上させる祭り。戦争だけでなく、迷宮探索に向けて行われることも多い。生贄の血を軍神に捧げたりする。このゲームの間、戦闘に勝利すると《民の声》を1点獲得し、逃走すると《民の声》が1点失われる' ],
+[ 4, '記念日。建国記念日や領土獲得などの記念日のお祝い。簡単につくることができるが、気がつくと記念日だらけで、何の記念だったかを忘れてしまう。ほどほどに。このゲームの間、行為判定の目で3でも絶対失敗、11でも絶対成功になる（「呪い」のバッドステータスを受けたものは4でも絶対失敗、【必殺】を使った命中判定なら10でも絶対成功）' ],
+[ 5, '星祭。季節のお祭り。冬至や夏至などの祭りや、七夕、お花見、雪祭りなどが含まれる。季節感の少ない迷宮では、殊更にその風情を楽しもうとやたら盛り上がる。宮廷全員、好きなキャラクター1人を選び、そのキャラクターに対する《好意》を1点上げる' ],
+[ 6, '民衆の宴。民が自発的に開くお祭り、イベント。アキハバラ電気祭りに餃子祭り、コミックマーケットなど、文化や地域の活性化と結びつくものが多い。このゲームの間、好きな施設1つを選んで、その施設の施設レベルを1上げる' ],
+[ 7, '誕生日。ランドメイカーや逸材、国の重要人物の誕生日。聖誕祭や花祭りなど、国教の聖人などを祝う国も多い。現王の誕生日を「父の日」、后の誕生日を「母の日」とする国も多い。そのゲームの間、ケーキやおにぎり、缶ジュースなど、1人分が明確な食べ物を食べきったとき、自分のPCが《気力》1点を獲得する' ],
+[ 8, '冠婚葬祭。国の重要人物の元服（成人）、婚礼、葬儀、祖先の慰霊などの儀式。格式の高い王国では、もっとも重要な祭礼である。このゲームの間、国力を使った判定の達成値を1上昇させる' ],
+[ 9, '感謝祭。豊漁や豊作などがあったときに自然（迷宮）や精霊、信仰対象など、偉大なるものへの感謝を捧げるお祭り。獲物の毛の一部を切りとって迷宮に感謝する毛祭りや瀬祭り、豊饒を祝う新嘗祭などがある。終了フェイズに「木」や「革」、「肉」のいずれかを1つ消費すると、王国変動表の結果を±1の範囲でずらすことができる' ],
+[ 10, '鬼祭り。お正月に旧年の悪を正す修正会、豆をまいて福を呼び込む追儺の儀式、怪物に仮装した子供たちが夜の王国をねり歩くハロウィーンなど、悪魔や悪霊を払うお祭り。モンスター除けに行われる。このゲームの間、ランダムエンカウントの戦闘後に使用するお宝表が1段階、高いレベルのものを使用する' ],
+[ 11, '舞踏会。最高の音楽と芸術的な食事、そしてとびきりの衣装で臨む社交界の華。身分や素性を隠してパートナーを探す仮面舞踏会も人気は高い。ちなみに仮面舞踏会では、女性の側から男性をダンスに誘うのが礼儀だぞ。宮廷全員、ランダムにキャラクター1人を選び、そのキャラクターに対する《好意》を1点上げる' ],
+[ 12, '競技会。国をあげて、スポーツや芸術、ゲームなど、さまざまなジャンルの一番を決めるお祭り、大会。オリンピックや料理勝負、歌合戦などがある。ランダムに能力値1つを選び、宮廷全員で難易度15の判定を行う。このとき成功した中で、もっとも達成値が高かったキャラクターは、シナリオ終了後、終了フェイズの探索会議で決定されるキャラクターとは別に、勲章を得る' ],
+    );
+    return &get_table_by_number($num, @table);
 }
 
 #**王国災厄表（2d6）
@@ -6181,6 +6487,27 @@ sub mk_emotion_table {
         "愛情／侮蔑",
     );
     $output = $table[$num] if($table[$num]);
+    return $output;
+}
+
+#**相場表（2d6）
+sub mk_market_price_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        "無し",
+        "肉",
+        "牙",
+        "鉄",
+        "魔素",
+        "機械",
+        "衣料",
+        "木",
+        "火薬",
+        "情報",
+        "革",
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
     return $output;
 }
 
@@ -6486,6 +6813,915 @@ sub mk_name_fa_table {
     return &get_table_by_number($num, @table);
 }
 
+#**デバイスファクトリー(1D6)
+sub mk_device_factory_table {
+    my $num = shift;
+    my $output = &mk_item_decide_table(int(rand(6)+1));
+
+    $num = 1;
+    for(my $i=0; $i < $num; $i++) {
+        my($dice, $dummy) = &roll(2, 6);
+        $output .= ' / '.&mk_item_features_table($dice);
+    }
+    return $output;
+}
+
+#**アイテムカテゴリ決定表(1D6)
+sub mk_item_decide_table {
+    my $num = shift;
+
+    my @table = (
+[ 1, &mk_weapon_item_table(&d66(2)) ],
+[ 2, &mk_life_item_table(&d66(2)) ],
+[ 3, &mk_rest_item_table(&d66(2)) ],
+[ 4, &mk_search_item_table(&d66(2)) ],
+[ 5, &mk_rare_weapon_item_table(&d66(1)) ],
+[ 6, &mk_rare_item_table(&d66(1)) ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**武具アイテム表(D66)
+sub mk_weapon_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, 'だんびら' ],
+[ 12, 'だんびら' ],
+[ 13, 'ダガー' ],
+[ 14, '戦斧' ],
+[ 15, '盾' ],
+[ 16, '鑓' ],
+[ 22, '籠手（だんびら）' ],
+[ 23, '手裏剣' ],
+[ 24, '石弓' ],
+[ 25, '甲冑' ],
+[ 26, '戦鎚' ],
+[ 33, '大弓（だんびら）' ],
+[ 34, '爆弾' ],
+[ 35, '鉄砲' ],
+[ 36, '大剣' ],
+[ 44, '拳銃（だんびら）' ],
+[ 45, 'ホウキ' ],
+[ 46, '徹甲弾' ],
+[ 55, 'だんびら' ],
+[ 56, '大砲' ],
+[ 66, 'だんびら' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**生活アイテム表(D66)
+sub mk_life_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, 'バックパック' ],
+[ 12, 'バックパック' ],
+[ 13, '鍋' ],
+[ 14, 'クラッカー' ],
+[ 15, 'がまぐち' ],
+[ 16, 'マント' ],
+[ 22, '法衣（バックパック）' ],
+[ 23, 'カード' ],
+[ 24, 'エプロン' ],
+[ 25, '住民台帳' ],
+[ 26, '携帯電話' ],
+[ 33, '召喚鍵（バックパック）' ],
+[ 34, '肖像画' ],
+[ 35, '衣装' ],
+[ 36, '山吹色のお菓子' ],
+[ 44, 'バックパック' ],
+[ 45, '眼鏡' ],
+[ 46, 'クレジットカード' ],
+[ 55, 'バックパック' ],
+[ 56, '魔道書' ],
+[ 66, 'バックパック' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**回復アイテム表(D66)
+sub mk_rest_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, 'お弁当' ],
+[ 12, 'お弁当' ],
+[ 13, '特効薬' ],
+[ 14, '保存食' ],
+[ 15, '担架' ],
+[ 16, '珈琲' ],
+[ 22, '軟膏（お弁当）' ],
+[ 23, 'チョコレート' ],
+[ 24, 'お酒' ],
+[ 25, 'フルコース' ],
+[ 26, 'ポーション' ],
+[ 33, 'お弁当' ],
+[ 34, '救急箱' ],
+[ 35, '強壮剤' ],
+[ 36, '迷宮保険' ],
+[ 44, 'お弁当' ],
+[ 45, '科学調味料' ],
+[ 46, '惚れ薬' ],
+[ 55, 'お弁当' ],
+[ 56, '復活薬' ],
+[ 66, 'お弁当' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**探索アイテム表(D66)
+sub mk_search_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, '星の欠片' ],
+[ 12, '星の欠片' ],
+[ 13, '旗' ],
+[ 14, 'お守り' ],
+[ 15, '拷問具' ],
+[ 16, 'パワーリスト' ],
+[ 22, '工具（星の欠片）' ],
+[ 23, 'テント' ],
+[ 24, '楽器' ],
+[ 25, '使い魔' ],
+[ 26, '乗騎' ],
+[ 33, '迷宮迷彩（星の欠片）' ],
+[ 34, '罠百科' ],
+[ 35, '迷宮防護服' ],
+[ 36, '地図' ],
+[ 44, '星の欠片' ],
+[ 45, '時計' ],
+[ 46, 'もぐら棒' ],
+[ 55, '星の欠片' ],
+[ 56, 'カボチャの馬車' ],
+[ 66, '星の欠片' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**レア武具アイテム表(1D6+1D6)
+sub mk_rare_weapon_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, '虚弾' ],
+[ 12, '怪物毒' ],
+[ 13, '小鬼の襟巻' ],
+[ 14, '喇叭銃' ],
+[ 15, '蛍矢' ],
+[ 16, '大盾' ],
+[ 21, 'まわし' ],
+[ 22, '怪物毒' ],
+[ 23, 'しゃべる剣' ],
+[ 24, '小麦粉' ],
+[ 25, '王笏' ],
+[ 26, '服従の鞭' ],
+[ 31, 'ぬいぐるみ' ],
+[ 32, '魔杖' ],
+[ 33, '怪物毒' ],
+[ 34, '星衣' ],
+[ 35, '聖印' ],
+[ 36, '獣の毛皮' ],
+[ 41, '日傘' ],
+[ 42, 'チェインソード' ],
+[ 43, '邪眼' ],
+[ 44, '怪物毒' ],
+[ 45, '徒手空拳' ],
+[ 46, 'バカには見えない鎧' ],
+[ 51, 'ビキニアーマー' ],
+[ 52, '輝く者' ],
+[ 53, '貪る者' ],
+[ 54, '滅ぼす者' ],
+[ 55, '機械の体' ],
+[ 56, '破城槌' ],
+[ 61, '刈り取る者' ],
+[ 62, '貫く者' ],
+[ 63, '黄金の鶴嘴' ],
+[ 64, 'ムラサマ' ],
+[ 65, '蒸気甲冑' ],
+[ 66, '王剣' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**レア一般アイテム表(1D6+1D6)
+sub mk_rare_item_table {
+    my $num = shift;
+    my @table = (
+[ 11, 'ブルーリボン' ],
+[ 12, '聖痕' ],
+[ 13, '剥製' ],
+[ 14, '愚者の冠' ],
+[ 15, '名刺' ],
+[ 16, '種籾' ],
+[ 21, '香水' ],
+[ 22, '守りの指輪（名刺）' ],
+[ 23, '煙玉' ],
+[ 24, '悪名' ],
+[ 25, '藁人形' ],
+[ 26, 'パワー餌' ],
+[ 31, '王妃の鏡' ],
+[ 32, '蓄音機' ],
+[ 33, '無限の心臓（名刺）' ],
+[ 34, '星籠' ],
+[ 35, '水晶球' ],
+[ 36, '転ばぬ先の杖' ],
+[ 41, '悟りの書' ],
+[ 42, '操りロープ' ],
+[ 43, '盗賊の七つ道具' ],
+[ 44, '携帯算術機（名刺）' ],
+[ 45, '棺桶' ],
+[ 46, 'カメラ' ],
+[ 51, '不思議なたまご' ],
+[ 52, 'ブーケ' ],
+[ 53, '露眼鏡' ],
+[ 54, '災厄王の遺物' ],
+[ 55, '経験値' ],
+[ 56, '鞍' ],
+[ 61, '視肉' ],
+[ 62, '玉璽' ],
+[ 63, '衛星帯' ],
+[ 64, '軍配' ],
+[ 65, '聖杯' ],
+[ 66, '愛' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**アイテムの特性決定表(2D6)
+sub mk_item_features_table {
+    my $num = shift;
+    my $output = "";
+    my($dice, $dummy) = &roll(2, 6);
+    if($num <= 2) {
+        $output = '「'.&mk_item_power_table(int(rand(6))+1).'」の神力を宿す';
+    }
+    elsif($num <= 3) {
+        $output = '寿命を持つ。寿命の値を決定する。'."\n";
+        $output .= 'さらに、'.&mk_item_features_table($dice);
+    }
+    elsif($num <= 4) {
+        $output = '境界障壁を持つ。《HP》の値を決定する。';
+    }
+    elsif($num <= 5) {
+        $output = '銘を持つ。銘を決定する。';
+    }
+    elsif($num <= 6) {
+        $output = '合成具である。もう1つの機能は「'.&mk_item_decide_table(int(rand(6))+1).'」である。';
+    }
+    elsif($num <= 7) {
+        $output = 'そのアイテムにレベルがあれば、レベルを1点上昇する。'."\n";
+        $output .='レベルが設定されていなければ、'.&mk_item_features_table($dice);
+    }
+    elsif($num <= 8) {
+        $output = '「'.&mk_item_jyumon_table($dice).'」の呪紋を持つ。';
+    }
+    elsif($num <= 9) {
+        $output = '「'.&mk_item_jyuka_table(int(rand(6))+1).'」の呪禍を持つ。'."\n";
+        $output .='さらに、'.&mk_item_features_table($dice);
+    }
+    elsif($num <= 10) {
+        $output = '高価だ。価格を設定する。';
+    }
+    elsif($num <= 11) {
+        $output = '「条件：'.&mk_item_aptitude_table(int(rand(6))+1).'」の適性を持つ。'."\n";
+        $output .='さらに、'.&mk_item_features_table($dice);
+    }
+    else {
+        $output = '「'.&mk_item_attribute_table(int(rand(6))+1).'」の属性を持つ。';
+    }
+    return '特性['.$num.']：'.$output;
+}
+
+#**神力決定表(1D6)
+sub mk_item_power_table {
+    my $num = shift;
+    my @table = (
+[ 1, '〔才覚〕' ],
+[ 2, '〔魅力〕' ],
+[ 3, '〔探索〕' ],
+[ 4, '〔武勇〕' ],
+[ 5, '〈器〉' ],
+[ 6, '〈回避値〉' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+#**呪紋決定表(2D6)
+sub mk_item_jyumon_table {
+    my $num = shift;
+    my @table = (
+[ 2, 'モンスタースキル' ],
+[ 3, '便利スキル' ],
+[ 4, '芸能スキル' ],
+[ 5, '迷宮スキル' ],
+[ 6, '星術スキル' ],
+[ 7, '一般スキル' ],
+[ 8, '召喚スキル' ],
+[ 9, '科学スキル' ],
+[ 10, '交渉スキル' ],
+[ 11, '神官のクラススキル' ],
+[ 12, 'ジョブスキル' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+#**呪禍表(1D6)
+sub mk_item_jyuka_table {
+    my $num = shift;
+    my @table = (
+[ 1, '「呪い」のバッドステータス' ],
+[ 2, '「肥満」のバッドステータス' ],
+[ 3, '「愚か」のバッドステータス' ],
+[ 4, 'サイクルの終了時に《HP》が1点減少する' ],
+[ 5, '条件を満たしても誰とも人間関係を結べない' ],
+[ 6, '〈器〉が1点減少する' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+#**適正表(1D6)
+sub mk_item_aptitude_table {
+    my $num = shift;
+    my @table = (
+[ 1, 'ランダムなクラス1種' ],
+[ 2, &mk_family_business_table(&d66(2)) ],
+[ 3, &mk_gender_table(int(rand 6)+1).'性' ],
+[ 4, '上級ジョブ' ],
+[ 5, 'モンスタースキルを修得' ],
+[ 6, '童貞、もしくは処女' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+#**属性表(1D6)
+sub mk_item_attribute_table {
+    my $num = shift;
+    my @table = (
+[ 1, '自然の力' ],
+[ 2, '幻夢の力' ],
+[ 3, '星炎の力' ],
+[ 4, '暗黒の力' ],
+[ 5, '聖なるの力' ],
+[ 6, '災厄の力' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+sub mk_gender_table {
+    my $num = shift;
+    my $output = '1';
+    
+    if($num % 2) {
+        $output = '男';
+    } else {
+        $output = '女';
+    }
+    
+    return $output;
+}
+
+#**生まれ表(D66)
+sub mk_family_business_table {
+    my $num = shift;
+    my @table = (
+[ 11, '星術師' ],
+[ 12, '魔道師' ],
+[ 13, '召喚師' ],
+[ 14, '博士' ],
+[ 15, '医者' ],
+[ 16, '貴族' ],
+[ 22, '宦官' ],
+[ 23, '武人' ],
+[ 24, '処刑人' ],
+[ 25, '衛視' ],
+[ 26, '商人' ],
+[ 33, '迷宮職人' ],
+[ 34, '亭主' ],
+[ 35, '料理人' ],
+[ 36, '寿ぎ屋' ],
+[ 44, '働きもの' ],
+[ 45, '狩人' ],
+[ 46, '冒険者' ],
+[ 55, '怠け者' ],
+[ 56, '盗賊' ],
+[ 66, '生まれ表の中から、好きなジョブ1つを選ぶ' ],
+    );
+
+    return "[${num}]".&get_table_by_number($num, @table);
+}
+
+#**1レベルランダムエンカウント表(1D6)
+sub mk_random_encount1_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『守って守って突撃ゴー！』　前衛：ごんぎつね×宮廷の人数、後衛：ノコギリ猪×1' ],
+[ 2, '『じわじわ削る、カボチャの舞』　前衛：焔虫×宮廷の人数、本陣：カボチャ頭×宮廷の人数の半分' ],
+[ 3, '『ものすごくジャマな人たち。』　前衛：小人さん×宮廷の人数、取り替え子×宮廷の人数の半分' ],
+[ 4, '『何かやってくれるかも……』　前衛：兵隊エルフ×宮廷の人数' ],
+[ 5, '『【かばう】で延命しつつ【鉄の勇気】』　前衛：キンギョ×宮廷の人数、本陣：イカロス×宮廷の人数の半分' ],
+[ 6, '『英雄で指示してシュシュシュシュ～～～～ト!!』　前衛：小鬼×宮廷の人数、後衛：小鬼×宮廷の人数、本陣：小鬼大砲×1、小鬼英雄×1' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**2レベルランダムエンカウント表(1D6)
+sub mk_random_encount2_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『作戦判定に負けてもOK、そして強い』　前衛：ガーゴイル×宮廷の人数' ],
+[ 2, '『吸い殺せ！　ドレインしまくれ！』　後衛：塚人×宮廷の人数の半分' ],
+[ 3, '『ゴールデンコンビ結成。指揮と【鉄腕】＋【範囲攻撃】で大暴れ』　前衛：牛頭×宮廷の人数の半分、後衛：山羊頭×宮廷の人数の半分' ],
+[ 4, '『クピドは野放しにできないが、ハルキュオネは殺せない。このジレンマが……』　前衛：ハルキュオネ×宮廷の人数、後衛：ハルキュオネ×宮廷の人数、本陣：クピド×宮廷の人数の半分' ],
+[ 5, '『眠りコンボ』　前衛：グレムリン×宮廷の人数、本陣：眠りの精×1' ],
+[ 6, '『回避を減らしてみみずの範囲攻撃』　前衛：みみず×宮廷の人数、本陣：大喰らい×宮廷の人数の半分' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**3レベルランダムエンカウント表(1D6)
+sub mk_random_encount3_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『魅了→木霊ハメ』　後衛：淫魔×1、本陣：レーシィ×宮廷の人数' ],
+[ 2, '『素早く【多勢に無勢】をしかけ……たい』　前衛：階賊×宮廷の人数、本陣：抜け忍×1' ],
+[ 3, '『倒しても嬉しくない人柱をどうぞ』　前衛：人柱×宮廷の人数、本陣：恋のぼり×宮廷の人数の半分' ],
+[ 4, '『位置を調整して【抱擁】してみよう』　後衛：霧妾×宮廷の人数、本陣：お化けシーツ×宮廷の人数' ],
+[ 5, '『クリティカルヒットしたい（希望）』　後衛：ヴォーパルバニー×宮廷の人数、本陣：二面人×1' ],
+[ 6, '『なんとか特攻したい（願望）』　前衛：穴人×宮廷の人数、ゴーレム×1' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**4レベルランダムエンカウント表(1D6)
+sub mk_random_encount4_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『増やして治す。ド外道タッグが嵐を呼ぶぜ』　前衛：闇双子×1、本陣：坊主子牛×宮廷の人数の半分' ],
+[ 2, '『カリスマ的存在＋平和の使者→エセNGOみたいな？』　前衛：ワリアヒラ×宮廷の人数、後衛：妖精騎士×1' ],
+[ 3, '『【星戦】→攻撃、【星界】→【ベアハッグ】』　前衛：洞窟熊×宮廷の人数、本陣：星人×宮廷の人数の半分' ],
+[ 4, '『さりげなく先攻を取りつつ《民》をバイドバイパー作戦』　前衛：大目玉×宮廷の人数、本陣：笛吹き男×宮廷の人数の半分' ],
+[ 5, '『アンデッドチーム、がんばれ！』　前衛：墓暴き×宮廷の人数、本陣：吸血鬼×1' ],
+[ 6, '『まよセレ、このゲームの代名詞（？）。こいつは欠かせない！』　後衛：マヨネーズキング・ピュアセレクト×宮廷の人数、本陣：メイクイーン×1' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**5レベルランダムエンカウント表(1D6)
+sub mk_random_encount5_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『「死ぬが良い」最終鬼畜兵器岸降臨』　前衛：暗黒騎士×1' ],
+[ 2, '『割と痛い。さりげなく魔王が分裂する』　前衛：カミツキ魔王×宮廷の人数の半分、本陣：雷鳥×1' ],
+[ 3, '『ハマると死ぬ。5人パーティだと3体出てザマーミロ』　前衛：ヴァララカール×宮廷の人数の半分' ],
+[ 4, '『不意打ちされたらデンジャー。ひそかにワイヴァーンで先手を取る』　前衛：睨み毒蛇×宮廷の人数の半分、後衛：ワイヴァーン×1' ],
+[ 5, '『ゾンビスペシャル……で、がんばりたい』　前衛：死にぞこない×宮廷の人数の半分、後衛：死にぞこない×宮廷の人数の半分、本陣：屍術師×1' ],
+[ 6, '『とにかく殴れ！　単純明快パワーチーム』　前衛：鮫人×宮廷の人数、夜這い海星×1' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**6レベルランダムエンカウント表(1D6)
+sub mk_random_encount6_table {
+    my $num = shift;
+    my @table = (
+[ 1, '『死んでください。【外皮】か【甲冑】がないと相当ヤバい』　本陣：死告天使×宮廷の人数' ],
+[ 2, '『ド迫力。ブレス連発。3体出ちゃったらカーニバル』　本陣：ドラゴン×宮廷の人数の半分' ],
+[ 3, '『死霊のボス。スキル次第でヤバい。GMの悪意が閃くときだ』　本陣：骨龍×1、推奨スキル【不滅の炎】、【困惑】、【ヤバチョンガー】など' ],
+[ 4, '『《好意》を消して【魅了】に持ち込む』　後衛：愛染明王×宮廷の人数' ],
+[ 5, '『真の狙いは【蜘蛛の群れ】』　前衛：アラクネ×宮廷の人数、本陣：蜘蛛の王×1' ],
+[ 6, '『お約束。まあこいつは出るだろうみたいな』　前衛：魔蟹×1、帳魚×1' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#**地名決定表
+sub mk_pn_decide_table {
+    my $num = shift;
+    my $output = '';
+    my $d1 = int(rand 6)+1;
+    my $d2 = int(rand 6)+1;
+    
+    for(my $i = 0; $i < $num; $i++) {
+        $output .= "「".&mk_decoration_table(int($d1 / 2)).&mk_placename_table(int($d2 / 2))."」";
+    }
+    return $output;
+}
+
+#**修飾決定表(1D6)
+sub mk_decoration_table {
+    my $num = shift;
+    
+    my @table = (
+[ 1, &mk_basic_decoration_table(&d66(2)) ],
+[ 2, &mk_spooky_decoration_table(&d66(2)) ],
+[ 3, &mk_katakana_decoration_table(&d66(2)) ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**地名決定表(1D6)
+sub mk_placename_table {
+    my $num = shift;
+    my @table = (
+[ 1, &mk_passage_placename_table(&d66(2)) ],
+[ 2, &mk_natural_placename_table(&d66(2)) ],
+[ 3, &mk_artifact_placename_table(&d66(2)) ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**基本表(D66)
+sub mk_basic_decoration_table {
+    my $num = shift;
+    my @table = (
+[ 11, '欲望（よくぼう）' ],
+[ 12, '漂流（ひょうりゅう）' ],
+[ 13, '黄金（おうごん）' ],
+[ 14, '火達磨（ひだるま）' ],
+[ 15, '災厄（さいやく）' ],
+[ 16, '三日月（みかづき）' ],
+[ 22, '絡繰り（からくり）' ],
+[ 23, '流星（りゅうせい）' ],
+[ 24, '棘々（とげとげ）' ],
+[ 25, '鏡（かがみ）' ],
+[ 26, '銀鱗（ぎんりん）' ],
+[ 33, '螺旋（らせん）' ],
+[ 34, '七色（なないろ）' ],
+[ 35, '殉教（じゅんきょう）' ],
+[ 36, '水晶（すいしょう）' ],
+[ 44, '氷結（ひょうけつ）' ],
+[ 45, '忘却（ぼうきゃく）' ],
+[ 46, '幸福（こうふく）' ],
+[ 55, '妖精（ようせい）' ],
+[ 56, '霧雨（きりさめ）' ],
+[ 66, '夕暮れ（ゆうぐれ）' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**不気味表(D66)
+sub mk_spooky_decoration_table {
+    my $num = shift;
+    my @table = (
+[ 11, '赤錆（あかさび）' ],
+[ 12, '串刺し（くしざし）' ],
+[ 13, '鬼蜘蛛（おにぐも）' ],
+[ 14, '蠍（さそり）' ],
+[ 15, '幽霊（ゆうれい）' ],
+[ 16, '髑髏（どくろ）' ],
+[ 22, '血溜まり（ちだまり）' ],
+[ 23, '臓物（ぞうもつ）' ],
+[ 24, '骸（むくろ）' ],
+[ 25, '鉤爪（かぎづめ）' ],
+[ 26, '犬狼（けんろう）' ],
+[ 33, '奈落（ならく）' ],
+[ 34, '大蛇（おろち）' ],
+[ 35, '地獄（じごく）' ],
+[ 36, '蚯蚓（みみず）' ],
+[ 44, '退廃（たいはい）' ],
+[ 45, '土竜（もぐら）' ],
+[ 46, '絶望（ぜつぼう）' ],
+[ 55, '夜泣き（よなき）' ],
+[ 56, '緑林（りょくりん）' ],
+[ 66, 'どん底（どんぞこ）' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**カタカナ表(D66)
+sub mk_katakana_decoration_table {
+    my $num = shift;
+    my @table = (
+[ 11, 'マヨネーズ' ],
+[ 12, 'ダイナマイト' ],
+[ 13, 'ドラゴン' ],
+[ 14, 'ボヨヨン' ],
+[ 15, 'モケモケ' ],
+[ 16, 'マヌエル' ],
+[ 22, 'ダイス' ],
+[ 23, 'ロマン' ],
+[ 24, 'ウクレレ' ],
+[ 25, 'エップカプ' ],
+[ 26, 'カンパネルラ' ],
+[ 33, 'マンチキン' ],
+[ 34, 'バロック' ],
+[ 35, 'ミサイル' ],
+[ 36, 'ドッキリ' ],
+[ 44, 'ブラック' ],
+[ 45, '好きなモンスターの名前' ],
+[ 46, '好きなトラップの名前' ],
+[ 55, '好きな単語表で' ],
+[ 56, '好きな名前決定表で' ],
+[ 66, '好きな数字の組み合わせ' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**通路系地名表(D66)
+sub mk_passage_placename_table {
+    my $num = shift;
+    my @table = (
+[ 11, '門（ゲート）' ],
+[ 12, '回廊（コリドー）' ],
+[ 13, '通り（ストリート）' ],
+[ 14, '小路（アレイ）' ],
+[ 15, '大路（アベニュー）' ],
+[ 16, '街道（ロード）' ],
+[ 22, '鉄道（ライン）' ],
+[ 23, '迷宮（メイズ）' ],
+[ 24, '坑道（トンネル）' ],
+[ 25, '坂（スロープ）' ],
+[ 26, '峠（パス）' ],
+[ 33, '運河（カナル）' ],
+[ 34, '水路（チャネル）' ],
+[ 35, '河（ストリーム）' ],
+[ 36, '堀（モート）' ],
+[ 44, '溝（ダイク）' ],
+[ 45, '階段（ステア）' ],
+[ 46, '辻（トレイル）' ],
+[ 55, '橋（ブリッジ）' ],
+[ 56, '穴（ホール）' ],
+[ 66, '柱廊（ストア）' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**自然系地名表(D66)
+sub mk_natural_placename_table {
+    my $num = shift;
+    my @table = (
+[ 11, '砂漠（デザート）' ],
+[ 12, '丘陵（ヒル）' ],
+[ 13, '海（オーシャン）' ],
+[ 14, '森（フォレスト）' ],
+[ 15, '沼（ポンド）' ],
+[ 16, '海岸（コースト）' ],
+[ 22, '密林（ジャングル）' ],
+[ 23, '湖（レイク）' ],
+[ 24, '山脈（マウンテンズ）' ],
+[ 25, '平原（プレイン）' ],
+[ 26, 'ヶ原（ランド）' ],
+[ 33, '荒野（ヒース）' ],
+[ 34, '渓谷（ヴァレー）' ],
+[ 35, '島（アイランド）' ],
+[ 36, '連峰（ピークス）' ],
+[ 44, '火山（ヴォルケイノ）' ],
+[ 45, '湿原（ウェットランド）' ],
+[ 46, '星雲（ネビュラ）' ],
+[ 55, '星（スター）' ],
+[ 56, 'ヶ淵（プール）' ],
+[ 66, '雪原（スノウズ）' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**人工系地名表(D66)
+sub mk_artifact_placename_table {
+    my $num = shift;
+    my @table = (
+[ 11, '城（キャッスル）' ],
+[ 12, '壁（ウォール）' ],
+[ 13, '砦（フォート）' ],
+[ 14, '地帯（ゾーン）' ],
+[ 15, '室（ルーム）' ],
+[ 16, 'の間（チャンバー）' ],
+[ 22, '浴室（バス）' ],
+[ 23, '畑（ファーム）' ],
+[ 24, '館（ハウス）' ],
+[ 25, '座（コンスティレィション）' ],
+[ 26, '遺跡（ルイン）' ],
+[ 33, 'ヶ浜（ビーチ）' ],
+[ 34, '塔（タワー）' ],
+[ 35, '墓場（グレイブ）' ],
+[ 36, '洞（ケイヴ）' ],
+[ 44, '堂（バジリカ）' ],
+[ 45, '野（フィールド）' ],
+[ 46, '書院（スタディ）' ],
+[ 55, '駅前（ステイション）' ],
+[ 56, '房（クラスター）' ],
+[ 66, '腐海（ケイオスシー）' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**迷宮風景決定表
+sub mk_ls_decide_table {
+    my $num = shift;
+    my $output = '';
+    for(my $i = 0; $i < $num; $i++) {
+        $output .= "「".&mk_landscape_table(int(rand 6)+1)."」";
+    }
+    return $output;
+}
+
+#**迷宮風景表(1D6)
+sub mk_landscape_table {
+    my $num = shift;
+    my $dice = &d66(2);
+    my @table = (
+[ 1, &mk_artifact_landscape_table($dice) ],
+[ 2, &mk_cave_landscape_table($dice) ],
+[ 3, &mk_natural_landscape_table($dice) ],
+[ 4, &mk_waterside_landscape_table($dice) ],
+[ 5, &mk_skyrealm_landscape_table($dice) ],
+[ 6, &mk_strange_place_landscape_table($dice) ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**人工風景表(D66)
+sub mk_artifact_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '石組みの部屋' ],
+[ 12, '巨大な縦穴に刻まれた螺旋階段' ],
+[ 13, '埃だらけの古い図書館' ],
+[ 14, '古びた、素朴な祭壇' ],
+[ 15, '歯車やピストンがやかましい動力室' ],
+[ 16, '石組みの巨大な階段' ],
+[ 22, '太い丸太で組まれた部屋' ],
+[ 23, '作りかけの製品が放置された工房' ],
+[ 24, '錆びた武器や骨が散らばる古戦場' ],
+[ 25, '石組みのトイレ' ],
+[ 26, '高い天井の厨房' ],
+[ 33, 'レンガで組まれた部屋' ],
+[ 34, '静まりかえった劇場' ],
+[ 35, 'がらくたが散らばっているゴミ捨て場' ],
+[ 36, '切り出し途中で放棄された巨大な石像' ],
+[ 44, '壁画やタペストリーが残る大広間' ],
+[ 45, 'メトロ汗国の線路' ],
+[ 46, '絵画や彫刻が展示してあるギャラリー' ],
+[ 55, '石棺が並ぶ墓' ],
+[ 56, '錆びついた扉が残る巨大な門' ],
+[ 66, '放置された牢獄' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**洞窟風景表(D66)
+sub mk_cave_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '岩肌がむき出しの洞穴' ],
+[ 12, 'コウモリや羽蟲が飛び交う洞穴' ],
+[ 13, '放置された坑道' ],
+[ 14, '誰かのキャンプ跡' ],
+[ 15, '岩だらけで見通しのきかない空洞' ],
+[ 16, '煙が吹きぬける洞穴' ],
+[ 22, 'どこからか水音が響く鍾乳洞' ],
+[ 23, '光の衰えた星がまたたく幻想的な空洞' ],
+[ 24, '流砂が流れる洞穴' ],
+[ 25, '生物が掘った、つるつるした洞穴' ],
+[ 26, '冷えきった氷の洞穴' ],
+[ 33, '巨大な岩の隙間' ],
+[ 34, '動物や狩を描いた素朴な壁画が続く洞穴' ],
+[ 35, '巨大な空洞にかけられた自然の橋' ],
+[ 36, '埋まりかけで天井すれすれの洞穴' ],
+[ 44, '奈落と断崖絶壁' ],
+[ 45, '壁がうごめく蟲でおおわれた洞穴' ],
+[ 46, '無数の化石が埋まっている洞穴' ],
+[ 55, '熱気を放つ溶岩が流れる空洞' ],
+[ 56, '水晶でできた洞穴' ],
+[ 66, '骨が散らばるなにものかの住処' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**自然風景表(D66)
+sub mk_natural_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '苔むした部屋' ],
+[ 12, '動物の声が響き渡る密林' ],
+[ 13, 'つる草でできた通路' ],
+[ 14, '空洞いっぱいのお花畑' ],
+[ 15, '壁から木の根が突き出している部屋' ],
+[ 16, '空洞に広がる耕作地' ],
+[ 22, '折り重なって繁茂する森林' ],
+[ 23, '垂直の空洞にえんえんと伸びる大木の幹' ],
+[ 24, '空洞中に広がるアザラシの営巣地' ],
+[ 25, 'カビで壁がねとつく部屋' ],
+[ 26, 'サボテンが点在する部屋' ],
+[ 33, '巨大キノコの群生地' ],
+[ 34, '真ん中に大木が一本そびえ立っている空洞' ],
+[ 35, '通路いっぱいに進む野生ウマトカゲの大群' ],
+[ 36, '落ち葉がうずたかく積もった部屋' ],
+[ 44, '植え込みで作られた迷宮庭園' ],
+[ 45, '生い茂る竹林' ],
+[ 46, '松ぼっくりが転がる部屋' ],
+[ 55, '丈の長い草が生い茂る部屋' ],
+[ 56, '枯れた森林' ],
+[ 66, '大木の空洞内のような通路や部屋' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**水域風景表(D66)
+sub mk_waterside_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '轟々と流れる川にかかった橋' ],
+[ 12, '色とりどりの珊瑚の中' ],
+[ 13, '腰高まで水に浸かった部屋' ],
+[ 14, '澄んだ水が流れる噴水と水飲み場' ],
+[ 15, '沸騰する湖' ],
+[ 16, '地面が干潟化した部屋' ],
+[ 22, '水をたたえた貯水池' ],
+[ 23, '熱い蒸気がたちこめる部屋' ],
+[ 24, '空洞に広がる沼地' ],
+[ 25, '樽や鎖が放置されている船の中' ],
+[ 26, '水槽が並ぶ水族館' ],
+[ 33, '悪臭を放つ下水道' ],
+[ 34, '底に遺跡が見える水没した空洞' ],
+[ 35, '桟橋と船着き場' ],
+[ 36, '筏やハシケが浮かぶ湖' ],
+[ 44, '巨大な縦穴と滝' ],
+[ 45, 'かつて建設された上水道の中' ],
+[ 46, 'ペンギンの右往左往する氷結した湖' ],
+[ 55, '湯気を立てる温泉' ],
+[ 56, '奇怪な彫刻が施された古井戸' ],
+[ 66, '壁に貝やフジツボがはりついた部屋' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**天空風景表(D66)
+sub mk_skyrealm_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '雨が降る部屋' ],
+[ 12, 'チーズにうがたれた洞穴' ],
+[ 13, '中空に何層にも重なる空中庭園' ],
+[ 14, '無限に連なる真っ白な洗濯物' ],
+[ 15, '天空に向かって伸びる豆の木' ],
+[ 16, '巨大な縦穴にぶら下がる縄ばしごや鎖' ],
+[ 22, '強風の吹き荒れる部屋' ],
+[ 23, '雲の上。なぜか、その上を歩くことができる' ],
+[ 24, '濃霧に覆われた空洞' ],
+[ 25, '無重量でふわふわ浮く部屋' ],
+[ 26, '雪がしんしんと降り積もる部屋' ],
+[ 33, '時空がねじ曲がった空中回廊' ],
+[ 34, '怪物よけの風車が音を立てる通路' ],
+[ 35, '天井に遺跡が見える空洞' ],
+[ 36, '轟々と音を立てる巨大排気孔' ],
+[ 44, '時折稲妻の走る部屋' ],
+[ 45, '鳥の羽毛が舞い落ちる部屋' ],
+[ 46, '青空が壁面いっぱいに描かれた空洞' ],
+[ 55, '一面、鏡でできた部屋' ],
+[ 56, 'オーロラがゆらめく空洞' ],
+[ 66, '重力方向がばらばらの部屋' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**異界風景表(D66)
+sub mk_strange_place_landscape_table {
+    my $num = shift;
+    my @table = (
+[ 11, '古びた六畳間' ],
+[ 12, 'せせこましいカラオケボックス' ],
+[ 13, '時の止まった街' ],
+[ 14, 'ボールが一個転がっている体育館' ],
+[ 15, '毛が生えている部屋' ],
+[ 16, 'なにかの待合室' ],
+[ 22, '生物の粘液したたる体内' ],
+[ 23, 'ブランコやすべり台のある小公園' ],
+[ 24, '安っぽいユニットバス' ],
+[ 25, '上の住人がうるさい部屋' ],
+[ 26, '人骨で組まれている部屋' ],
+[ 33, '呼吸している部屋' ],
+[ 34, '斜めに傾いた部屋' ],
+[ 35, 'ラブホテルの一室' ],
+[ 36, 'ときどきなにかが覗いていく部屋' ],
+[ 44, 'がやがやと話し声が聞こえる部屋' ],
+[ 45, '触手が生えている部屋' ],
+[ 46, '机と椅子が置いてある取調室' ],
+[ 55, '静まりかえった教室' ],
+[ 56, '天井に巨大な人の顔がある部屋' ],
+[ 66, '常に揺れている部屋' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+
+
+
 ####################        エムブリオマシン       ########################
 sub em_table {
     my $string = "\U$_[0]";
@@ -6613,6 +7849,1030 @@ sub ga_ma_chit_table {
     return &get_table_by_number($num, @table);
 }
 
+####################          マギカロギア         ########################
+#** 表振り分け
+sub magicalogia_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    
+    if($game_type eq "MagicaLogia") {
+        if($string =~ /((\w)*BGT)/i) {   # 経歴表
+            $output = &magicalogia_background_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*DAT)/i) {   # 初期アンカー表
+            $output = &magicalogia_defaultanchor_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*FAT)/i) {   # 運命属性表
+            $output = &magicalogia_fortune_attribution_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*WIT)/i) {   # 願い表
+            $output = &magicalogia_wish_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*ST)/i) {  # シーン表
+            $output = &magicalogia_scene_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*FT)/i) {   # ファンブル表
+            $output = &magicalogia_fumble_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*WT)/i) {   # 変調表
+            $output = &magicalogia_wrong_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*(FC|C)T)/i) {   # 運命変転表
+            $output = &magicalogia_fortunechange_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*AT)/i) {   # 事件表
+            $output = &magicalogia_accident_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)*RTT)/i) {   # ランダム特技決定表
+            $output = &magicalogia_random_skill_table("\U$1", "$nick");
+        }
+    }
+    return $output;
+}
+
+#** シーン表
+sub magicalogia_scene_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+    my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
+
+#    if($string =~ /CST/i) {
+#        $type = '都市';
+#    }
+    if($type eq '都市') {
+    }
+    else {
+        @table = (
+            '魔法で作り出した次元の狭間。ここは時間や空間から切り離された、どこでもあり、どこでもない場所だ。',
+            '夢の中。遠く過ぎ去った日々が、あなたの前に現れる。',
+            '静かなカフェの店内。珈琲の香りと共に、優しく穏やかな雰囲気が満ちている。',
+            '強く風が吹き、雲が流されていく。遠く、雷鳴が聞こえた。どうやら、一雨きそうだ。',
+            '無人の路地裏。ここならば、邪魔が入ることもないだろう。',
+            '周囲で〈断章〉が引き起こした魔法災厄が発生する。ランダムに特技一つを選び、判定を行うこと。成功すると、好きな魔素が一個発生する。失敗すると「運命変転表」を使用する。',
+            '夜の街を歩く。暖かな家々の明かりが、遠く見える。',
+            '読んでいた本を閉じる。そこには、あなたが知りたがっていたことが書かれていた。なるほど、そういうことか。',
+            '大勢の人々が行き過ぎる雑踏の中。あなたを気に掛ける者は誰もいない。',
+            '街のはるか上空。あなたは重力から解き放たれ、自由に空を飛ぶ。',
+            '未来の予感。このままだと起きるかもしれない出来事の幻が現れる。',
+        );
+    }
+    my ($total_n, $dice_dmy) = &roll(2, 6);
+    my $tn = $total_n - 2;
+    $output = "${nick}: ${type}シーン表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** ファンブル表
+sub magicalogia_fumble_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+    @table = (
+        '魔法災厄が、あなたのアンカーに降りかかる。「運命変転」が発生する。',
+        '魔法災厄が、あなたの魔素を奪い取る。チャージしている魔素の中から、好きな組み合わせで2点減少する。',
+        '魔法の制御に失敗してしまう。【魔力】が1点減少する。',
+        '魔法災厄になり、そのサイクルが終了するまで、行為判定にマイナス1の修正が付く。',
+        '魔法災厄が、直接あなたに降りかかる。変調表を振り、その変調を受ける。',
+        'ふぅ、危なかった。特に何も起こらない。',
+        );
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: ファンブル表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 変調表
+sub magicalogia_wrong_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+#   if($string =~ /GWT/) {
+#       $type = ''
+#   }
+    if($type eq '都市') {
+    }
+    else {
+        @table = (
+            '『封印』自分の魔法(習得タイプが装備以外)からランダムに一つ選ぶ。選んだ魔法のチェック欄をチェックする。その魔法を使用するには【魔力】を2点消費しなくてはいけない。',
+            '『綻び』魔法戦の間、各ラウンドの終了時に自分の【魔力】が1点減少する。',
+            '『虚弱』【攻撃力】が1点減少する。',
+            '『病魔』【防御力】が1点減少する。',
+            '『遮蔽』【根源力】が1点減少する',
+            '『不運』1D6→2D6と振ってランダムに特技を一つ選ぶ。選んだ特技のチェック欄をチェックする。その特技が使用不能になり、その分野の特技が指定特技になった判定を行うとき、マイナス1の修正が付く。',
+            );
+    }
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: ${type}変調表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 運命変転表
+sub magicalogia_fortunechange_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+#   if($string =~ /GCT/) {
+#       $type = ''
+#   }
+    @table = (
+        '『挫折』そのキャラクターは、自分にとって大切だった夢を諦める。',
+        '『別離』そのキャラクターにとって大切な人――親友や恋人、親や兄弟などを失う。',
+        '『大病』そのキャラクターは、不治の病を負う。',
+        '『借金』そのキャラクターは、悪人に利用され多額の借金を負う。',
+        '『不和』そのキャラクターは、人間関係に失敗し深い心の傷を負う。',
+        '『事故』そのキャラクターは交通事故にあい、取り返しのつかない怪我を負う。',
+        );
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: ${type}運命変転表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 事件表
+sub magicalogia_accident_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+    my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
+
+#    if($string =~ /CST/i) {
+#        $type = '都市';
+#    }
+    if($type eq '都市') {
+    }
+    else {
+        @table = (
+            '不意のプレゼント、素晴らしいアイデア、悪魔的な取引……あなたは好きな魔素を1つ獲得するか【魔力】を1D6点回復できる。どちらかを選んだ場合、その人物に対する【運命】が1点上昇する。【運命】の属性は、ゲームマスターが自由に決定できる。',
+            '気高き犠牲、真摯な想い、圧倒的な力……その人物に対する【運命】が1点上昇する。【運命】の属性は「尊敬」になる。',
+            '軽い口論、殴り合いの喧嘩、魔法戦……互いに1D6を振り、低い目を振った方が、高い目を振った方に対して【運命】が1点上昇する。【運命】の属性は「尊敬」になる。',
+            '裏切り、策謀、不幸な誤解……その人物に対する【運命】が1点上昇する。【運命】の属性は「宿敵」になる。',
+            '意図せぬ感謝、窮地からの救済、一生のお願いを叶える……その人物に対する【運命】が1点上昇する。【運命】の属性は「支配」になる。',
+            '生ける屍の群れ、地獄の業火、迷宮化……魔法災厄に襲われる。ランダムに特技一つを選んで判定を行う。失敗すると、その人物に対し「運命変転表」を使用する。',
+            '道路の曲がり角、コンビニ、空から落ちてくる……偶然出会う。その人物に対する【運命】が1点上昇する。【運命】の属性は「興味」になる。',
+            '魂のひらめき、愛の告白、怪しい抱擁……その人物に対する【運命】が1点上昇する。【運命】の属性は「恋愛」になる。',
+            '師弟関係、恋人同士、すれ違う想い……その人物との未来が垣間見える。たがいに対する【運命】が1点上昇する。',
+            '懐かしい表情、大切な思い出、伴侶となる予感……その人物に対する【運命】が1点上昇する。【運命】の属性は「血縁」になる。',
+            '献身的な看護、魔法的な祝福、奇跡……その人物に対する【運命】が1点上昇する。【運命】の属性は自由に決定できる。もしも関係欄に疵があれば、その疵を1つ関係欄から消すことができる。',
+        );
+    }
+    my ($total_n, $dice_dmy) = &roll(2, 6);
+    my $tn = $total_n - 2;
+    $output = "${nick}: ${type}事件表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 魔素獲得チェック
+sub magicalogia_check_gain_ME {
+    my ($dice1, $dice2) = @_;
+    my $output = "";
+    
+    if ($dice1 == $dice2) {
+        # ゾロ目
+        my @table = ('星','獣','力','歌','夢','闇',);
+        $output = " ＞ " .$table[$dice1 - 1] ."の魔素2が発生";
+    }
+    return $output;
+}
+#** 経歴表
+sub magicalogia_background_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+    @table = (
+        '書警／ブックウォッチ',
+        '司書／ライブラリアン',
+        '書工／アルチザン',
+        '訪問者／ゲスト',
+        '異端者／アウトサイダー',
+        '外典／アポクリファ',
+        );
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: 経歴表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 初期アンカー表
+sub magicalogia_defaultanchor_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+    my @table = ('1','1','1','1','1','1','1','1','1','1','1',);
+
+    @table = (
+        '『恩人』あなたは、困っているところを、そのアンカーに助けてもらった。',
+        '『居候』あなたかアンカーは、どちらかの家や経営するアパートに住んでいる。',
+        '『酒友』あなたとアンカーは、酒飲み友達である。',
+        '『常連』あなたかアンカーは、その仕事場によくやって来る。',
+        '『同人』あなたは、そのアンカーと同じ趣味を楽しむ同好の士である。',
+        '『隣人』あなたは、そのアンカーの近所に住んでいる。',
+        '『同輩』あなたはそのアンカーと仕事場、もしくは学校が同じである。',
+        '『文通』あなたは、手紙やメール越しにそのアンカーと意見を交換している。',
+        '『旧友』あなたは、そのアンカーと以前に、親交があった。',
+        '『庇護』あなたは、そのアンカーを秘かに見守っている。',
+        '『情人』あなたは、そのアンカーと肉体関係を結んでいる。',
+    );
+    my ($total_n, $dice_dmy) = &roll(2, 6);
+    my $tn = $total_n - 2;
+    $output = "${nick}: ${type}初期アンカー表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 運命属性表
+sub magicalogia_fortune_attribution_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+    @table = (
+        '『血縁』自分や、自分が愛した者の親類や家族。',
+        '『支配』あなたの部下になることが運命づけられた相手。',
+        '『宿敵』何らかの方法で戦いあい、競い合う不倶戴天の敵。',
+        '『恋愛』心を奪われ、相手に強い感情を抱いている存在。',
+        '『興味』とても稀少だったり、不可解だったりして研究や観察をしたくなる対象。',
+        '『尊敬』その才能や思想、姿勢に対し畏敬や尊敬を抱く人物。',
+        );
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: 運命属性表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 願い表
+sub magicalogia_wish_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = '';
+
+    @table = (
+        '自分以外の特定の誰かを助けてあげて欲しい。',
+        '自分の大切な人や憧れの人に会わせて欲しい。',
+        '自分をとりまく不幸を消し去って欲しい。',
+        '自分のなくした何かを取り戻して欲しい。',
+        '特定の誰かを罰して欲しい。',
+        '自分の欲望（金銭欲、名誉欲、肉欲、知識欲など）を満たして欲しい。',
+        );
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my $tn = $total_n - 1;
+    $output = "${nick}: 願い表(${total_n}) ＞ $table[$tn]" if($table[$tn] ne '1');
+    return $output;
+}
+#** 指定特技ランダム決定表
+sub magicalogia_random_skill_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my @table = ('1','1','1','1','1','1');
+    my $type = 'ランダム';
+
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    my ($total_n2, $dice_dmy2) = &roll(2, 6);
+    my $tn = $total_n - 1;
+    my $tn2 = $total_n2 - 2;
+    
+    @table = ('星','獣','力','歌','夢','闇',);
+    my @table2 = (
+        ['黄金', '大地', '森', '道', '海', '静寂', '雨', '嵐', '太陽', '天空', '異界'],           # 星
+        ['肉', '蟲', '花', '血', '鱗', '混沌', '牙', '叫び', '怒り', '翼', 'エロス'],             # 獣
+        ['重力', '風', '流れ', '水', '波', '自由', '衝撃', '雷', '炎', '光', '円環'],             # 力
+        ['物語', '旋律', '涙', '別れ', '微笑み', '想い', '勝利', '恋', '情熱', '癒し', '時'],     # 歌
+        ['追憶', '謎', '嘘', '不安', '眠り', '偶然', '幻', '狂気', '祈り', '希望', '未来'],       # 夢
+        ['深淵', '腐敗', '裏切り', '迷い', '怠惰', '歪み', '不幸', 'バカ', '悪意', '絶望', '死'], # 闇
+    );
+    
+    $output = "${nick}: ${type}指定特技表(${total_n},${total_n2}) ＞ 『$table[$tn]』$table2[$tn][$tn2]" if($table[$tn] ne '1');
+    return $output;
+}
+
+####################           ネクロニカ         ########################
+sub nechronica_hit_location_table {
+    my $dice = shift;
+    my $output = '1';
+    
+    my $idx = 0;
+    if($dice > 5) {
+        $output = "";
+        my @table = (
+            '防御側任意',
+            '脚（なければ攻撃側任意）',
+            '胴（なければ攻撃側任意）',
+            '腕（なければ攻撃側任意）',
+            '頭（なければ攻撃側任意）',
+            '攻撃側任意',
+        );
+        $idx = $dice - 6;
+        if($dice > 10) {
+            $idx = 5;
+            $output = "(追加ダメージ".($dice - 10).")";
+        }
+        $output = $table[$idx].$output;
+    }
+
+    return $output;
+}
+
+####################           迷宮デイズ          ########################
+sub mayoday_table {
+    my $string = "\U$_[0]";
+    my $output = '1';
+    my $type = "";
+    my $total_n = "";
+
+    my $dummy;
+    # 散策表(2d6)
+    if($string =~ /DRT/i) {
+        $type = '散策';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_research_table($total_n);
+    # 休憩表(2D6)
+    } elsif($string =~ /DBT/i) {
+        $type = '休憩';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_break_table($total_n);
+    # ハプニング表(2D6)
+    } elsif($string =~ /DHT/i) {
+        $type = 'ハプニング';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_happening_table($total_n);
+    # お宝表
+    } elsif($string =~ /MPT/i) {
+        $type = '相場';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_market_price_table($total_n);
+    } elsif($string =~ /T1T/i) {
+        $type = 'お宝１';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &md_treasure1_table($total_n);
+    } elsif($string =~ /T2T/i) {
+        $type = 'お宝２';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &md_treasure2_table($total_n);
+    } elsif($string =~ /T3T/i) {
+        $type = 'お宝３';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &md_treasure3_table($total_n);
+    } elsif($string =~ /T4T/i) {
+        $type = 'お宝４';
+        ($total_n, $dummy) = &roll(1, 6);
+        $output = &md_treasure4_table($total_n);
+    # 因縁表
+    } elsif($string =~ /DCT/i) {
+        $type = '因縁';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_connection_table($total_n);
+    } elsif($string =~ /MCT/i) {
+        $type = '怪物因縁';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_monster_connection_table($total_n);
+    } elsif($string =~ /PCT/i) {
+        $type = 'PC因縁';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_pc_connection_table($total_n);
+    } elsif($string =~ /LCT/i) {
+        $type = 'ラブ因縁';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_love_connection_table($total_n);
+    # 戦闘系
+    } elsif($string =~ /CAT/i) {
+        $type = '痛打';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_critical_attack_table($total_n);
+    } elsif($string =~ /FWT/i) {
+        $type = '致命傷';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_fatal_wounds_table($total_n);
+    } elsif($string =~ /CFT/i) {
+        $type = '戦闘ファンブル';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_combat_fumble_table($total_n);
+    # そのほか
+    } elsif($string =~ /DNT/i) {
+        $type = '交渉';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_negotiation_table($total_n);
+    } elsif($string =~ /APT/i) {
+        $type = '登場';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_appearance_table($total_n);
+    } elsif($string =~ /KST/i) {
+        $type = 'カーネル停止';
+        ($total_n, $dummy) = &roll(2, 6);
+        $output = &md_kernel_stop_table($total_n);
+    }
+
+    if($output ne '1') {
+        $output = "$_[1]: ${type}表(${total_n}) ＞ $output";
+    }
+    return $output;
+}
+
+#**散策表(2d6)
+sub md_research_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '次に挑む迷宮の迷宮支配者を倒さなければ人類文明が滅ぶことを偶然知ってしまう。《気力》を最大値まで回復する。',
+        '同じ迷宮を対象とする違う依頼を受ける。シナリオの目的を果たしたときに、追加で1d6MCの報酬を得られるようになる。',
+        '他の迷宮屋の評判を耳にする。パーティから好きなキャラクター1人を選び、そのキャラクターに対する《好意》が1点上昇する。',
+        '毎日の散歩の成果が出て、体の調子が良い。このゲーム中、《HP》の最大値が5点上昇し、《HP》が5点回復する。',
+        'メディアの取材を受ける。《民の声》を2点得る。',
+        '近所からおすそ分けをもらう。【回復薬】を6個手に入れる。',
+        '近所の人がきみの噂話をしている。ゲーム中に自分が対象に入った「恋人」「親友」「忠誠」の人間関係を成立させるたび、《民の声》を2点得る。',
+        '似たような迷宮に挑んだことがある迷宮屋から話を聞いた。迷宮フェイズでの情報収集の難易度が2下がる。',
+        '武具の安売りを見つける。ランダムな武具アイテム1つを半分の値段で購入することができる。',
+        '他の迷宮屋と喧嘩になる。パーティの中からランダムに1人を選び、お互いの《敵意》を1点上昇させる。',
+        '迷宮屋志望の見習が、1d6人ほど配下として加わる。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**休憩表（2d6）
+sub md_break_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        'アイテムの改善案を出し合ってみる。各キャラクターは、好きなキャラクター1体を選び、1d6を振ってそのキャラクターのアイテムスロットから1つをランダムに選ぶ。出た目のアイテムにレベルがあれば、1上昇する。',
+        '何気ない雑談が腹の探り合いに発展する。各キャラクターは、好きなキャラクターに対する《好意》と《敵意》を入れ替え、その属性を自由に変更することができる。',
+        '好きな単語表からランダムに単語を1つ選ぶ。その部屋にはそれに関係したものがたくさん置いてあるため、出た単語が「好きなもの」に入っているキャラクターは、《気力》を2点得る。',
+        '嫌いな人の話題で盛り上がる。各キャラクターは同じキャラクターに《敵意》を持っている人を1人選び、その人への《好意》を1点上昇させる。',
+        '窓の外から報道のヘリコプターがこちらを撮影しているのが見える。格好よく見せるために、各キャラクターは〔魅力〕で難易度13の判定を行う。誰かが成功するたびに《民の声》が1点増加する。',
+        '雑談や休息など、思い思いに時間を過ごす。各キャラクターは、好きなキャラクター1体への《好意》を1点上昇させる。',
+        '通路の片隅で素材が山を作っているのを見つけた。各キャラクターは〔探索〕で難易度11の判定を行う。誰かが成功するたびに、好きな素材を1種類選び、それを1d6個手に入れる。',
+        'チームワークの確認。各プレイヤーは打ち合わせをせずに、一斉にじゃんけんを行う。いちばん出した人が多かった手を出したプレイヤーのPCは、《気力》を2点得る。',
+        '仮眠をとって休憩。各キャラクターは〔才覚〕で難易度9の判定を行う。成功すれば《HP》が最大値まで回復する。',
+        '各キャラクターは、迷宮化現象に巻き込まれ、身動きがとれない普通の人を1人見つけた。《配下》に加えることができる。',
+        '各キャラクターは1d6を振る。出た目の上位2名が唐突に恋に落ちる。同じ目が出て2名をうまく割り出せない場合は、GMの左隣に近い方を優先する。恋に落ちた2人、相手以外に対する《好意》を合計し、その値に対する《好意》に加える。その後、相手以外に対する《好意》をすべて0にする。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**交渉表（2d6）
+sub md_negotiation_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '中立的な態度は偽装だった。彼らは不意打ちを行う。奇襲扱いで戦闘を開始すること。',
+        '交渉は決裂！　戦闘を行うこと。',
+        '交渉は決裂！　戦闘を行うこと。',
+        '「贄をささげれば話を聞こう」モンスターの中で最もレベルが高いもののレベルと等しい数だけ何らかの素材を減少すれば、友好的になる。減少させない場合、戦闘を開始すること。',
+        '「……お前の趣味、なに？」好きな単語表一個を選び、D66を振る。パーティの中に、その項目を好きなものにしているキャラクターがいれば、友好的になる。そうでなければ戦闘を開始すること。',
+        '怪物たちは物欲しそうにこちらを見ている。「肉」の素材をモンスターの数だけ消費するか、【お弁当】【フルコース】1個を消費すれば友好的になる。消費しなければ、戦闘を開始すること。',
+        '怪物たちは値踏みするようにこちらを見ている。現金で1d6MC支払えば友好的になる。そうでない場合、戦闘を開始すること。',
+        '「何かいいもんよこせ」モンスターの中で最もレベルの高いもののレベル以上の価格のアイテムを消費すれば友好的になる。そうでない場合、戦闘を開始すること。',
+        '「面白い話を聞かせろよ」プレイヤーたちは面白い話をすること。GMは面白いと思えばモンスターは友好的になる。面白くなかった場合は戦闘を開始する。',
+        '「俺に勝てたら話を聞いてやろう」怪物が力比べを挑んできた。モンスターの中で最もレベルが高いものと、パーティの代表がそれぞれ〔武勇〕で判定を行う。パーティの代表の達成値がモンスター以上であれば友好的になる。負けた場合、もう一度交渉するか戦闘するかを決定すること。',
+        '運命の出会い。一目見た瞬間に打ち解けあい、友好的になる。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+
+
+#**ハプニング表（2d6）
+sub md_happening_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '急に絶望に襲われる。【お酒】を消費することが出来なければ、このゲーム中、最も高い能力値が1点減少する。',
+        '思考に靄がかかってしまう。「散漫」のバッドステータスを受ける。',
+        '気がついたら太っていた。「肥満」のバッドステータスを受ける。',
+        '無残な失敗に愛想を尽かした配下が2d6人ほど去って行ってしまう。',
+        '微妙な空気を読み切れず、パーティ全員の《気力》が1点減少する。',
+        '事故だか故意だかで、仲間を殴ってしまう。ランダムに選んだパーティメンバー1名の《HP》を自分の〔武勇〕と同じ値だけ減少させる。',
+        '期待が大きければ失望も大きい。あなたに対して《好意》を持っているキャラクター全員は、あなたに対する《好意》を1点減らす。',
+        'アイテムを粗末に扱ってしまう。持ち物の中からランダムにアイテムを1つ決定する。そのアイテムにレベルがある場合、レベルが1下がる。',
+        '失敗のショックのせいで知的な行動をとれなくなる。「愚か」のバッドステータスを受ける。',
+        '過去の行状のせいで人に呪われる。「呪い」のバッドステータスを受ける。',
+        '自分の失敗が許せない。このゲームの間、《器》が1点減少したものとして扱う。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**カーネル停止表（2d6）
+sub md_kernel_stop_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        'カーネルが肉体に致命的な迷宮化を引き起こす！致命傷表を振ること。カーネルはまだ停止しない。',
+        '〔才覚〕で難易度9の判定を行う。失敗すると記憶が迷宮化を起こし、銀行口座の暗証番号を忘れてしまう。口座に入っているMCはすべて失われる。カーネルは停止しない。',
+        '迷宮化エネルギーが装備を直撃。素早く避けるため〔武勇〕で難易度9の判定を行う。失敗した場合、持っているアイテムからランダムに1つを選ぶ。そのアイテムは激しい迷宮化を起こし破壊される。カーネルは停止しない。',
+        '正体不明のエネルギーが部屋中を駆け巡る。パーティ全員は1d6ダメージを受ける。カーネルは停止しない。',
+        '心象が迷宮化していく。〔魅力〕で難易度9の判定を行う。失敗すると人間関係が迷宮化を起こし、持っている感情値がすべて1点減少する。カーネルは停止しない。',
+        '激しい迷宮化に曝され、1d6点のダメージを受ける。〔探索〕で難易度11の判定を行う。成功すれば、怪我を負いながらもカーネルを停止させることに成功する。',
+        'パーティ全員は軽い迷宮化に曝され1ダメージを受ける。パーティを統率する為に〔魅力〕で難易度11の判定を行うこと。成功すれば、カーネルは停止する。',
+        '素早い一撃でカーネルの息の根を止めるために〔武勇〕で難易度9の判定を行う。成功すれば見事にカーネルを停止させることに成功する。',
+        'カーネルの構造を感じ取り、一瞬にして停止させることに成功。さらに迷宮化の副産物としてランダムなレアアイテム1つを入手する。',
+        'カーネルは停止した。そして持っているアイテムの中からランダムに1つを選ぶ。そのアイテムにレベルがあれば、いつのまにかレベルが1上昇している。',
+        '鮮やかにカーネルを停止させ、傷一つないまま保存することに成功した。このカーネルの売却価格が3d6MC上昇する。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+
+#**痛打表（2d6）
+sub md_critical_attack_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '武器の伝説がまた一つ増えた。攻撃に使用した武具アイテムにレベルがあれば、そのレベルが1点上昇する。',
+        '偶然ながら敵の弱点をつく。敵の《HP》を現在の半分の値にする。',
+        '攻撃が終わった後、攻撃の勢いを利用して、自分を好きなエリアに移動させることができる。',
+        '素晴らしい手ごたえに自分でも感動し、自分の《HP》が全快する。',
+        '叙事詩的な一撃。《民の声》を1点増やす。',
+        'クリーンヒット。攻撃の威力が2d6点上昇する。',
+        '敵の動きを封じた。攻撃目標の《回避値》を戦闘終了まで2下げる。この効果は累積する。',
+        '敵の勢いを利用し大ダメージ。攻撃の威力が、攻撃目標のレベルと同じだけ上昇する。',
+        '敵の技を封じる。攻撃目標のスキル1種類を選び、戦闘中はそのスキルを使用できなくする。',
+        '敵の急所をとらえ致命傷を与える。攻撃目標の《HP》を0にする。',
+        '戦いの中、武具もまた成長する。持っているアイテムをランダムに1選ぶ。そのアイテムにレベルがあれば、1点上昇する。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**致命傷表（2d6）
+sub md_fatal_wounds_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '重要器官を粉砕される。キャラクターは即座に死亡する。',
+        '傍目にも分かる致命傷。キャラクターは次の自分の行動処理が終わった時点で死亡する。《HP》の回復でこの死亡を防ぐことはできない。',
+        '全身に強い衝撃をうける。〔武勇〕で難易度[5+受けたダメージ]の判定に成功すると、行動不能になる。判定に失敗すると死亡する。',
+        '出血多量で意識不明。行動不能になる。この戦闘が終了するまでに《HP》を1以上にしないと、キャラクターは死亡する。',
+        '重傷を負い昏睡状態。行動不能になる。このクォーターが終了するまでに《HP》を1以上にしないと、キャラクターは死亡する。',
+        '攻撃で負った傷により意識を失う。行動不能になる。',
+        '緊急回避！　〔探索〕で難易度[7-現在の《HP》]の判定を行う。成功すると、ランダムなバッドステータス1つを受けたうえで攻撃が無効になる。失敗すると、ランダムなバッドステータス1つを受けたうえで行動不能になる。',
+        '最後の一撃を見切ることができるかもしれない。〔才覚〕で難易度[9-現在の《HP》]の判定を行う。成功すると《HP》が1になる。失敗すると行動不能になる。',
+        'まだここで死ぬ運命ではないのかもしれない。〔魅力〕で難易度[9-現在の《HP》]の判定を行う。成功すると《HP》が1になる。失敗すると行動不能になる。',
+        'カウンター！　攻撃をしてきた敵に対して、割り込んで好きな武器またはスキルを使った反撃をすることができる。これらの判定が成功した場合、ダメージやスキルの効果のあとで《HP》が1になる。失敗した場合、ただ行動不能になる。',
+        '致命傷を受けたような気がしたが、気のせいだった。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**戦闘ファンブル表（2d6）
+sub md_combat_fumble_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        'ぶざまな失敗に熱くなる。攻撃の目標のキャラクターに対して《敵意》を4点得る。',
+        '急にお腹が痛くなる！　何か回復アイテムを使うまで攻撃を行えなくなる。モンスターの場合、そのラウンドの終わりに未行動にならなくなる。',
+        'アイテムが壊れた！　自分が持っているアイテムの中からランダムに1つを選び、そのアイテムが失われる。モンスターの場合、1d6ダメージを受ける。',
+        '敵がいい気になる。行動不能になっていない敵軍キャラクター全ての《HP》を6点回復する。',
+        '自分に攻撃が命中！　使用した武器のダメージを自分に与える。',
+        'なんというか、やる気をなくす。《気力》を1点失う。モンスターの場合、1d6ダメージを受ける。',
+        '仲間に攻撃が命中！　使用した武器の射程内の味方から、ランダムに1人を選ぶ。そのキャラクターに武器のダメージを与える。',
+        '仲間の邪魔をしてしまう。未行動の自軍キャラクター1体を選び、行動済みにする。',
+        'スキルを忘れてしまった！　習得しているスキルからランダムに1種類を選ぶ。そのスキルは戦闘が終了するまで使用できない。',
+        '位置取りに失敗してとんでもない場所に。敵陣営プレイヤーまたはGMが、ファンブルしたキャラクターを好きな位置に移す。',
+        'ピンチがチャンスに！　《HP》が現在値の半分になり、《気力》が最大値まで貯まる。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**登場表（2d6）
+sub md_appearance_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '「ここから先に行かせるわけにはいかん」急ぐ途中に敵が立ちふさがる。〔武勇〕で難易度11の判定を行う。成功すればバトルフィールドの好きなエリアにそのキャラクターを配置することができる。失敗した場合、《HP》を1にした状態でバトルフィールドの好きなエリアにそのキャラクターを配置することができる。',
+        '「待たせたな！」バトルフィールドの好きなエリアにそのキャラクターを配置することができる。',
+        'おっと鉢合わせ！　バトルフィールドの敵軍の本陣に、そのキャラクターを配置すること。',
+        '全力で駆けつける！　《HP》を2d6点減少すれば、バトルフィールドの好きなエリアにそのキャラクターを配置することができる。',
+        'あいつらはこの先に行ったはず！　GMはそのキャラクターをバトルフィールドの好きなエリアに配置する。',
+        'あの聞き覚えのある音は……！　そのキャラクターが【乗騎】を装備していれば、GMはそのキャラクターをバトルフィールドの好きなエリアに配置する。',
+        '……間に合ったみたいだな。バトルフィールドの中に、そのキャラクターに対する《好意》が1点以上あるキャラクターがいれば、同じエリアにそのキャラクターを配置することができる。',
+        'を！　これはこれは。好きな素材を1個拾う。',
+        'いかん！　迷ってしまった。〔探索〕で難易度11の判定を行うこと。成功すればもう一度登場表を振り、結果を適用することができる。',
+        'むむむむ？　ここは一度来た道のような……？　疲労して《気力》が1点減少。',
+        '……いや、しかしそれどころではない！　そのキャラクターは、この戦闘に登場することはできない。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**因縁表（2d6）
+sub md_connection_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '対象はあなたの父、もしくは母である。幼い頃に家庭を捨てて失踪した対象を、あなたはずっと憎んでいた。対象への《敵意》が1点上昇する。また、対象を戦闘で倒した際に、経験点10点を得ることができる。',
+        '対象は、あなたの小学校時代の恩師である。懐かしい顔にこんな形で会うことになろうとは。対象への《好意》もしくは《敵意》が1点上昇する。',
+        '対象は、過去にあなたと戦い、あなたの体に古傷を残している。今でもときどき傷は代償を求めて疼く。対象への《敵意》が1点上昇する。',
+        'あなたは対象に憧れているが、全く相手にされていない。たとえ敵としてでも対象に認めてもらうことがあなたの願いだ。彼または彼女への《敵意》が1点上昇し、「ライバル」の人間関係を結ぶことが出来れば経験点を10得られるようになる。',
+        'あなたは過去、対象のせいで、思い出したくもない大失敗をしたことがある。嫌いなものに絡んだ大失敗を設定すること。対象への《敵意》が1点上昇する。',
+        'あなたは対象に手酷く敗北したことがある。あなたは屈辱を晴らすためにできる限りのことをする気でいる。対象への《敵意》が1点上昇する。',
+        '対象はあなたの親族を殺した。あなたはいつか訪れる復讐の日を信じて、鍛錬を続けてきた。対象への《敵意》が1点上昇する。',
+        '対象は、過去のあなたの仲間だ。意見の違いで袂を分かったが、ここまで対立することになるとは考えてもいなかった。対象への《敵意》が1点上昇する。',
+        '対象とあなたは、前世があなたの妻/夫であった。幸せな生涯の記憶が蘇る。対象への《好意》が1点上昇する。',
+        'あなたは対象とあなたの通勤・通学路でぶつかったことがあり、そこで一目惚れしている。恋を幸せに成就させるため、もしくは不幸な恋を対象の死によって終わらせるため、あなたは迷宮にめぐる。対象への愛情の《好意》4点と、「片思い」の人間関係を得る。',
+        'あなたは過去に対象の恋人であった。対象のどこが好きだったのかは、自分の好きなものからランダムに単語を決め、それに関連した話をでっち上げること。対象への愛情の《好意》4点と、「恋人」の人間関係を得る。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+#**怪物因縁表（2d6）
+sub md_monster_connection_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '対象はあなたの故郷を滅ぼした。そこは、もうペンペン草すら生えない廃墟となっている。対象への《敵意》が4点上昇する。',
+        '対象はあなたのDNA情報をもとに某国が作り出したものである。GMは対象にあなたのスキルから1つを任意に選んで修得させる。対象への《敵意》が1点上昇する。',
+        'あなたはかつて対象の同族を絶滅させた。しかし、奴らは死んではいなかったのだ。対象への《敵意》が1点上昇する。',
+        'あなたは幼いころに対象と遭遇したが、一顧だにされず見逃された。対象への《敵意》が1点上昇する。',
+        '何年も前に死んだ、あなたの親しい人は、ちょうど対象の攻撃手段と同じ方法で殺されている。対象への《敵意》が1点上昇する。',
+        '対象はなんとなくあなたが嫌いな特徴をそなえている。嫌いなものに関連した特徴を設定すること。対象への《敵意》が1点上昇する。',
+        'あなたは過去に対象と戦い、完敗を喫している。対象への《敵意》が1点上昇する。対象との戦闘に勝利した場合、経験点10点を得る。',
+        '対象はあなたの好きなものを穢したり貶めたことがある。好きなものにちなんだ出来事を設定すること。対象への《敵意》が1点上昇する。',
+        'あなたは、対象が同族のなかでも強力な個体であることを知っている。対象への《敵意》が2点上昇する。対象の《HP》と威力を6点ずつ上昇させる。',
+        '対象はあなたが昔飼っていた生き物や持っていたものが変化したものである。対象への《好意》と《敵意》が1点ずつ上昇する。交渉によって対象との戦闘を終わらせた場合、経験点10点を得る。',
+        'かつてあなたは対象と同族であった。対象への《好意》と《敵意》が1点ずつ上昇する。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+#**PC因縁表（2d6）
+sub md_pc_connection_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        '対象はあなたが追い求めていた敵だった。なぜ敵なのか設定すること。対象への《敵意》が4点上昇する。対象を殺害すると経験点100点を得る。',
+        '対象は、あなたがあなたのクラスになるきっかけを作った人物である。1分以内に詳細を設定できれば対象への好きな感情値を2点上昇させてよい。',
+        '対象と共通の知人がいることが発覚する。好きなものにちなんだ知人を設定すること。対象への《好意》が1点上昇する。',
+        '対象と同じ場所に住んでいたり、通っていたことが分かる。対象への《好意》が1点上昇する。',
+        'あなたは何らかの種類の迷宮屋ランキングで対象に負けている。対象への《敵意》が1点上昇する。終了フェイズで対象に（何でもいいので）負けを認めさせれば、経験点を1点獲得する。',
+        '対象は、なんとなくあなたの好きな特徴を備えているような気がする。好きなものにちなんだ特徴を1つ設定し、対象のプレイヤーの了解をとること。チャンスは１回だ。ＯＫなら対象への《好意》が1点上昇する。',
+        '対象は何らかの媒体で、あなたに対して好意的でないコメントを出したことがあるような気がする。コメントの詳細はあなたが決定すること。対象への《敵意》が１点上昇する。',
+        'あなたは対象に関する良い噂を聞いたことがある。噂の内容を決定したうえで、対象への《好意》が1点上昇する。',
+        '対象は実は幼馴染だったことが明らかになる。容姿の変化などで気付かなかったのだ。対象への《好意》が1点上昇する。',
+        '対象が実は兄弟であったことが明らかになる。家庭の事情を1分で考えだせれば、対象への《好意》が1点上昇する。',
+        'あなたと対象は、今まで隠していたが実はつきあっている。対象のプレイヤーの了解を15秒以内にとることができれば、お互いへの愛情の《好意》を4点上昇させることができる。',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+#**ラブ因縁表（2d6）
+sub md_love_connection_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        'あなたは対象と過去にいい友人だった。対象への《好意》が2点上昇するが、その属性は友情に変化する。',
+        'あなたは対象を本来とは別の性別だと思い込んで片思いしていた。対象への《敵意》が2点、または《好意》が1点上昇する。',
+        'あなたはかつて親友であった対象に恋人を奪われたことがある。対象への《敵意》が1点上昇する。',
+        '対象は、あなたの好きなものによく似ている。好きなものから１つを選んで、どう似ているか説明できたら、対象への《好意》が1点上昇する。',
+        '対象をよく見たらけっこう可愛いような気がしてきた。対象への《好意》が1点上昇し、対象への《好意》をすべて愛情に変換する。',
+        'あなたは対象と過去につきあっていたことがある。現在はどうだか分からないが、あのころは本気だった。対象への《好意》が1点上昇する。',
+        '対象は、むかしあなたが好きだった人と印象がよく似ている。対象への《好意》が1点上昇する。',
+        'あなたは対象に助けられたり、命を救われたことがある。１分以内に設定を作り上げられれば、対象への《好意》が1点上昇する。',
+        'あなたは対象に振られ、失意のあまり自殺しようとしたことがある。対象への《好意》と《敵意》が1点上昇する。',
+        'あなたは昔から、対象を独占したいと思っていた。対象があなた以外と関わるたびに怒りを募らせていたのだ。対象への《好意》と《敵意》が2点ずつ上昇する。',
+        'なんだか良く分からないが、とにかく好きでたまらない。対象への《好意》が3点上昇し、対象への《好意》をすべて愛情に変換する。'
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**相場表（2d6）
+sub md_market_price_table {
+    my $num = shift;
+    my $output = '1';
+    my @table = (
+        'なし',
+        '肉',
+        '牙',
+        '鉄',
+        '魔素',
+        '機械',
+        '衣料',
+        '木',
+        '火薬',
+        '情報',
+        '革',
+    );
+    $output = $table[$num - 2] if($table[$num - 2]);
+    return $output;
+}
+
+#**お宝表１（1d6）
+sub md_treasure1_table {
+    my $num = shift;
+    $num = $num - 1;
+    my $output = '1';
+    my @table = (
+        '何もなし。',
+        '何もなし。',
+        'そのモンスターの素材欄の中から、好きな素材を1個。',
+        'そのモンスターの素材欄の中から、好きな素材を2個。',
+        'そのモンスターの素材欄の中から、好きな素材を3個。',
+        '【お弁当】1個。',
+    );
+    $output = $table[$num] if($table[$num]);
+    return $output;
+}
+
+#**お宝表２（1d6）
+sub md_treasure2_table {
+    my $num = shift;
+    $num = $num - 1;
+    my $output = '1';
+    my @table = (
+        'そのモンスターの素材欄の中から、好きな素材を3個。',
+        'そのモンスターの素材欄の中から、好きな素材を4個。',
+        'そのモンスターの素材欄の中から、好きな素材を5個。',
+        'ランダムな回復アイテム1個。',
+        'ランダムな武具アイテム1個。そのアイテムにレベルがあれば、レベル1のアイテムとなる。',
+        'ランダムなレアアイテム1個。',
+    );
+    $output = $table[$num] if($table[$num]);
+    return $output;
+}
+
+#**お宝表３（1d6）
+sub md_treasure3_table {
+    my $num = shift;
+    $num = $num - 1;
+    my $output = '1';
+    my @table = (
+        'そのモンスターの素材欄の中から、好きな素材を5個。',
+        'そのモンスターの素材欄の中から、好きな素材を7個。',
+        'そのモンスターの素材欄の中から、好きな素材を10個。',
+        '好きなコモンアイテムのカテゴリ1種を選ぶ。そのカテゴリの中からランダムなアイテム1個。そのアイテムにレベルがあれば、レベル1のアイテムとなる。',
+        'ランダムなレアアイテム1個',
+        'ランダムなレアアイテム1個。そのアイテムにレベルがあれば、レベル1のアイテムとなる。',
+    );
+    $output = $table[$num] if($table[$num]);
+    return $output;
+}
+
+#**お宝表４（1d6）
+sub md_treasure4_table {
+    my $num = shift;
+    $num = $num - 1;
+    my $output = '1';
+    my @table = (
+        'そのモンスターの素材欄の中から、好きな素材を5個。',
+        'そのモンスターの素材欄の中から、好きな素材を10個。',
+        '好きなコモンアイテムのカテゴリ1種を選ぶ。そのカテゴリの中からランダムなアイテム1個。そのアイテムにレベルがあれば、レベル2のアイテムとなる。',
+        '好きなコモンアイテムのカテゴリ1種を選ぶ。そのカテゴリの中からランダムなアイテム1個。そのアイテムにレベルがあれば、レベル3のアイテムとなる。',
+        'ランダムなレアアイテム1個。そのアイテムにレベルがあれば、レベル1のアイテムとなる。',
+        'ランダムなレアアイテム1個。そのアイテムにレベルがあれば、レベル2のアイテムとなる。',
+    );
+    $output = $table[$num] if($table[$num]);
+    return $output;
+}
+
+####################           ピーカブー          ########################
+#** 表振り分け
+sub peekaboo_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    
+    if($game_type eq "Peekaboo") {
+        if($string =~ /((\w)+ET)/i) {       # イベント表
+            $output = &pk_event_table("\U$1", "$nick");
+        }
+        elsif($string =~ /((\w)+BT)/i) {    # バタンキュー表
+            $output = &pk_batankyu_table("\U$1", "$nick");
+        }
+    }
+    return $output;
+}
+
+#** イベント表
+sub pk_event_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+
+    my ($total_n, $dice_dmy) = &roll(2, 6);
+    if($string =~ /PSET/i) {
+        $type = '個別学校';
+        $output = &pk_private_school_event_table($total_n);
+    }
+    elsif($string =~ /SET/i) {
+        $type = '学校';
+        $output = &pk_school_event_table($total_n);
+    }
+    elsif($string =~ /OET/i) {
+        $type = 'お化け屋敷';
+        $output = &pk_obakeyashiki_event_table($total_n);
+    }
+    $output = "${nick}: ${type}イベント表(${total_n}) ＞ $output" if($output ne '1');
+    return $output;
+}
+#** 学校イベント表
+sub pk_school_event_table {
+    my $num = shift;
+    my @table = (
+        [ 2, '持ち物検査が行われる！　イノセント全員は、《隠れる/不良9》の判定を行うこと。失敗したキャラクターは、GMがアイテム1個を選んで没収することができる（セッション終了時に返してもらえる）' ],
+        [ 3, 'クラスで流行っている遊びに誘われる。GMは、「遊び」の分野の中からランダムに特技一つを選ぶ。イノセント全員は、その判定を行う。失敗したキャラクターは、【眠気】が1d6点増える。' ],
+        [ 4, 'とても退屈な授業が始まった。イノセント全員は、《いねむり/不良3》の判定を行う。失敗したキャラクターは、【眠気】が1d6+1点増える。' ],
+        [ 5, '明日までの宿題を出される。イノセント全員は、明日までに宿題を終わらせないといけない。宿題をやるためには、《宿題/勉強7》の判定に成功しなければならない。宿題を次の日の学校フェイズまでに終わらせることができなかった場合は居残り勉強させられる。その日の放課後フェイズの最初のサイクルは、1回休み。' ],
+        [ 6, '今日も今日とて楽しい授業。GMは、「勉強」の分野の中からランダムに特技1つを選ぶ。イノセント全員は、その判定を行う。失敗したキャラクターは【眠気】が1d6点増える。' ],
+        [ 7, '特に変わったこともなく、おだやかな一日だった。イノセント全員は、【眠気】が1点増える。' ],
+        [ 8, '今日の体育の時間はハードだった！　GMは、「運動」の分野の中からランダムに特技1つを選ぶ。イノセント全員は、その判定を行う。失敗したキャラクターは、【眠気】が1d6点増える。' ],
+        [ 9, '自習の時間だ！　GMは、「勉強」の分野の中からランダムに特技1つを選ぶ。イノセント全員は、その判定を行う。成功したキャラクターは、1回だけ自由行動ができる。' ],
+        [ 10, '抜き打ちテストだ！　GMは、「勉強」の分野の中からランダムに特技1つを選ぶ。イノセント全員は、-2の修正をつけて、その特技の判定を行う。成功したキャラクターはよい点をゲット！家にかえってそれを親に見せるとおこづかいを1個もらえる。失敗したキャラクターは、親にこっぴどく怒られ、【眠気】が1d6点増えるうえに、それ以降「みんなで遊ぶ」ことが出来なくなる。' ],
+        [ 11, '体操服や水着、宿題に提出物などなど、今日は学校に持ってこないといけないものがあったはず！《計画性/大人7》で判定を行う。失敗すると、先生に怒られてしょんぼり。【眠気】が1d6点増える。' ],
+        [ 12, 'それぞれに色々なことがあった。イノセントは、各自1回ずつ2d6を振り、個別学校イベント表の指示に従うこと。' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+#** 個別学校イベント表
+sub pk_private_school_event_table {
+    my $num = shift;
+    my @table = (
+        [ 2, 'クラスの中に気になるコが現れる。《恋愛/大人11》の判定を行う。成功すると、その子と仲良くなって経験値を1点獲得する。' ],
+        [ 3, 'お腹の調子が悪くなり、トイレに行きたくなる。《がまん/友達5》か《隠れる/不良9》の判定を行うこと。失敗すると、不名誉なあだ名をつけられ、それ以降、「友達」の分野の判定に-1の修正を受ける。' ],
+        [ 4, '今日の給食には、どうしても苦手な食べ物が出てきた。《勇気/友達9》で判定を行うこと。成功すると、苦手な食べ物を克服し、気分爽快！【眠気】を1d6点回復するか、【元気】を1点回復することができる。' ],
+        [ 5, '友達から遊ぼうと誘われる。その日の放課後フェイズに、クラスメイト1d6人と「みんなで遊ぶ」ことができる。これを断る場合は、《優しさ/友達4》で判定を行うこと。失敗するとこれ以降、「みんなで遊ぶ」を行うとき、友達を誘うことが出来なくなる。' ],
+        [ 6, '今日はクラブ活動があった。次のサイクルは行動できなくなる。その代わり、好きな特技1つを選ぶ。このセッションの間、その特技の判定を行うとき+1の修正がつく。' ],
+        [ 7, '授業中、先生がとても難しい問題を出してくる。GMは、「勉強」の分野からランダムに特技を1つ選ぶ。その判定を行うこと。成功すると、経験値を1点獲得する。' ],
+        [ 8, 'クラスでオバケの噂を耳にする。《うわさ話/友達3》の判定に成功すると、GMからそのセッションで出てくるオバケの外見や情報を教えてもらうことができる。' ],
+        [ 9, '校庭や体育館など、自分達の遊び場が他のグループに占拠されている。《けんか/不良12》で判定を行うこと。成功すると、それ以降「友達」の分野の判定に+1の修正を受ける。失敗すると遊び場を失ってしまう。1ダメージを受け、それ以降、「友達と遊ぶ」ことができなくなってしまう。' ],
+        [ 10, 'いじめの現場に出くわす！　《勇気/友達10》の判定に成功すると、いじめっこを撃退することができる。いじめられていた子が、お礼にお菓子を1個くれる。失敗すると1点のダメージを受ける。' ],
+        [ 11, '今日は全校集会があった。《がまん/友達5》で判定を行う。失敗すると貧血で倒れ次のサイクルは行動できなくなる。' ],
+        [ 12, '図書室で面白そうな本を発見する。《読書/遊び8》で判定を行うこと。成功すると、経験値を1点獲得する。' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+#** お化け屋敷イベント表
+sub pk_obakeyashiki_event_table {
+    my $num = shift;
+    my @table = (
+        [ 2, '謎かけ守護者が門を護っている。未行動のキャラクターは、《クイズ/遊び10》の判定を行うことができる。判定したキャラクターは行動済みになる。失敗したキャラクターは、1点のダメージを受ける。誰かが成功すれば、イベントはクリアできる。' ],
+        [ 3, '天井から血の雨が降ってくる！　この雨に触れると火傷しちゃうみたいだ！【防御力】が0のスプーキーとイノセントは、《かけっこ/運動7》の判定を行う。失敗すると、イノセントは1ダメージ、スプーキーは1d6ダメージを受ける。成功・失敗にかかわらず、イベントはクリアできる。' ],
+        [ 4, 'トンガリ族の妖精がいる。彼は、先へ行くための通行料として、アイテムを要求してくる。何か好きなアイテム1個を渡すか、未行動のキャラクターは、《お話づくり/遊び9》の判定を行うことができる。判定したキャラクターは行動済みになる。誰かが判定に成功するか、アイテムを渡すかしたら、イベントはクリアできる。' ],
+        [ 5, '行き止まりだ。先に進む方法が分からない。未行動のキャラクターは、《推理/大人6》の判定を行うことができる。判定したキャラクターは行動済みになる。誰かが成功したら、イベントはクリアできる。' ],
+        [ 6, 'まっくらで、何も見えない部屋だ。一行は不安におちいる。未行動のキャラクターは、《仕切る/友達11》の判定を行うことができる。判定したキャラクターは行動済みになる。誰かが成功すれば、イベントはクリアできる。' ],
+        [ 7, 'ジメジメした通路だ。特に何もしなくても、イベントはクリアだ。誰かがのぞむなら、自由行動を1回行うことができるぞ。' ],
+        [ 8, '通路が途中で途切れて崖のようになっている。誰かが飛ぶことが出来れば、向こう岸にあるはしごを断崖にかけられそうだけど……。未行動のキャラクターは、《とぶ/運動6》の判定を行うことができる。判定したキャラクターは行動済みになる。誰かが成功すれば、イベントはクリアできる。' ],
+        [ 9, 'まぼろしの部屋だ。各キャラクターの大好物のまぼろしがつぎつぎ現れる。未行動のキャラクターは、《がまん/友達5》の判定を行うことができる。判定したキャラクターは行動済みになる。誰かが成功したら、イベントはクリアできる。' ],
+        [ 10, '通路がいくつにも分岐している……。未行動のキャラクターのうち1人が《地理/勉強11》、もしくは《絵/遊び5》の判定を行う。判定したキャラクターは行動済みになる。失敗すると、そのオバケ屋敷の部屋数が1d6点上昇する。成功失敗にかかわらず、イベントはクリアできる。' ],
+        [ 11, 'シャドウが見回りをしている。未行動のキャラクターのうち1人が、《隠れる/不良9》の判定を行う。成功すれば、イベントはクリアできる。失敗すると、プレイヤーと同じ人数のシャドウと戦闘を行うこと。勝利すればイベントはクリアできる。' ],
+        [ 12, '足下からシャドウが現れ、みんなに襲いかかる！　プレイヤーと同じ人数のシャドウと戦闘を行うこと。勝利すればイベントはクリアできる。' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+#** バタンキュー表
+sub pk_batankyu_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+
+    my ($total_n, $dice_dmy) = &roll(1, 6);
+    if($string =~ /IBT/i) {
+        $type = 'イノセント用';
+        $output = &pk_innocent_batankyu_table($total_n);
+    }
+    if($string =~ /SBT/i) {
+        $type = 'スプーキー用';
+        $output = &pk_spooky_batankyu_table($total_n);
+    }
+    $output = "${nick}: ${type}バタンキュー！表(${total_n}) ＞ $output" if($output ne '1');
+    return $output;
+}
+#** イノセント用バタンキュー！表
+sub pk_innocent_batankyu_table {
+    my $num = shift;
+    my @table = (
+        [ 1, '悲しい別れ。病院につれていくことができれば、1d6日入院したあとに目覚めます。その間は、行動不能です。目覚めたときに【眠気】も【元気】もすべて回復しますが、スプーキーを見ることができなくなっています。そのキャラクターはスプーキーと一緒に冒険を続けることはできません……。' ],
+        [ 2, '大けがをして昏睡状態。病院につれていくことができれば、1d6日入院したあとに目覚めます。その間は、行動不能です。目覚めたときに【眠気】はすべて回復し、【元気】が3点回復します。' ],
+        [ 3, '気絶しちゃった！　1d6サイクル後に目覚めます。気絶している間は、行動不能です。目覚めたときに【眠気】が1d6点、【元気】が1点回復します。' ],
+        [ 4, '体が動かない！　何かを見たり、話したりといった簡単な行動ならできますが、自由行動や戦闘行動といった通常の行動は行えません。1d6サイクル後に【元気】が1点回復し、通常通り行動できるようになります。' ],
+        [ 5, 'かろうじて意識はあるものの、朦朧としてきた。【眠気】が2d6点増えます。それで行動不能になっていなければ、【元気】が1点回復します。そうでなければ、気絶してしまい、1d6サイクル後に目覚めます。気絶している間は、行動不能です。目覚めたときに【眠気】が1d6点減少し、【元気】が1点回復します。' ],
+        [ 6, 'なんという幸運！　アイテムがキミを護ってくれた。もし持ち物にアイテムがあった場合、それが1個破壊され、受けたダメージを無効化します。アイテムがなければ行動不能になります。' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+#** スプーキー用バタンキュー！表
+sub pk_spooky_batankyu_table {
+    my $num = shift;
+    my @table = (
+        [ 1, '封印状態！　オバケは封印されてしまいます。1d6*1年後になれば、そのオバケは復活します。それまでは、イノセントと一緒に冒険することはできません。できたとしても、そのときイノセントはあなたを見ることができなくなっているかもしれませんが……。' ],
+        [ 2, '休眠状態！　オバケは休眠状態になります。1d6日が経過すると目覚めます。その間は、行動不能です。目覚めたときに【魔力】はすべて回復しています。' ],
+        [ 3, 'コバケ状態！　体は小さく縮んてしまい、重戦闘も戦闘行動も行うことはできません。【魔力】が1点以上になると、通常通り行動できるようになります。' ],
+        [ 4, '混沌変化！　自分のリングのからだリストを使って、ランダムにからだを1つ選びます。自分のからだが、それに変化します。1d6サイクルの間、行動不能になります。その後、【魔力】が1d6点回復して通常通り行動できるようになります。' ],
+        [ 5, '魔力変質！　自分のリングの衣装リストを使って、ランダムに衣装を1つ選びます。自分の衣装1つが、それに変化します。そして、1d6サイクルの間、行動不能になります。その後、【魔力】が1d6点回復して通常通り行動できるようになります。' ],
+        [ 6, '魔法暴発！　自分の持っている魔法をランダムに1つ選んで、その効果が発動します。魔法の対象が選べる場合は、スプーキーのプレイヤーが選んで構いません。そして、1d6サイクルの間、行動不能になります。その後、【魔力】が1d6点回復して通常通り行動できるようになります。' ],
+    );
+
+    return &get_table_by_number($num, @table);
+}
+
+####################        バルナ・クロニカ      ########################
+#** 命中部位表
+sub barna_kronika_hit_location_table {
+    my $num = shift;
+    my @table = (
+        [ 1, '頭部' ],
+        [ 2, '右腕' ],
+        [ 3, '左腕' ],
+        [ 4, '右脚' ],
+        [ 5, '左脚' ],
+        [ 6, '胴体' ],
+    );
+    
+    return &get_table_by_number($num, @table);
+}
+
+####################    モノトーン・ミュージアム  ########################
+sub monotone_musium_table {
+    my ($string, $nick) = @_;
+    my $output = '1';
+    my $type = "";
+
+    my ($total_n, $dice_dmy) = &roll(2, 6);
+    if($string =~ /WDT/i) {
+        $type = '世界歪曲表';
+        $output = &mm_world_distortion_table($total_n);
+    }
+    elsif($string =~ /OT/i) {
+        $type = '兆候表';
+        $output = &mm_omens_table($total_n);
+    }
+    elsif($string =~ /DT/i) {
+        $type = '歪み表';
+        $output = &mm_distortion_table($total_n);
+    }
+    $output = "${nick}: ${type}(${total_n}) ＞ $output" if($output ne '1');
+    return $output;
+}
+
+#**兆候表(2d6)[OT]
+sub mm_omens_table {
+    my $num = shift;
+    my @table = (
+[ 2, '信念の喪失：[出自]を喪失する。特徴は失われない。' ],
+[ 3, '昏倒：あなたは[戦闘不能]になる。' ],
+[ 4, '肉体の崩壊：あなたは 2D6点のHPを失う。' ],
+[ 5, '放心：あなたはバッドステータスの[放心]を受ける。' ],
+[ 6, '重圧：あなたはバッドステータスの[重圧]を受ける。' ],
+[ 7, '現在の喪失：現在持っているパートナーをひとつ喪失する。' ],
+[ 8, 'マヒ：あなたはバッドステータスの[マヒ]を受ける。' ],
+[ 9, '邪毒：あなたはバッドステータスの[邪毒]5 を受ける。' ],
+[ 10, '色彩の喪失：漆黒、墨白、透明化……。その禍々しい色彩の喪失は他らなぬ異形化の片鱗だ。' ],
+[ 11, '理由の喪失：[境遇]をう喪失する。特徴は失われない。' ],
+[ 12, '存在の喪失：あなたの存在は一瞬、この世界から消失する。' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**歪み表(2D6)[DT]
+sub mm_distortion_table {
+    my $num = shift;
+    my @table = (
+[ 2, '世界消失：演目の舞台がすべて失われる。舞台に残っているのはキミたちと異形、伽藍だけだ。クライマックスフェイズへ。' ],
+[ 3, '生命減少：演目の舞台となっている街や国から動物や人間の姿が少なくなる。特に子供の姿は見られない。' ],
+[ 4, '空間消失：演目の舞台の一部（建物一棟程度）が消失する。' ],
+[ 5, '天候悪化：激しい雷雨に見舞われる。' ],
+[ 6, '生命繁茂：シーン内に植物が爆発的に増加し、建物はイバラのトゲと蔓草に埋没する。' ],
+[ 7, '色彩喪失：世界から色彩が失われる。紡ぎ手（PC）以外の人々は世界のすべてをモノクロームになったかのように認識する。' ],
+[ 8, '神権音楽：美しいが不安を覚える音が流れる。音は人々にストレスを与え、街の雰囲気は悪化している。' ],
+[ 9, '鏡面世界：演目の舞台に存在するあらゆる文字は鏡文字になる。' ],
+[ 10, '時空歪曲：昼夜が逆転する。昼間であれば夜になり、夜であれば朝となる。' ],
+[ 11, '存在修正：GMが任意に決定したNPCの性別や年齢、外見が変化する。' ],
+[ 12, '人体消失：シーンプレイヤーのパートナーとなっているNPCが消失する。どのNPCが消失するかは、GMが決定する。' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+#**世界歪曲表(2D6)[WDT]
+sub mm_world_distortion_table {
+    my $num = shift;
+    my @table = (
+[ 2, '消失：世界からボスキャラクターが消去され、消滅する。エンディングフェイズへ。' ],
+[ 3, '自己犠牲：チャート振ったPCのパートナーとなっているNPCのひとりが死亡する。チャート振ったPCのHPとMPを完全に回復させる。' ],
+[ 4, '生命誕生：キミたちは大地の代わりに何かの生き物の臓腑の上に立っている。登場しているキャラクター全員に邪毒5 を与える。' ],
+[ 5, '歪曲拡大：シーンに登場している紡ぎ手ではないNPCひとりが漆黒の凶獣（P.240）に変身する。' ],
+[ 6, '暴走：“ほつれ ”がいくつも生まれ、シーンに登場しているすべてのキャラクターの剥離値を +1 する。' ],
+[ 7, '幻像世界：周囲の空間は歪み、破壊的なエネルギーが充満する。次に行なわれるダメージロールに +5D6 する。' ],
+[ 8, '変調：右は左に、赤は青に、上は下に、歪みが身体の動きを妨げる。登場しているキャラクター全員に狼狽を与える。' ],
+[ 9, '空間消失：演目の舞台が煙のように消失する。圧倒的な喪失感により、登場しているキャラクター全員に放心を与える。' ],
+[ 10, '生命消失：次のシーン以降、エキストラは一切登場できない。現在のシーンのエキストラに関してはGMが決定する。' ],
+[ 11, '自己死：もっとも剥離値の高いPCひとりが戦闘不能になる。複数のPCが該当した場合はGMがランダムに決定する。' ],
+[ 12, '世界死：世界の破滅。難易度12の【縫製】判定に成功すると破滅から逃れられる。失敗すると行方不明になる。エンディングフェイズへ。' ],
+    );
+    return &get_table_by_number($num, @table);
+}
+
+
+
 #==========================================================================
 #**                            その他の機能
 #==========================================================================
@@ -6657,33 +8917,36 @@ sub check_hit { # 成功数判定用
     my $diff     = $_[2];
     my $suc = 0;
 
-    if($ulflg =~ /(<=|=<)/) {
-        if($dice_now <= $diff) {
-            $suc++;
-        }
-    } elsif($ulflg =~ /(>=|=>)/) {
-        if($dice_now >= $diff) {
-            $suc++;
-        }
-    } elsif($ulflg =~ /(<>)/) {
-        if($dice_now != $diff) {
-            $suc++;
-        }
-    } elsif($ulflg =~ /[<]+/) {
-        if($dice_now < $diff) {
-            $suc++;
-        }
-    } elsif($ulflg =~ /[>]+/) {
-        if($dice_now > $diff) {
-            $suc++;
-        }
-    } elsif($ulflg =~ /[=]+/) {
-        if($dice_now == $diff) {
-            $suc++;
+    if($diff =~ /\d/) {
+        if($ulflg =~ /(<=|=<)/) {
+            if($dice_now <= $diff) {
+                $suc++;
+            }
+        } elsif($ulflg =~ /(>=|=>)/) {
+            if($dice_now >= $diff) {
+                $suc++;
+            }
+        } elsif($ulflg =~ /(<>)/) {
+            if($dice_now != $diff) {
+                $suc++;
+            }
+        } elsif($ulflg =~ /[<]+/) {
+            if($dice_now < $diff) {
+                $suc++;
+            }
+        } elsif($ulflg =~ /[>]+/) {
+            if($dice_now > $diff) {
+                $suc++;
+            }
+        } elsif($ulflg =~ /[=]+/) {
+            if($dice_now == $diff) {
+                $suc++;
+            }
         }
     }
     return($suc);
 }
+
 
 ####################       ゲーム別成功度判定      ########################
 sub check_suc { # ゲーム別成功度判定
@@ -6993,6 +9256,23 @@ sub check_nD10 {    # ゲーム別成功度判定(nD10)
                 $output .= " ＞ 失敗";
             }
         }
+    } elsif($game_type eq "Nechronica") {
+        if($ulflg eq ">=") {
+            if($total_n >= 11) {
+                $output .= " ＞ 大成功";
+            } elsif($total_n >= $diff) {
+                $output .= " ＞ 成功";
+            } else {
+                if($n1 > 0) {
+                    $output .= " ＞ 大失敗";
+                    if($dice_cnt > 1) {
+	                    $output .= " ＞ 使用パーツ全損";
+                    }
+                } else {
+                    $output .= " ＞ 失敗";
+                }
+            }
+        }
     }
     return $output;
 }
@@ -7106,7 +9386,44 @@ sub check_2D6 { # ゲーム別成功度判定(2D6)
                 $output .= " ＞ 失敗";
             }
         }
+    } elsif($game_type eq "MagicaLogia") {
+        if($ulflg eq ">=") {
+            if($dice_n <= 2) {
+                $output .= " ＞ ファンブル";
+            } elsif($dice_n >= 12) {
+                $output .= " ＞ スペシャル(魔力1D6点か変調1つ回復)";
+            } elsif($total_n >= $diff) {
+                $output .= " ＞ 成功";
+            } else {
+                $output .= " ＞ 失敗";
+            }
+        }
+    } elsif($game_type eq "MeikyuDays") {
+        if($ulflg eq ">=") {
+            if($dice_n <= 2) {
+                $output .= " ＞ 絶対失敗";
+            } elsif($dice_n >= 12) {
+                $output .= " ＞ 絶対成功";
+            } elsif($total_n >= $diff) {
+                $output .= " ＞ 成功";
+            } else {
+                $output .= " ＞ 失敗";
+            }
+        }
+    } elsif($game_type eq "Peekaboo") {
+        if($ulflg eq ">=") {
+            if($dice_n <= 2) {
+                $output .= " ＞ ファンブル(【眠気】が1d6点上昇)";
+            } elsif($dice_n >= 12) {
+                $output .= " ＞ スペシャル(【魔力】あるいは【眠気】が1d6点回復)";
+            } elsif($total_n >= $diff) {
+                $output .= " ＞ 成功";
+            } else {
+                $output .= " ＞ 失敗";
+            }
+        }
     }
+
     return $output;
 }
 sub check_nD6 { # ゲーム別成功度判定(nD6)
@@ -7214,32 +9531,7 @@ sub check_nDx { # ゲーム別成功度判定(ダイスごちゃ混ぜ系)
 #=========================================================================
 
 ####################          カウンタ操作         ########################
-sub set_point_counter {
 #削除
-}
-
-####################          カウンタ一覧         ########################
-sub get_point_list {
-#削除
-}
-
-####################          カウンタ削除         ########################
-sub delete_point_list {
-#削除
-}
-
-####################          識別名の交換         ########################
-sub rename_point_counter {
-#削除
-}
-
-####################          その他の処理         ########################
-sub set_point_tree {
-#削除
-}
-sub sort_point_hash {
-#削除
-}
 
 #==========================================================================
 #**                         カード関係
@@ -7266,11 +9558,14 @@ sub send_msg {
     if(length($msgs) > $SEND_STR_MAX) {         # 長すぎる出力はイタズラと見なす
         $msgs = '結果が長くなりすぎました';
     }
-    &debug_out("$to [$nick] ${msgs}\n");
-    if($NOTICE_SW) {
-        $self->notice(encode($IRC_CODE ,$to), encode($IRC_CODE ,$msgs));        # noticeで送信
-    } else {
-        $self->privmsg(encode($IRC_CODE ,$to), encode($IRC_CODE ,$msgs));       # privmsgで送信
+    my @msg_arr = split "\n", $msgs;
+    foreach my $msg1 (@msg_arr) {
+        &debug_out("$to [$nick] ${msgs}\n");
+        if($NOTICE_SW) {
+            $self->notice(encode($IRC_CODE ,$to), encode($IRC_CODE ,$msg1));        # noticeで送信
+        } else {
+            $self->privmsg(encode($IRC_CODE ,$to), encode($IRC_CODE ,$msg1));       # privmsgで送信
+        }
     }
 }
 sub debug_out {
@@ -7395,7 +9690,7 @@ sub parren_killer {
             $string =~ s/DB\@(\d)\@(\d)/DB${1}${2}/ig;
             $string =~ s/DB(\d)(\d)(#([\d][\+\-\d]*))/3R6+${4}[${1},${2}]/ig;
             $string =~ s/DB(\d)(\d)(#([\+\-\d]*))/3R6${4}[${1},${2}]/ig;
-            $string =~ s/DB(\d)(\d)/3R6$[${1},${2}]/ig;
+            $string =~ s/DB(\d)(\d)/3R6[${1},${2}]/ig;
         }
     }
     elsif($game_type eq "NightWizard") {
@@ -7435,6 +9730,26 @@ sub parren_killer {
         $string =~ s/(\d+)GA(\d+)/${1}R6>=${2}[1]/ig;
         $string =~ s/(\d+)G(\d+)([\+\-][\+\-\d]+)/${1}R6${3}>=${2}[0]/ig;
         $string =~ s/(\d+)G(\d+)/${1}R6>=${2}[0]/ig;
+    }
+    elsif($game_type eq "Nechronica") {
+        $string =~ s/(\d+)NC(10)?([\+\-][\+\-\d]+)/${1}R10${3}[0]/ig;
+        $string =~ s/(\d+)NC(10)?/${1}R10[0]/ig;
+        $string =~ s/(\d+)NA(10)?([\+\-][\+\-\d]+)/${1}R10${3}[1]/ig;
+        $string =~ s/(\d+)NA(10)?/${1}R10[1]/ig;
+    }
+    elsif($game_type eq "MeikyuDays") {
+        $string =~ s/(\d+)MD6/${1}R6/ig;
+        $string =~ s/(\d+)MD/${1}R6/ig;
+    }
+    elsif($game_type eq "BarnaKronika") {
+        $string =~ s/(\d+)BKC(\d)/${1}R6[0,${2}]/ig;
+        $string =~ s/(\d+)BAC(\d)/${1}R6[1,${2}]/ig;
+        $string =~ s/(\d+)BK/${1}R6[0,0]/ig;
+        $string =~ s/(\d+)BA/${1}R6[1,0]/ig;
+    }
+    elsif($game_type eq "RokumonSekai2") {
+        $string =~ s/(\d+)RS([\+\-][\+\-\d]+)<=(\d+)/3R6${2}<=${3}[${1}]/ig;
+        $string =~ s/(\d+)RS<=(\d+)/3R6<=${2}[${1}]/ig;
     }
 
 
@@ -7529,38 +9844,7 @@ sub paren_k {
 ###########################################################################
 #**                        ゲーム設定関連
 ###########################################################################
-sub card_setup {
-    my $card_file = $_[0];
-
-    if($card_file) { # 専用カードセットのロード
-        &debug_out("Loading Cardset『${card_file}』...\n");
-
-        @card_val = ('-1',);
-        open(FILE , encode(CHARCODE, "< ${card_file}")) || return "カードデータを開けません :『${card_file}』$!";
-        while(my $line_raw = <FILE>) {
-            my $line = decode(CHARCODE, "$line_raw");   # カードデータの文字コードはOSの文字コードと一致とする
-            if($line =~ /^(\d+)->(.+)$/) {  # 番号->タイトル
-                my $cardnum = "$1";
-                my $card_t = "$2";
-                push(@card_val, $cardnum);
-                $card_ttl{"${cardnum}"} = $card_t;
-            } else {
-                next;
-            }
-        }
-        close(FILE);
-        $card_reg = '[\d]+';    #カード指定文字列の正規表現
-        @card_re = @card_val;
-        $CARD_MAX = scalar @card_val - 1;
-        $card_m = $CARD_MAX;
-        $card_buried = 0;
-        undef %deal_cards;
-        %deal_cards = ('card_played' => '');
-
-        &debug_out("Load Finished...\n");
-    }
-    return '_OK_';
-}
+#削除
 
 sub game_clear {
     $upperinf = 0;      #上方無限
@@ -7576,65 +9860,46 @@ sub game_clear {
     $round_flg = 0;     #端数の処理(0=切り捨て, 1=切り上げ, 2=四捨五入)
     $double_type = 0;   #ゾロ目で振り足しのロール種別(0=判定のみ, 1=ダメージのみ, 2=両方)
     $modeflg = $SEND_MODE;
-    &c_set_default;
-}
-sub c_set_default { # カードをデフォルトに戻す
-    @card_val = ('0',
-    'S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13',
-    'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12','H13',
-    'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13',
-    'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13',
-    'J1',
-        );
-    @card_re = @card_val;
-    $CARD_MAX = scalar @card_val - 1;
-    $card_m = $CARD_MAX;
-    $card_buried = 0;
-    undef %deal_cards;
-    %deal_cards = ('card_played' => '');
-    $card_reg = '[DHSCJdhscj][\d]+';    #カード指定文字列の正規表現
-    undef %card_ttl;
-
-    $card_place = 1;    #手札の他のカード置き場
-    $can_tap = 1;       #場札のタップ処理の必要があるか？
+#    &c_set_default;
+#削除(カード関連処理)
 }
 
 sub game_set {  # 各種ゲームモードの設定
     my $tnick = $_[0];
 
-    if($tnick =~ /((Cthulhu)|(COC))$/i) {
+    if($tnick =~ /(^|\s)((Cthulhu)|(COC))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Cthulhu";
         return('Game設定をCall of Cthulhu(BRP)に設定しました');
     }
-    elsif($tnick =~ /((Hieizan)|(COCH))$/i) {
+    elsif($tnick =~ /(^|\s)((Hieizan)|(COCH))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = 'Hieizan';
         return('Game設定を比叡山炎上(CoC)に設定しました');
     }
-    elsif($tnick =~ /((Elric!)|(EL))$/i) {
+    elsif($tnick =~ /(^|\s)((Elric!)|(EL))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = 'Elric!';
         return('Game設定をElric!に設定しました');
     }
-    elsif($tnick =~ /((RuneQuest)|(RQ))$/i) {
+    elsif($tnick =~ /(^|\s)((RuneQuest)|(RQ))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "RuneQuest";
         return('Game設定をRuneQuestに設定しました');
     }
-    elsif($tnick =~ /((Chill)|(CH))$/i) {
+    elsif($tnick =~ /(^|\s)((Chill)|(CH))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Chill";
         return('Game設定をChillに設定しました');
     }
-    elsif($tnick =~ /((RoleMaster)|(RM))$/i) {
+    elsif($tnick =~ /(^|\s)((RoleMaster)|(RM))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "RoleMaster";
         $upperinf = 96;
         $upper_dice = 100;
         return('Game設定をRoleMasterに設定しました');
     }
-    elsif($tnick =~ /((ShadowRun)|(SR))$/i) {
+    elsif($tnick =~ /(^|\s)((ShadowRun)|(SR))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "ShadowRun";
         $upperinf = 6;
@@ -7642,7 +9907,7 @@ sub game_set {  # 各種ゲームモードの設定
         $sort_flg = 3;
         return('Game設定をShadowRunに設定しました');
     }
-    elsif($tnick =~ /((ShadowRun4)|(SR4))$/i) {
+    elsif($tnick =~ /(^|\s)((ShadowRun4)|(SR4))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "ShadowRun4";
         $sort_flg = 3;
@@ -7650,24 +9915,24 @@ sub game_set {  # 各種ゲームモードの設定
         $suc_def = ">=5";   #目標値が空欄の時の目標値
         return('Game設定をShadowRun4版に設定しました');
     }
-    elsif($tnick =~ /((Pendragon)|(PD))$/i) {
+    elsif($tnick =~ /(^|\s)((Pendragon)|(PD))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Pendragon";
         return('Game設定をPendragonに設定しました');
     }
-    elsif($tnick =~ /((SwordWorld)|(SW))$/i) {
+    elsif($tnick =~ /(^|\s)((SwordWorld)|(SW))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "SwordWorld";
         $rating_table = 0;  # レーティング表を文庫版モードに
         return('Game設定をソードワールドに設定しました');
     }
-    elsif($tnick =~ /((SwordWorld)\s*2\.0|(SW)\s*2\.0)$/i) {
+    elsif($tnick =~ /(^|\s)((SwordWorld)\s*2\.0|(SW)\s*2\.0)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "SwordWorld2.0";
         $rating_table = 2;
         return('Game設定をソードワールド2.0に設定しました');
     }
-    elsif($tnick =~ /((Arianrhod)|(AR))$/i) {
+    elsif($tnick =~ /(^|\s)((Arianrhod)|(AR))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Arianrhod";
         $modeflg = 2;
@@ -7675,17 +9940,17 @@ sub game_set {  # 各種ゲームモードの設定
         $sort_flg = 1;
         return('Game設定をアリアンロッドに設定しました');
     }
-    elsif($tnick =~ /((Infinite[\s]*Fantasia)|(IF))$/i) {
+    elsif($tnick =~ /(^|\s)((Infinite[\s]*Fantasia)|(IF))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Infinite Fantasia";
         return('Game設定を無限のファンタジアに設定しました');
     }
-    elsif($tnick =~ /(WARPS)$/i) {
+    elsif($tnick =~ /(^|\s)(WARPS)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "WARPS";
         return('Game設定をWARPSに設定しました');
     }
-    elsif($tnick =~ /((Demon[\s]*Parasite)|(DP))$/i) {
+    elsif($tnick =~ /(^|\s)((Demon[\s]*Parasite)|(DP))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Demon Parasite";
         $modeflg = 2;
@@ -7693,7 +9958,7 @@ sub game_set {  # 各種ゲームモードの設定
         $sort_flg = 1;
         return('Game設定をデモンパラサイト/鬼御魂に設定しました');
     }
-    elsif($tnick =~ /((Parasite\s*Blood)|(PB))$/i) {
+    elsif($tnick =~ /(^|\s)((Parasite\s*Blood)|(PB))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "ParasiteBlood";
         $modeflg = 2;
@@ -7701,17 +9966,17 @@ sub game_set {  # 各種ゲームモードの設定
         $sort_flg = 1;
         return('Game設定をパラサイトブラッドに設定しました');
     }
-    elsif($tnick =~ /((Gun[\s]*Dog)|(GD))$/i) {
+    elsif($tnick =~ /(^|\s)((Gun[\s]*Dog)|(GD))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Gundog";
         return('Game設定をガンドッグに設定しました');
     }
-    elsif($tnick =~ /((Gun[\s]*Dog[\s]*Zero)|(GDZ))$/i) {
+    elsif($tnick =~ /(^|\s)((Gun[\s]*Dog[\s]*Zero)|(GDZ))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "GundogZero";
         return('Game設定をガンドッグゼロに設定しました');
     }
-    elsif($tnick =~ /((Tunnels[\s]*&[\s]*Trolls)|(TuT))$/i) {
+    elsif($tnick =~ /(^|\s)((Tunnels[\s]*&[\s]*Trolls)|(TuT))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Tunnels & Trolls";
         $modeflg = 2;
@@ -7719,58 +9984,40 @@ sub game_set {  # 各種ゲームモードの設定
         $double_up = 1;
         return('Game設定をトンネルズ＆トロールズに設定しました');
     }
-    elsif($tnick =~ /((Nightmare[\s]*Hunter[=\s]*Deep)|(NHD))$/i) {
+    elsif($tnick =~ /(^|\s)((Nightmare[\s]*Hunter[=\s]*Deep)|(NHD))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "NightmareHunterDeep";
         $modeflg = 2;
         $sort_flg = 1;
         return('Game設定をナイトメアハンター・ディープに設定しました');
     }
-    elsif($tnick =~ /((War[\s]*Hammer(FRP)?)|(WH))$/i) {
+    elsif($tnick =~ /(^|\s)((War[\s]*Hammer(FRP)?)|(WH))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Warhammer";
         $modeflg = 2;
         $round_flg = 1;
         return('Game設定をウォーハンマーFRPに設定しました');
     }
-    elsif($tnick =~ /((Phantasm[\s]*Adventure)|(PA))$/i) {
+    elsif($tnick =~ /(^|\s)((Phantasm[\s]*Adventure)|(PA))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "PhantasmAdventure";
         $modeflg = 2;
         return('Game設定をファンタズムアドベンチャーに設定しました');
     }
-    elsif($tnick =~ /((Chaos[\s]*Flare)|(CF))$/i) {
+    elsif($tnick =~ /(^|\s)((Chaos[\s]*Flare)|(CF))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Chaos Flare";
-        @card_val = ('0',
-        'S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13',
-        's1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13',
-        'H1','H2','H3','H4','H5','H6','H7','H8','H9','H10','H11','H12','H13',
-        'h1','h2','h3','h4','h5','h6','h7','h8','h9','h10','h11','h12','h13',
-        'D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13',
-        'd1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12','d13',
-        'C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13',
-        'c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13',
-        'J1','J2','J3','J4',
-            );
-        @card_re = @card_val;
-        $CARD_MAX = (scalar @card_val) - 1;
-        $card_m = $CARD_MAX;
-        $card_buried = 0;
-        undef %deal_cards;
-        %deal_cards = ('card_played' => '');
-        $card_place = 0;    #手札の他のカード置き場
-        $can_tap = 0;       #場札のタップ処理の必要があるか？
+#削除(カード関連処理)
         return('Game設定をカオスフレアに設定しました');
     }
-    elsif($tnick =~ /((Cthulhu[\s]*Tech)|(CT))$/i) {
+    elsif($tnick =~ /(^|\s)((Cthulhu[\s]*Tech)|(CT))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "CthulhuTech";
         $modeflg = 2;
         $sort_flg = 1;
         return('Game設定をクトゥルフ・テックに設定しました');
     }
-    elsif($tnick =~ /((Tokumei[\s]*Tenkousei)|(ToT))$/i) {
+    elsif($tnick =~ /(^|\s)((Tokumei[\s]*Tenkousei)|(ToT))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "TokumeiTenkousei";
         $modeflg = 2;
@@ -7779,7 +10026,7 @@ sub game_set {  # 各種ゲームモードの設定
         $double_type = 2;
         return('Game設定を特命転攻生に設定しました');
     }
-    elsif($tnick =~ /((Shinobi[\s]*Gami)|(SG))$/i) {
+    elsif($tnick =~ /(^|\s)((Shinobi[\s]*Gami)|(SG))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "ShinobiGami";
         $modeflg = 2;
@@ -7787,7 +10034,7 @@ sub game_set {  # 各種ゲームモードの設定
         $d66_on = 2;
         return('Game設定を忍神に設定しました');
     }
-    elsif($tnick =~ /((Double[\s]*Cross)|(DX))/i) {
+    elsif($tnick =~ /(^|\s)((Double[\s]*Cross)|(DX))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "DoubleCross";
         $modeflg = 2;
@@ -7798,7 +10045,7 @@ sub game_set {  # 各種ゲームモードの設定
         $max_dice = 1;      #最大値表示
         return('Game設定をダブルクロス3に設定しました');
     }
-    elsif($tnick =~ /((Sata[\s]*Supe)|(SS))/i) {
+    elsif($tnick =~ /(^|\s)((Sata[\s]*Supe)|(SS))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "Satasupe";
         $modeflg = 2;
@@ -7806,31 +10053,31 @@ sub game_set {  # 各種ゲームモードの設定
         $d66_on = 2;
         return('Game設定をサタスペに設定しました');
     }
-    elsif($tnick =~ /((Ars[\s]*Magica)|(AM))/i) {
+    elsif($tnick =~ /(^|\s)((Ars[\s]*Magica)|(AM))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "ArsMagica";
         $modeflg = 2;
         return('Game設定をArsMagicaに設定しました');
     }
-    elsif($tnick =~ /((Dark[\s]*Blaze)|(DB))/i) {
+    elsif($tnick =~ /(^|\s)((Dark[\s]*Blaze)|(DB))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "DarkBlaze";
         $modeflg = 2;
         return('Game設定をダークブレイズに設定しました');
     }
-    elsif($tnick =~ /((Night[\s]*Wizard)|(NW))/i) {
+    elsif($tnick =~ /(^|\s)((Night[\s]*Wizard)|(NW))$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "NightWizard";
         $modeflg = 2;
         return('Game設定をナイトウィザードに設定しました');
     }
-    elsif($tnick =~ /TORG/i) {
+    elsif($tnick =~ /(^|\s)(TORG)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "TORG";
         $modeflg = 2;
         return('Game設定をTORGに設定しました');
     }
-    elsif($tnick =~ /(hunters\s*moon|HM)/i) {
+    elsif($tnick =~ /(^|\s)(hunters\s*moon|HM)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "HuntersMoon";
         $modeflg = 2;
@@ -7839,7 +10086,7 @@ sub game_set {  # 各種ゲームモードの設定
         $round_flg = 1;     # 端数切り上げに設定
         return('Game設定をハンターズ・ムーンに設定しました');
     }
-    elsif($tnick =~ /(Meikyu\s*Kingdom|MK)/i) {
+    elsif($tnick =~ /(^|\s)(Meikyu\s*Kingdom|MK)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "MeikyuKingdom";
         $modeflg = 2;
@@ -7847,29 +10094,86 @@ sub game_set {  # 各種ゲームモードの設定
         $d66_on = 2;
         return('Game設定を迷宮キングダムに設定しました');
     }
-    elsif($tnick =~ /(Earth\s*Dawn|ED)/i) {
+    elsif($tnick =~ /(^|\s)(Earth\s*Dawn|ED)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "EarthDawn";
         $modeflg = 2;
         $sort_flg = 1;
         return('Game設定をEarthDawnに設定しました');
     }
-    elsif($tnick =~ /(Embryo\s*Machine|EM)/i) {
+    elsif($tnick =~ /(^|\s)(Embryo\s*Machine|EM)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "EmbryoMachine";
         $modeflg = 2;
         $sort_flg = 1;
         return('Game設定をエムブリオマシンに設定しました');
     }
-    elsif($tnick =~ /(Gehenna\s*An|GA)/i) {
+    elsif($tnick =~ /(^|\s)(Gehenna\s*An|GA)$/i) {
         &game_clear;        # 諸設定のクリア
         $game_type = "GehennaAn";
         $modeflg = 3;
         $sort_flg = 3;
-        return('Game設定をゲヘナ・アナスタシアに設定しました');
+        return('Game設定をゲヘナ・アナスタシスに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)((Magica[\s]*Logia)|(ML))$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "MagicaLogia";
+        $modeflg = 2;
+        $sort_flg = 3;
+        $d66_on = 2;
+        return('Game設定をマギカロギアに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)((Nechronica)|(NC))$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "Nechronica";
+        $suc_def = "6";      #目標値が空欄の時の目標値
+        $modeflg = 2;
+        $sort_flg = 3;
+        return('Game設定をネクロニカに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)(Meikyu\s*Days|MD)$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "MeikyuDays";
+        $modeflg = 2;
+        $sort_flg = 1;
+        $d66_on = 2;
+        return('Game設定を迷宮デイズに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)(Peekaboo|PK)$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "Peekaboo";
+        $modeflg = 2;
+        $sort_flg = 1;
+        $d66_on = 2;
+        $round_flg = 1;     # 端数切り上げに設定
+        return('Game設定をピーカブーに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)(Barna\sKronika|BK)$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "BarnaKronika";
+        $modeflg = 2;
+        $sort_flg = 3;
+#カード関連のため削除
+        $card_place = 0;    #手札の他のカード置き場
+        $can_tap = 0;       #場札のタップ処理の必要があるか？
+        return('Game設定をバルナ・クロニカに設定しました');
+    }
+    elsif($tnick =~ /(^|\s)(RokumonSekai2|RS2)$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "RokumonSekai2";
+        $modeflg = 2;
+        $sort_flg = 1;
+        return('Game設定を六門世界2nd.に設定しました');
+    }
+    elsif($tnick =~ /(^|\s)(Monotone(\s*)Musium|MM)$/i) {
+        &game_clear;        # 諸設定のクリア
+        $game_type = "MonotoneMusium";
+        $modeflg = 2;
+        $d66_on = 1;        #d66の差し替え
+        $sort_flg = 1;      #ソート設定
     }
 
-    elsif($tnick =~ /(None)$/i || $tnick eq "") {   # ゲーム設定を解除する
+    elsif($tnick =~ /(^|\s)(None)$/i || $tnick eq "") {   # ゲーム設定を解除する
         &game_clear;        # 諸設定のクリア
         $game_type = "";
         return('Game設定を解除しました');

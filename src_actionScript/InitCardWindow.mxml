@@ -30,12 +30,13 @@
       <mx:NumericStepper id="randomDungeonJorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
     </mx:HBox>
     
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="シャッフルして初期配置へ" click="execute()" enabled="true" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+    
+    <mx:Spacer height="100%" width="100%" />
   </mx:Box>
-  
-  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="シャッフルして初期配置へ" click="execute()" enabled="true" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
-  </mx:HBox>
   
   <mx:Script>
     <![CDATA[
@@ -53,7 +54,7 @@
     }
     
     //static private var cardTypeTrump:String = "trump_jorker3";
-    static private var cardTypeTrump:String = "trump_2";
+    static private var cardTypeTrump:String = "trump_swf";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
     
     static private function isTrump(cardType:String):Boolean {

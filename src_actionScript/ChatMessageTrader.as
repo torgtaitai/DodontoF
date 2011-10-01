@@ -165,6 +165,27 @@ package {
             return false;
         }
         
+        private function isOwnMessage(senderName:String, chatSenderUniqueId:String):Boolean {
+            //初回読み込みタイミングなら常に全メッセージ表示
+            if( DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever().isFirstChatRefresh() ) {
+                return false;
+            }
+            
+            if( senderName == systemMessageSenderName ) {
+                return false;
+            }
+            
+            if( senderName == "" ) {
+                return false;
+            }
+            
+            
+            return ( getOwnUniqueId() == chatSenderUniqueId );
+        }
+        
+        
+        //関数の戻り値は「リプレイログに保存できる、正しいメッセージかどうか」を示します。
+        //このため、自分自身の発言は画面に表示する処理を行いませんがtrueとみなします。
         public function addMessageToChatLogParts(channel:int,
                                                  senderName:String,
                                                  chatMessage:String,
@@ -177,20 +198,19 @@ package {
                                                  ):Boolean {
             Log.logging("addMessageToChatLog called");
             
-            //自分の発言が戻ってきた場合は表示無し
-            if( (senderName != systemMessageSenderName) && (senderName != "") ) {
-                if( getOwnUniqueId() == chatSenderUniqueId ) {
-                    Log.logging("it's own message");
-                    return false;
-                }
-            }
-            
             if( DodontoF_Main.getInstance().isReplayMode() ) {
                 if( ! isReplayChatMessage ) {
                     var messageData:Object = [channel, senderName, chatMessage, color, time, chatSenderUniqueId];
                     DodontoF_Main.getInstance().addRestChatMessageForReplay(messageData);
                     Log.logging("it's replay log.");
-                    return false;
+                    return true;
+                }
+            } else {
+                //リプレイモード以外（通常プレイ時）に自分の発言が戻ってきた場合は表示無し
+                if( isOwnMessage(senderName, chatSenderUniqueId) ) {
+                    Log.logging("it's own message");
+                    //でも自分の発言は正しい発言なのでtrue
+                    return true;
                 }
             }
             

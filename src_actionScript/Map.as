@@ -16,6 +16,11 @@ package {
     import flash.utils.getQualifiedClassName;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.display.Bitmap;
+    import flash.display.BitmapData;
+    import flash.geom.Matrix;
+    import net.hires.debug.Stats;
+    
     
     public class Map {
         
@@ -480,10 +485,15 @@ package {
             parent.addChild(baseLayer);
             
             cardLayer.x = 150;
+            cardLayer.alpha = 0.9;
             parent.addChild(cardLayer);
             initCardLayer();
             
             parent.addChild(frontLayer);
+        }
+        
+        public function addPaformanceMonitor():void {
+            overMapLayer.addChild( new Stats() );
         }
         
         public function getView():UIComponent {
@@ -634,6 +644,11 @@ package {
                 });
             
             setRulerEvent();
+        }
+        
+        public function stopDrag():void {
+            cardLayer.stopDrag();
+            baseLayer.stopDrag();
         }
         
         //centerといいながら、画面構成を鑑みて全体幅・高さの0.4倍の場所を中央と定義しています。
@@ -800,36 +815,45 @@ package {
             layer.graphics.endFill();
         }
         
+        private var gridPositionList:Vector.<Bitmap> = new Vector.<Bitmap>();
+        private var gridPosition:BitmapData = new BitmapData(50, 50, true, 0x00000000);
+        
         private function printGridPosition(xMax:int, yMax:int):void {
+            while( gridPositionList.length > 0 ) {
+                gridPositionLayer.removeChild(gridPositionList.shift());
+            }
+            
             gridPositionLayer.graphics.clear();
             
-            while( positionStrings.length > 0 ) {
-                var textField:TextField = positionStrings.pop();
-                gridPositionLayer.removeChild(textField);
-            }
-            
-            for(var x:int = 0 ; x < xMax ; x++) {
-                for(var y:int = 0 ; y < yMax ; y++) {
-                    var positionText:String = "" + (x + 1) + "-" + (y + 1);
-                    drawGridPositionString(gridPositionLayer, positionText, x * getSquareLength(), y * getSquareLength());
-                }
-            }
-        }
-        
-        private var positionStrings:Array = new Array();
-        
-        private function drawGridPositionString(layer:UIComponent, message:String, x:int, y:int):void {
             var textField:TextField = new TextField();
-            textField.autoSize = TextFieldAutoSize.CENTER;
-            textField.text = message;
+            textField.autoSize = TextFieldAutoSize.LEFT;
             textField.selectable = false;
             textField.textColor = gridColor;
             
-            positionStrings.push(textField);
+            var squareLength:int = getSquareLength();
+            var squareLengthHalf:int = squareLength / 2;
             
-            layer.addChild(textField);
-            textField.x = (x + (getSquareLength() / 2) - (textField.width / 2));
-            textField.y = (y + (getSquareLength() / 2) - (textField.height / 2));
+            var matrix:Matrix = new Matrix();
+            
+            for(var x:int = 0 ; x < xMax ; x++) {
+                for(var y:int = 0 ; y < yMax ; y++) {
+                    textField.text = "" + (x + 1) + "-" + (y + 1);
+                    
+                    matrix.tx = squareLengthHalf - (textField.width / 2);
+                    matrix.ty = squareLengthHalf - (textField.height / 2);
+                    
+                    var gridPositionClone:BitmapData = gridPosition.clone();
+                    gridPositionClone.draw(textField, matrix);
+                    
+                    var gridPositionBitmap:Bitmap = new Bitmap();
+                    gridPositionBitmap.bitmapData = gridPositionClone;
+                    gridPositionBitmap.x = x * squareLength;
+                    gridPositionBitmap.y = y * squareLength;
+                    
+                    gridPositionLayer.addChild( gridPositionBitmap );
+                    gridPositionList.push( gridPositionBitmap );
+                }
+            }
         }
         
         
@@ -928,15 +952,6 @@ package {
             //window.setPosition(point.x, point.y);
         }
         
-        /*
-        private function addStatusMarker(event:ContextMenuEvent):void {
-            var point:Point = menuClickPoint;
-            
-            var window:AddStatusMarkerWindow = DodontoF.popup(AddStatusMarkerWindow, false) as AddStatusMarkerWindow;
-            window.setPosition(point.x, point.y);
-        }
-        */
-        
         private function addDiceSymbol(event:ContextMenuEvent):void {
             DodontoF.popup(StockDiceSymbolWindow, false);
             /*
@@ -961,7 +976,6 @@ package {
             MovablePiece.addMenuItem(menu, "魔法タイマー追加", addMagicTimer);
             MovablePiece.addMenuItem(menu, "マップマスク追加", addMapMask);
             MovablePiece.addMenuItem(menu, "マップマーカー追加", addMapMarker);
-            //MovablePiece.addMenuItem(menu, "状態マーカー追加", addStatusMarker);
             MovablePiece.addMenuItem(menu, "ダイスシンボル追加", addDiceSymbol, true);
             
             overMapLayer.contextMenu = menu;

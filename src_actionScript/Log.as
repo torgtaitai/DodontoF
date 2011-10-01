@@ -148,6 +148,10 @@ package {
             }
         }
         
+        static public function printSystemLogPublic(logMessage:String):void {
+            printSystemLog(logMessage, ChatWindow.getInstance().publicChatChannel);
+        }
+        
         static private function printSystemLog(logMessage:String, channel:int):void {
             channel = ChatWindow.getInstance().changeChatChannelNumberForSystemLog(channel);
             

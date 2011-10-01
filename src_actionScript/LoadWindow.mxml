@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="430"
+   height="450"
    title="ロード" 
    showCloseButton="true"
    >
@@ -30,6 +30,7 @@
         <mx:CheckBox id="mapMask" label="マップマスク" />
         <mx:CheckBox id="mapMarker" label="マップマーカー" />
         <mx:CheckBox id="character" label="キャラクター" />
+        <mx:CheckBox id="characterWaitingRoom" label="キャラクター待合室" />
         <mx:CheckBox id="magicRangeMarker" label="魔法範囲" />
         <mx:CheckBox id="memo" label="共有メモ" />
         <mx:CheckBox id="standingGraphicInfos" label="立ち絵" />
@@ -71,6 +72,9 @@
         }
         if( character.selected ) {
             targets.push( Character.getTypeStatic() );
+        }
+        if( characterWaitingRoom.selected ) {
+            targets.push( "characterWaitingRoom" );
         }
         if( magicRangeMarker.selected ) {
             targets.push( MagicRange.getTypeStatic() );

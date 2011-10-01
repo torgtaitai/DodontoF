@@ -211,8 +211,7 @@ package {
             }
             
             if( (history.length == historyIndex) && (restChatMessageForReplay.length == 0) ) {
-                Log.loggingError("リプレイ再生を終了します。");
-                setPlayingState( false );
+                endPhase();
                 return;
             }
             
@@ -230,6 +229,21 @@ package {
             sleepTime /= replaySpeed;
             
             timeoutId = setTimeout(replayHistory, sleepTime, currentReplaySeekIndex);
+        }
+        
+        private function endPhase():void {
+            if( isRepeat() ) {
+                setPlayingState( false );
+                var startIndex:int = 1;
+                changeReplayPoint( startIndex );
+            } else {
+                Log.printSystemLogPublic("リプレイ再生を終了します。");
+                setPlayingState( false );
+            }
+        }
+        
+        private function isRepeat():Boolean {
+            return DodontoF_Main.getInstance().getDodontoF().isRepeat.selected;
         }
         
         public function stopTimer():void {
@@ -257,6 +271,7 @@ package {
         }
         
         public function beginChangeReplayPoint():void {
+            initChatSize();
             DodontoF_Main.getInstance().clearForReplay();
             
             var jsonData:Object = new Object();
@@ -274,6 +289,12 @@ package {
             analyzeForReplay(jsonData);
             replayHistory(replaySeekIndex)
             DodontoF_Main.getInstance().getDodontoF().replaySeekSlider.enabled = true;
+        }
+        
+        private function initChatSize():void {
+            var fontSize:int = 26;
+            var isReplayMode:Boolean = true;
+            ChatWindow.getInstance().setChatFontSize(fontSize, isReplayMode);
         }
         
         public function pauseAndPlay():void {
@@ -299,7 +320,7 @@ package {
                 return 0;
             }
             
-            DodontoF_Main.getInstance().getChatWindow().clearChatMessageLog();
+            DodontoF_Main.getInstance().getChatWindow().clearPublicChatMessageLog();
             DodontoF_Main.getInstance().getChatWindow()
                 .addMessageToChatLog(channel,
                                      messageData[1],

@@ -107,13 +107,13 @@ package {
             textLogBox.addChild(text);
         }
         
-        private function addTextToTextBox():void {
-            var chatMessageLogList:Array = chatWindow.getChatMessageLogList();
+        private function addPublicChannelTextToThisTextBox():void {
+            var chatMessageLogList:Array = chatWindow.getPublicChatMessageLogList();
             
             for(var i:int ; i < chatMessageLogList.length ; i++) {
                 var text:Text = chatMessageLogList[i] as Text;
                 try {
-                    chatWindow.chatMessageLogBox.removeChild( text );
+                    chatWindow.publicChatChannelBox.removeChild( text );
                     textLogBox.addChild(text);
                 } catch (e:Error) {
                 }
@@ -121,12 +121,12 @@ package {
         }
         
         private function removeTextFromTextBox():void {
-            var chatMessageLogList:Array = chatWindow.getChatMessageLogList();
+            var chatMessageLogList:Array = chatWindow.getPublicChatMessageLogList();
             for(var i:int = 0 ; i < chatMessageLogList.length ; i++) {
                 var text:Text = chatMessageLogList[i] as Text;
                 try {
                     textLogBox.removeChild(text);
-                    chatWindow.chatMessageLogBox.addNewTextBlock( text, true );
+                    chatWindow.publicChatChannelBox.addNewTextBlock( text, true );
                 }catch(e:Error) {
                 }
             }
@@ -176,10 +176,10 @@ package {
             }
             
             if( isNovelticMode ) {
-                var compressHeight:int = chatWindow.chatMessageLogBox.height - 2;
+                var compressHeight:int = chatWindow.publicChatChannelBox.height - 2;
                 compressForNovelticMode(true, compressHeight, isInit);
                 try {
-                    addTextToTextBox();
+                    addPublicChannelTextToThisTextBox();
                     setChatMessageLogBoxAlpha( textLogBox, 0.8 );
                     setTextBoxPosition();
                 }catch(e:Error){
@@ -205,6 +205,7 @@ package {
         }
         
         private function compressForNovelticMode(isCompress:Boolean, compressHeight:int, isInit:Boolean):void {
+            /*
             try {
                 chatWindow.setChatChannelVisible(ChatWindow.getInstance().publicChatChannel, ( ! isCompress ));
                 if( isCompress ) {
@@ -213,7 +214,8 @@ package {
                 chatWindow.validateNow();
             } catch (e:Error) {
             }
-            Log.loggingError("isCompress:" + isCompress);
+            */
+            Log.logging("isCompress:" + isCompress);
             //textLogBox.visible = true;
             return;
             ////////////////////////////////
@@ -227,8 +229,8 @@ package {
             }
             
             chatWindow.validateNow();
-            chatWindow.chatMessageLogBoxDivder.moveDivider(0, compressHeight * rate);
-            chatWindow.chatMessageLogBox.visible = ( ! isCompress );
+            chatWindow.publicChatChannelBoxDivder.moveDivider(0, compressHeight * rate);
+            chatWindow.publicChatChannelBox.visible = ( ! isCompress );
         }
         
         private function setChatMessageLogBoxAlpha(textLogBox:Box, alpha:Number):void {

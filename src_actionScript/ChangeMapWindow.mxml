@@ -47,6 +47,7 @@
     private var previewLoader:PreviewLoader = new PreviewLoader();
     
     override protected function setup():void {
+        imageSelecter.setTagDisplayVisible(true);
         imageSelecter.addPreview(previewLoader);
         
         var map:Map = DodontoF_Main.getInstance().getMap();
@@ -59,7 +60,7 @@
            
         checkBoxWhiteMap.selected = (mapImageUrl.text == "");
         mapImageUrl.enabled = (mapImageUrl.text != "");
-           
+        
         imageSelecter.setImageClickEventFunction(imageClickEvent);
         imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
         imageSelecter.setDefaultTags( [ImageTag.getMapTag(), ImageTag.getAllTag()] );
@@ -111,9 +112,37 @@
         
         previewLoader.loadImageWidthHeight(imageUrl, xCount, yCount, 6);
         previewLoader.drawGrid( gridColorPicker.selectedColor );
+        
+        setWidthHeigthFromImageUrlTagName(imageUrl);
     }
-
-
+    
+    private function setWidthHeigthFromImageUrlTagName(imageUrl:String):void {
+        var imageUrlOrg:String = Config.getInstance().getOriginalUrlString(imageUrl);
+        Log.logging("imageUrlOrg", imageUrlOrg);
+        
+        var tags:Array = imageSelecter.getTags(imageUrlOrg);
+        Log.logging("tags", tags);
+        
+        for each(var tag:String in tags) {
+                //ここで縦NN横MMの数値部分が全角でもOKに変換する
+                tag = Utils.changeZenkakuToHankakuOnDiceBot(tag);
+                
+                var result:Object = /^縦(\d+)横(\d+)$/.exec(tag);
+                if( result == null ) {
+                    continue;
+                }
+                
+                var heigth:int = parseInt(result[1]);
+                var width:int = parseInt(result[2]);
+                Log.logging("heigth", heigth);
+                Log.logging("width", width);
+                mapHeight.value = heigth;
+                mapWidth.value = width;;
+                break;
+            }
+    }
+    
+    
     private function checkWhiteMap():void {
         var isWhiteMap:Boolean = ( ! checkBoxWhiteMap.selected);
         mapImageUrl.enabled = isWhiteMap;

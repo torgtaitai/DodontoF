@@ -52,12 +52,17 @@ package {
         private var chatChannelNames:Array = Utils.clone(defaultChatChannelNames);
         private var canVisitValue:Boolean = false;
         
+        
         public function getPlayRoomName():String {
             return Utils.clone(playRoomName);
         }
         
         public function getPlayRoomPassword():String {
             return Utils.clone(playRoomPassword);
+        }
+        
+        public function getPlayRoomNumber():int {
+            return sender.getRoomNumber();
         }
         
         public function setPlayRoomPassword(pass:String):void {
@@ -77,11 +82,20 @@ package {
             return canVisitValue;
         }
         
+        
+        private var serverViewStateInfo:Object = null;
+        private var isServerViewStateNotInitialized:Boolean = true;
+        
         public function setPlayRoomInfo(local_playRoomName:String,
                                         local_chatChannelNames:Array,
                                         local_canUseExternalImageMode:Boolean,
-                                        local_canVisit:Boolean):void {
+                                        local_canVisit:Boolean,
+                                        gameType:String,
+                                        info:Object):void {
+            Log.logging("setPlayRoomInfo begin");
+            
             if( local_playRoomName == "" ) {
+                Log.logging("local_playRoomName is empty");
                 return;
             }
             
@@ -90,7 +104,84 @@ package {
             canUseExternalImageMode = local_canUseExternalImageMode;
             canVisitValue = local_canVisit;
             
+            setDiceBotGameType(gameType);
             setChatChannelNames(local_chatChannelNames);
+            
+            
+            if( info == null ) {
+                info = new Object();
+            }
+            
+            initServerViewStateInfo();
+            
+            Log.logging("serverViewStateInfo.key", serverViewStateInfo.key);
+            Log.logging("info.key", info.key);
+            Log.logging("isServerViewStateNotInitialized", isServerViewStateNotInitialized );
+            
+            if( (serverViewStateInfo.key != info.key) ||
+                isServerViewStateNotInitialized ) {
+                Log.logging("serverViewStateInfo.key is diff info.key");
+                setViewState(serverViewStateInfo, info);
+                isServerViewStateNotInitialized = false;
+            }
+        }
+        
+        private function setDiceBotGameType(gameType:String):void {
+            if( chatWindow == null ) {
+                return;
+            }
+            if( gameType == null ) {
+                return;
+            }
+            if( gameType == "" ) {
+                return;
+            }
+            
+            chatWindow.setDiceBotGameType(gameType);
+            Log.logging("setGame", gameType);
+        }
+        
+        private function setViewState(serverViewStateInfo:Object, info:Object):void {
+            Log.logging("has diff! info.key", info.key);
+            Log.logging("serverViewStateInfo.key", serverViewStateInfo.key);
+            try {
+                serverViewStateInfo = info;
+                if( serverViewStateInfo == null ) {
+                    serverViewStateInfo = new Object();
+                }
+                
+                Config.getInstance().loadViewStateInfo(serverViewStateInfo);
+                Config.getInstance().saveInfo(serverViewStateInfo_saveKey, serverViewStateInfo);
+            } catch(e:Error) {
+                Log.loggingException("DodontoF_Main.loadViewStateInfo()", e);
+            }
+        }
+        
+        private var serverViewStateInfo_saveKey:String = "serverViewStateInfo_saveKey";
+        
+        private function initServerViewStateInfo():void {
+            Log.logging("initServerViewStateInfo begin");
+            
+            if( serverViewStateInfo != null ) {
+                Log.logging("serverViewStateInfo is NOT null", serverViewStateInfo);
+                return;
+                
+            }
+            
+            Log.logging("serverViewStateInfo is null");
+            
+            serverViewStateInfo = Config.getInstance().loadInfo(serverViewStateInfo_saveKey);
+            Log.logging("serverViewStateInfo from loadInfo", serverViewStateInfo);
+            
+            if( serverViewStateInfo == null ) {
+                serverViewStateInfo = new Object();
+            }
+        }
+        
+        
+        public function getServerViewStateInfo():Object {
+            initServerViewStateInfo();
+            return serverViewStateInfo;
         }
         
         private function setChatChannelNames(names:Array):void {
@@ -215,9 +306,11 @@ package {
                 return new SharedDataSenderForGoogleWave();
             }
             */
+            /*
             if( Config.isGaeJava() ) {
                 return new SharedDataSenderForGaeJava();
             }
+            */
             return new SharedDataSender();
         }
         
@@ -301,12 +394,9 @@ package {
             }
             
             hideForTiny(characterWindow.otherInfos);
-            hideForTiny(characterWindow.characterImageUrlItem);
-            hideForTiny(characterWindow.underNameBox);
             hideForTiny(characterWindow.characterSizeBox);
             hideForTiny(characterWindow.hideCheckBox);
             characterWindow.height = 400;
-            characterWindow.inputBox.height = 80;
         }
         
         public function initWindowForTiny():void {
@@ -633,7 +723,7 @@ package {
             
             chatWindow.nameBox.height = 0;
             chatWindow.chatControlBox.height = 0;
-            chatWindow.chatMessageLogBox.percentHeight = 100;
+            chatWindow.publicChatChannelBox.percentHeight = 100;
             
             var isReplayMode:Boolean = true;
             var chatFontSizeForReplayMode:int = 30;//40;
@@ -757,6 +847,7 @@ package {
         public function setDiceBoxVisible(v:Boolean):void {
             diceBox.setVisibleState(v);
         }
+        
         
         public function replayFromDataUrl(url:String):void {
             setReplayMode();
@@ -894,6 +985,7 @@ package {
             
             if( isMentenanceModeOn ) {
                 dodontoF.mentenanceModeButton.visible = true;
+                dodontoF.mentenanceModeButton.width = 80;
             }
             dodontoF.mentenanceModeButton.selected = isMentenanceModeOn;
         }
@@ -908,7 +1000,6 @@ package {
         
         public function initForFirstRefresh():void {
             chatWindow.initForFirstRefresh(isWelcomeMessageOn);
-            Config.getInstance().loadViewStateInfo();
             dodontoF.findMainMenuItem("pass_display").enabled = true;
         }
         
@@ -971,22 +1062,25 @@ package {
 
     {label:"表示", data:"pass_display", enabled:"true",
      children: [
-        {label:"表示状態初期化", data:"initLocalSaveData"},
+        {label:"チャットパレット表示", data:"isChatPaletteVisible", type:"check", toggled:false},
         {type:"separator"},
-        {label:"マス目にキャラクターを合わせる", data:"isSnapMovablePiece", type:"check", toggled:true},
-        {label:"立ち絵のサイズを自動調整する", data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
-        {type:"separator"},
+        
         {label:"チャット表示", data:"isChatVisible", type:"check", toggled:true},
         {label:"ダイス表示", data:"isDiceVisible", type:"check", toggled:true},
         {label:"イニシアティブ表示", data:"isInitiativeListVisible", type:"check", toggled:true},
-        {label:"チャットパレット表示", data:"isChatPaletteVisible", type:"check", toggled:false},
+        {type:"separator"},
         
-        {label:"カード表示", data:"isCardVisible", type:"check", toggled:false},
         {label:"立ち絵表示", data:"isStandingGraphicVisible", type:"check", toggled:true},
-        {label:"マップ表示", data:"isMapVisible", type:"check", toggled:true},
         {label:"座標表示", data:"isPositionVisible", type:"check", toggled:true},
-        {label:"マップのマス目表示", data:"isGridVisible", type:"check", toggled:true}
-        //{label:"キャラクターの向き表示", data:"isDirectionVisible", type:"check", toggled:false}
+        {label:"マス目表示", data:"isGridVisible", type:"check", toggled:true},
+        {type:"separator"},
+        
+        {label:"マス目にキャラクターを合わせる", data:"isSnapMovablePiece", type:"check", toggled:true},
+        {label:"立ち絵のサイズを自動調整する", data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
+        {type:"separator"},
+        
+        {label:"表示状態初期化", data:"initLocalSaveData"}
+        
                 ]},
     
     {label:"コマ", data:"pass",
@@ -995,16 +1089,16 @@ package {
         {label:"魔法範囲追加(D&D3版)", data:"addMagicRange"},
         {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
         {label:"魔法タイマー追加", data:"addMagicTimer"},
-        {label:"墓場", data:"graveyard"},
-        /*
         {type:"separator"},
+        {label:"墓場", data:"graveyard"},
         {label:"キャラクター待合室", data:"characterWaitingRoom"},
-        */
                 ]},
     
-    {label:"カード", data:"pass",
+    {label:"カード", data:"pass_card",
      children: [
-        {label:"カード初期化画面を開く", data:"openInitCardWindow"}
+        {label:"カード表示", data:"isCardVisible", type:"check", toggled:false},
+        {type:"separator"},
+        {label:"カード配置の初期化", data:"openInitCardWindow"}
                 ]},
     
     {label:"マップ", data:"pass",
@@ -1022,6 +1116,7 @@ package {
         {label:"ファイルアップローダー", data:"imageFileUploader"},
         //{label:"URLアップローダー", data:"imageUrlUploader"},
         {label:"WEBカメラ撮影", data:"webcameraCaptureUploader"},
+        {type:"separator"},
         {label:"タグ編集", data:"openImageTagManager"},
         {label:"画像削除", data:"deleteImage"}
                 ]},
@@ -1035,8 +1130,8 @@ package {
                        ]
             },
     
-    /*
-    ,{label:"ログ", data:"pass", 
+    //    /*
+    {label:"ログ", data:"pass", 
      children: [
         {label:"initLogWindow", data:"initLogWindow"}, 
         {type:"separator"}, 
@@ -1045,7 +1140,7 @@ package {
         {label:"errorLog", data:"errorLog"}, 
         {label:"fatalErrorLog", data:"fatalErrorLog"} 
                 ]} 
-     */
+    //     */
                     ];
         }
 	}

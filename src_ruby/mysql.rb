@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 TOMITA Masahiro
+# Copyright (C) 2008-2011 TOMITA Masahiro
 # mailto:tommy@tmtm.org
 
 # MySQL connection class.
@@ -16,7 +16,7 @@ class Mysql
   require "#{dir}/mysql/charset"
   require "#{dir}/mysql/protocol"
 
-  VERSION            = 20900               # Version number of this library
+  VERSION            = 20904               # Version number of this library
   MYSQL_UNIX_PORT    = "/tmp/mysql.sock"   # UNIX domain socket filename
   MYSQL_TCP_PORT     = 3306                # TCP socket port number
 
@@ -106,9 +106,13 @@ class Mysql
   # flag   :: [Integer / nil] connection flag. Mysql::CLIENT_* ORed
   # === Return
   # self
-  def connect(host=nil, user=nil, passwd=nil, db=nil, port=nil, socket=nil, flag=nil)
+  def connect(host=nil, user=nil, passwd=nil, db=nil, port=nil, socket=nil, flag=0)
+    if flag & CLIENT_COMPRESS != 0
+      warn 'unsupported flag: CLIENT_COMPRESS'
+      flag &= ~CLIENT_COMPRESS
+    end
     @protocol = Protocol.new host, port, socket, @connect_timeout, @read_timeout, @write_timeout
-    @protocol.authenticate user, passwd, db, (@local_infile ? CLIENT_LOCAL_FILES : 0), @charset
+    @protocol.authenticate user, passwd, db, (@local_infile ? CLIENT_LOCAL_FILES : 0) | flag, @charset
     @charset ||= @protocol.charset
     @host_info = (host.nil? || host == "localhost") ? 'Localhost via UNIX socket' : "#{host} via TCP/IP"
     query @init_command if @init_command
@@ -120,6 +124,15 @@ class Mysql
   def close
     if @protocol
       @protocol.quit_command
+      @protocol = nil
+    end
+    return self
+  end
+
+  # Disconnect from mysql without QUIT packet.
+  def close!
+    if @protocol
+      @protocol.close
       @protocol = nil
     end
     return self
@@ -258,6 +271,7 @@ class Mysql
   # === Return
   # [String] server version
   def server_info
+    check_connection
     @protocol.server_info
   end
   alias get_server_info server_info
@@ -265,6 +279,7 @@ class Mysql
   # === Return
   # [Integer] server version
   def server_version
+    check_connection
     @protocol.server_version
   end
   alias get_server_version server_version
@@ -287,6 +302,7 @@ class Mysql
   # === Return
   # self
   def kill(pid)
+    check_connection
     @protocol.kill_command pid
     self
   end
@@ -314,6 +330,7 @@ class Mysql
   # === Example
   #  my.query("select 1,NULL,'abc'").fetch  # => [1, nil, "abc"]
   def query(str, &block)
+    check_connection
     @fields = nil
     begin
       nfields = @protocol.query_command str
@@ -348,6 +365,7 @@ class Mysql
   # === Return
   # [Mysql::Result]
   def store_result
+    check_connection
     raise ClientError, 'invalid usage' unless @result_exist
     res = Result.new @fields, @protocol
     @server_status = @protocol.server_status
@@ -359,6 +377,7 @@ class Mysql
   # === Return
   # [Integer] Thread ID
   def thread_id
+    check_connection
     @protocol.thread_id
   end
 
@@ -373,6 +392,7 @@ class Mysql
   # === Return
   # self
   def set_server_option(opt)
+    check_connection
     @protocol.set_option_command opt
     self
   end
@@ -388,6 +408,7 @@ class Mysql
   # true if next query exists.
   def next_result
     return false unless more_results
+    check_connection
     @fields = nil
     nfields = @protocol.get_result
     if nfields
@@ -423,6 +444,7 @@ class Mysql
   # === Return
   # [Mysql::Result]
   def list_fields(table, field=nil)
+    check_connection
     begin
       fields = @protocol.field_list_command table, field
       return Result.new fields
@@ -437,6 +459,7 @@ class Mysql
   # === Return
   # [Mysql::Result]
   def list_processes
+    check_connection
     @fields = @protocol.process_info_command
     @result_exist = true
     store_result
@@ -459,6 +482,7 @@ class Mysql
   # === Return
   # self
   def ping
+    check_connection
     @protocol.ping_command
     self
   end
@@ -469,6 +493,7 @@ class Mysql
   # === Return
   # self
   def refresh(op)
+    check_connection
     @protocol.refresh_command op
     self
   end
@@ -492,6 +517,7 @@ class Mysql
   # === Return
   # self
   def shutdown(level=0)
+    check_connection
     @protocol.shutdown_command level
     self
   end
@@ -499,7 +525,7 @@ class Mysql
   # === Return
   # [String] statistics message
   def stat
-    @protocol.statistics_command
+    @protocol ? @protocol.statistics_command : 'MySQL server has gone away'
   end
 
   # Commit transaction
@@ -526,6 +552,12 @@ class Mysql
   def autocommit(flag)
     query "set autocommit=#{flag ? 1 : 0}"
     self
+  end
+
+  private
+
+  def check_connection
+    raise ClientError::ServerGoneError, 'The MySQL server has gone away' unless @protocol
   end
 
   # Field class

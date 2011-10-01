@@ -6,12 +6,6 @@ package {
     public class ChangeCharacterWindow extends CharacterWindow {
         import mx.managers.PopUpManager;
         
-        private static var character:Character;
-        
-        public static function setCharacter(character_:Character):void {
-            character = character_;
-        }
-        
         protected override function isLoadInitImageList():Boolean {
             return false;
         }
@@ -30,20 +24,23 @@ package {
             isHide.selected = character.isHideMode();
             characterInitiative.value = Utils.getInitiativeInt(character.getInitiative());
             characterInitiativeModify.value = Utils.getInitiativeModify(character.getInitiative());
-            characterInfo.text = character.getInfo();
+            characterOtherInfo.text = character.getInfo();
+            statusAlias = character.getStatusAlias();
             
-            initCounterValues(character);
+            initCounterValues();
             
             printPreview();
         }
         
         
-        public override function setCharacter(name:String,
+        public override function sendCharacterData(name:String,
                                               imageUrl:String,
                                               size:int, isHide:Boolean,
                                               initiative:Number,
                                               info:String,
-                                              counters:Object):void {
+                                              counters:Object, 
+                                              statusAlias:Object):void {
+            Log.logging("statusAlias", statusAlias);
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
@@ -54,7 +51,8 @@ package {
                                            isHide,
                                            initiative,
                                            info,
-                                           counters);
+                                           counters,
+                                           statusAlias);
         }
     }
 }

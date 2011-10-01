@@ -24,7 +24,6 @@ package {
         protected var imageUrl:String = "";
         protected var size:int = 1;
         private var isHide:Boolean = false;
-        private var rotation:int = 0;
         private var dogTag:String = "";
         
         private var dogTagTextField:TextField = new TextField();
@@ -48,6 +47,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "キャラクター";
+        }
+        
         
         public static function getJsonData(name:String,
                                            imageUrl:String,
@@ -55,28 +58,26 @@ package {
                                            isHide:Boolean,
                                            initiative:Number,
                                            info:String,
-                                           rotation:int,
+                                           rotation:Number,
                                            characterPositionX:int,
                                            characterPositionY:int,
-                                           dogTag:String):Object {
-            var characterJsonData:Object = {
-                "name": name,
-                "imageName": imageUrl,
-                "size": size,
-                "isHide": isHide,
-                "initiative": initiative,
-                "info": info,
-                "rotation": rotation,
-                "dogTag":dogTag,
-                
-                "imgId": "0",
-                "type": getTypeStatic(),
-                "x": characterPositionX,
-                "y": characterPositionY,
-                "draggable": true
-            };
+                                           dogTag:String,
+                                           counters:Object,
+                                           statusAlias:Object):Object {
             
-            return characterJsonData;
+            var draggable:Boolean = true;
+            var jsonData:Object = 
+                InitiativedMovablePiece.getJsonData(getTypeStatic(),
+                                                    name, initiative, info, counters, statusAlias,
+                                                    characterPositionX, characterPositionY,
+                                                    draggable, rotation);
+            
+            jsonData.imageName = imageUrl;
+            jsonData.size = size;
+            jsonData.isHide = isHide;
+            jsonData.dogTag = dogTag;
+            
+            return jsonData;
         }
         
         override public function getJsonData():Object {
@@ -85,14 +86,9 @@ package {
             jsonData.imageName = getImageUrl();
             jsonData.size = getSize();
             jsonData.isHide = isHideMode();
-            jsonData.rotation = getRotation();
             jsonData.dogTag = this.dogTag;
             
             return jsonData;
-        }
-        
-        public function getRotation():int {
-            return rotation;
         }
         
         public function setImageUrl(url_:String):void {
@@ -123,12 +119,27 @@ package {
             this.imageUrl = params.imageName;
             this.size = params.size;
             this.isHide = params.isHide;
-            this.rotation = params.rotation;
             setDogTag( params.dogTag );
             
             thisObj = this;
             
             setNameTag();
+        }
+        
+        override protected function canRotate():Boolean {
+            return true;
+        }
+        
+        override public function getOwnWidth():int {
+            return getWidth() * getSquareLength();
+        }
+        
+        override public function getOwnHeight():int {
+            return getHeight() * getSquareLength();
+        }
+        
+        public function getView():ImageSprite {
+            return view;
         }
         
         public function getImageUrl():String {
@@ -168,17 +179,20 @@ package {
             menu.hideBuiltInItems();
             
             addMenuItem(menu, "キャラクターの変更", thisObj.getItemPopUpChangeWindow);
+            /*
             addMenuItem(menu, "右90度回転", thisObj.getContextMenuItemFunctionObRotateCharacter( 90), true);
             addMenuItem(menu, "180度回転",  thisObj.getContextMenuItemFunctionObRotateCharacter(180));
             addMenuItem(menu, "左90度回転", thisObj.getContextMenuItemFunctionObRotateCharacter(-90));
             addMenuItem(menu,  "−＞ 少し右に傾ける",    thisObj.getContextMenuItemFunctionObRotateCharacter( 30), true);
             addMenuItem(menu,  "＜− 少し左に傾ける",    thisObj.getContextMenuItemFunctionObRotateCharacter(-30));
+            */
             addMenuItem(menu, "キャラクターの削除", thisObj.getContextMenuItemRemoveCharacter, true);
             
             //view.contextMenu = menu;
             view.setContexMenu(menu);
         }
         
+        /*
         protected function getContextMenuItemFunctionObRotateCharacter(rotationDiff:Number):Function {
             return function(event:ContextMenuEvent):void {
                 var rotation:Number = thisObj.rotation;
@@ -190,17 +204,14 @@ package {
                 sender.changeCharacter( thisObj.getJsonData() );
             };
         }
+        */
         
         override public function popUpChangeWindow():void {
             try {
-                Log.logging("contextmenuevent character change.");
-                ChangeCharacterWindow.setCharacter(this);
-                Log.logging("DodontoF.popup(ChangeCharacterWindow, true);");
-                
                 var characterWindow:CharacterWindow = DodontoF.popup(ChangeCharacterWindow, true) as CharacterWindow;
-                DodontoF_Main.getInstance().setCharacterWindow(characterWindow);
+                characterWindow.setCharacter(this);
                 
-                Log.logging("contextmenuevent character changeend");
+                DodontoF_Main.getInstance().setCharacterWindow(characterWindow);
             } catch(e:Error) {
                 Log.loggingExceptionDebug("Character.popUpChangeWindow()", e);
             }
@@ -210,12 +221,110 @@ package {
             return true;
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             if( this.isHide ) {
                 return getMap().getHideCharacterLayer();
             }
             
             return getMap().getCharacterLayer();
+        }
+        
+        
+        override protected function mouseDownEvent(event:MouseEvent):void {
+            //キャラクター待合室を開いてるなら待合室へのドラッグ処理に差し替え
+            if( CharacterWaitingRoomWindow.isOpened() ) {
+                CharacterWaitingRoomWindow.getInstance().dragEvent(event, thisObj);
+                return;
+            }
+            
+            //Ctrlキーを押しながらのクリックで一括削除用の選択<->選択解除へ。
+            //一度でもCtrlキーを離してキャラクターをクリックしたら解除へ。
+            if( event.ctrlKey ) {
+                clickCharacterForBatchDelete();
+                return;
+            }
+            unSelectAllCharacters();
+            
+            super.mouseDownEvent(event);
+        }
+        
+        static private var charactersForBatchDelete:Array = new Array();
+        
+        public function clickCharacterForBatchDelete():void {
+            if( isInclude(charactersForBatchDelete, this) ) {
+                unSelectCharacterForBatchDelete();
+            } else {
+                selectCharacterForBatchDelete();
+            }
+        }
+        
+        private function isInclude(array:Array, target:Object):Boolean {
+            for(var i:int = 0 ; i < array.length ; i++) {
+                if( array[i] == target ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private function selectCharacterForBatchDelete():void {
+            charactersForBatchDelete.push(this);
+            var color:int = 0xFF4500;
+            changeSelectedColor(color);
+        }
+        
+        public function changeSelectedColor(color:int = -1):void {
+            view.setRoundColor(color);
+            //view.setBackGroundColor(color);
+            view.setLineColor(color);
+            loadViewImage();
+        }
+        
+        private function unSelectCharacterForBatchDelete():void {
+            deleteFromArray(charactersForBatchDelete, this);
+            this.changeSelectedColor();
+        }
+        
+        public function unSelectAllCharacters():void {
+            while( charactersForBatchDelete.length > 0 ) {
+                var character:Character = charactersForBatchDelete.pop();
+                character.changeSelectedColor();
+            }
+        }
+        
+        private function deleteFromArray(array:Array, target:Object):void {
+            var index:int = -1;
+            
+            for(var i:int = 0 ; i < array.length ; i++) {
+                if( array[i] == target ) {
+                    index = i;
+                }
+            }
+            
+            if( index != -1 ) {
+                array.splice(index, 1);
+            }
+        }
+        
+        override public function sendDelete():void {
+            if( charactersForBatchDelete.length == 0 ) {
+                super.sendDelete();
+            } else {
+                sendDeleteBatch();
+            }
+        }
+        
+        private function sendDeleteBatch():void {
+            Log.logging("sendDeleteBatch begin");
+            
+            sender.removeCharacters(charactersForBatchDelete);
+            
+            while( charactersForBatchDelete.length > 0 ) {
+                var character:Character = charactersForBatchDelete.pop();
+                character.deleteFromMap();
+            }
+            
+            Log.logging("sendDeleteBatch end");
         }
         
         override protected function update(params:Object):void {
@@ -228,7 +337,6 @@ package {
             this.imageUrl = params.imageName;
             this.size = params.size;
             setHide( params.isHide );
-            setRotation( params.rotation );
             setDogTag( params.dogTag );
             
             loadViewImage();
@@ -240,56 +348,36 @@ package {
             Log.loggingTuning("=>analyzeChangedCharacterChanged Characteris changed End");
         }
         
-        static private var allMarkerImageUrls:Array
-            = [
-               "./image/statusMarker/mark0.png",
-               "./image/statusMarker/mark1.png",
-               "./image/statusMarker/mark2.png",
-               "./image/statusMarker/mark3.png",
-               "./image/statusMarker/mark4.png",
-               "./image/statusMarker/mark5.png",
-               "./image/statusMarker/mark6.png",
-               "./image/statusMarker/mark7.png",
-               "./image/statusMarker/mark8.png",
-               "./image/statusMarker/mark9.png",
-               "./image/statusMarker/mark10.png",
-               "./image/statusMarker/mark11.png",
-               ];
+        private var statusMarkerIndexs:Array = [];
+        private var statusMarkerWidth:int = 0;
         
         private function updateStatusMarker():void {
             if( view == null ) {
                 return;
             }
             
-            var newMarkerImageUrls:Array = getNewMarkerImageUrls();
+            var newStatusMarkerIndexs:Array = getNewMarkerImageIndexs();
+            var newStatusMarkerWidth:int = (getOwnWidth() / 5) + 1;
             
-            if( isSameArray(newMarkerImageUrls, statusMarkerUrls) ) {
-                return;
-            }
-            
-            refreshMarkerImage(newMarkerImageUrls);
-        }
-        
-        private function isSameArray(array1:Array, array2:Array):Boolean {
-            if( array1.length != array2.length ) {
-                return false;
-            }
-            
-            for(var i:int = 0 ; i < array1.length ; i++) {
-                if( array1[i] != array2[i] ) {
-                    return false;
+            if( newStatusMarkerWidth == statusMarkerWidth ) {
+                if( Utils.isSameArray(newStatusMarkerIndexs, statusMarkerIndexs) ) {
+                    return;
                 }
             }
+            Log.logging("newMarkerIndexs has diff refreshing...");
             
-            return true;
+            refreshMarkerImage(newStatusMarkerIndexs, newStatusMarkerWidth);
+            statusMarkerIndexs = newStatusMarkerIndexs;
+            statusMarkerWidth = newStatusMarkerWidth;
         }
         
-        private function getNewMarkerImageUrls():Array {
-            var newMarkerImageUrls:Array = [];
+        
+        private function getNewMarkerImageIndexs():Array {
+            var newMarkerIndexs:Array = [];
             
             var infos:Array = getStatusInfos();
             for(var i:int = 0 ; i < infos.length ; i++) {
-                if( i >= allMarkerImageUrls.length ) {
+                if( i >= StatusMarkerInfo.getInstance().length() ) {
                     break;
                 }
                 
@@ -301,42 +389,37 @@ package {
                     continue;
                 }
                 
-                var imageUrl:String = allMarkerImageUrls[i];
-                imageUrl = Config.getInstance().getUrlString(imageUrl);
-                
-                newMarkerImageUrls.push(imageUrl);
+                newMarkerIndexs.push(i);
             }
             
-            return newMarkerImageUrls;
+            return newMarkerIndexs;
         }
         
         private var statusMarkerBase:UIComponent = null;
-        private var statusMarkerUrls:Array = [];
         
-        private function refreshMarkerImage(newMarkerImageUrls:Array):void {
+        private function refreshMarkerImage(newMarkerIndexs:Array, width:int):void {
             if( statusMarkerBase != null ) {
-                view.removeChild( statusMarkerBase );
+                view.removeChildInner( statusMarkerBase );
             }
             
             statusMarkerBase = new UIComponent();
-            statusMarkerUrls = [];
             
-            for each(var imageUrl:String in newMarkerImageUrls) {
+            for(var i:int = 0 ; i < newMarkerIndexs.length ; i++) {
+                var newMarkerIndex:int = newMarkerIndexs[i];
                 var marker:Image = new Image();
-                marker.source = imageUrl;
-                marker.width = 11;
-                marker.height = 11;
+                marker.source = StatusMarkerInfo.getInstance().getMarker(newMarkerIndex);
+                marker.width = width;
+                marker.height = width;
                 
-                var markerIndex:int = statusMarkerUrls.length;
-                marker.x = (markerIndex % 5) * marker.width - 2;
+                var index:int = i;
+                marker.x = (index % 5) * marker.width - 2;
                 marker.y = (this.getHeight() * Map.getSquareLength())
-                    - ((Math.floor(markerIndex / 5) + 1) * marker.height) + 2;
+                    - ((Math.floor(index / 5) + 1) * marker.height) + 2;
                 
                 statusMarkerBase.addChild(marker);
-                statusMarkerUrls.push(imageUrl);
             }
             
-            view.addChild( statusMarkerBase );
+            view.addChildInner( statusMarkerBase );
         }
         
         private function setDogTag(dogTag_:String):void {
@@ -350,21 +433,22 @@ package {
             nameTextField.text = getName();
         }
         
-        private function loadViewImage():void {
+        override public function loadViewImage():void {
             view.loadImageWidthHeightRotation(this.name, this.imageUrl,
                                               this.size, this.size,
-                                              this.rotation);
+                                              getRotation());
+            
+            super.loadViewImage();
         }
         
         private function setCenterTextFields():void {
-            setCenterTextFieldXPosition(nameTextField);
+            var width:int = getWidth() * getSquareLength();
+            setCenterTextFieldXPosition(nameTextField, width);
             
-            //dogTagTextField = getDogTagTextField(this.dogTag);
             setLeftBottomTextFieldPosition(dogTagTextField);
         }
         
-        private function setCenterTextFieldXPosition(textField:TextField):void {
-            var width:int = getWidth() * getSquareLength();
+        static private function setCenterTextFieldXPosition(textField:TextField, width:Number):void {
             textField.x = ( (1.0 * width / 2) - (textField.width / 2) );
             textField.alpha = 0.7;
         }
@@ -393,18 +477,16 @@ package {
             initDogTag();
         }
         
-        private function initName():void {
-            
+        static public function initNameTextField(textField:TextField, width:Number):void {
             var textHeight:int = 18;
-            nameTextField.y = (textHeight * -1);
-            nameTextField.height = textHeight;
-            setCenterTextFields();
-            
-            /*
-            var format:TextFormat = new TextFormat();
-            format.size=12;
-            nameTextField.setTextFormat(format);
-            */
+            textField.y = (textHeight * -1);
+            textField.height = textHeight;
+            setCenterTextFieldXPosition(textField, width);
+        }
+        
+        private function initName():void {
+            var width:int = getWidth() * getSquareLength();
+            initNameTextField(nameTextField, width);
             
             view.addChild(nameTextField);
         }
@@ -415,19 +497,13 @@ package {
             view.addChild(dogTagTextField);
         }
         
-        private function initTextField(textField:TextField):void {
+        public static function initTextField(textField:TextField):void {
             textField.background = true;
             textField.multiline = false;
             textField.selectable = false;
             textField.mouseEnabled = false;
             textField.autoSize = TextFieldAutoSize.CENTER;
         }
-        
-        private function setRotation(targetRotation:int):void {
-            thisObj.rotation = targetRotation;
-        }
-        
-
         
     }
 }

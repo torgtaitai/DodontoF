@@ -1,7 +1,7 @@
 //--*-coding:utf-8-*--
 
 package {
-    import mx.controls.Alert;
+    import mx.controls.CheckBox;
     
     public class ChangePlayRoomWindow extends CreatePlayRoomWindow {
         import mx.managers.PopUpManager;
@@ -45,6 +45,24 @@ package {
             executeButton.label = "変更";
         }
         
+        override protected function initViewStateInfos():void {
+            super.initViewStateInfos();
+            
+            var serverViewStateInfo:Object = DodontoF_Main.getInstance().getServerViewStateInfo();
+            
+            for each(var info:Object in menuInfos) {
+                    var checkBox:CheckBox = info.checkBox;
+                    
+                    var obj:Object = serverViewStateInfo[ info.data ];
+                    if( obj == null ) {
+                        continue;
+                    }
+                    
+                    var b:Boolean = obj as Boolean;
+                    checkBox.selected = b;
+                }
+        }
+        
         
         override protected function execute():void {
             try {
@@ -57,6 +75,8 @@ package {
                                               chatChannelNames,
                                               canUseExternalImage.selected,
                                               canVisit.selected,
+                                              getGameType(),
+                                              getViewStates(),
                                               playRoomIndex,
                                               executeResult);
             } catch(error:Error) {

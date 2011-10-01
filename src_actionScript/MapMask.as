@@ -37,6 +37,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "マップマスク";
+        }
+        
         
         public static function getJsonData(width:int,
                                            height:int,
@@ -94,7 +98,7 @@ package {
             return this.height;
         }
         
-        public function getName():String {
+        override public function getName():String {
             return this.name;
         }
         
@@ -180,7 +184,7 @@ package {
             }
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getMapMaskLayer();
         }
         
@@ -291,6 +295,14 @@ package {
         
         override public function snapMovablePieceViewPosition(isListed:Boolean = false):void {
             return;
+        }
+        
+        override public function getOwnWidth():int {
+            return getWidth() * Map.getSquareLength();
+        }
+        
+        override public function getOwnHeight():int {
+            return getHeight() * Map.getSquareLength();
         }
         
     }

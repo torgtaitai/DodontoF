@@ -25,5 +25,6 @@ package {
         function canDeleteOnInitiativeList():Boolean;
         function sendDelete():void;
         function hasStatus():Boolean;
+        function getStatusName(key:String):String;
     }
 }

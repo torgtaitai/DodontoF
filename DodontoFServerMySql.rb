@@ -13,7 +13,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.30.05.01(2011/04/24)"
+$version = "Ver.1.33.05(2011/09/25)"
 
 class SaveDataManagerOnMySql
   def initialize
@@ -709,14 +709,10 @@ class DodontoFServer_MySql < DodontoFServer
   end
   
   
-  def sendChatMessage
+  def sendChatMessageByChatData(chatData)
+    logging(chatData, "sendChatMessage chatData")
     saveFileName = @saveFiles['chatMessageDataLog']
-    
-    jsonData = getRequestData('chatMessageData')
-    chatMessageData = getJsonDataFromText(jsonData)
-    logging(chatMessageData, "chatMessageData")
-    
-    getDataAccesser().sendChatMessage(chatMessageData, saveFileName)
+    getDataAccesser().sendChatMessage(chatData, saveFileName)
   end
   
   

@@ -44,12 +44,15 @@
     import mx.controls.Label;
     import mx.controls.Text;
     import mx.events.ColorPickerEvent;
+    import mx.core.IFlexDisplayObject;
+    
     
     private var defaultTabCount:int = 5;
     private var tabEditors:Array = new Array();
     private var tabs:Array = new Array();
     
     public function setInitPosition():void {
+        setLoadAddAction( loadSaveDataFromLocalCash );
         if( loadPosition() ) {
             return;
         }
@@ -67,8 +70,8 @@
     }
     
     override public function setup():void {
-        setInitPosition();
         initChatPalet();
+        setInitPosition();
     }
     
     private function initChatPalet():void {
@@ -319,6 +322,7 @@
         var window:EditChatPaletteWindow = DodontoF.popup(EditChatPaletteWindow, true) as EditChatPaletteWindow;
         window.initParams(array, function(lines:Array):void {
                 setLines(lines, tabEditorInfo);
+                savePosition();
             });
     }
     
@@ -331,6 +335,21 @@
         changer.analize();
     }
     
+    
+    override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+        var info:Object = super.getWindowInfoSaveData(this);
+        info.saveData = getChatPalletSaveData();
+        
+        return info;
+    }
+    
+    private function loadSaveDataFromLocalCash(info:Object):void {
+        if( info.saveData != null ) {
+            loadSaveData( info.saveData );
+        }
+    }
+    
+    
     private var typeName:String = "ChatPalette2";
     
     private var saveDataExt:String = "cpd";
@@ -338,6 +357,12 @@
     private var fileReferenceForLoad:FileReference = new FileReference();
     
     public function save():void {
+        var saveData:Object = getChatPalletSaveData();
+        var jsonString:String = Utils.getJsonString(saveData);
+        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+    }
+    
+    public function getChatPalletSaveData():Object {
         var saveData:Object = new Object();
         
         saveData.typeName = typeName;
@@ -345,6 +370,10 @@
         
         for(var i:int = 0 ; i < tabSpace.numChildren ; i++) {
             var lines:Array = [];
+            if( tabEditors[i] == null ) {
+                Log.logging("tabEditors[i] == null break;");
+                break;
+            }
             var inputList:List = tabEditors[i].list as List;
             if( inputList.dataProvider != null ) {
                 lines = inputList.dataProvider.source;
@@ -357,8 +386,7 @@
             saveData.tabInfos.push(tabInfo);
         }
         
-        var jsonString:String = Utils.getJsonString(saveData);
-        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+        return saveData;
     }
     
     public function load():void {
@@ -379,9 +407,11 @@
     public function loadComplete(e:Event):void {
         var data:ByteArray = fileReferenceForLoad.data as ByteArray;
         var dataString:String = data.toString();
-        
         var saveData:Object = Utils.getJsonDataFromString(dataString) as Object;
+        loadSaveData(saveData);
+    }
         
+    public function loadSaveData(saveData:Object):void {
         while( tabSpace.numChildren > 0 ) {
             var isForce:Boolean = true;
             deletePaletTab(isForce);
@@ -413,7 +443,7 @@
     
     private function loadOnChatPalette1(saveData:Object):void {
         var chatPaletteStrings:Array = saveData as Array;
-        var paletteCountParTab:int = ChatPalette.getPaletteCountParTab();
+        var paletteCountParTab:int = Config.getInstance().getPaletteCountParTab();
         
         var tabCount:int = (chatPaletteStrings.length / paletteCountParTab);
         

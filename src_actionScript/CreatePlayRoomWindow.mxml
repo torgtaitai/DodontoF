@@ -8,7 +8,8 @@
    showCloseButton="true"
    >
   
-  <mx:Box width="100%" height="100%">
+  <mx:Box width="100%" height="100%"
+          verticalGap="1" horizontalGap="1" >
     
 	<mx:Label text="新規プレイルームを作成します。" />
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
@@ -22,7 +23,16 @@
                     />
     </mx:HBox>
     
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+	  <mx:Label text="この部屋で遊ぶゲームシステム:" />
+      <torgtaitai:SuggestComboBox id="gameType" width="100%"
+                    rowCount="10"
+                    />
+    </mx:HBox>
+    
     <mx:Spacer width="100%" height="5" />
+    
+    <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()" />
     
     <mx:Box id="extendBox" height="0" width="100%" visible="false" >
       
@@ -64,19 +74,22 @@
                         />
       </mx:HBox>
       
-      <mx:Spacer width="100%" height="5" />
+      <mx:Box width="100%">
+        <mx:Label text="使用するチャットのタブ:" />
+        <mx:Label text="半角・全角スペースでタブ名を区切ってください。（例：「雑談　打ち合わせ　メモ用」）" />
+        <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
+          <mx:Label id="publicChannelLabel" text="" />
+          <mx:TextInput id="chatChannelNamesText" width="100%" text="雑談" />
+          <mx:Label id="visiterChannlelLabel" width="0" text="見学用" />
+        </mx:HBox>
+      </mx:Box>
       
-      <mx:Label text="使用するチャットのタブ:" />
-      <mx:Label text="半角・全角スペースでタブ名を区切ってください。（例：「雑談　打ち合わせ　メモ用」）" />
-      <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-        <mx:Label id="publicChannelLabel" text="" />
-        <mx:TextInput id="chatChannelNamesText" width="100%" text="雑談" />
-        <mx:Label id="visiterChannlelLabel" width="0" text="見学用" />
-      </mx:HBox>
+      <mx:Box id="viewStateInfosBox"
+              width="100%" height="100%" >
+        <mx:Label text="この部屋の表示設定。変更するとルーム内全員の設定が変更されます。" />
+      </mx:Box>
       
     </mx:Box>
-      
-    <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()" />
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="作成" click="execute()" />
@@ -85,10 +98,13 @@
     </mx:Box>
   <mx:Script>
     <![CDATA[
+             
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.controls.Alert;
-
+    import mx.controls.CheckBox;
+    
+    
     protected var resultFunction:Function;
     protected var playRoomIndex:int;
     
@@ -102,6 +118,8 @@
     override protected function setup():void {
         try {
             init();
+            initViewStateInfos();
+            initGameSystem();
         } catch(error:Error) {
             this.status = error.message;
         }
@@ -110,6 +128,27 @@
     protected function init():void {
         publicChannelLabel.text = DodontoF_Main.getInstance().publicChatChannelName;
     }
+    
+    protected function initGameSystem():void {
+        var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
+        diceBotInfos[0].label = "（指定なし）";
+        gameType.dataProvider = diceBotInfos;
+    }
+    
+    protected var menuInfos:Array = null;
+    
+    protected function initViewStateInfos():void {
+        menuInfos = DodontoF_Main.getInstance().getDodontoF().collectMainMenuInfos();
+        
+        for each(var info:Object in menuInfos) {
+                var checkBox:CheckBox = new CheckBox();
+                checkBox.label = info.label;
+                checkBox.selected = info.toggled;
+                viewStateInfosBox.addChild( checkBox );
+                info.checkBox = checkBox;
+            }
+    }
+    
     
     protected function getChatChannelNames():Array {
         var parts:Array = chatChannelNamesText.text.split(/[\s　]+/);
@@ -133,6 +172,27 @@
         return chatChannelNames;
     }
     
+    protected function getViewStates():Object {
+        var result:Object = new Object();
+        
+        for each(var info:Object in menuInfos) {
+                var checkBox:CheckBox = info.checkBox;
+                result[ info.data ] = checkBox.selected;
+            }
+        
+        Log.logging("getViewStates result", result);
+        return result;
+    }
+
+    protected function getGameType():String {
+        var item:Object = gameType.selectedItem;
+        if( item == null ) {
+            return null;
+        }
+        
+        return item.gameType;
+    }
+    
     protected function execute():void {
         Log.loggingTuning("=>createPlayRoom Begin");
         
@@ -145,6 +205,8 @@
                                           chatChannelNames,
                                           canUseExternalImage.selected,
                                           canVisit.selected,
+                                          getGameType(),
+                                          getViewStates(),
                                           playRoomIndex,
                                           executeResult);
         } catch(error:Error) {
@@ -188,7 +250,10 @@
     public function extend():void {
         extendMode = ( ! extendMode);
         
-        var extendHeight:int = 105 + visiterBox.height + canUseExternalImageBox.height;
+        var extendHeight:int = 105
+            + visiterBox.height
+            + canUseExternalImageBox.height
+            + 90;//viewStateInfosBox.height;
         
         if( extendMode ) {
             extendButton.label = "＜＜拡張機能を隠す";
@@ -201,6 +266,8 @@
             this.height -= extendHeight;
             extendBox.visible = false;
         }
+        
+        PopUpManager.centerPopUp(this);
     }
     
     public function changeVisitMode(canVisitValue:Boolean):void {

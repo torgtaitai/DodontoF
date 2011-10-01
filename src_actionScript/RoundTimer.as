@@ -10,7 +10,7 @@ package {
         private var sender:SharedDataSender;
         private var isChanged:Boolean = true;
         
-        private var counterNames:Array = ["HP", "MP"];
+        private var counterNames:Array = [];
         
         public function getCounterNames():Array {
             return counterNames.concat();
@@ -187,8 +187,15 @@ package {
         }
         
         public function setCounterNames(names:Array):void {
-            if( names != null ) {
-                counterNames = names;
+            if( names == null ) {
+                return;
+            }
+            
+            counterNames = new Array();
+            for(var i:int = 0 ; i < names.length ; i++) {
+                var name:String = names[i];
+                name = name.replace(/^＊/, '*');
+                counterNames.push( name);
             }
         }
         

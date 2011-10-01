@@ -155,6 +155,8 @@ package {
                     var movieClip:MovieClip = (imageLoader as MovieClip);
                     if( movieClip != null ) {
                         movieClip.stop();
+                    } else {
+                        imageLoader.unloadAndStop();
                     }
                 });
         }

@@ -25,6 +25,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "共有メモ";
+        }
+        
         
         public static function getJsonData(message:String):Object {
             var color:uint = 0xFFFFFF;//0xBBBB00;
@@ -95,7 +99,7 @@ package {
             window.setMemo(this);
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getFrontLayer();
         }
         
@@ -128,7 +132,7 @@ package {
             return 1.0;
         }
         
-        private function getName():String {
+        override public function getName():String {
             var parts:Array = getMessage().split("\n");
             if( parts.length == 0 ) {
                 return "(no title)";

@@ -38,21 +38,22 @@
 	</mx:columns>
   </mx:DataGrid>
       
-  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:TextInput id="selectedTitle" text="タイトル" width="150" editable="false" />
-    <mx:TextInput id="selectedUrl" text="再生URL" width="100%" editable="false" />
+  <mx:HBox height="25" width="100%" verticalAlign="middle">
+    <mx:Button label="再生" click="playReplayData()"  fontWeight="normal" />
+    <mx:Button label="削除"  click="removeReplayData()" fontWeight="normal" />
+    <mx:Label id="selectedTitle" text="タイトル" width="150" selectable="true" />
   </mx:HBox>
-  <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Spacer width="100%" />
-    <mx:Button label="リプレイ再生" click="playReplayData()" toolTip="上記のURLを貼り付ければ、リプレイを直接再生することが出来ます。&#13;他の人にリプレイを見せるにはこのURLを教えるのが手軽でオススメです。" />
-    <mx:Spacer width="100%" />
-    <mx:Button label="データ削除"  click="removeReplayData()" />
+  <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Label id="selectedUrl" text="再生URL" width="100%" selectable="true"
+              toolTip="このURLでリプレイを直接再生することが出来ます。&#13;他の人にリプレイを見せる場合に手軽でオススメです。"
+ />
   </mx:HBox>
   
+  <mx:Spacer width="100%" height="10" />
   
   <mx:Label text="リプレイデータの投稿は以下から" />
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="selectButton" label="リプレイデータ選択" click="selectReplayData()" />
+    <mx:Button id="selectButton" label="投稿リプレイデータ選択" click="selectReplayData()" />
     <mx:Label text="タイトル:" />
 	<mx:TextInput id="replayDataTitle" width="100%" />
     <mx:Button id="uploadButton" enabled="false" label="投稿（リプレイデータアップロード）" click="uploadReplayData()" />

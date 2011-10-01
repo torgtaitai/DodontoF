@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="680"
    height="420"
-   title="カード選択" 
+   title="" 
    showCloseButton="true"
    close="closeWindow()"
    >
@@ -12,7 +12,7 @@
   <mx:Box id="baseBox"
       width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
     
-    <mx:Label text="山札のカードは以下の通り。抜き取りたいカードをドラッグしてカード置き場（緑のマットの上）にドロップしてください。" />
+    <mx:Label id="howToLabel" text=""/>
     <mx:Tile id="preview" 
            height="100%" width="100%"
            paddingTop="10" paddingBottom="10" 
@@ -21,12 +21,6 @@
            direction="horizontal" 
            borderStyle="solid" 
            tileWidth="50" />
-
-<!--
-    <mx:TextArea id="printer"
-                 height="20%" width="100%"
-                 />
--->
 
       <mx:ProgressBar id="imageProgressBar" indeterminate="true"
                   width="100%" height="20" minHeight="0" minWidth="0"
@@ -41,50 +35,56 @@
     import mx.controls.TextArea;
     import mx.controls.Alert;
     import mx.events.DragEvent;
-    import mx.core.UIComponent;
     import mx.core.IFlexDisplayObject;
     import mx.core.DragSource;
     import mx.managers.DragManager;
     
     private var thisObj:SelectCardWindow;
     
-    public function closeWindow():void {
-        try {
-            layer.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-            layer.removeEventListener(DragEvent.DRAG_ENTER, dragEnter);
-        } catch(e:Error) {
-        }
-        PopUpManager.removePopUp(this);
-    }
+    private var dragDropForDrow:DragDrop = new DragDrop();
     
     private var map:Map;
-    private var layer:UIComponent;
     
     override protected function setup():void {
         thisObj = this;
         
         map = DodontoF_Main.getInstance().getMap();
-        layer = map.getCardLayer();
         
-        layer.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-        layer.addEventListener(DragEvent.DRAG_ENTER, dragEnter);
+        dragDropForDrow.addDropEvent( map.getCardLayer() );
+        
+        init();
     }
     
-    public function dragEnter(e:DragEvent):void {
-        DragManager.acceptDragDrop(layer);
+    protected function init():void {
+        title = "カード選択";
+        howToLabel.text = "山札のカードは以下の通り。抜き取りたいカードをドラッグしてカード置き場（緑のマットの上）にドロップしてください。";
     }
     
-    private var cardMount:CardMount;
+    public function closeWindow():void {
+        try {
+            dragDropForDrow.removeDropEvent();
+        } catch(e:Error) {
+        }
+        PopUpManager.removePopUp(this);
+    }
+    
+    protected var cardMount:CardMount;
     
     public function setCardMount(cardMount_:CardMount):void {
         cardMount = cardMount_;
-        DodontoF_Main.getInstance().getGuiInputSender()
-            .getMountCardInfos( cardMount.getMountName(),
-                                cardMount.getId(),
-                                printMountCardInfos);
+        
+        getMountCardInfos();
     }
     
-    public function printMountCardInfos(event:Event):void {
+    protected function getMountCardInfos():void {
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.getMountCardInfos( cardMount.getMountNameForDisplay(),
+                                          cardMount.getMountName(),
+                                          cardMount.getId(),
+                                          printMountCardInfos );
+    }
+    
+    protected function printMountCardInfos(event:Event):void {
         Log.loggingTuning("=>printMountCardInfos(event:Event) Begin");
         try {
             imageProgressBar.height = 0;
@@ -143,49 +143,30 @@
         component.scaleX = 0.5;
         component.scaleY = 0.5;
         
-        component.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                mouseDownHandler(event, card, component);
-            });
-        
-        component.addEventListener(MouseEvent.MOUSE_DOWN, function(event:DragEvent):void {
-                dragDropHandler(event);
-            });
+        var value:Object = {
+            "card" : card,
+            "component" : component };
+
+        dragDropForDrow.setDropEventWidthHeigth(card.getView(), 104, 154, value, drowAction);
         
         return component;
     }
     
-    
-    private function mouseDownHandler(event:MouseEvent, card:Card, component:UIComponent):void{
-        //ドラッグされるデータを作成
-        var dragSource:DragSource = new DragSource();
-        dragSource.addData(card, "card");
-        dragSource.addData(component, "component");
+    private function drowAction(obj:Object):void {
+        var card:Card = obj.card;
+        var component:UIComponent = obj.component;
         
-        //ドラッグ中のイメージを作成
-        var length:int = Map.getSquareLength();
-        var bitmapData:BitmapData = new BitmapData(104, 154);//card.getWidth(), card.getHeight());
-        bitmapData.draw(card.getView());
-        var bitmap:Bitmap = new Bitmap();
-        bitmap.bitmapData = bitmapData;
-        
-        var imageProxy:UIComponent = new UIComponent();
-        imageProxy.addChild(bitmap);
-        
-        //ドラッグを開始
-        DragManager.doDrag(card.getView(), dragSource, event, imageProxy);
-    }
-    
-    private function dragDropHandler(event:DragEvent):void{
-        var card:Card = event.dragSource.dataForFormat("card") as Card;
-        var component:UIComponent = event.dragSource.dataForFormat("component") as UIComponent;
-
         var base:UIComponent = UIComponent(DodontoF_Main.getInstance().getDodontoF());
         var mousePoint:Point = new Point(base.mouseX, base.mouseY);
-        var cardPoint:Point = map.getCardLayer().globalToLocal(mousePoint);
+        var cardPoint:Point = dragDropForDrow.getLayer().globalToLocal(mousePoint);
         
         var x:int = cardPoint.x - (card.getWidth() / 2);
         var y:int = cardPoint.y - (card.getHeight() / 2);
         
+        drawTargetCard(card, component, x, y);
+    }
+    
+    protected function drawTargetCard(card:Card, component:UIComponent, x:int, y:int):void {
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.getSender().drawTargetCard( card.getJsonData(),
                                                    cardMount.getSelfOwnerId(),
@@ -197,10 +178,10 @@
                                                    getRemoveComponentFunction(component));
     }
     
-    public function getRemoveComponentFunction(component:UIComponent):Function {
+    
+    protected function getRemoveComponentFunction(component:UIComponent):Function {
         return function(event:Event):void {
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-            //Alert.show(Utils.getJsonString(jsonData));
             
             var result:String = jsonData.result;
             

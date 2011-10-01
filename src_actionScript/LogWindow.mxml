@@ -8,13 +8,19 @@
                 >
 
   <mx:Box height="100%" width="100%">
-    <mx:TextArea id="textArea" height="100%" width="100%" />
+    <mx:TextArea id="textArea" height="100%" width="100%"
+                 change="changeText()"
+                 />
   </mx:Box>
   
   <mx:Script>
     <![CDATA[
     import mx.managers.PopUpManager;
-       
+    
+    private function changeText():void {
+        textArea.verticalScrollPosition = textArea.maxVerticalScrollPosition;
+    }
+    
     ]]>
   </mx:Script>
   

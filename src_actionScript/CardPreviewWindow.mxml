@@ -18,7 +18,11 @@
         //
         private var cardPreview:CardPickup = null;
         
+        private var thisObj:CardPreviewWindow;
+        
         override public function setup():void {
+            thisObj = this;
+            
             cardPreview = new CardPickup(Card.getJsonData("", "", 0, 0));
             
             cardPreview.getView().visible = false;
@@ -32,6 +36,11 @@
             this.height = resizerMinHeigth();
             
             setResizeEventFunction( function():void { setCardPreviewPosition() });
+            
+            this.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+                    thisObj.hideCardPreview();
+                });
+            
         }
         
         override public function getSaveInfoKeyName():String {
@@ -67,12 +76,11 @@
             cardView.y = 0;
             
             var cardWidth:int = cardPreview.getWidth() * Map.getSquareLength();
-            var windowWidth:int = this.width;
+            var windowWidth:int = this.width * 0.9;
             var rate:Number = (windowWidth / cardWidth);
             
             cardPreview.setRate(rate);
         }
-        
         
     ]]>
   </mx:Script>

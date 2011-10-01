@@ -68,7 +68,7 @@ package {
         }
         
         public function getSendto():String {
-            return getValue(sendto, getComboBoxText(getChatWindw().sendto));
+            return getValue(sendto, getComboBoxText(getChatWindw().sendtoBox));
         }
         
         private function getValue(param1:String, param2:String):String {

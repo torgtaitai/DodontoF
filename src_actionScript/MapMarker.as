@@ -33,6 +33,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "マップマーカー";
+        }
+        
         
         public static function getJsonData(message:String, color:uint,
                                            isPaint:Boolean,
@@ -136,7 +140,7 @@ package {
             window.setMapMarker(this);
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getMapMarkerLayer();
         }
         
@@ -178,7 +182,7 @@ package {
             return true;
         }
         
-        public function loadViewImage():void {
+        override public function loadViewImage():void {
             var name:String = "name";
             var imageUrl:String = "image/MapMarker.gif";
             var size:int = 1;
@@ -245,6 +249,14 @@ package {
         
         protected function getTextAlpha():Number {
             return 1;
+        }
+        
+        override public function getOwnWidth():int {
+            return getWidth() * Map.getSquareLength();
+        }
+        
+        override public function getOwnHeight():int {
+            return getHeight() * Map.getSquareLength();
         }
         
     }

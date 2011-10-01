@@ -2,12 +2,12 @@
 <mx:TitleWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   backgroundAlpha="1.0"
+   backgroundAlpha="{Config.windowAlpha}"
    backgroundColor="#F4FBFF"
    borderStyle="solid"
    borderThickness="2"
    borderThicknessBottom="0"
-   close="toggleVisible()"
+   close="closeEvent()"
    creationComplete="onThis_creationComplete();"
    >
   <mx:Script>
@@ -42,7 +42,7 @@
             if( changeVisibleEvent == null ) {
                 return;
             }
-            changeVisibleEvent.call(this, this.visible);
+            changeVisibleEvent(this.visible);
         }
         
         protected function resizerMinWidth():int {
@@ -67,6 +67,10 @@
             Utils.setSkin(this);
             
             titleBar.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
+            
+            this.addEventListener(MouseEvent.MOUSE_UP, function():void {
+                    DodontoF_Main.getInstance().getMap().stopDrag();
+                } );
         }
         
         public function setup():void {
@@ -74,14 +78,21 @@
         
         public function setVisibleState(v:Boolean):void {
             this.visible = v;
-            
             savePosition();
-            
             sendChnageVisibleEvent();
+        }
+        
+        public function closeEvent():void {
+            toggleVisible();
         }
         
         public function toggleVisible():void {
             setVisibleState( ! this.visible );
+        }
+        
+        private var loadAddAction:Function = null;
+        public function setLoadAddAction(act:Function):void {
+            loadAddAction = act;
         }
         
         public function loadPosition():Boolean {
@@ -89,7 +100,7 @@
                 return false;
             }
             
-            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyName() );
+            var info:Object = Config.getInstance().loadInfoForResiableWindow( getSaveInfoKeyName() );
             if( info == null ) {
                 return false;
             }
@@ -99,6 +110,10 @@
             this.width = info.width;
             this.height = info.height;
             setVisibleState( info.visible );
+            
+            if( loadAddAction != null ) {
+                loadAddAction(info);
+            }
             
             sendChnageVisibleEvent();
             
@@ -135,7 +150,7 @@
             canSavePosition = b;
         }
         
-        private function savePosition():void {
+        protected function savePosition():void {
             if( getSaveInfoKeyName() == ignoreSavePosition ){
                 return;
             }
@@ -145,10 +160,11 @@
             }
             
             var info:Object = getWindowInfoSaveData(this);
-            Config.getInstance().saveInfo( getSaveInfoKeyName(), info );
+            //Config.getInstance().saveInfo( getSaveInfoKeyName(), info );
+            Config.getInstance().saveInfoForResiableWindow( getSaveInfoKeyName(), info );
         }
         
-        private function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+        protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
             var windowInfo:Object = new Object();
             
             windowInfo.x = window.x;

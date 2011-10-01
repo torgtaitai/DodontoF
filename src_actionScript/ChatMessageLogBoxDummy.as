@@ -41,8 +41,8 @@ package {
         }
         
         override public function addChatLogText(novelticMode:NovelticMode, 
-                                       chatFontSize:int,
-                                       isCurrentChannel:Boolean):Boolean {
+                                                isCurrentChannel:Boolean,
+                                                isFirstLoadFinished:Boolean):Boolean {
             return true;
         }
         
@@ -60,10 +60,10 @@ package {
         override public function validateNow_All():void {
         }
         
-        override public function scrollChatBox(chatFontSize:int, isForceScroll:Boolean = false):void {
+        override public function scrollChatBox(isForceScroll:Boolean = false):void {
         }
         
-        override public function resizeChatLog(chatFontSize:int, novelticMode:NovelticMode):void {
+        override public function resizeChatLog(novelticMode:NovelticMode):void {
         }
     
 

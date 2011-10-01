@@ -253,6 +253,9 @@ package {
         }
         
         public function clearExistImages(name:String, leftIndex:int = -1):void {
+            Log.logging("clearExistImages name", name);
+            Log.logging("clearExistImages leftIndex", leftIndex);
+            
             for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
                 var imageInfo:Object = this.imageInfos[i] as Object;
                 if( imageInfo == null ) {

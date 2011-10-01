@@ -1,57 +1,57 @@
 image
-cards/trump_2/trump13.png
-cards/trump_2/trump0.png
-cards/trump_2/trump1.png
-cards/trump_2/trump2.png
-cards/trump_2/trump3.png
-cards/trump_2/trump4.png
-cards/trump_2/trump5.png
-cards/trump_2/trump6.png
-cards/trump_2/trump7.png
-cards/trump_2/trump8.png
-cards/trump_2/trump9.png
-cards/trump_2/trump10.png
-cards/trump_2/trump11.png
-cards/trump_2/trump12.png
-cards/trump_2/trump14.png
-cards/trump_2/trump15.png
-cards/trump_2/trump16.png
-cards/trump_2/trump17.png
-cards/trump_2/trump18.png
-cards/trump_2/trump19.png
-cards/trump_2/trump20.png
-cards/trump_2/trump21.png
-cards/trump_2/trump22.png
-cards/trump_2/trump23.png
-cards/trump_2/trump24.png
-cards/trump_2/trump25.png
-cards/trump_2/trump26.png
-cards/trump_2/trump28.png
-cards/trump_2/trump29.png
-cards/trump_2/trump30.png
-cards/trump_2/trump31.png
-cards/trump_2/trump32.png
-cards/trump_2/trump33.png
-cards/trump_2/trump34.png
-cards/trump_2/trump35.png
-cards/trump_2/trump36.png
-cards/trump_2/trump37.png
-cards/trump_2/trump38.png
-cards/trump_2/trump39.png
-cards/trump_2/trump40.png
-cards/trump_2/trump42.png
-cards/trump_2/trump43.png
-cards/trump_2/trump44.png
-cards/trump_2/trump45.png
-cards/trump_2/trump46.png
-cards/trump_2/trump47.png
-cards/trump_2/trump48.png
-cards/trump_2/trump49.png
-cards/trump_2/trump50.png
-cards/trump_2/trump51.png
-cards/trump_2/trump52.png
-cards/trump_2/trump53.png
-cards/trump_2/trump54.png
-cards/trump/j01.gif
-cards/trump/j02.gif
-cards/trump/j03.gif
+cards/trump_2/trump13.png	裏向きの札
+cards/trump_2/trump0.png	スペードのA
+cards/trump_2/trump1.png	スペードの2
+cards/trump_2/trump2.png	スペードの3
+cards/trump_2/trump3.png	スペードの4
+cards/trump_2/trump4.png	スペードの5
+cards/trump_2/trump5.png	スペードの6
+cards/trump_2/trump6.png	スペードの7
+cards/trump_2/trump7.png	スペードの8
+cards/trump_2/trump8.png	スペードの9
+cards/trump_2/trump9.png	スペードの10
+cards/trump_2/trump10.png	スペードのJ
+cards/trump_2/trump11.png	スペードのQ
+cards/trump_2/trump12.png	スペードのK
+cards/trump_2/trump14.png	ハートのA
+cards/trump_2/trump15.png	ハートの2
+cards/trump_2/trump16.png	ハートの3
+cards/trump_2/trump17.png	ハートの4
+cards/trump_2/trump18.png	ハートの5
+cards/trump_2/trump19.png	ハートの6
+cards/trump_2/trump20.png	ハートの7
+cards/trump_2/trump21.png	ハートの8
+cards/trump_2/trump22.png	ハートの9
+cards/trump_2/trump23.png	ハートの10
+cards/trump_2/trump24.png	ハートのJ
+cards/trump_2/trump25.png	ハートのQ
+cards/trump_2/trump26.png	ハートのK
+cards/trump_2/trump28.png	クラブのA
+cards/trump_2/trump29.png	クラブの2
+cards/trump_2/trump30.png	クラブの3
+cards/trump_2/trump31.png	クラブの4
+cards/trump_2/trump32.png	クラブの5
+cards/trump_2/trump33.png	クラブの6
+cards/trump_2/trump34.png	クラブの7
+cards/trump_2/trump35.png	クラブの8
+cards/trump_2/trump36.png	クラブの9
+cards/trump_2/trump37.png	クラブの10
+cards/trump_2/trump38.png	クラブのJ
+cards/trump_2/trump39.png	クラブのQ
+cards/trump_2/trump40.png	クラブのK
+cards/trump_2/trump42.png	ダイヤのA
+cards/trump_2/trump43.png	ダイヤの2
+cards/trump_2/trump44.png	ダイヤの3
+cards/trump_2/trump45.png	ダイヤの4
+cards/trump_2/trump46.png	ダイヤの5
+cards/trump_2/trump47.png	ダイヤの6
+cards/trump_2/trump48.png	ダイヤの7
+cards/trump_2/trump49.png	ダイヤの8
+cards/trump_2/trump50.png	ダイヤの9
+cards/trump_2/trump51.png	ダイヤの10
+cards/trump_2/trump52.png	ダイヤのJ
+cards/trump_2/trump53.png	ダイヤのQ
+cards/trump_2/trump54.png	ダイヤのK
+cards/trump/j01.gif	Joker
+cards/trump/j02.gif	Joker
+cards/trump/j03.gif	Joker

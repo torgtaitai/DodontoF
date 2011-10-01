@@ -23,6 +23,10 @@ package {
             return getTypeStatic();
         }
         
+        public function getTypeName():String {
+            return "魔法タイマー";
+        }
+        
         public static function getJsonData(name_:String,
                                            timeRange_:Number,
                                            createRound_:Number,
@@ -210,5 +214,6 @@ package {
         public function isOnlyOwnMap():Boolean {return false;}
         public function remove():void {}
         public function hasStatus():Boolean {return false;}
+        public function getStatusName(key:String):String {return "";}
    }
 }

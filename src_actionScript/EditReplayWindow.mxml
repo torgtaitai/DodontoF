@@ -5,6 +5,7 @@
    width="600"
    height="450"
    title="リプレイデータ編集画面" 
+   showCloseButton="true"
    >
   
   

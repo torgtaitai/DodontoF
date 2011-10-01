@@ -8,11 +8,18 @@
         borderStyle="solid"
         backgroundColor="#FFFFFF"
         verticalGap="0"
-        >
+        verticalScrollPolicy="on"
+        creationComplete="setup();"
+      >
+<!--
+        updateComplete="updateCompleteAction();"
+        scroll="setScrollPosition(event)"
+-->
   <mx:Script>
     <![CDATA[
 
         import mx.controls.Text;
+        import mx.events.ScrollEvent;
         
         private var chatBlockMaxTextCount:int = 5000;
         private var textBlockList:Array = new Array();
@@ -22,6 +29,7 @@
         private var defaultLabel:String = null;
         private var buffer:Array = new Array();
         private var allChatLogList:Array = new Array();
+        private var chatFontSize:int = 11;
         
         public function init(novelticMode:NovelticMode):void {
             defaultLabel = this.label;
@@ -111,10 +119,15 @@
             return tmpBuffer;
         }
         
+        public function setChatFontSize(size:int):void {
+            chatFontSize = size;
+        }
+        
         public function addChatLogText(novelticMode:NovelticMode, 
-                                       chatFontSize:int,
-                                       isCurrentChannel:Boolean):Boolean {
-            this.validateNow();
+                                       isCurrentChannel:Boolean,
+                                       isFirstLoadFinished:Boolean):Boolean {
+            Log.logging("addChatLogText");
+            this.validateNow_All();
             
             var tmpBuffer:Array = clearBuffer();
             
@@ -130,10 +143,15 @@
             
             lastText.minHeight = lastText.height;
             lastText.htmlText += bufferString
-            lastText.validateNow();
+            validateNow_All();
             
             if( ! isCurrentChannel ) {
                 addLabelCount(tmpBuffer.length);
+            }
+            
+            if( isFirstLoadFinished ) {
+                Log.logging("talk Text");
+                //new TextTalker().sendTexts(tmpBuffer);
             }
             
             return true;
@@ -169,7 +187,11 @@
                 }
             }
         }
-
+        
+        private function setup():void {
+            
+        }
+        
         
         public function isScrollPositionBottom():Boolean {
             var component:Box = this;
@@ -181,15 +203,43 @@
             this.validateNow();
         }
         
-        public function scrollChatBox(chatFontSize:int, isForceScroll:Boolean = false):void {
+        
+        /*
+        private function updateCompleteAction():void {
+            Log.logging('updateComplete');
+            if( this.verticalScrollPosition != lastVerticalScrollPosition ) {
+                this.verticalScrollPosition = lastVerticalScrollPosition;
+                Log.logging("re-set lastVerticalScrollPosition", lastVerticalScrollPosition);
+            }
+        }
+        
+        private function setScrollPosition(event:ScrollEvent):void {
+            Log.logging("setScrollPosition called");
+            lastVerticalScrollPosition = event.currentTarget.verticalScrollPosition
+            Log.logging("setScrollPosition lastVerticalScrollPosition", lastVerticalScrollPosition);
+        }
+        
+        private var lastVerticalScrollPosition:Number = 0;
+        
+        public function scrollChatBox(isForceScroll:Boolean = false):void {
+            this.validateNow_All();
+            lastVerticalScrollPosition = scrollChatBox_static(chatFontSize, this, isForceScroll);
+            Log.logging("set lastVerticalScrollPosition", lastVerticalScrollPosition);
+        }
+        */
+        
+        public function scrollChatBox(isForceScroll:Boolean = false):void {
             this.validateNow_All();
             scrollChatBox_static(chatFontSize, this, isForceScroll);
         }
         
-        static public function scrollChatBox_static(chatFontSize:int, component:Box, isForceScroll:Boolean = false):void {
+        static public function scrollChatBox_static(chatFontSize:int, component:Box,
+                                                    isForceScroll:Boolean = false):Number {
             if( isScrollChatBoxState(chatFontSize, component, isForceScroll) ) {
-               component.verticalScrollPosition = component.maxVerticalScrollPosition;
-           }
+                component.verticalScrollPosition = component.maxVerticalScrollPosition;
+            }
+            
+            return component.verticalScrollPosition
         }
         
         static private function isScrollChatBoxState(chatFontSize:int, component:Box, isForceScroll:Boolean):Boolean {
@@ -211,7 +261,7 @@
         
         
         
-        public function resizeChatLog(chatFontSize:int, novelticMode:NovelticMode):void {
+        public function resizeChatLog(novelticMode:NovelticMode):void {
             this.setLastText( novelticMode );
             clearChatMessageLog();
             
@@ -220,8 +270,8 @@
                 addBufferOnly( line );
             }
         }
-    
-
+        
+        
     ]]>
   </mx:Script>
   

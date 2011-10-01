@@ -29,6 +29,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "ランダムダンジョン用カード山";
+        }
+        
         override public function getCardCount():int {
             return super.getCardCount() - this.cardCountDisplayDiff;
         }

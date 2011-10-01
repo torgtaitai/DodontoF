@@ -17,25 +17,32 @@ package {
         protected override function init():void {
             title = "キャラクター追加";
             executeButton.label = "追加";
+            
+            initCounterValues();
         }
         
-        public override function setCharacter(name:String,
+        public override function sendCharacterData(name:String,
                                               imageUrl:String,
                                               size:int,
                                               isHide:Boolean,
                                               initiative:Number,
                                               info:String,
-                                              counters:Object):void {
+                                              counters:Object,
+                                              statusAlias:Object):void {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
             var characterParams:Object =
                 guiInputSender.getAndCheckAddCharacterParams(
                     name, imageUrl, 
                     size, isHide, 
-                    initiative, info);
+                    initiative, info,
+                    counters, statusAlias);
             
-            StockCharacterWindow.setParams(characterParams);
-            PopUpManager.createPopUp(this, StockCharacterWindow, false);
+            
+            var window:StockCharacterWindow =
+                PopUpManager.createPopUp(this, StockCharacterWindow, false) as StockCharacterWindow;
+            
+            window.setParams(characterParams);
         }
     }
 }

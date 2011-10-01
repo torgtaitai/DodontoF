@@ -41,6 +41,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "カード置き場";
+        }
+        
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x_:int,
@@ -125,13 +129,13 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "手札置き場を自分の管理へ", changeOwn);
+            addMenuItem(menu, "手札置き場を自分の管理へ", changeOwner);
             addMenuItem(menu, "手札置き場の削除", getContextMenuItemRemoveCharacter, true);
             
             view.contextMenu = menu;
         }
         
-        override public function changeOwn(event:ContextMenuEvent = null):void {
+        override public function changeOwner(event:ContextMenuEvent = null):void {
             ChatWindow.getInstance().sendSystemMessage("が「" + getOwnerName() + "」のカード一式を受け取りました。");
             
             setOwnerName( getSelfOwnerName() );
@@ -146,10 +150,17 @@ package {
                 var card:Card = cards[i] as Card;
                 
                 if( hitTestObject(card) ) {
-                    card.changeOwn();
+                    card.changeOwner();
                 }
             }
         }
         
+        override protected function canRotate():Boolean {
+            return false;
+        }
+        
+        override protected function canDoubleClick():Boolean {
+            return false;
+        }
     }
 }

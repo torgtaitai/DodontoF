@@ -36,25 +36,19 @@
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
 
-    private static var characterParamsStatic:Object = new Object;
+    private var characterParams:Object = new Object;
 
-    public static function setParams(characterParams:Object):void {
-        for (var key:String in characterParams) {
-            characterParamsStatic[key] = characterParams[key];
-        }
+    public function setParams(params:Object):void {
+        characterParams = Utils.clone(params);
     }
 
     [Bindable]
     private var characterName:String = "";
     private var characterNameBase:String = "";
+    
     [Bindable]
     private var characterImageUrl:String = "";
-    private var characterSize:int = 1;
-    private var characterHideState:Boolean = false;
-    [Bindable]
-    private var characterInitiative:int = 0;
-    private var characterInfo:String = "";
-
+    
     private function setup():void {
         Log.loggingTuning("=>setup() Begin");
         
@@ -62,16 +56,11 @@
         
         statusTextField.background = true;
         statusTextField.backgroundColor = 0xFFFFDD;
-
-        var characterParams:Object = characterParamsStatic;
+        
         characterNameBase = characterParams.name;
         setCharacterName();
         characterImageUrl = characterParams.imageUrl;
-        characterSize = characterParams.size;
-        characterHideState = characterParams.isHide;
-        characterInitiative = characterParams.initiative;
-        characterInfo = characterParams.info;
-    
+        
         setDragEvent();
     
         Log.loggingTuning("=>setup() End");
@@ -125,13 +114,15 @@
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.addCharacter(characterName,
                                         characterImageUrl,
-                                        characterSize,
-                                        characterHideState,
-                                        characterInitiative,
-                                        characterInfo,
+                                        characterParams.size,
+                                        characterParams.isHide,
+                                        characterParams.initiative,
+                                        characterParams.info,
                                         x,
                                         y,
-                                        dogTag);
+                                        dogTag,
+                                        characterParams.counters,
+                                        characterParams.statusAlias);
             if( ! isMany.selected ) {
                 PopUpManager.removePopUp(this);
             }

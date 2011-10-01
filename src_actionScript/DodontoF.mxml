@@ -10,7 +10,7 @@
   <mx:ApplicationControlBar 
      id="mainMenu"
      dock="true" horizontalGap="0"
-     fillAlphas="[0.9, 0.9]"
+     fillAlphas="[0.9, Config.windowAlpha]"
      enabled="false"
      >
     <mx:HBox id="mainMenuBody" width="100%" height="100%" visible="true">
@@ -32,26 +32,7 @@
                 click="popup(AddMemoWindow, true)"
                  />
       
-      <!--
-      <mx:Label text="キャラクター透明度" />
-      <mx:HSlider id="characterAlphaSlider" 
-                  showTrackHighlight="true"
-                  width="50"
-                  minimum="0" maximum="1" value="1"
-                  change="dodontoF_Main.getMap().getCharacterLayer().alpha = characterAlphaSlider.value"
-                  labels="['0', '1']"
-                  labelOffset="0"
-                  />
-      -->
-      <mx:Spacer width="100%" />
-
-      <!--
-      <mx:ColorPicker id="titleColorPicker" showTextField="true" selectedColor="0x3333FF"
-                      toolTip="タイトルバー色"
-                      change="var array:Array = [titleColorPicker.selectedColor, titleColorPicker.selectedColor];
-                             CommonPopupWindow.headerColorsArray = array;"
-      />
-      -->
+      <mx:Spacer width="50%" />
       
       <mx:Button id="graveyard"
                 label="墓場"
@@ -62,8 +43,10 @@
                 dragExit="graveyardDragExitHandler(event)"
                 />
       
-      <mx:Button id="mentenanceModeButton" label="メンテナンスモード" click="changeMentenanceMode();" toggle="true" visible="false" />
-      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" toolTip="ログアウト" />
+      <mx:Spacer width="50%" />
+      
+      <mx:Button id="mentenanceModeButton" label="メンテナンスモード" click="changeMentenanceMode();" toggle="true" visible="false" width="0" />
+      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" label="ログアウト" />
       
     </mx:HBox>
     
@@ -92,6 +75,10 @@
                   labelOffset="0"
                   />
       
+      <mx:CheckBox id="isRepeat" label="繰り返し" selected="false"
+                   visible="false" width="0"
+                   />
+
       <mx:Button id="displayCard"
                  paddingLeft="2" paddingRight="2" 
                  label="カード"
@@ -200,6 +187,7 @@
     
     private function setup():void {
         thisObj = this;
+        
         dodontoF_Main.setDodontoF(this);
         
         if( ! Config.getInstance().isAdobeAir() ) {
@@ -320,6 +308,8 @@
     }
     
     public function selectMenuByManuName(menuName:String, toggled:Boolean):void {
+        Log.logging("selectMenuByManuName menuName", menuName);
+        
         if( menuName == "save" ) {
             popup(SaveWindow, true);
         } else if( menuName == "load" ) {
@@ -327,14 +317,14 @@
         } else if( menuName == "saveLog" ) {
             DodontoF_Main.getInstance().getChatWindow().saveChatLogHtml();
         } else if( menuName == "startSessionRecording" ) {
-            findItem("startSessionRecording", menuArray).enabled = false;
-            findItem("stopSessionRecording", menuArray).enabled = true;
+            findMainMenuItem("startSessionRecording").enabled = false;
+            findMainMenuItem("stopSessionRecording").enabled = true;
             refreshMainMenu();
             
             dodontoF_Main.startSessionRecording();
         } else if( menuName == "stopSessionRecording" ) {
-            findItem("startSessionRecording", menuArray).enabled = true;
-            findItem("stopSessionRecording", menuArray).enabled = false;
+            findMainMenuItem("startSessionRecording").enabled = true;
+            findMainMenuItem("stopSessionRecording").enabled = false;
             refreshMainMenu();
             
             dodontoF_Main.stopSessionRecording();
@@ -350,8 +340,6 @@
             dodontoF_Main.setChatPaletteVisible( toggled );
         } else if( menuName == "isInitiativeListVisible" ) {
             InitiativeWindow.getInstance().setVisibleState( toggled );
-        } else if( menuName == "isChatVisible" ) {
-            ChatWindow.getInstance().setVisibleState( toggled );
         } else if( menuName == "isCardVisible" ) {
             var visibleCard:Boolean = toggled;
             dodontoF_Main.getMap().setVisibleCardLayer( visibleCard );
@@ -372,12 +360,6 @@
             var visibleMapGrid:Boolean = toggled;
             dodontoF_Main.getMap().setVisibleGridLayer( visibleMapGrid );
             Config.getInstance().saveViewStateInfo();
-            /*
-        } else if( menuName == "isDirectionVisible" ) {
-            var visibleCharacterDirection:Boolean = toggled;
-            dodontoF_Main.setVisibleDirectionLayer( visibleCharacterDirection );
-            Config.getInstance().saveViewStateInfo();
-            */
         } else if( menuName == "isSnapMovablePiece" ) {
             var isSnapMovablePiece:Boolean = toggled;
             Config.getInstance().setSnapMovablePiece( isSnapMovablePiece );
@@ -398,10 +380,10 @@
             popup(AddMagicTimerWindow, true);
         } else if( menuName == "graveyard" ) {
             popup(GraveyardWindow, true);
-/*
         } else if( menuName == "characterWaitingRoom" ) {
-            popup(CharacterWaitingRoomWindow, true);
-*/
+            if( ! CharacterWaitingRoomWindow.isOpened() ) {
+                popup(CharacterWaitingRoomWindow, true);
+            }
         } else if( menuName == "clearCards" ) {
             dodontoF_Main.clearCards();
         } else if( menuName == "openInitCardWindow" ) {
@@ -538,7 +520,7 @@
     public function setLoginUserInfo(loginUserInfoNew:Array):void {
         loginUserInfo = loginUserInfoNew;
         updateDisplayLoginUserInfoButtonLabel();
-        updateChatWindowSendtoLabel();
+        updateChatWindowSendtoBox();
     }
     
     private function updateDisplayLoginUserInfoButtonLabel():void {
@@ -550,37 +532,9 @@
         displayPlayRoomInfoButton.enabled = true;
     }
     
-    private function updateChatWindowSendtoLabel():void {
-        var sendto:ComboBox = dodontoF_Main.getChatWindow().sendto;
-        
-        var preData:String = null;
-        if( sendto.selectedItem != null ) {
-            preData = sendto.selectedItem.data;
-        }
-        
-        var dataProvider:Array = [];
-        
-        var option_all:Object = {
-            label : "（全員）",
-            data : null};
-        dataProvider.push(option_all);
-        
-        for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
-            var userInfo:Object = loginUserInfo[i];
-            
-            if( userInfo.userId == dodontoF_Main.getUniqueId() ) {
-                continue;
-            }
-            
-            var option:Object = {
-                label : userInfo.userName,// + ":" + userInfo.userId,
-                data : userInfo.userId};
-            dataProvider.push(option);
-        }
-        
-        sendto.dataProvider = dataProvider;
-        
-        Utils.selectComboBox(sendto, preData);
+    private function updateChatWindowSendtoBox():void {
+        dodontoF_Main.getChatWindow().updateChatWindowSendtoBox( Utils.clone(loginUserInfo),
+                                                                 dodontoF_Main.getUniqueId() );
     }
     
     public function getLoginUserCount(isIncludeVisiter:Boolean):int {
@@ -635,36 +589,64 @@
         return "???";
     }
     
-    public function findItem(targetData:String, array:Array):Object {
+    public function collectMainMenuInfos():Array {
+        var targetTyep:String = "check";
+        var result:Array = new Array();
+        
+        var array:Array = menuArray;
+        
+        for(var i:int = 0 ; i < array.length ; i++) {
+            var item:Object = array[i];
+            if( item == null ) {
+                continue;
+            }
+            
+            var children:Array = item.children;
+            if( children == null ) {
+                continue;
+            }
+            
+            for each(var child:Object in children) {
+                    if( child.type == targetTyep ) {
+                        result.push( child );
+                    }
+                }
+        }
+        
+        return result;
+    }
+    
+    public function findMainMenuItem(targetData:String, array:Array = null):Object {
         if( array == null ) {
-            return null;
+            array = menuArray;
         }
         
         for(var i:int = 0 ; i < array.length ; i++) {
             var item:Object = array[i];
+            if( item == null ) {
+                continue;
+            }
+            
             if( item.data == targetData ) {
                 return item;
             }
             
-            if( item.children ) {
-                var children:Array = item.children;
-                var result:Object = findItem(targetData, children);
-                if( result != null ) {
-                    return result;
-                }
+            var children:Array = item.children;
+            if( children == null ) {
+                continue;
+            }
+            
+            var result:Object = findMainMenuItem(targetData, children);
+            if( result != null ) {
+                return result;
             }
         }
         
         return null;
     }
     
-    public function findMainMenuItem(key:String):Object {
-        var result:Object = findItem(key, menuArray);
-        return result;
-    }
-    
     public function getMainMenuToggle(key:String):Boolean {
-        var result:Object = findItem(key, menuArray);
+        var result:Object = findMainMenuItem(key);
         if( result == null ) {
             return false;
         }
@@ -673,7 +655,7 @@
     }
     
     public function changeMainMenuToggle(targetData:String, value:Boolean):void {
-        var result:Object = findItem(targetData, menuArray);
+        var result:Object = findMainMenuItem(targetData);
         if( result == null ) {
             Log.loggingError("targetData is invalid menu item data", targetData);
             return;

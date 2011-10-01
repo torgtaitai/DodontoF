@@ -20,6 +20,8 @@ package {
     import mx.styles.CSSStyleDeclaration;
     import mx.styles.StyleManager;
     import mx.utils.URLUtil;
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
     
     public class Utils {
         
@@ -93,7 +95,9 @@ package {
         }
         
         static public function setSkin(component:UIComponent):void {
-            //component.setStyle("borderSkin", CustomSkin);
+            if( CustomSkin.isSkinDefined() ) {
+                component.setStyle("borderSkin", CustomSkin);
+            }
         }
         
         static public function getInitiativeInt(initiative:Number):int {
@@ -130,7 +134,11 @@ package {
             comboBox.validateNow();
             
             var list:ArrayCollection = comboBox.dataProvider as  ArrayCollection;
-            for (var i:int=0; i < list.length ;i++){
+            if( list.length == 0 ) {
+                return;
+            }
+            
+            for(var i:int = 0 ; i < list.length ; i++) {
                 if(list[i][field] == key){
                     comboBox.selectedIndex = i;
                     return;
@@ -417,6 +425,30 @@ package {
             */
             
             ToolTip.maxWidth = maxWidth;
+        }
+        
+        static public function getBitMap(component:UIComponent, width:Number, height:Number):Bitmap {
+            var bitmapData:BitmapData = new BitmapData(width, height);
+            bitmapData.draw(component);
+            
+            var bitmap:Bitmap = new Bitmap();
+            bitmap.bitmapData = bitmapData;
+            
+            return bitmap;
+        }
+
+        static public function isSameArray(array1:Array, array2:Array):Boolean {
+            if( array1.length != array2.length ) {
+                return false;
+            }
+            
+            for(var i:int = 0 ; i < array1.length ; i++) {
+                if( array1[i] != array2[i] ) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
     }

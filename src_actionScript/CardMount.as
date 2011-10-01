@@ -33,6 +33,10 @@ package {
             return getTypeStatic();
         }
 
+        override public function getTypeName():String {
+            return "カード山";
+        }
+        
         public function getCardCount():int {
             return this.cardCount;
         }
@@ -45,6 +49,7 @@ package {
             
             characterJsonData.type = getTypeStatic();
             characterJsonData.cardCount = 0;
+            characterJsonData.nextCardId = MovablePiece.getDefaultId();
             
             return characterJsonData;
         }
@@ -54,11 +59,13 @@ package {
             
             characterJsonData.type = getTypeStatic();
             characterJsonData.cardCount = this.cardCount;
+            characterJsonData.nextCardId = this.nextCardId;
             
             return characterJsonData;
         }
         
         private var cardCount:int = 0;
+        private var nextCardId:String = MovablePiece.getDefaultId();
         
         public function CardMount(params:Object) {
             super(params);
@@ -70,6 +77,10 @@ package {
             super.setParams(params);
         }
         
+        override public function getRoundColor():int {
+            return 0xEEEEEE;
+        }
+
         override public function getTitleText():String {
             return "山札:" + getCardCount() + "枚";
         }
@@ -87,8 +98,10 @@ package {
             menu.hideBuiltInItems();
             
             addMenuItem(menu, "カードを引く：非公開で自分だけ", getContextMenuItemCardDraw, false);
-            addMenuItem(menu, "カードを引く：全員に公開する", getContextMenuItemCardDrawPublic, true);
-            addMenuItem(menu, "カードを引く：全員に非公開で", getContextMenuItemCardDrawSecret, true);
+            addMenuItem(menu, "カードを引く：全員に公開する", getContextMenuItemCardDrawPublic, false);
+            addMenuItem(menu, "カードを引く：全員に非公開で", getContextMenuItemCardDrawSecret, false);
+            
+            addMenuItem(menu, "カードをN枚引く", getContextMenuItemCardDrawMany, true);
             
             addMenuItem(menu, "山からカードを選び出す", getContextMenuItemCardSelect, true);
             
@@ -111,20 +124,6 @@ package {
             }
         }
         
-        override protected function isPrintCardText():Boolean {
-            return false;
-        }
-        
-        private function drawCard(isOpen_:Boolean):void {
-            sender.drawCard( isOpen_,
-                             getSelfOwnerId(),
-                             getSelfOwnerName(),
-                             this.getMountName(),
-                             this.getX() + (getWidth() * Map.getSquareLength() / 3),
-                             this.getY() + 10,
-                             getId());
-        }
-        
         private function getContextMenuItemCardDrawSecret(event:ContextMenuEvent):void {
             try {
                 drawCardSecret();
@@ -133,7 +132,15 @@ package {
             }
         }
         
-        private function getContextMenuItemCardSelect(event:ContextMenuEvent):void {
+        protected function getContextMenuItemCardDrawMany(event:ContextMenuEvent):void {
+            try {
+                openDrawCardWindow();
+            } catch(e:Error) {
+                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+            }
+        }
+        
+        protected function getContextMenuItemCardSelect(event:ContextMenuEvent):void {
             try {
                 openSelectCardWindow();
             } catch(e:Error) {
@@ -141,24 +148,75 @@ package {
             }
         }
         
-        private function drawCardSecret():void {
+        override protected function isPrintCardText():Boolean {
+            return false;
+        }
+        
+        public function drawCard(isOpen_:Boolean, count:int = 1):void {
+            if( isOpen_ ) {
+                DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを引いて公開しました。");
+            } else {
+                DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを引きました。");
+            }
+
+            
+            sender.drawCard( isOpen_,
+                             getSelfOwnerId(),
+                             getSelfOwnerName(),
+                             this.getMountName(),
+                             getNewCardImgId(),
+                             this.getX() + (getWidth() * Map.getSquareLength() / 3),
+                             this.getY() + 10,
+                             getId(),
+                             count);
+        }
+        
+        private function getNewCardImgId():String {
+            var newCardImgId:String = MovablePiece.getDefaultId();
+            
+            'nextCardId'
+            return newCardImgId;
+        }
+        
+        public function drawCardSecret(count:int = 1):void {
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを伏せたまま引きました。");
+            
             var isOpen:Boolean = false;
             var ownerId:String = Card.getNobodyOwner();
             var ownerName:String = "";
+            
+            var newCardImgId:String = MovablePiece.getDefaultId();
             
             sender.drawCard( isOpen,
                              ownerId,
                              ownerName,
                              this.getMountName(),
+                             getNewCardImgId(),
                              this.getX() + 10,
                              this.getY() + 10,
-                             getId());
+                             getId(),
+                             count);
         }
         
-        private function openSelectCardWindow():void {
+        protected function openDrawCardWindow():void {
+            var window:DrawCardWindow = DodontoF.popup(DrawCardWindow, true) as DrawCardWindow;
+            window.setCardMount(this);
+        }
+        
+        
+        protected function openSelectCardWindow():void {
             var window:SelectCardWindow = DodontoF.popup(SelectCardWindow, true) as SelectCardWindow;
             window.setCardMount(this);
         }
         
+        
+        override protected function canDoubleClick():Boolean {
+            return true;
+        }
+        
+        override protected function doubleClickEvent(event:MouseEvent):void {
+            drawCard(false);
+        }
+                
     }
 }

@@ -33,6 +33,11 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "フロアタイル";
+        }
+        
+        
         
         public static function getJsonData(imageUrl:String,
                                            width:int,
@@ -114,7 +119,7 @@ package {
             };
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getMapTileLayer();
         }
         
@@ -147,7 +152,7 @@ package {
             drawTile();
         }
         
-        private function loadViewImage():void {
+        override public function loadViewImage():void {
             var name:String = this.imageUrl;
             var rotation:int = 0;
             view.loadImageWidthHeightRotation(name, this.imageUrl,
@@ -197,7 +202,21 @@ package {
             view.addChild(nameTextField);
         }
         
+        override public function getWidth():int {
+            return this.width;
+        }
         
-
+        override public function getHeight():int {
+            return this.height;
+        }
+        
+        override public function getOwnWidth():int {
+            return getWidth() * getSquareLength();
+        }
+        
+        override public function getOwnHeight():int {
+            return getHeight() * getSquareLength();
+        }
+        
     }
 }

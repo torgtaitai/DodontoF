@@ -28,6 +28,12 @@
     
     public function imageTypeChanged():void {
         tagText.text = imageType.selectedItem.label + "　";
+        tagText.toolTip = "";
+        
+        if( imageType.selectedItem.label == ImageTag.getMapTag() ) {
+            tagText.text += "縦20横20　";
+            tagText.toolTip = "タグ名に 縦nn横mm を記述することでマップ変更時に自動的にそのサイズが指定されます。";
+        }
     }
     
     private function setup():void {

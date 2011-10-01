@@ -49,9 +49,9 @@
                     click="visibleSecretTalk()"
                     toolTip="秘話機能有効化"
                     />
-          <mx:ComboBox id="sendto"
+          <mx:ComboBox id="sendtoBox"
                        toolTip="送信先：（全員）以外ならその相手にだけ送信されます"
-                       change="changeSendto()"
+                       change="changeSendtoBox()"
                        rowCount="10"
                        visible="false"
                        width="0"
@@ -65,46 +65,6 @@
                            change="setDiceBotHelpText();"
                            rowCount="10"
                            >
-<!--
-                <mx:Object label="ダイスボット(指定無し)"      gameType=""                    prefix="" />
-                <mx:Object label="アースドーン"                gameType="EarthDawn"           prefix="\d+e\d+" />
-                <mx:Object label="アリアンロッド"              gameType="Arianrhod"           prefix="" />
-                <mx:Object label="アルスマギカ"                gameType="ArsMagica"           prefix="ArS" />
-                <mx:Object label="ウォーハンマー"              gameType="Warhammer"           prefix="WH" />
-                <mx:Object label="エルリック！"                gameType="Elric!"              prefix="" />
-                <mx:Object label="エムブリオマシン"            gameType="EmbryoMachine"       prefix="(EM\t+|HLT|MFT|SFT)" />
-                <mx:Object label="カオスフレア"                gameType="Chaos Flare"         prefix="" />
-                <mx:Object label="ガンドッグ"                  gameType="Gundog"              prefix="" />
-                <mx:Object label="ガンドッグ・ゼロ"            gameType="GundogZero"          prefix="(.DPT|.FT)" />
-                <mx:Object label="クトゥルフ"                  gameType="Cthulhu"             prefix="" />
-                <mx:Object label="クトゥルフテック"            gameType="CthulhuTech"         prefix="" />
-                <mx:Object label="ゲヘナ・アナスタシス"        gameType="GehennaAn"           prefix="(\d+G\d+|\d+GA\d+)" />
-                <mx:Object label="サタスペ"                    gameType="Satasupe"            prefix="(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)" />
-                <mx:Object label="シノビガミ"                  gameType="ShinobiGami"         prefix="(BT|ET|FT|ST|WT|CST|MST|DST|TST|NST|KST)" />
-                <mx:Object label="シャドウラン"                gameType="ShadowRun"           prefix="" />
-                <mx:Object label="シャドウラン第４版"          gameType="ShadowRun4"          prefix="" />
-                <mx:Object label="ソードワールド"              gameType="SwordWorld"          prefix="K\d+" />
-                <mx:Object label="ソードワールド2.0"           gameType="SwordWorld2.0"       prefix="K\d+" />
-                <mx:Object label="ダークブレイズ"              gameType="DarkBlaze"           prefix="(DB\d+|DB@|BT\d+)" />
-                <mx:Object label="ダブルクロス2nd,3rd"         gameType="DoubleCross"         prefix="(\d+dx|ET)" />
-                <mx:Object label="デモンパラサイト"            gameType="Demon Parasite"      prefix="((N|A|M)?URGE\d+|OUURGE\d|OCURGE)" />
-                <mx:Object label="トーグ"                      gameType="TORG"                prefix="(TG|RT|Result|IT|Initimidate||TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage||BT|bonus|total)" />
-                <mx:Object label="特命転校生"                  gameType="TokumeiTenkousei"    prefix="" />
-                <mx:Object label="トンネルズ＆トロールズ"      gameType="Tunnels &amp; Trolls"  prefix="(\d+H?BS)" />
-                <mx:Object label="ナイトウィザード"            gameType="NightWizard"         prefix="\d+NW" />
-                <mx:Object label="ナイトメアハンター=ディープ" gameType="NightmareHunterDeep" prefix="" />
-                <mx:Object label="ファンタズムアドベンチャー"  gameType="PhantasmAdventure"   prefix="" />
-                <mx:Object label="パラサイトブラッド"          gameType="ParasiteBlood"      prefix="(N|A|M)?URGE\d+" />
-                <mx:Object label="ハンターズムーン"            gameType="HuntersMoon"         prefix="(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)" />
-                <mx:Object label="ペンドラゴン"                gameType="Pendragon"           prefix="" />
-                <mx:Object label="迷宮キングダム"              gameType="MeikyuKingdom"       prefix="\d+MK|LRT|ORT|CRT|ART|TBT|CBT|SBT|VBT|THT|CHT|SHT|VHT|KDT|KCT|KMT|CAT|FWT|CFT|TT|NT|ET|T1T|T2T|T3T|T4T|T5T|NAME" />
-                <mx:Object label="ルーンクエスト"              gameType="RuneQuest"           prefix="" />
-                <mx:Object label="ロールマスター"              gameType="RoleMaster"          prefix="" />
-                <mx:Object label="ワープス"                    gameType="WARPS"               prefix="" />
-                <mx:Object label="比叡山炎上"                  gameType="Hieizan"             prefix="" />
-                <mx:Object label="無限のファンタジア"          gameType="Infinite Fantasia"   prefix="" />
-                <mx:Object label="Chill"                       gameType="Chill"               prefix="SR\d+" />
--->
               </mx:ComboBox>
               
               <mx:Image id="novelticModeButton" source="{novelticModeIcon}" click="changeNovelticMode()" />
@@ -118,6 +78,7 @@
               <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="カットイン設定" />
               <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
               <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="ファイルアップローダー" />
+              <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->
       
             </mx:HBox>
           </mx:HBox>
@@ -169,6 +130,10 @@
         [Embed(source='image/icons/page_white_get.png')]
         [Bindable]
         private static var fileUploadIcon:Class;
+    
+        [Embed(source='image/icons/twitter.png')]
+        [Bindable]
+        private static var twitterIcon:Class;
     
         [Embed(source='image/icons/key.png')]
         [Bindable]
@@ -271,12 +236,15 @@
             return isSoundOn;
         }
         
-        public function get publicChatChannelBox():ChatMessageLogBox {
-            return getChatChannle(0);
+        static private var defaultCharacterName:String = "";
+        
+        static public function setDefaultCharacterName(name:String):void {
+            defaultCharacterName = name;
+            Log.logging('defaultCharacterName', defaultCharacterName);
         }
         
-        public function get chatMessageLogBox():ChatMessageLogBox {
-            return publicChatChannelBox;
+        public function get publicChatChannelBox():ChatMessageLogBox {
+            return getChatChannle(0);
         }
         
         public function printStandingGraphics(senderName:String,
@@ -305,6 +273,10 @@
             
             var characterName:String = info["characterName"];
             Log.logging("loadPlayerInfo characterName", characterName);
+            if( characterName == "" ) {
+                characterName = defaultCharacterName;
+            }
+            
             chatCharacterName.text = characterName;
             chatCharacterName.validateNow();
             Log.logging("loadPlayerInfo end, chatCharacterName.text", chatCharacterName.text);
@@ -337,6 +309,9 @@
         
         public function setDiceBotGameType(gameType:String):void {
             Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            
+            diceBotGameType.validateNow();
+            setDiceBotHelpText();
         }
         
         private function getDiceBotGameTypeKeyName():String { 
@@ -366,7 +341,6 @@
             
             Config.getInstance().saveInfo(getSaveInfoKeyNameForChatFont(), info);
         }
-        
         
         public function setInitPosition():void {
             if( loadPosition() ) {
@@ -648,8 +622,6 @@
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
             super.updateDisplayList(unscaledWidth, unscaledHeight);
             
-            // Shift the divider one pixel up if minimized so there isn't a gap between the left and right borders.
-            // The bottom border is removed if minimized.
             var deltaY:Number = windowState == WINDOW_STATE_MINIMIZED ? -1 : 0;
             var graphics:Graphics = headerDivider.graphics;
             graphics.clear();
@@ -673,7 +645,7 @@
         override public function setup():void {
             titleBar.addChild(diceRollPlace);
             
-            chatMessageLogBox.checkNovelMode();
+            publicChatChannelBox.checkNovelMode();
             initChannels();
             
             novelticMode = new NovelticMode(this);
@@ -735,7 +707,7 @@
         
         public function clearForReplay():void {
             standingGraphics.clear();
-            clearChatMessageLog();
+            clearPublicChatMessageLog();
         }
         
         public function setStandingGraphics(infos:ArrayCollection):void {
@@ -771,8 +743,10 @@
             }
             chatCharacterName.dataProvider = dataProvider;
             chatCharacterName.validateNow();
+            standingGraphicsStates.validateNow();
             
             chatCharacterName.text = tmpChatCharacterName;
+            changedChatCharacterName();
             Log.logging("refreshChatCharacterName() end, chatCharacterName.text", chatCharacterName.text);
         }
         
@@ -824,226 +798,24 @@
             
             Log.logging("changedChatCharacterName() end, chatCharacterName.text", chatCharacterName.text);
         }
-
+        
         private function setDiceBotHelpText():void {
             saveChatInfos();
+            var helpText:String = diceBotGameType.dataProvider[0].info;
             
-            var result:String = "";
-            result += "【ダイスボット】(Faceless氏の「ボーンズ＆カーズ」を流用)\n";
-            result += "チャットの先頭にダイス用の文字を入力するとロールが可能（全角文字でもOK）。\n";
-            result += "入力例）２ｄ６＋１　攻撃！\n";
-            result += "出力例）2d6+1　攻撃！\n";
-            result += "　　　　  diceBot: (2d6) → 7\n";
-            result += "上記のようにダイス文字の後ろに空白を入れて発言も可能。\n";
-            result += "以下、使用例をザックリと。\n";
-            result += "　3d6+1>=9 ：3d6+1で目標値9以上かの判定\n";
-            result += "　1d100<=50 ：D100の下方ロール\n";
-            result += "　3u6[6] ：ダイスが6の場合に振り足しして合計する(上方無限)\n";
-            result += "　3B6 ：3d6を振って、ダイス目をバラバラのまま出力する。（合計しない）\n";
-            result += "　10b6>=4 ：10d6を振り、4以上のダイス目の個数を数える。\n";
-            result += "　(8/2)D(4+6)<=(5*3)：個数・ダイス・達成値には四則演算も使用可能。\n";
-            result += "　C(10-4*3/2+2)：C(計算式）で計算だけの実行も可能。\n";
-            //result += "Choise[A,B,C] ：A,B,Cをランダムで選択。敵の攻撃目標選択等に\n";
-            //result += "　例）diceBot : (CHOISE[PC1,PC2]) → PC1\n";
-            result += "======================================\n";
-
-            var gameType:String = getGameType();
-        
-            if( (gameType == "SwordWorld") || (gameType == "SwordWorld2.0") ) {
-                result += "【ソードワールド、ソードワールド2.0専用】\n";
-                result += "K20+3：レーティング（威力）表で20を参照し+3する。\n";
-                result += "　例）KeyNo.20+3 → 2D:5 → 3+3 → 6\n";
-                result += "K10+5[9]／K10+5@9：「[値]」あるいは「@値」でクリティカル値指定\n";
-                result += "　例）KeyNo.10[9]+5 → 2D:9,5 → 7+5 → 12 → 1回転\n";
-                result += "K20$+1／K10+5$9／k10-5@9$+2／k10[9]+10$9：「$修正値」を付けることでダイス目を修正（運命変転やクリティカルレイ用）\n";
-            } else if( gameType == "EarthDawn" ) {
-                result += "【アースドーン専用】\n";
-                result += "13e8+1d10：[ステップ]e[目標値]+[カルマダイス]\n";
-                result += "　例）EarthDawn : ステップ13,目標値8:1d12(11)+2d10(5,5)=21:結果:最良成功。\n";
-            } else if( gameType == "GehennaAn" ) {
-                result += "【ゲヘナ・アナスタシア専用】\n";
-                result += "・通常判定　(nGt+m)  (n:ダイス数, t:目標値, m:修正値)\n";
-                result += "・戦闘判定　(nGAt+m) (n:ダイス数, t:目標値, m:修正値)\n";
-                result += "　例）1G2+3 2ga3 3GA4+5";
-            } else if( gameType == "EmbryoMachine") {
-                result += '・判定ロール(EMt+m@c#f) (t:目標値, m:修正値, c:クリティカル値, f;ファンブル値)\n';
-                result += "・命中部位表　(HLT)\n";
-                result += "・白兵攻撃ファンブル表　(MFT)\n";
-                result += "・射撃攻撃ファンブル表　(SFT)\n";
-            } else if( gameType == "Warhammer" ) {
-                result += "【ウォーハンマー専用】\n";
-                result += "whH10 ：クリティカル表結果出力。「WH部位 クリティカル値」の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。\n";
-                result += "　例）Warhammer :腕部CT表(29+5) → 09:大動脈に傷が及んだ。コンマ数秒の内に損傷した肩から血を噴出して倒れる。ショックと失血により、ほぼ即死する。サドンデス×\n";
-                result +="wh60 ：命中判定。「WH(命中値)@(種別)」の形で指定します。\n";
-                result +="部位は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。\n";
-                result +="「2H(二足)」「2W(有翼二足)」「4(四足)」「4H(半人四足)」「4W(有翼四足)」「W(鳥類)」となります。\n";
-                result +="命中判定を行って、当たれば部位も表示します。\n";
-                result +="なお、種別指定を省略すると「二足」、「@」だけにすると全種別の命中部位を表示します。(コマンドを忘れた時の対応です)\n";
-                result +="　例）以下、各種出力例\n";
-                result +="wh60\n";
-                result +="Warhammer : (WH60) → 1 → 成功(成功度5) 二足:頭部\n";
-                result +="Wh43@4W\n";
-                result +="Warhammer : (WH43) → 1 → 成功(成功度4) 有翼四足:頭部\n";
-                result +="WH65@\n";
-                result +="Warhammer : (WH65) → 2 → 成功(成功度6) 二足:右腕 有翼二足:右腕 四足:胴体 半人四足:右腕 有翼四足:右翼 鳥:右翼\n";
-
-            } else if( gameType == "Chill" ) {
-                result += "【Chill専用】\n";
-                result += "SR7 ：ストライク・ランク・チャートに従って自動でダイスロールを行い、負傷とスタミナロスを計算します\n";
-                result += "　例）Chill : (SR7:4d10, 1d10) → 20, 2 → スタミナ損失20, 負傷2\n";
-
-            } else if(( gameType == "Demon Parasite" ) || ( gameType == "ParasiteBlood" )) {
-                result += "【デモンパラサイト・パラサイトブラッド専用】\n";
-                /*
-                result += "URGEx →”URGE衝動レベル”の形で指定します。\n";
-                result += "衝動表に従って自動でダイスロールを行い、結果を表示します。\n";
-                result += "ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。\n";
-                result += "”nURGE衝動レベル”と頭にNを付けると「新衝動表」、頭にAを付けると「誤作動表」\n";
-                result += "頭にMを付けると「ミュータント衝動表」になります。\n";
-                result += "　例）URGE1　nurge2　AURGE3　murge4　Surge5\n";
-                */
-                result += "・デモンパラサイト　衝動表　　 (URGEx) (xは衝動段階)\n";
-                result += "・　　〃　　　　　新衝動表　　(NURGEx)\n";
-                result += "・　　〃　　　　　誤作動表　　(AURGEx)\n";
-                result += "・　　〃ミュータント衝動表　　(MURGEx)\n";
-                result += "・　〃鬼御魂(戦闘外)衝動表　 (OUURGEx)\n";
-                result += "・　〃鬼御魂(戦闘中)衝動表　 (OCURGEx)\n";
-                result += "例）URGE1　nurge2　AURGE3　murge4　Surge5 OUURGE1 ocurge2\n";
-            } else if( gameType == "ShinobiGami" ) {
-                result += "【シノビガミ専用】\n";
-                result += "BT→戦場表を振る\n";
-                result += "ET→感情表を振る\n";
-                result += "FT→ファンブル表を振る\n";
-                result += "ST→シーン表を振る\n";
-                result += "WT→変調表を振る\n";
-                result += "CST→都市シーン表を振る\n";
-                result += "MST→館シーン表を振る\n";
-                result += "DST→出島シーン表を振る\n";
-                result += "TST→トラブルシーン表を振る\n";
-                result += "NST→日常シーン表を振る\n";
-                result += "KST→回想シーン表を振る\n";
-            } else if( gameType == "DoubleCross" ) {
-                result += "【ダブルクロス専用】\n";
-                result += "xDX@c→\"(個数)DX(修正)@(クリティカル値)\"で指定します。\n";
-                result += "　例）10dx　　　10dx+5@8　　　5DX10+7-3@7\n";
-                result += "ET→感情表を振る\n";
-                result += "　例）DoubleCross : 感情表(6-89) → ○憧憬(どうけい) - 不快感(ふかいかん)\n";
-            } else if( gameType == "ArsMagica" ) {
-                result += "【アルスマギカ専用】\n";
-                result += "\"ArS(ボッチダイス)+(修正)\"　アルスマギカのストレスダイス専用コマンドです。判定にも使えます。\n";
-                result += "ボッチダイスと修正は省略可能です。(ボッチダイスを省略すると1として扱います)\n";
-                result += "botchダイスの0の数が2以上の時は、数えて表示します。\n";
-                result += "（注意！） botchの判断が発生したときには、そのダイスを含めてロールした全てのダイスを[]の中に並べて表示します。\n";
-                result += "　例) (1R10[5]) → 0[0,1,8,0,8,1] → Botch!\n";
-                result += "　　最初の0が判断基準で、その右側5つがボッチダイスです。1*2,8*2,0*1なので1botchという訳です。\n";
-            } else if( gameType == "Tunnels & Trolls" ) {
-                result += "【トンネルズ＆トロールズ専用】\n";
-                result += "T&T バーサーク　　　　　(nBS+x)  (n:ダイス数, x:修正)\n";
-                result += "T&T ハイパーバーサーク　(nHBS+x) (n:ダイス数, x:修正)\n";
-            } else if( gameType == "Satasupe" ) {
-                result += "【サタスペ専用】\n";
-                result += "nR>=x[y,z]　(n:最大ロール数, x:目標値, y:目標成功数, z:ファンブル値)\n";
-                result += "　例）3R>=7[1,2]\n";
-                result += "　　　Satasupe : (3R>=7[1,2]) → 0[1,3]+1[5,2] → 成功度1\n";
-                result += "表一覧：表は TAGT3 のように後ろに数字を書くことで複数回ロールします\n";
-                result += "タグ決定表　　　　　　　(TAGT)\n";
-                result += "情報イベント表　　　　　(～IET)\n";
-                result += "　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)\n";
-                result += "情報ハプニング表　　　　(～IHT)\n";
-                result += "　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)\n";
-                result += "命中判定ファンブル表　　(FumbleT)\n";
-                result += "致命傷表　　　　　　　　(FatalT)\n";
-                result += "アクシデント表　　　　　(AccidentT)\n";
-                result += "汎用アクシデント表　　　(GeneralAT)\n";
-                result += "その後表　　　　　　　　(AfterT)\n";
-                result += "ロマンスファンブル表　　(RomanceFT)\n";
-                result += "NPCの年齢と好みを一括出力　(NPCT)\n";
-            } else if( gameType == "DarkBlaze" ) {
-                result += "【ダークブレイズ専用】\n";
-                result += "判定　　(DBx,y#m) (x:能力値, y:技能値, m:修正)\n";
-                result += "掘り出し袋表　　(BTx) (x:ダイス数)\n";
-            } else if( gameType == "GundogZero" ) {
-                result += "【ガンドッグ・ゼロ専用】\n";
-                result += "・ダメージペナルティ表　　(～DPTx) (x:修正)\n";
-                result += "　　射撃DP表(SDPT)、格闘DP表(MDPT)、車両DP表(VDPT)、汎用DP表(GDPT)\n";
-                result += "・ファンブル表　　　　　　(～FTx)  (x:修正)\n";
-                result += "　　射撃F表(SFT)、格闘F表(MFT)、投擲F表(TFT)\n";
-            } else if( gameType == "NightWizard" ) {
-                result += "【ナイトウィザード専用】\n";
-                result += "・判定ロール (nNW+m@x#y) \n";
-                result += "　　(n:基本値+常時, m:否常時+状態異常, x:クリティカル値, y:ファンブル値)\n";
-            } else if( gameType == "TORG" ) {
-                result += "【トーグ専用】\n";
-                result += "・判定　(TGm)\n";
-                result += "　TORG専用の判定コマンドです。\n";
-                result += "　\"TG(技能基本値)\"でロールします。Rコマンドに読替されます。\n";
-                result += "　振り足しを自動で行い、20の出目が出たときには技能無し値も並記します。\n";
-                result += "・各種表　\"(表コマンド)(数値)\"で振ります。\n";
-                result += "　・一般結果表 成功度出力「RTx or RESULTx」\n";
-                result += "　・威圧/威嚇 対人行為結果表「ITx or INTIMIDATEx or TESTx」\n";
-                result += "　・挑発/トリック 対人行為結果表「TTx or TAUNTx or TRICKx or CTx」\n";
-                result += "　・間合い 対人行為結果表「MTx or MANEUVERx」\n";
-                result += "　・オーズ（一般人）ダメージ　「ODTx or ORDSx or ODAMAGEx」\n";
-                result += "　・ポシビリティー能力者ダメージ「DTx or DAMAGEx」\n";
-                result += "　・ボーナス表「BTx+y or BONUSx+y or TOTALx+y」 xは数値, yは技能基本値\n";
-            } else if( gameType == "HuntersMoon" ) {
-                result += "【ハンターズムーン専用】\n";
-                result += "・各種表\n";
-                result += "　・遭遇表　(ET)\n";
-                result += "　・都市ロケーション表　(CLT)\n";
-                result += "　・閉所ロケーション表　(SLT)\n";
-                result += "　・炎熱ロケーション表　(HLT)\n";
-                result += "　・冷暗ロケーション表　(FLT)\n";
-                result += "　・部位ダメージ決定表　(DLT)\n";
-                result += "　・モノビースト行動表　(MAT)\n";
-                result += "　・異形アビリティー表　(SATx) (xは個数)\n";
-                result += "　・指定特技(社会)表　　(TST)\n";
-                result += "　・指定特技(頭部)表　　(THT)\n";
-                result += "　・指定特技(腕部)表　　(TAT)\n";
-                result += "　・指定特技(胴部)表　　(TBT)\n";
-                result += "　・指定特技(脚部)表　　(TLT)\n";
-                result += "　・指定特技(環境)表　　(TET)\n";
-            } else if( gameType == "MeikyuKingdom" ) {
-                result += "【迷宮キングダム専用】\n";
-                result += "・判定　(nMK+m)\n";
-                result += "　　迷宮キングダム判定用コマンドです。Rコマンドに読替されます。\n";
-                result += "　　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。\n";
-                result += "　絶対成功と絶対失敗も自動判定します。\n";
-                result += "・各種表\n　　";
-                result += "生活散策表 LRT／";
-                result += "治安散策表 ORT／";
-                result += "文化散策表 CRT／";
-                result += "軍事散策表 ART／";
-                result += "才覚休憩表 TBT／";
-                result += "魅力休憩表 CBT／";
-                result += "探索休憩表 SBT／";
-                result += "武勇休憩表 VBT／";
-                result += "才覚ハプニング表 THT／";
-                result += "魅力ハプニング表 CHT／";
-                result += "探索ハプニング表 SHT／";
-                result += "武勇ハプニング表 VHT／";
-                result += "王国災厄表 KDT／";
-                result += "王国変動表 KCT／";
-                result += "王国変動失敗表 KMT／";
-                result += "痛打表 CAT／";
-                result += "致命傷表 FWT／";
-                result += "戦闘ファンブル表 CFT／";
-                result += "道中表 TT／";
-                result += "交渉表 NT／";
-                result += "感情表 ET／";
-                result += "お宝表１ T1T／";
-                result += "お宝表２ T2T／";
-                result += "お宝表３ T3T／";
-                result += "お宝表４ T4T／";
-                result += "お宝表５ T5T／";
-                result += "名前表 NAMEx (xは個数)";
+            var item:Object = diceBotGameType.selectedItem;
+            
+            if( item.gameType == '' ) {
+                helpText += "==【その他】===============================\n";
+                helpText += "ゲーム固有の判定がある場合はこの場所に記載されます。";
             } else {
-                result += "その他、ゲーム固有の判定がある場合はこの場所に記載されます。\n";
+                helpText += ("==【" + item.label + "専用】=======================\n")
+                helpText += item.info;
             }
-        
-            diceBotHelpText = result;
+            
+            diceBotHelpText = helpText;
         }
-
+        
         private static var isDiceBotOn:Boolean = true;
         public static function setDiceBotOn(b:Boolean):void {
             isDiceBotOn = b;
@@ -1237,6 +1009,8 @@
         }
         
         public function sendChatMessage(channel:int, chatMessage:String, isCheckDiceRoll:Boolean = true):void {
+            Log.logging("sendChatMessage begin");
+            
             if( DodontoF_Main.getInstance().isVisiterMode() ) {
                 channel = this.lastChatChannel;
                 selectChatChannel(channel);
@@ -1247,22 +1021,27 @@
         }
         
         public function sendChatMessageByChatSendData(data:ChatSendData, isCheckDiceRoll:Boolean = true):void {
+            Log.logging("sendChatMessageByChatSendData begin");
             if( data.getMessage() == "" ) {
+                Log.logging("data.getMessage() is empty")
                 return;
             }
             
+            Log.logging("isCheckDiceRoll", isCheckDiceRoll)
             if( isCheckDiceRoll ) {
-                var prefix:String = diceBotGameType.selectedItem.prefix;
-                var diceRoolMessage:String = getDiceRollText(data.getMessage(), prefix);
+                var diceRollMessage:String = getDiceRollText(data.getMessage());
+                Log.logging("diceRollMessage", diceRollMessage)
                 
-                if( diceRoolMessage != null ) {
-                    data.setMessage(diceRoolMessage);
+                if( diceRollMessage != null ) {
+                    data.setMessage(diceRollMessage);
                     var gameType:String = getGameType();
+                    Log.logging("sendDiceBotChatMessage(data, gameType) gameType", gameType)
                     sendDiceBotChatMessage(data, gameType);
                     return;
                 }
             }
             
+            Log.logging("chatMessageTrader.sendMessage(data)");
             chatMessageTrader.sendMessage(data);
         }
         
@@ -1281,38 +1060,19 @@
             chatMessageTrader.sendMessage(data);
         }
         
-        private function getDiceRollText(targetText:String, prefix:String):String {
-            var targetText:String = Utils.changeZenkakuToHankakuOnDiceBot(targetText);
-            
+        
+        private function getDiceRollText(targetText:String):String {
             if( ! isDiceBotOn ) {
                 return null;
             }
             
-            var patterns:Array = new Array();
-            patterns.push("\\d+D\\d*"); //加算ロール　(xDn)
-            patterns.push("\\d+B\\d+"); //バラバラロール　(xBn)
-            patterns.push("\\d+R\\d+"); //個数振り足しロール　(xRn)
-            patterns.push("\\d+U\\d+"); //上方無限ロール　(xUn)
-            patterns.push("C\\("); //計算用(Cコマンド)
-            patterns.push("\\([\\d\\+\\-\\*\\/]+\\)"); //ダイスの個数部分計算用
-            patterns.push("\\d+U\\d+"); //上方無限ロール　(xUn)
-            patterns.push("(\\d+|\\[\\d+...\\d+\\])D(\\d+|\\[\\d+...\\d+\\])"); //ランダム数値の埋め込み　([n...m]D[x...y])
-            patterns.push("\\d+[\\+\\-\\*\\/]"); //a+xDn のような加減算用
-            //patterns.push("choise\\["); //ランダム選択　(choise[A, B, C])
-            patterns.push("make"); //ランダムジェネレータ用
-            patterns.push(prefix);
+            var targetText:String = Utils.changeZenkakuToHankakuOnDiceBot(targetText);
+            var patterns:Array = getDicePatterns();
             
             for(var i:int = 0; i < patterns.length ; i++) {
-                var targetPattern:String = patterns[i];
-                if(targetPattern == "" ) {
-                    break;
-                }
+                var pattern:RegExp = patterns[i];
                 
-                if( isMatchGamePreFixByTargetPattern( targetText, targetPattern ) ) {
-                    return targetText;
-                }
-                
-                if( isMatchGamePreFixByTargetPattern( targetText, ("S" + targetPattern) ) ) {
+                if( isMatchGamePreFixByTargetPattern( targetText, pattern ) ) {
                     return targetText;
                 }
             }
@@ -1320,9 +1080,42 @@
             return null;
         }
         
-        private function isMatchGamePreFixByTargetPattern(targetText:String, targetPattern:String):Boolean {
-            var patternRegExp:RegExp = new RegExp("^" + targetPattern, "i");
-            var index:int = targetText.search( patternRegExp );
+        private var dicePatternsList:Object = new Object();
+        
+        private function getDicePatterns():Array {
+            var diceIndex:int = diceBotGameType.selectedIndex;
+            
+            var patterns:Array = dicePatternsList[diceIndex];
+            if( patterns != null ) {
+                Log.logging("patterns is already exist");
+                return patterns;
+            }
+            
+            patterns = new Array();
+            
+            addPrefixToPatterns( 0, patterns);
+            
+            if( diceIndex != 0 ) {
+                addPrefixToPatterns( diceIndex, patterns );
+            }
+            
+            Log.logging("create new patterns");
+            dicePatternsList[diceIndex] = patterns
+            
+            return patterns;
+        }
+        
+        private function addPrefixToPatterns(index:int, patterns:Array):void {
+            var prefixs:Array = diceBotGameType.dataProvider[index].prefixs;
+            
+            for each(var prefix:String in prefixs) {
+                    patterns.push( new RegExp("^" + prefix, "i") );
+                    patterns.push( new RegExp("^S" + prefix, "i") );
+                }
+        }
+        
+        private function isMatchGamePreFixByTargetPattern(targetText:String, pattern:RegExp):Boolean {
+            var index:int = targetText.search( pattern );
             return ( index == 0 );
         }
         
@@ -1333,8 +1126,7 @@
             var randomSeed:int = Dice.getRandomNumber(0xffff);
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.sendDiceBotChatMessage(chatSendData,
-                                                  randomSeed, gameType,
+            guiInputSender.sendDiceBotChatMessage(chatSendData, randomSeed, gameType,
                                                   sendDiceBotChatMessageResult);
         }
     
@@ -1346,60 +1138,37 @@
             return str;
         }
         
-        public function sendDiceBotChatMessageResult(event:Event):void {
+        public function sendDiceBotChatMessageResult(obj:Object):void {
             Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) Begin");
         
             try {
-                var loader:URLLoader = URLLoader(event.target);
-                var resultText:String = loader.data;
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+                var isSecret:Boolean = jsonData.isSecret;
+                Log.logging("isSecret", isSecret);
                 
-                //                                                  channel name  state  sendto color message       isSecret
-                var diceResultRegExp:RegExp = /##>customBot BEGIN<##(.*?)\t(.*?)\t(.*?)\t(.*?)\t(.+?)\t(.+?)(##>isSecretDice<##(.*))?##>customBot END<##/ms;
-                var diceResult:Object = diceResultRegExp.exec(resultText);
-                
-                var channel:int = parseInt( getDiceBotParam(diceResult[1]) );
-                var name:String = getDiceBotParam(diceResult[2]);
-                var state:String = getDiceBotParam(diceResult[3]);
-                var sendto:String = getDiceBotParam(diceResult[4]);
-                var color:String = getDiceBotParam(diceResult[5]);
-                
-                var diceRolledText:String = diceResult[6];
-                var isSecretMarker:String = diceResult[7];
-                var diceRolledText2:String = diceResult[8];
-                
-                if( diceRolledText == null ) {
-                    Log.loggingError("diceRolledText is null");
+                if( ! isSecret ) {
+                    Log.logging("result NOT isSecret");
                     return;
                 }
                 
-                diceRolledText = diceRolledText.replace(/＞/g, '→');
+                var channel:int = jsonData.channel;
+                var name:String = jsonData.name;
+                var state:String = jsonData.state;
+                var sendto:String = jsonData.sendto;
+                var color:String = jsonData.color;
                 
-                if( diceRolledText2 != null ) {
-                    diceRolledText2 = diceRolledText2.replace(/＞/g, '→');
-                }
-                
-                var data:ChatSendData = new ChatSendData(channel, diceRolledText, name, state, sendto);
+                var message:String = jsonData.message;
+                var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
                 data.setColorString(color);
                 data.setDiceRollResult();
-                
-                if( isSecretMarker == null ) {
-                    Log.logging("通常ダイスロール結果");
-                    sendDiceRollResultMessage(data);
-                } else {
-                    Log.logging("シークレットダイスロール結果");
-                    chatMessageTrader.sendMessage(data);
-                    
-                    data.setMessage(diceRolledText + diceRolledText2);
-                    SecretDiceWindow.printMessage(data);
-                }
-                
+                SecretDiceWindow.printMessage(data);
             } catch(e:Error) {
                 Log.loggingException("ChatWindow.sendDiceBotChatMessageResult()", e);
             }
         
             Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) End");
         }
-        
+
         public function sendDiceRollResultMessageForChatWindowUser(diceRolledText:String):void {
             var channel:int = getSelectedChatChannleIndex();
             var data:ChatSendData = new ChatSendData(channel, diceRolledText);
@@ -1427,6 +1196,14 @@
             guiInputSender.sendChatMessageMany(chatCharacterName.text, chatMessage, chatFontColor);
         }
         
+        /*
+        public function talkText():void {
+            var chatMessage:String = chatMessageInput.text;
+            //chatMessage = Utils.htmlToText(line);
+            new TextTalker().sendText( chatMessage );
+        }
+        */
+        
         private var userNames:Object = new Array();
         
         public function setUserNames(name:String):void {
@@ -1435,8 +1212,8 @@
         
         public function setChatFontSize(size:int, isReplayMode:Boolean = false):void {
             chatFontSize = size;
-            
             chatMessageInput.setStyle("fontSize", chatFontSize);
+            eachChatChannel(function(i:ChatMessageLogBox):void { i.setChatFontSize(chatFontSize); });
             
             if( isReplayMode ) {
                 return;
@@ -1503,12 +1280,12 @@
             }
             
             if( novelticMode.isNovelticModeOn() ) {
-                chatMessageLogBox.validateNow_All();
+                publicChatChannelBox.validateNow_All();
                 novelticMode.scrollChatMessageLogIfPositionIsLast(isForceScroll);
                 return;
             }
             
-            getChatChannle(channel).scrollChatBox(chatFontSize, isForceScroll);
+            getChatChannle(channel).scrollChatBox(isForceScroll);
         }
         
         public function scrollChatBox(component:Box, isForceScroll:Boolean = false):void {
@@ -1525,7 +1302,7 @@
         
         private function printChatLog():void {
             var channel:int = publicChatChannel;
-            getChatChannle(channel).resizeChatLog(chatFontSize, novelticMode);
+            getChatChannle(channel).resizeChatLog(novelticMode);
             
             chatMessageTrader.printAddedMessageToChatMessageLog();
             scrollChatMessageLogIfPositionIsLast(publicChatChannel, true);
@@ -1665,7 +1442,7 @@
         
         //どどんとふ起動後の初期手続きが完了したかのチェック用。
         private var isFirstLoadFinished:Boolean = false;
-    
+        
         public function playAddMessageSound(senderName:String):void {
             if( ! isFirstLoadFinished ) {
                 return;
@@ -1840,17 +1617,17 @@
             novelticMode.setChatBackgroundColor(color);
         }
         
-        public function getChatMessageLogList():Array {
-            return chatMessageLogBox.getChatMessageLogList();
+        public function getPublicChatMessageLogList():Array {
+            return publicChatChannelBox.getChatMessageLogList();
         }
         
-        public function clearChatMessageLog():void {
-            chatMessageLogBox.clearChatMessageLog();
+        public function clearPublicChatMessageLog():void {
+            publicChatChannelBox.clearChatMessageLog();
         }
         
         public function addChatLogText(channel:int):Boolean {
             var isCurrentChannel:Boolean = (channel == getSelectedChatChannleIndex());
-            var isAdded:Boolean = getChatChannle(channel).addChatLogText(novelticMode, chatFontSize, isCurrentChannel);
+            var isAdded:Boolean = getChatChannle(channel).addChatLogText(novelticMode, isCurrentChannel, isFirstLoadFinished);
             if( ! isAdded ) {
                 return false;
             }
@@ -1883,8 +1660,8 @@
         
         private function visibleSecretTalk():void {
             nameBox.removeChild(secretTalkButton);
-            sendto.visible = true;
-            sendto.width = 100;
+            sendtoBox.visible = true;
+            sendtoBox.width = 100;
         }
         
         private function changeWindowColorAndTitle(titleTail:String, color:String):void {
@@ -1901,10 +1678,10 @@
             changeWindowColorAndTitle("", "#F4FBFF");
         }
         
-        private function changeSendto():void {
+        private function changeSendtoBox():void {
             
-            if( sendto.selectedItem.data != null ) {
-                changeWindowColorAndTitle(sendto.selectedItem.label, "#FFFF99");
+            if( sendtoBox.selectedItem.data != null ) {
+                changeWindowColorAndTitle(sendtoBox.selectedItem.label, "#FFFF99");
             } else {
                 changeDefaultWindowColorAndTitle();
             }
@@ -1923,6 +1700,50 @@
             }
         }
         
+        public function updateChatWindowSendtoBox(loginUserInfo:Array, uniqueId:String):void {
+            var preData:String = null;
+            if( sendtoBox.selectedItem != null ) {
+                preData = sendtoBox.selectedItem.data;
+            }
+            
+            var dataProvider:Array = [];
+            
+            var option_all:Object = {
+                label : "（全員）",
+                data : null};
+            dataProvider.push(option_all);
+            
+            for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
+                var userInfo:Object = loginUserInfo[i];
+                
+                if( userInfo.userId == uniqueId ) {
+                    continue;
+                }
+                
+                var option:Object = {
+                    label : userInfo.userName,// + ":" + userInfo.userId,
+                    data : userInfo.userId};
+                dataProvider.push(option);
+            }
+            
+            sendtoBox.dataProvider = dataProvider;
+            
+            Utils.selectComboBox(sendtoBox, preData);
+        }
+        
+        public function sendToTwitter():void {
+            var urlVariables:URLVariables = new URLVariables();
+            var locationHref:String = String(ExternalInterface.call("function(){return location.href}"));
+            var reg:RegExp = /https?:\/\/[-_.!~*\'()\w;\/?:@&=+$,%#]+/;
+            urlVariables.url = ((locationHref.search(reg)==0) ? locationHref : "");
+            urlVariables.text = chatMessageInput.text;
+            urlVariables.related = "torgtaitai:どどんとふ作者です";
+            var urlRequest:URLRequest = new URLRequest("https://twitter.com/share");
+            urlRequest.data = urlVariables;
+            navigateToURL(urlRequest, "_blank");
+            
+            sendChatMessageLocal();
+        }
     ]]>
   </mx:Script>
   

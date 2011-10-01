@@ -13,7 +13,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.30.05.01(2011/04/24)";
+        private var version:String = "Ver.1.33.05(2011/09/25)";
         
         public function getVersion():String {
             return version;
@@ -52,8 +52,13 @@ package {
         }
         
         
+        private function getPlayRoomNumber():int {
+            var playRoomNumber:int =  + DodontoF_Main.getInstance().getPlayRoomNumber();
+            return playRoomNumber;
+        }
+        
         private function getSaveData():SharedObject {
-            return SharedObject.getLocal(saveDataKey);
+            return SharedObject.getLocal(saveDataKey + "_" + getPlayRoomNumber());
         }
         
         private var isSnapMovablePiece:Boolean= true;
@@ -152,6 +157,17 @@ package {
             return url;
         }
         
+        private var skinImageUrl:String;
+        
+        public function setSkinImageUrl(url:String):void {
+            skinImageUrl = getUrlString(url);
+        }
+        
+        public function getSkinImageUrl():String {
+            Log.logging("getSkinImageUrl skinImageUrl", skinImageUrl);
+            return skinImageUrl;
+        }
+        
         public function getOriginalUrlString(url:String):String {
             if(localUrlPrefix == null) {
                 return url;
@@ -169,7 +185,6 @@ package {
         }
         
         public function saveInfo(key:String, info:Object):void {
-            
             if( DodontoF_Main.getInstance().isTinyMode() ) {
                 key = tinyModePrefix + key;
             }
@@ -203,33 +218,121 @@ package {
             saveData.flush();
         }
         
-        public function getSaveInfoKeyNameForViewState():String {
-            return "ViewState";
-        }
+        private var saveInfoKeyNameForViewState:String = "ViewState";
         
-        
-        public function loadViewStateInfo():void {
-            var info:Object = loadInfo(getSaveInfoKeyNameForViewState());
-            
-            if( info == null ) {
+        public function setViewStateKey(key:String):void {
+            if( key == null ) {
                 return;
             }
             
-            loadToggleState( info, "isSnapMovablePiece", function(v:Boolean):void {isSnapMovablePiece = v} );
-            loadToggleState( info, "isAdjustImageSize", function(v:Boolean):void {isAdjustImageSize = v} );
-            loadToggleState( info, "isCardVisible", getDodontoFM().getMap().setVisibleCardLayer );
-            loadToggleState( info, "isStandingGraphicVisible", getDodontoFM().getChatWindow().setStandingGraphicsDisplayState );
-            loadToggleState( info, "isMapVisible", getDodontoFM().getMap().setVisible );
-            loadToggleState( info, "isPositionVisible", getDodontoFM().getMap().setVisibleGridPositionLayer );
-            loadToggleState( info, "isGridVisible", getDodontoFM().getMap().setVisibleGridLayer );
-            //loadToggleState( info, "isDirectionVisible", getDodontoFM().setVisibleDirectionLayer );
+            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            Log.logging("info", info);
+            if( info != null ) {
+                if( info.key == key ) {
+                    return;
+                }
+            }
+            
+            //キーが今までと異なるなら、コレまでの表示状態は破棄
+            var newInfo:Object = new Object();
+            saveInfo(getSaveInfoKeyNameForViewState(), newInfo);
         }
         
-        private function loadToggleState(info:Object, key:String, function_:Function):void {
-            var fullKey:String =  getMenuSateSaveKey(key);
-            var toggleState:Boolean = info[fullKey];
+        public function getSaveInfoKeyNameForViewState():String {
+            return saveInfoKeyNameForViewState;
+        }
+        
+        
+        private var loginSaveDataKey:String = "loginInfo";
+        
+        public function loadLoginInfo():Object {
+            return Config.getInstance().loadInfo(loginSaveDataKey);
+        }
+        
+        public function saveLoginInfo(loginInfo:Object):void {
+            saveInfo(loginSaveDataKey, loginInfo);
+        }
+        
+        
+        public function loadInfoForResiableWindow(key:String):Object {
+            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            if( info == null ) {
+                info = new Object();
+            }
             
-            function_.call(null, toggleState);
+            return info[key];
+        }
+        
+        public function loadViewStateInfo(serverInfo:Object):void {
+            if( serverInfo == null ) {
+                serverInfo = new Object();
+            }
+            
+            Log.logging("serverInfo", serverInfo);
+            var key:String = serverInfo.key;
+            Log.logging("loadViewStateInfo key", key);
+            setViewStateKey(key);
+            
+            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            if( info == null ) {
+                info = new Object();
+            }
+            Log.logging("local info", info);
+            
+            loadToggleState( serverInfo, info, "isSnapMovablePiece",
+                             function(v:Boolean):void {isSnapMovablePiece = v} );
+            loadToggleState( serverInfo, info, "isAdjustImageSize",
+                             function(v:Boolean):void {isAdjustImageSize = v} );
+            loadToggleState( serverInfo, info, "isCardVisible",
+                             getDodontoFM().getMap().setVisibleCardLayer );
+            loadToggleState( serverInfo, info, "isStandingGraphicVisible",
+                             getDodontoFM().getChatWindow().setStandingGraphicsDisplayState );
+            loadToggleState( serverInfo, info, "isPositionVisible",
+                             getDodontoFM().getMap().setVisibleGridPositionLayer );
+            loadToggleState( serverInfo, info, "isGridVisible",
+                             getDodontoFM().getMap().setVisibleGridLayer );
+            
+            loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isChatVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
+
+            Log.logging("loadViewStateInfo info", info);
+            
+            saveViewStateInfo();
+        }
+        
+        private function loadToggleStateForRisizableWindow(serverInfo:Object, menuName:String):void {
+            Log.logging("loadToggleStateForRisizableWindow menuName", menuName);
+            
+            var dummyInfo:Object = new Object();
+            loadToggleState(serverInfo, dummyInfo, menuName, function(toggled:Boolean):void {
+                    thisObj.getDodontoF().selectMenuByManuName(menuName, toggled);
+                });
+        }
+        
+        private function loadToggleState(serverInfo:Object, info:Object, key:String,
+                                         action:Function):void {
+            Log.logging("loadToggleState key", key);
+            
+            var fullKey:String =  getMenuSateSaveKey(key);
+            var toggleStateObj:Object = info[fullKey];
+            
+            Log.logging("local value", toggleStateObj);
+            
+            if( toggleStateObj == null ) {
+                toggleStateObj = serverInfo[key];
+                Log.logging("server value", toggleStateObj);
+            }
+            
+            if( toggleStateObj == null ) {
+                Log.logging("this is NULL.");
+                return;
+            }
+            
+            var toggleState:Boolean = toggleStateObj as Boolean;
+            
+            action(toggleState);
             getDodontoF().changeMainMenuToggle(key, toggleState);
         }
         
@@ -250,19 +353,32 @@ package {
         }
         
         public function saveViewStateInfo():void {
-            var info:Object = {};
+            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            if( info == null ) {
+                info = new Object();
+            }
             
             saveMainManuStateToInfo(info, "isSnapMovablePiece");
             saveMainManuStateToInfo(info, "isAdjustImageSize");
             saveMainManuStateToInfo(info, "isCardVisible");
             saveMainManuStateToInfo(info, "isStandingGraphicVisible");
-            saveMainManuStateToInfo(info, "isMapVisible");
             saveMainManuStateToInfo(info, "isPositionVisible");
             saveMainManuStateToInfo(info, "isGridVisible");
-            //saveMainManuStateToInfo(info, "isDirectionVisible");
+            
+            Log.logging("saveViewStateInfo info", info);
             
             saveInfo(getSaveInfoKeyNameForViewState(), info);
         }
+        
+        public function saveInfoForResiableWindow(key:String, value:Object):void {
+            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            if( info == null ) {
+                info = new Object();
+            }
+            info[key] = value;
+            saveInfo(getSaveInfoKeyNameForViewState(), info);
+        }
+        
         
         private var novelticModeInfoKey:String = "novelticModeInfo";
         
@@ -294,8 +410,18 @@ package {
             return url;
         }
         
+        private var paletteCountParTab:int = 20;
+        public function getPaletteCountParTab():int {
+            return paletteCountParTab;
+        }
+        
+        
         public function getGraveyardLimit():int {
             return 10;
         }
+        
+        [Bindable]
+            static public var windowAlpha:Number = 0.85;
+        
     }
 }

@@ -12,7 +12,8 @@ sub new{
     my $hash= {
         args => $args_org,
         game_type => $game_type,
-        isSecretMarkerPrinted => 0
+        isSecretMarkerPrinted => 0,
+        isGameTypePrinted => 0
     };
     
     bless $hash,$pkg;
@@ -46,12 +47,23 @@ sub privmsg {
     $self->notice($to, $message);
 }
 
+sub init {
+    my $self = shift;
+    $self->{'isGameTypePrinted'} = 0;
+    $self->{'isSecretMarkerPrinted'} = 0;
+}
+
 sub notice {
     my $self = shift;
     my $to = shift;
     my $message = shift;
     
-    print( "\n" . $self->{'game_type'} . " " );
+    print("\n");
+    
+    unless( $self->{'isGameTypePrinted'} ) {
+        print( $self->{'game_type'} . " " );
+        $self->{'isGameTypePrinted'} = 1;
+    }
     
     print( $message );
 }

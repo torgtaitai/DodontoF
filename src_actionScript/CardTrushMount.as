@@ -29,6 +29,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "カード捨て札";
+        }
+        
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x_:int,
@@ -54,6 +58,10 @@ package {
         
         override protected function setParams(params:Object):void {
             super.setParams(params);
+        }
+        
+        override public function getRoundColor():int {
+            return 0x000000;
         }
         
         override public function getTitleText():String {
@@ -84,6 +92,8 @@ package {
             addMenuItem(menu, "捨て札を山札に積んでシャッフルする", getContextMenuItemCardShuffle, true);
             addMenuItem(menu, "捨て札をそのまま山札に積んで、シャッフルしない", getContextMenuItemCardNoShuffle, true);
             
+            addMenuItem(menu, "山からカードを選び出す", getContextMenuItemCardSelect, true);
+            
             view.contextMenu = menu;
         }
         
@@ -96,6 +106,14 @@ package {
         }
         
         private function returnCard():void {
+            var message:String = "";
+            if( this.getCardName() == "" ) {
+                message = "が「" + this.getMountNameForDisplay() + "」の捨て札からカードを引き戻しました。";
+            } else {
+                message = "が捨て札から「" + this.getCardName() + "」を引き戻しました。";
+            }
+            
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message );
             sender.returnCard( getMountName(),
                                this.getX(),
                                this.getY(),
@@ -122,5 +140,19 @@ package {
             sender.shuffleCards( this.getMountName(), this.getId(), isShuffle );
         }
         
-   }
+        override protected function openSelectCardWindow():void {
+            var window:SelectCardWindow = DodontoF.popup(SelectTrushCardWindow, true) as SelectCardWindow;
+            window.setCardMount(this);
+        }
+        
+        
+        override protected function canDoubleClick():Boolean {
+            return true;
+        }
+        
+        override protected function doubleClickEvent(event:MouseEvent):void {
+            returnCard();
+        }
+                
+    }
 }

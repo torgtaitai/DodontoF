@@ -3,6 +3,7 @@
 package {
     public interface Piece {
         function getType():String;
+        function getTypeName():String;
         function getX():Number;
         function getY():Number;
         function getViewX():Number;
@@ -18,5 +19,6 @@ package {
         function getId():String;
         function isOnlyOwnMap():Boolean;
         function isGotoGraveyard():Boolean;
+        function getName():String;
    }
 }

@@ -29,6 +29,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "ランダムダンジョン用カード捨て札";
+        }
+        
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x_:int,

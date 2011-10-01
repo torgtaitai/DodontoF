@@ -2,27 +2,27 @@
 
 package {
     
-    import mx.controls.Alert;
+	import flash.display.Stage;
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.MovieClip;
-    import flash.events.MouseEvent;
-    import mx.core.UIComponent;
     import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
     import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
     import flash.text.TextFormatAlign;
-    import flash.text.TextFieldAutoSize;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-    import flash.geom.Point;
-    import mx.controls.Text;
-    import mx.controls.Label;
-    import mx.managers.PopUpManager;
     import mx.containers.Box;
+    import mx.controls.Alert;
+    import mx.controls.Image;
+    import mx.controls.Label;
+    import mx.controls.Text;
+    import mx.core.UIComponent;
     import mx.effects.Glow;
-    import flash.text.TextFormat;
+    import mx.managers.PopUpManager;
+    
     
     public class Card extends MovablePiece {
         
@@ -40,6 +40,10 @@ package {
             return getTypeStatic();
         }
         
+        override public function getTypeName():String {
+            return "カード";
+        }
+        
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x:int,
@@ -52,7 +56,6 @@ package {
             jsonData["isBack"] = true;
             jsonData["isText"] = true;
             jsonData["isOpen"] = false;
-            jsonData["rotation"] = 0;
             jsonData["owner"] = "";
             jsonData["ownerName"] = "";
             jsonData["mountName"] = "";
@@ -71,7 +74,6 @@ package {
             jsonData["isBack"] = this.isBack;
             jsonData["isText"] = this.isText;
             jsonData["isOpen"] = this.isOpen;
-            jsonData["rotation"] = this.rotation;
             jsonData["owner"] = this.owner;
             jsonData["ownerName"] = this.ownerName;
             jsonData["mountName"] = this.mountName;
@@ -82,7 +84,6 @@ package {
         }
         
         private var isOpen:Boolean = false;
-        private var rotation:Number = 0;
         private var owner:String = "";
         private var ownerName:String = "";
         private var isText:Boolean = true;
@@ -100,7 +101,6 @@ package {
         private var cashSubText:Bitmap = null;
         private var subTextArea:MovieClip = new MovieClip();
         
-        
         public function Card(params:Object) {
             thisObj = this;
             
@@ -111,6 +111,12 @@ package {
             view.setBackGroundColor(0xFFFFFF);
             view.setLineDiameter(4 * 2);
         }
+
+        override protected function canRotate():Boolean {
+            return true;
+        }
+        
+
         
         public function getMountName():String {
             return this.mountName;
@@ -120,13 +126,13 @@ package {
             view.scaleX = rate;
             view.scaleY = rate;
         }
+        
         public function getView():UIComponent {
             return view;
         }
         
         protected function setParams(params:Object):void {
             this.isOpen = params.isOpen;
-            setRotation( Number(params.rotation) );
             this.owner = params.owner;
             this.ownerName = params.ownerName;
             this.isText = params.isText;
@@ -151,6 +157,16 @@ package {
             canDelete = b;
         }
         
+        private function getStringFromParams(params:Object, key:String):String {
+            var name:String = params[key];
+            
+            if( name == null ) {
+                return name;
+            }
+            
+            return name;
+        }
+        
         public function getOwner():String {
             return this.owner;
         }
@@ -168,15 +184,20 @@ package {
             return true;
         }
         
+        public function getRoundColor():int {
+            var roundColor:int = 0xBBBB00;
+            if( this.isOpen ) {
+                roundColor = 0xAFEEEE;
+            }
+            return roundColor;
+        }
+        
         private function setViewStates():void {
             if( this.view == null ) {
                 return;
             }
             
-            var roundColor:int = 0xBBBB00;
-            if( this.isOpen ) {
-                roundColor = 0xAFEEEE;
-            }
+            var roundColor:int = getRoundColor();
             this.view.setRoundColor(roundColor);
             this.view.setLineColor(roundColor);
             
@@ -264,12 +285,11 @@ package {
             return 1;
         }
         
-        override protected function getMapLayer():UIComponent {
+        override public function getMapLayer():UIComponent {
             return getMap().getCardLayer();
         }
         
         private var zoomRate:Number = 4;
-        private var fontSize:Number = 8;
         
         protected function getWidthSize():Number {
             return 2;
@@ -317,7 +337,7 @@ package {
             return targetImageName;
         }
         
-        public function loadViewImage():void {
+        override public function loadViewImage():void {
             var targetImageName:String = getLoadImageUrl();
             
             if( this.isText ) {
@@ -326,23 +346,37 @@ package {
                 targetImageName = "image/transparent.gif";
             } else {
                 mainTextArea.visible = false;
+                subTextArea.visible = false;
+                this.cardName = getCardNameWhenImageData(targetImageName);
+                targetImageName = getImageUrlWhenImageData(targetImageName);
             }
             
             setViewStates();
             
             //伏せたカードの上下がバレないように、伏せカードは強制的に上向きの表示に差し替え
-            var viewRotation:Number = rotation;
-            if( isPrintBackSide() ) {
-                if( viewRotation >= 180 ) {
-                    viewRotation -= 180;
-                }
-            }
+            var viewRotation:Number = getRotation() + getViewRotationDiff();
             
             view.loadImageWidthHeightRotation(targetImageName, targetImageName,
                                               getWidthSize(), getHeightSize(),
                                               viewRotation);
             
+            super.loadViewImage();
+            
             printTitle();
+        }
+        
+        override public function getViewRotationDiff():Number {
+            var rotationDiff:Number = 0;
+            if( ! isPrintBackSide() ) {
+                return rotationDiff;
+            }
+            
+            if( ( getRotation() > 90 ) &&
+                ( getRotation() <= 270 ) ){
+                rotationDiff = 180;
+            }
+            
+            return rotationDiff;
         }
         
         protected function isOwner():Boolean {
@@ -380,9 +414,22 @@ package {
             view.x = trushMount.getX();
             view.y = trushMount.getY();
             
+            var message:String = "";
+            if( this.getCardName() == "" ) {
+                message = "が「" + this.getMountNameForDisplay() + "」のカードを捨てました。";
+            } else {
+                message = "が「" + this.getCardName() + "」を捨てました。";
+            }
+            
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message );
             sender.dumpTrushCard( getId(), trushMount.getMountName(), trushMount.getId() );
             
         }
+        
+        public function getMountNameForDisplay():String {
+            return InitCardWindow.getCardName( getMountName() );
+        }
+        
         
         override public function snapViewPosition():Boolean {
             if( ! thisObj.isInitMovedd ) {
@@ -400,7 +447,7 @@ package {
             if( cardZone != null ) {
                 var isForce:Boolean = true;
                 move(cardZone.getCenterX(), cardZone.getCenterY(), isForce);
-                changeOwnToAnyoneOnLocal(cardZone.getOwner(), cardZone.getOwnerName());
+                changeOwnerToAnyoneOnLocal(cardZone.getOwner(), cardZone.getOwnerName());
                 sender.changeCharacter( thisObj.getJsonData() );
                 return false;
             }
@@ -458,10 +505,44 @@ package {
             view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
                     DodontoF_Main.getInstance().hideCardPreview();
                 });
+            
+            view.doubleClickEnabled = canDoubleClick()
+            view.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickEvent);
+        }
+        
+        protected function canDoubleClick():Boolean {
+            return true;
+        }
+        
+        protected function doubleClickEvent(event:MouseEvent):void {
+            Log.logging("MouseEvent.DOUBLE_CLICK");
+            
+            //カード自分の物なら表裏を入れ替えるだけで終了。
+            if( isOwner() ) {
+                var isBackPrint:Boolean = ( ! isPrintBackSide());
+                thisObj.reverseCard( isBackPrint );
+                return;
+            }
+            
+            
+            //カードが自分の物でなければここで自分の物に。
+            if( ! isOwner() ) {
+                var isPrintMessage:Boolean = true;
+                changeOwnerLocal(isPrintMessage);
+            }
+            
+            if( ! isPrintBackSide() ) {
+                //カードが表向きなら画像更新して終了。
+                loadViewImage();
+                sender.changeCharacter( getJsonData() );
+            } else {
+                //裏向きなら表にして終了。
+                thisObj.reverseCard( false );
+            }
         }
         
         private function isUpSide():Boolean {
-            return (this.rotation <= 90) || (this.rotation > 270);
+            return (getRotation() <= 90) || (getRotation() > 270);
         }
         
         public function getJsonDataForPreview():Object {
@@ -485,12 +566,12 @@ package {
             openPrivateMenu = addMenuItem(menu, "カードを自分だけが見る（非公開）", openPrivate, false);
             openPublicMenu = addMenuItem(menu, "カードを全員に見せる（公開）", openCard, true);
             closeSecretMenu = addMenuItem(menu, "カードを伏せる（非公開）", closeSecret, false);
-            changeOwnerMenu = addMenuItem(menu, "カードを自分の管理へ", changeOwn, true);
-            
+            changeOwnerMenu = addMenuItem(menu, "カードを自分の管理へ", changeOwner, true);
+            /*
             addMenuItem(menu, "右回転",    thisObj.getContextMenuItemFunctionRotateCharacter( 90), true);
             addMenuItem(menu, "180度回転", thisObj.getContextMenuItemFunctionRotateCharacter(180));
             addMenuItem(menu, "左回転",    thisObj.getContextMenuItemFunctionRotateCharacter(270));
-            
+            */
             printCardTextMenu = addMenuItem(menu, "カードテキストをチャットに引用", getContextMenuItemFunctionPrintCardText, true);
             
             removeCardMenu = addMenuItem(menu, "カード削除", getContextMenuItemRemoveCharacter, true);
@@ -509,7 +590,7 @@ package {
         }
         
         private function getCardMessage(mainText:String, subText:String):String {
-            if( subText == null ) {
+            if( subText == "" ) {
                 return ( mainText + "　：　" + (isUpSide() ? "正位置" : "逆位置") );
             }
             
@@ -536,22 +617,16 @@ package {
             DodontoF_Main.getInstance().getChatWindow().addTextToChatMessageInput(cardMessage);
         }
         
-        public function setRotation(rotation:Number):void {
-            rotation = ( rotation % 360 );
-            this.rotation = rotation;
-        }
-        
+        /*
         protected function getContextMenuItemFunctionRotateCharacter(rotationDiff:Number):Function {
             return function(event:ContextMenuEvent):void {
-                var rotation:Number = thisObj.rotation;
-                rotation += rotationDiff;
-                setRotation(rotation);
+                setDiffRotation(rotationDiff);
                 
                 thisObj.loadViewImage();
                 sender.changeCharacter( thisObj.getJsonData() );
             };
         }
-        
+        */
         
         override public function isGotoGraveyard():Boolean {
             return false;
@@ -571,7 +646,7 @@ package {
         
         private function openCard(event:ContextMenuEvent = null):void {
             if( ! isOwner() ) {
-                Log.loggingError("カードの所持者ではないため公開できません。");
+                view.toolTip = "カードの所持者ではないため公開できません。";
                 return;
             }
             
@@ -600,8 +675,15 @@ package {
             return DodontoF_Main.getInstance().getChatWindow().getChatCharacterName();
         }
         
-        public function changeOwn(event:ContextMenuEvent = null):void {
-            if( event != null ) {
+        public function changeOwner(event:ContextMenuEvent = null):void {
+            var isPrintMessage:Boolean = (event != null);
+            changeOwnerLocal( isPrintMessage );
+            loadViewImage();
+            sender.changeCharacter( getJsonData() );
+        }
+        
+        private function changeOwnerLocal(isPrintMessage:Boolean):void {
+            if( isPrintMessage ) {
                 ChatWindow.getInstance().sendSystemMessage("が「" + this.ownerName + "」のカードを受け取りました。");
             }
             
@@ -609,12 +691,9 @@ package {
             
             this.owner = thisUserId;
             this.ownerName = getSelfOwnerName()
-            
-            loadViewImage();
-            sender.changeCharacter( getJsonData() );
         }
         
-        public function changeOwnToAnyoneOnLocal(ownerAnyone:String, ownerNameAneone:String):void {
+        public function changeOwnerToAnyoneOnLocal(ownerAnyone:String, ownerNameAneone:String):void {
             
             if( ownerAnyone != this.owner ) {
                 ChatWindow.getInstance().sendSystemMessage("が「" + ownerNameAneone + "」へカードを渡しました。");
@@ -626,36 +705,38 @@ package {
             loadViewImage();
         }
         
-        private function reverseCard(isFaceBack:Boolean):void {
-            reverseCardLocal(isFaceBack);
+        private function reverseCard(isBackPrint:Boolean):void {
+            reverseCardLocal(isBackPrint);
             
             loadViewImage();
             sender.changeCharacter( getJsonData() );
         }
         
-        public function reverseCardLocal(isFaceBack:Boolean):void {
+        public function reverseCardLocal(isBackPrint:Boolean):void {
             Log.logging("Card.reverse begin");
             
             if( ! isOwner() ) {
-                Log.loggingError("カードの所持者ではないため操作できません。");
+                view.toolTip = "カードの所持者ではないため操作できません。";
                 return;
             }
             
             var thisUserId:String = getSelfOwnerId();
             var thisUserName:String = ChatWindow.getInstance().getChatCharacterName();
             
-            if( isFaceBack ) {
+            if( isBackPrint ) {
                 Log.logging("カードを伏せた場合は、所有者も初期化(未所有）となる。");
                 this.isOpen = false;
                 thisUserId = "";
                 thisUserName = "";
+            } else {
+                this.isOpen = false;
             }
             
-            this.isBack = isFaceBack;
+            this.isBack = isBackPrint;
             this.owner = thisUserId;
             this.ownerName = thisUserName;
             
-            if( ! isFaceBack ) {
+            if( ! isBackPrint ) {
                 if( this.canDelete ) {
                     ChatWindow.getInstance().sendSystemMessage("がメッセージカードを開きました。");
                 }
@@ -663,7 +744,7 @@ package {
         }
         
         private function setTextFieldXPosition():void {
-            var width:int = getWidthSize() * Map.getSquareLength();
+            var width:int = getOwnWidth();
             nameTextField.x = ( (1.0 * width / 2) - (nameTextField.width / 2) );
         }
         
@@ -732,7 +813,7 @@ package {
         }
         
         private function getBackColor(text:String):uint {
-            if( text == null ) {
+            if( text == null || text == "" ) {
                 text = '#FFFFFF';
             }
             
@@ -741,18 +822,56 @@ package {
             return color;
         }
         
-        private function getCardMainText(message:String):String {
+        private function getTextFromMessage(message:String, index:int):String {
             var texts:Array = message.split(/\t/);
-            return texts[0];
+            var text:String = texts[index];
+            if( text == null ) {
+                return "";
+            }
+            return text;
+        }
+        private function getCardMainText(message:String):String {
+            return getTextFromMessage(message, 0);
         }
         private function getCardSubText(message:String):String {
-            var texts:Array = message.split(/\t/);
-            return texts[1];
+            return getTextFromMessage(message, 1);
         }
         protected function getCardBackColor(message:String):uint {
-            var texts:Array = message.split(/\t/);
-            return getBackColor(texts[2]);
+            var colorText:String = getTextFromMessage(message, 2);
+            return getBackColor( colorText );
         }
+        protected function getCardNameWhenText(message:String):String {
+            return getTextFromMessage(message, 3);
+        }
+        
+        protected function getImageUrlWhenImageData(message:String):String {
+            return getTextFromMessage(message, 0);
+        }
+        
+        protected function getCardNameWhenImageData(message:String):String {
+            return getTextFromMessage(message, 1);
+        }
+        
+        
+        override public function getOwnWidth():int {
+            return getWidthSize() * Map.getSquareLength();
+        }
+        
+        override public function getOwnHeight():int {
+            return getHeightSize() * Map.getSquareLength();
+        }
+        
+        
+        private var cardName:String = null;
+        
+        public function getCardName():String {
+            if( this.cardName == null ) {
+                return "";
+            }
+            
+            return this.cardName;
+        }
+        
         
         private function printMainText(message:String):void {
             var texts:Array = message.split(/\t/);
@@ -760,13 +879,14 @@ package {
             var mainText:String = getCardMainText(message);
             var subText:String = getCardSubText(message);
             var backColor:uint = getCardBackColor(message);
+            this.cardName = getCardNameWhenText(message);
             
             if( subText == null ) {
                 subText = "";
             }
             
-            var width:Number = getWidthSize() * Map.getSquareLength();
-            var height:Number = getHeightSize() * Map.getSquareLength();
+            var width:Number = getOwnWidth();
+            var height:Number = getOwnHeight();
             
             var textFieldHeight:Number = height;
             if( subText != "" ) {
@@ -793,5 +913,6 @@ package {
             textArea.x = width;
             textArea.y = height;
         }
+        
    }
 }

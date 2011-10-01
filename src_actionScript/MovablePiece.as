@@ -18,6 +18,7 @@ package {
     import mx.events.EffectEvent;
     import mx.managers.PopUpManager;
     import mx.utils.ArrayUtil;
+    import mx.controls.Image;
     
     public class MovablePiece implements Piece {
         
@@ -28,6 +29,9 @@ package {
         private static var defaultId:String = "0";
         protected var id:String = defaultId;
         private var draggable:Boolean = true;
+        
+        private var rotation:Number = 0;
+        protected var rotater:Rotater;
         
         private var positionX:Number = 0;
         private var positionY:Number = 0;
@@ -61,17 +65,22 @@ package {
             return "";
         }
         
+        public function getTypeName():String {
+            return "コマ基本クラス";
+        }
         
         public static function getJsonData(type:String,
                                            createPositionX:Number,
                                            createPositionY:Number, 
-                                           draggable:Boolean = false):Object {
+                                           draggable:Boolean = false,
+                                           rotation:Number = 0):Object {
             var jsonData:Object = new Object();
             
             jsonData.type = type;
             jsonData.imgId = defaultId;
             jsonData.x = createPositionX;
             jsonData.y = createPositionY;
+            jsonData.rotation = rotation;
             jsonData.draggable = draggable;
             
             return jsonData;
@@ -84,6 +93,7 @@ package {
             jsonData.imgId = this.getId();
             jsonData.x = this.getX();
             jsonData.y = this.getY();
+            jsonData.rotation = this.getRotation();
             jsonData.draggable = this.getDraggable();
             
             return jsonData;
@@ -94,8 +104,23 @@ package {
             thisObj = this;
             parallels = new Array();
             
-            id = params.imgId;
-            draggable = params.draggable;
+            this.id = params.imgId;
+            this.draggable = params.draggable;
+            setRotation( params.rotation );
+            
+        }
+        
+        protected function canRotate():Boolean {
+            return false;
+        }
+        
+        private function initRotater():void {
+            if( ! canRotate() ) {
+                return;
+            }
+            
+            rotater = new Rotater();
+            rotater.init(view, this);
         }
         
         public function getX():Number {
@@ -162,6 +187,10 @@ package {
             throwNotImplimentedError("initContextMenu");
         }
         
+        public function getName():String {
+            return "";
+        }
+        
         public function isGotoGraveyard():Boolean {
             return true;
         }
@@ -187,7 +216,10 @@ package {
         
         public function sendDelete():void {
             sender.removeCharacter(this);
-            
+            deleteFromMap();
+        }
+        
+        public function deleteFromMap():void {
             this.remove();
             DodontoF_Main.getInstance().getMap().removeExistPieces(this);
         }
@@ -205,7 +237,7 @@ package {
             view = null;
         }
         
-        protected function getMapLayer():UIComponent {
+        public function getMapLayer():UIComponent {
             throwNotImplimentedError("getMapLayer");
             return null;
         }
@@ -220,14 +252,30 @@ package {
         }
         
         protected function isSetViewForevroungOnMouseClicked():Boolean {
+            if( Rotater.isAnyRotating() ) {
+                return false;
+            }
+            
             return false;
         }
         
         protected function dragged():void {
         }
         
+        protected function mouseDownEvent(event:MouseEvent):void {
+            if( isSetViewForevroungOnMouseClicked() ){
+                thisObj.setViewForeground();
+            }
+            
+            view.startDrag();
+            draggingPiece = thisObj;
+            dragged();
+        }
+        
         protected function initEventAll():void {
             view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                    Rotater.stopRotation();
+                    
                     if( thisObj.isOnlyOwnMap() ) {
                         return;
                     }
@@ -236,15 +284,9 @@ package {
                         return;
                     }
                     
-                    if( isSetViewForevroungOnMouseClicked() ){
-                        thisObj.setViewForeground();
-                    }
-                    
-                    view.startDrag();
-                    draggingPiece = thisObj;
-                    dragged();
-                    
                     event.stopPropagation();
+                    
+                    mouseDownEvent(event);
                 });
             
             view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
@@ -261,6 +303,7 @@ package {
                         return;
                     }
                     
+                    thisObj.zoomLittleForTeachDraggable();
                     thisObj.snapMovablePieceViewPosition( true );
                 });
             
@@ -269,11 +312,57 @@ package {
                         return;
                     }
                     
+                    thisObj.shrinkLittleForTeachDraggable();
                     thisObj.snapMovablePieceViewPosition( false );
                 });
             
             initEvent();
+            initRotater();
+            //            initTurnUper();
         }
+        /*        
+        //[Embed(source='image/cursor/uragaesi_b50.swf')]
+        [Embed(source='image/cursor/uragaesi_a50.swf')]
+        [Bindable]
+        private var turnUpMarkerImageSource:Class;
+        
+        private function initTurnUper():void {
+            var marker:Image = new Image();
+            marker.source = turnUpMarkerImageSource;
+            marker.width = getOwnWidth() * 0.4;
+            marker.height = marker.width;
+            marker.x = marker.width * -1;
+            marker.y = (getOwnHeight() - marker.height * 1.5) / 2;
+            marker.visible = false;
+            view.addChild( marker );
+            
+            view.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+                    marker.visible = true;
+                });
+            view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+                    marker.visible = false;
+                });
+            
+        }
+        */
+        
+        public function shrinkLittleForTeachDraggable():void {
+            this.view.scaleX = 1.0;
+            this.view.scaleY = 1.0;
+        }
+        
+        public function zoomLittleForTeachDraggable():void {
+            //移動不可なら「ちょっと拡大」はしない。
+            if( ! this.getDraggable() ) {
+                return;
+            }
+            
+            var zoomPix:int = 3;
+            var zoomRate:Number = 1 + (zoomPix / this.getOwnWidth());
+            this.view.scaleX = zoomRate;
+            this.view.scaleY = zoomRate;
+        }
+        
         
         public function snapMovablePieceViewPosition(isListed:Boolean = false):void {
             map.snapMovablePieceViewPosition( new Point(positionX, positionY), isListed );
@@ -359,9 +448,15 @@ package {
         
         private var isUpdateCalled:Boolean = false;
         protected function update(params:Object):void {
+            setRotation( params.rotation );
+            
+            if( rotater != null ) {
+                rotater.update();
+            }
+            
             isUpdateCalled = true;
         }
-        
+
         public function move(x:Number, y:Number, isForce:Boolean = false):Boolean {
             if( ! isForce ) {
                 if( isDragging() ) {
@@ -382,6 +477,10 @@ package {
             
             if( isMoved ) {
                 executeMoveEffect();
+                
+                if( rotater != null ) {
+                    rotater.stopRotation();
+                }
             }
             
             this.snapMovablePieceViewPosition();
@@ -549,5 +648,38 @@ package {
         protected function throwNotImplimentedError(functionName:String):void {
             throw new Error("Movable." + functionName + " is not implimented!");
         }
+        
+        public function getOwnWidth():int {
+            return 1 * Map.getSquareLength();
+        }
+        
+        public function getOwnHeight():int {
+            return 1 * Map.getSquareLength();
+        }
+        
+        public function getViewRotationDiff():Number {
+            return 0;
+        }
+        public function loadViewImage():void {
+            if( rotater != null ) {
+                rotater.setBaseRotation( this.rotation + getViewRotationDiff() );
+            }
+        }
+        
+        public function setRotation(rotation:Number):void {
+            rotation = ( rotation % 360 );
+            this.rotation = rotation;
+        }
+        
+        public function getRotation():Number {
+            return this.rotation
+        }
+        
+        public function setDiffRotation(rotationDiff:Number):void {
+            var rotation:Number = getRotation();
+            rotation += rotationDiff;
+            setRotation(rotation);
+        }
+        
    }
 }

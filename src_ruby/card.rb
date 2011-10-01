@@ -14,16 +14,21 @@ class Card
       'title' => 'トランプ',
       'fileName' => 'cards/trump_3.txt',
     },
-=end
     { 'type' => 'trump_2',
       'title' => 'トランプ',
       'fileName' => 'cards/trump_2.txt',
     },
     
+=end
+    { 'type' => 'trump_swf',
+      'title' => 'トランプ',
+      'fileName' => 'cards/trump_swf.txt',
+    },
+    
     
     { 'type' => 'randomDungeonTrump',
       'title' => 'ランダムダンジョン・トランプ',
-      'fileName' => 'cards/trump_2.txt',
+      'fileName' => 'cards/trump_swf.txt',
     },
     
     
@@ -65,6 +70,11 @@ class Card
     { 'type' => 'tatoono',
       'title' => 'ローズ・トゥ・ロード：タトゥーノ',
       'fileName' => 'cards/tatoono.txt',
+    },
+    
+    { 'type' => 'shanhaitaimakou',
+      'title' => '上海退魔行：陰陽カード',
+      'fileName' => 'cards/shanhaitaimakou.txt',
     },
     
     { 'type' => 'actCard',

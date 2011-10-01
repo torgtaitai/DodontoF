@@ -46,7 +46,7 @@
                          dataField="currentTarget"
                          textAlign="left"
                          editable="false"
-      	                 minWidth="5"
+      	                 minWidth="0"
                          width="10"
                          />
 	  <mx:DataGridColumn headerText="イニシアティブ"
@@ -54,7 +54,7 @@
                          dataField="initiativeInt"
                          textAlign="right"
                          editable="true"
-      	                 minWidth="20"
+      	                 minWidth="0"
                          width="30">
         <mx:itemEditor>
           <mx:Component>
@@ -68,7 +68,7 @@
                          dataField="initiativeModify"
                          textAlign="right"
                          editable="true"
-      	                 minWidth="15"
+      	                 minWidth="0"
                          width="25">
         <mx:itemEditor>
           <mx:Component>
@@ -118,7 +118,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor0}" enabled="{data.checkBoxEnable0}" />
+            <mx:CheckBox iconColor="{data.columnColor0}" enabled="{data.checkBoxEnable0}" label="{data.checkBoxLabel0}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -152,7 +152,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor1}" enabled="{data.checkBoxEnable1}" />
+            <mx:CheckBox iconColor="{data.columnColor1}" enabled="{data.checkBoxEnable1}" label="{data.checkBoxLabel1}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -186,7 +186,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor2}" enabled="{data.checkBoxEnable2}" />
+            <mx:CheckBox iconColor="{data.columnColor2}" enabled="{data.checkBoxEnable2}" label="{data.checkBoxLabel2}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -220,11 +220,11 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor3}" enabled="{data.checkBoxEnable3}" />
+            <mx:CheckBox iconColor="{data.columnColor3}" enabled="{data.checkBoxEnable3}" label="{data.checkBoxLabel3}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
-         
+      
 	  <mx:DataGridColumn id="counter4"
                          visible="false"
                          headerText=""
@@ -254,7 +254,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor4}" enabled="{data.checkBoxEnable4}" />
+            <mx:CheckBox iconColor="{data.columnColor4}" enabled="{data.checkBoxEnable4}" label="{data.checkBoxLabel4}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -288,7 +288,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor5}" enabled="{data.checkBoxEnable5}" />
+            <mx:CheckBox iconColor="{data.columnColor5}" enabled="{data.checkBoxEnable5}" label="{data.checkBoxLabel5}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -322,7 +322,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor6}" enabled="{data.checkBoxEnable6}" />
+            <mx:CheckBox iconColor="{data.columnColor6}" enabled="{data.checkBoxEnable6}" label="{data.checkBoxLabel6}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -356,7 +356,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor7}" enabled="{data.checkBoxEnable7}" />
+            <mx:CheckBox iconColor="{data.columnColor7}" enabled="{data.checkBoxEnable7}" label="{data.checkBoxLabel7}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -390,7 +390,7 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor8}" enabled="{data.checkBoxEnable8}" />
+            <mx:CheckBox iconColor="{data.columnColor8}" enabled="{data.checkBoxEnable8}" label="{data.checkBoxLabel8}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
@@ -424,14 +424,13 @@
                          >
         <mx:itemRenderer>
           <mx:Component>
-            <mx:CheckBox iconColor="{data.columnColor9}" enabled="{data.checkBoxEnable9}" />
+            <mx:CheckBox iconColor="{data.columnColor9}" enabled="{data.checkBoxEnable9}" label="{data.checkBoxLabel9}" />
           </mx:Component>
         </mx:itemRenderer>
       </mx:DataGridColumn>
-         
-	  <mx:DataGridColumn id="counterEnd" width="0" visible="false"/>
-      
-      
+	  
+      <mx:DataGridColumn headerText="counterEnd"
+                         id="counterEnd" width="0" visible="false" />
       
 	  <mx:DataGridColumn headerText="その他"
                          dataField="info"
@@ -458,6 +457,7 @@
       [Bindable]
       private var initiativeInfoList:Array;
       
+      import mx.core.IFlexDisplayObject;
       import mx.events.DragEvent;
       import mx.managers.DragManager;
       import mx.events.ListEvent;
@@ -504,6 +504,10 @@
               // 初期値のカラーパターンを記憶
               defaultColors = initiativeInfoListView.getStyle("alternatingItemColors");
           }
+          
+          initiativeInfoListView.addEventListener(DataGridEvent.COLUMN_STRETCH,changeColumnWidth);
+          
+          initCheckBoxColumnHeaderStyles();
       }
       
       private var defaultColors:Array;
@@ -594,8 +598,15 @@
           return getRoundTimer().getCounterNames();
       }
       
+      private var preCounterNames:Array = new Array();
       private function initColumns():void {
           var counterNames:Array = getCounterNames();
+          if( Utils.isSameArray(counterNames, preCounterNames) ) {
+              Log.loggingTuning("columns is same.");
+              return;
+          }
+          preCounterNames = counterNames;
+          Log.loggingTuning("columns is diff!!")
           
           var checkBoxIndex:int = 0;
           var counterBeginIndex:int = -1;
@@ -625,9 +636,7 @@
               
               if( counterIndex >= counterNames.length ) {
                   column.visible = false;
-                  column.width = 0;
                   checkBoxColumn.visible = false;
-                  checkBoxColumn.width = 0;
                   continue;
               }
               
@@ -637,10 +646,13 @@
               var mainColumn:DataGridColumn = null;
               var subColumn:DataGridColumn = null;
               if( columnInfo.isCheckBox ) {
-                  checkBoxIndex++;
-                  
                   subColumn = column;
                   mainColumn = checkBoxColumn;
+                  
+                  //var headerStyle:CSSStyleDeclaration = checkBoxColumnHeaderStyles[checkBoxIndex];
+                  //mainColumn.setStyle("headerStyleName", headerStyle);
+                  
+                  checkBoxIndex++;
               } else {
                   subColumn = checkBoxColumn;
                   mainColumn = column;
@@ -649,33 +661,47 @@
               subColumn.visible = false;
               mainColumn.visible = true;
               mainColumn.headerText = columnInfo.title;
-              //mainColumn.setStyle("backgroundColor", columnInfo.color);
+          }
+          
+          loadColumnInfosAfter();
+      }
+      
+      static private var checkBoxColumnHeaderStyles:Array;
+      
+      static public function initCheckBoxColumnHeaderStyles():void {
+          checkBoxColumnHeaderStyles = new Array();
+          
+          var colors:Array = checkBoxDefaultColors;
+          for(var i:int = 0 ; i < colors.length ; i++) {
+              var color:String = colors[i];
               
-              var headerStyle:CSSStyleDeclaration = new CSSStyleDeclaration;
-              headerStyle.setStyle("color", columnInfo.color);
-              mainColumn.setStyle("headerStyleName", headerStyle);
+              var style:CSSStyleDeclaration = new CSSStyleDeclaration;
+              style.setStyle("color", color);
+              
+              checkBoxColumnHeaderStyles.push(style);
           }
       }
       
+      static private var checkBoxDefaultColors:Array
+      = [0xD40045,
+         0x99CF15,
+         0x0F218B,
+         0xFF7F00,
+         0x008678,
+         0x56007D,
+         0xFE4118,
+         0x33A23D,
+         0x281285,
+         0xFFE600,
+         0x055D87,
+         0xAF0065];
       
-      private function getDefaultColor(index:int):String {
-          var colors:Array = [0xD40045,
-                              0x99CF15,
-                              0x0F218B,
-                              0xFF7F00,
-                              0x008678,
-                              0x56007D,
-                              0xFE4118,
-                              0x33A23D,
-                              0x281285,
-                              0xFFE600,
-                              0x055D87,
-                              0xAF0065];
-          
+      static private function getCheckBoxDefaultColor(index:int):String {
+          var colors:Array = checkBoxDefaultColors;
           return colors[ (index % colors.length) ];
       }
       
-      private function getColumnInfo(counterName:String, index:int = 0):Object {
+      static public function getColumnInfo(counterName:String, index:int = 0):Object {
           var columnInfo:Object = {
               "counterName": counterName,
               "isCheckBox": false,
@@ -683,20 +709,36 @@
               "color": null
           };
           
-          var matchResult:Object = /^(\*|＊)?([^#]+)?$/.exec(counterName);
-          if( matchResult == null ) {
-              return columnInfo;
-          }
-          
-          columnInfo.isCheckBox = (matchResult[1] != null);
-          columnInfo.title = matchResult[2];
+          var checkBoxInfo:Object = getCheckBoxInfoFromCounterName(counterName);
+          columnInfo.isCheckBox = checkBoxInfo.isCheckBox;
+          columnInfo.title = checkBoxInfo.title;
           
           if( columnInfo.isCheckBox ) {
-              columnInfo.color = getDefaultColor(index);
+              columnInfo.color = getCheckBoxDefaultColor(index);
           }
           
           return columnInfo;
       }
+      
+      static public function getCheckBoxInfoFromCounterName(counterName:String):Object {
+          var result:Object = {
+              "isCheckBox": false,
+              "title": counterName
+          };
+          
+          var matchResult:Object = counterCheckReg.exec(counterName);
+          if( matchResult == null ) {
+              return result;
+          }
+          
+          result.isCheckBox = (matchResult[1] != null);
+          result.title = matchResult[2];
+          
+          return result;
+      }
+      
+      static private var counterCheckReg:RegExp = /^(\*|＊)?([^#]+)?$/;
+      
       
       public function getListCharacter():InitiativedPiece {
           var info:Object = initiativeInfoList[ initiativeInfoListView.selectedIndex ];
@@ -807,6 +849,7 @@
                   var b:Boolean = (count != 0);
                   characterInfo["checkBox" + i] = b;
                   characterInfo["checkBoxEnable" + i] = piece.hasStatus();
+                  characterInfo["checkBoxLabel" + i] = piece.getStatusName(counterName);
                   characterInfo["columnColor" + i] = columnInfo.color;
               } else {
                   characterInfo["counter" + i] = count
@@ -915,7 +958,71 @@
           return instance;
       }
       
+      
+      override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+          var info:Object = super.getWindowInfoSaveData(this);
+          info.columnInfos = getColumnInfosFromSaveData(info);
+          
+          return info;
+      }
+      
+      
+      private function changeColumnWidth(e:DataGridEvent):void{
+          initiativeInfoListView.validateNow();
+          savePosition();
+      }
+      
+      private function getColumnInfosFromSaveData(info:Object):Object {
+          var columnInfos:Object = new Object();
+          
+          var columns:Array = initiativeInfoListView.columns;
+          for(var i:int = 0 ; i < columns.length ; i++) {
+              var column:DataGridColumn = columns[i];
+              var title:String = column.headerText;
+              
+              var data:Object = {
+                  "width" : column.width,
+                  "visible" : column.visible
+              };
+              columnInfos[title] = data;
+          }
+          
+          return columnInfos;
+      }
+      
+      private var columnInfos:Object = null;
+      private function loadColumnInfos(info:Object):void {
+          columnInfos = info.columnInfos;
+      }
+      
+      private function loadColumnInfosAfter():void {
+          initiativeInfoListView.validateNow();
+          
+          if( columnInfos == null ) {
+              return;
+          }
+          
+          var columns:Array = initiativeInfoListView.columns;
+          
+          for(var i:int = 0 ; i < columns.length ; i++) {
+              var column:DataGridColumn = columns[i];
+              
+              var title:String = column.headerText;
+              var data:Object = columnInfos[title];
+              if( data == null ) {
+                  continue;
+              }
+              
+              //column.visible = data["visible"];
+              column.width = data["width"];
+          }
+          
+          columnInfos = null;
+      }
+      
       public function setInitPosition():void {
+          setLoadAddAction( loadColumnInfos );
+          
           if( loadPosition() ) {
               return;
           }

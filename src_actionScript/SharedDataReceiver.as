@@ -168,7 +168,7 @@ package {
         
         static private var regJsonStringResult:RegExp = /#D@EM>#(.*)#<D@EM#/ms;
         
-        private static function getJsonStringFromEventResultJsonString(jsonStringOriginal:String):String {
+        public static function getJsonStringFromEventResultJsonString(jsonStringOriginal:String):String {
             var textResult:Object = regJsonStringResult.exec(jsonStringOriginal);
             var jsonString:String = textResult[1];
             
@@ -318,7 +318,9 @@ package {
             DodontoF_Main.getInstance().setPlayRoomInfo( playRoomInfo.playRoomName,
                                                          playRoomInfo.chatChannelNames,
                                                          playRoomInfo.canUseExternalImage,
-                                                         playRoomInfo.canVisit);
+                                                         playRoomInfo.canVisit,
+                                                         playRoomInfo.gameType,
+                                                         playRoomInfo.viewStateInfo);
             
             Log.logging("analyzePlayRoomInfo end");
         }
@@ -366,6 +368,7 @@ package {
                                               color, writtenTime, chatSenderUniqueId,
                                               messageIndex, sendto);
                 if( isValidMessage ) {
+                    Log.logging("chatMessageDataSet", chatMessageDataSet);
                     result.push(chatMessageDataSet);
                 }
             }
@@ -431,7 +434,7 @@ package {
         
         public function addCharacterInOwnMap(characterData:Object):void {
             Log.logging("SharedDataReceiver.addCharacterInOwnMap() begin");
-            var piece:Piece = this.createPieceFromCharacterData(characterData);
+            var piece:Piece = this.addNewCharacterToMap(characterData);
             Log.logging("piece", piece);
             
             if( piece == null ) {
@@ -519,14 +522,19 @@ package {
                                                    RandomDungeonCardTrushMount,
                                                    Character ];
         
-        private function createPieceFromCharacterData(characterData:Object):Piece {
-            var piece:Piece = null;
-            
+        static public function createPieceFromCharacterData(characterData:Object):Piece {
             for each(var pieceClass:Object in pieceClassList) {
                 if( characterData.type == pieceClass.getTypeStatic() ) {
-                    piece = new pieceClass(characterData);
+                    return new pieceClass(characterData);
                 }
             }
+            
+            return null;
+        }
+        
+        
+        private function addNewCharacterToMap(characterData:Object):Piece {
+            var piece:Piece = createPieceFromCharacterData(characterData);
             
             if( piece == null ) {
                 var message:String = "SharedDataReceiver.createCharacterFromCharacterData Unknown characterData : ";
