@@ -35,6 +35,7 @@ package {
         override public function imageLoadComplete():void {
             imageSource.text = cutInInfo.source;
             soundSourceEdit.text = cutInInfo.soundSource;
+            isSoundLoopCheck.selected = cutInInfo.isSoundLoop;
             imageSource.enabled = true;
             printPreview();
         }

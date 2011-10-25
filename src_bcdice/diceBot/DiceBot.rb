@@ -108,6 +108,7 @@ class DiceBot
   end
   
   def setDiceText(diceText)
+    debug("setDiceText diceText", diceText)
     @diceText = diceText
   end
   
@@ -208,6 +209,18 @@ class DiceBot
   #シャドウラン4版用グリッチ判定
   def getGrichText(n1_total, dice_cnt_total, suc)
     ''
+  end
+  
+  def getDiceList
+    debug("getDiceList @diceText", @diceText)
+    
+    diceList = []
+    return diceList unless( /\[([\d,]+)\]/ =~ @diceText )
+    
+    diceString = $1;
+    diceList = diceString.split(/,/).collect{|i| i.to_i}
+    
+    return diceList
   end
 
   

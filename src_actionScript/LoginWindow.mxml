@@ -46,6 +46,10 @@
                              dataField="playRoomName"
                              textAlign="center"
                              width="250"/>
+		  <mx:DataGridColumn headerText="ゲームシステム"
+                             dataField="gameName"
+                             textAlign="center"
+                             width="100"/>
 		  <mx:DataGridColumn headerText="入室人数"
                              dataField="loginUserCount"
                              textAlign="center"
@@ -409,6 +413,10 @@
             stage.frameRate = jsonData.fps;
         }
         
+        var diceBotInfos:Array = jsonData.diceBotInfos;
+        Log.logging("diceBotInfos", diceBotInfos);
+        DodontoF_Main.getInstance().setDiceBotInfos( diceBotInfos );
+        
         playRoomGetRangeMax = jsonData.playRoomGetRangeMax;
         setMaxPlayRoomNumber(jsonData.playRoomMaxNumber);
         
@@ -600,7 +608,6 @@
             var canUseExternalImage:Boolean = jsonData.canUseExternalImage;
             var canVisit:Boolean = jsonData.canVisit;
             var isPasswordLocked:Boolean = jsonData.isPasswordLocked;
-            var diceBotInfos:Array = jsonData.diceBotInfos;
             
             Log.logging("roomNumber", roomNumber);
             Log.logging("roomName", roomName);
@@ -608,11 +615,9 @@
             Log.logging("canUseExternalImage", canUseExternalImage);
             Log.logging("canVisit", canVisit);
             Log.logging("isPasswordLocked", isPasswordLocked);
-            Log.logging("diceBotInfos", diceBotInfos);
             
             DodontoF_Main.getInstance().setMentenanceModeOn( jsonData.isMentenanceModeOn );
             DodontoF_Main.getInstance().setWelcomeMessageOn( jsonData.isWelcomeMessageOn );
-            DodontoF_Main.getInstance().setDiceBotInfos( diceBotInfos );
             DodontoF_Main.getInstance().setUseExternalImage( canUseExternalImage );
             
             var enterPlayRoomFunction:Function = getEnterPlayRoomFunction(roomNumber, roomName, chatChannelNames);
@@ -644,10 +649,15 @@
         enableLoginButton(false);
         
         var createPlayRoomWindow:CreatePlayRoomWindow = DodontoF.popup(CreatePlayRoomWindow, true) as CreatePlayRoomWindow;
-        createPlayRoomWindow.initParams(-1, function(roomIndex:int):void {
-                //プレイルームを作り終わったらそのルームナンバーへＵＲＬから直接ログイン
-                loginByRoomNumber(roomIndex);
-            });
+        createPlayRoomWindow.initParams(-1,
+                                        function(roomIndex:int):void {
+                                            //プレイルームを作り終わったらそのルームナンバーへＵＲＬから直接ログイン
+                                            loginByRoomNumber(roomIndex);
+                                        },
+                                        function():void {
+                                            thisObj.enableLoginButton(true);
+                                        }
+                                        );
     }
     
     private function loginByRoomNumber(roomIndex:int):void {

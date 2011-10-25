@@ -232,14 +232,13 @@ MESSAGETEXT
   
 #** 魔素獲得チェック
   def getGainMagicElementText()
-    return '' unless( /\[([\d,]+)\]/ =~ @diceText )
+    diceList = getDiceList
+    debug("getGainMagicElementText diceList", diceList)
     
-    dice_str = $1;
-    
-    dice_arr = dice_str.split(/,/).collect{|i| i.to_i}
-    
-    dice1 = dice_arr[0]
-    dice2 = dice_arr[1]
+    return '' if( diceList.empty? )
+
+    dice1 = diceList[0]
+    dice2 = diceList[1]
     
     #マギカロギア用魔素取得判定
     return  gainMagicElement(dice1, dice2);

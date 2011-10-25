@@ -25,7 +25,6 @@ require 'uri'
 require 'fileutils'
 require 'tempfile'
 require 'json/jsonParser'
-require 'customDiceBot.rb'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -45,7 +44,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.33.05(2011/09/25)"
+$version = "Ver.1.34.00(2011/10/25)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -165,6 +164,7 @@ class DodontoFServer
     initSaveFiles( getRequestData("saveDataDirIndex") )
     
     @isAddMarker = true
+    @jsonpCallBack = nil
   end
   
   def initSaveFiles(roomNumber)
@@ -180,6 +180,7 @@ class DodontoFServer
   end
   
   attr :isAddMarker
+  attr :jsonpCallBack
   
   #override
   def getSaveFileLockReadOnly(saveFileName)
@@ -505,6 +506,7 @@ class DodontoFServer
     
     begin
       result = analyzeWebInterfaceCatched
+      setJsonpCallBack
     rescue => e
       result['result'] = e.inspect + "$@ : " + $@.join("\n")
     end
@@ -513,7 +515,10 @@ class DodontoFServer
   end
   
   def analyzeWebInterfaceCatched
+    logging("analyzeWebInterfaceCatched begin")
+    
     commandName = getRequestData('webif')
+    logging('commandName', commandName)
     if( isInvalidRequestParam(commandName) )
       return nil
     end
@@ -546,11 +551,23 @@ class DodontoFServer
       'no data'
     end
     
+    logging("analyzeWebInterfaceCatched end response", response)
     return response
   end
-
+  
   def isInvalidRequestParam(param)
     return ( param.nil? or param.empty? )
+  end
+  
+  def setJsonpCallBack
+    callBack = getRequestData('callback')
+    
+    logging('callBack', callBack)
+    if( isInvalidRequestParam(callBack) )
+      return
+    end
+    
+    @jsonpCallBack = callBack
   end
   
   
@@ -584,8 +601,8 @@ class DodontoFServer
     
     secondsParam = getRequestData('sec')
     targetTime = getTargetTimeForGetWebIfChatText(secondsParam)
-    loggingForce(secondsParam, "secondsParam")
-    loggingForce(targetTime, "targetTime")
+    logging(secondsParam, "secondsParam")
+    logging(targetTime, "targetTime")
     
     lastUpdateTimes = {'chatMessageDataLog' => targetTime}
     getCurrentSaveData(lastUpdateTimes) do |targetSaveData, saveFileTypeName|
@@ -617,13 +634,22 @@ class DodontoFServer
     
     name = getRequestData('name')
     name ||= ''
+    logging(name, "name")
+    
     message = getRequestData('message')
     message ||= ''
-    channel = getRequestData('channel').to_i
+    logging(message, "message")
     
-    loggingForce(name, "name")
-    loggingForce(message, "message")
-    loggingForce(channel, "channel")
+    channel = getRequestData('channel').to_i
+    logging(channel, "channel")
+    
+    gameType = getRequestData('bot')
+    gameType ||= ''
+    logging(gameType, 'gameType')
+    
+    rollResult, isSecret = rollDice(message, gameType)
+    message = message + rollResult
+    logging(message, "diceRolled message")
     
     chatData = {
       "senderName" => name,
@@ -833,27 +859,39 @@ class DodontoFServer
   end
   
   def getCanVisitList( roomNumberRange )
-    canVisitList = {}
-    roomNumberRange.each{|i| canVisitList[i] = false}
+    defaultValue = false
+    saveDataKey = 'canVisit'
+    return getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
+  end
+  
+  def getGameTypeList( roomNumberRange )
+    defaultValue = ''
+    saveDataKey = 'gameType'
+    return getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
+  end
+  
+  def getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
+    infoList = {}
+    roomNumberRange.each{|i| infoList[i] = defaultValue}
     
     @saveDirInfo.each_with_index(roomNumberRange, $playRoomInfo) do |saveFiles, index|
       next unless( roomNumberRange.include?(index) )
       
       if( saveFiles.size != 1 )
-        loggingForce("[#{index}](getCanVisitList) invalid playRoomInfo saveFiles:#{saveFiles.inspect}")
+        loggingForce("[#{index}](infoList) invalid playRoomInfo saveFiles:#{saveFiles.inspect}")
         next
       end
       
       trueSaveFileName = saveFiles.first
       
       getSaveData(trueSaveFileName) do |saveData|
-        unless( saveData['canVisit'].nil? )
-          canVisitList[index] = saveData['canVisit']
+        unless( saveData[saveDataKey].nil? )
+          infoList[index] = saveData[saveDataKey]
         end
       end
     end
     
-    return canVisitList
+    return infoList
   end
   
   def getPlayRoomNames( saveDataLastAccesTimes, roomNumberRange )
@@ -1012,6 +1050,7 @@ class DodontoFServer
     saveDataLastAccesTimes = getSaveDataLastAccessTimes( roomNumberRange )
     playRoomNames = getPlayRoomNames( saveDataLastAccesTimes, roomNumberRange )
     canVisitList = getCanVisitList( roomNumberRange )
+    gameTypeList = getGameTypeList( roomNumberRange )
     
     roomNumberRange.each do |i|
       createdState = false
@@ -1022,6 +1061,7 @@ class DodontoFServer
       passwordLockState = (playRoomPasswordLockStates[i] ? "有り" : "--")
       canVisit = (canVisitList[i] ? "可" : "--")
       timeStamp = saveDataLastAccesTimes[i]
+      gameName = getGameName( gameTypeList[i] )
       
       timeString = ""
       unless( timeStamp.nil? )
@@ -1036,12 +1076,22 @@ class DodontoFServer
         'loginUsers' => loginUsers,
         'lastUpdateTime' => timeString,
         'canVisit' => canVisit,
+        'gameName' => gameName,
       }
       
       playRoomStates << playRoomState
     end
     
     return playRoomStates;
+  end
+  
+  def getGameName(gameType)
+    require 'diceBotInfos'
+    gameInfo = $diceBotInfos.find{|i| i[:gameType] == gameType}
+    
+    return '--' if( gameInfo.nil? )
+    
+    return gameInfo[:name]
   end
   
   def getAllLoginCount()
@@ -1057,6 +1107,41 @@ class DodontoFServer
     
     return total
   end
+  
+  def getFamousGames
+    roomNumberRange = (0 .. $saveDataMaxCount)
+    gameTypeList = getGameTypeList( roomNumberRange )
+    
+    counts = {}
+    gameTypeList.each do |roomNo, gameType|
+      next if( gameType.empty? )
+      
+      counts[gameType] ||= 0
+      counts[gameType] += 1
+    end
+    
+    logging(counts, 'counts')
+    
+    countList = counts.collect{|gameType, count|[count, gameType]}
+    countList.sort!
+    countList.reverse!
+    
+    logging('countList', countList)
+    
+    famousGames = []
+    
+    countList.each_with_index do |info, index|
+      # next if( index >= 3 )
+      
+      count, gameType = info
+      famousGames << {:gameType => gameType, :count => count}
+    end
+    
+    logging('famousGames', famousGames)
+    
+    return famousGames
+  end
+  
   
   def getMinRoom(params)
     minRoom = [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
@@ -1078,6 +1163,9 @@ class DodontoFServer
     loginMessage = getLoginMessage()
     cardInfos = $card.collectCardTypeAndTypeName()
     
+    #ダイスボットの情報読み出し
+    require 'diceBotInfos'
+    
     result = {
       "loginMessage" => loginMessage,
       "cardInfos" => cardInfos,
@@ -1093,6 +1181,7 @@ class DodontoFServer
       "skinImage" => $skinImage,
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
+      'diceBotInfos' => $diceBotInfos,
     }
     
     logging(result, "result")
@@ -1523,10 +1612,6 @@ class DodontoFServer
     
     logging("isPasswordLocked", isPasswordLocked);
     
-    #ダイスボットの情報読み出し
-    require 'diceBotInfos'
-    
-    
     result = {
       'isRoomExist' => isExistPlayRoomInfo,
       'roomName' => playRoomName,
@@ -1537,7 +1622,6 @@ class DodontoFServer
       'isPasswordLocked' => isPasswordLocked,
       'isMentenanceModeOn' => isMentenanceModeOn,
       'isWelcomeMessageOn' => isWelcomeMessageOn,
-      'diceBotInfos' => $diceBotInfos,
     }
     
     return result
@@ -2333,8 +2417,8 @@ class DodontoFServer
     gameType = params['gameType']
     
     rollResult, isSecret = rollDice(message, gameType)
-    debug(rollResult, 'rollResult')
-    debug(isSecret, 'isSecret')
+    logging(rollResult, 'rollResult')
+    logging(isSecret, 'isSecret')
     
     secretResult = ""
     if( isSecret )
@@ -2378,6 +2462,7 @@ class DodontoFServer
     logging(message, 'rollDice message')
     logging(gameType, 'rollDice gameType')
     
+    require 'customDiceBot.rb'
     bot = CgiDiceBot.new
     result = bot.roll(message, gameType)
     
@@ -3949,6 +4034,10 @@ def printResult(server)
     
     if( server.isAddMarker )
       result = "#D@EM>#" + result + "#<D@EM#";
+    end
+    
+    unless( server.jsonpCallBack.nil? )
+      result = "#{server.jsonpCallBack}(" + result + ");";
     end
     
     logging(result.length.to_s, "CGI response original length")

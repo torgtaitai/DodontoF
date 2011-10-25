@@ -6,7 +6,7 @@
 require 'log'
 require 'configBcDice.rb'
 require 'CountHolder.rb'
-
+require 'kconv'
 
 #============================== 起動法 ==============================
 # 上記設定をしてダブルクリック、
@@ -39,8 +39,8 @@ def decode(code, str)
 end
 
 def encode(code, str)
-  return str;
-  #Kconv.kconv(str, code)
+  #return str;
+  Kconv.kconv(str, code)
 end
 
 
@@ -48,8 +48,6 @@ $secretRollMembersHolder = {};
 $secretDiceResultHolder = {};
 $plotPrintChannels = {};
 $point_counter = {};
-
-$counterInfos = {};
 
 
 require 'CardTrader'
@@ -66,6 +64,8 @@ class BCDiceMaker
     @cardTrader = CardTrader.new
     @cardTrader.initValues;
     
+    @counterInfos = {};
+    
     @master = "";
     @quitFunction = nil
   end
@@ -75,7 +75,7 @@ class BCDiceMaker
   attr_accessor :diceBot
   
   def newBcDice
-    bcdice = BCDice.new(self, @cardTrader, @diceBot)
+    bcdice = BCDice.new(self, @cardTrader, @diceBot, @counterInfos)
     
     return bcdice
   end
@@ -85,13 +85,14 @@ end
 
 class BCDice
   
-  def initialize(parent, cardTrader, diceBot)
+  def initialize(parent, cardTrader, diceBot, counterInfos)
     @parent = parent
     
     setDiceBot(diceBot)
     
     @cardTrader = cardTrader
     @cardTrader.setBcDice(self)
+    @counterInfos = counterInfos
     
 
     @nick_e = ""
@@ -635,7 +636,7 @@ class BCDice
     end
     
     pointerMode = :sameChannel
-    countHolder = CountHolder.new(self, $counterInfos)
+    countHolder = CountHolder.new(self, @counterInfos)
     output_msg, isSecret = countHolder.executeCommand(@message, @nick_e, @channel, pointerMode);
     debug("executePointCounterPublic output_msg, isSecret", output_msg, isSecret)
     
@@ -697,36 +698,35 @@ class BCDice
     
     case arg
       
-    when /D66/
-      # D66ロール検出
+    when /D66/i
+      debug("D66ロール検出")
       if(@diceBot.d66Type != 0)
-        output_msg = d66dice(arg)
-        if( /S\d*D66/ =~ args )   # 隠しロール
-          secret_flg = true if(output_msg != '1');
+        output_msg, secret_flg_tmp = d66dice(arg)
+        if(output_msg != '1');
+          secret_flg = secret_flg_tmp
         end
       end
       
-    when /[-\d]+D[\d\+\*\-D]+([<>=]+[?\-\d]+)?($|\s)/
-      # 加算ロール検出
+    when /[-\d]+D[\d\+\*\-D]+([<>=]+[?\-\d]+)?($|\s)/i
+      debug("加算ロール検出")
       dice = AddDice.new(self, @diceBot)
       output_msg = dice.rollDice(arg)
       if( /S[-\d]+D[\d+-]+/ =~ arg )     # 隠しロール
         secret_flg = true if(output_msg != '1');
         end
       
-    when /[\d]+B[\d]+([<>=]+[\d]+)?($|\s)/
-      # バラバラロール検出
+    when /[\d]+B[\d]+([<>=]+[\d]+)?($|\s)/i
+      debug("バラバラロール検出")
       output_msg = bdice(arg)
       if(/S[\d]+B[\d]+/i =~ arg )   # 隠しロール
         secret_flg = true if(output_msg != '1');
       end
       
-      # 個数振り足しロール検出
-    when /(S)?[\d]+R[\d]+/
-      secretMarker = $1
-      
+    when /(S)?[\d]+R[\d]+/i
+      debug("個数振り足しロール検出")
       debug('xRn input arg', arg)
       
+      secretMarker = $1
       output_msg = @diceBot.dice_command_xRn(arg, @nick_e)
       
       if( output_msg.empty? )
@@ -741,7 +741,8 @@ class BCDice
       end
       
     when /[\d]+U[\d]+/
-      # 上方無限ロール検出
+      debug("上方無限ロール検出")
+      
       dice = UpperDice.new(self, @diceBot)
       output_msg = dice.rollDice(arg)
       if( /S[\d]+U[\d]+/ =~ arg )   # 隠しロール
@@ -749,8 +750,8 @@ class BCDice
       end
       
     when /((^|\s)(S)?choise\[[^,]+(,[^,]+)+\]($|\s))/i
-      # 選択コマンド
-      debug(" execute choise")
+      debug("選択コマンド")
+      debug("execute choise")
       
       secretMarker = $3
       output_msg = choise_random($1)
@@ -963,22 +964,27 @@ class BCDice
 ####################             D66ダイス        ########################
   def d66dice(string)
     string = string.upcase
+    secret_flg = false
     output = '1';
     count = 1;
     
-    if(string =~ /(^|\s)((\d*)D66)(\s|$)/)
-      string = $2;
-      count = $3 if($3);
-      output = "";
+    if(string =~ /(^|\s)(S)?((\d+)?D66)(\s|$)/i)
+      string = $3
+      secret_flg = (not $2.nil?)
+      count = $4.to_i if($4)
+      debug('d66dice count', count)
       
+      d66List = []
       count.times do |i|
-        output += "," if(output);
-        output += getD66Value()
+        d66List << getD66Value( @diceBot.d66Type )
       end
-      output = "#{@nick_e}: (#{string}) ＞ ".output;
+      d66Text = d66List.join(',')
+      debug('d66Text', d66Text)
+      
+      output = "#{@nick_e}: (#{string}) ＞ #{d66Text}"
     end
     
-    return output;
+    return output, secret_flg
   end
   
   def getD66Value(mode)
@@ -1295,7 +1301,7 @@ class BCDice
     end
     
     if( nick == @nick_e )
-      sendMessageToOnlySender(output_msg); #encode($IRC_CODE, output_msg));
+      sendMessageToOnlySender(output_msg); #encode($ircCode, output_msg));
     else
       sendMessage(nick, output_msg);
     end
@@ -1720,6 +1726,10 @@ class BCDice
       require 'diceBot/ZettaiReido'
       diceBot = ZettaiReido.new
       message = 'Game設定を絶対隷奴に設定しました'
+    when /(^|\s)Eclipse\s*Phase$/i
+      require 'diceBot/EclipsePhase'
+      diceBot = EclipsePhase.new
+      message = 'Game設定をEclipse Phaseに設定しました'
     when /(^|\s)(None)$/i, ""
       diceBot = DiceBot.new
       message = 'Game設定を解除しました'

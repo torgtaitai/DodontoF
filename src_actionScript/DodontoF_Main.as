@@ -966,6 +966,16 @@ package {
         }
         
         
+        public function initWindowPosition():void {
+            initiativeWindow.setInitPositionDefault();
+            chatWindow.setInitPositionDefault();
+            chatPalette.setInitPositionDefault();
+            diceBox.setInitPositionDefault();
+            
+            cardPreviewWindow.setInitPositionDefault();
+        }
+        
+        
         private var canUseExternalImageMode:Boolean = false
         
         public function setUseExternalImage(b:Boolean):void {
@@ -1079,6 +1089,7 @@ package {
         {label:"立ち絵のサイズを自動調整する", data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
         {type:"separator"},
         
+        {label:"ウィンドウ配置初期化", data:"initWindowPosition"},
         {label:"表示状態初期化", data:"initLocalSaveData"}
         
                 ]},

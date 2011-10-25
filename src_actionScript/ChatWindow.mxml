@@ -61,6 +61,7 @@
             
             <mx:HBox id="diceBotGameTypeBox" height="200">
               <mx:ComboBox id="diceBotGameType"
+                           labelField="name"
                            toolTip="{diceBotHelpText}"
                            change="setDiceBotHelpText();"
                            rowCount="10"
@@ -308,7 +309,10 @@
         }
         
         public function setDiceBotGameType(gameType:String):void {
-            Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            var index:int = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            if( index == -1 ) {
+                Utils.selectComboBox(diceBotGameType, gameType, "name");
+            }
             
             diceBotGameType.validateNow();
             setDiceBotHelpText();
@@ -347,6 +351,10 @@
                 return;
             }
             
+            setInitPositionDefault();
+        }
+        
+        override public function setInitPositionDefault():void {
             var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
             var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
             var diceBoxWidth:int = DodontoF_Main.getInstance().getDiceBoxWidth();
@@ -809,7 +817,7 @@
                 helpText += "==【その他】===============================\n";
                 helpText += "ゲーム固有の判定がある場合はこの場所に記載されます。";
             } else {
-                helpText += ("==【" + item.label + "専用】=======================\n")
+                helpText += ("==【" + item.name + "専用】=======================\n")
                 helpText += item.info;
             }
             
@@ -951,7 +959,7 @@
             textArea.setSelection(newIndex, newIndex);
         }
     
-        private function getGameType():String { 
+        public function getGameType():String { 
             return diceBotGameType.selectedItem.gameType;
         }
         

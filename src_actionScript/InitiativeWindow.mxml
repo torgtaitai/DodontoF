@@ -1027,6 +1027,10 @@
               return;
           }
           
+          setInitPositionDefault();
+      }
+      
+      override public function setInitPositionDefault():void {
           this.width = DodontoF_Main.getInstance().getDiceBox().width;
           
           var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();

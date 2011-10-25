@@ -24,10 +24,10 @@
     </mx:HBox>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-	  <mx:Label text="この部屋で遊ぶゲームシステム:" />
-      <torgtaitai:SuggestComboBox id="gameType" width="100%"
-                    rowCount="10"
-                    />
+	  <mx:Label text="ゲームシステム（自由入力も可）:" />
+      <torgtaitai:SuggestComboBox id="gameType" width="100%" rowCount="10"
+                                  labelField="name"
+                                  />
     </mx:HBox>
     
     <mx:Spacer width="100%" height="5" />
@@ -93,7 +93,7 @@
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="作成" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button label="キャンセル" click="closeAction()" />
     </mx:HBox>
     </mx:Box>
   <mx:Script>
@@ -106,11 +106,13 @@
     
     
     protected var resultFunction:Function;
+    protected var canselFunction:Function;
     protected var playRoomIndex:int;
     
-    public function initParams(playRoomIndex_:int, resultFunction_:Function = null):void {
+    public function initParams(playRoomIndex_:int, resultFunction_:Function = null, canselFunction_:Function = null):void {
         playRoomIndex = playRoomIndex_;
         resultFunction = resultFunction_;
+        canselFunction = canselFunction_;
         playRoomName.text = "仮プレイルーム（削除可能）";
         playRoomName.toolTip = "プレイルーム名を設定しない場合、仮使用とみなして削除されます。\n正式に利用する場合には正しく名前をつけましょう。";
     }
@@ -119,9 +121,15 @@
         try {
             init();
             initViewStateInfos();
-            initGameSystem();
+            initGameType();
         } catch(error:Error) {
             this.status = error.message;
+        }
+    }
+
+    override protected function teardown():void {
+        if( canselFunction != null ) {
+            canselFunction();
         }
     }
     
@@ -129,10 +137,15 @@
         publicChannelLabel.text = DodontoF_Main.getInstance().publicChatChannelName;
     }
     
-    protected function initGameSystem():void {
+    protected function initGameType():void {
         var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
-        diceBotInfos[0].label = "（指定なし）";
+        diceBotInfos[0].name = "（指定なし）";
         gameType.dataProvider = diceBotInfos;
+        
+        if( ChatWindow.getInstance() != null ) {
+            var gameTypeText:String = ChatWindow.getInstance().getGameType();
+            Utils.selectComboBox(gameType, gameTypeText, "gameType");
+        }
     }
     
     protected var menuInfos:Array = null;
@@ -186,11 +199,27 @@
 
     protected function getGameType():String {
         var item:Object = gameType.selectedItem;
+        var itemClass:String = getQualifiedClassName(item);
+        
+        Log.logging("getGameType item", item);
+        Log.logging("getGameType itemClass", itemClass);
+        
+        var result:String = null;
+        
+        if( itemClass == "String" ) {
+            result = item as String;
+            Log.logging("getGameType item is String, so result", result);
+            return result;
+        }
+        
         if( item == null ) {
             return null;
         }
         
-        return item.gameType;
+        result = item.gameType;
+        
+        Log.logging("getGameType result", result);
+        return result;
     }
     
     protected function execute():void {

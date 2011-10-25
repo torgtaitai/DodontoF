@@ -2,10 +2,14 @@
 
 package {
     
+    import flash.display.MovieClip;
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
     import com.adobe.serialization.json.JSON;
     import flash.display.Loader;
     import flash.events.KeyboardEvent;
     import flash.events.TimerEvent;
+    import flash.media.SoundTransform;
     import flash.ui.Keyboard;
     import flash.utils.ByteArray;
     import flash.utils.Timer;
@@ -15,13 +19,11 @@ package {
     import mx.controls.ComboBox;
     import mx.controls.Label;
     import mx.controls.ToolTip;
-    //import mx.core.FlexGlobals;
     import mx.core.UIComponent;
     import mx.styles.CSSStyleDeclaration;
     import mx.styles.StyleManager;
     import mx.utils.URLUtil;
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
+    import mx.controls.SWFLoader;
     
     public class Utils {
         
@@ -65,6 +67,11 @@ package {
         }
         
         
+        static public function isMovie(source:String):Boolean {
+            return (isFlvFile(source) || isYoutubeUrl(source));
+        }
+        
+        
         static private var patternFlv:RegExp = /.+\.flv$/i;
         
         static public function isFlvFile(source:String):Boolean {
@@ -72,15 +79,11 @@ package {
             return ( index != -1 );
         }
         
-        static public function isMovie(source:String):Boolean {
-            return (isFlvFile(source) || isYoutubeUrl(source));
-        }
+        static private var youtubeIdRegExp:RegExp = /^http:\/\/www\.youtube\..+\/watch\?v=(.+)/;
         
         static public function isYoutubeUrl(source:String):Boolean {
             return ( getYoutubeId(source) != "notFound" );
         }
-        
-        static private var youtubeIdRegExp:RegExp = /^http:\/\/www\.youtube\..+\/watch\?v=(.+)/;
         
         static public function getYoutubeId(source:String):String {
             var result:Object = youtubeIdRegExp.exec(source);
@@ -93,6 +96,15 @@ package {
             
             return youtubeId;
         }
+        
+        
+        static private var patternSwf:RegExp = /.+\.swf$/i;
+        
+        static public function isSwfFile(source:String):Boolean {
+            var index:int = source.search( patternSwf );
+            return ( index != -1 );
+        }
+        
         
         static public function setSkin(component:UIComponent):void {
             if( CustomSkin.isSkinDefined() ) {
@@ -130,22 +142,23 @@ package {
         }
         
         
-        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data"):void {
+        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data"):int {
             comboBox.validateNow();
             
             var list:ArrayCollection = comboBox.dataProvider as  ArrayCollection;
             if( list.length == 0 ) {
-                return;
+                return -1;
             }
             
             for(var i:int = 0 ; i < list.length ; i++) {
                 if(list[i][field] == key){
                     comboBox.selectedIndex = i;
-                    return;
+                    return i;
                 }
             }
             
             comboBox.selectedIndex = 0;
+            return -1;
         }
         
         static public function getComboBoxText(combobox:ComboBox):String {
@@ -449,6 +462,19 @@ package {
             }
             
             return true;
+        }
+        
+        static public function setImageVolume(obj:Object, volume:Number):void {
+            Log.logging("setImageVolume volume", volume);
+            
+            var swf:SWFLoader = obj as SWFLoader;
+            if( swf == null ) {
+                Log.logging("setImageVolume obj is NOT SWFLoader");
+                return;
+            }
+            
+            var soundTransform:SoundTransform = new SoundTransform(volume);
+            swf.soundTransform = soundTransform;
         }
         
     }

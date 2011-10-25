@@ -3,8 +3,8 @@
 $diceBotInfos = 
   [
   {
-    :label => 'ダイスボット(指定無し)',
-    :gameType => '',
+    :name => 'ダイスボット(指定無し)',
+    :gameType => 'diceBot',
     :prefixs => [
       '\d+D\d*', #加算ロール　(xDn)
       '\d+B\d+', #バラバラロール　(xBn)
@@ -38,7 +38,7 @@ $diceBotInfos =
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'アースドーン',
+    :name => 'アースドーン',
     :gameType => 'EarthDawn',
     :prefixs => ['\d+e\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -48,7 +48,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'アリアンロッド',
+    :name => 'アリアンロッド',
     :gameType => 'Arianrhod',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -57,7 +57,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'アルスマギカ',
+    :name => 'アルスマギカ',
     :gameType => 'ArsMagica',
     :prefixs => ['ArS'],
     :info => <<INFO_MESSAGE_TEXT
@@ -71,7 +71,7 @@ INFO_MESSAGE_TEXT
 　INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ウォーハンマー',
+    :name => 'ウォーハンマー',
     :gameType => 'Warhammer',
     :prefixs => ['WH'],
     :info => <<INFO_MESSAGE_TEXT
@@ -88,7 +88,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'エルリック！',
+    :name => 'エルリック！',
     :gameType => 'Elric!',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -96,7 +96,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'エムブリオマシン',
+    :name => 'エムブリオマシン',
     :gameType => 'EmbryoMachine',
     :prefixs => ['(EM\t+|HLT|MFT|SFT)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -111,7 +111,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'カオスフレア',
+    :name => 'カオスフレア',
     :gameType => 'Chaos Flare',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -120,7 +120,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ガンドッグ',
+    :name => 'ガンドッグ',
     :gameType => 'Gundog',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -129,7 +129,7 @@ nD9ロールも対応。
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ガンドッグ・ゼロ',
+    :name => 'ガンドッグ・ゼロ',
     :gameType => 'GundogZero',
     :prefixs => ['(.DPT|.FT)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -144,7 +144,7 @@ nD9ロールも対応。
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'クトゥルフ',
+    :name => 'クトゥルフ',
     :gameType => 'Cthulhu',
     :prefixs => ['RES\(\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -156,7 +156,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'クトゥルフテック',
+    :name => 'クトゥルフテック',
     :gameType => 'CthulhuTech',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -166,7 +166,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ゲヘナ・アナスタシス',
+    :name => 'ゲヘナ・アナスタシス',
     :gameType => 'GehennaAn',
     :prefixs => ['(\d+G\d+|\d+GA\d+)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -180,7 +180,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'サタスペ',
+    :name => 'サタスペ',
     :gameType => 'Satasupe',
     :prefixs => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -208,7 +208,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'シノビガミ',
+    :name => 'シノビガミ',
     :gameType => 'ShinobiGami',
     :prefixs => ['ST', 'FT', 'ET', 'WT', 'BT', 'CST', 'MST', 'DST', 'TST', 'NST', 'KST', 'TKST', 'GST', 'GWT', 'GAST', 'KYST', 'JBST'],
     :info => <<INFO_MESSAGE_TEXT
@@ -225,7 +225,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'シャドウラン',
+    :name => 'シャドウラン',
     :gameType => 'ShadowRun',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -233,7 +233,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'シャドウラン第４版',
+    :name => 'シャドウラン第４版',
     :gameType => 'ShadowRun4',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -242,7 +242,7 @@ BコマンドとRコマンド時に、グリッチの表示を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '絶対隷奴',
+    :name => '絶対隷奴',
     :gameType => 'ZettaiReido',
     :prefixs => ['\d+\-2DR'],
     :info => <<INFO_MESSAGE_TEXT
@@ -250,7 +250,7 @@ m-2DR+n>=x　：m(基本能力),n(修正値),x(目標値) DPの取得の有無�
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ソードワールド',
+    :name => 'ソードワールド',
     :gameType => 'SwordWorld',
     :prefixs => ['K\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -278,7 +278,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ソードワールド2.0',
+    :name => 'ソードワールド2.0',
     :gameType => 'SwordWorld2.0',
     :prefixs => ['K\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -306,7 +306,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ダークブレイズ',
+    :name => 'ダークブレイズ',
     :gameType => 'DarkBlaze',
     :prefixs => ['DB', 'BT'],
     :info => <<INFO_MESSAGE_TEXT
@@ -323,7 +323,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ダブルクロス2nd,3rd',
+    :name => 'ダブルクロス2nd,3rd',
     :gameType => 'DoubleCross',
     :prefixs => ['(\d+dx|ET)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -341,8 +341,24 @@ INFO_MESSAGE_TEXT
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
+=begin
   {
-    :label => 'デモンパラサイト',
+    :name => 'ダンジョンズ＆ドラゴンズ3.x版',
+    :gameType => 'D&D3rd',
+    :prefixs => [],
+    :info => <<INFO_MESSAGE_TEXT
+INFO_MESSAGE_TEXT
+  },
+  {
+    :name => 'ダンジョンズ＆ドラゴンズ4版',
+    :gameType => 'D&D4th',
+    :prefixs => [],
+    :info => <<INFO_MESSAGE_TEXT
+INFO_MESSAGE_TEXT
+  },
+=end
+  {
+    :name => 'デモンパラサイト',
     :gameType => 'Demon Parasite',
     :prefixs => ['(N|A|M|U|C|)?URGE\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -361,7 +377,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'トーグ',
+    :name => 'トーグ',
     :gameType => 'TORG',
     :prefixs => ['(TG|RT|Result|IT|Initimidate|TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage|BT|bonus|total)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -380,7 +396,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '特命転攻生',
+    :name => '特命転攻生',
     :gameType => 'TokumeiTenkousei',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -388,8 +404,8 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'トンネルズ＆トロールズ',
-    :gameType => 'Tunnels &amp; Trolls',
+    :name => 'トンネルズ＆トロールズ',
+    :gameType => 'T&T',
     :prefixs => ['(\d+H?BS)'],
     :info => <<INFO_MESSAGE_TEXT
 失敗、成功、自動失敗の自動判定とゾロ目の振り足し経験値の自動計算を行います。
@@ -410,7 +426,7 @@ SAVEの難易度を「レベル」で表記することが出来ます。
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ナイトウィザード',
+    :name => 'ナイトウィザード',
     :gameType => 'NightWizard',
     :prefixs => ['\d+NW'],
     :info => <<INFO_MESSAGE_TEXT
@@ -422,7 +438,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ナイトメアハンター=ディープ',
+    :name => 'ナイトメアハンター=ディープ',
     :gameType => 'NightmareHunterDeep',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -431,7 +447,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ネクロニカ',
+    :name => 'ネクロニカ',
     :gameType => 'Nechronica',
     :prefixs => ['(\d+NC|\d+NA)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -444,7 +460,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ファンタズムアドベンチャー',
+    :name => 'ファンタズムアドベンチャー',
     :gameType => 'PhantasmAdventure',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -452,7 +468,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'パラサイトブラッド',
+    :name => 'パラサイトブラッド',
     :gameType => 'ParasiteBlood',
     :prefixs => ['(N|A|M|U|C|)?URGE\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -471,7 +487,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'バルナ・クロニカ',
+    :name => 'バルナ・クロニカ',
     :gameType => 'BarnaKronika',
     :prefixs => ['\d+BK', '\d+BA', '\d+BKC\d+', '\d+BAC\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -488,7 +504,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ハンターズムーン',
+    :name => 'ハンターズムーン',
     :gameType => 'HuntersMoon',
     :prefixs => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)'],
     :info => <<INFO_MESSAGE_TEXT
@@ -513,7 +529,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ピーカーブー',
+    :name => 'ピーカーブー',
     :gameType => 'Peekaboo',
     :prefixs => ['SET', 'PSET', 'OET', 'IBT', 'SBT'],
     :info => <<INFO_MESSAGE_TEXT
@@ -531,7 +547,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ペンドラゴン',
+    :name => 'ペンドラゴン',
     :gameType => 'Pendragon',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -539,7 +555,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'マギカロギア',
+    :name => 'マギカロギア',
     :gameType => 'MagicaLogia',
     :prefixs => ['WT', 'CT', 'ST', 'FT', 'AT', 'BGT', 'DAT', 'FAT', 'WIT', 'RTT'],
     :info => <<INFO_MESSAGE_TEXT
@@ -558,7 +574,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '迷宮デイズ',
+    :name => '迷宮デイズ',
     :gameType => 'MeikyuDays',
     :prefixs => ['\d+MD', 'DRT', 'DNT', 'DBT', 'DHT', 'KST', 'CAT', 'CFT', 'FWT', 'T1T', 'T2T', 'T3T', 'T4T', 'MPT', 'APT', 'DCT', 'MCT', 'PCT', 'LCT'],
     :info => <<INFO_MESSAGE_TEXT
@@ -581,7 +597,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '迷宮キングダム',
+    :name => '迷宮キングダム',
     :gameType => 'MeikyuKingdom',
     :prefixs => ['\d+MK',
  'LRT', 'ORT', 'CRT', 'ART', 'FRT',
@@ -597,6 +613,7 @@ INFO_MESSAGE_TEXT
  'IFT',
  '\d+RET',
  'PNT', 'MLT',
+ 'KNT\d+', 'WORD\d+'
 ],
     :info => <<INFO_MESSAGE_TEXT
 ・判定　(nMK+m)
@@ -609,10 +626,12 @@ INFO_MESSAGE_TEXT
 　・ハプニング表(〜HT)：才覚ハプニング表 THT／魅力ハプニング表 CHT／探索ハプニング表 SHT
 　　／武勇ハプニング表 VHT
 　・王国災厄表 KDT／王国変動表 KCT／王国変動失敗表 KMT
+　・王国名決定表１／２／３／４／５ KNT1／KNT2／KNT3／KNT4
 　・痛打表 CAT／致命傷表 FWT／戦闘ファンブル表 CFT
 　・道中表 TT／交渉表 NT／感情表 ET／相場表 MPT
 　・お宝表１／２／３／４／５ T1T／T2T／T3T／T4T／T5T
 　・名前表 NAMEx (xは個数)
+　・名前表A NAMEA／名前表B NAMEB／エキゾチック名前表 NAMEEX／ファンタジック名前表 NAMEFA
 　・アイテム関連（猟奇戦役不使用の場合をカッコ書きで出力）
 　　・デバイスファクトリー　　DFT
 　　・アイテムカテゴリ決定表　IDT
@@ -621,11 +640,12 @@ INFO_MESSAGE_TEXT
 　・ランダムエンカウント表　nRET (nはレベル,1〜6)
 　・地名決定表　　　　PNTx (xは個数)
 　・迷宮風景表　　　　MLTx (xは個数)
+　・単語表１／２／３／４　WORD1／WORD2／WORD3／WORD4
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'モノトーン・ミュージアム',
+    :name => 'モノトーン・ミュージアム',
     :gameType => 'MonotoneMusium',
     :prefixs => ['OT', 'DT', 'WDT'],
     :info => <<INFO_MESSAGE_TEXT
@@ -642,7 +662,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ルーンクエスト',
+    :name => 'ルーンクエスト',
     :gameType => 'RuneQuest',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -650,7 +670,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '六門世界2nd',
+    :name => '六門世界2nd',
     :gameType => 'RokumonSekai2',
     :prefixs => ['\d+RS'],
     :info => <<INFO_MESSAGE_TEXT
@@ -662,7 +682,7 @@ Rコマンド(3R6m<=t[a])に読み替えます。
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ロールマスター',
+    :name => 'ロールマスター',
     :gameType => 'RoleMaster',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -670,7 +690,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'ワープス',
+    :name => 'ワープス',
     :gameType => 'WARPS',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -678,7 +698,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '比叡山炎上',
+    :name => '比叡山炎上',
     :gameType => 'Hieizan',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -686,7 +706,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => '無限のファンタジア',
+    :name => '無限のファンタジア',
     :gameType => 'Infinite Fantasia',
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
@@ -694,7 +714,7 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :label => 'Chill',
+    :name => 'Chill',
     :gameType => 'Chill',
     :prefixs => ['SR\d+'],
     :info => <<INFO_MESSAGE_TEXT
@@ -704,6 +724,14 @@ INFO_MESSAGE_TEXT
 　負傷とスタミナロスを計算します。
 　ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。
 　例）SR7　　　sr13　　　SR(7+4)　　　Ssr10
+INFO_MESSAGE_TEXT
+  },
+  {
+    :name => 'Eclipse Phase',
+    :gameType => 'EclipsePhase',
+    :prefixs => [],
+    :info => <<INFO_MESSAGE_TEXT
+1D100<=m 方式の判定で成否、クリティカル・ファンブルを自動判定
 INFO_MESSAGE_TEXT
   },
 ]

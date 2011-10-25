@@ -3,10 +3,6 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
    title="カードピックアップ"
-   x="10"
-   y="40"
-   width="200"
-   height="20"
    showCloseButton="false"
    backgroundColor="#FFFFFF"
    borderStyle="solid"
@@ -22,6 +18,8 @@
         
         override public function setup():void {
             thisObj = this;
+            
+            setInitPositionDefault();
             
             cardPreview = new CardPickup(Card.getJsonData("", "", 0, 0));
             
@@ -80,6 +78,13 @@
             var rate:Number = (windowWidth / cardWidth);
             
             cardPreview.setRate(rate);
+        }
+        
+        override public function setInitPositionDefault():void {
+            this.x = 10;
+            this.y = 40
+            width = 200;
+            height = 20;
         }
         
     ]]>

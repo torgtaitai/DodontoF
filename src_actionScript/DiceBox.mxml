@@ -43,6 +43,11 @@
             return;
         }
         
+        setInitPositionDefault();
+    }
+    
+    override public function setInitPositionDefault():void {
+        
         var screenWidth:int = DodontoF_Main.getInstance().getScreenWidth();
         var screenHeigth:int = DodontoF_Main.getInstance().getScreenHeight();
         

@@ -49,7 +49,10 @@
       <mx:Box height="100%" width="50%">
         
 	    <mx:FormItem label="BGM(空欄ならBGM無し):" >
-          <mx:TextInput id="soundSourceEdit" width="150" text="" />
+          <mx:HBox height="100%" width="100%">
+            <mx:TextInput id="soundSourceEdit" width="90" text="" />
+            <mx:CheckBox id="isSoundLoopCheck" label="無限ループ" selected="false" />
+          </mx:HBox>
         </mx:FormItem>
         
 	    <mx:FormItem label="表示位置:" >
@@ -195,12 +198,14 @@
         
         var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
         var soundSource:String = soundSourceEdit.text;
+        var isSoundLoop:Boolean = isSoundLoopCheck.selected;
         var position:String = positionCoboBox.selectedItem.data;
         
         var params:Object = {
             "message": message.text,
             "source": imageUrl,
             "soundSource": soundSource,
+            "isSoundLoop": isSoundLoop,
             "volume": volume.value,
             "width": imageWidth.value,
             "height": imageHeight.value,

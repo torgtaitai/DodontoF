@@ -70,6 +70,7 @@ package {
         static private var volumeDefault:Number = 0.1;
         private var volume:Number = volumeDefault;
         private var soundSource:String = null;
+        private var isSoundLoop:Boolean = false;
         
         override protected function executeEffect(params_:Object):void {
             params = params_;
@@ -81,6 +82,8 @@ package {
             if( soundSource == "" ) {
                 soundSource = null;
             }
+            
+            isSoundLoop = params.isSoundLoop;
             
             if( params.volume == null ) {
                 this.volume = volumeDefault;
@@ -132,6 +135,11 @@ package {
             
             var startTime:Number = 0;
             var loops:int = 0;
+            
+            if( isSoundLoop ) {
+                loops = int.MAX_VALUE;
+            }
+            
             var soundTransform:SoundTransform = new SoundTransform();
             soundTransform.volume = this.volume;
             soundChannel = sound.play(startTime, loops, soundTransform);
@@ -145,6 +153,7 @@ package {
             imageLoader.width = imageInfo.width;
             imageLoader.height = imageInfo.height;
             
+            Utils.setImageVolume(imageLoader, this.volume);
             var soundChannel:SoundChannel = playSound();
             
             cutInWindow.setSize(imageInfo.width, imageInfo.height);

@@ -95,6 +95,9 @@
             loadAddAction = act;
         }
         
+        public function setInitPositionDefault():void {
+        }
+        
         public function loadPosition():Boolean {
             if( getSaveInfoKeyName() == ignoreSavePosition ) {
                 return false;

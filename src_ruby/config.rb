@@ -95,9 +95,8 @@ $mentenanceModePassword = nil
 #ログアウト時のメッセージも抑止
 $isWelcomeMessageOn = true
 
-#ダイスボットスクリプトへのパス
-$diceBoxCgiUrl = "customBot.pl"
-# $diceBoxCgiUrl = "src_bcdice/customBot.rb"
+#ダイスボットスクリプトへのパス -> B&C2では不要になりました。
+# $diceBoxCgiUrl = "customBot.pl"
 
 #セーブデータの管理方法(nil/"mysql")
 $dbType = nil

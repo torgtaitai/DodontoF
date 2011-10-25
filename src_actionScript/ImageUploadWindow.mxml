@@ -155,13 +155,39 @@
     private function getCompleteHandlerOnPreviewLoader(imageFileName:String):Function {
         return function(event:Event):void {
             Log.logging("completeHandlerOnPreviewLoader(event:Event)");
-            var loaderInfo:LoaderInfo = event.currentTarget as LoaderInfo;
-            var previewLoader:Loader = loaderInfo.loader as Loader;
-            
-            getSmallImage(previewLoader, imageFileName);
+            getSmallImage(event, imageFileName);
             
             Log.logging("completeHandlerOnPreviewLoader(event:Event) end");
         }
+    }
+    
+    private function getSmallImage(event:Event, imageFileName:String):void {
+        var loaderInfo:LoaderInfo = event.currentTarget as LoaderInfo;
+        if( loaderInfo == null ) {
+            Log.loggingTuning("getSmallImage currentTarget is NOT LoaderInfo");
+            return;
+        }
+        
+        var previewLoader:Loader = loaderInfo.loader as Loader;
+        
+        var rates:Object = getSmallImageRates(previewLoader);
+        previewLoader.width *= rates.widthRate;
+        previewLoader.height *= rates.heightRate;
+        
+        var bitmap:Bitmap = new Bitmap();
+        var bitmapData:BitmapData = new BitmapData(previewLoader.width, previewLoader.height);
+        var matrix:Matrix = new Matrix();
+        matrix.scale(rates.widthRate, rates.heightRate);
+        bitmap.bitmapData = bitmapData;
+        bitmapData.draw(previewLoader, matrix);
+        
+        smallImages[imageFileName] = getSmallImageData(bitmap);
+        
+        var component:UIComponent = getPreviewComponent();
+        component.addChild(previewLoader);//bitmap);
+        
+        previewLoaderComponentList.push(component);
+        preview.addChild(component);
     }
     
     static public function getSmallImageRates(previewLoader:Loader):Object {
@@ -233,27 +259,6 @@
         component.setStyle("horizontalAlign", "center");
         
         return component;
-    }
-    
-    private function getSmallImage(previewLoader:Loader, imageFileName:String):void {
-        var rates:Object = getSmallImageRates(previewLoader);
-        previewLoader.width *= rates.widthRate;
-        previewLoader.height *= rates.heightRate;
-        
-        var bitmap:Bitmap = new Bitmap();
-        var bitmapData:BitmapData = new BitmapData(previewLoader.width, previewLoader.height);
-        var matrix:Matrix = new Matrix();
-        matrix.scale(rates.widthRate, rates.heightRate);
-        bitmap.bitmapData = bitmapData;
-        bitmapData.draw(previewLoader, matrix);
-        
-        smallImages[imageFileName] = getSmallImageData(bitmap);
-        
-        var component:UIComponent = getPreviewComponent();
-        component.addChild(previewLoader);//bitmap);
-        
-        previewLoaderComponentList.push(component);
-        preview.addChild(component);
     }
     
     private function getSmallImageData(bitmap:Bitmap):ByteArray {

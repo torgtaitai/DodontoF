@@ -121,6 +121,7 @@
     import mx.managers.DragManager;
     import mx.managers.PopUpManager;
     
+    
     protected static var thisObj:DodontoF;
     
     [Embed(source='image/icons/zoom_in.png')]
@@ -330,6 +331,8 @@
             dodontoF_Main.stopSessionRecording();
         } else if( menuName == "logout" ) {
             dodontoF_Main.logout();
+        } else if( menuName == "initWindowPosition" ) {
+            dodontoF_Main.initWindowPosition();
         } else if( menuName == "initLocalSaveData" ) {
             initLocalSaveData();
         } else if( menuName == "isChatVisible" ) {

@@ -13,7 +13,7 @@
   
   <mx:HBox height="220" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Box height="220" width="30%" horizontalAlign="right" verticalAlign="middle">
-      <mx:Image id="previewImage" width="200" height="200" />
+      <mx:Image id="preview" width="200" height="200" />
     </mx:Box>
     
     <mx:Box height="220" width="70%" horizontalAlign="left" verticalAlign="middle">
@@ -58,9 +58,21 @@
     }
         
     override protected function setup():void {
+        preview.addEventListener(Event.COMPLETE, completeHandler);
         imageUploadSetInfo.imageTypeChanged();
     }
     
+    private function completeHandler(event:Event = null):void {
+        var preview:Image = event.currentTarget as Image;
+        if( preview == null ) {
+            return;
+        }
+        
+        var volume:Number = 0;
+        Utils.setImageVolume(preview, volume);
+    }
+    
+
     private function uploadImageUrl():void {
         result.text = "[アップロード中・・・]";
         
@@ -89,10 +101,9 @@
 
 
     private function changePreview():void {
-        previewImage.source = imageUrl.text;
+        preview.source = imageUrl.text;
     }
-
-
+    
     ]]>
   </mx:Script>
   

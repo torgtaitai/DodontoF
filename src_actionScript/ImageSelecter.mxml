@@ -105,10 +105,24 @@
        public function addPreview(preview:UIComponent, size:int = 300):void {
            previewSpace.height = size;
            previewSpace.width = size;
+           
            preview.height = size;
            preview.width  = size;
+           preview.addEventListener(Event.COMPLETE, completeHandler);
            
            previewSpace.addChild(preview);
+       }
+       
+       private function completeHandler(event:Event = null):void {
+           Log.logging("ImageSelecter.completeHander begin");
+           var preview:Image = event.currentTarget as Image;
+           if( preview == null ) {
+               Log.logging("ImageSelecter.completeHander preview is null");
+               return;
+           }
+           
+           var volume:Number = 0;
+           Utils.setImageVolume(preview, volume);
        }
        
        public function getImageUrlChanger():ImageUrlChanger {
