@@ -329,6 +329,8 @@
             refreshMainMenu();
             
             dodontoF_Main.stopSessionRecording();
+        } else if( menuName == "uploadScenarioData" ) {
+            dodontoF_Main.uploadScenarioData();
         } else if( menuName == "logout" ) {
             dodontoF_Main.logout();
         } else if( menuName == "initWindowPosition" ) {

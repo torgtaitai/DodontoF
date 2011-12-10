@@ -53,39 +53,42 @@
         initCardTypes();
     }
     
-    //static private var cardTypeTrump:String = "trump_jorker3";
     static private var cardTypeTrump:String = "trump_swf";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
+    
+    private var gropuBoxes:Object = new Object();
     
     static private function isTrump(cardType:String):Boolean {
         return ( cardType == cardTypeTrump );
     }
     
     static public function setCardInfos(infos:Array):void {
-        cardInfos = new Array();
-        
-        for(var i:int = 0 ; i < infos.length ; i++) {
-            var cardInfo:Object = infos[i];
-            var cardType:String = cardInfo.type;
-            
-            cardInfos.push(cardInfo);
-        }
+        cardInfos = Utils.clone(infos);
     }
     
     static public function getCardName(mountName:String):String {
+        var info:Object = getCardInfo(mountName);
+        
+        var cardName:String = info.title;
+        
+        if( cardName == null ) {
+            cardName = "";
+        }
+        
+        return cardName;
+    }
+    
+    static public function getCardInfo(cardType:String):Object {
         for(var i:int = 0 ; i < cardInfos.length ; i++) {
             var cardInfo:Object = cardInfos[i];
-            var cardType:String = cardInfo.type;
-            var cardName:String = cardInfo.title;
-            
-            if( cardType == mountName ) {
-                return cardName;
+            if( cardInfo.type == cardType ) {
+                return cardInfo;
             }
         }
         
-        return "";
+        return new Object();
     }
-       
+    
     private function initCardTypes():void {
         for(var i:int = 0 ; i < cardInfos.length ; i++) {
             var cardInfo:Object = cardInfos[i];
@@ -102,13 +105,68 @@
             
             var checkBox:CheckBox = new CheckBox();
             checkBox.id = cardType;
-            checkBox.label = cardName;
-               
-            checkBoxPlace.addChild( checkBox );
+            checkBox.label = getPrefixExclideText(cardName);
+            
             checkBoxes[cardType] = checkBox;
+            
+            if( isGroupCardType(cardType) ) {
+                addGropBox(cardType, checkBox);
+            } else {
+                checkBoxPlace.addChild( checkBox );
+            }
         }
     }
-       
+    
+    private function isGroupCardType(cardType:String):Boolean {
+        return (getPrefix(cardType) != "");
+    }
+    
+    private function addGropBox(cardType:String, checkBox:CheckBox):void {
+        var prefix:String = getPrefix(cardType);
+        
+        var box:HBox = this.gropuBoxes[prefix];
+        
+        if( box == null ) {
+            this.gropuBoxes[prefix] = new HBox();
+            box = this.gropuBoxes[prefix];
+            
+            var cardName:String = getCardName(cardType);
+            
+            var label:Label = new Label();
+            label.text = getPrefix( cardName );
+            Log.logging("getCardInfo(cardType)", getCardInfo(cardType));
+            
+            checkBoxPlace.addChild( label );
+            checkBoxPlace.addChild( box );
+
+            var blank:Label = new Label();
+            blank.text = getPrefix( "  " );
+            box.addChild( blank );
+        }
+        
+        box.addChild( checkBox );
+    }
+    
+    private function getPrefix(cardType:String):String {
+        var index:int = cardType.indexOf(":");
+        
+        if( index == -1 ) {
+            return "";
+        }
+        
+        return cardType.substr(0, index);
+    }
+    
+    private function getPrefixExclideText(text:String):String {
+        var index:int = text.indexOf(":");
+        
+        if( index == -1 ) {
+            return text;
+        }
+        
+        return text.substr( (index + 1) );
+    }
+    
     private function changeTrumpCheck():void {
         deckCount.enabled = trump.selected;
         jorkerCount.enabled = trump.selected;

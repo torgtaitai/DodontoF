@@ -445,6 +445,10 @@ package {
         }
         
 
+        public function uploadScenarioData():void {
+            getGuiInputSender().getSender().uploadScenarioData();
+        }
+        
         
         
         public function login():void {
@@ -492,17 +496,17 @@ package {
         }
         
         public function isSessionRecording():Boolean {
-            return DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever().isSessionRecording();
+            return getGuiInputSender().getSender().getReciever().isSessionRecording();
         }
         
         public function startSessionRecording():void {
             chatWindow.sendSystemMessage("が録画を開始しました。");
-            var sender:SharedDataSender = DodontoF_Main.getInstance().getGuiInputSender().getSender();
+            var sender:SharedDataSender = getGuiInputSender().getSender();
             sender.startSessionRecording();
         }
         
         public function stopSessionRecording():void {
-            var reciever:SharedDataReceiver = DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever();
+            var reciever:SharedDataReceiver = getGuiInputSender().getSender().getReciever();
             if( ! reciever.stopHistory() ) {
                 return;
             }
@@ -776,6 +780,10 @@ package {
         }
         
         private var chatPalette:ResizableWindow;
+        
+        public function getChatPaletteWindow():ChatPalette2 {
+            return chatPalette as ChatPalette2;
+        }
         
         public function setChatPaletteWindow(window:IFlexDisplayObject, eventName:String):void {
             chatPalette = window as ResizableWindow;
@@ -1067,6 +1075,9 @@ package {
         {label:"チャットログ保存", data:"saveLog"},
         {label:"録画開始", data:"startSessionRecording", enabled:"true"},
         {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
+        {type:"separator"},
+        {label:"シナリオデータ読み込み", data:"uploadScenarioData"},
+        {type:"separator"},
         {label:"ログアウト", data:"logout", enabled:"true"},
                 ]},
 

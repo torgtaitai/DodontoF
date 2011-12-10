@@ -37,13 +37,13 @@
                horizontalAlign="left"
                >
 	    <mx:Label text="イニシアティブ:" />
-        <mx:NumericStepper id="characterInitiative" minimum="0" maximum="99" value="0" stepSize="1" />
+        <mx:NumericStepper id="characterInitiative" maximum="999" minimum="-999" value="0" stepSize="1" />
         
         <mx:Spacer height="100%" width="10" />
         
 	    <mx:Label text="修正値:"
                   toolTip="イニシアティブが同値の場合の比較に使用します"/>
-        <mx:NumericStepper id="characterInitiativeModify" minimum="0" maximum="99" value="0" stepSize="1"
+        <mx:NumericStepper id="characterInitiativeModify" maximum="90" minimum="-9" value="0" stepSize="1"
                            toolTip="イニシアティブが同値の場合の比較に使用します"/>
       </mx:HBox>
       

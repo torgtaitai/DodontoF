@@ -181,18 +181,25 @@ class SaveDirInfo
   end
   
   def removeSaveDir(saveDataDirIndex)
-    saveDataDirName = getDirNameByIndex(saveDataDirIndex)
+    dirName = getDirNameByIndex(saveDataDirIndex)
+    self.class.removeDir(dirName)
+  end
+  
+  def self.removeDir(dirName)
+    unless( FileTest.directory?(dirName) )
+      return
+    end
     
     #fileNames = getSaveFileAllNames
-    #files = getExistFileNames(saveDataDirName, fileNames)
-    files = Dir.glob( File.join(saveDataDirName, "*") )
+    #files = getExistFileNames(dirName, fileNames)
+    files = Dir.glob( File.join(dirName, "*") )
     
     logging(files, "removeDir files")
     files.each do |fileName|
       File.delete(fileName.untaint)
     end
     
-    Dir.delete(saveDataDirName)
+    Dir.delete(dirName)
   end
   
   def getTrueSaveFileName(saveFileName)

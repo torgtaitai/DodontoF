@@ -1,0 +1,10 @@
+text
+<p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>森</i></font><p>
+<font size="40">豊かな水源</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.清らかな泉<br>2.小さな川<br>3.水を飲みに来ている動物<br>4.湿地に行く手を遮られる<br>5.みずみずしい果実<br>6.泉の精が現れる</font>
+<font size="40">森の脅威</font><br><p align='right'><font size="40">【真の黒】</font></p><br><font size="36">1.道に迷い、1日空費する<br>2.敵意を持った妖精<br>3.毒虫が降ってくる<br>4.大型の獣に襲われる<br>5.盗賊に奇襲される<br>6.モンスターと遭遇する</font>
+<font size="40">大自然の神秘</font><br><p align='right'><font size="40">【真の緑】</font></p><br><font size="36">1.生命の誕生<br>2.自然の声を聞く<br>3.森に行く手を遮られる<br>4.道に迷ってしまう<br>5.大型昆虫2d6匹に襲われる<br>6.植物モンスターに襲われる</font>
+<font size="40">豊かな森</font><br><p align='right'><font size="40">【真の緑】</font></p><br><font size="36">1.果実を発見<br>2.木の実がふってくる<br>3.薬草を発見<br>4.キノコを発見<br>5.回復の泉<br>6.食用に適する動物</font>
+<font size="40">森の妖精たち</font><br><p align='right'><font size="40">【真の白】</font></p><br><font size="36">1.踊っている妖精たち<br>2.妖精／精霊に、お願いされる<br>3.親切な妖精<br>4.悪戯好きの小妖精<br>5.精霊の声を聞く<br>6.妖精の輪</font>
+<font size="40">歓迎せざる者</font><br><p align='right'><font size="40">【真の金色】</font></p><br><font size="36">1.野営の跡<br>2.気のいい木こり<br>3.狩人に獲物と間違えられる<br>4.謎の老人<br>5.光る獣の目<br>6.山火事</font>
+<font size="40">さまざまな出会い</font><br><p align='right'><font size="40">【真の赤】</font></p><br><font size="36">1.大型の獣に遭遇する<br>2.道に迷い、1日空費する<br>3.斧を持った山小人<br>4.快適な野宿場所<br>5.森の中の一軒家<br>6.モンスターが1d6匹襲ってくる</font>
+<font size="40">気まぐれな旅人</font><br><p align='right'><font size="40">【真の紫】</font></p><br><font size="36">1.小鳥が羽ばたいてゆく<br>2.清風が吹き爽やかになる<br>3.旅人に遭遇する<br>4.木々がざわめく<br>5.動物の鳴き声が聞こえる<br>6.天候が悪化する</font>

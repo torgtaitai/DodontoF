@@ -431,6 +431,7 @@
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout as int );
         Config.getInstance().setDiceBotCgiUrl( jsonData.diceBoxCgiUrl );
+        ChangeMapWindow.setMaxWidthHeigth( jsonData.mapMaxWidth, jsonData.mapMaxHeigth );
         
         Config.getInstance().setSkinImageUrl( jsonData.skinImage );
         Utils.setSkin(this);

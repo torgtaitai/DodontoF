@@ -66,15 +66,19 @@
           </mx:ComboBox>
         </mx:FormItem>
         
-        <mx:Spacer height="10" width="100%" />
-        
         <mx:HBox width="100%">
 	      <mx:Label text="横:" />
-          <mx:NumericStepper id="imageWidth" minimum="0" maximum="1000" value="0" stepSize="1" />
+          <mx:NumericStepper id="imageWidth" minimum="0" maximum="1000" value="0" stepSize="1" width="60" />
 	      <mx:Label text="縦:" />
-          <mx:NumericStepper id="imageHeight" minimum="0" maximum="1000" value="0" stepSize="1" />
-	      <mx:Label text="（0なら自動設定）" />
+          <mx:NumericStepper id="imageHeight" minimum="0" maximum="1000" value="0" stepSize="1" width="60" />
+	      <mx:Label text="ドット(0なら自動設定)" />
         </mx:HBox>
+        
+        <mx:Spacer height="10" width="100%" />
+        
+	    <mx:FormItem label="カットインタグ名(空欄なら指定無し):"  toolTip="カットインタグ名が同一のカットインが表示されている場合は、既存のカットインを先に閉じて新しいカットインが表示されます。&#13;カットインタグ名が空欄（指定無し）の場合には常に新しいカットインが生成されます。" >
+        <mx:TextInput id="cutInTag" width="100" text="" />
+        </mx:FormItem>
         
         <mx:Spacer height="10" width="100%" />
         
@@ -210,7 +214,8 @@
             "width": imageWidth.value,
             "height": imageHeight.value,
             "position" : position,
-            "displaySeconds": displaySeconds.value};
+            "displaySeconds": displaySeconds.value,
+            "cutInTag": cutInTag.text };
     
         getCommandParamsExt(params);
     

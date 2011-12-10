@@ -112,17 +112,57 @@ package {
             }
         }
         
+        
+        
+        /*　イニシアティブの算出方法について
+          イニシアティブ値は 1.03 なら イニシアティブ値１、修正値３のように
+          小数点2桁を修正値として扱う。
+          ただし、1.99のように修正値が90以上の場合は、修正値から100を引いて修正値 −1 のように負に数える。
+          （90以上の修正値はゲームで使わないと仮定）
+          このため、 1.99 は イニシアティブ値２、修正値 −1　となる。
+        */
+        static private var initiativeModifyLimit:int = 100;
+        static private var initiativeModifyMax:int = 90;
+        
         static public function getInitiativeInt(initiative:Number):int {
-            return Math.floor(initiative);
+            Log.logging("Utils.getInitiativeInt initiative", initiative);
+            
+            var initiativeInt:int = Math.floor(initiative);
+            Log.logging("initiativeInt", initiativeInt);
+            
+            var modify:int = getInitiativeModify(initiative);
+            Log.logging("modify", modify);
+            
+            if( modify < 0 ) {
+                initiativeInt += 1;
+            }
+            
+            Log.logging("result initiativeInt", initiativeInt);
+            return initiativeInt;
         }
         
         static public function getInitiativeModify(initiative:Number):int {
-            var initiativeModify:int = Math.round(initiative * 100) %100;
-            return initiativeModify;
+            
+            var modify:int = Math.round(initiative * initiativeModifyLimit) % initiativeModifyLimit;
+            
+            if( modify > initiativeModifyMax ) {
+                if( modify < initiativeModifyLimit ) {
+                    modify -= initiativeModifyLimit;
+                } else {
+                    modify = initiativeModifyMax;
+                }
+            }
+            
+            return modify;
         }
         
         static public function getInitiative(initiativeInt:int, initiativeModify:int):Number {
+            Log.logging("Utils.getInitiative");
+            Log.logging("initiativeInt", initiativeInt);
+            Log.logging("initiativeModify", initiativeModify);
+            
             var initiative:Number = initiativeInt + (initiativeModify / 100);
+            Log.logging("initiative", initiative);
             
             return initiative;
         }

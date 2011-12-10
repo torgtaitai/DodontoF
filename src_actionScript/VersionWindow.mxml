@@ -21,7 +21,7 @@
   
   <mx:TextArea id="titleImage" width="100%" height="100%" />
   <mx:HBox width="100%">
-    <mx:Label text="どどんとふ　Ver.1.34.00(2011/10/25リリース)" selectable="true" />
+    <mx:Label text="どどんとふ　Ver.1.34.02.01(2011/12/05リリース)" selectable="true" />
     <mx:Spacer width="100%"/>
     <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>

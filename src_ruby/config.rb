@@ -55,6 +55,9 @@ $SAVE_DATA_LOCK_FILE_DIR = nil
 #各画像(キャラクター・マップ)の保存パス
 $imageUploadDir = "./imageUploadSpace"
 
+#シナリオ読み込み機能用のマーカー文字列(変更してはいけません)
+$imageUploadDirMarker = '###ROOM_LOCAL_SPACE###'
+
 #削除対象から外す画像ディレクトリ名一覧
 $protectImagePaths = []
 
@@ -78,7 +81,7 @@ $oldSaveFileDelteSeconds = 180
 $loginTimeOut = $refreshTimeout * 1.5 + 10
 
 #プレイルームを削除してもよい経過時間(秒)
-$deletablePassedSeconds = 60
+$deletablePassedSeconds = 10
 
 #ダイスボットの有効(true)、無効(false)の設定
 $isDiceBotOn = true
@@ -99,6 +102,7 @@ $isWelcomeMessageOn = true
 # $diceBoxCgiUrl = "customBot.pl"
 
 #セーブデータの管理方法(nil/"mysql")
+# $dbType = nil
 $dbType = nil
 
 #MySQLを使用する場合のDB設定。
@@ -134,3 +138,10 @@ $isPaformanceMonitor = false;
 
 #画面の更新速度。nilなら従来通りFlexの初期固定値(30)のまま。
 $fps = 60
+
+#マップの横幅・縦幅として設定できる最大マス数
+$mapMaxWidth = 150
+$mapMaxHeigth = 150
+
+#アップロード可能なシナリオデータの上限(MB)
+$scenarioDataMaxSize = 100.0 

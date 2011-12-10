@@ -54,6 +54,7 @@ package {
             jsonData["imageName"] = imageName_;
             jsonData["imageNameBack"] = imageNameBack_;
             jsonData["isBack"] = true;
+            jsonData["isUpDown"] = false;
             jsonData["isText"] = true;
             jsonData["isOpen"] = false;
             jsonData["owner"] = "";
@@ -72,6 +73,7 @@ package {
             jsonData["imageName"] = this.imageName;
             jsonData["imageNameBack"] = this.imageNameBack;
             jsonData["isBack"] = this.isBack;
+            jsonData["isUpDown"] = this.isUpDown;
             jsonData["isText"] = this.isText;
             jsonData["isOpen"] = this.isOpen;
             jsonData["owner"] = this.owner;
@@ -86,6 +88,7 @@ package {
         private var isOpen:Boolean = false;
         private var owner:String = "";
         private var ownerName:String = "";
+        private var isUpDown:Boolean = false;
         private var isText:Boolean = true;
         private var imageName:String = "";
         private var imageNameBack:String = "";
@@ -135,6 +138,7 @@ package {
             this.isOpen = params.isOpen;
             this.owner = params.owner;
             this.ownerName = params.ownerName;
+            this.isUpDown = params.isUpDown;
             this.isText = params.isText;
             setImageName( params.imageName );
             setImageNameBack( params.imageNameBack );
@@ -292,8 +296,8 @@ package {
         private var zoomRate:Number = 4;
         
         protected function getWidthSize():Number {
-            return 2;
-        }
+            return 2; 
+       }
         
         protected function getHeightSize():Number {
             return 3;
@@ -591,7 +595,11 @@ package {
         
         private function getCardMessage(mainText:String, subText:String):String {
             if( subText == "" ) {
-                return ( mainText + "　：　" + (isUpSide() ? "正位置" : "逆位置") );
+                if( this.isUpDown ) {
+                    return ( mainText + "　：　" + (isUpSide() ? "正位置" : "逆位置") );
+                } else {
+                    return ( mainText );
+                }
             }
             
             if( isUpSide() ) {
@@ -629,7 +637,7 @@ package {
         */
         
         override public function isGotoGraveyard():Boolean {
-            return false;
+            return true;
         }
         
         public function openPrivate(event:ContextMenuEvent = null):void {

@@ -44,7 +44,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.34.00(2011/10/25)"
+$version = "Ver.1.34.02.01(2011/12/05)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -427,6 +427,7 @@ class DodontoFServer
       ['save', hasReturn], 
       ['saveMap', hasReturn], 
       ['load', hasReturn], 
+      ['loadScenario', hasReturn], 
       ['requestReplayDataList', hasReturn], 
       ['uploadReplayData', hasReturn], 
       ['removeReplayData', hasReturn], 
@@ -1181,7 +1182,9 @@ class DodontoFServer
       "skinImage" => $skinImage,
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
-      'diceBotInfos' => $diceBotInfos,
+      "diceBotInfos" => $diceBotInfos,
+      "mapMaxWidth" => $mapMaxWidth,
+      "mapMaxHeigth" => $mapMaxHeigth,
     }
     
     logging(result, "result")
@@ -1413,6 +1416,7 @@ class DodontoFServer
       case resultText
       when "OK"
         @saveDirInfo.removeSaveDir(roomNumber)
+        removeLocalSpaceDir(roomNumber)
         deletedRoomNumbers << roomNumber
       when "userExist"
         askDeleteRoomNumbers << roomNumber
@@ -1429,6 +1433,11 @@ class DodontoFServer
     logging(result, 'result')
     
     return result
+  end
+  
+  def removeLocalSpaceDir(roomNumber)
+    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
+    rmdir(dir)
   end
   
   def getTrueSaveFileName(fileName)
@@ -1828,8 +1837,8 @@ class DodontoFServer
       fileUploadUrl = baseUrl + fileNameFullPath
       
       result["uploadFileInfo"] = {
-        "fileName"=>fileNameOriginal,
-        "fileUploadUrl"=>fileUploadUrl,
+        "fileName" => fileNameOriginal,
+        "fileUploadUrl" => fileUploadUrl,
       }
     end
   end
@@ -1859,7 +1868,7 @@ class DodontoFServer
   end
   
   
-  def uploadFileBase(fileUploadDir, fileMaxSize, isReplayData = false)
+  def uploadFileBase(fileUploadDir, fileMaxSize, isChangeFileName = true)
     logging("uploadFile() Begin")
     
     result = {
@@ -1883,7 +1892,12 @@ class DodontoFServer
       end
       
       fileNameOriginal = fileIO.original_filename.toutf8
-      fileName = getNewFileName(fileNameOriginal)
+      
+      fileName = fileNameOriginal
+      if( isChangeFileName )
+        fileName = getNewFileName(fileNameOriginal)
+      end
+      
       fileNameFullPath = fileJoin(fileUploadDir, fileName).untaint
       logging(fileNameFullPath, "fileNameFullPath")
       
@@ -1907,6 +1921,110 @@ class DodontoFServer
   end
   
   
+  def loadScenario()
+    logging("loadScenario() Begin")
+    
+    fileMaxSize = $scenarioDataMaxSize # Mbyte
+    fileUploadDir = getRoomLocalSpaceDirName
+    
+    mkdir(fileUploadDir)
+    
+    scenarioFile = nil
+    
+    isChangeFileName = false
+    result = uploadFileBase(fileUploadDir, fileMaxSize, isChangeFileName) do |fileNameFullPath, fileNameOriginal, result|
+      scenarioFile = fileNameFullPath
+    end
+    
+    logging(result, "uploadFileBase result")
+    
+    unless( result["resultText"] == 'OK' )
+      return result
+    end
+    
+    extendSaveData(scenarioFile, fileUploadDir)
+    
+    chatPalleteData = loadScenarioDefaultInfo(fileUploadDir)
+    result['chatPalleteData'] = chatPalleteData
+    
+    logging(result, 'loadScenario result')
+    
+    return result
+  end
+  
+  def extendSaveData(scenarioFile, fileUploadDir)
+    logging(scenarioFile, 'scenarioFile')
+    logging(fileUploadDir, 'fileUploadDir')
+    
+    require 'zlib'
+    require 'archive/tar/minitar'
+    
+    tgz = Zlib::GzipReader.new(File.open(scenarioFile, 'rb'))
+    Archive::Tar::Minitar.unpack(tgz, fileUploadDir)
+    
+    File.delete(scenarioFile)
+    
+    logging("archive extend !")
+  end
+  
+  def getRoomLocalSpaceDirName
+    roomNo = @saveDirInfo.getSaveDataDirIndex
+    getRoomLocalSpaceDirNameByRoomNo(roomNo)
+  end
+  
+  def getRoomLocalSpaceDirNameByRoomNo(roomNo)
+    dir = File.join($imageUploadDir, "room_#{roomNo}")
+    return dir
+  end
+  
+  def mkdir(dir)
+    return if( File.exist?(dir) )
+    
+    Dir::mkdir(dir)
+    File.chmod(0755, dir)
+  end
+  
+  def rmdir(dir)
+    SaveDirInfo.removeDir(dir)
+  end
+  
+  $scenarioDefaultSaveData = 'default.sav'
+  $scenarioDefaultChatPallete = 'default.cpd'
+  
+  def loadScenarioDefaultInfo(dir)
+    loadScenarioDefaultSaveData(dir)
+    chatPalleteData = loadScenarioDefaultChatPallete(dir)
+    
+    return chatPalleteData
+  end
+  
+  def loadScenarioDefaultSaveData(dir)
+    logging('loadScenarioDefaultSaveData begin')
+    saveFile = File.join(dir, $scenarioDefaultSaveData)
+    
+    unless( File.exist?(saveFile) )
+      logging(saveFile, 'saveFile is NOT exist')
+      return
+    end
+    
+    jsonDataString = File.readlines(saveFile).join
+    loadFromJsonDataString(jsonDataString)
+    
+    logging('loadScenarioDefaultSaveData end')
+  end
+  
+  
+  def loadScenarioDefaultChatPallete(dir)
+    file = File.join(dir, $scenarioDefaultChatPallete)
+    
+    return nil unless( File.exist?(file) )
+    
+    buffer = File.readlines(file).join
+    
+    return buffer
+  end
+  
+  
   def load()
     logging("saveData load() Begin")
     
@@ -1919,10 +2037,33 @@ class DodontoFServer
     loadFromJsonDataString(jsonDataString)
   end
   
+  
+  def changeLoadText(text)
+    text = changeTextForLocalSpaceDir(text)
+    return text
+  end
+  
+  def changeTextForLocalSpaceDir(text)
+    #プレイルームにローカルなファイルを置く場合の特殊処理用ディレクトリ名変換
+    dir = getRoomLocalSpaceDirName
+    dirJsonText = JsonBuilder.new.build(dir)
+    changedDir = dirJsonText[2...-2]
+    
+    logging(changedDir, 'localSpace name')
+    
+    text = text.gsub($imageUploadDirMarker, changedDir)
+    return text
+  end
+  
+  
   def loadFromJsonDataString(jsonDataString)
+    jsonDataString = changeLoadText(jsonDataString)
+    
     jsonData = getJsonDataFromText(jsonDataString)
-    logging(jsonData, 'jsonData')
-    saveDataAll = jsonData['saveDataAll']
+    
+    logging(jsonData, 'loadFromJsonData jsonData')
+    
+    saveDataAll = getSaveDataAllFromSaveData(jsonData)
     logging(saveDataAll, 'saveDataAll')
     
     removeCharacterDataList = getRequestData('removeCharacterDataList');
@@ -1947,6 +2088,10 @@ class DodontoFServer
     logging(result, "load result")
     
     return result
+  end
+  
+  def getSaveDataAllFromSaveData(jsonData)
+    jsonData['saveDataAll']
   end
   
   def getLoadData(saveDataAll, fileType, key, defaultValue)
@@ -2874,6 +3019,7 @@ class DodontoFServer
       "imageNameBack" => imageNameBack,
       "isBack" => true,
       "rotation" => getRotation(isUpDown),
+      "isUpDown" => isUpDown,
       "isText" => isText,
       "isOpen" => false,
       "owner" => "",
@@ -4028,7 +4174,7 @@ def printResult(server)
   logging("========================================>CGI begin.")
   
   text = "empty"
-  header = "empty";
+  header = "";
   begin
     result = server.getResponse
     
@@ -4071,11 +4217,7 @@ def printResult(server)
   output = $stdout
   output.binmode if( defined?(output.binmode) )
   
-  if( header.empty? )
-    output.print( "\n" )
-  else
-    output.print( header + "\n")
-  end
+  output.print( header + "\n")
   
   output.print( text )
   

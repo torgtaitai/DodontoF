@@ -32,9 +32,13 @@ package {
         private var defaultWidth:int;
         private var defaultHeight:int;
         private var params:Object;
-        //static private var youtubeMovie:MovieSprite;
-        private var youtubeMovie:MovieSprite;
+
+        static private var volumeDefault:Number = 0.1;
+        private var volume:Number = volumeDefault;
+        private var soundSource:String = null;
+        private var isSoundLoop:Boolean = false;
         
+        private var youtubeMovie:MovieSprite;
         
         public function CutInMovie() {
         }
@@ -42,14 +46,6 @@ package {
         override protected function getMarkString():String {
             return "###CutInMovie###";
         }
-        
-        /*
-        override protected function getPrintMessageText():String {
-            return "【" + params.message + "】";
-            //return "【" + params.message + "】" + params.source;
-            //return "カットイン動画「" + params.message + "」：" + params.source;
-        }
-        */
         
         static public function isFlvFile(source:String):Boolean {
             return Utils.isFlvFile(source);
@@ -67,16 +63,11 @@ package {
             return Utils.getYoutubeId(source);
         }
         
-        static private var volumeDefault:Number = 0.1;
-        private var volume:Number = volumeDefault;
-        private var soundSource:String = null;
-        private var isSoundLoop:Boolean = false;
         
         override protected function executeEffect(params_:Object):void {
             params = params_;
             
-            var window:IFlexDisplayObject = DodontoF.popup(CutInWindow, false);
-            cutInWindow = window as CutInWindow;
+            cutInWindow = CutInWindow.getWindow(params.cutInTag);
             
             soundSource = params.soundSource;
             if( soundSource == "" ) {
@@ -214,7 +205,7 @@ package {
         }
         
         
-        private function onPlayerReadyYoutube(e:PlayerReadyEvent = null):void {
+        private function onPlayerReadyYoutube(playerReadyEvent:PlayerReadyEvent = null):void {
             youtubeMovie.x = 0;
             youtubeMovie.y = 0;
             
@@ -244,7 +235,7 @@ package {
                     youtubeMovie.stopVideo();
                 });
             
-            if( e != null ) {
+            if( playerReadyEvent != null ) {
                 //youtubeMovie.playVideo();
                 var youtubeId:String = getYoutubeId(params.source);
                 loadYoutube(youtubeId);

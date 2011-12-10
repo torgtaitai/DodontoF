@@ -93,9 +93,14 @@ package {
                                   mapHeight:int,
                                   gridColor:uint,
                                   mapMarks:Array):void {
-            if( ( mapHeight < 1 ) || ( mapHeight > 100 ) ||
-                ( mapWidth < 1 ) || ( mapWidth > 100 ) ) {
-                throw new Error("縦・横マス数の入力値が不正です。1〜100の整数を入力してください。");
+            if( ( mapHeight < 1 ) ||
+                ( mapHeight > ChangeMapWindow.getMapMaxHeigth() )) {
+                throw new Error("縦マス数の入力値が不正です。1〜" + ChangeMapWindow.getMapMaxHeigth() + "の整数を入力してください。");
+            }
+                
+            if( ( mapWidth < 1 ) ||
+                ( mapWidth > ChangeMapWindow.getMapMaxWidth() )) {
+                throw new Error("横マス数の入力値が不正です。1〜" + ChangeMapWindow.getMapMaxWidth() + "の整数を入力してください。");
             }
             
             sender.changeMap(mapImageUrl, mapWidth, mapHeight, gridColor, mapMarks);
@@ -129,10 +134,6 @@ package {
             
             if( ( size < 1 ) || ( size > 10 ) ) {
                 throw new Error("サイズの入力値が不正です。1〜10の整数を入力してください。");
-            }
-            
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
             
             if( counters == null ) {
@@ -261,10 +262,6 @@ package {
                 throw new Error("設置X,Y座標が0未満の値になっています。");
             }
             
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
-            }
-            
             var characterJsonData:Object =
                 MagicRange.getJsonData(name, feets, type, color,
                                        timeRange,
@@ -314,10 +311,6 @@ package {
                 throw new Error("設置X,Y座標が0未満の値になっています。");
             }
             
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
-            }
-            
             var characterJsonData:Object =
                 MagicRangeDD4th.getJsonData(name, feets, type, color,
                                             timeRange,
@@ -344,10 +337,6 @@ package {
             
             if( name.length == 0 ) {
                 throw new Error("名前を入力してください。");
-            }
-            
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
             
             var characterJsonData:Object =
@@ -383,10 +372,6 @@ package {
             
             if( ( size < 1 ) || ( size > 10 ) ) {
                 throw new Error("サイズの入力値が不正です。1〜10の整数を入力してください。");
-            }
-            
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
             
             character.setName(name);
@@ -509,10 +494,6 @@ package {
             
             if( name.length == 0 ) {
                 throw new Error("名前を入力してください。");
-            }
-            
-            if( ( initiative < 0 ) ) {
-                throw new Error("イニシアティブの入力値が不正です。0以上の数値を入力してください。");
             }
             
             magicTimer.setName(name);

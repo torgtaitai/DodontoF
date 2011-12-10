@@ -1,0 +1,11 @@
+text
+<p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>石</i></font><p>
+<font size="40">住人たち</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.うわさ話<br>2.子供たち<br>3.おしゃべりする女たち<br>4.老人<br>5.不良少年／愚連隊<br>6.言いがかりをつけてくる悪党</font>
+<font size="40">都市の影</font><br><p align='right'><font size="40">【真の黒】</font></p><br><font size="36">1.怪しげな酒場<br>2.暗い路地裏<br>3.喧嘩に巻き込まれる<br>4.麻薬の取引人<br>5.盗賊団のアジト<br>6.強盗に襲われる</font>
+<font size="40">安らぎの場所</font><br><p align='right'><font size="40">【真の白】</font></p><br><font size="36">1.薬草／薬屋<br>2.神殿<br>3.落ち着く店／建物<br>4.親切な人に助けられる<br>5.困っている薬草売りの娘<br>6.急いでいる医者</font>
+<font size="40">知恵の結集</font><br><p align='right'><font size="40">【真の紫】</font></p><br><font size="36">1.図書館／書物<br>2.古めかしい学院<br>3.気難しい学者<br>4.博学な旅人<br>5.長い間生きている妖精<br>6.長老／老人</font>
+<font size="40">生と死</font><br><p align='right'><font size="40">【真の緑】</font></p><br><font size="36">1.墓地／墓<br>2.悲しげに道をいく葬列<br>3.赤ん坊の泣き声<br>4.良い香りのする花屋<br>5.不思議な占い師<br>6.古ぼけた廃墟</font>
+<font size="40">道をいく人々</font><br><p align='right'><font size="40">【真の赤】</font></p><br><font size="36">1.うわさ話<br>2.露天／大道芸人<br>3.泣いている迷子<br>4.陽気な旅人<br>5.忙しそうな郵便夫／配達人<br>6.スリにやられる</font>
+<font size="40">都市の不思議</font><br><p align='right'><font size="40">【真の黒】</font></p><br><font size="36">1.迷路のような路地で迷う<br>2.古い建物<br>3.不思議な老人／怪しげな魔道師<br>4.1d6枚の銅貨を拾う<br>5.見たこともない場所<br>6.不思議な美しいひと</font>
+<font size="40">袋小路</font><br><p align='right'><font size="40">【真の赤】</font></p><br><font size="36">1.うわさ話<br>2.行き止まり<br>3.衛兵に呼び止められる<br>4.渋滞／人ごみ<br>5.野良犬／野良猫<br>6.へんな場所にある扉／窓</font>
+<font size="40">賑わい</font><br><p align='right'><font size="40">【真の金色】</font></p><br><font size="36">1.評判の料理屋<br>2.賑わう市場<br>3.陽気な酔っ払いたち<br>4.威勢のいい鍛冶屋<br>5.罵声が飛び交う賭博場<br>6.人ごみにもみくちゃにされる</font>

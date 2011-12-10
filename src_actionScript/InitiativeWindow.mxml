@@ -72,7 +72,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="90" minimum="-9" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>

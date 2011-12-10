@@ -45,12 +45,31 @@
     import mx.controls.Image;
     
     private var previewLoader:PreviewLoader = new PreviewLoader();
+    static private var mapMaxWidth:int = 100;
+    static private var mapMaxHeigth:int = 100;
+    
+    static public function setMaxWidthHeigth(mapMaxWidth_:int, mapMaxHeigth_:int):void {
+        mapMaxWidth = mapMaxWidth_;
+        mapMaxHeigth = mapMaxHeigth_;
+    }
+    
+    static public function getMapMaxWidth():int {
+        return mapMaxWidth;
+    }
+    
+    static public function getMapMaxHeigth():int {
+        return mapMaxHeigth;
+    }
+    
     
     override protected function setup():void {
         imageSelecter.setTagDisplayVisible(true);
         imageSelecter.addPreview(previewLoader);
         
         var map:Map = DodontoF_Main.getInstance().getMap();
+        
+        mapWidth.maximum = mapMaxWidth;
+        mapHeight.maximum = mapMaxHeigth;
         
         mapHeight.value = map.getHeight();
         mapWidth.value = map.getWidth();

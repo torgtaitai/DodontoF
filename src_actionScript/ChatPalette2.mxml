@@ -411,6 +411,15 @@
     public function loadComplete(e:Event):void {
         var data:ByteArray = fileReferenceForLoad.data as ByteArray;
         var dataString:String = data.toString();
+        
+        loadFromText(dataString);
+    }
+    
+    public function loadFromText(dataString:String):void {
+        if( dataString == null ) {
+            return;
+        }
+        
         var saveData:Object = Utils.getJsonDataFromString(dataString) as Object;
         loadSaveData(saveData);
     }

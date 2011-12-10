@@ -22,8 +22,15 @@ package {
             if( cutInInfo.displaySeconds != null ) {
                 displaySeconds.value = cutInInfo.displaySeconds;
             }
+            
             imageWidth.value = parseInt(cutInInfo.width);
             imageHeight.value = parseInt(cutInInfo.height);
+            
+            if(  cutInInfo.cutInTag != null ) {
+                cutInTag.text = cutInInfo.cutInTag;
+            }
+
+            
             if( cutInInfo.volume == null ) {
                 cutInInfo.volume = 0.1;
             }

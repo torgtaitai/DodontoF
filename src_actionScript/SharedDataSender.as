@@ -19,6 +19,7 @@ package {
     import mx.controls.Alert;
     import ym.net.HTTPPostBinary;
     import flash.geom.Point;
+    import flash.events.DataEvent;
     
     
     public class SharedDataSender {
@@ -145,8 +146,10 @@ package {
             loadParams = params;
             
             if( fileReferenceForUpload == null ) {
+                var commandName:String = "load"
                 fileReferenceForUpload  = new FileReference();
-                fileReferenceForUpload.addEventListener(Event.SELECT, getFileSelectHandlerForLoad(resultFunction));
+                fileReferenceForUpload.addEventListener(Event.SELECT,
+                                                        getFileSelectHandlerForLoad(commandName, resultFunction));
             }
             
             var filters:Array = new Array();
@@ -154,6 +157,69 @@ package {
             
             fileReferenceForUpload.browse(filters);
         }
+        
+        
+        protected function getFileSelectHandlerForLoad(commandName:String,
+                                                       resultFunction:Function = null):Function {
+            return function(event:Event):void {
+                var fileReference:FileReference = event.currentTarget as FileReference;
+                if( fileReference == null ) {
+                    return;
+                }
+                
+                thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
+                
+                if( resultFunction != null ) {
+                    resultFunction();
+                }
+            }
+        }
+        
+        
+        private var uplodScenarioFileExtension:String = "tgz";
+        
+        public function uploadScenarioData():void {
+            Log.loggingTuning("uploadScenarioData begin");
+            loadParams = new Object();
+            
+            var commandName:String = "loadScenario";
+            
+            var loadScenarioFileReference:FileReference = new FileReference();
+            
+            var clearLastUpdateTimes:Function = function():void {
+                    DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
+            }
+            
+            loadScenarioFileReference.addEventListener(Event.SELECT,
+                                                       getFileSelectHandlerForLoad(commandName, clearLastUpdateTimes));
+            loadScenarioFileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA,
+                                                       analyzeLoadScenarioResult);
+            
+            var filters:Array = new Array();
+            var extension:String = uplodScenarioFileExtension;
+            filters.push(new FileFilter("シナリオデータ(*." + extension + ")", "*." + extension));
+            
+            loadScenarioFileReference.browse(filters);
+            Log.loggingTuning("uploadScenarioData end");
+        }
+
+
+        public function analyzeLoadScenarioResult(dataEvent:DataEvent):void {
+            Log.logging('analyzeLoadScenarioResult called, dataEvent', dataEvent);
+            
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            Log.logging('analyzeLoadScenarioResult jsonData', jsonData);
+            
+            if( jsonData.resultText != 'OK' ) {
+                Log.loggingError( "シナリオデータ読み込み時にエラーが発生しました：" + jsonData.resultText );
+                return;
+            }
+            
+            DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPalleteData );
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("シナリオデータ読み込みに成功しました。", false);
+        }
+        
+        
         
         
         public function requestReplayDataList(resultFunction:Function):void {
@@ -185,6 +251,37 @@ package {
             
             sendFileUpload(fileReferenceForImageUpload, "uploadImageFile", params);
         }
+        
+        public function sendFileUpload(fileReferenceForLocal:FileReference,
+                                       commandName:String,
+                                       params:Object = null):void {
+            var request:URLRequest = new URLRequest( Config.getInstance().getImageUploaderUrl() );
+            
+            request.method = URLRequestMethod.POST;
+            var jsonData:Object = {
+                "Command" : commandName,
+                "saveDataDirIndex" : this.saveDataDirIndex
+            };
+            
+            if( params != null ) {
+                for(var key:String in params) {
+                    jsonData[key] = params[key];
+                }
+            }
+            
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            Log.loggingTuning("load jsonParams", jsonParams);
+            
+            var variables:URLVariables = new URLVariables();
+            variables.__jsonDataForFileUploader__ = jsonParams;
+            
+            request.data = variables;
+            Log.loggingTuning("fileReferenceForLocal.upload(request) calling...");
+            
+            fileReferenceForLocal.upload(request);
+            Log.loggingTuning("fileReferenceForLocal.upload(request) called.");
+        }
+        
         
         public function uploadImageData(params_obj:Object, resultFunction:Function, errorFunction:Function):void {
             Log.loggingTuning("SharedDataSenderBody.uploadImageData begin");
@@ -238,52 +335,6 @@ package {
             Log.logging("loader.load() end");
             
             Log.loggingTuning("uploadImageData end");
-        }
-        
-        protected function getFileSelectHandlerForLoad(resultFunction:Function):Function {
-            return function(event:Event):void {
-                var fileReference:FileReference = event.currentTarget as FileReference;
-                if( fileReference == null ) {
-                    return;
-                }
-                
-                thisObj.sendFileUpload(fileReference, "load", thisObj.loadParams);
-                
-                if( resultFunction != null ) {
-                    resultFunction();
-                }
-            }
-        }
-        
-        
-        public function sendFileUpload(fileReferenceForLocal:FileReference,
-                                        commandName:String,
-                                        params:Object = null):void {
-            var request:URLRequest = new URLRequest( Config.getInstance().getImageUploaderUrl() );
-            
-            request.method = URLRequestMethod.POST;
-            var jsonData:Object = {
-                "Command" : commandName,
-                "saveDataDirIndex" : this.saveDataDirIndex
-            };
-            
-            if( params != null ) {
-                for(var key:String in params) {
-                    jsonData[key] = params[key];
-                }
-            }
-            
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            Log.loggingTuning("load jsonParams", jsonParams);
-            
-            var variables:URLVariables = new URLVariables();
-            variables.__jsonDataForFileUploader__ = jsonParams;
-            
-            request.data = variables;
-            Log.loggingTuning("fileReferenceForLocal.upload(request) calling...");
-            
-            fileReferenceForLocal.upload(request);
-            Log.loggingTuning("fileReferenceForLocal.upload(request) called.");
         }
         
         public function checkLastUpdateTimes(type:String, jsonLastUpdateTimes:Object):Boolean {

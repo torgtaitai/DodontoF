@@ -25,6 +25,46 @@
     private var position:String = "center";
     private var thisObj:CutInWindow;
     
+    static private var cutInWindows:Object = {};
+    
+    static public function getWindow(cutInTag:String):CutInWindow {
+        
+        var window:CutInWindow = null;
+        
+        if( isValidCutInTag(cutInTag) ) {
+            window = cutInWindows[cutInTag];
+        }
+        
+        if( window != null ) {
+            window.closeWindow();
+        }
+        
+        window = DodontoF.popup(CutInWindow, false) as CutInWindow;
+        window.setCutInTag(cutInTag);
+        
+        cutInWindows[cutInTag] = window;
+        
+        return window;
+    }
+    
+    static private function isValidCutInTag(cutInTag:String):Boolean {
+        if( cutInTag == null ) {
+            return false;
+        }
+        
+        if( cutInTag == "" ) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private var cutInTag:String = "";
+    
+    public function setCutInTag(cutInTag_:String):void {
+        cutInTag = cutInTag_;
+    }
+    
     override protected function setup():void {
         thisObj = this;
     
@@ -32,7 +72,7 @@
         this.mouseEnabled = true;
         this.addEventListener(MouseEvent.DOUBLE_CLICK, function():void {thisObj.closeWindow();});
     }
-
+    
     public function centerPouUp():void {
         PopUpManager.centerPopUp(this);
         
@@ -96,7 +136,7 @@
     public function setCutInStopFunction(stopFunction_:Function):void {
         stopFunction = stopFunction_;
     }
-
+    
     public function closeWindow():void {
         if( stopFunction != null ) {
             try {
@@ -104,6 +144,8 @@
             } catch(error:Error) {
             }
         }
+        
+        cutInWindows[cutInTag] = null;
         
         PopUpManager.removePopUp(this);
     }
