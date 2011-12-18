@@ -44,7 +44,7 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.34.02.01(2011/12/05)"
+$version = "Ver.1.35.00(2011/12/18)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
@@ -120,8 +120,6 @@ class DodontoFServer
     setCgiParams
     logging(@cgiParams, "SaveFileUploader cgi.params")
     
-    logging('pass1')
-    
     if( @cgiParams.include?(key) )
       value = @cgi[key]
       return value if( key == 'Filedata' )
@@ -129,12 +127,8 @@ class DodontoFServer
       return getStringFromStringOrStringIoOrFile(value)
     end
     
-    logging('pass2')
-    
     @jsonDataForFileUploader ||= getJsonDataForFileUploader
     logging(@jsonDataForFileUploader, "@jsonDataForFileUploader")
-    
-    logging('pass4')
     
     return @jsonDataForFileUploader[key]
   end
@@ -146,8 +140,6 @@ class DodontoFServer
     
     jsonDataString = getStringFromStringOrStringIoOrFile(jsonDataIo)
     logging(jsonDataString, "jsonDataString in getRequestData")
-    
-    logging('pass3')
     
     logging("getJsonDataFromText(jsonDataString)")
     jsonDataForFileUploader = getJsonDataFromText(jsonDataString)
@@ -548,6 +540,14 @@ class DodontoFServer
       getWebIfChatText
     when 'talk'
       sendWebIfChatText
+    when 'addCharacter'
+      sendWebIfAddCharacter
+    when 'addMemo'
+      sendWebIfAddMemo
+    when 'getRoomInfo'
+      getWebIfRoomInfo
+    when 'setRoomInfo'
+      setWebIfRoomInfo
     else
       'no data'
     end
@@ -633,19 +633,16 @@ class DodontoFServer
     logging("sendWebIfChatText begin")
     saveData = {}
     
-    name = getRequestData('name')
-    name ||= ''
+    name = getWebIfRequestText('name')
     logging(name, "name")
     
-    message = getRequestData('message')
-    message ||= ''
+    message = getWebIfRequestText('message')
     logging(message, "message")
     
-    channel = getRequestData('channel').to_i
+    channel = getWebIfRequestInt('channel')
     logging(channel, "channel")
     
-    gameType = getRequestData('bot')
-    gameType ||= ''
+    gameType = getWebIfRequestText('bot')
     logging(gameType, 'gameType')
     
     rollResult, isSecret = rollDice(message, gameType)
@@ -669,8 +666,217 @@ class DodontoFServer
     return result
   end
   
-
+  def getWebIfRequestText(key, default = '')
+    text = getRequestData(key)
+    
+    if( text.nil? or text.empty? )
+      text = default
+    end
+    
+    return text
+  end
   
+  def getWebIfRequestInt(key, default = 0)
+    text = getWebIfRequestText(key, default.to_s)
+    return text.to_i
+  end
+  
+  def getWebIfRequestNumber(key, default = 0)
+    text = getWebIfRequestText(key, default.to_s)
+    return text.to_f
+  end
+  
+  def getWebIfRequestBoolean(key, default = false)
+    text = getWebIfRequestText(key)
+    if( text.empty? )
+      return default
+    end
+    
+    return (text == "true")
+  end
+  
+  def getWebIfRequestArray(key, empty = [], separator = ',')
+    text = getWebIfRequestText(key, nil)
+    
+    if( text.nil? )
+      return empty
+    end
+    
+    return text.split(separator)
+  end
+  
+  def getWebIfRequestHash(key, separator1 = ':', separator2 = ',')
+    array = getWebIfRequestArray(key, [], separator2)
+    
+    hash = {}
+    array.each do |value|
+      key, value = value.split(separator1)
+      hash[key] = value
+    end
+    
+    return hash
+  end
+  
+  def sendWebIfAddMemo
+    logging('sendWebIfAddMemo begin')
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    jsonData = {
+      "message" => getWebIfRequestText('message', ''),
+      "x" => 0,
+      "y" => 0,
+      "height" => 1,
+      "width" => 1,
+      "rotation" => 0,
+      "isPaint" => true,
+      "color" => 16777215,
+      "draggable" => true,
+      "type" => "Memo",
+      "imgId" => createCharacterImgId(),
+    }
+    
+    logging(jsonData, 'sendWebIfAddMemo jsonData')
+    addResult = addCharacterData( [jsonData] )
+    
+    return result
+  end
+  
+  
+  def sendWebIfAddCharacter
+    logging("sendWebIfAddCharacter begin")
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    jsonData = {
+      "name" => getWebIfRequestText('name'),
+      "size" =>  getWebIfRequestInt('size', 1),
+      "x" => getWebIfRequestInt('x', 0),
+      "y" => getWebIfRequestInt('y', 0),
+      "initiative" => getWebIfRequestNumber('initiative', 0),
+      "counters" => getWebIfRequestHash('counters'),
+      "info" => getWebIfRequestText('info'),
+      "imageName" => getWebIfImageName(),
+      "rotation" => getWebIfRequestInt('rotation', 0),
+      "statusAlias" => {},
+      "dogTag" => "",
+      "draggable" => true,
+      "isHide" => false,
+      "type" => "characterData",
+      "imgId" =>  createCharacterImgId(),
+    }
+    
+    logging(jsonData, 'sendWebIfAddCharacter jsonData')
+    
+    
+    if( jsonData['name'].empty? )
+      result['result'] = "キャラクターの追加に失敗しました。キャラクター名が設定されていません"
+      return result
+    end
+    
+    
+    addResult = addCharacterData( [jsonData] )
+    addFailedCharacterNames = addResult["addFailedCharacterNames"]
+    logging(addFailedCharacterNames, 'addFailedCharacterNames')
+    
+    if( addFailedCharacterNames.length > 0 )
+      result['result'] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{addFailedCharacterNames.join(' ')}\""
+    end
+    
+    return result
+  end
+  
+  def getWebIfImageName
+    image = getWebIfRequestText('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png")
+    image.gsub!('(local)', $imageUploadDir)
+    image.gsub!('__LOCAL__', $imageUploadDir)
+    return image
+  end
+  
+  def getWebIfRoomInfo
+    logging("getWebIfRoomInfo begin")
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    getSaveData(@saveFiles['time']) do |saveData|
+      logging(saveData, "saveData")
+      roundTimeData = getHashValue(saveData, 'roundTimeData', {})
+      result['counter'] = getHashValue(roundTimeData, "counterNames", [])
+    end
+    
+    roomInfo = getRoomInfoForWebIf
+    result.merge!(roomInfo)
+    
+    logging(result, "getWebIfRoomInfo result")
+    
+    return result
+  end
+  
+  def getRoomInfoForWebIf
+    result = {}
+    
+    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+    
+    getSaveData(trueSaveFileName) do |saveData|
+      result['roomName'] = getHashValue(saveData, 'playRoomName', '')
+      result['chatTab'] = getHashValue(saveData, 'chatChannelNames', [])
+      result['outerImage'] = getHashValue(saveData, 'canUseExternalImage', false)
+      result['visit'] = getHashValue(saveData, 'canVisit', false)
+      result['game'] = getHashValue(saveData, 'gameType', '')
+    end
+    
+    return result
+  end
+  
+  def getHashValue(hash, key, default)
+    value = hash[key]
+    value ||= default
+    return value
+  end
+  
+  def setWebIfRoomInfo
+    logging("setWebIfRoomInfo begin")
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    setWebIfRoomInfoCounterNames
+    
+    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+    
+    roomInfo = getRoomInfoForWebIf
+    changeSaveData(trueSaveFileName) do |saveData|
+      saveData['playRoomName'] = getWebIfRequestAny(:getWebIfRequestText, 'roomName', roomInfo)
+      saveData['chatChannelNames'] = getWebIfRequestAny(:getWebIfRequestArray, 'chatTab', roomInfo)
+      saveData['canUseExternalImage'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'outerImage', roomInfo)
+      saveData['canVisit'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'visit', roomInfo)
+      saveData['gameType'] = getWebIfRequestAny(:getWebIfRequestText, 'game', roomInfo)
+    end
+    
+    logging(result, "setWebIfRoomInfo result")
+    
+    return result
+  end
+  
+  def setWebIfRoomInfoCounterNames
+    counterNames = getWebIfRequestArray('counter', nil, ',')
+    return if( counterNames.nil? )
+    
+    changeSaveData(@saveFiles['time']) do |saveData|
+      saveData['roundTimeData'] ||= {}
+      roundTimeData = saveData['roundTimeData']
+      roundTimeData['counterNames'] = counterNames
+    end
+  end
+  
+  def getWebIfRequestAny(functionName, key, defaultInfos)
+    command = "#{functionName}( key, defaultInfos[key] )"
+    logging(command, "getWebIfRequestAny command")
+    eval("#{functionName}( key, defaultInfos[key] )")
+  end
   
   def refresh
     logging("==>Begin refresh");
@@ -1264,6 +1470,7 @@ class DodontoFServer
       logging("viewStates", viewStates)
       
       trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+      
       changeSaveData(trueSaveFileName) do |saveData|
         saveData['playRoomName'] = playRoomName
         saveData['playRoomChangedPassword'] = playRoomChangedPassword
@@ -1317,6 +1524,7 @@ class DodontoFServer
       logging('playRoomPassword is get')
       
       viewStates = params['viewStates']
+      logging("viewStates", viewStates)
       
       trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
       
@@ -1907,6 +2115,7 @@ class DodontoFServer
         file.binmode
         file.write(fileIO.read)
       end
+      File.chmod(0666, fileNameFullPath)
       
       result["resultText"] = "OK"
     rescue => e
@@ -1960,11 +2169,43 @@ class DodontoFServer
     require 'archive/tar/minitar'
     
     tgz = Zlib::GzipReader.new(File.open(scenarioFile, 'rb'))
-    Archive::Tar::Minitar.unpack(tgz, fileUploadDir)
+    
+    Archive::Tar::Minitar.unpackWithCheck(tgz, fileUploadDir) do |fileName, isDirectory|
+      checkUnpackFile(fileName, isDirectory)
+    end
     
     File.delete(scenarioFile)
     
     logging("archive extend !")
+  end
+  
+  
+  #直下のファイルで許容する拡張子の場合かをチェック
+  def checkUnpackFile(fileName, isDirectory)
+    logging(fileName, 'checkUnpackFile fileName')
+    logging(isDirectory, 'checkUnpackFile isDirectory')
+    
+    if( isDirectory )
+      logging('isDirectory!')
+      return false
+    end
+    
+    result = 
+      case fileName
+      when /\//
+        loggingForce('NG! checkUnpackFile /\// paturn')
+        false
+      when /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/
+        # logging('checkUnpackFile good paturn')
+        true
+      else
+        loggingForce('NG! checkUnpackFile else paturn')
+        false
+      end
+    
+    logging(result, 'checkUnpackFile result')
+    
+    return result
   end
   
   def getRoomLocalSpaceDirName
@@ -2016,10 +2257,12 @@ class DodontoFServer
   
   def loadScenarioDefaultChatPallete(dir)
     file = File.join(dir, $scenarioDefaultChatPallete)
+    logging(file, 'loadScenarioDefaultChatPallete file')
     
     return nil unless( File.exist?(file) )
     
     buffer = File.readlines(file).join
+    logging(buffer, 'loadScenarioDefaultChatPallete buffer')
     
     return buffer
   end
@@ -4163,7 +4406,10 @@ end
 def getInitializedHeaderText()
   header = ""
   
-  unless( $isModRuby )
+  if( $isModRuby )
+    #Apache::request.content_type = "text/plain; charset=utf-8"
+    #Apache::request.send_header
+  else
     header << "Content-Type: text/plain; charset=utf-8\n"
   end
   
@@ -4174,7 +4420,9 @@ def printResult(server)
   logging("========================================>CGI begin.")
   
   text = "empty"
-  header = "";
+  
+  header = getInitializedHeaderText()
+  
   begin
     result = server.getResponse
     
@@ -4182,31 +4430,31 @@ def printResult(server)
       result = "#D@EM>#" + result + "#<D@EM#";
     end
     
-    unless( server.jsonpCallBack.nil? )
+    if( server.jsonpCallBack )
       result = "#{server.jsonpCallBack}(" + result + ");";
     end
     
     logging(result.length.to_s, "CGI response original length")
     
     if ( isGzipTarget(result) )
-      header = getInitializedHeaderText()
-      
       if( $isModRuby )
         Apache.request.content_encoding = 'gzip'
       else
         header << "Content-Encoding: gzip\n"
+        
+        if( server.jsonpCallBack )
+          header << "Access-Control-Allow-Origin: *\n"
+        end
       end
       
       text = getGzipResult(result)
     else
-      header = getInitializedHeaderText()
       text = result
     end
   rescue => e
     errorMessage = getErrorResponseText(e)
     loggingForce(errorMessage, "errorMessage")
     
-    header = getInitializedHeaderText()
     text = "\n= ERROR ====================\n"
     text << errorMessage
     text << "============================\n"

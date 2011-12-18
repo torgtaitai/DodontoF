@@ -731,6 +731,7 @@ module Archive::Tar::Minitar
         FileUtils.mkdir_p(destdir, :mode => 0755)
 
         destfile = File.join(destdir, File.basename(entry.full_name))
+        destfile = destfile.untaint
         FileUtils.chmod(0600, destfile) rescue nil  # Errno::ENOENT
 
         yield :file_start, entry.full_name, stats if block_given?
@@ -830,7 +831,7 @@ module Archive::Tar::Minitar
       # Tests if +path+ refers to a directory. Fixes an apparently
       # corrupted <tt>stat()</tt> call on Windows.
     def dir?(path)
-      File.directory?((path[-1] == ?/) ? path : "#{path}/")
+      File.directory?((path[-1] == ?/) ? path : "#{path}\/")
     end
 
       # A convenience method for wrapping Archive::Tar::Minitar::Input.open
@@ -961,19 +962,48 @@ module Archive::Tar::Minitar
       # specified by +dest+. Only those files named explicitly in +files+
       # will be extracted.
     def unpack(src, dest, files = [], &block)
-      Input.open(src) do |inp|
-        if File.exist?(dest) and (not dir?(dest))
-          raise "Can't unpack to a non-directory."
-        elsif not File.exist?(dest)
-          FileUtils.mkdir_p(dest)
-        end
-
-        inp.each do |entry|
-          if files.empty? or files.include?(entry.full_name)
-            inp.extract_entry(dest, entry, &block)
+      Input.open(src) do |input|
+        makeUnpackDest(dest)
+        
+        input.each do |entry|
+          if( isUnpackTarget(entry.full_name, files) )
+            input.extract_entry(dest, entry, &block)
           end
         end
       end
     end
+    
+    def makeUnpackDest(dest)
+      if File.exist?(dest) and (not dir?(dest))
+        raise "Can't unpack to a non-directory."
+      elsif not File.exist?(dest)
+        FileUtils.mkdir_p(dest)
+      end
+    end
+    
+    def isUnpackTarget(fileName, files)
+      return true if files.empty?
+      
+      files.each do |file|
+        if file === fileName
+          return true 
+        end
+      end
+      
+      return false
+    end
+    
+    def unpackWithCheck(src, dest)
+      Input.open(src) do |input|
+        input.each do |entry|
+          
+          if yield(entry.full_name, entry.directory?)
+            input.extract_entry(dest, entry)
+          end
+          
+        end
+      end
+    end
+    
   end
 end

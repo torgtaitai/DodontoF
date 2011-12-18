@@ -191,7 +191,7 @@ package {
             }
             
             loadScenarioFileReference.addEventListener(Event.SELECT,
-                                                       getFileSelectHandlerForLoad(commandName, clearLastUpdateTimes));
+                                                       getFileSelectHandlerForLoad(commandName));
             loadScenarioFileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA,
                                                        analyzeLoadScenarioResult);
             

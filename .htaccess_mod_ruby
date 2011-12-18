@@ -1,0 +1,11 @@
+Options +ExecCGI
+AddHandler cgi-script .pl
+RubyRequire apache/ruby-run
+
+<Files *.rb>
+  SetHandler ruby-object
+  RubyHandler Apache::RubyRun.instance
+  <IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+  </IfModule>
+</Files>
