@@ -24,6 +24,8 @@ package {
     import mx.styles.StyleManager;
     import mx.utils.URLUtil;
     import mx.controls.SWFLoader;
+    import flash.system.Capabilities;
+    
     
     public class Utils {
         
@@ -515,6 +517,52 @@ package {
             
             var soundTransform:SoundTransform = new SoundTransform(volume);
             swf.soundTransform = soundTransform;
+        }
+        
+        
+        static public function getEnterText():String {
+            if( isWindowsOs() ) {
+                Log.logging("isWindowsOs")
+                return "\r\n";
+            }
+            Log.logging("linux")
+            return "\n";
+        }
+        
+        
+        static private function isWindowsOs():Boolean {
+            var fullVersionString:String = flash.system.Capabilities.version;
+            Log.loggingTuning(fullVersionString, "fullVersionString"); //output MAC 9,0,115,0
+            
+            // WIN 9,0,0,0  // Flash Player 9 for Windows
+            // MAC 7,0,25,0   // Flash Player 7 for Macintosh
+            // LNX 9,0,115,0  // Flash Player 9 for Linux
+            // AND 10,2,150,0 // Flash Player 10 for Android
+            
+            return ( fullVersionString.indexOf("WIN ") == 0 );
+        }
+        
+        
+        static private function getFlashVersion():int {
+            var fullVersionString:String = flash.system.Capabilities.version;
+            Log.loggingTuning(fullVersionString, "fullVersionString"); //output MAC 9,0,115,0
+            
+            var versionNoString:String = fullVersionString.split(" ")[1].split(",")[0];
+            Log.loggingTuning(versionNoString, "versionNoString"); //9
+            
+            var version:int = parseInt(versionNoString);
+            Log.loggingTuning("version", version); //9
+            
+            return version;
+        }
+        
+        static public function isFileRefecenseLoadMethodSupportVersion():Boolean {
+            var version:int = getFlashVersion();
+            
+            if ( version < 10) {
+                return false;
+            }
+            return true;
         }
         
     }

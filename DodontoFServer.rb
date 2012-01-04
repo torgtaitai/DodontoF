@@ -44,13 +44,15 @@ $card = Card.new();
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.35.00(2011/12/18)"
+$versionOnly = "Ver.1.35.01"
+$version = "#{$versionOnly}(2012/01/02)"
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
 
 $chatMessageDataLogAll = 'chatLongLines.txt'
 
+$loginCountFile = 'loginCount.txt'
 $loginUserInfo = 'login.json'
 $playRoomInfo = 'playRoomInfo.json'
 $playRoomInfoTypeName = 'playRoomInfo'
@@ -61,7 +63,7 @@ $saveFiles = {
   'characters' => 'characters.json',
   'time' => 'time.json',
   'effects' => 'effects.json',
-  'playRoomInfo' => $playRoomInfo,
+  $playRoomInfoTypeName => $playRoomInfo,
 };
 
 
@@ -412,12 +414,15 @@ class DodontoFServer
       ['refresh', hasReturn],
       
       ['getGraveyardCharacterData', hasReturn], 
+      ['resurrectCharacter', hasReturn], 
+      ['clearGraveyard', hasReturn], 
       ['getLoginInfo', hasReturn], 
       ['getPlayRoomStates', hasReturn], 
       ['deleteImage', hasReturn], 
       ['uploadImageUrl', hasReturn], 
       ['save', hasReturn], 
       ['saveMap', hasReturn], 
+      ['saveScenario', hasReturn], 
       ['load', hasReturn], 
       ['loadScenario', hasReturn], 
       ['requestReplayDataList', hasReturn], 
@@ -445,7 +450,7 @@ class DodontoFServer
       
       ['logout', hasNoReturn], 
       ['addCard', hasNoReturn],
-      ['changeCharacterData', hasNoReturn],
+      ['changeCharacter', hasNoReturn],
       ['removeCharacter', hasNoReturn],
       ['addCardZone', hasNoReturn],
       ['initCards', hasNoReturn],
@@ -454,7 +459,6 @@ class DodontoFServer
       ['shuffleForNextRandomDungeon', hasNoReturn],
       ['dumpTrushCards', hasNoReturn],
       ['clearCharacterByType', hasNoReturn],
-      ['resurrectCharacter', hasNoReturn],
       ['moveCharacter', hasNoReturn],
       ['changeMap', hasNoReturn],
       ['sendChatMessage', hasNoReturn],
@@ -542,6 +546,8 @@ class DodontoFServer
       sendWebIfChatText
     when 'addCharacter'
       sendWebIfAddCharacter
+    when 'changeCharacter'
+      sendWebIfChangeCharacter
     when 'addMemo'
       sendWebIfAddMemo
     when 'getRoomInfo'
@@ -705,14 +711,27 @@ class DodontoFServer
     return text.split(separator)
   end
   
-  def getWebIfRequestHash(key, separator1 = ':', separator2 = ',')
+  def getWebIfRequestHash(key, default = {}, separator1 = ':', separator2 = ',')
+    logging("getWebIfRequestHash begin")
+    logging(key, "key")
+    logging(separator1, "separator1")
+    logging(separator2, "separator2")
+    
     array = getWebIfRequestArray(key, [], separator2)
+    logging(array, "array")
+    
+    if( array.empty? )
+      return default
+    end
     
     hash = {}
     array.each do |value|
+      logging(value, "array value")
       key, value = value.split(separator1)
       hash[key] = value
     end
+    
+    logging(hash ,"getWebIfRequestHash result")
     
     return hash
   end
@@ -758,12 +777,12 @@ class DodontoFServer
       "initiative" => getWebIfRequestNumber('initiative', 0),
       "counters" => getWebIfRequestHash('counters'),
       "info" => getWebIfRequestText('info'),
-      "imageName" => getWebIfImageName(),
+      "imageName" => getWebIfImageName('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png"),
       "rotation" => getWebIfRequestInt('rotation', 0),
-      "statusAlias" => {},
-      "dogTag" => "",
-      "draggable" => true,
-      "isHide" => false,
+      "statusAlias" => getWebIfRequestHash('statusAlias'),
+      "dogTag" => getWebIfRequestText('dogTag', ""),
+      "draggable" => getWebIfRequestBoolean("draggable", true),
+      "isHide" => getWebIfRequestBoolean("isHide", false),
       "type" => "characterData",
       "imgId" =>  createCharacterImgId(),
     }
@@ -788,12 +807,101 @@ class DodontoFServer
     return result
   end
   
-  def getWebIfImageName
-    image = getWebIfRequestText('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png")
-    image.gsub!('(local)', $imageUploadDir)
-    image.gsub!('__LOCAL__', $imageUploadDir)
+  def getWebIfImageName(key, default)
+    logging("getWebIfImageName begin")
+    logging(key, "key")
+    logging(default, "default")
+    
+    image = getWebIfRequestText(key, default)
+    logging(image, "image")
+    
+    if( image != default )
+      image.gsub!('(local)', $imageUploadDir)
+      image.gsub!('__LOCAL__', $imageUploadDir)
+    end
+    
+    logging(image, "getWebIfImageName result")
+      
     return image
   end
+  
+  
+  def sendWebIfChangeCharacter
+    logging("sendWebIfChangeCharacter begin")
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    begin
+      sendWebIfChangeCharacterChatched
+    rescue => e
+      loggingException(e)
+      result['result'] =  e.to_s
+    end
+    
+    return result
+  end
+  
+  def sendWebIfChangeCharacterChatched
+    logging("sendWebIfChangeCharacterChatched begin")
+    
+    targetName = getWebIfRequestText('targetName')
+    logging(targetName, "targetName")
+    
+    if( targetName.empty? )
+      raise '変更するキャラクターの名前(\'target\'パラメータ）が正しく指定されていません'
+    end
+    
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      
+      characterData = getCharacterDataByName(saveData, targetName)
+      logging(characterData, "characterData")
+      
+      if( characterData.nil? )
+        raise "「#{targetName}」という名前のキャラクターは存在しません"
+      end
+      
+      name = getWebIfRequestAny(:getWebIfRequestText, 'name', characterData)
+      logging(name, "name")
+      
+      if( characterData['name'] != name )
+        failedName = isAlreadyExistCharacterInRoom?( saveData, {'name' => name})
+        if( failedName )
+          raise "「#{name}」という名前のキャラクターはすでに存在しています"
+        end
+      end
+      
+      characterData['name'] = name
+      characterData['size'] = getWebIfRequestAny(:getWebIfRequestInt, 'size', characterData)
+      characterData['x'] = getWebIfRequestAny(:getWebIfRequestNumber, 'x', characterData)
+      characterData['y'] = getWebIfRequestAny(:getWebIfRequestNumber, 'y', characterData)
+      characterData['initiative'] = getWebIfRequestAny(:getWebIfRequestNumber, 'initiative', characterData)
+      characterData['counters'] = getWebIfRequestAny(:getWebIfRequestHash, 'counters', characterData)
+      characterData['info'] = getWebIfRequestAny(:getWebIfRequestText, 'info', characterData)
+      characterData['imageName'] = getWebIfRequestAny(:getWebIfImageName, 'image', characterData, 'imageName')
+      characterData['rotation'] = getWebIfRequestAny(:getWebIfRequestInt, 'rotation', characterData)
+      characterData['statusAlias'] = getWebIfRequestAny(:getWebIfRequestHash, 'statusAlias', characterData)
+      characterData['dogTag'] = getWebIfRequestAny(:getWebIfRequestText, 'dogTag', characterData)
+      characterData['draggable'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'draggable', characterData)
+      characterData['isHide'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'isHide', characterData)
+      # 'type' => 'characterData',
+      # 'imgId' =>  createCharacterImgId(),
+      
+    end
+    
+  end
+  
+  def getCharacterDataByName(saveData, targetName)
+    characters = getCharactersFromSaveData(saveData)
+    
+    characterData = characters.find do |i|
+      (i['name'] == targetName)
+    end
+    
+    return characterData
+  end
+  
   
   def getWebIfRoomInfo
     logging("getWebIfRoomInfo begin")
@@ -872,10 +980,24 @@ class DodontoFServer
     end
   end
   
-  def getWebIfRequestAny(functionName, key, defaultInfos)
-    command = "#{functionName}( key, defaultInfos[key] )"
+  def getWebIfRequestAny(functionName, key, defaultInfos, key2 = nil)
+    key2 ||= key
+    
+    logging("getWebIfRequestAny begin")
+    logging(key, "key")
+    logging(key2, "key2")
+    logging(defaultInfos, "defaultInfos")
+    
+    defaultValue = defaultInfos[key2]
+    logging(defaultValue, "defaultValue")
+    
+    command = "#{functionName}( key, defaultValue )"
     logging(command, "getWebIfRequestAny command")
-    eval("#{functionName}( key, defaultInfos[key] )")
+    
+    result = eval( command )
+    logging(result, "getWebIfRequestAny result")
+    
+    return result
   end
   
   def refresh
@@ -1301,6 +1423,13 @@ class DodontoFServer
     return gameInfo[:name]
   end
   
+  def getAllLoginInfo()
+    count = getAllLoginCount()
+    percentage = (100 * count / $aboutMaxLoginCount).to_i
+    allLoginInfo = "#{count}/#{$aboutMaxLoginCount}(#{percentage}%)"
+    return allLoginInfo
+  end
+  
   def getAllLoginCount()
     limitTime = (Time.now.to_f - (60 * 60 * 24))
     
@@ -1366,7 +1495,9 @@ class DodontoFServer
     uniqueId = params['uniqueId'];
     uniqueId ||= Time.now.to_f.to_s;
     
-    allLoginCount = getAllLoginCount()
+    allLoginInfo = getAllLoginInfo()
+    writeAllLoginInfo( allLoginInfo )
+    
     loginMessage = getLoginMessage()
     cardInfos = $card.collectCardTypeAndTypeName()
     
@@ -1384,7 +1515,7 @@ class DodontoFServer
       "diceBoxCgiUrl" => $diceBoxCgiUrl,
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
-      "allLoginCount" => allLoginCount,
+      "allLoginInfo" => allLoginInfo,
       "skinImage" => $skinImage,
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
@@ -1397,6 +1528,20 @@ class DodontoFServer
     logging("getLoginInfo end")
     return result
   end
+  
+  def writeAllLoginInfo( allLoginInfo )
+    text = "#{allLoginInfo}"
+    
+    saveFileName = $loginCountFile
+    saveFileLock = getSaveFileLockReadOnly(saveFileName)
+    
+    saveFileLock.lock do
+      File.open(saveFileName, "w+") do |file|
+        file.write( text.toutf8 )
+      end
+    end
+  end
+  
   
   def getLoginWarning
     unless( isExistDir?(getSmallImageDir) )
@@ -1520,6 +1665,8 @@ class DodontoFServer
       logging(params, "params")
       
       playRoomPassword = params['playRoomPassword']
+      checkSetPassword(playRoomPassword)
+      
       playRoomChangedPassword = getChangedPassword(playRoomPassword)
       logging('playRoomPassword is get')
       
@@ -1544,7 +1691,7 @@ class DodontoFServer
       end
     rescue => e
       loggingException(e)
-      resultText = e.inspect
+      resultText = e.to_s
     end
     
     result = {
@@ -1554,6 +1701,18 @@ class DodontoFServer
     
     return result
   end
+  
+  
+  def checkSetPassword(playRoomPassword)
+    return if( playRoomPassword.empty? )
+    
+    roomNumber = @saveDirInfo.getSaveDataDirIndex
+    
+    if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
+      raise "noPasswordPlayRoomNumber"
+    end
+  end
+  
   
   def isSameViewState(viewStates, preViewStateInfo)
     result = true
@@ -1651,6 +1810,58 @@ class DodontoFServer
   def getTrueSaveFileName(fileName)
     saveFileName = @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
+  
+  def saveScenario()
+    dir = getRoomLocalSpaceDirName
+    
+    mkdir(dir)
+    File.delete( File.join(dir, "*") )
+    
+    saveFileName = createScenarioSaveFile(dir)
+    moveAllImagesToDir(dir, saveFileName)
+    makeScenarioFile(dir)
+  end
+  
+  def createSaveFile(dir)
+    isAddPlayRoomInfo = true
+    extension = "sav"
+    result = saveSelectFiles($saveFiles.keys, extension, isAddPlayRoomInfo)
+    
+    from = result["saveFileName"]
+    to = File.join(dir, $scenarioDefaultSaveData)
+    
+    File.move(form, to)
+  end
+  
+  def moveAllImagesToDir(dir, saveFileName)
+    jsonDataString = File.readlines(saveFileName).join
+    jsonData = getJsonDataFromText(jsonDataString)
+    
+    logging(jsonData, 'loadFromJsonData jsonData')
+    
+    saveDataAll = getSaveDataAllFromSaveData(jsonData)
+    logging(saveDataAll, 'saveDataAll')
+    
+    
+    
+  end
+    
+  def makeScenarioFile(dir)
+    currentDir = Dir.pwd
+    Dir.cd(dir)
+    
+    require 'zlib'
+    require 'archive/tar/minitar'
+    
+    tgz = Zlib::GzipWriter.new(File.open('scenario.tgz', 'wb'))
+    
+    fileNames = Dir.glob('*')
+    fileNames = fileNames.collect{|i| i.untaint}
+    Minitar.pack(fileNames, tgz)
+    
+    Dir.cd(currentDir)
+  end
+  
   
   def save()
     isAddPlayRoomInfo = true
@@ -2133,14 +2344,13 @@ class DodontoFServer
   def loadScenario()
     logging("loadScenario() Begin")
     
-    fileMaxSize = $scenarioDataMaxSize # Mbyte
     fileUploadDir = getRoomLocalSpaceDirName
-    
     mkdir(fileUploadDir)
     
+    fileMaxSize = $scenarioDataMaxSize # Mbyte
     scenarioFile = nil
-    
     isChangeFileName = false
+    
     result = uploadFileBase(fileUploadDir, fileMaxSize, isChangeFileName) do |fileNameFullPath, fileNameOriginal, result|
       scenarioFile = fileNameFullPath
     end
@@ -2271,15 +2481,39 @@ class DodontoFServer
   def load()
     logging("saveData load() Begin")
     
-    fileIO = getRequestData('Filedata')
-    logging(fileIO, 'fileIO')
+    result = {}
     
-    jsonDataString = fileIO.read
-    logging(jsonDataString, 'jsonDataString')
+    begin
+      checkLoad()
+      
+      fileIO = getRequestData('Filedata')
+      logging(fileIO, 'fileIO')
+      
+      jsonDataString = fileIO.read
+      logging(jsonDataString, 'jsonDataString')
+      
+      result = loadFromJsonDataString(jsonDataString)
+      
+    rescue => e
+      result["resultText"] = e.to_s
+    end
     
-    loadFromJsonDataString(jsonDataString)
+    logging(result, "load result")
+    
+    return result
   end
   
+
+  def checkLoad()
+    roomNumber = @saveDirInfo.getSaveDataDirIndex
+    
+    if( $unloadablePlayRoomNumbers.include?(roomNumber) )
+      raise "unloadablePlayRoomNumber"
+    end
+  end
+  
+  
+
   
   def changeLoadText(text)
     text = changeTextForLocalSpaceDir(text)
@@ -2328,7 +2562,7 @@ class DodontoFServer
     result = {
       "resultText"=> "OK"
     }
-    logging(result, "load result")
+    logging(result, "loadFromJsonData result")
     
     return result
   end
@@ -3159,16 +3393,14 @@ class DodontoFServer
     
     changeSaveData(@saveFiles['characters']) do |saveData|
       saveData['characters'] ||= []
-      characters = saveData['characters']
-      waitingRoom = getWaitinigRoomFromSaveData(saveData)
+      characters = getCharactersFromSaveData(saveData)
       
       characterDataList.each do |characterData|
         logging(characterData, "characterData")
         
         characterData['imgId'] = createCharacterImgId()
         
-        allCharacters = (characters + waitingRoom)
-        failedName = isAlreadyExistCharacter?( allCharacters, characterData )
+        failedName = isAlreadyExistCharacterInRoom?( saveData, characterData )
         
         if( failedName )
           result["addFailedCharacterNames"] << failedName
@@ -3183,15 +3415,28 @@ class DodontoFServer
     return result
   end
   
-  def changeCharacterData
+  def isAlreadyExistCharacterInRoom?( saveData, characterData )
+    characters = getCharactersFromSaveData(saveData)
+    waitingRoom = getWaitinigRoomFromSaveData(saveData)
+    allCharacters = (characters + waitingRoom)
+    
+    failedName = isAlreadyExistCharacter?( allCharacters, characterData )
+    return failedName
+  end
+  
+  
+  def changeCharacter()
+    characterData = getParamsFromRequestData()
+    logging(characterData.inspect, "characterData")
+    
+    changeCharacterData(characterData)
+  end
+  
+  def changeCharacterData(characterData)
     changeSaveData(@saveFiles['characters']) do |saveData|
       logging("changeCharacterData called")
       
-      jsCharacterData = getRequestData('characterData')
-      characterData = getJsonDataFromText(jsCharacterData)
-      logging(characterData.inspect, "characterData")
-      
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       index = nil
       characters.each_with_index  do |item, targetIndex|
@@ -3294,7 +3539,7 @@ class DodontoFServer
     ownerName = data['ownerName']
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       logging(characters, "addCardZone characters")
       
       cardData = getCardZoneData(owner, ownerName, x, y)
@@ -3326,7 +3571,7 @@ class DodontoFServer
       saveData['cardMount'] = {}
       cardMounts = saveData['cardMount']
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       logging(characters, "initCards saveData.characters")
       
       cardTypeInfos.each_with_index do |cardTypeInfo, index|
@@ -3409,7 +3654,7 @@ class DodontoFServer
       cardData["x"] = addCardData['x']
       cardData["y"] = addCardData['y']
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       characters << cardData
     end
     
@@ -3641,7 +3886,7 @@ class DodontoFServer
       cardData['y'] = params['y'] + 10
       logging('returned cardData', cardData)
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       characters.push( cardData )
       
       trushMountData = findCardData( characters, params['imgId'] )
@@ -3779,7 +4024,7 @@ class DodontoFServer
       cardData['ownerName'] = params['ownerName']
       
       saveData['characters'] ||= []
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       characters << cardData
       
       cardMountData = findCardMountData(saveData, params['mountId'])
@@ -3831,7 +4076,7 @@ class DodontoFServer
       
       trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       dumpedCardId = dumpTrushCardsData['dumpedCardId']
       logging( dumpedCardId, "dumpedCardId")
@@ -3944,7 +4189,7 @@ class DodontoFServer
       cardMount[mountName] ||= []
       mountCards = cardMount[mountName]
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       cardMountData = findCardMountDataByType(characters, mountName, getRandomDungeonCardMountType)
       return if( cardMountData.nil?) 
       
@@ -4112,7 +4357,7 @@ class DodontoFServer
     logging(targetType, "clearCharacterByTypeLocal targetType")
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       characters.delete_if do |i|
         (i['type'] == targetType)
@@ -4132,7 +4377,7 @@ class DodontoFServer
     logging(removeCharacterDataList, "removeCharacterDataList")
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       removeCharacterDataList.each do |removeCharacterData|
         logging(removeCharacterData, "removeCharacterData")
@@ -4215,7 +4460,21 @@ class DodontoFServer
       characters = getCharactersFromSaveData(saveData)
       characters << characterData
     end
+    
+    return nil
   end
+  
+  def clearGraveyard
+    logging("clearGraveyard begin")
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      graveyard = getGraveyardFromSaveData(saveData)
+      graveyard.clear
+    end
+    
+    return nil
+  end
+  
   
   def getGraveyardFromSaveData(saveData)
     return getArrayInfoFromHash(saveData, 'graveyard')
@@ -4316,7 +4575,7 @@ class DodontoFServer
       
       logging(characterMoveData['imgId'], "character.imgId")
       
-      characters = saveData['characters']
+      characters = getCharactersFromSaveData(saveData)
       
       characters.each do |characterData|
         next unless( characterData['imgId'] == characterMoveData['imgId'] )

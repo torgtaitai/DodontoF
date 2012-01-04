@@ -24,7 +24,6 @@ package {
     
     public class SharedDataSender {
         
-        protected var fileReferenceForUpload:FileReference = null;
         protected var loadParams:Object = null;
         
         protected var uniqueId:String = "";
@@ -145,12 +144,10 @@ package {
         protected function loadSelectFile(params:Object, extension:String, resultFunction:Function = null):void {
             loadParams = params;
             
-            if( fileReferenceForUpload == null ) {
-                var commandName:String = "load"
-                fileReferenceForUpload  = new FileReference();
-                fileReferenceForUpload.addEventListener(Event.SELECT,
-                                                        getFileSelectHandlerForLoad(commandName, resultFunction));
-            }
+            var fileReferenceForUpload:FileReference = new FileReference();
+            var commandName:String = "load";
+            fileReferenceForUpload.addEventListener(Event.SELECT,
+                                                    getFileSelectHandlerForLoad(commandName, resultFunction));
             
             var filters:Array = new Array();
             filters.push(new FileFilter("セーブデータ(*." + extension + ")", "*." + extension));
@@ -159,19 +156,18 @@ package {
         }
         
         
-        protected function getFileSelectHandlerForLoad(commandName:String,
-                                                       resultFunction:Function = null):Function {
+        protected function getFileSelectHandlerForLoad(commandName:String, resultFunction:Function = null):Function {
             return function(event:Event):void {
                 var fileReference:FileReference = event.currentTarget as FileReference;
                 if( fileReference == null ) {
                     return;
                 }
                 
-                thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
-                
                 if( resultFunction != null ) {
-                    resultFunction();
+                    fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, resultFunction);//Event.COMPLETE, resultFunction);
                 }
+                
+                thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
             }
         }
         
@@ -358,12 +354,12 @@ package {
             return true;
         }
         
-        public function resurrectCharacter(resurrectCharacterId:String):void {
+        public function resurrectCharacter(resurrectCharacterId:String, resultFunction:Function):void {
             var jsonData:Object = {"imgId" : resurrectCharacterId};
             var jsonParams:String = getEncodedJsonString( jsonData );
             
             var params:String = getParamString("resurrectCharacter", [["params", jsonParams]]);
-            this.sendCommandData(params);
+            this.sendCommandData(params, resultFunction);
         }
         
         public function sendRoundTimeData(round:int, initiative:Number, counterNames:Array):void {
@@ -656,7 +652,7 @@ package {
             var jsonParams:String = getEncodedJsonString(characterJsonData);
             Log.logging("jsonParams : " + jsonParams);
             
-            var params:String = getParamString("changeCharacterData", [["characterData", jsonParams]]);
+            var params:String = getParamString("changeCharacterData", [["params", jsonParams]]);
             Log.logging("var params:String : " + params);
             sendCommandData(params);
         }
@@ -800,6 +796,11 @@ package {
         
         public function requestImageTagInfosAndImageList(resultFunction:Function):void {
             var params:String = this.getParamString("getImageTagsAndImageList", []);
+            this.sendCommandData(params, resultFunction);
+        }
+        
+        public function clearGraveyard(resultFunction:Function):void {
+            var params:String = this.getParamString("clearGraveyard", []);
             this.sendCommandData(params, resultFunction);
         }
         

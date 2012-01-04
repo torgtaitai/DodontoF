@@ -13,9 +13,10 @@ package {
         
         public function getText(index:int):String {
             var line:String = buffer[index];
-            
-            Log.logging("getText input", line);
-            
+            return getTextFromText(line);
+        }
+        
+        public function getTextFromText(line:String):String {
             if( line == null ) {
                 return "";
             }
@@ -29,7 +30,7 @@ package {
                 line = getChangedLine(line, pattern2, value);
             }
             
-            Log.logging("getText result", line);
+            Log.logging("getTextFromText result", line);
             return line;
         }
         
@@ -46,17 +47,35 @@ package {
         }
         
         
+        private var loopMax:int = 30; //無限ルーム回避のためのMAXループ回数
+        
         public function analize():void {
+            var lines:Array = buffer;
+            
+            for(var i:int = 0 ; i < loopMax ; i++) { //本来は無限ループで良いが、安全のため上限を設ける
+                analizeBuffer(lines);
+                var newLines:Array = getChangedTexts(lines);
+                
+                if( Utils.isSameArray(lines, newLines) ) {
+                    break;
+                }
+                
+                lines = newLines;
+            }
+            
+        }
+        
+        private function analizeBuffer(lines:Array):void {
             definitions = new Object();
             
-            for each(var line:String in buffer) {
+            for each(var line:String in lines) {
                 analizeDefinition(line);
             }
             
             Log.logging("definitions", definitions);
         }
         
-        static private var definitionRegExp:RegExp = /^(\/\/|／／)(.+)\s*(=|＝)\s*(.+)\s*$/m;
+        static private var definitionRegExp:RegExp = /^(\/\/|／／)(.+?)\s*(=|＝)\s*(.+?)\s*$/m;
         
         private function analizeDefinition(line:String):void {
             var result:Object = definitionRegExp.exec(line);
@@ -67,6 +86,16 @@ package {
             var key:String = result[2];
             var value:String = result[4];
             definitions[key] = value;
+        }
+        
+        private function getChangedTexts(lines:Array):Array {
+            var newLines:Array = new Array();
+            
+            for each(var line:String in lines) {
+                newLines.push( getTextFromText(line) );
+            }
+            
+            return newLines;
         }
         
     }
@@ -81,4 +110,9 @@ package {
 2d6+{知力}+3 アイテム鑑定[出自：冒険者]
 2d6+{筋力} 筋力判定
 =====================================
+
+//A = 1
+//B = 2
+//AB = {A} + {B}
+
 */

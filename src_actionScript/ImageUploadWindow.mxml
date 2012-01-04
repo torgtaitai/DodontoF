@@ -67,7 +67,7 @@
     override protected function setup():void {
         imageUploadSetInfo.imageTypeChanged();
         
-        if( ! DodontoF_Main.isFileRefecenseLoadMethodSupportVersion() ) {
+        if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
             printWarningAboutSamnailNotSupport();
             return;
         }
@@ -125,7 +125,7 @@
             uploadButton.enabled = true;
             result.text = "選択画像のアップロード可能";
             
-            if( ! DodontoF_Main.isFileRefecenseLoadMethodSupportVersion() ) {
+            if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
                 warningInfo.htmlText = "選択ファイル名：" + previewFileReference.name;
                 return;
             }

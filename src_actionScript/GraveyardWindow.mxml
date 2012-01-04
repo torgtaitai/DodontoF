@@ -14,8 +14,11 @@
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Spacer width="50%" />
     <mx:Button id="executeButton" label="復活" click="this.resurrectCharacter()" />
     <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Spacer width="50%" />
+    <mx:Button id="clearButton" label="墓地を空にする" click="this.clearGraveyard()" />
   </mx:HBox>
   
   <mx:Script>
@@ -28,7 +31,7 @@
         loadGraveyardInfo();
     }
     
-    private function loadGraveyardInfo():void {
+    private function loadGraveyardInfo(event:Object = null):void {
         executeButton.enabled = false;
         characterInfo.enabled = false;
         characterInfo.text = "ロード中・・・";
@@ -94,11 +97,17 @@
             Log.logging("characterInfo.text", characterInfo.text );
         
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.resurrectCharacter( characterInfo.selectedItem.data );
-            
-            //PopUpManager.removePopUp(this);
-            loadGraveyardInfo();
-
+            guiInputSender.resurrectCharacter( characterInfo.selectedItem.data, loadGraveyardInfo );
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    
+    public function clearGraveyard():void {
+        try{
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.clearGraveyard( loadGraveyardInfo );
         } catch(error:Error) {
             this.status = error.message;
         }

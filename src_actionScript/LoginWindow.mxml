@@ -76,8 +76,8 @@
                     change="savePlayerInfo()"
                     />
       
-      <mx:Label text="現在の総ログイン人数：" />
-      <mx:Label id="currentAllLoginCount" text="0" width="50" height="100%" />
+      <mx:Label text="現在のログイン状況：" />
+      <mx:Label id="currentAllLoginInfo" text="0/0(0%)" width="100" height="100%" />
       
       <mx:TextInput id="adminPassword" text="管理用パスワード" width="0" height="0" enabled="false"
                     />
@@ -440,7 +440,7 @@
             DodontoF_Main.getInstance().getMap().addPaformanceMonitor();
         }
         
-        currentAllLoginCount.text = "" + jsonData.allLoginCount;
+        currentAllLoginInfo.text = "" + jsonData.allLoginInfo;
         
         
         if( autoLoginRoom >= 0 ) {

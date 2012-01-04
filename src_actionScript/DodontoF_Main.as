@@ -19,7 +19,6 @@ package {
     import flash.net.URLRequest;
     import flash.net.URLRequestHeader;
     import flash.net.navigateToURL;
-    import flash.system.Capabilities;
     import flash.text.TextField;
     import flash.ui.Keyboard;
     import flash.utils.ByteArray;
@@ -625,28 +624,6 @@ package {
         
         public function setRulerMode():void {
             map.setRulerMode();
-        }
-        
-        static public function getFlashVersion():int {
-            var fullVersionString:String = flash.system.Capabilities.version
-            Log.loggingTuning(fullVersionString, "fullVersionString"); //output MAC 9,0,115,0
-            
-            var versionNoString:String = fullVersionString.split(" ")[1].split(",")[0];
-            Log.loggingTuning(versionNoString, "versionNoString"); //9
-            
-            var version:int = parseInt(versionNoString);
-            Log.loggingTuning("version", version); //9
-            
-            return version;
-        }
-        
-        static public function isFileRefecenseLoadMethodSupportVersion():Boolean {
-            var version:int = getFlashVersion();
-            
-            if ( version < 10) {
-                return false;
-            }
-            return true;
         }
         
         public function getUniqueId():String {

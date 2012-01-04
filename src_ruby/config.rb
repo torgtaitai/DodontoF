@@ -5,6 +5,10 @@
 $debug = false
 
 
+#サーバで許容できると思うログイン人数を記載。大体でいいです。
+$aboutMaxLoginCount = 50
+
+
 #CGIがクライアントへ通知を返す最大待機時間（秒）
 #本CGIではAjaxで言うComet方式で実装されています（擬似的に、ですが）。
 #つまりクライアントからの要求に即座に通知を返さず
@@ -120,9 +124,15 @@ $gzipTargetSize = 0;
 
 #削除不可能なプレイルーム番号を指定
 #たとえばプレイルーム0と1を削除できなくするなら
-# $unremovablePlayRoomNumbers = []
+# $unremovablePlayRoomNumbers = [0, 1]
 #となります。デフォルトは指定なし。
-$unremovablePlayRoomNumbers = []
+$unremovablePlayRoomNumbers = [0]
+
+#上記と同様に、ロード不可の指定
+$unloadablePlayRoomNumbers = [0]
+
+#上記と同様に、パスワード設定不可の指定
+$noPasswordPlayRoomNumbers = [0]
 
 #FirstCGIを使用する場合にはtrueに設定。通常のCGIであればfalseのまま。
 $isFirstCgi = false
@@ -145,3 +155,4 @@ $mapMaxHeigth = 150
 
 #アップロード可能なシナリオデータの上限(MB)
 $scenarioDataMaxSize = 100.0 
+

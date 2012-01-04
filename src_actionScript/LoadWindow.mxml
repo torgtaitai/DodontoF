@@ -104,21 +104,41 @@
     public function execute():void {
         try {
             var params:Object = getLoadParams();
-            
-            var resultFunction:Function = null;
-            if( params == null ) {
-                resultFunction = function():void {
-                    DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
-                }
-            }
-            
-            DodontoF_Main.getInstance().getGuiInputSender().load(params, resultFunction);
+            var resultFunction:Function = getExecuteResult(params);
+            DodontoF_Main.getInstance().getGuiInputSender().load_(params, resultFunction);
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {
             this.status = error.message;
         }
     }
+    
+    public function getExecuteResult(params:Object):Function {
+        return function(dataEvent:DataEvent):void {
+            Log.logging("LoadWindow result call begin");
+            
+            try {
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+                Log.logging("jsonData", Utils.getJsonString(jsonData));
+                var resultText:String = jsonData.resultText;
+                Log.logging("load resultText", resultText);
+                
+                if( resultText != "OK" ) {
+                    Alert.show( Messages.getMessage(resultText) );
+                    return;
+                }
+                
+                
+                if( params == null ) {
+                DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
+                }
+            } catch(error:Error) {
+                this.status = error.message;
+                Alert.show( error.message );
+            }
+        }
+    }
+    
     
     ]]>
   </mx:Script>

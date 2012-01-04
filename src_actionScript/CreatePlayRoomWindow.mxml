@@ -252,27 +252,32 @@
             
             var chatChannelNames:Array = getChatChannelNames();
             
-            if( resultText == "OK" ) {
-                DodontoF_Main.getInstance().setPlayRoomPassword(playRoomPassword.text);
-                
-                PopUpManager.removePopUp(this);
-                
-                if( resultFunction != null ) {
-                    if( playRoomIndex == -1 ) {
-                        resultFunction(jsonData.playRoomIndex);
-                    } else {
-                        resultFunction(playRoomPassword.text);
-                    }
+            if( resultText != "OK" ) {
+                printError(resultText);
+                return;
+            }
+            
+            DodontoF_Main.getInstance().setPlayRoomPassword(playRoomPassword.text);
+            
+            PopUpManager.removePopUp(this);
+            
+            if( resultFunction != null ) {
+                if( playRoomIndex == -1 ) {
+                    resultFunction(jsonData.playRoomIndex);
+                } else {
+                    resultFunction(playRoomPassword.text);
                 }
-            } else {
-                status = "server error : "+ resultText;
-                Alert.show(resultText);
             }
         } catch(error:Error) {
             status = "executeResult error : " + error.message;
         }
     }
     
+    private function printError(resultText:String):void {
+        resultText = Messages.getMessage(resultText);
+        Alert.show(resultText);
+        status = "server error : "+ resultText;
+    }
     
     private var extendMode:Boolean = false;
     

@@ -53,7 +53,9 @@ package {
     "canNotRefreshBecauseMentenanceNow" : "現在メンテナンス作業中のためサーバからの応答が取得できません。\nエラーが発生したため更新を停止しました。再度ログインしなおしてください。",
     //
     "dragMeForFloorTile" : "ドラッグ＆ドロップするとマップにタイルを貼り付けることが出来ます。",
-    "unremovablePlayRoomNumber" : "指定されたプレイルームは削除不可として指定されています。",
+    "unremovablePlayRoomNumber" : "指定されたプレイルームはシステム管理者によって削除不可に指定されています。",
+    "unloadablePlayRoomNumber" : "このプレイルームはシステム管理者によってロード不可に指定されています。ロードを行いたい場合は他のプレイルームを作成してください。",
+    "noPasswordPlayRoomNumber" : "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。パスワードは空にしてください。",
     
     "9999" : "dummy"
 };

@@ -761,6 +761,68 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2012/01/02 Ver.1.35.01<br>
+・墓場の中身を削除できるように機能追加。墓場画面から削除ボタンを押してください。<br>
+・チャットログをテキスト保存時に改行コードが正しく保存されない障害に対応（流さん指摘ありがとうっ！）<br>
+・チャットパレットでの変数定義に以下のような多重定義を可能に<br>
+//A = 1
+//B = 2
+//AB = {A}+{B}
+・特定のプレイルームへのパスワード設定・ロード実行を禁止できるように src_ruby/config.rb に $unloadablePlayRoomNumbers, $noPasswordPlayRoomNumbers を追加。公式サーバ用の機能なので一般用途では特に必要ないかと思います。<br>
+・サーバのログイン人数からの負荷率を保存し、外部参照できるように機能追加。<br>
+　上限ログイン人数の目安を src_ruby/cofig.rb の $aboutMaxLoginCount に定義してください。<br>
+　またログイン状況は loginCount.txt に保存されます。<br>
+　WEB上での表示には <a href="http://www.dodontof.com/torgtaitai/dodontofBusy.html">http://www.dodontof.com/torgtaitai/dodontofBusy.html</a>が参考になるでしょう。<br>
+<br>
+・WEB IFのキャラクター追加コマンドにパラメーターを追加。<br>
+DodontoFServer.rb?webif=addCharacter&room=1&password=himitsu&name=abc&counters=HP:1,MP:1,*check:0,*check:1&info=foo&x=0&y=1&size=2&initiative=9&rotation=30&statusAlias=check:abc,check2:def&dogTag=1&draggable=true&isHide=false<br>
+のように指定することで実行可能。<br>
+各パラメータの意味は以下の通り<br>
+　webif：キャラクター追加時は addCharacter を指定<br>
+　room：プレイルーム番号<br>
+　password：プレイルームのパスワード（パスワードが無い、あるいは見学可の場合は省略可能）<br>
+　name：キャラクター名<br>
+　counters：イニシアティブに表示するカウンター値 名1:値1,名2:値2,.... というフォーマットで指定。省略可<br>
+　info：その他情報。省略可<br>
+　x：x座標。省略可<br>
+　y：y座標。省略可<br>
+　size：キャラクターのサイズ。省略可<br>
+　initiative：イニシアティブ値。省略可<br>
+　rotation：回転角度。省略可<br>
+　image：画像。省略時はデフォルトに。<br>
+  callback: JSONP取得用。省略可<br>
+★ここから追加分
+　statusAlias：イニシアティブに表示するカウンター値がチェックボックスの場合に付けることの出来る別名の指定 名1:別名1,名2:別名2,.... というフォーマットで指定。省略可<br>
+　dogTag：複数キャラクター作成時に付与される「１」のような番号表示用のパラメータ。実は任意の文字が使えます。省略可<br>
+　draggable：ドラッグ移動の是非。trueで移動可能(true,false)。省略可<br>
+　isHide：マップマスクの下にキャラクターを隠すかの指定。trueで隠す(true,false)。省略可<br>
+<br>
+<br>
+・WEB IFにキャラクター変更コマンドを追加。<br>
+DodontoFServer.rb?webif=changeCharacter&room=1&password=himitsu&targetName=abc&name=def&counters=HP:1,MP:1,*check:0,*check:1&info=foo&x=0&y=1&size=2&initiative=9&rotation=30&statusAlias=check:abc,check2:def&dogTag=1&draggable=true&isHide=false<br>
+のように指定することで実行可能。<br>
+各パラメータの意味は以下の通り<br>
+　webif：キャラクター追加時は changeCharacter を指定<br>
+　room：プレイルーム番号<br>
+　password：プレイルームのパスワード（パスワードが無い、あるいは見学可の場合は省略可能）<br>
+　targetName：変更対象とするキャラクターの名前<br>
+　name：キャラクター名。省略可<br>
+　counters：イニシアティブに表示するカウンター値 名1:値1,名2:値2,.... というフォーマットで指定。省略可<br>
+　info：その他情報。省略可<br>
+　x：x座標。省略可<br>
+　y：y座標。省略可<br>
+　size：キャラクターのサイズ。省略可<br>
+　initiative：イニシアティブ値。省略可<br>
+　rotation：回転角度。省略可<br>
+　image：画像。省略時はデフォルトに。<br>
+  callback: JSONP取得用。省略可<br>
+　statusAlias：イニシアティブに表示するカウンター値がチェックボックスの場合に付けることの出来る別名の指定 名1:別名1,名2:別名2,.... というフォーマットで指定。省略可<br>
+　dogTag：複数キャラクター作成時に付与される「１」のような番号表示用のパラメータ。実は任意の文字が使えます。省略可<br>
+　draggable：ドラッグ移動の是非。trueで移動可能(true,false)。省略可<br>
+　isHide：マップマスクの下にキャラクターを隠すかの指定。trueで隠す(true,false)。省略可<br>
+  callback: JSONP取得用。省略可<br>
+<br>
+<br>
 2011/12/18 Ver.1.35.00<br>
 ・Ver.1.34.04をベースに安定版を開発コード「sunlight」としてリリース<br>
 <br>

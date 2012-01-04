@@ -42,7 +42,7 @@ package {
             sender.clearLastUpdateTimes();
         }
         
-        public function load(params:Object, resultFunction:Function):void {
+        public function load_(params:Object, resultFunction:Function):void {
             sender.load(params, resultFunction);
         }
         
@@ -507,15 +507,19 @@ package {
             Log.logging("addMagicTimer end");
         }
         
-        public function resurrectCharacter(resurrectCharacterId:String):void {
+        public function resurrectCharacter(resurrectCharacterId:String, resultFunction:Function):void {
             Log.logging("resurrectCharacterId", resurrectCharacterId);
             
             if( resurrectCharacterId.length == 0 ) {
                 throw new Error("復活させたいキャラクターのＩＤを入力してください。");
             }
             
-            sender.resurrectCharacter(resurrectCharacterId);
+            sender.resurrectCharacter(resurrectCharacterId, resultFunction);
             Log.logging("resurrectCharacter end");
+        }
+        
+        public function clearGraveyard(resultFunction:Function):void {
+            sender.clearGraveyard(resultFunction);
         }
         
         public function requestGraveyard(requestGraveyardResult:Function):void {

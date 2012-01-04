@@ -1384,13 +1384,17 @@
                 saveChatLogHtmlByChatLogList(allChatLogList);
             } else {
                 var chatLogText:String = Utils.htmlToText(allChatLogList.join('\n'));
+                
+                var enterText:String = Utils.getEnterText();
+                chatLogText = chatLogText.replace("\r", enterText);
+                
                 saveChatLogHtmlFromString(chatLogText, "txt");
             }
         }
         
         static public function saveChatLogHtmlByChatLogList(chatLogList:Array):void {
             
-            if( ! DodontoF_Main.isFileRefecenseLoadMethodSupportVersion() ) {
+            if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
                 Alert.show("この機能を使用するにはFlashPlayerのバージョン10以上が必要です。");
             }
             
