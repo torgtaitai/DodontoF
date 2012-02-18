@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="250"
+   title="入力" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Box id="infoBox" width="100%"
+            verticalGap="2" horizontalGap="2" >
+      <mx:Label text="カウンターに使用するパラメータ名をスペース区切りで入力してください" />
+      <mx:Label text="先頭に ＊（全角・半角どちらでも可）を付けて記述するとチェック欄になります。" />
+      <mx:Label text="　　　例）　HP　MP　AC　侵食率　ポシビリティ　*毒　＊転倒" />
+      <mx:Label text="(注)この設定は同一プレイルームの全員に影響します。" />
+    </mx:Box>
+    <mx:HBox width="100%" height="100%">
+      <mx:Label id="inputLabel" text="入力:" />
+      <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />
+    </mx:HBox>
+    
+    <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
+      <mx:HBox width="100%" height="100%">
+        <mx:Label text="イニシアティブ表フォントサイズ:" />
+        <mx:NumericStepper id="fontSize" maximum="999" minimum="1" value="11" />
+      </mx:HBox>
+      <mx:Label text="(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。" />
+    </mx:Box>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="実行" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    
+    public function init(initText:String):void {
+        
+        var isPassword:Boolean = false;
+        
+        this.title = "カウンター名入力";
+        this.inputLabel.text = "カウンター名一覧:";
+        input.text = initText;
+        input.displayAsPassword = isPassword;
+        
+        fontSize.value = DodontoF_Main.getInstance().getInitiativeWindow().getFontSize();
+    }
+    
+    override protected function setup():void {
+    }
+
+    public function execute():void {
+        try {
+            var counters:Array = input.text.split(/[\s　]+/);
+            DodontoF_Main.getInstance().getRoundTimer().sendCounterNames(counters);
+            DodontoF_Main.getInstance().getInitiativeWindow().setFontSize(fontSize.value);
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

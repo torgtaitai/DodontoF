@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>どどんとふ運用状況</title>
+
+<script type="text/javascript"><!--
+
+function getDodontofBusyAll() {
+    getDodontofBusy("安定版",                 "dodontof_stable1",   "http://www.taruki.com/~takeru/DodontoF/DodontoF.swf");
+    getDodontofBusy("安定版その２",           "dodontof_stable2",   "http://dodontof.dip.jp/DodontoF/DodontoF.swf");
+    getDodontofBusy("らぁさんの安定版",       "dodontof_raa1",      "http://www.raa0121.info/DodontoF/DodontoF.swf");
+    getDodontofBusy("らぁさんの安定版その２", "dodontof_raa2",      "http://raa0121.shiracha.net/DodontoF/DodontoF.swf");
+    getDodontofBusy("たぐっちゃんの安定版",   "dodontof_taguchan1", "http://smile-b.xsrv.jp/dodon2/DodontoF.swf");
+    getDodontofBusy("最新版",                 "dodontof_newest",    "http://www.dodontof.com/DodontoF/DodontoF.swf");
+//    getDodontofBusy("おためし版",             "dodontof_test",      "http://www.dodontof.com/DodontoF_New/DodontoF.swf");
+}
+
+function getDodontofBusy(title, target, baseUrl) {
+	var url = baseUrl;
+	
+	document.getElementById(target).innerHTML = getUrlLinkText((title + "：不明"), baseUrl);
+	
+	url = url.replace(/DodontoF.swf$/, "");
+	url = url.replace(/DodontoFServer.rb$/, "");
+	url = url.replace(/\/$/, "");
+	
+	url = url + "/getInfo.rb?callback=?"
+    
+    jQuery.getJSON(url, function(data) {
+        var percentage = data.loginCount / data.maxLoginCount * 100;
+        percentage = Math.floor( percentage );
+        var busyInfo = "" + data.loginCount + "/" + data.maxLoginCount + "(" + percentage + "%)";
+        
+        var htmlText = getUrlLinkText((title + "：" + busyInfo + "<br>　" + data.version), baseUrl);
+		document.getElementById(target).innerHTML = htmlText;
+    });
+}
+
+function getUrlLinkText(text, url) {
+    var htmlText = "<u><a href='" + url + "' target='_blank'>" + text + "</a></u>";
+    return htmlText;
+}
+
+
+
+// --></script>
+
+<script type="text/javascript" src="./jquery-1.7.1.min.js"></script>
+
+</head>
+<body onLoad="getDodontofBusyAll()" >
+  <font size="1">
+    <div id="dodontof_stable1"></div>
+    <div id="dodontof_stable2"></div>
+    <div id="dodontof_raa1"></div>
+    <div id="dodontof_raa2"></div>
+    <div id="dodontof_taguchan1"></div>
+    <div id="dodontof_newest"></div>
+<!--    <div id="dodontof_test"></div> -->
+  </font>
+</div>
+</body>
+</html>
