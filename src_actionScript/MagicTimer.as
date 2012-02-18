@@ -215,5 +215,6 @@ package {
         public function remove():void {}
         public function hasStatus():Boolean {return false;}
         public function getStatusName(key:String):String {return "";}
+        public function getUrl():String {return "";}
    }
 }

@@ -163,6 +163,10 @@ package {
             return false;
         }
         
+        public function getUrl():String {
+            return "";
+        }
+        
         override protected function update(params:Object):void {
             Log.loggingTuning("=>InitiativedMovablePiece update Begin");
             

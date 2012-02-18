@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="480"
-   height="440"
+   width="550"
+   height="470"
    verticalAlign="middle"
    horizontalAlign="center"
    title="WEBカメラ撮影" 
@@ -17,6 +17,9 @@
     <mx:VideoDisplay y="0" x="0" width="320" height="240" id="display"/>
     <mx:Image x="0" y="0" id="imgPreview" />
   </mx:Panel>
+  
+  <torgtaitai:ImageUploadSetInfo id="imageUploadSetInfo"
+                                 width="100%" horizontalAlign="center" verticalAlign="middle" />
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Button label="撮影" id="btnShoot" click="clickShoot()"/>
@@ -39,7 +42,7 @@
     import PNGEncoder;
 
     private var camera:Camera;
-    private var bitmap:Bitmap;
+    private var captureBitMap:Bitmap;
     
     private var closeEvent:Function = null;
         
@@ -51,13 +54,19 @@
         if( closeEvent != null ) {
             closeEvent.call();
         }
-            
+        
+        stopCamera();
         PopUpManager.removePopUp(this);
+    }
+    
+    public function stopCamera():void {
+        display.attachCamera(null);
     }
     
     
     override protected function setup():void {
         initCamera();
+        imageUploadSetInfo.imageTypeChanged();
     }
         
     // カメラの初期化
@@ -85,43 +94,66 @@
             btnSave.enabled = true;
                 
             // 表示されている画像を取得して動画の上に貼り付ける。。
-            bitmap = new Bitmap();
+            captureBitMap = new Bitmap();
             var bitmapData:BitmapData = new BitmapData(display.width, display.height);
-            bitmap.bitmapData = bitmapData;
+            captureBitMap.bitmapData = bitmapData;
             bitmapData.draw(display);
-            imgPreview.source = bitmap;
+            imgPreview.source = captureBitMap;
         }
+    }
+    
+    private function getSmallImageData(imageBitmap:Bitmap, imageData:ByteArray):ByteArray {
+        var sizeInfo:Object = {
+                "width"  : captureBitMap.width,
+                "height" : captureBitMap.height
+        };
+        var rates:Object = ImageUploadWindow.getSmallImageRatesFromSizeInfo(sizeInfo);
+        
+        var smallData:BitmapData = new BitmapData( captureBitMap.width * rates.widthRate, 
+                                                   captureBitMap.height * rates.heightRate );
+        
+        var matrix:Matrix = new Matrix();
+        matrix.scale(rates.widthRate, rates.heightRate);
+        
+        smallData.draw(imageBitmap, matrix);
+        
+        var pngEncoder:PNGEncoder = new PNGEncoder();
+        var bytes:ByteArray = pngEncoder.encode(smallData);
+        
+        return bytes;
+
     }
         
     // 保存ボタン
     public function clickSave():void {
+        var imageFileName:String = "tmp.png";
+        
         var pngEncoder:PNGEncoder = new PNGEncoder();
-        var bytes:ByteArray = pngEncoder.encode(bitmap.bitmapData);
-            
-        var request:URLRequest = new URLRequest();
-            
-        request.url = "./WebCameraCaptureImageUploader.rb";
-        request.contentType = "application/octet-stream";
-        request.method = URLRequestMethod.POST;
-        request.data = bytes;
-            
-        var loader: URLLoader = new URLLoader();
-        loader.addEventListener(Event.COMPLETE, function(event:Event):void {
-                btnShoot.label = "撮影";
-                imgPreview.source = null;
-                bitmap = null;
-                
-                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-                Log.loggingTuning("loader end");
-                Log.loggingTuning("jsonData.resultText", jsonData.resultText);
-                previewPanle.status = "転送結果：" + jsonData.resultText;
-            });
-            
-        loader.load(request);
+        var imageData:ByteArray = pngEncoder.encode(captureBitMap.bitmapData);
+        var smallImageData:ByteArray = getSmallImageData(captureBitMap, imageData);
+        var tagInfo:Object = imageUploadSetInfo.getTagInfo();
+        
+        ImageUploadWindow.uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo,
+                                           uploadSuccessResult, uploadErrorResult);
         btnSave.enabled = false;
         previewPanle.status = "転送中・・・";;
     }
+    
+    public function uploadSuccessResult(event:Event):void {
+        btnShoot.label = "撮影";
+        imgPreview.source = null;
+        captureBitMap = null;
         
+        var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+        Log.loggingTuning("loader end");
+        Log.loggingTuning("jsonData.resultText", jsonData.resultText);
+        previewPanle.status = "転送結果：" + jsonData.resultText;
+    }
+        
+    public function uploadErrorResult(event:Event):void {
+        previewPanle.status = "転送結果：" + "失敗";
+    }
+    
         ]]>
     </mx:Script>
 </torgtaitai:CommonPopupWindow>

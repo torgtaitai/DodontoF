@@ -80,6 +80,7 @@
               <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
               <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="ファイルアップローダー" />
               <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->
+              <!-- <mx:Image source="{goodIcon}" click="sendGood()" toolTip="いいねっ！" /> -->
       
             </mx:HBox>
           </mx:HBox>
@@ -135,6 +136,10 @@
         [Embed(source='image/icons/twitter.png')]
         [Bindable]
         private static var twitterIcon:Class;
+    
+        [Embed(source='image/icons/good.jpg')]
+        [Bindable]
+        private static var goodIcon:Class;
     
         [Embed(source='image/icons/key.png')]
         [Bindable]
@@ -1756,6 +1761,11 @@
             
             sendChatMessageLocal();
         }
+        
+        public function sendGood():void {
+            chatMessageTrader_sendMessage_publicChatChannel("【いいねっ！】");
+        }
+        
     ]]>
   </mx:Script>
   

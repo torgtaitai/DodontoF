@@ -290,7 +290,7 @@
         dodontoF_Main.initWindowForTiny();
     }
     
-    private function openUrl(urlString:String):void {
+    public static function openUrl(urlString:String):void {
         var url:URLRequest = new URLRequest(urlString);
         navigateToURL(url);
     }
@@ -329,6 +329,8 @@
             refreshMainMenu();
             
             dodontoF_Main.stopSessionRecording();
+        } else if( menuName == "saveScenarioData" ) {
+            popup(SaveScenarioDataWindow, true);
         } else if( menuName == "uploadScenarioData" ) {
             dodontoF_Main.uploadScenarioData();
         } else if( menuName == "logout" ) {

@@ -25,10 +25,12 @@ package {
         protected var size:int = 1;
         private var isHide:Boolean = false;
         private var dogTag:String = "";
+        private var url:String = "";
         
         private var dogTagTextField:TextField = new TextField();
         private var nameTextField:TextField = new TextField();
         private var thisObj:Character;
+        private var openUrlMenu:ContextMenuItem;
         
         public function isHit(comp:UIComponent):Boolean {
             return view.hitTestObject(comp);
@@ -63,7 +65,8 @@ package {
                                            characterPositionY:int,
                                            dogTag:String,
                                            counters:Object,
-                                           statusAlias:Object):Object {
+                                           statusAlias:Object,
+                                           url:String):Object {
             
             var draggable:Boolean = true;
             var jsonData:Object = 
@@ -76,6 +79,7 @@ package {
             jsonData.size = size;
             jsonData.isHide = isHide;
             jsonData.dogTag = dogTag;
+            jsonData.url = url;
             
             return jsonData;
         }
@@ -87,6 +91,7 @@ package {
             jsonData.size = getSize();
             jsonData.isHide = isHideMode();
             jsonData.dogTag = this.dogTag;
+            jsonData.url = this.url;
             
             return jsonData;
         }
@@ -120,6 +125,7 @@ package {
             this.size = params.size;
             this.isHide = params.isHide;
             setDogTag( params.dogTag );
+            setUrl( params.url );
             
             thisObj = this;
             
@@ -179,32 +185,20 @@ package {
             menu.hideBuiltInItems();
             
             addMenuItem(menu, "キャラクターの変更", thisObj.getItemPopUpChangeWindow);
-            /*
-            addMenuItem(menu, "右90度回転", thisObj.getContextMenuItemFunctionObRotateCharacter( 90), true);
-            addMenuItem(menu, "180度回転",  thisObj.getContextMenuItemFunctionObRotateCharacter(180));
-            addMenuItem(menu, "左90度回転", thisObj.getContextMenuItemFunctionObRotateCharacter(-90));
-            addMenuItem(menu,  "−＞ 少し右に傾ける",    thisObj.getContextMenuItemFunctionObRotateCharacter( 30), true);
-            addMenuItem(menu,  "＜− 少し左に傾ける",    thisObj.getContextMenuItemFunctionObRotateCharacter(-30));
-            */
             addMenuItem(menu, "キャラクターの削除", thisObj.getContextMenuItemRemoveCharacter, true);
+            openUrlMenu = addMenuItem(menu, "データ参照先URLを開く", thisObj.getContextMenuItemOpenUrl, true);
+            setUrlMenuVisible();
             
-            //view.contextMenu = menu;
             view.setContexMenu(menu);
         }
         
-        /*
-        protected function getContextMenuItemFunctionObRotateCharacter(rotationDiff:Number):Function {
-            return function(event:ContextMenuEvent):void {
-                var rotation:Number = thisObj.rotation;
-                rotation += rotationDiff;
-                rotation = ( rotation % 360 );
-                thisObj.rotation = rotation;
-                
-                thisObj.loadViewImage();
-                sender.changeCharacter( thisObj.getJsonData() );
-            };
+        protected function getContextMenuItemOpenUrl(event:ContextMenuEvent):void {
+          if( (url == null) || (url == "") ) {
+              return;
+          }
+          
+          DodontoF.openUrl( url );
         }
-        */
         
         override public function popUpChangeWindow():void {
             try {
@@ -338,6 +332,7 @@ package {
             this.size = params.size;
             setHide( params.isHide );
             setDogTag( params.dogTag );
+            setUrl( params.url );
             
             loadViewImage();
             updateStatusMarker();
@@ -427,6 +422,31 @@ package {
             
             dogTagTextField.text = this.dogTag;
             dogTagTextField.visible = ( this.dogTag != "" );
+        }
+        
+        public function setUrl(url:String):void {
+            Log.logging("setUrl url", url);
+            
+            if( url == null ) {
+                url = "";
+            }
+            
+            this.url = url;
+            setUrlMenuVisible();
+            
+            Log.logging("this.url", this.url);
+        }
+        
+        private function setUrlMenuVisible():void {
+            if( openUrlMenu == null ){
+                return;
+            }
+            
+            openUrlMenu.visible = (this.url != "");
+        }
+        
+        override public function getUrl():String {
+            return this.url;
         }
         
         private function setNameTag():void {

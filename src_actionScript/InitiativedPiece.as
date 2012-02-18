@@ -26,5 +26,6 @@ package {
         function sendDelete():void;
         function hasStatus():Boolean;
         function getStatusName(key:String):String;
+        function getUrl():String;
     }
 }

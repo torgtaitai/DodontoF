@@ -154,7 +154,8 @@ package {
             
             var jsonData:Object = getJsonDataFromString(jsonString);
             
-            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent end");
+            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent end, jsonData", jsonData);
+            
             return jsonData;
         }
         
@@ -168,15 +169,23 @@ package {
         
         static private var regJsonStringResult:RegExp = /#D@EM>#(.*)#<D@EM#/ms;
         
-        public static function getJsonStringFromEventResultJsonString(jsonStringOriginal:String):String {
-            var textResult:Object = regJsonStringResult.exec(jsonStringOriginal);
-            var jsonString:String = textResult[1];
+        public static function getJsonStringFromEventResultJsonString(jsonString:String):String {
+            Log.logging('getJsonStringFromEventResultJsonString jsonString', jsonString);
             
-            if( jsonString == null ) {
-                jsonString = jsonStringOriginal;
+            var textResult:Object = regJsonStringResult.exec(jsonString);
+            Log.logging('textResult', textResult);
+            
+            if( textResult == null ) {
+                return jsonString;
             }
             
-            return jsonString;
+            var matchedJsonString:String = textResult[1];
+            if( matchedJsonString == null ) {
+                return jsonString;
+            }
+            
+            Log.logging('matchedJsonString', matchedJsonString);
+            return matchedJsonString;
         }
         
         public static function getJsonDataFromString(jsonString:String):Object {
@@ -406,7 +415,7 @@ package {
                 this.analyzeChangedCharacter(characterData);
                 Log.loggingTuning("=>analyzeChangedCharacter");
             }
-            Log.loggingTuning("=>End analyzeCharacterData pre");
+            Log.loggingTuning("analyzeCharacterData for loop end");
             
             Log.loggingTuning("=>Begin analyzeRemoveCharacter");
             this.analyzeRemoveCharacter(characterDataList);

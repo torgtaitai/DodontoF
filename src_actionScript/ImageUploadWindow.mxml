@@ -51,6 +51,7 @@
     private var warningInfo:TextArea = new TextArea();
     static private var previewSizeLimit:int = 100;
     private var closeEvent:Function = null;
+    private var resultList:Array = new Array();
     
     public function setCloseEvent(function_:Function):void {
         closeEvent = function_;
@@ -191,8 +192,12 @@
     }
     
     static public function getSmallImageRates(previewLoader:Loader):Object {
+        var sizeInfo:Object = Utils.getSizeInfo(previewLoader, 0, 0, previewSizeLimit);
+        return getSmallImageRatesFromSizeInfo(sizeInfo);
+    }
+    
+    static public function getSmallImageRatesFromSizeInfo(sizeInfo:Object):Object {
         var sizeLimit:int = previewSizeLimit;
-        var sizeInfo:Object = Utils.getSizeInfo(previewLoader, 0, 0, sizeLimit);
         
         var result:Object = new Object();
         
@@ -209,42 +214,27 @@
         }
         
         var rates:Object = {
-            widthRate : (1.0 * result.width / previewLoader.width),
-            heightRate: (1.0 * result.height / previewLoader.height)};
+            widthRate : (1.0 * result.width / sizeInfo.width),
+            heightRate: (1.0 * result.height / sizeInfo.height)};
         
         return rates;
     }
     
-    private var uploadImageFileResultList:Array = new Array();
-    
     private function uploadImageFile():void {
         try {
-            uploadImageFileResultList = new Array();
+            resultList = new Array();
             uploadButton.enabled = false;
             result.text = "アップロード実行中...";
             
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             for(var i:int = 0 ; i < fileReferenceForUpload.fileList.length ; i++) {
                 var fileReference:FileReference = fileReferenceForUpload.fileList[i];
-                
-                /*
-                try {
-                    fileReference.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-                    fileReference.removeEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
-                } catch(e:Error) {
-                }
-                fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
-                
-                var params:Object = {
-                    'tagInfo' : imageUploadSetInfo.getTagInfo()
-                };
-                guiInputSender.uploadImageFile(fileReference, params);
-                */
                 var imageFileName:String = fileReference.name;
                 var imageData:ByteArray = fileReference.data;
                 var smallImageData:ByteArray = smallImages[imageFileName];
                 var tagInfo:Object = imageUploadSetInfo.getTagInfo();
-                uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo);
+                
+                uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo,
+                                 uploadImageFileResult, ioErrorHandler);
             }
         } catch(error:Error) {
             Log.loggingException("ImageUploadWindow.uploadImageFile", error);
@@ -268,7 +258,8 @@
         return bytes;
     }
     
-    private function uploadSmallImage(imageFileName:String, imageData:ByteArray, smallImageData:ByteArray, tagInfo:Object):void {
+    public static function uploadSmallImage(imageFileName:String, imageData:ByteArray, smallImageData:ByteArray, tagInfo:Object,
+                                            successResult:Function, errorResult:Function):void {
         Log.logging("ImageUploadWindow.uploadSmallImage begin");
         
         //(type(binary/string):String, // params_key:String, data:ByteArray, mimetype:String, filename:String = null)
@@ -277,9 +268,9 @@
                              ["binary", "imageData", imageData, "image/png", imageFileName],
                              ["binary", "smallImageData", smallImageData, "image/png", imageFileName + ".png"]];
         
-        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         try {
-            guiInputSender.uploadImageData(params, uploadImageFileResult, ioErrorHandler);
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.uploadImageData(params, successResult, errorResult);
         } catch (e:Error) {
             Log.loggingException("uploadSmallImage", e);
         }
@@ -288,8 +279,8 @@
     }
     
     private function ioErrorHandler(event:Event):void {
-        uploadImageFileResultList.push("画像の読み込みでエラーが発生しました。");
-        printUploadImageFileResultList();
+        resultList.push("画像の読み込みでエラーが発生しました。");
+        printResultList();
     }
     
     
@@ -299,24 +290,24 @@
             Log.loggingTuning("event", event);
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             Log.loggingTuning("jsonData", jsonData);
-            uploadImageFileResultList.push(jsonData.resultText);
-            printUploadImageFileResultList();
+            resultList.push(jsonData.resultText);
+            printResultList();
         } catch(e:Error) {
             Log.loggingException("uploadImageFileResult", e);
         }
         Log.loggingTuning("=>uploadImageFileResult(event:Event) End");
     }
     
-    private function printUploadImageFileResultList():void {
-        Log.logging("printUploadImageFileResultList Begin");
+    private function printResultList():void {
+        Log.logging("printResultList Begin");
         
-        if( uploadImageFileResultList.length == fileReferenceForUpload.fileList.length ) {
-            result.text = getAllFinishResult(uploadImageFileResultList);
+        if( resultList.length == fileReferenceForUpload.fileList.length ) {
+            result.text = getAllFinishResult(resultList);
         } else {
-            result.text = "アップロード実行中...(" + uploadImageFileResultList.length + "/" + fileReferenceForUpload.fileList.length + ")";
+            result.text = "アップロード実行中...(" + resultList.length + "/" + fileReferenceForUpload.fileList.length + ")";
         }
         
-        Log.logging("printUploadImageFileResultList End");
+        Log.logging("printResultList End");
     }
     
     private function getAllFinishResult(resultTextArray:Array):String {

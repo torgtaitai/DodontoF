@@ -43,16 +43,11 @@ $card = Card.new();
 
 
 
-#サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.35.01"
-$version = "#{$versionOnly}(2012/01/02)"
-
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
 $imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
 
 $chatMessageDataLogAll = 'chatLongLines.txt'
 
-$loginCountFile = 'loginCount.txt'
 $loginUserInfo = 'login.json'
 $playRoomInfo = 'playRoomInfo.json'
 $playRoomInfoTypeName = 'playRoomInfo'
@@ -176,9 +171,12 @@ class DodontoFServer
   attr :isAddMarker
   attr :jsonpCallBack
   
-  #override
   def getSaveFileLockReadOnly(saveFileName)
     getSaveFileLock(saveFileName, true)
+  end
+  
+  def getSaveFileLockReadOnlyRealFile(saveFileName)
+    getSaveFileLockRealFile(saveFileName, true)
   end
   
   def self.getLockFileName(saveFileName)
@@ -198,7 +196,12 @@ class DodontoFServer
     return lockFileName
   end
   
+  #override
   def getSaveFileLock(saveFileName, isReadOnly = false)
+    getSaveFileLockRealFile(saveFileName, isReadOnly)
+  end
+  
+  def getSaveFileLockRealFile(saveFileName, isReadOnly = false)
     begin
       lockFileName = self.class.getLockFileName(saveFileName)
       return FileLock.new(lockFileName);
@@ -554,6 +557,8 @@ class DodontoFServer
       getWebIfRoomInfo
     when 'setRoomInfo'
       setWebIfRoomInfo
+    when 'getChatColor'
+      getChatColor
     else
       'no data'
     end
@@ -600,40 +605,77 @@ class DodontoFServer
       end
     end
   end
-
+  
   
   def getWebIfChatText
     logging("getWebIfChatText begin")
-    saveData = {}
     
-    secondsParam = getRequestData('sec')
-    targetTime = getTargetTimeForGetWebIfChatText(secondsParam)
-    logging(secondsParam, "secondsParam")
+    seconds = getRequestData('sec')
+    saveData = getWebIfChatTextFromSecond(seconds)
+    saveData['result'] = 'OK'
+    
+    return saveData
+  end
+  
+  def getWebIfChatTextFromSecond(seconds)
+    
+    targetTime = getTargetTimeForGetWebIfChatText(seconds)
+    logging(seconds, "seconds")
     logging(targetTime, "targetTime")
     
+    saveData = {}
     lastUpdateTimes = {'chatMessageDataLog' => targetTime}
     getCurrentSaveData(lastUpdateTimes) do |targetSaveData, saveFileTypeName|
       saveData.merge!(targetSaveData)
     end
     
     logging("getCurrentSaveData end saveData", saveData)
-
-    saveData['result'] = 'OK'
     
     return saveData
   end
   
-  def getTargetTimeForGetWebIfChatText(secondsParam)
-    case secondsParam
+  
+  def getTargetTimeForGetWebIfChatText(seconds)
+    case seconds
     when "all"
       return 0
     when nil
       return Time.now.to_i - $oldMessageTimeout
     end
     
-    return Time.now.to_i - secondsParam.to_i
+    return Time.now.to_i - seconds.to_i
   end
-
+  
+  
+  def getChatColor()
+    name = getWebIfRequestText('name')
+    logging(name, "name")
+    
+    seconds = 'all'
+    saveData = getWebIfChatTextFromSecond(seconds)
+    
+    color = nil
+    chats = saveData['chatMessageDataLog']
+    chats.reverse_each do |time, data|
+      senderName = data['senderName'].split(/\t/).first
+      if( name == senderName )
+        color = data['color']
+        break
+      end
+    end
+    
+    color ||= getTalkDefaultColor
+    
+    result = {}
+    result['result'] = 'OK'
+    result['color'] = color
+    
+    return result
+  end
+  
+  def getTalkDefaultColor
+    "000000"
+  end
   
   def sendWebIfChatText
     logging("sendWebIfChatText begin")
@@ -644,6 +686,9 @@ class DodontoFServer
     
     message = getWebIfRequestText('message')
     logging(message, "message")
+    
+    color = getWebIfRequestText('color', getTalkDefaultColor)
+    logging(color, "color")
     
     channel = getWebIfRequestInt('channel')
     logging(channel, "channel")
@@ -658,7 +703,7 @@ class DodontoFServer
     chatData = {
       "senderName" => name,
       "message" => message,
-      "color" => "000000",
+      "color" => color,
       "uniqueId" => '0',
       "messageIndex" => 0,
       "channel" => channel,
@@ -1000,6 +1045,7 @@ class DodontoFServer
     return result
   end
   
+  
   def refresh
     logging("==>Begin refresh");
     
@@ -1010,9 +1056,7 @@ class DodontoFServer
       return saveData
     end
     
-    refreshDataJsonString = getRequestData('refreshData')
-    logging(refreshDataJsonString, "refreshDataJsonString");
-    refreshData = getJsonDataFromText(refreshDataJsonString)
+    refreshData = getParamsFromRequestData()
     
     lastUpdateTimes = refreshData['lastUpdateTimes']
     logging(lastUpdateTimes, "lastUpdateTimes");
@@ -1425,9 +1469,10 @@ class DodontoFServer
   
   def getAllLoginInfo()
     count = getAllLoginCount()
-    percentage = (100 * count / $aboutMaxLoginCount).to_i
-    allLoginInfo = "#{count}/#{$aboutMaxLoginCount}(#{percentage}%)"
-    return allLoginInfo
+    return count
+    # percentage = (100 * count / $aboutMaxLoginCount).to_i
+    # allLoginInfo = "#{count}/#{$aboutMaxLoginCount}(#{percentage}%)"
+    # return allLoginInfo
   end
   
   def getAllLoginCount()
@@ -1533,7 +1578,7 @@ class DodontoFServer
     text = "#{allLoginInfo}"
     
     saveFileName = $loginCountFile
-    saveFileLock = getSaveFileLockReadOnly(saveFileName)
+    saveFileLock = getSaveFileLockReadOnlyRealFile(saveFileName)
     
     saveFileLock.lock do
       File.open(saveFileName, "w+") do |file|
@@ -1812,54 +1857,175 @@ class DodontoFServer
   end
   
   def saveScenario()
+    logging("saveScenario begin")
     dir = getRoomLocalSpaceDirName
     
-    mkdir(dir)
-    File.delete( File.join(dir, "*") )
+    params = getParamsFromRequestData()
+    @saveScenarioBaseUrl = params['baseUrl']
+    chatPaletteSaveDataString = params['chatPaletteSaveData']
     
-    saveFileName = createScenarioSaveFile(dir)
-    moveAllImagesToDir(dir, saveFileName)
-    makeScenarioFile(dir)
+    clearDir(dir)
+    
+    saveDataAll = getSaveDataAllForScenario
+    saveDataAll = moveAllImagesToDir(dir, saveDataAll)
+    makeCHatPalletSaveFile(dir, chatPaletteSaveDataString)
+    makeScenariDefaultSaveFile(dir, saveDataAll)
+    
+    scenarioFile = makeScenarioFile(dir)
+    
+    result = {}
+    result['resultText'] = "OK"
+    result["saveFileName"] = scenarioFile
+    
+    logging(result, "saveScenario result")
+    return result
   end
   
-  def createSaveFile(dir)
+  def clearDir(dir)
+    mkdir(dir)
+    files = Dir.glob( File.join(dir, "*") )
+    files.each do |file|
+      File.delete( file.untaint )
+    end
+  end
+  
+  def getSaveDataAllForScenario
+    selectTypes = $saveFiles.keys
+    selectTypes.delete_if{|i| i == 'chatMessageDataLog'}
+    
     isAddPlayRoomInfo = true
+    saveDataAll = getSelectFilesData(selectTypes, isAddPlayRoomInfo)
+    return saveDataAll
+  end
+  
+  def moveAllImagesToDir(dir, saveDataAll)
+    logging(saveDataAll, 'moveAllImagesToDir saveDataAll')
+    
+    moveMapImageToDir(dir, saveDataAll)
+    moveEffectsImageToDir(dir, saveDataAll)
+    moveCharactersImagesToDir(dir, saveDataAll)
+    
+    logging(saveDataAll, 'moveAllImagesToDir result saveDataAll')
+    
+    return saveDataAll
+  end
+  
+  def moveMapImageToDir(dir, saveDataAll)
+    mapData = getLoadData(saveDataAll, 'map', 'mapData', {})
+    imageSource = mapData['imageSource']
+    
+    changeFilePlace(imageSource, dir)
+  end
+  
+  def moveEffectsImageToDir(dir, saveDataAll)
+    effects = getLoadData(saveDataAll, 'effects', 'effects', [])
+    
+    effects.each do |effect|
+      imageFile = effect['source']
+      changeFilePlace(imageFile, dir)
+    end
+  end
+  
+  def moveCharactersImagesToDir(dir, saveDataAll)
+    characters = getLoadData(saveDataAll, 'characters', 'characters', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
+    
+    characters = getLoadData(saveDataAll, 'characters', 'graveyard', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
+    
+    characters = getLoadData(saveDataAll, 'characters', 'waitingRoom', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
+  end
+  
+  def moveCharactersImagesToDirFromCharacters(dir, characters)
+    characters.each do |character|
+      next unless( character['type'] == 'characterData' )
+      
+      imageName = character['imageName']
+      changeFilePlace(imageName, dir)
+    end
+  end
+  
+  def changeFilePlace(from ,to)
+    logging(from, "changeFilePlace from")
+    
+    result = copyFile(from ,to)
+    logging(result, "copyFile result")
+    
+    return unless( result )
+    
+    from.gsub!(/.*\//, $imageUploadDirMarker + "/" )
+    logging(from, "changeFilePlace result")
+  end
+  
+  def copyFile(from ,to)
+    logging("moveFile begin")
+    logging(from, "from")
+    logging(to, "to")
+    
+    logging(@saveScenarioBaseUrl, "@saveScenarioBaseUrl")
+    from.gsub!(@saveScenarioBaseUrl, './')
+    logging(from, "from2")
+    
+    return false if( from.nil? )
+    return false unless( File.exist?(from) )
+    
+    logging("copying...")
+    
+    result = true
+    begin
+      FileUtils.cp(from, to)
+    rescue => e
+      result = false
+    end
+    
+    return result
+  end
+  
+  def makeCHatPalletSaveFile(dir, chatPaletteSaveDataString)
+    currentDir = FileUtils.pwd.untaint
+    FileUtils.cd(dir)
+    
+    File.open($scenarioDefaultChatPallete, "a+") do |file|
+      file.write(chatPaletteSaveDataString)
+    end
+    
+    FileUtils.cd(currentDir)
+  end
+  
+  def makeScenariDefaultSaveFile(dir, saveDataAll)
     extension = "sav"
-    result = saveSelectFiles($saveFiles.keys, extension, isAddPlayRoomInfo)
+    result = saveSelectFilesFromSaveDataAll(saveDataAll, extension)
     
     from = result["saveFileName"]
     to = File.join(dir, $scenarioDefaultSaveData)
     
-    File.move(form, to)
+    FileUtils.mv(from, to)
   end
   
-  def moveAllImagesToDir(dir, saveFileName)
-    jsonDataString = File.readlines(saveFileName).join
-    jsonData = getJsonDataFromText(jsonDataString)
-    
-    logging(jsonData, 'loadFromJsonData jsonData')
-    
-    saveDataAll = getSaveDataAllFromSaveData(jsonData)
-    logging(saveDataAll, 'saveDataAll')
-    
-    
-    
-  end
-    
+  
   def makeScenarioFile(dir)
-    currentDir = Dir.pwd
-    Dir.cd(dir)
+    logging("makeScenarioFile begin")
     
     require 'zlib'
     require 'archive/tar/minitar'
     
-    tgz = Zlib::GzipWriter.new(File.open('scenario.tgz', 'wb'))
+    currentDir = FileUtils.pwd.untaint
+    FileUtils.cd(dir)
+    
+    scenarioFile = 'scenario.tar.gz'
+    tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
     
     fileNames = Dir.glob('*')
     fileNames = fileNames.collect{|i| i.untaint}
-    Minitar.pack(fileNames, tgz)
     
-    Dir.cd(currentDir)
+    fileNames.delete_if{|i| i == scenarioFile}
+    
+    Archive::Tar::Minitar.pack(fileNames, tgz)
+    
+    FileUtils.cd(currentDir)
+    
+    return File.join(dir, scenarioFile)
   end
   
   
@@ -1875,8 +2041,40 @@ class DodontoFServer
     saveSelectFiles( selectTypes, extension)
   end
   
+  
   def saveSelectFiles(selectTypes, extension, isAddPlayRoomInfo = false)
-    logging("save() begin")
+    saveDataAll = getSelectFilesData(selectTypes, isAddPlayRoomInfo)
+    saveSelectFilesFromSaveDataAll(saveDataAll, extension)
+  end
+    
+  def saveSelectFilesFromSaveDataAll(saveDataAll, extension)
+    result = {}
+    result["result"] = "unknown error"
+    
+    if( saveDataAll.empty? )
+      result["result"] = "no save data"
+      return result
+    end
+    
+    deleteOldSaveFile
+    
+    saveData = {}
+    saveData['saveDataAll'] = saveDataAll
+    
+    text = getTextFromJsonData(saveData)
+    saveFileName = getNewSaveFileName(extension)
+    createSaveFile(saveFileName, text)
+    
+    result["result"] = "OK"
+    result["saveFileName"] = saveFileName
+    logging(result, "saveSelectFiles result")
+    
+    return result
+  end
+  
+  
+  def getSelectFilesData(selectTypes, isAddPlayRoomInfo = false)
+    logging("getSelectFilesData begin")
     
     lastUpdateTimes = {}
     selectTypes.each do |type|
@@ -1900,29 +2098,7 @@ class DodontoFServer
     
     logging(saveDataAll, "saveDataAll tmp")
     
-    result = {}
-    
-    if( saveDataAll.empty? )
-      return result
-    end
-    
-    
-    saveFileName = getNewSaveFileName(extension)
-    
-    deleteOldSaveFile
-    
-    saveData = {}
-    saveData['saveDataAll'] = saveDataAll
-    text = getTextFromJsonData(saveData)
-    
-    createSaveFile(saveFileName, text)
-    
-    result["saveFileName"] = saveFileName
-    logging(result, "save result")
-    
-    logging("save() end")
-    
-    return result
+    return saveDataAll
   end
   
   #override
@@ -2363,8 +2539,8 @@ class DodontoFServer
     
     extendSaveData(scenarioFile, fileUploadDir)
     
-    chatPalleteData = loadScenarioDefaultInfo(fileUploadDir)
-    result['chatPalleteData'] = chatPalleteData
+    chatPaletteSaveData = loadScenarioDefaultInfo(fileUploadDir)
+    result['chatPaletteSaveData'] = chatPaletteSaveData
     
     logging(result, 'loadScenario result')
     
@@ -2378,15 +2554,39 @@ class DodontoFServer
     require 'zlib'
     require 'archive/tar/minitar'
     
-    tgz = Zlib::GzipReader.new(File.open(scenarioFile, 'rb'))
-    
-    Archive::Tar::Minitar.unpackWithCheck(tgz, fileUploadDir) do |fileName, isDirectory|
-      checkUnpackFile(fileName, isDirectory)
+    readScenarioTar(scenarioFile) do |tar|
+      logging("begin read scenario tar file")
+      
+      Archive::Tar::Minitar.unpackWithCheck(tar, fileUploadDir) do |fileName, isDirectory|
+        checkUnpackFile(fileName, isDirectory)
+      end
     end
     
     File.delete(scenarioFile)
     
     logging("archive extend !")
+  end
+  
+  def readScenarioTar(scenarioFile)
+    
+    begin
+      File.open(scenarioFile, 'rb') do |file|
+        tar = file
+        tar = Zlib::GzipReader.new(file)
+        
+        logging("scenarioFile is gzip")
+        yield(tar)
+        
+      end
+    rescue
+      File.open(scenarioFile, 'rb') do |file|
+        tar = file
+        
+        logging("scenarioFile is tar")
+        yield(tar)
+        
+      end
+    end
   end
   
   
@@ -2403,13 +2603,13 @@ class DodontoFServer
     result = 
       case fileName
       when /\//
-        loggingForce('NG! checkUnpackFile /\// paturn')
+        loggingForce(fileName, 'NG! checkUnpackFile /\// paturn')
         false
       when /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/
         # logging('checkUnpackFile good paturn')
         true
       else
-        loggingForce('NG! checkUnpackFile else paturn')
+        loggingForce(fileName, 'NG! checkUnpackFile else paturn')
         false
       end
     
@@ -2444,9 +2644,9 @@ class DodontoFServer
   
   def loadScenarioDefaultInfo(dir)
     loadScenarioDefaultSaveData(dir)
-    chatPalleteData = loadScenarioDefaultChatPallete(dir)
+    chatPaletteSaveData = loadScenarioDefaultChatPallete(dir)
     
-    return chatPalleteData
+    return chatPaletteSaveData
   end
   
   def loadScenarioDefaultSaveData(dir)
@@ -4710,7 +4910,7 @@ def printResult(server)
     else
       text = result
     end
-  rescue => e
+  rescue Exception => e
     errorMessage = getErrorResponseText(e)
     loggingForce(errorMessage, "errorMessage")
     

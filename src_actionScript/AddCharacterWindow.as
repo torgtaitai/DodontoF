@@ -22,22 +22,26 @@ package {
         }
         
         public override function sendCharacterData(name:String,
-                                              imageUrl:String,
-                                              size:int,
-                                              isHide:Boolean,
-                                              initiative:Number,
-                                              info:String,
-                                              counters:Object,
-                                              statusAlias:Object):void {
+                                                   imageUrl:String,
+                                                   size:int,
+                                                   isHide:Boolean,
+                                                   initiative:Number,
+                                                   info:String,
+                                                   counters:Object,
+                                                   statusAlias:Object,
+                                                   url:String):void {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
             var characterParams:Object =
-                guiInputSender.getAndCheckAddCharacterParams(
-                    name, imageUrl, 
-                    size, isHide, 
-                    initiative, info,
-                    counters, statusAlias);
-            
+                guiInputSender.getAndCheckAddCharacterParams(name,
+                                                             imageUrl, 
+                                                             size,
+                                                             isHide, 
+                                                             initiative,
+                                                             info,
+                                                             counters,
+                                                             statusAlias,
+                                                             url);
             
             var window:StockCharacterWindow =
                 PopUpManager.createPopUp(this, StockCharacterWindow, false) as StockCharacterWindow;

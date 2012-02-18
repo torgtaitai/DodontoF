@@ -9,6 +9,12 @@ $debug = false
 $aboutMaxLoginCount = 50
 
 
+#サーバCGIとクライアントFlashのバージョン一致確認用
+$versionOnly = "Ver.1.35.08"
+$versionDate = "2012/02/18"
+$version = "#{$versionOnly}(#{$versionDate})"
+
+
 #CGIがクライアントへ通知を返す最大待機時間（秒）
 #本CGIではAjaxで言うComet方式で実装されています（擬似的に、ですが）。
 #つまりクライアントからの要求に即座に通知を返さず
@@ -156,3 +162,5 @@ $mapMaxHeigth = 150
 #アップロード可能なシナリオデータの上限(MB)
 $scenarioDataMaxSize = 100.0 
 
+#ログイン状況を記録するファイル
+$loginCountFile = File.join($SAVE_DATA_DIR, 'saveData', 'loginCount.txt')

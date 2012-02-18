@@ -30,6 +30,10 @@ package {
             sender.saveFileDownload(saveFileName, resultFunction);
         }
         
+        public function saveScenario(chatPalleteData:String, resultFunction:Function):void {
+            sender.saveScenario(chatPalleteData, resultFunction);
+        }
+        
         public function save(resultFunction:Function):void {
             sender.save(resultFunction);
         }
@@ -114,7 +118,8 @@ package {
         public function getAndCheckAddCharacterParams(characterName:String, imageUrl:String,
                                                       size:int, isHide:Boolean,
                                                       initiative:Number, info:String,
-                                                      counters:Object, statusAlias:Object):Object {
+                                                      counters:Object, statusAlias:Object,
+                                                      url:String):Object {
             Log.logging("getAndCheckAddCharacterParams start");
             Log.logging("characterName", characterName);
             Log.logging("imageUrl", imageUrl);
@@ -157,6 +162,7 @@ package {
             characterParams.info = info;
             characterParams.counters = counters;
             characterParams.statusAlias = statusAlias;
+            characterParams.url = url;
             
             return characterParams;
         }
@@ -165,14 +171,16 @@ package {
                                      size:int, isHide:Boolean,
                                      initiative:Number, info:String,
                                      characterPositionX:int, characterPositionY:int,
-                                     dogTag:String, counters:Object, statusAlias:Object):void {
+                                     dogTag:String, counters:Object, statusAlias:Object,
+                                     url:String):void {
             
             var characterJsonData:Object =
                 Character.getJsonData(name, imageUri,
                                       size, isHide,
                                       initiative, info, 0,
                                       characterPositionX, characterPositionY,
-                                      dogTag, counters, statusAlias);
+                                      dogTag, counters, statusAlias,
+                                      url);
             sender.addCharacter(characterJsonData);
             
             Log.logging("addCharacter end");
@@ -354,7 +362,8 @@ package {
                                         name:String, imageUri:String,
                                         size:int, isHide:Boolean,
                                         initiative:Number, info:String,
-                                        counters:Object, statusAlias:Object):void {
+                                        counters:Object, statusAlias:Object,
+                                        url:String):void {
             Log.logging("changeCharacter start");
             Log.logging("name", name);
             Log.logging("imageUri", imageUri);
@@ -382,6 +391,7 @@ package {
             character.setInfo(info);
             character.setCounters(counters);
             character.setStatusAlias(statusAlias);
+            character.setUrl(url);
             
             sender.changeCharacter( character.getJsonData() );
             

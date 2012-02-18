@@ -122,7 +122,8 @@
                                         y,
                                         dogTag,
                                         characterParams.counters,
-                                        characterParams.statusAlias);
+                                        characterParams.statusAlias,
+                                        characterParams.url);
             if( ! isMany.selected ) {
                 PopUpManager.removePopUp(this);
             }

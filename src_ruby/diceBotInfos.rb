@@ -547,6 +547,24 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    :name => 'ブラッド・クルセイド',
+    :gameType => 'BloodCrusade',
+    :prefixs => ['RT', 'ST', 'IST', 'BRT', 'CHT', 'SHT', 'DHT', 'LHT', 'EHT'],
+    :info => <<INFO_MESSAGE_TEXT
+・各種表
+　・関係属性表         RT
+　・シーン表           ST
+　・先制判定指定特技表 IST
+　・身体部位決定表　　 BRT
+　・自信幸福表　　　　 CHT
+　・地位幸福表　　　　 SHT
+　・日常幸福表　　　　 DHT
+　・人脈幸福表　　　　 LHT
+　・退路幸福表　　　　 EHT
+・D66ダイスあり
+INFO_MESSAGE_TEXT
+  },
+  {
     :name => 'ペンドラゴン',
     :gameType => 'Pendragon',
     :prefixs => [],

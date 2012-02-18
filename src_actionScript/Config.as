@@ -13,7 +13,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.35.01(2012/01/02)";
+        private var version:String = "Ver.1.35.08(2012/02/18)";
         
         public function getVersion():String {
             return version;
@@ -40,6 +40,10 @@ package {
         
         static public function isGaeRuby():Boolean {
             return COMPILE::isGaeRuby;
+        }
+        
+        static public function isRails():Boolean {
+            return DodontoF_Main.getInstance().isRails();
         }
         
         public function setServerUrl(url:String):void {
@@ -92,6 +96,10 @@ package {
         public function getDodontoFServerCgiUrl():String {
             if( isGaeRuby() ) {
                 return "/dodontof";
+            }
+            
+            if( isRails() ) {
+                return "/command/any.json";
             }
             
             var cgiUrl:String = "DodontoFServer.rb";

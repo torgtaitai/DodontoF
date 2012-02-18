@@ -26,6 +26,7 @@ package {
             characterInitiativeModify.value = Utils.getInitiativeModify(character.getInitiative());
             characterOtherInfo.text = character.getInfo();
             statusAlias = character.getStatusAlias();
+            url.text = character.getUrl();
             
             initCounterValues();
             
@@ -34,12 +35,13 @@ package {
         
         
         public override function sendCharacterData(name:String,
-                                              imageUrl:String,
-                                              size:int, isHide:Boolean,
-                                              initiative:Number,
-                                              info:String,
-                                              counters:Object, 
-                                              statusAlias:Object):void {
+                                                   imageUrl:String,
+                                                   size:int, isHide:Boolean,
+                                                   initiative:Number,
+                                                   info:String,
+                                                   counters:Object, 
+                                                   statusAlias:Object,
+                                                   url:String):void {
             Log.logging("statusAlias", statusAlias);
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
@@ -52,7 +54,8 @@ package {
                                            initiative,
                                            info,
                                            counters,
-                                           statusAlias);
+                                           statusAlias,
+                                           url);
         }
     }
 }

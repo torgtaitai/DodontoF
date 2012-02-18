@@ -123,6 +123,16 @@ package {
             fileReferenceForSaveDownload.download(request);
         }
         
+        public function saveScenario(chatPalleteData:String, resultFunction:Function):void {
+            var jsonData:Object = {
+                "chatPalleteData": chatPalleteData,
+                "baseUrl": Utils.getOwnBaseUrl() };
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            
+            var params:String = this.getParamString("saveScenario",  [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+        
         public function save(resultFunction:Function):void {
             var params:String = this.getParamString("save", [["extension", saveFileExtension]]);
             this.sendCommandData(params, resultFunction);
@@ -171,8 +181,7 @@ package {
             }
         }
         
-        
-        private var uplodScenarioFileExtension:String = "tgz";
+        private var scenarioFileExtensions:String = "*.tgz;*.tar.gz";
         
         public function uploadScenarioData():void {
             Log.loggingTuning("uploadScenarioData begin");
@@ -182,18 +191,14 @@ package {
             
             var loadScenarioFileReference:FileReference = new FileReference();
             
-            var clearLastUpdateTimes:Function = function():void {
-                    DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
-            }
-            
             loadScenarioFileReference.addEventListener(Event.SELECT,
                                                        getFileSelectHandlerForLoad(commandName));
             loadScenarioFileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA,
                                                        analyzeLoadScenarioResult);
             
             var filters:Array = new Array();
-            var extension:String = uplodScenarioFileExtension;
-            filters.push(new FileFilter("シナリオデータ(*." + extension + ")", "*." + extension));
+            filters.push( new FileFilter("シナリオデータ(" + scenarioFileExtensions + ")",
+                                         scenarioFileExtensions) );
             
             loadScenarioFileReference.browse(filters);
             Log.loggingTuning("uploadScenarioData end");
@@ -477,7 +482,7 @@ package {
             var refreshData:String = getEncodedJsonString(jsonData);
             Log.logging("refreshData", refreshData);
             
-            var params:String = getParamString("refresh", [["refreshData", refreshData]]);
+            var params:String = getParamString("refresh", [["params", refreshData]]);
             Log.logging("refreshData params", params);
             
             var isRefresh:Boolean = true;
@@ -652,7 +657,7 @@ package {
             var jsonParams:String = getEncodedJsonString(characterJsonData);
             Log.logging("jsonParams : " + jsonParams);
             
-            var params:String = getParamString("changeCharacterData", [["params", jsonParams]]);
+            var params:String = getParamString("changeCharacter", [["params", jsonParams]]);
             Log.logging("var params:String : " + params);
             sendCommandData(params);
         }
@@ -965,6 +970,7 @@ package {
             request.url = Config.getInstance().getDodontoFServerCgiUrl();
             request.method = URLRequestMethod.POST;
             
+            Log.logging("POST to", request.url);
             Log.logging("var variables:URLVariables = new URLVariables(paramsString);");
             var variables:URLVariables = new URLVariables(paramsString);
             request.data = variables;

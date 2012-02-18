@@ -118,13 +118,16 @@
     }
     
     override protected function setup():void {
+        return;
+        Log.logging("CreatePlayRoomWindow.setup begin");
         try {
             init();
             initViewStateInfos();
             initGameType();
         } catch(error:Error) {
-            this.status = error.message;
+            this.status = "setup error" + error.message;
         }
+        Log.logging("CreatePlayRoomWindow.setup end");
     }
 
     override protected function teardown():void {
@@ -269,14 +272,14 @@
                 }
             }
         } catch(error:Error) {
-            status = "executeResult error : " + error.message;
+            this.status = "executeResult error : " + error.message;
         }
     }
     
     private function printError(resultText:String):void {
         resultText = Messages.getMessage(resultText);
         Alert.show(resultText);
-        status = "server error : "+ resultText;
+        this.status = "server error : "+ resultText;
     }
     
     private var extendMode:Boolean = false;

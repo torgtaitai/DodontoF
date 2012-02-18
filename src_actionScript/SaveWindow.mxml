@@ -10,7 +10,7 @@
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Spacer width="30" />
-    <mx:Label id="loadingMessage" text="セーブ準備中……" width="100%"/>
+    <mx:Label id="loadingMessage" text="準備中..." width="100%"/>
   </mx:HBox>
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Button id="saveButton" label="保存" click="this.save()" enabled="false" />
@@ -22,6 +22,7 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.utils.StringUtil;
+    import mx.controls.Alert;
     
     private var saveFileName:String = "";
     private var thisObj:SaveWindow;
@@ -30,23 +31,36 @@
         Log.loggingTuning("=>setup() Begin");
         try {
             thisObj = this;
-    
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.save(this.init);
-        
+            
+            executeServerSave();
         } catch(error:Error) {
             this.status = error.message;
         }
         Log.loggingTuning("=>setup() End");
     }
-
-    protected function init(event:Object):void {
+    
+    protected function executeServerSave():void {
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.save(this.resultFuction);
+    }
+    
+    protected function getReadyMessage():String {
+        return "セーブ準備完了";
+    }
+    
+    protected function resultFuction(event:Object):void {
         try {
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            
+            if( jsonData.resultText != "OK" ) {
+                Alert.show(jsonData.resultText);
+                return;
+            }
+            
             saveFileName = jsonData.saveFileName;
             Log.logging("saveFileName : " + saveFileName);
             saveButton.enabled = true;
-            loadingMessage.text = "セーブ準備完了";
+            loadingMessage.text = getReadyMessage();
             
         } catch(error:Error) {
             this.status = error.message;

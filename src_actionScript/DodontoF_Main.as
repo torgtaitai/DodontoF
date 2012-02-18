@@ -319,6 +319,10 @@ package {
         }
         */
         
+        public function isRails():Boolean {
+            return isMode('Rails');
+        }
+        
         public function isMySqlMode():Boolean {
             if( COMPILE::isMySql ) {
                 var isMySql:Boolean = ( ! isMode('filedb') );
@@ -1053,6 +1057,7 @@ package {
         {label:"録画開始", data:"startSessionRecording", enabled:"true"},
         {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
         {type:"separator"},
+        {label:"シナリオデータ作成", data:"saveScenarioData"},
         {label:"シナリオデータ読み込み", data:"uploadScenarioData"},
         {type:"separator"},
         {label:"ログアウト", data:"logout", enabled:"true"},

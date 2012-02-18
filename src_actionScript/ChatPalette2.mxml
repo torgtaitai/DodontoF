@@ -361,9 +361,14 @@
     private var fileReferenceForLoad:FileReference = new FileReference();
     
     public function save():void {
+        var jsonString:String = getSaveData();
+        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+    }
+    
+    public function getSaveData():String {
         var saveData:Object = getChatPalletSaveData();
         var jsonString:String = Utils.getJsonString(saveData);
-        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+        return jsonString
     }
     
     public function getChatPalletSaveData():Object {

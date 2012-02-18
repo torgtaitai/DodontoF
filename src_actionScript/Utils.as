@@ -222,11 +222,14 @@ package {
             return url;
         }
         
+        // http://www.dodontof.com/DodontoF/DodontoF.swf?loginRoom=1
         public static function getOwnRawUrl():String {
             //return FlexGlobals.topLevelApplication.application.url;
             return mx.core.Application.application.url;
         }
         
+        // url : http://www.dodontof.com/DodontoF/DodontoF.swf
+        // hostUrl : www.dodontof.com
         public static function isOwnHostUrl(url:String):Boolean {
             var httpExp:RegExp = /^http/;
             var httpExpResult:Object = httpExp.exec(url);
@@ -244,6 +247,7 @@ package {
             return result;
         }
         
+        // http://www.dodontof.com/DodontoF/
         public static function getOwnBaseUrl():String {
             var url:String = getOwnRawUrl();
             Log.logging("getOwnUrlBase url", url);
@@ -261,6 +265,7 @@ package {
             return ownBaseUrl;
         }
         
+        // http://www.dodontof.com/DodontoF/DodontoF.swf
         public static function getOwnUrl():String {
             var url:String = getOwnRawUrl();
             Log.logging("url", url);
