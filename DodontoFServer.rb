@@ -1557,7 +1557,6 @@ class DodontoFServer
       "refreshTimeout" => $refreshTimeout,
       "version" => $version,
       "playRoomMaxNumber" => ($saveDataMaxCount - 1),
-      "diceBoxCgiUrl" => $diceBoxCgiUrl,
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
       "allLoginInfo" => allLoginInfo,

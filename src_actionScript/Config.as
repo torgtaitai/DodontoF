@@ -13,7 +13,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.35.08(2012/02/18)";
+        private var version:String = "Ver.1.35.09(2012/02/19)";
         
         public function getVersion():String {
             return version;
@@ -122,20 +122,6 @@ package {
         
         public function getImageDataUploaderUrl():String {
             return getUrlString("imageUploader.rb");
-        }
-        
-        private var diceBotCgiUrl:String = "customBot.pl";
-        
-        public function setDiceBotCgiUrl(url:String):void {
-            if( url != null ) {
-                diceBotCgiUrl = url
-            }
-            
-            diceBotCgiUrl = getUrlString(diceBotCgiUrl);
-        }
-        
-        public function getDiceBotCgiUrl():String {
-            return diceBotCgiUrl;
         }
         
         public function getUrlString(url:String):String {
