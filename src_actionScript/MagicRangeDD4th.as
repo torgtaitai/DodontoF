@@ -84,7 +84,7 @@ package {
                 size = 1;
             }
             view.setIsDrawRound(false);
-            view.loadImage(this.name, getCenterImageUrl(), size);
+            view.loadImage(getCenterImageUrl(), size);
         }
         
         private function initDrawSquareDD4th():void {

@@ -12,37 +12,37 @@
   <mx:Script>
     <![CDATA[
         //
-        private var cardPreview:CardPickup = null;
+        private var cardPickUp:CardPickUp = null;
         
-        private var thisObj:CardPreviewWindow;
+        private var thisObj:CardPickUpWindow;
         
         override public function setup():void {
             thisObj = this;
             
             setInitPositionDefault();
             
-            cardPreview = new CardPickup(Card.getJsonData("", "", 0, 0));
+            cardPickUp = new CardPickUp(Card.getJsonData("", "", 0, 0));
             
-            cardPreview.getView().visible = false;
-            cardPreview.setTitleVisible( false );
+            cardPickUp.getView().visible = false;
+            cardPickUp.setTitleVisible( false );
             
-            this.titleBar.addChild(cardPreview.getView());
+            this.titleBar.addChild(cardPickUp.getView());
             
             titleTextField.textColor = 0;
             
             loadPosition();
             this.height = resizerMinHeigth();
             
-            setResizeEventFunction( function():void { setCardPreviewPosition() });
+            setResizeEventFunction( function():void { setCardPickUpPosition() });
             
             this.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
-                    thisObj.hideCardPreview();
+                    thisObj.hideCardPickUp();
                 });
             
         }
         
         override public function getSaveInfoKeyName():String {
-            return "CardPreviewWindow";
+            return "CardPickUpWindow";
         }
         
         override protected function resizerMinWidth():int {
@@ -57,27 +57,27 @@
             return false;
         }
         
-        public function displayCardPreview(card:Card):void {
-            cardPreview.setCard( card );
-            setCardPreviewPosition();
+        public function displayCardPickUp(card:Card):void {
+            cardPickUp.setCard( card );
+            setCardPickUpPosition();
             
-            cardPreview.getView().visible = true;
+            cardPickUp.getView().visible = true;
         }
         
-        public function hideCardPreview():void {
-            cardPreview.getView().visible = false;
+        public function hideCardPickUp():void {
+            cardPickUp.getView().visible = false;
         }
         
-        public function setCardPreviewPosition():void {
-            var cardView:Sprite = cardPreview.getView();
+        public function setCardPickUpPosition():void {
+            var cardView:Sprite = cardPickUp.getView();
             cardView.x = 0;
             cardView.y = 0;
             
-            var cardWidth:int = cardPreview.getWidth() * Map.getSquareLength();
+            var cardWidth:int = cardPickUp.getWidth() * Map.getSquareLength();
             var windowWidth:int = this.width * 0.9;
             var rate:Number = (windowWidth / cardWidth);
             
-            cardPreview.setRate(rate);
+            cardPickUp.setRate(rate);
         }
         
         override public function setInitPositionDefault():void {

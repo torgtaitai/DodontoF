@@ -19,7 +19,10 @@ package {
             executeButton.label = "変更";
             
             characterName.text = character.getName();
+            
             characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( character.getImageUrl() );
+            imageSelecter.setMirrored(character.isMirrored());
+            
             characterSize.value = character.getSize();
             isHide.selected = character.isHideMode();
             characterInitiative.value = Utils.getInitiativeInt(character.getInitiative());
@@ -36,6 +39,7 @@ package {
         
         public override function sendCharacterData(name:String,
                                                    imageUrl:String,
+                                                   mirrored:Boolean,
                                                    size:int, isHide:Boolean,
                                                    initiative:Number,
                                                    info:String,
@@ -49,6 +53,7 @@ package {
             guiInputSender.changeCharacter(character,
                                            name,
                                            imageUrl,
+                                           mirrored,
                                            size,
                                            isHide,
                                            initiative,

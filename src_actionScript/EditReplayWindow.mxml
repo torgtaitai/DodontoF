@@ -29,6 +29,7 @@
                      click="clickReplayLog()"
                      keyFocusChange="focusReplayLog(event)"
                      sortableColumns="false"
+                     allowMultipleSelection="true"
                      >
 	      <mx:columns>
 		    <mx:DataGridColumn headerText="index"
@@ -55,7 +56,7 @@
             <mx:Button label="↓" click="down()" width="100%"/>
             <mx:Button label="挿入ロード" click="addLoadItems()" width="100%"/>
             <mx:Button label="削除" click="deleteItem()" width="100%"/>
-            <mx:Button label="削除取消" click="undoDeleteItem()" width="100%"/>
+            <mx:Button label="削除取消" click="undoDeletedItem()" width="100%"/>
           </mx:Box>
         </mx:Box>
         
@@ -68,6 +69,7 @@
             <mx:TextInput id="nameEditor" text="" width="50%" change="changeChatMessage()" />
             <mx:ComboBox id="stateEditor" text="" width="50%" change="changeChatMessage()" />
             <mx:ColorPicker id="colorEditor" showTextField="true" selectedColor="0x000000" change="changeColor();changeChatMessage()" />
+            <mx:NumericStepper id="channelSpinner" minimum="0" value="0" />
             <mx:Spacer id="imageSpacer" width="100" />
           </mx:HBox>
           <mx:Box id="chatMessageBase" width="100%" height="100%" >
@@ -210,8 +212,9 @@
     }
     
     public function setHistory(historyOriginal:Array, startIndex:int = 0):void {
+        Log.logging("setHistory historyOriginal", historyOriginal);
+        
         var prePosition:Number = replayDataListDisplay.verticalScrollPosition;
-        //replayDataList.removeAll();
         
         var replayEditor:ReplayEditor = new ReplayEditor();
         replayEditor.setHistory(historyOriginal);
@@ -326,7 +329,9 @@
             
             chatInfo.message = ChatMessageTrader.escapeHtml(chatInfo.message);
             chatInfo.name = ChatMessageTrader.escapeHtml(chatInfo.name);
-            var separator:String = "：";
+            chatInfo.channel = chatInfo.channel;
+            
+            var separator:String = ChatMessageTrader.getChatMessageSeparator();
             
             var messageLine:String = 
                 "<font color='#" + chatInfo.color + "'>"
@@ -397,6 +402,9 @@
         };
         
         if( jsonData.characters ) {
+            result.dataType = "キャラクター・カード";
+        }
+        if( jsonData.record ) {
             result.dataType = "キャラクター・カード";
         }
         if( jsonData.roundTimeData ) {
@@ -516,13 +524,6 @@
     }
     
     
-    private function clone(source:Object):*{
-        var myBA:ByteArray = new ByteArray();
-        myBA.writeObject(source);
-        myBA.position = 0;
-        return(myBA.readObject());
-    }
-    
     private function copyItem():void {
         if( targetIndex < 0 ) {
             return;
@@ -531,7 +532,7 @@
         var index:int = targetIndex;
         
         var item:Object = replayDataList.getItemAt(index);
-        var jsonDataCopy:Object = clone(item.jsonData);
+        var jsonDataCopy:Object = Utils.clone(item.jsonData);
         
         index++;
         
@@ -546,36 +547,79 @@
     private var deleteItemList:Array = new Array();
     
     private function deleteItem():void {
-        if( targetIndex < 0 ) {
+        var indexeList:Array = replayDataListDisplay.selectedIndices;
+        
+        indexeList.sort(Array.NUMERIC);
+        indexeList.reverse();
+        
+        Log.logging("indexeList", indexeList);
+        
+        var itemList:Array = new Array();
+        for each(var index:int in indexeList) {
+            var item:Object = deleteOneItem(index);
+            if( item == null ) {
+                continue;
+            }
+            itemList.push(item);
+        }
+        
+        if(itemList.length == 0) {
             return;
         }
         
-        if( targetIndex >= replayDataList.length ) {
-            return;
-        }
+        deleteItemList.push(itemList);
         
-        var item:Object = replayDataList.removeItemAt(targetIndex);
-        deleteItemList.push(item);
-        
+   
         if( targetIndex >= (replayDataList.length - 1) ) {
             targetIndex = (replayDataList.length - 1);
         }
         
         printHistory();
-        selectHistory( targetIndex );
+        selectHistory( index );
     }
     
-    private function undoDeleteItem():void {
+    private function deleteOneItem(index:int):Object {
+        if( index < 0 ) {
+            return null;
+        }
+        
+        if( index >= replayDataList.length ) {
+            return null;
+        }
+        
+        var item:Object = replayDataList.removeItemAt(index);
+        
+        return item;
+    }
+    
+    private function undoDeletedItem():void {
+        Log.logging("undoDeletedItem Begin");
+        
         if( deleteItemList.length == 0 ) {
             return;
         }
+        var itemList:Array = deleteItemList.pop();
+        itemList.reverse();
         
-        var item:Object = deleteItemList.pop();
-        var index:int = item.index;
-        replayDataList.addItemAt(item, index);
+        var index:int = 0;
+        for each(var item:Object in itemList) {
+            index = undoDeletedOneItem(item);
+        }
         
         targetIndex = index;
         printHistory();
+        
+        Log.logging("undoDeletedItem End");
+    }
+    
+    private function logging(message:String):void {
+        logEditor.text += message + "\n";
+    }
+    
+    private function undoDeletedOneItem(item:Object):int {
+        var index:int = item.index;
+        replayDataList.addItemAt(item, index);
+        return index;
     }
     
     private function focusReplayLog(event:FocusEvent):void {
@@ -751,21 +795,18 @@
         messageEditor.text = "";
         messageEditor.enabled = false;
         
-        if( index < 0 ) {
-            return;
-        }
-        
-        var jsonData:Object = replayDataList[index].jsonData;
-        var chatInfo:Object = getChatInfo(jsonData);
-        
+        var chatInfo:Object = getChatInfoFromIndex(index);
         if( chatInfo == null ) {
             return;
         }
+        
+        Log.logging("chatInfo", chatInfo);
         
         setStandingGraphics(chatInfo.name);
         
         messageEditor.enabled = true;
         nameEditor.text = chatInfo.name;
+        channelSpinner.value = chatInfo.channel;
         printState(chatInfo);
         colorEditor.selectedColor = parseInt("0x" + chatInfo.color);
         changeColor();
@@ -773,8 +814,15 @@
         messageEditor.text = chatInfo.message;
     }
     
-    private function logging(message:String):void {
-        logEditor.text += message + "\n";
+    private function getChatInfoFromIndex(index:int):Object {
+        if( index < 0 ) {
+            return null;
+        }
+        
+        var jsonData:Object = replayDataList[index].jsonData;
+        var chatInfo:Object = getChatInfo(jsonData);
+        
+        return chatInfo;
     }
     
     private function getChatInfo(jsonData:Object):Object {
@@ -791,6 +839,7 @@
         chatInfo.state = nameData[1];
         chatInfo.color = chat.color;
         chatInfo.message = chat.message;
+        chatInfo.channel = chat.channel;
         
         return chatInfo;
     }
@@ -805,6 +854,7 @@
         
         var chat:Object = jsonData.chatMessageDataLog[0][1];
         chat.senderName = nameEditor.text;
+        chat.channel = channelSpinner.value
         if( stateEditor.text != "" ) {
             chat.senderName += ("\t" + stateEditor.text);
         }

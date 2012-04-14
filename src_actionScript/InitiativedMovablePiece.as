@@ -254,7 +254,7 @@ package {
             //map.centeringFromPiece(this);
             
             setViewForeground();
-            this.snapMovablePieceViewPosition();
+            this.setPickuped();
             
             DodontoF_Main.getInstance().getDodontoF().getGlowEffect().end();
             DodontoF_Main.getInstance().getDodontoF().getGlowEffect().play( [view] );

@@ -8,6 +8,7 @@ package {
     import flash.display.MovieClip;
     import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
+    import flash.geom.Point;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
@@ -119,7 +120,6 @@ package {
             return true;
         }
         
-
         
         public function getMountName():String {
             return this.mountName;
@@ -360,7 +360,7 @@ package {
             //伏せたカードの上下がバレないように、伏せカードは強制的に上向きの表示に差し替え
             var viewRotation:Number = getRotation() + getViewRotationDiff();
             
-            view.loadImageWidthHeightRotation(targetImageName, targetImageName,
+            view.loadImageWidthHeightRotation(targetImageName,
                                               getWidthSize(), getHeightSize(),
                                               viewRotation);
             
@@ -420,7 +420,8 @@ package {
             
             var message:String = "";
             if( this.getCardName() == "" ) {
-                message = "が「" + this.getMountNameForDisplay() + "」のカードを捨てました。";
+                //message = "が「" + this.getMountNameForDisplay() + "」のカードを捨てました。";
+                message = "がカードを捨てました。";
             } else {
                 message = "が「" + this.getCardName() + "」を捨てました。";
             }
@@ -456,10 +457,21 @@ package {
                 return false;
             }
             
-            return super.snapViewPosition();
+            
+            return snapViewPositionCard();
+            //return super.snapViewPosition();
+        }
+
+        private function snapViewPositionCard():Boolean {
+            var length:int = Map.getSquareLength();
+            
+            var point:Point = getMap().getSnapViewPoint(view.x, view.y, length);
+            view.x = point.x * length;
+            view.y = point.y * length;
+            
+            return move(view.x, view.y, true);
         }
         
-
         private function getHitedCardZone():CardZone {
             
             if( ! isTrashable() ) {
@@ -486,14 +498,9 @@ package {
         
 
         
-        override public function canSnapOnPositionX():Boolean {
+        override public function canExtendOnPositionX():Boolean {
             return true;
         }
-        /*
-        override public function canSnapOnPositionY():Boolean {
-            return true;
-        }
-        */
         
         override protected function initEvent():void {
             Log.logging("Card.initEvent begin");
@@ -503,11 +510,11 @@ package {
                         return;
                     }
                     
-                    DodontoF_Main.getInstance().displayCardPreview(thisObj);
+                    DodontoF_Main.getInstance().displayCardPickUp(thisObj);
                 });
             
             view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
-                    DodontoF_Main.getInstance().hideCardPreview();
+                    DodontoF_Main.getInstance().hideCardPickUp();
                 });
             
             view.doubleClickEnabled = canDoubleClick()

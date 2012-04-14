@@ -21,13 +21,17 @@
 	  </mx:HBox>
       
       <mx:HBox height="25" width="100%" horizontalAlign="left" verticalAlign="middle">
-        <mx:CheckBox id="checkBoxWhiteMap" label="白地図を作る" selected="false" change="checkWhiteMap()"/>
-	    <mx:Label text="縦マス数:" />
+        <mx:CheckBox id="checkBoxWhiteMap" label="白地図にする" selected="false" change="checkWhiteMap()"/>
+	    <mx:Label text="縦:" />
         <mx:NumericStepper id="mapHeight" minimum="1" maximum="100" value="25" change="printPreview()" />
-	    <mx:Label text="横マス数:" />
+	    <mx:Label text="横:" />
         <mx:NumericStepper id="mapWidth" minimum="1" maximum="100" value="25" change="printPreview()" />
 	    <mx:Label text="マス目・座標文字の色:" />
         <mx:ColorPicker id="gridColorPicker" showTextField="true" selectedColor="0x000000" change="printPreview()" />
+	    <mx:Label text="マス目間隔:" />
+        <mx:NumericStepper id="gridInterval" minimum="1" maximum="100" value="1" change="printPreview()" />
+        <mx:Spacer width="20" />
+        <mx:CheckBox id="isAlternately" label="マスを交互に" selected="false" change="printPreview()"/>
       </mx:HBox>
       
       <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
@@ -63,10 +67,11 @@
     
     
     override protected function setup():void {
+        var map:Map = DodontoF_Main.getInstance().getMap();
+        
+        imageSelecter.setMirrored(map.isMirrored());
         imageSelecter.setTagDisplayVisible(true);
         imageSelecter.addPreview(previewLoader);
-        
-        var map:Map = DodontoF_Main.getInstance().getMap();
         
         mapWidth.maximum = mapMaxWidth;
         mapHeight.maximum = mapMaxHeigth;
@@ -75,8 +80,11 @@
         mapWidth.value = map.getWidth();
         mapImageUrl.text = map.getImageUrl();
         gridColorPicker.selectedColor = map.getGridColor();
+        gridInterval.value = map.getGridInterval();
+        isAlternately.selected = map.isAlternatelyMode();
+        
         printPreview();
-           
+        
         checkBoxWhiteMap.selected = (mapImageUrl.text == "");
         mapImageUrl.enabled = (mapImageUrl.text != "");
         
@@ -102,14 +110,20 @@
     private function changeMap():void {
         try{
             var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( mapImageUrl.text );
-        
+            var mirrored:Boolean = imageSelecter.isMirrored();
+            
             if( checkBoxWhiteMap.selected ) {
                 imageUrl = "";
             }
         
             var map:Map = DodontoF_Main.getInstance().getMap();
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.changeMap(imageUrl, mapWidth.value, mapHeight.value, gridColorPicker.selectedColor, map.getMarks());
+            guiInputSender.changeMap(imageUrl, mirrored,
+                                     mapWidth.value, mapHeight.value,
+                                     gridColorPicker.selectedColor,
+                                     gridInterval.value,
+                                     isAlternately.selected,
+                                     map.getMarks());
         
             PopUpManager.removePopUp(this);
         } catch(error:Error) {
@@ -130,7 +144,7 @@
         Log.logging("imageUrl getLonged", imageUrl);
         
         previewLoader.loadImageWidthHeight(imageUrl, xCount, yCount, 6);
-        previewLoader.drawGrid( gridColorPicker.selectedColor );
+        previewLoader.drawGrid( gridColorPicker.selectedColor, gridInterval.value, isAlternately.selected );
         
         setWidthHeigthFromImageUrlTagName(imageUrl);
     }

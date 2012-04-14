@@ -6,6 +6,7 @@ package {
     import mx.controls.Alert;
     import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
+    import flash.events.KeyboardEvent;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.text.TextField;
@@ -20,6 +21,7 @@ package {
     import flash.display.BitmapData;
     import flash.geom.Matrix;
     import net.hires.debug.Stats;
+    import flash.ui.Keyboard
     
     
     public class Map {
@@ -36,9 +38,10 @@ package {
             return 50;
         }
         
-        private var cardZoomRateDefault:Number = 1.07;
         private var zoomRate:Number = 1.2;
         private var currentZoomRate:Number = 1.0;
+
+        private var extractViewRate:Number = 0.97;//0.9;
         
         protected var baseLayer:UIComponent = new UIComponent();
         protected var imageLayer:ImageSprite = new ImageSprite();
@@ -53,18 +56,21 @@ package {
         protected var mapMaskLayer:UIComponent = new UIComponent();
         protected var mapMarkerLayer:UIComponent = new UIComponent();
         protected var gridLayer:UIComponent = new UIComponent();
+        protected var cardLayer:UIComponent = new UIComponent();
         protected var characterLayer:UIComponent = new UIComponent();
         protected var hideCharacterLayer:UIComponent = new UIComponent();
-        protected var cardLayer:UIComponent = new UIComponent();
         protected var frontLayer:UIComponent = new UIComponent();
         protected var rulerLayer:UIComponent = new UIComponent();
         
-        private var thisObj:Map;
+        static private var thisObj:Map;
         
         private var imageUri:String = "";
+        private var mirrored:Boolean = false;
         private var mapWidth:int = 1;
         private var mapHeight:int = 1;
         private var gridColor:uint = 0x000000;
+        private var gridInterval:int = 1;
+        private var isAlternately:Boolean = false;
         private var squareColors:Array = new Array();
         private var menuClickPoint:Point = new Point();
         
@@ -96,7 +102,7 @@ package {
                 return;
             }
             
-            existPieces.splice(index,1);
+            existPieces.splice(index, 1);
         }
         
         public function findExistPiecesByTypeName(typeName:String):Array {
@@ -111,6 +117,7 @@ package {
             
             return result;
         }
+        
         
         public function findExistCharacterById(characterId:String):Piece {
             Log.logging("characterId", characterId);
@@ -244,30 +251,6 @@ package {
                 }
                 
                 result.push(character);
-                
-                /*
-                if( character.getX() > point.x ) {
-                    continue;
-                }
-                if( point.x >= (character.getX() + character.getWidth())) {
-                    continue;
-                }
-                
-                if( character.getY() > point.y ) {
-                    continue;
-                }
-                if( point.y >= (character.getY() + character.getHeight())) {
-                    continue;
-                }
-                Alert.show(character.getName()
-                           + " point.x : " + point.x
-                           + " point.y : " + point.y
-                           + " character.getX() : " + character.getX()
-                           + " character.getY() : " + character.getY()
-                           );
-                
-                result.push(character);
-                */
             }
             
             result.sort(sortedByViewIndex);
@@ -276,40 +259,44 @@ package {
         }
         
         
-        public function snapMovablePieceViewPosition(point:Point, isListed:Boolean = false):void {
-            var samePositionCharactersForSnapX:Array = new Array();
-            var samePositionCharactersForSnapY:Array = new Array();
-            var samePositionCharactersForSnapCard:Array = new Array();
+        public function extendMovablePieceViewPosition(point:Point, isListed:Boolean = false):void {
             
-            var samePositionCharacters:Array = getSamePositionMovablePieciesOrderdByViewIndex(point);
+            //コマの回転中なら展開は全て一時取りやめ。
+            if( Rotater.isAnyRotating() ) {
+                return;
+            }
             
-            for(var i:int = 0 ; i < samePositionCharacters.length ; i++) {
-                var character:MovablePiece = samePositionCharacters[i];
+            var xCharacters:Array = new Array();
+            var yCharacters:Array = new Array();
+            var cards:Array = new Array();
+            
+            var characters:Array = getSamePositionMovablePieciesOrderdByViewIndex(point);
+            
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var character:MovablePiece = characters[i];
                 
                 var card:Card = character as Card;
                 if( card != null ) {
                     if( card.isForeground() ) {
-                        samePositionCharactersForSnapCard.push(card);
+                        cards.push(card);
                     }
                     continue;
                 }
                 
-                if( character.canSnapOnPositionX() ) {
-                    samePositionCharactersForSnapX.push(character);
+                if( character.canExtendOnPositionX() ) {
+                    xCharacters.push(character);
                     continue;
                 }
                 
-                if( character.canSnapOnPositionY() ) {
-                    samePositionCharactersForSnapY.push(character);
+                if( character.canExtendOnPositionY() ) {
+                    yCharacters.push(character);
                     continue;
                 }
             }
             
-            snapSortedCharacterToViewPosition(samePositionCharactersForSnapCard, isListed, true, new Array());
-            
-            snapSortedCharacterToViewPosition(samePositionCharactersForSnapX, isListed, true, new Array());
-            
-            snapSortedCharacterToViewPosition(samePositionCharactersForSnapY, isListed, false, samePositionCharactersForSnapX);
+            extendSortedCharacterToViewPosition(cards,       isListed, true);
+            extendSortedCharacterToViewPosition(xCharacters, isListed, true);
+            extendSortedCharacterToViewPosition(yCharacters, isListed, false, xCharacters);
         }
         
         private function getCharactersSizeInfos(characters:Array, isX:Boolean):Object {
@@ -345,12 +332,13 @@ package {
             }
         }
         
-        private function snapSortedCharacterToViewPosition(characters:Array, 
-                                                           isListed:Boolean,
-                                                           isX:Boolean,
-                                                           samePositionCharactersOnBorderLine:Array):void {
-            //Log.logging("snapSortedCharacterToViewPosition isListed", isListed);
-            //Log.logging("snapSortedCharacterToViewPosition isX", isX);
+        private function extendSortedCharacterToViewPosition(characters:Array, 
+                                                             isListed:Boolean,
+                                                             isX:Boolean,
+                                                             samePositionCharactersOnBorderLine:Array = null):void {
+            if( samePositionCharactersOnBorderLine == null ) {
+                samePositionCharactersOnBorderLine = new Array();
+            }
             
             if(( ! isX ) && ( characters.length <= 1 ) && (samePositionCharactersOnBorderLine.length == 0)) {
                 return;
@@ -377,24 +365,25 @@ package {
                 var totalWidth:int = widthSizeInfo.totalWidth;
                 var maxSize:int = widthSizeInfo.maxSize;
                 
-                var newPosition:int = (widthPadding - (totalWidth / 2) + (maxSize / 2)) * getSquareLength() * 0.97;//0.9;
+                var newPosition:int = (widthPadding - (totalWidth / 2) + (maxSize / 2))
+                    * getSquareLength() * extractViewRate;
                 
                 widthPadding += (isX ? character.getWidth() : character.getHeight());
                 
                 //Y軸展開の場合でX軸上にキャラがいるなら、真ん中に「X軸キャラの最大高さ分だけ」の空間を空けたい
                 if( ! isX ) {
-                    newPosition = getNewPositionForSnapOnY(newPosition, i, characters,
-                                                           samePositionCharactersOnBorderLine);
+                    newPosition = getNewPositionForExtendOnY(newPosition, i, characters,
+                                                             samePositionCharactersOnBorderLine);
                 }
                 
                 addViewPosition(character, newPosition, isX);
             }
         }
         
-        private function getNewPositionForSnapOnY(newPosition:int,
-                                                  index:int,
-                                                  characters:Array,
-                                                  samePositionCharactersOnBorderLine:Array):int {
+        private function getNewPositionForExtendOnY(newPosition:int,
+                                                    index:int,
+                                                    characters:Array,
+                                                    samePositionCharactersOnBorderLine:Array):int {
             var sizeInfoOfBorders:Object = getCharactersSizeInfos(samePositionCharactersOnBorderLine, false);
             var spaceSize:int = (sizeInfoOfBorders.maxSize * getSquareLength());
             
@@ -431,6 +420,71 @@ package {
         }
         
         
+        public function getCharacterPointFromGlobalPoint(globalPoint:Point):Point {
+            var mapLocalPoint:Point = getCharacterLayer().globalToLocal( globalPoint );
+            var dropMapPoint:Point = getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, getSquareLength());
+            return dropMapPoint;
+        }
+        
+        public function getSnapViewPoint(viewX:Number, viewY:Number, squareLength:int):Point {
+            var y:Number = getSnapPositionFromViewPosition(viewY, squareLength, false);
+            
+            var isAlternatelyPosition:Boolean = isAlternatelyPosition(y);
+            var x:Number = getSnapPositionFromViewPosition(viewX, squareLength, isAlternatelyPosition);
+            
+            return new Point(x, y);
+        }
+        
+        private function getSnapPositionFromViewPosition(position:Number, squareLength:int,
+                                                                isAlternatelyPosition:Boolean):Number {
+            Log.logging("position : ", position);
+            
+            var newPosition:Number = (position / squareLength);
+            
+            if( isAlternatelyPosition ) {
+                newPosition += 0.5;
+            }
+            if( Config.getInstance().isSnapMovablePieceMode() ) {
+                newPosition = Math.round( newPosition );
+            }
+            if( isAlternatelyPosition ) {
+                newPosition -= 0.5;
+            }
+            
+            Log.logging("newPosition : ", newPosition);
+            
+            return newPosition;
+        }
+        
+        private function isAlternatelyPosition(y:Number):Boolean {
+            Log.logging("isAlternatelyPosition Begin");
+            
+            
+            if( ! isAlternately ) {
+                Log.logging("そもそも、マス目は互い違い設定じゃなかった");
+                return false;
+            }
+            
+            var gridInterval:int = thisObj.getGridInterval();
+            
+            if( (gridInterval % 2) == 0 ) {
+                Log.logging("マス間隔が偶数なら半マスずらす必要なし");
+                return false;
+            }
+            
+            Log.logging("マス間隔が奇数の場合");
+            
+            if( ! isAlternatelyY(y) ) {
+                Log.logging("Y座標から半マスずらす必要なしと判断");
+                return false;
+            }
+            
+            Log.logging("マス目の互い違いにあわせる必要があるよ！");
+            return true;
+        }
+        
+        
+        
         public function Map() {
             thisObj = this;
             
@@ -439,7 +493,7 @@ package {
 
         private function initMapLayerEvent():void {
             //マウスロールオーバー時の挙動（立ち絵隠し）の登録
-            var layers:Array = [this.baseLayer, this.cardLayer];
+            var layers:Array = [this.baseLayer];
             
             for(var i:int = 0 ; i < layers.length ; i++) {
                 var layer:UIComponent = layers[i];
@@ -476,19 +530,13 @@ package {
             overMapLayer.addChild(magicRangeLayer);
             overMapLayer.addChild(gridLayer);
             overMapLayer.addChild(mapMarkerLayer);
-            //overMapLayer.addChild(statusMarkLayer);
+            overMapLayer.addChild(cardLayer);
             overMapLayer.addChild(characterLayer);
             overMapLayer.addChild(rulerLayer);
             
             rulerLayer.visible = false;
             
             parent.addChild(baseLayer);
-            
-            cardLayer.x = 150;
-            cardLayer.alpha = 0.9;
-            parent.addChild(cardLayer);
-            initCardLayer();
-            
             parent.addChild(frontLayer);
         }
         
@@ -508,6 +556,10 @@ package {
             return imageUri;
         }
         
+        public function isMirrored():Boolean {
+            return mirrored;
+        }
+        
         public function getWidth():int {
             return mapWidth;
         }
@@ -520,17 +572,28 @@ package {
             return gridColor;
         }
         
+        public function isAlternatelyMode():Boolean {
+            return this.isAlternately;
+        }
+        
+        public function getGridInterval():int {
+            return gridInterval;
+        }
+        
+        public function setGridInterval(value:int):void {
+            if( value < 1 ) {
+                value = 1;
+            }
+            
+            this.gridInterval = value;
+        }
+        
         public function setVisibleGridPositionLayer(visible:Boolean):void {
             gridPositionLayer.visible = visible;
         }
         
         public function setVisibleGridLayer(visible:Boolean):void {
             gridLayer.visible = visible;
-        }
-        
-        public function setVisibleCardLayer(visible:Boolean):void {
-            cardLayer.visible = visible;
-            DodontoF_Main.getInstance().setVisibleCardPreview(visible);
         }
         
         public function getMagicRangeLayer():UIComponent {
@@ -548,12 +611,6 @@ package {
         public function getFrontLayer():UIComponent {
             return frontLayer;
         }
-        
-        /*
-        public function getStatusMarkerLayer():UIComponent {
-            return statusMarkLayer;
-        }
-        */
         
         public function getMapTileLayer():UIComponent {
             return mapTileLayer;
@@ -633,21 +690,64 @@ package {
             return newMapPointP;
         }
         
+        
+        
         public function setEvents():void {
-            baseLayer.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                    baseLayer.startDrag();
-                    event.stopPropagation();
-                });
+            setWheelEvent();
+            //setKeyDownEvent();
             
-            baseLayer.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
-                    baseLayer.stopDrag();
-                });
+            setMouseDownEvent();
+            setMouseUpEvent();
             
             setRulerEvent();
         }
         
+        private function setWheelEvent():void {
+            var zoomEvent:Function = function (event:MouseEvent):void {
+                var isZoom:Boolean = (event.delta > 0);
+                thisObj.zoom(isZoom);
+            };
+            
+            getView().addEventListener(MouseEvent.MOUSE_WHEEL, zoomEvent);
+        }
+        
+        /*
+        private function setKeyDownEvent():void {
+            Log.loggingTest("setKeyDownEvent Begin");
+            
+            var zoomEvent:Function = function (event:KeyboardEvent):void {
+                Log.loggingTest("setKeyDownEvent zoomEvent");
+                
+                var isZoom:Boolean = false;
+                
+                if( event.keyCode != Keyboard.	PAGE_UP ) {
+                    isZoom = true;
+                } else if( event.keyCode != Keyboard.PAGE_DOWN ) {
+                    isZoom = false;
+                } else {
+                    return;
+                }
+                
+                thisObj.zoom(isZoom);
+            };
+        }
+        */
+        
+        private function setMouseDownEvent():void {
+            baseLayer.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                    baseLayer.startDrag();
+                    event.stopPropagation();
+                });
+        }
+
+        private function setMouseUpEvent():void {
+            baseLayer.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                    baseLayer.stopDrag();
+                });
+        }
+
+        
         public function stopDrag():void {
-            cardLayer.stopDrag();
             baseLayer.stopDrag();
         }
         
@@ -793,17 +893,23 @@ package {
             return squareColors;
         }
         
-        public function changeMap(imageUri_:String, mapWidth_:int, mapHeight_:int, gridColor_:uint):void {
+        public function changeMap(imageUri_:String, mirrored_:Boolean,
+                                  mapWidth_:int, mapHeight_:int, gridColor_:uint,
+                                  gridInterval_:int, isAlternately_:Boolean):void {
             imageUri = imageUri_;
+            mirrored = mirrored_;
             mapWidth = mapWidth_;
             mapHeight = mapHeight_;
             gridColor = gridColor_;
+            setGridInterval( gridInterval_ );
+            isAlternately = isAlternately_;
             
             drawBackGround(baseLayer);
-            printGridPosition(mapWidth, mapHeight);
+            drawGridPosition(mapWidth, mapHeight);
             drawGridOnMap();
             
-            imageLayer.loadImageWidthHeight("マップ背景画像", imageUri, mapWidth, mapHeight);
+            imageLayer.setMirrored(mirrored);
+            imageLayer.loadImageWidthHeight(imageUri, mapWidth, mapHeight);
             drawBackGround(clickMapLayer);
         }
         
@@ -816,81 +922,232 @@ package {
         }
         
         private var gridPositionList:Vector.<Bitmap> = new Vector.<Bitmap>();
-        private var gridPosition:BitmapData = new BitmapData(50, 50, true, 0x00000000);
         
-        private function printGridPosition(xMax:int, yMax:int):void {
+        private function drawGridPosition(xMax:int, yMax:int):void {
             while( gridPositionList.length > 0 ) {
                 gridPositionLayer.removeChild(gridPositionList.shift());
             }
             
             gridPositionLayer.graphics.clear();
             
-            var textField:TextField = new TextField();
-            textField.autoSize = TextFieldAutoSize.LEFT;
-            textField.selectable = false;
-            textField.textColor = gridColor;
-            
-            var squareLength:int = getSquareLength();
-            var squareLengthHalf:int = squareLength / 2;
-            
-            var matrix:Matrix = new Matrix();
+            var squareLength:int = getSquareLength() * gridInterval;
             
             for(var x:int = 0 ; x < xMax ; x++) {
+                if(( x % gridInterval) != 0 ) {
+                    continue;
+                }
+                var xIndex:int = x / gridInterval;
+                
                 for(var y:int = 0 ; y < yMax ; y++) {
-                    textField.text = "" + (x + 1) + "-" + (y + 1);
+                    if(( y % gridInterval) != 0 ) {
+                        continue;
+                    }
                     
-                    matrix.tx = squareLengthHalf - (textField.width / 2);
-                    matrix.ty = squareLengthHalf - (textField.height / 2);
+                    if( isOutOfMapPosition(x, y, xMax, yMax) ) {
+                        continue;
+                    }
                     
-                    var gridPositionClone:BitmapData = gridPosition.clone();
-                    gridPositionClone.draw(textField, matrix);
-                    
-                    var gridPositionBitmap:Bitmap = new Bitmap();
-                    gridPositionBitmap.bitmapData = gridPositionClone;
-                    gridPositionBitmap.x = x * squareLength;
-                    gridPositionBitmap.y = y * squareLength;
-                    
-                    gridPositionLayer.addChild( gridPositionBitmap );
-                    gridPositionList.push( gridPositionBitmap );
+                    var yIndex:int = y / gridInterval;
+                    drawGridPositionOne(xIndex, yIndex, squareLength);
                 }
             }
         }
         
-        
-        private function drawGridOnMap():void {
-            drawGrid(mapWidth, mapHeight, gridLayer, getSquareLength(), gridColor);
+        public function isOutOfMapPosition(x:int, y:int, xMax:int, yMax:int):Boolean {
+            Log.logging("\r\rx:" + x + ", xMax:" + xMax + ", y:" + y + ", yMax:" + yMax);
+            Log.logging("gridInterval", gridInterval);
+            Log.logging("isAlternatelyY(y)", isAlternatelyY(y));
+            
+            var endX:Number = getMapPositionEndPoint(x, isAlternatelyY(y));
+            
+            if( isAlternatelyY(y) ) {
+                endX += (gridInterval / 2);
+            }
+            Log.logging("endX", endX);
+            
+            if( endX >= xMax ) {
+                Log.logging("x over");
+                return true;
+            }
+            
+            var endY:Number = getMapPositionEndPoint(y);
+            Log.logging("endY", endY);
+            
+            if( endY >= yMax ) {
+                Log.logging("y over");
+                return true;
+            }
+            
+            return false;
         }
         
-        public static function drawGrid(xMax:int, yMax:int, layer:UIComponent, squareLength:Number, color:uint):void {
+        private function getMapPositionEndPoint(v:Number, isAlternatelyYPadding:Boolean = false):Number {
+            var result:Number = v + (gridInterval / 2);
+            if( isAlternatelyYPadding ) {
+                result += 0.5;
+            }
+            return result;
+        }
+        
+        private function drawGridPositionOne(x:int, y:int, squareLength:int):void {
+            var textField:TextField = getGridTextField(squareLength, x, y);
+            
+            var squareLengthHalf:int = squareLength / 2;
+            
+            var matrix:Matrix = new Matrix();
+            matrix.tx = squareLengthHalf - (textField.width / 2);
+            matrix.ty = squareLengthHalf - (textField.height / 2);
+            
+            var gridPosition:BitmapData = new BitmapData(squareLength, squareLength, true, 0x00000000);
+            
+            var gridPositionClone:BitmapData = gridPosition.clone();
+            gridPositionClone.draw(textField, matrix);
+            
+            var xPadding:Number = 0;
+            if( isAlternatelyYIndex(y) ) {
+                xPadding = 0.5;
+            }
+            
+            var gridPositionBitmap:Bitmap = new Bitmap();
+            gridPositionBitmap.bitmapData = gridPositionClone;
+            gridPositionBitmap.x = (x + xPadding) * squareLength;
+            gridPositionBitmap.y = y * squareLength;
+            
+            gridPositionLayer.addChild( gridPositionBitmap );
+            gridPositionList.push( gridPositionBitmap );
+        }
+        
+        private function getGridTextField(length:int, x:int, y:int):TextField {
+            var textField:TextField = new TextField();
+            
+            textField.autoSize = TextFieldAutoSize.LEFT;
+            textField.selectable = false;
+            textField.textColor = gridColor;
+            textField.width = length;
+            textField.height = length;
+            
+            textField.text = "" + (x + 1) + "-" + (y + 1);
+            
+            return textField;
+        }
+        
+        private function isAlternatelyY(y:int):Boolean {
+            var yIndex:int = ( y / gridInterval );
+            return isAlternatelyYIndex(yIndex);
+        }
+        
+        private function isAlternatelyYIndex(yIndex:int):Boolean {
+            if( ! isAlternately ) {
+                return false;
+            }
+            return ((yIndex % 2) == 0);
+        }
+        
+        private function drawGridOnMap():void {
+            drawGrid(mapWidth, mapHeight,
+                     gridLayer, getSquareLength(),
+                     gridColor, gridInterval, 
+                     isAlternately);
+        }
+        
+        public static function drawGrid(xMax:int,
+                                        yMax:int,
+                                        layer:UIComponent,
+                                        squareLength:Number,
+                                        color:uint,
+                                        gridInterval:int,
+                                        isAlternately:Boolean):void {
             Log.logging("Map.drawGrid");
             Log.logging("xMax", xMax);
             Log.logging("yMax", yMax);
             Log.logging("squareLength", squareLength);
             layer.graphics.clear();
             layer.graphics.lineStyle(1, color);
-            drawGridVertical(xMax, yMax, layer, squareLength);
-            drawGridHrison(xMax, yMax, layer, squareLength);
+            
+            if( isAlternately ) {
+                drawGridVerticalAlternately(xMax, yMax, layer, squareLength, gridInterval);
+            } else {
+                drawGridVertical(xMax, yMax, layer, squareLength, gridInterval);
+            }
+            drawGridHrison(xMax, yMax, layer, squareLength, gridInterval);
         }
-        private static function drawGridVertical(xMax:int, yMax:int, layer:UIComponent, squareLength:Number):void {
-            for(var x:int = 0 ; x < (xMax + 1) ; x++) {
+        
+        private static function drawGridVertical(xMax:int, yMax:int,
+                                                 layer:UIComponent, squareLength:Number,
+                                                 interval:int):void {
+            var x:int = 0;
+            for(; x < xMax ; x++) {
+                
+                if(( x % interval) != 0 ) {
+                    continue;
+                }
+                
                 var xPosition:int = x * squareLength;
                 var yPosition:int = yMax * squareLength;
-                layer.graphics.moveTo(xPosition, 0);
-                layer.graphics.lineTo(xPosition, yPosition);
+                drawLine(layer, xPosition, 0, xPosition, yPosition);
             }
+            
+            drawLine(layer, xPosition, 0, xPosition, yPosition);
         }
-        private static function drawGridHrison(xMax:int, yMax:int, layer:UIComponent, squareLength:Number):void {
-            for(var y:int = 0 ; y < (yMax + 1) ; y++) {
-                var xPosition:int = xMax * squareLength;
-                var yPosition:int = y * squareLength;
-                layer.graphics.moveTo(0, yPosition);
-                layer.graphics.lineTo(xPosition, yPosition);
+        
+        private static function drawGridVerticalAlternately(xMax:int, yMax:int,
+                                                            layer:UIComponent, squareLength:Number,
+                                                            interval:int):void {
+            var y:int = 0;
+            for( ; y < yMax ; y++) {
+                if(( y % interval) != 0 ) {
+                    continue;
+                }
+                
+                var x:int = 0;
+                for(; x < xMax ; x++) {
+                    if(( x % interval) != 0 ) {
+                        continue;
+                    }
+                    
+                    var xIndex:Number = x;
+                    if( (y % (2 * interval)) == 0 ) {
+                        xIndex += (1.0 * interval / 2);
+                    }
+                    if( xIndex > xMax ) {
+                        continue;
+                    }
+                    
+                    var x1:int = xIndex * squareLength;
+                    
+                    var y1:int = y * squareLength;
+                    
+                    var y2Index:int = Math.min((y + interval), yMax);
+                    var y2:int = y2Index * squareLength;
+                    
+                    drawLine(layer, x1, y1, x1, y2);
+                }
             }
         }
         
-        private function getCreatePointOnCardLayer():Point {
-            return new Point(cardLayer.mouseX, cardLayer.mouseY);
+        private static function drawGridHrison(xMax:int, yMax:int,
+                                               layer:UIComponent, squareLength:Number,
+                                               interval:int):void {
+            var y:int = 0;
+            for( ; y < (yMax + 1) ; y++) {
+                
+                if(( y % interval) != 0 ) {
+                    continue;
+                }
+                
+                var xPosition:int = xMax * squareLength;
+                var yPosition:int = y * squareLength;
+                drawLine(layer, 0, yPosition, xPosition, yPosition);
+            }
+            
+            drawLine(layer, 0, yPosition, xPosition, yPosition);
         }
+        
+        private static function drawLine(layer:UIComponent, x1:int, y1:int, x2:int, y2:int):void {
+            layer.graphics.moveTo(x1, y1);
+            layer.graphics.lineTo(x2, y2);
+        }
+        
         
         public function getMouseCurrentPoint():Point {
             return getLayerPoint(baseLayer);
@@ -954,12 +1211,6 @@ package {
         
         private function addDiceSymbol(event:ContextMenuEvent):void {
             DodontoF.popup(StockDiceSymbolWindow, false);
-            /*
-            var point:Point = menuClickPoint;
-            var ownerName:String = DodontoF_Main.getInstance().getChatWindow().getChatCharacterName();
-            var jsonData:Object = DiceSymbol.getJsonData(6, 1, ownerName, point.x, point.y);
-            DodontoF_Main.getInstance().getGuiInputSender().getSender().addCharacter(jsonData, "ownerName");
-            */
         }
         
         public function initContextMenu():void {
@@ -978,47 +1229,10 @@ package {
             MovablePiece.addMenuItem(menu, "マップマーカー追加", addMapMarker);
             MovablePiece.addMenuItem(menu, "ダイスシンボル追加", addDiceSymbol, true);
             
+            MovablePiece.addMenuItem(menu, "手札置き場の作成", addCardZone, true);
+            MovablePiece.addMenuItem(menu, "メッセージカードの追加", addMessageCard);
+            
             overMapLayer.contextMenu = menu;
-        }
-        
-        private function initCardLayer():void {
-            var color:int = 0xFFFFFF;
-            cardLayer.graphics.lineStyle(5, color);
-            cardLayer.graphics.beginFill(color);
-            
-            color = 0x2E8B57;
-            cardLayer.graphics.beginFill(color);
-            cardLayer.graphics.drawRect(0,
-                                        0,
-                                        1600, 1200);
-            cardLayer.scaleX = 0.5;
-            cardLayer.scaleY = 0.5;
-            
-            cardLayer.visible = false;
-            
-            cardLayer.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                    event.stopPropagation();
-                    
-                    cardLayer.startDrag();
-                });
-            
-            cardLayer.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
-                    event.stopPropagation();
-                    
-                    cardLayer.stopDrag();
-                });
-            
-            initCardLayerContextMenu();
-        }
-        private function initCardLayerContextMenu():void {
-            var menu:ContextMenu = new ContextMenu();
-            
-            menu.hideBuiltInItems();
-
-            MovablePiece.addMenuItem(menu, "手札置き場の作成", addCardZone);
-            MovablePiece.addMenuItem(menu, "メッセージカードの追加", addMessageCard, true);
-            
-            cardLayer.contextMenu = menu;
         }
         
         private function addCardZone(event:ContextMenuEvent):void {
@@ -1035,20 +1249,10 @@ package {
             window.setCreatePoint(point);
         }
         
-        
-        public function zoomCardLayer(isZoom:Boolean):void {
-            cardLayer.stopDrag();
-            
-            var cardZoomRate:Number = cardZoomRateDefault;
-            if( ! isZoom ) {
-                cardZoomRate = (1.0 / cardZoomRate);
-            }
-            
-            centerZoomingToMousePiont(cardLayer, cardZoomRate);
-            
-            cardLayer.scaleX *= cardZoomRate;
-            cardLayer.scaleY *= cardZoomRate;
+        private function getCreatePointOnCardLayer():Point {
+            return new Point(cardLayer.mouseX, cardLayer.mouseY);
         }
+        
         
         public function getTrushMountIfHit(card:Card):CardTrushMount {
             

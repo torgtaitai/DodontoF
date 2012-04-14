@@ -13,7 +13,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.35.09(2012/02/19)"
+$version = "Ver.1.36.06.01(2012/04/14)"
 
 class SaveDataManagerOnMySql
   def initialize
@@ -625,6 +625,8 @@ class FileLockMySql < FileLock
   
 end
 
+
+
 class DodontoFServer_MySql < DodontoFServer
   
   def getDataAccesser
@@ -696,13 +698,13 @@ class DodontoFServer_MySql < DodontoFServer
   end
   
   
-  def loadSaveFileForChat(typeName, saveFileName, lastUpdateTimes)
-    getDataAccesser().loadSaveFileForChat(typeName, saveFileName, lastUpdateTimes)
+  def loadSaveFileForChat(typeName, saveFileName)
+    getDataAccesser().loadSaveFileForChat(typeName, saveFileName, @lastUpdateTimes)
   end
   
-  def loadSaveFile(typeName, saveFileName, lastUpdateTimes)
+  def loadSaveFile(typeName, saveFileName)
     if( isChatType(typeName) )
-      return loadSaveFileForChat(typeName, saveFileName, lastUpdateTimes)
+      return loadSaveFileForChat(typeName, saveFileName)
     end
     
     return super
@@ -733,7 +735,7 @@ class DodontoFServer_MySql < DodontoFServer
 end
 
 
-def mainMySql()
+def mainMySql(cgi)
   
   saveDataManager = SaveDataManagerOnMySql.new
   
@@ -741,7 +743,6 @@ def mainMySql()
   MySqlAccesser.setSaveDataManager(saveDataManager)
   SaveDirInfoMySql.setSaveDataManager(saveDataManager)
   
-  cgi = CGI.new
   server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgi, cgi.content_type)
   
   printResult(server)
@@ -750,11 +751,12 @@ end
 
 
 if( $0 === __FILE__ )
+  cgi = getCgi()
   
   initLog();
   
   
-  mainMySql()
+  mainMySql(cgi)
   
 end
 

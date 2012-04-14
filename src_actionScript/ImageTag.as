@@ -39,7 +39,7 @@ package {
         }
         
         public static function getDefinedTagList():Array {
-            return [characterTag, mapTag, standingGraphicsTag];
+            return [characterTag, standingGraphicsTag, mapTag, floorTileTag];
         }
         
         static public function getTags(text:String):Array {

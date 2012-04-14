@@ -178,15 +178,14 @@ package {
         override protected function droped():void {
         }
         
-        override public function canSnapOnPositionY():Boolean {
+        override public function canExtendOnPositionY():Boolean {
             return true;
         }
         
         override public function loadViewImage():void {
-            var name:String = "name";
             var imageUrl:String = "image/MapMarker.gif";
             var size:int = 1;
-            view.loadImageWidthHeight(name, imageUrl, width, height);
+            view.loadImageWidthHeight(imageUrl, width, height);
             
             view.toolTip = getMessage();
         }

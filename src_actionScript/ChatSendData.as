@@ -63,7 +63,17 @@ package {
             return nameString;
         }
         
+        private var isStateEmpty:Boolean = false;
+        
+        public function setStateEmpty():void {
+            isStateEmpty = true;
+        }
+        
         public function getState():String {
+            if( isStateEmpty ) {
+                return "";
+            }
+            
             return getValue(state, getComboBoxText(getChatWindw().standingGraphicsStates));
         }
         
@@ -71,7 +81,7 @@ package {
             return getValue(sendto, getComboBoxText(getChatWindw().sendtoBox));
         }
         
-        private function getValue(param1:String, param2:String):String {
+        private function getValue(param1:String, param2:String = ""):String {
             if( (param1 != null) && (param1 != "") ) {
                 return param1;
             }
@@ -86,8 +96,12 @@ package {
             return message;
         }
         
+        public function setChannel(c:int):void {
+            this.channel = c;
+        }
+        
         public function getChannel():int {
-            return channel;
+            return this.channel;
         }
         
         public function setDiceRollResult():void {

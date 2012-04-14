@@ -50,6 +50,11 @@
                      width="100%" change="tagNameChanged()" enabled="false" />
         <mx:Label id="indexPrintLabel" text="0/0" />
         <mx:Button label="隠し画像" height="20" fontWeight="normal" click="createPasswordWindow()" />
+        <mx:Button id="mirrored" label="反" width="20" height="20" fontWeight="normal" toolTip="左右反転" selected="false" toggle="true"  click="changeMirror()"
+      paddingRight="1" paddingLeft="1" 
+      verticalGap="2" horizontalGap="2" 
+      visible="false"
+      />
       </mx:HBox>
       
       <mx:HBox id="tagDispalyBox" 
@@ -101,20 +106,41 @@
        
        private var nonselectedColor:uint = 0xFFFFFF;
        private var selectedColor:uint = 0xFFAAAA;
+       private var preview:UIComponent;
        
-       public function addPreview(preview:UIComponent, size:int = 300):void {
+       
+       public function addPreview(preview_:UIComponent, size:int = 300):void {
+           preview = preview_;
+           
+           setPreviewSize(size);
+           setLoadCompleteIvent();
+           
+           previewSpace.addChild(preview);
+       }
+       
+       private function setPreviewSize(size:int):void {
            previewSpace.height = size;
            previewSpace.width = size;
            
            preview.height = size;
            preview.width  = size;
-           preview.addEventListener(Event.COMPLETE, completeHandler);
-           
-           previewSpace.addChild(preview);
        }
+       
+       private function setLoadCompleteIvent():void {
+           var previewLoader:PreviewLoader = preview as PreviewLoader;
+           if( previewLoader != null ) {
+               previewLoader.setLoadImageCompleate( completeHandler );
+           } else {
+               preview.addEventListener(Event.COMPLETE, completeHandler);
+           }
+       }
+       
        
        private function completeHandler(event:Event = null):void {
            Log.logging("ImageSelecter.completeHander begin");
+           
+           changeMirror();
+           
            var preview:Image = event.currentTarget as Image;
            if( preview == null ) {
                Log.logging("ImageSelecter.completeHander preview is null");
@@ -143,6 +169,29 @@
        
        public function setDefaultTags(tags:Array):void {
            defaultTags = tags;
+       }
+       
+       public function isMirrored():Boolean {
+           return mirrored.selected;
+       }
+       
+       public function visibleMirrored(b:Boolean = true):void {
+           mirrored.visible = b;
+       }
+       
+       public function setMirrored(b:Boolean):void {
+           visibleMirrored();
+           mirrored.selected = b;
+       }
+       
+       public function changeMirror():void {
+           if( mirrored.selected ) {
+               preview.scaleX = -1;
+               preview.x = preview.width;
+           } else {
+               preview.scaleX = 1;
+               preview.x = 0;
+           }
        }
        
        public function createPasswordWindow():void {
@@ -559,6 +608,7 @@
        }
        
        private function getSmallImageUrl(imageUrl:String):String {
+           Log.logging("ImageSelecter getSmallImageUrl Begin");
            var result:String = imageUrl;
            
            imageUrl = Config.getInstance().getOriginalUrlString(imageUrl);
@@ -585,6 +635,8 @@
            Log.logging("smallImageUrl", smallImageUrl);
            
            result = smallImageUrl;
+           
+           Log.logging("ImageSelecter getSmallImageUrl End", result);
            
            return result;
        }

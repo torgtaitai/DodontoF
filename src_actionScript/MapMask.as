@@ -293,8 +293,8 @@ package {
             view.addChild(mainTextField);
         }
         
-        override public function snapMovablePieceViewPosition(isListed:Boolean = false):void {
-            return;
+        override public function canExtend():Boolean {
+            return false;
         }
         
         override public function getOwnWidth():int {

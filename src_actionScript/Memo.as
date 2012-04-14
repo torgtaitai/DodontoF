@@ -55,11 +55,11 @@ package {
             super(params);
         }
         
-        override public function canSnapOnPositionX():Boolean {
+        override public function canExtendOnPositionX():Boolean {
             return false;
         }
         
-        override public function canSnapOnPositionY():Boolean {
+        override public function canExtendOnPositionY():Boolean {
             return false;
         }
         
@@ -106,10 +106,8 @@ package {
         private var isFirst:Boolean = true;
         
         override protected function initDraw(x:Number, y:Number):void {
-            //view.setLineDiameter(8);
             view.setLineColor(0x00AAAA);
             loadViewImage();
-            //move(x, y, true);
             var memos:Array = DodontoF_Main.getInstance().getMap().findExistPiecesByTypeName(getType());
             var memoCountIndex:int = memos.length;
             if( memoCountIndex < 0 ) {
@@ -141,10 +139,9 @@ package {
         }
         
         override public function loadViewImage():void {
-            var name:String = getName();
-            var imageUrl:String = "image/memo.png";//document.png";
+            var imageUrl:String = "image/memo.png";
             var size:int = 1;
-            view.loadImageWidthHeight(name, imageUrl, size, size);
+            view.loadImageWidthHeight(imageUrl, size, size);
             
             view.toolTip = getMessage();
         }

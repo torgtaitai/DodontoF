@@ -38,11 +38,10 @@ package {
             initMarkerBasePosition();
             
             rotateMarker = createRotateMarker();
-            addRotateRotateMarker( rotateMarkerBase, rotateMarker );
+            rotateMarkerBase.addChild(rotateMarker);
+            addRotateRotateMarker()
             
             view.addChild(rotateMarkerBase);
-            
-            //dragDropForRotate.addDropEvent( piece.getMapLayer() );
             
             initEvent();
         }
@@ -139,22 +138,6 @@ package {
         private function createRotateMarker():UIComponent {
             var marker:Image = new Image();
             marker.source = rotateMarkerImageSource;
-            
-            /*
-            var marker:UIComponent = new UIComponent();
-            var lineColor:uint = 0xEEEE00;
-            var color:uint = 0xEE0000;
-            marker.alpha = 0.75;
-            
-            marker.graphics.beginFill(lineColor);
-            marker.graphics.drawCircle(0 + getMarkerWidth() / 2, 0 + getMarkerWidth() / 2, getMarkerWidth() * 0.5);
-            marker.graphics.endFill();
-            
-            marker.graphics.beginFill(color);
-            marker.graphics.drawCircle(0 + getMarkerWidth() / 2, 0 + getMarkerWidth() / 2, (getMarkerWidth() * 0.4));
-            marker.graphics.endFill();
-            */
-            
             return marker;
         }
         
@@ -194,19 +177,22 @@ package {
             return point;
         }
         
-        private function addRotateRotateMarker( base:UIComponent, marker:UIComponent ):UIComponent {
-            base.addChild(marker);
+        private function addRotateRotateMarker():void {
+            rotateMarker.width = getMarkerWidth();
+            rotateMarker.height = getMarkerWidth();
+            rotateMarker.visible = false;
             
-            marker.width = getMarkerWidth();
-            marker.height = getMarkerWidth();
-            marker.visible = false;
-            
-            initMarkerPosition(marker);
-            marker.visible = false;
-            
-            //marker.toolTip = "Ctrlキーで任意角度";
-            
-            marker.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+            initMarkerPosition(rotateMarker);
+            rotateMarker.visible = false;
+            addMouseDownEventToRotateMarker();
+            addMouseMoveEventToRotateMarker();
+            addMouseUpEventToRotateMarker();
+            addMouseOverEventToRotateMarker();
+            addMouseOutEventToRotateMarker();
+        }
+        
+        private function addMouseDownEventToRotateMarker():void {
+            rotateMarker.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                     event.stopPropagation();
                     
                     if( rotatingObject != null ) {
@@ -217,78 +203,79 @@ package {
                     piece.setViewForeground();
                     
                     var localPoint:Point = new Point(event.stageX, event.stageY);
-                    var basePoint:Point = base.globalToLocal(localPoint);
+                    var basePoint:Point = rotateMarkerBase.globalToLocal(localPoint);
                     
-                    var diff:Number = (marker.width / -2);
-                    marker.startDrag();
+                    var diff:Number = (rotateMarker.width / -2);
+                    rotateMarker.startDrag();
                 });
-            
-            marker.addEventListener(MouseEvent.MOUSE_MOVE, function(event:MouseEvent):void {
+        }
+        
+        private function addMouseMoveEventToRotateMarker():void {
+            rotateMarker.addEventListener(MouseEvent.MOUSE_MOVE, function(event:MouseEvent):void {
                     if( ! isRotating() ) {
                         return;
                     }
                     
-                    var rotation:Number = thisObj.getRotationOnMarker(marker.x, marker.y, event.ctrlKey);
+                    var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, event.ctrlKey);
                     thisObj.drawRotateImage(rotation);
                 });
             
-            stopRotationFunction = function(ctrlKey:Boolean):void {
-                marker.stopDrag();
-                
-                var rotation:Number = thisObj.getRotationOnMarker(marker.x, marker.y, ctrlKey);
-                
-                thisObj.initMarkerPosition(marker);
-                marker.visible = false;
-                
-                clearRotateImage();
-                
-                if( rotation != 0 ) {
+        }
+        
+        private function addMouseUpEventToRotateMarker():void {
+            rotateMarker.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
+                    event.stopPropagation();
+                    stopRotationFunction(event.ctrlKey);
+                });
+            
+        }
+        
+        private function addMouseOverEventToRotateMarker():void {
+            rotateMarker.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+                    if( ! isRotating() ) {
+                        rotateMarker.scaleX = 1.5;
+                        rotateMarker.scaleY = 1.5;
+                    }
+                });
+        }
+        
+        private function addMouseOutEventToRotateMarker():void {
+            rotateMarker.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+                    if( ! isRotating() ) {
+                        rotateMarker.scaleX = 1.0;
+                        rotateMarker.scaleY = 1.0;
+                    }
+                });
+        }
+        
+        private function stopRotationFunction(isCtrkPressed:Boolean):void {
+            rotateMarker.stopDrag();
+            
+            var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, isCtrkPressed);
+            
+            thisObj.initMarkerPosition(rotateMarker);
+            rotateMarker.visible = false;
+            
+            clearRotateImage();
+            
+            if( rotation != 0 ) {
                     thisObj.piece.setDiffRotation(rotation);
                     thisObj.piece.loadViewImage();
                     
                     DodontoF_Main.getInstance().getGuiInputSender().getSender()
                         .changeCharacter( thisObj.piece.getJsonData() );
-                }
-                
-                if( rotatingObject != null ) {
-                    if( rotatingObject != this ) {
-                        try {
-                            rotatingObject.stopRotation();
-                        } catch(e:Error) {
-                            Log.loggingExceptionDebug("Character.popUpChangeWindow()", e);
-                        }
+            }
+            
+            if( rotatingObject != null ) {
+                if( rotatingObject != this ) {
+                    try {
+                        rotatingObject.stopRotation();
+                    } catch(e:Error) {
+                        Log.loggingExceptionDebug("Character.popUpChangeWindow()", e);
                     }
                 }
-                rotatingObject = null;
-            };
-            
-            /*
-            var value:Object = {};
-            dragDropForRotate.setDropEventWidthHeigth(marker,
-                                                      marker.width - 3, marker.height - 3,
-                                                      value, rotateAction);
-            */
-            
-            marker.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
-                    event.stopPropagation();
-                    stopRotationFunction(event.ctrlKey);
-                });
-            
-            marker.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
-                    if( ! isRotating() ) {
-                        marker.scaleX = 1.5;
-                        marker.scaleY = 1.5;
-                    }
-                });
-            
-            marker.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
-                    if( ! isRotating() ) {
-                        marker.scaleX = 1.0;
-                        marker.scaleY = 1.0;
-                    }
-                });
-        
-            return marker;
+            }
+            rotatingObject = null;
         }
         
         private function rotateAction(obj:Object):void {
@@ -296,8 +283,6 @@ package {
             //event.stopPropagation();
             stopRotationFunction(event.ctrlKey);
         }
-        
-        private var stopRotationFunction:Function;
         
         public function stopRotation():void {
             stopRotationFunction(false);

@@ -89,15 +89,10 @@
         view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                 view.stopDrag();
         
-                var map:Map = DodontoF_Main.getInstance().getMap();
                 var globalPoint:Point = localToGlobal( new Point(view.x + ctrlBox.width + 25, view.y + 25 + 25) );
-                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
+                var dropMapPoint:Point = DodontoF_Main.getInstance().getMap().getCharacterPointFromGlobalPoint(globalPoint);
                 
-                var dorpMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
-                
-                if( (dorpMapPoint.x >= 0) && (dorpMapPoint.y >= 0) ) {
-                    addDice(dorpMapPoint);
-                }
+                addDice(dropMapPoint);
                 
                 view.x = viewStartPoint.x;
                 view.y = viewStartPoint.y;

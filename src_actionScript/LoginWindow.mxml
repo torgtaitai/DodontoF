@@ -414,6 +414,8 @@
             stage.frameRate = jsonData.fps;
         }
         
+        Config.getInstance().setImageUploadDirInfo(jsonData.imageUploadDirInfo);
+        
         var diceBotInfos:Array = jsonData.diceBotInfos;
         Log.logging("diceBotInfos", diceBotInfos);
         DodontoF_Main.getInstance().setDiceBotInfos( diceBotInfos );
@@ -428,20 +430,25 @@
         InitCardWindow.setCardInfos( jsonData.cardInfos );
         
         Log.logging("result jsonData.uniqueId", jsonData.uniqueId);
+        
         saveUniqeId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId );
-        DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout as int );
+        DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout );
+        DodontoF_Main.getInstance().setRefreshInterval( jsonData.refreshInterval );
+        DodontoF_Main.getInstance().setCommet( jsonData.isCommet );
         ChangeMapWindow.setMaxWidthHeigth( jsonData.mapMaxWidth, jsonData.mapMaxHeigth );
         
-        Config.getInstance().setSkinImageUrl( jsonData.skinImage );
-        Utils.setSkin(this);
+        ChatWindow.setTalk(jsonData.canTalk);
+        
+        //Config.getInstance().setSkinImageUrl( jsonData.skinImage );
+        //Utils.setSkin(this);
         
         if( jsonData.isPaformanceMonitor) {
             DodontoF_Main.getInstance().getMap().addPaformanceMonitor();
         }
         
-        currentAllLoginInfo.text = "" + jsonData.allLoginInfo;
-        
+        currentAllLoginInfo.text = getLoginCountInfo(jsonData);
+        checkLoginCount(jsonData);
         
         if( autoLoginRoom >= 0 ) {
             Log.loggingTuning("autoLoginRoom", autoLoginRoom);
@@ -456,6 +463,34 @@
         getPlayRoomStates();
     }
     
+    private function getLoginCountInfo(jsonData:Object):String {
+        var count:int = jsonData.allLoginInfo;
+        var max:int = jsonData.maxLoginCount;
+        var percentage:int = getLoginCountPercentage(jsonData);
+        
+        var message:String = "" + percentage + "%(" + count  + "/" + max + ")";
+        return message;
+    }
+    
+    private function getLoginCountPercentage(jsonData:Object):int { 
+        var count:int = jsonData.allLoginInfo;
+        var max:int = jsonData.maxLoginCount;
+        
+        var percentage:int = 100.0 * count / max;
+        
+        return percentage;
+    }
+    
+    private function checkLoginCount(jsonData:Object):void {
+        var percentage:int = getLoginCountPercentage(jsonData);
+        
+        if( percentage <= 100 ) {
+            return;
+        }
+        
+        var message:String = getLoginCountInfo(jsonData);
+        status = "ログイン人数が許容人数を超えています【" + message + "】　 他のサーバの利用を検討ください";
+    }
     
     private function setMaxPlayRoomNumber(playRoomMaxNumber:int):void {
         guiInputSender.setPlayRoomMaxNumber(playRoomMaxNumber);
@@ -571,13 +606,20 @@
         var enterPlayRoomFunction:Function = function(password:String = "", visiterMode:Boolean = false):void {
             
             Log.logging("enterPlayRoomFunction begin");
+            
+            var startFlag:Boolean = ( roomNumber != -1 );
+            Log.logging("startFlag", startFlag);
+            
+            if( startFlag ) {
+                checkTotalLoginCount();
+            }
+            
             guiInputSender.setSaveDataDirIndex(roomNumber);
             
             Log.logging("LoginWindow, getEnterPlayRoomFunction setPlayRoomPassword", password);
             DodontoF_Main.getInstance().setPlayRoomPassword(password);
             DodontoF_Main.getInstance().setVisiterMode(visiterMode);
             
-            var startFlag:Boolean = ( roomNumber != -1 );
             DodontoF_Main.getInstance().start(startFlag);
             
             PopUpManager.removePopUp(thisObj);
@@ -586,6 +628,34 @@
         
         return enterPlayRoomFunction;
     }
+    
+    private var totalLoginCountLimit:int = -1;
+    
+    private function checkTotalLoginCount():void {
+        
+        if( totalLoginCountLimit <= 0 ) {
+            return;
+        }
+        
+        var key:String = "totalLoginCount";
+        var info:Object = Config.getInstance().loadInfo(key);
+        if( info == null ) {
+            info = {
+                "count" : 0
+            };
+        }
+        
+        if( info.count > totalLoginCountLimit ) {
+            var window:CheckLoginCountWindow = DodontoF.popupForce(CheckLoginCountWindow, true) as CheckLoginCountWindow;
+            window.setMessage(info.count);
+        }
+        
+        info.count++;
+        
+        Config.getInstance().saveInfo(key, info);
+    }
+    
+    
     
     private function enableLoginButton(b:Boolean = true):void {
         loginButton.enabled = b;

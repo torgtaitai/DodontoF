@@ -79,8 +79,9 @@
               <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="カットイン設定" />
               <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
               <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="ファイルアップローダー" />
-              <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->
+              <mx:Image id="talkButton" source="{talkSilentIcon}" click="setTalkMode()"  visible="{canTalk}" />
               <!-- <mx:Image source="{goodIcon}" click="sendGood()" toolTip="いいねっ！" /> -->
+              <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->
       
             </mx:HBox>
           </mx:HBox>
@@ -181,8 +182,19 @@
         [Bindable]
         private static var novelticModeIcon:Class;
         
+        [Embed(source='image/icons/emoticon_grin.png')]
+        [Bindable]
+        private static var talkIcon:Class;
+        
+        [Embed(source='image/icons/emoticon_smile.png')]
+        [Bindable]
+        private static var talkSilentIcon:Class;
+        
         [Bindable]
         private var diceBotHelpText:String;
+        
+        [Bindable]
+        static private var canTalk:Boolean = false;
         
         
         import mx.containers.dividedBoxClasses.BoxDivider;
@@ -209,6 +221,7 @@
         private var chatFontColor:String = "000000";
         private var chatBackgroundColor:String = "FFFFFF";
         private var chatFontSize:int = 11;
+        private var isDisplayTime:Boolean = false;
         private var chatMessageTrader:ChatMessageTrader;
         private var novelticMode:NovelticMode = null;
         
@@ -216,6 +229,10 @@
         
         public static function getInstance():ChatWindow {
             return instance;
+        }
+        
+        public static function setTalk(b:Boolean):void {
+            canTalk = b;
         }
         
         public function getDiceRollPlace():UIComponent {
@@ -302,6 +319,7 @@
                 return;
             }
             
+            setDisplayTime( info["isDisplayTime"] );
             setChatFontSize( info["chatFontSize"] );
             setChatFontColor( info["chatFontColor"] );
             setChatBackgroundColor( info["chatBackgroundColor"] );
@@ -341,6 +359,7 @@
                 info = new Object();
             }
             
+            info["isDisplayTime"] = isDisplayTime;
             info["chatFontSize"] = chatFontSize;
             info["chatFontColor"] = chatFontColor;
             info["chatBackgroundColor"] = chatBackgroundColor;
@@ -399,10 +418,15 @@
             addChannels(changedChannelNames);
             renameChanells(changedChannelNames);
             
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+            selectChatChannelWhenVisiterMode();
+        }
+
+        private function selectChatChannelWhenVisiterMode():void {
+            if( isVisiterMode() ) {
                 selectChatChannel(lastChatChannel);
             }
         }
+
         
         private function getChannelNamesWhenReplayMode(names:Array):Array {
             
@@ -698,6 +722,7 @@
             setMoveEventFunction( novelticMode.resizeAndMoveWindow );
             
             changeVisiterMode();
+            setTalkButton();
         }
         
         private function initDiceBotInfos():void {
@@ -734,7 +759,7 @@
         
         public function getChatCharacterName():String {
             var name:String = chatCharacterName.text;
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+            if( isVisiterMode() ) {
                 name += "＠見学";
             }
             return name;
@@ -995,45 +1020,47 @@
         }
         
         public function changeChatChannelNumberForSystemLog(channel:int):int {
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                channel = this.lastChatChannel;
-            }
+            channel = getChatChannleWhenVisiterMode(channel);
             return channel;
         }
         
         public function sendChatMessage_selected(chatMessage:String):void {
             var channel:int = getSelectedChatChannleIndex();
-            
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                channel = this.lastChatChannel;
-            }
+            channel = getChatChannleWhenVisiterMode(channel);
             
             sendChatMessage(channel, chatMessage);
         }
         
         public function sendChatMessage_public(chatMessage:String):void {
             var channel:int = publicChatChannel;
-            
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                channel = this.lastChatChannel;
-            }
+            channel = getChatChannleWhenVisiterMode(channel);
             
             sendChatMessage(channel, chatMessage);
         }
         
         public function sendChatMessage(channel:int, chatMessage:String, isCheckDiceRoll:Boolean = true):void {
             Log.logging("sendChatMessage begin");
-            
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                channel = this.lastChatChannel;
-                selectChatChannel(channel);
-            }
-            
             var data:ChatSendData = new ChatSendData(channel, chatMessage);
             sendChatMessageByChatSendData(data, isCheckDiceRoll);
         }
         
+        private function isVisiterMode():Boolean {
+            return DodontoF_Main.getInstance().isVisiterMode();
+        }
+        
+        private function getChatChannleWhenVisiterMode(channel:int):int {
+            if( isVisiterMode() ) {
+                channel = this.lastChatChannel;
+            }
+            
+            return channel;
+        }
+        
         public function sendChatMessageByChatSendData(data:ChatSendData, isCheckDiceRoll:Boolean = true):void {
+            var channel:int = getChatChannleWhenVisiterMode(data.getChannel());
+            data.setChannel( channel );
+            selectChatChannelWhenVisiterMode();
+            
             Log.logging("sendChatMessageByChatSendData begin");
             if( data.getMessage() == "" ) {
                 Log.logging("data.getMessage() is empty")
@@ -1209,14 +1236,6 @@
             guiInputSender.sendChatMessageMany(chatCharacterName.text, chatMessage, chatFontColor);
         }
         
-        /*
-        public function talkText():void {
-            var chatMessage:String = chatMessageInput.text;
-            //chatMessage = Utils.htmlToText(line);
-            new TextTalker().sendText( chatMessage );
-        }
-        */
-        
         private var userNames:Object = new Array();
         
         public function setUserNames(name:String):void {
@@ -1234,7 +1253,23 @@
             
             printChatLog();
         }
-
+        
+        public function setDisplayTime(b:Boolean, isReplayMode:Boolean = false):void {
+            if( isReplayMode ) {
+                return;
+            }
+            
+            isDisplayTime = b;
+        }
+        
+        public function getDisplayTime():Boolean {
+            return isDisplayTime
+        }
+        
+        public function getChatMessageTrader():ChatMessageTrader {
+            return chatMessageTrader;
+        }
+        
         public function addMessageToChatLog(channel:int,
                                             senderName:String,
                                             chatMessage:String,
@@ -1315,12 +1350,16 @@
         
         private function printChatLog():void {
             var channel:int = publicChatChannel;
-            getChatChannle(channel).resizeChatLog(novelticMode);
             
+            getChatChannle(channel).stopNoCheckCount();
+            
+            getChatChannle(channel).resizeChatLog(novelticMode);
             chatMessageTrader.printAddedMessageToChatMessageLog();
             scrollChatMessageLogIfPositionIsLast(publicChatChannel, true);
+            
+            getChatChannle(channel).startNoCheckCount();
         }
-    
+        
         private var allUserName:String = '＜全員＞';
     
         private function getAlarmStringPrefix(userName:String):String {
@@ -1363,21 +1402,6 @@
             return userNameArray;
         }
     
-        private function printUpdateDateString(time:Number):void {
-            Log.logging("chat time", time);
-            var lastChatDate:Date = new Date(time * 1000);
-            var dateString:String = StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}", 
-                                                          lastChatDate.fullYear,
-                                                          lastChatDate.month,
-                                                          lastChatDate.date,
-                                                          lastChatDate.hours,
-                                                          lastChatDate.minutes,
-                                                          lastChatDate.seconds)
-            Log.logging("dateString", dateString);
-            //this.status = "更新：" + dateString;
-        }
-        
-        
         public function saveChatLogHtml():void {
             var window:SaveChatLogWindow = DodontoF.popup(SaveChatLogWindow, true) as SaveChatLogWindow;
             window.init(this);
@@ -1607,7 +1631,28 @@
                 soundStatusImage.toolTip = "音再生なし";
             }
         }
-    
+        
+        private var isTalking:Boolean = false;
+        
+        public function isTalkMode():Boolean {
+            return isTalking;
+        }
+        
+        private function setTalkMode():void {
+            isTalking = ( ! isTalking );
+            setTalkButton();
+        }
+        
+        private function setTalkButton():void {
+            if( isTalking ) {
+                talkButton.source = talkIcon;
+                talkButton.toolTip = "テキスト読み上げあり";
+            } else {
+                talkButton.source = talkSilentIcon;
+                talkButton.toolTip = "テキスト読み上げなし";
+            }
+        }
+        
         public function setStandingGraphicsDisplayState(b:Boolean):void {
             standingGraphics.setDisplayState( b );
             refreshChatCharacterName();
@@ -1615,7 +1660,7 @@
     
         private function setChatFontWindow():void {
             var chatFontWindow:ChatFontWindow = DodontoF.popup(ChatFontWindow, true) as ChatFontWindow;
-            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize);
+            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize, isDisplayTime);
         }
     
         public function setChatFontColor(color:String):void {
@@ -1650,7 +1695,9 @@
             }
             
             if( ! isCurrentChannel ) {
-                chatMessageLogBoxTab.getTabAt(channel).styleName = "nocheckTabStyle";
+                if( getChatChannle(channel).isNoCheckCountingMode() ) {
+                    chatMessageLogBoxTab.getTabAt(channel).styleName = "nocheckTabStyle";
+                }
             }
             return true;
         }
@@ -1710,25 +1757,45 @@
         
         
         public function changeVisiterMode():void {
-            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+            if( isVisiterMode() ) {
                 changeWindowColorAndTitle("見学モード","#FFFFCC");
             } else {
                 changeDefaultWindowColorAndTitle();
             }
         }
         
+        private var preDataProvider:Array = [];
+        
         public function updateChatWindowSendtoBox(loginUserInfo:Array, uniqueId:String):void {
-            var preData:String = null;
-            if( sendtoBox.selectedItem != null ) {
-                preData = sendtoBox.selectedItem.data;
+            var selected:String = getSendtoBoxSelectedString();
+            var dataProvider:Array = getSendtoDataProvider(loginUserInfo, uniqueId);
+            
+            Log.logging("preDataProvider", preDataProvider);
+            Log.logging("dataProvider", dataProvider);
+            
+            if( Utils.isEqual(preDataProvider, dataProvider) ) {
+                Log.logging("dataProvider is no changed");
+                return;
             }
             
-            var dataProvider:Array = [];
+            Log.logging("dataProvider is changed!!!!!!");
             
-            var option_all:Object = {
-                label : "（全員）",
-                data : null};
-            dataProvider.push(option_all);
+            preDataProvider = Utils.clone(dataProvider);
+            sendtoBox.dataProvider = dataProvider;
+            Utils.selectComboBox(sendtoBox, selected);
+            
+        }
+        
+        private function getSendtoBoxSelectedString():String {
+            var selected:String = null;
+            if( sendtoBox.selectedItem != null ) {
+                selected = sendtoBox.selectedItem.data;
+            }
+            return selected;
+        }
+        
+        private function getSendtoDataProvider(loginUserInfo:Array,uniqueId:String):Array {
+            var dataProvider:Array = [];
             
             for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
                 var userInfo:Object = loginUserInfo[i];
@@ -1743,9 +1810,15 @@
                 dataProvider.push(option);
             }
             
-            sendtoBox.dataProvider = dataProvider;
+            dataProvider.sort();
             
-            Utils.selectComboBox(sendtoBox, preData);
+            var option_all:Object = {
+                label : "（全員）",
+                data : null};
+            
+            dataProvider.splice(0, 0, option_all);
+            
+            return dataProvider;
         }
         
         public function sendToTwitter():void {

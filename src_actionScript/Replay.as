@@ -274,21 +274,61 @@ package {
             initChatSize();
             DodontoF_Main.getInstance().clearForReplay();
             
-            var jsonData:Object = new Object();
+            var params:Array = getPiledReplayData();
+            var jsonData:Object = params[0];
+            var record:Array = params[1];
+            
+            analyzeForReplay(jsonData);
+            
+            for each(var data:Object in record) {
+                analyzeForReplay(data);
+            }
+            
+            replayHistory(replaySeekIndex)
+            DodontoF_Main.getInstance().getDodontoF().replaySeekSlider.enabled = true;
+        }
+        
+        private function getPiledReplayData():Array {
+            Log.logging("getPiledReplayData begin");
+            
+            var resultJsonData:Object = new Object();
+            var record:Array = new Array();
             
             for(var i:int = 0 ; i < historyIndex ; i++) {
-                var tmp_jsonData:Object = history[i];
+                var jsonData:Object = history[i];
                 
-                for(var key:String in tmp_jsonData) {
-                    if( tmp_jsonData[key] != null ) {
-                        jsonData[key] = tmp_jsonData[key];
+                for(var key:String in jsonData) {
+                    var data:Object = jsonData[key];
+                    
+                    Log.logging("jsonData key", key);
+                    Log.logging("jsonData data", data);
+                    if( data == null ) {
+                        Log.logging("data is null");
+                        continue;
                     }
+                    
+                    if( key == "record") {
+                        var recordData:Object = {
+                            "lastUpdateTimes" : jsonData.lastUpdateTimes,
+                            "record" : data
+                        }
+                        record.push( recordData );
+                        Log.logging("record.push data");
+                        continue;
+                    }
+                    
+                    if( key == "characters") {
+                        record = new Array();
+                        Log.logging("record.clear();");
+                    }
+                    
+                    resultJsonData[key] = data;
                 }
             }
             
-            analyzeForReplay(jsonData);
-            replayHistory(replaySeekIndex)
-            DodontoF_Main.getInstance().getDodontoF().replaySeekSlider.enabled = true;
+            Log.logging("getPiledReplayData End record", record);
+            
+            return [resultJsonData, record];
         }
         
         private function initChatSize():void {
@@ -334,6 +374,8 @@ package {
         }
         
         private function analyzeForReplay(jsonData:Object):int {
+            Log.logging("analyzeForReplay jsonData", jsonData);
+            
             var reciever:SharedDataReceiver = sender.getReciever();
             var isValidResponse:Boolean = reciever.analyzeRefreshResponseCatchedCallByJsonData(jsonData);
             
@@ -343,12 +385,22 @@ package {
                     var messageData:Object = restChatMessageForReplay[ restChatMessageForReplay.length - 1 ];
                     return getChatSleepTimeFromMessageData(messageData);
                 }
-                if( jsonData.characters != null) {
+                if( isCharacterData(jsonData) ) {
                     return characterSleepTime;
                 }
             }
             
             return 0;
+        }
+        
+        private function isCharacterData(jsonData:Object):Boolean {
+            if( jsonData.characters != null ) {
+                return true;
+            }
+            if( jsonData.record != null ) {
+                return true;
+            }
+            return false;
         }
         
 	}

@@ -22,6 +22,21 @@ package {
         after function teardown():void {
         }
         
+        test function tesMap.isOutOfMapPosition_4x3_2():void {
+            var xMax:int = 4;
+            var yMax:int = 3; 
+            assertEquals(true,  Map.isOutOfMapPosition(1, 0, xMax, yMax, 2), "[1, 0], [4, 3], 2");
+            assertEquals(true,  Map.isOutOfMapPosition(2, 0, xMax, yMax, 2), "[2, 0], [4, 3], 2");
+            assertEquals(false, Map.isOutOfMapPosition(3, 0, xMax, yMax, 2), "[3, 0], [4, 3], 2");
+            
+            assertEquals(true,  Map.isOutOfMapPosition(1, 0, xMax, yMax, 2), "[1, 0], [4, 3], 2");
+            assertEquals(true,  Map.isOutOfMapPosition(1, 1, xMax, yMax, 2), "[1, 1], [4, 3], 2");
+            assertEquals(false, Map.isOutOfMapPosition(1, 2, xMax, yMax, 2), "[1, 2], [4, 3], 2");
+            
+        }
+        test function tesMap.isOutOfMapPosition_5x5_3():void {
+        }
+        
         test function testLogin():void {
             sender.setSaveDataDirIndex(99);
             

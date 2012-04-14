@@ -33,7 +33,6 @@ package {
         private var isDrowBack:Boolean = true;
         private var imageUrl:String = "";
         private var preImageUrl:String = "";
-        private var imageName:String = "";
         private var lineDiameter:int = 4;
         static private var backColorDefault:int = -1;
         private var backColor:int = backColorDefault;
@@ -90,8 +89,8 @@ package {
             roundOutColor = c;
         }
         
-        public function loadImage(name:String, url:String, size:int, diffPoint:Point = null):void {
-            loadImageWidthHeight(name, url, size, size, diffPoint);
+        public function loadImage(url:String, size:int, diffPoint:Point = null):void {
+            loadImageWidthHeight(url, size, size, diffPoint);
         }
         
         public function setMaintainAspectRatio(b:Boolean):void {
@@ -112,14 +111,14 @@ package {
             }
         }
         
-        public function loadImageWidthHeightRotation(name:String, url:String,
+        public function loadImageWidthHeightRotation(url:String,
                                                      widthSize_:Number, heightSize_:Number,
                                                      rotation:Number = 0):void {
             var diffPoint:Point = new Point(0, 0);
             diffPoint = getRotationDiffPoint(rotation, widthSize_, heightSize_);
             base.rotation = rotation;
             
-            loadImageWidthHeight(name, url, widthSize_, heightSize_, diffPoint);
+            loadImageWidthHeight(url, widthSize_, heightSize_, diffPoint);
         }
         
         static public function getRotationDiffPoint(rotation:int,
@@ -141,12 +140,11 @@ package {
             return new Point(diffX, diffY);
         }
         
-        public function loadImageWidthHeight(name:String, url:String,
+        public function loadImageWidthHeight(url:String,
                                              widthSize_:Number, heightSize_:Number,
                                              diffPoint:Point = null):void {
             Log.logging("imageLoader url begin", url);
             
-            imageName = name;
             imageUrl = url;
             widthSize = widthSize_;
             heightSize = heightSize_;
@@ -163,7 +161,7 @@ package {
                 zoomImage();
             } else {
                 preImageUrl = imageUrl;
-                image.source = imageUrl
+                image.source = imageUrl;
             }
             
             if( diffPoint != null ) {
@@ -224,6 +222,8 @@ package {
             upperLayer.contextMenu = menu;
         }
         
+        private var imageX:Number = 0;
+        
         public function snapImagePosition():void {
             image.x = 0;
             image.y = 0;
@@ -251,6 +251,8 @@ package {
                 var imageWidth:Number = image.height * rate;
                 image.x = ((image.width - imageWidth) / 2);
             }
+            
+            imageX = image.x;
         }
         
         private function completeHandler(event:Event = null):void {
@@ -267,6 +269,25 @@ package {
             
             if( resultFunction != null ) {
                 resultFunction.call();
+            }
+            
+            mirror();
+        }
+        
+
+        private var mirrored:Boolean = false;
+        
+        public function setMirrored(b:Boolean):void {
+            mirrored = b;
+        }
+        
+        private function mirror():void {
+            if( mirrored ) {
+                image.scaleX = -1;
+                image.x = image.width - imageX;
+            } else {
+                image.scaleX = 1;
+                image.x = imageX;
             }
         }
         

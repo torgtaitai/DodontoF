@@ -70,6 +70,7 @@ package {
             }
             
             if( isHistoryOn ) {
+                Log.logging("addHistory jsonData", jsonData);
                 addHistory(jsonData);
             }
             
@@ -79,7 +80,7 @@ package {
                                          "" + retryConnectedCount + "回目");
             }
             
-            refreshNext();
+            sender.refreshNext();
         }
         
         private function addHistory(jsonData_original:Object):void {
@@ -111,14 +112,6 @@ package {
         
         public function clearChatLastWrittenTime():void {
             chatMessageDataLastWrittenTime = 0;
-        }
-        
-        protected function refreshNext():void {
-            refresh();
-        }
-        
-        private function refresh():void {
-            sender.refresh();
         }
         
         private function analyzeRefreshResponseCatched(obj:Object):Object {
@@ -221,10 +214,10 @@ package {
         }
         
         public function analyzeRefreshResponseCatchedCallByJsonData(jsonData:Object):Boolean {
-            Log.logging("analyzeRefreshResponseCatchedCallByJsonData jsonData", jsonData);
+            Log.logging("analyzeRefreshResponseCatchedCallByJsonData Begin jsonData", jsonData);
             
             if( jsonData == null ) {
-                Log.loggingError("jsonData is null");
+                //Log.loggingError("jsonData is null");
                 return false;
             }
             
@@ -271,6 +264,18 @@ package {
                 sender.checkLastUpdateTimes('characters', jsonData.lastUpdateTimes) ) {
                 
                 this.analyzeCharacterData(jsonData.characters);
+                sender.checkLastUpdateTimes('record', jsonData.lastUpdateTimes);
+                sender.checkLastUpdateTimes('recordIndex', jsonData.lastUpdateTimes);
+            }
+            
+            if( jsonData.record &&
+                sender.checkLastUpdateTimes('record', jsonData.lastUpdateTimes) ) {
+                
+                sender.checkLastUpdateTimes('characters', jsonData.lastUpdateTimes);
+                sender.checkLastUpdateTimes('recordIndex', jsonData.lastUpdateTimes);
+                
+                this.analyzeRecordData(jsonData.record);
+                Log.logging("on jsonData.record jsonData.lastUpdateTimes", jsonData.lastUpdateTimes);
             }
             
             if( jsonData.mapData &&
@@ -287,6 +292,8 @@ package {
                 initForFirstRefresh();
                 isInitialRefreshFlag = false;
             }
+            
+            Log.logging("jsonData.lastUpdateTimes", jsonData.lastUpdateTimes);
             
             return true;
         }
@@ -328,6 +335,7 @@ package {
                                                          playRoomInfo.chatChannelNames,
                                                          playRoomInfo.canUseExternalImage,
                                                          playRoomInfo.canVisit,
+                                                         playRoomInfo.backgroundImage,
                                                          playRoomInfo.gameType,
                                                          playRoomInfo.viewStateInfo);
             
@@ -393,7 +401,9 @@ package {
                 return;
             }
             
-            map.changeMap(mapData.imageSource, mapData.xMax, mapData.yMax, mapData.gridColor);
+            map.changeMap(mapData.imageSource, mapData.mirrored,
+                          mapData.xMax, mapData.yMax,
+                          mapData.gridColor, mapData.gridInterval, mapData.isAlternately);
             map.changeMarks(mapData.mapMarks);
         }
         
@@ -427,10 +437,15 @@ package {
             Log.loggingTuning("=>End analyzeCharacterData");
         }
         
-        private function analyzeAddCharacter(characterData:Object):void {
-            Log.logging("analyzeAddCharacter( characterData)", characterData);
+        private function analyzeAddCharacters(list:Array):void {
+            for each(var data:Object in list) {
+                analyzeAddCharacter(data);
+            }
+        }
         
-            if( map.findExistCharacter(characterData) != null ) {
+        private function analyzeAddCharacter(characterData:Object):void {
+            var found:Piece = map.findExistCharacter(characterData);
+            if( found != null ) {
                 Log.logging("character already exist, so pass charactr create");
                 return;
             }
@@ -476,9 +491,9 @@ package {
             
             pickupTarget.pickup();
         }
-            
         
-        public function removeCharacterOnlyOwnMap(event:Event):void {
+        
+        public function removeCharacterOnlyOwnMap(event:Event = null):void {
             var existList:Array = [];
             
             for(var i:int = 0 ; i < map.getExistPiecesCount() ; i++) {
@@ -492,6 +507,43 @@ package {
             
             map.setExistPieces(existList);
         }
+        
+        
+        
+        private function analyzeRecordData(record:Object):void {
+            Log.loggingTuning("=>Begin analyzeRecordData");
+            Log.logging("record", record);
+            
+            for(var i:int = 0 ; i < record.length ; i++) {
+                var recordData:Object = record[i];
+                Log.logging("recordData", recordData);
+                
+                var command:String = recordData[1];
+                var data:Array = recordData[2];
+                Log.loggingTuning("command", command);
+                Log.loggingTuning("data", data);
+                
+                if( command == "addCharacter" ) {
+                    this.analyzeAddCharacters(data);
+                    Log.loggingTuning("=>analyzeAddCharacter");
+                } else if( command == "changeCharacter" ) {
+                    this.analyzeMoveCharacters(data);
+                    Log.loggingTuning("=>analyzeMoveCharacter");
+                    this.analyzeChangedCharacters(data);
+                    Log.loggingTuning("=>analyzeChangedCharacter");
+                } else if( command == "removeCharacter" ) {
+                    this.analyzeRemoveCharacterForRecord(data);
+                }
+            }
+            Log.loggingTuning("analyzeRecordData for loop end");
+            
+            this.removeCharacterOnlyOwnMap();
+            this.refreshInitiativeList();
+            ChatWindow.getInstance().refreshChatCharacterName();
+            
+            Log.loggingTuning("=>End analyzeRecordData");
+        }
+        
         
         public function startHistory():void {
             history = new Array();
@@ -524,6 +576,7 @@ package {
                                                    DiceSymbol,
                                                    MagicTimer,
                                                    CardZone,
+                                                   Chit,
                                                    Card,
                                                    CardMount,
                                                    RandomDungeonCardMount,
@@ -558,6 +611,32 @@ package {
             return piece;
         }
         
+        
+        private function analyzeRemoveCharacterForRecord(removeIds:Object):void {
+            Log.logging("analyzeRemoveCharacterForRecord Begin removeIds", removeIds);
+            
+            var characterDataList:Array = new Array();
+            for each(var removeId:String in removeIds) {
+                var data:Object = {'imgId': removeId};
+                characterDataList.push(data);
+            }
+            Log.logging("characterDataList", characterDataList);
+            
+            for(var i:int = 0 ; i < map.getExistPiecesCount() ; i++) {
+                var existCharacter:Piece = map.getExistPiece(i);
+                Log.logging("analyzeRemoveCharacter existCharacter ", existCharacter);
+                
+                var exist:Object = findExistCharacterData(characterDataList, existCharacter);
+                if( exist == null ) {
+                    continue;
+                }
+                
+                Log.logging("remove targetCharacter", exist);
+                existCharacter.remove();
+            }
+            
+            Log.logging("analyzeRemoveCharacterForRecord End");
+        }
         
         private function analyzeRemoveCharacter(characterDataList:Object):void {
             var existList:Array = [];
@@ -595,8 +674,14 @@ package {
             return null;
         }
         
+        private function analyzeMoveCharacters(list:Array):void {
+            for each(var data:Object in list) {
+                analyzeMoveCharacter(data);
+            }
+        }
+        
         private function analyzeMoveCharacter(characterData:Object):void {
-            Log.logging("analyzeMoveCharacter characterData", characterData);
+            Log.logging("analyzeMoveCharacter Begin characterData", characterData);
             var character:Piece = map.findExistCharacter(characterData);
             Log.logging("moveCharacter character", character);
             
@@ -609,6 +694,7 @@ package {
             var isMoved:Boolean = character.move(characterData.x, characterData.y);
             pickupMovedForReplayMode(isMoved, character);
             
+            Log.logging("analyzeMoveCharacter End");
             Log.logging("character moved");
         }
         
@@ -627,6 +713,12 @@ package {
             }
             
             pickupTarget.pickupToCenter();
+        }
+        
+        private function analyzeChangedCharacters(list:Array):void {
+            for each(var data:Object in list) {
+                analyzeChangedCharacter(data);
+            }
         }
         
         private function analyzeChangedCharacter(characterData:Object):void {

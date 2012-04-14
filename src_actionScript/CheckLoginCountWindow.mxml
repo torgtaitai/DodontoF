@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="450"
+   height="130"
+   title="自前サーバはいかがでしょうか？" 
+   >
+  
+  <mx:Label id="message" width="100%" height="100%" />
+  <mx:HBox width="100%">
+    <mx:Button label="YES(設定方法について是非教えて下さい)" 
+      click='DodontoF.openUrl("README.html#howToSetting");' />
+    <mx:Spacer width="100%"/>
+    <mx:Button label="NO(またの機会に願いします)" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
+      
+      
+  <mx:Script>
+    <![CDATA[
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    
+    override protected function setup():void {
+        
+    }
+    
+    public function setMessage(count:int):void {
+        message.text = 
+        "このサーバへのログイン回数が " + count + "回 になりました！\r" + 
+        "そろそろ自前サーバの構築はいかがでしょうか！？";
+    }
+    
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

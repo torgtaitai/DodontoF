@@ -27,6 +27,7 @@ package {
         private var gridLayer:UIComponent = new UIComponent();
         private var rate:Number = 1;
         private var imageName:String = "";
+        private var mirrored:Boolean = false;
         
         public function PreviewLoader() {
             this.addChild(imageLoader);
@@ -65,6 +66,10 @@ package {
             imageLoader.load(new URLRequest(url));
         }
         
+        public function setMirrored(b:Boolean):void {
+            mirrored = b;
+        }
+        
         private function ioErrorHandler(event:Event):void {
             //NO action
         }
@@ -74,15 +79,18 @@ package {
             Log.logging("unLoadHandler");
         }
         
-        public function drawGrid(color:uint = 0x000000):void {
+        
+        public function drawGrid(color:uint = 0x000000,
+                                 gridInterval:int = 1,
+                                 isAlternately:Boolean = false):void {
             gridLayer.graphics.clear();
-            Map.drawGrid(widthSize, heightSize, gridLayer, rate * Map.getSquareLength(), color);
+            Map.drawGrid(widthSize, heightSize, gridLayer, rate * Map.getSquareLength(), color, gridInterval, isAlternately);
         }
         
-        private var loadImageCompleteFunction:Function = null;
+        private var loadImageCompleteFunctions:Array = new Array();
         
-        public function setLoadImageCompleate(f_:Function):void {
-            loadImageCompleteFunction = f_;
+        public function setLoadImageCompleate(func:Function):void {
+            loadImageCompleteFunctions.push(func);
         }
         
         private function completeHandler(event:Event):void {
@@ -92,8 +100,27 @@ package {
             event.target.loader.width = printWidthSize * Map.getSquareLength();
             event.target.loader.height = printHeightSize * Map.getSquareLength();
             
-            if( loadImageCompleteFunction != null ) {
-                loadImageCompleteFunction();
+            for(var i:int = 0 ; i < loadImageCompleteFunctions.length ; i++) {
+                var func:Function = loadImageCompleteFunctions[i] as Function;
+                if( func != null ) {
+                    func();
+                }
+            }
+            
+            changeMirror();
+        }
+        
+        private function changeMirror():void {
+            if( mirrored ) {
+                if( imageLoader.scaleX > 0 ) {
+                    imageLoader.scaleX *= -1;
+                }
+                imageLoader.x = imageLoader.width;
+            } else {
+                if( imageLoader.scaleX < 0 ) {
+                    imageLoader.scaleX *= -1;
+                }
+                imageLoader.x = 0;
             }
         }
         

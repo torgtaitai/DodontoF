@@ -10,23 +10,21 @@ $aboutMaxLoginCount = 50
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.35.09"
-$versionDate = "2012/02/19"
+$versionOnly = "Ver.1.36.06.01"
+$versionDate = "2012/04/14"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
-#CGIがクライアントへ通知を返す最大待機時間（秒）
-#本CGIではAjaxで言うComet方式で実装されています（擬似的に、ですが）。
-#つまりクライアントからの要求に即座に通知を返さず
-#ここで指定される秒数までセーブファイルの変更を定期的にチェックして待ちます。
-$refreshTimeout = 10
+#サーバがデータの更新をサーバ内で定期チェックして待つ最大待機時間（秒）
+#再接続が連発する場合には数値を「減らして」下さい。 $refreshTimeout = 1 とかに。
+$refreshTimeout = 2
 
 #サーバの一時チャットログの保存時間上限（秒）
 #上記の $refreshTimeout よりも大きい必要があり、
 #さらに言えば再接続後でも表示できるように十分な余裕が必要。
 $oldMessageTimeout = 180
 
-#セーブファイルの定期チェック時間（秒）
+#擬似Comet時のセーブファイル定期チェック時間（秒）
 $refreshInterval = 0.5
 
 #プレイルームの最大数
@@ -65,6 +63,10 @@ $SAVE_DATA_LOCK_FILE_DIR = nil
 #各画像(キャラクター・マップ)の保存パス
 $imageUploadDir = "./imageUploadSpace"
 
+#イメージディレクトリを示すマーカー文字列
+$localUploadDirMarker = '###IMAGE_UPLOADL_SPACE###'
+
+
 #シナリオ読み込み機能用のマーカー文字列(変更してはいけません)
 $imageUploadDirMarker = '###ROOM_LOCAL_SPACE###'
 
@@ -82,6 +84,9 @@ $fileUploadDir = "fileUploadSpace"
 
 #ログイン画面に表示される「お知らせ」メッセージの定義ファイル名
 $loginMessageFile = "loginMessage.html"
+
+#ログイン画面に表示される「更新履歴」の定義ファイル名
+$loginMessageBaseFile = "loginMessageBase.html"
 
 #古いセーブファイルの自動削除を行うかを判定するための基準経過時間(秒)
 $oldSaveFileDelteSeconds = 180
@@ -164,3 +169,18 @@ $scenarioDataMaxSize = 100.0
 
 #ログイン状況を記録するファイル
 $loginCountFile = File.join($SAVE_DATA_DIR, 'saveData', 'loginCount.txt')
+
+#読み上げ機能の有効／無効(true/false)。サーバに負荷が掛かるので有効化は慎重に
+#あ、あとPHP環境必須なんでその辺は頑張って下さい。
+$canTalk = true
+
+#差分記録方式で保存する保存件数
+$recordMaxCount = 5
+
+#通信方式を擬似Commet方式にするなら true に。
+#その場合応答は速くなりますが、CPUやネットワーフ負荷が上がります。
+$isCommet = false
+
+#擬似Commetを使わない場合のクライアント側での再読み込み待ち時間
+$refreshIntervalForNotCommet = 1.5
+

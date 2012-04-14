@@ -99,7 +99,7 @@ package {
                                                           now.hours,
                                                           now.minutes,
                                                           now.seconds,
-                                                          now.milliseconds)
+                                                          now.milliseconds);
                 return dateString;
         }
         

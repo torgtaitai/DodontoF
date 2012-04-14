@@ -3,13 +3,15 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="300"
-   height="230"
+   height="300"
    title="チャット文字設定" 
    showCloseButton="true"
    >
   
   <mx:Box width="100%" height="100%">
-    <mx:Form>
+    <mx:Form
+       paddingTop="1" paddingBottom="1" 
+       paddingRight="1" paddingLeft="1" >
       
 	  <mx:FormItem label="文字色:">
       <mx:ColorPicker id="chatMessageColorPicker" showTextField="true" selectedColor="0x000000"
@@ -27,13 +29,28 @@
                      change="printSample()"
                      toolTip="チャット文字サイズ" />
       </mx:FormItem>
-
+      
+	  <mx:FormItem label="フォーマット:">
+        <mx:CheckBox id="isDisplayTimeCheckBox" 
+                     label="「時：分」表示"
+                     change="printSample()"
+                     />
+      </mx:FormItem>
+      
+	  <mx:FormItem label="入力例:">
+        <mx:TextInput id="input" height="25" width="100%" text="どどんとふ"
+                     change="printSample()"
+                     />
+      </mx:FormItem>
+      
     </mx:Form>
-    <mx:Box id="sampleBase" height="30" width="100%" >
-      <mx:TextArea id="sample" height="100%" width="100%" text="どどんとふ" />
+    
+    <mx:Label text="出力例：" />
+    <mx:Box id="sampleBase" height="100%" width="100%" >
+      <mx:TextArea id="sample" height="100%" width="100%" text="どどんとふ" editable="false" />
     </mx:Box>
     
-    <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="設定" click="execute()" />
       <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
@@ -51,11 +68,15 @@
     public function init(chatWindow_:ChatWindow,
                          chatFontColor:String,
                          chatBackgroundColor:String,
-                         chatFontSize:int):void {
+                         chatFontSize:int,
+                         isDisplayTime:Boolean):void {
+        
         chatWindow = chatWindow_;
         chatMessageColorPicker.selectedColor = parseInt("0x" + chatFontColor);
         chatBackgroundColorPicker.selectedColor = parseInt("0x" + chatBackgroundColor);
         defaultFontSize = chatFontSize;
+        isDisplayTimeCheckBox.selected = isDisplayTime;
+        
         setDefaultFontSize();
     }
        
@@ -97,15 +118,32 @@
        
     private function printSample():void {
         var color:String = getColor(chatMessageColorPicker);
-        sampleBase.setStyle('color', '0x' + color);
+        //sampleBase.setStyle('color', '0x' + color);
            
         var backgroundColor:String = getColor(chatBackgroundColorPicker);
         sample.setStyle('backgroundColor', '0x' + backgroundColor);
            
         var fontSize:int = parseInt( chatFontSizeComboBox.text );
         sample.setStyle("fontSize", fontSize);
+        
+        var htmlText:String = getChatMessageForPrintHtml(color);
+        sample.htmlText = htmlText
     }
-       
+    
+    private function getChatMessageForPrintHtml(color:String):String {
+        
+        var time:Number = new Date().getTime() / 1000;
+        var name:String = "なまえ";
+        
+        var htmlText:String = chatWindow.getChatMessageTrader().
+        getChatMessageForPrintHtml(input.text,
+                                   name,
+                                   color,
+                                   time,
+                                   isDisplayTimeCheckBox.selected);
+        return htmlText;
+    }
+    
     public function execute():void {
         var color:String = getColor(chatMessageColorPicker);
         chatWindow.setChatFontColor(color);
@@ -115,6 +153,8 @@
            
         var fontSize:int = parseInt( chatFontSizeComboBox.text );
         chatWindow.setChatFontSize(fontSize);
+        
+        chatWindow.setDisplayTime( isDisplayTimeCheckBox.selected );
         
         chatWindow.saveChatInfos();
 

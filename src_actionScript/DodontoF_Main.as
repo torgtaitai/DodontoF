@@ -51,6 +51,10 @@ package {
         private var chatChannelNames:Array = Utils.clone(defaultChatChannelNames);
         private var canVisitValue:Boolean = false;
         
+        public function setCommet(b:Boolean):void {
+            sender.setCommet(b);
+        }
+        
         
         public function getPlayRoomName():String {
             return Utils.clone(playRoomName);
@@ -89,6 +93,7 @@ package {
                                         local_chatChannelNames:Array,
                                         local_canUseExternalImageMode:Boolean,
                                         local_canVisit:Boolean,
+                                        backgroundImage:String,
                                         gameType:String,
                                         info:Object):void {
             Log.logging("setPlayRoomInfo begin");
@@ -123,6 +128,8 @@ package {
                 setViewState(serverViewStateInfo, info);
                 isServerViewStateNotInitialized = false;
             }
+            
+            Config.getInstance().setBackgroundImage( backgroundImage );
         }
         
         private function setDiceBotGameType(gameType:String):void {
@@ -262,8 +269,12 @@ package {
             this.sender.setUniqueId(uniqueId_);
         }
         
-        public function setRefreshTimeout(refreshTimeout:int):void {
+        public function setRefreshTimeout(refreshTimeout:Number):void {
             this.sender.setRefreshTimeout(refreshTimeout);
+        }
+        
+        public function setRefreshInterval(value:Number):void {
+            this.sender.setRefreshInterval(value);
         }
         
         public function getScreenWidth():int {
@@ -540,7 +551,7 @@ package {
             
             Log.logging("DodontoF_Main setEvents");
             setEvents();
-            Log.logging("DodontoF_Main setEvents");
+            Log.logging("DodontoF_Main setEvents　End");
             if( isStart ) {
                 startRefresh();
             }
@@ -558,72 +569,42 @@ package {
         }
         
         private function setEvents():void {
-            Log.logging("setEventsWheel");
-            setEventsWheel();
-            
-            Log.logging("this addEventListener MOUSE_DOWN");
-            this.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                    //deckStateManager.stopAllDrag();
-                });
-            
-            Log.logging("map.setEvents() calling...");
             map.setEvents();
         }
         
-        private function zoomCheck(isZoom:Boolean, mouseX:int, mouseY:int):void {
-            if( map.getCardLayer().visible && 
-                map.getCardLayer().hitTestPoint(mouseX, mouseY) ) {
-                map.zoomCardLayer(isZoom);
-            } else {
-                map.zoom(isZoom);
-            }
-        }
-        
-        private function setEventsWheel():void {
-            var mapWheelEvent:Function = function (event:MouseEvent):void {
-                var isZoom:Boolean = (event.delta > 0);
-                map.zoom(isZoom);
-            };
-            map.getView().addEventListener(MouseEvent.MOUSE_WHEEL, mapWheelEvent);
-            
-            var cardWheelEvent:Function = function (event:MouseEvent):void {
-                var isZoom:Boolean = (event.delta > 0);
-                map.zoomCardLayer(isZoom);
-            };
-            map.getCardLayer().addEventListener(MouseEvent.MOUSE_WHEEL, cardWheelEvent);
-        }
-        
         public function zoom(isZoom:Boolean):void {
-            zoomCheck(isZoom, 0, 0);
+            map.zoom(isZoom);
         }
         
+        public function setCardPickUpWindow(window:IFlexDisplayObject, eventName:String):void {
+            window.visible = false;
+            cardPickUpWindow = window as CardPickUpWindow;
+            cardPickUpWindow.setChangeVisibleEvent( function(visible:Boolean):void {
+                    dodontoF.changeMainMenuToggle(eventName, visible);
+                });
+        }
         
-        private var cardPreviewWindow:CardPreviewWindow = null;
+        private var cardPickUpWindow:CardPickUpWindow = null;
         
-        private function getCardPreviewWindow():CardPreviewWindow {
-            if( cardPreviewWindow == null ) {
-                cardPreviewWindow = DodontoF.popup(CardPreviewWindow, false) as CardPreviewWindow;
+        public function displayCardPickUp(card:Card):void {
+            if( cardPickUpWindow == null ) {
+                return;
             }
-            
-            return cardPreviewWindow;
+            cardPickUpWindow.displayCardPickUp(card);
         }
         
-        public function displayCardPreview(card:Card):void {
-            getCardPreviewWindow().displayCardPreview(card);
-        }
-        
-        public function hideCardPreview():void {
-            getCardPreviewWindow().hideCardPreview();
-        }
-        
-        public function setVisibleCardPreview(b:Boolean):void {
-            if( ! b ) {
-                if( cardPreviewWindow == null ) {
-                    return;
-                }
+        public function hideCardPickUp():void {
+            if( cardPickUpWindow == null ) {
+                return;
             }
-            
-            getCardPreviewWindow().setVisibleState(b);
+            cardPickUpWindow.hideCardPickUp();
+        }
+        
+        public function setCardPickUpVisible(b:Boolean):void {
+            if( cardPickUpWindow == null ) {
+                return;
+            }
+            cardPickUpWindow..setVisibleState(b);
         }
         
         public function setRulerMode():void {
@@ -636,9 +617,6 @@ package {
         
         public function clearCards():void {
             sender.clearCards();
-        }
-        public function initCards(cardTypes:Array):void {
-            sender.initCards(cardTypes);
         }
         
         private  function getShffledIndexs(max:int):Array {
@@ -961,7 +939,7 @@ package {
             chatPalette.setInitPositionDefault();
             diceBox.setInitPositionDefault();
             
-            cardPreviewWindow.setInitPositionDefault();
+            cardPickUpWindow.setInitPositionDefault();
         }
         
         
@@ -1013,7 +991,6 @@ package {
         public function isTinyMode():Boolean {
             return isMode("tiny");
         }
-        
         
         private var menuXml:Array;
         
@@ -1074,6 +1051,9 @@ package {
         {type:"separator"},
         
         {label:"立ち絵表示", data:"isStandingGraphicVisible", type:"check", toggled:true},
+        {label:"カットイン表示", data:"isCutInVisible", type:"check", toggled:true},
+        {type:"separator"},
+        
         {label:"座標表示", data:"isPositionVisible", type:"check", toggled:true},
         {label:"マス目表示", data:"isGridVisible", type:"check", toggled:true},
         {type:"separator"},
@@ -1094,13 +1074,15 @@ package {
         {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
         {label:"魔法タイマー追加", data:"addMagicTimer"},
         {type:"separator"},
+        {label:"チット作成", data:"createChit"},
+        {type:"separator"},
         {label:"墓場", data:"graveyard"},
         {label:"キャラクター待合室", data:"characterWaitingRoom"},
                 ]},
     
     {label:"カード", data:"pass_card",
      children: [
-        {label:"カード表示", data:"isCardVisible", type:"check", toggled:false},
+        {label:"カードピックアップウィンドウ表示", data:"isCardPickUpVisible", type:"check", toggled:false},
         {type:"separator"},
         {label:"カード配置の初期化", data:"openInitCardWindow"}
                 ]},
@@ -1111,6 +1093,7 @@ package {
         {label:"フロアタイル変更モード", data:"changeFloorTile"},
         {label:"マップマスク追加", data:"addMapMask"},
         {label:"簡易マップ作成", data:"createMapEasy"},
+        {label:"射線測定モード", data:"setRulerMode"},
         {type:"separator"},
         {label:"マップ状態保存", data:"saveMap"},
         {label:"マップ切り替え", data:"loadMap"},
@@ -1132,9 +1115,10 @@ package {
                        {label:"チュートリアル動画", data:"tutorialReplay"},
                        {label:"オフィシャルサイトへ", data:"officialSite"}
                        ]
-            },
+            }
     
-    //    /*
+    /*
+    ,
     {label:"ログ", data:"pass", 
      children: [
         {label:"initLogWindow", data:"initLogWindow"}, 
@@ -1144,7 +1128,7 @@ package {
         {label:"errorLog", data:"errorLog"}, 
         {label:"fatalErrorLog", data:"fatalErrorLog"} 
                 ]} 
-    //     */
+    */
                     ];
         }
 	}

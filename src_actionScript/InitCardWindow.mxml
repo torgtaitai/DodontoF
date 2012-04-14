@@ -238,13 +238,26 @@
     public function initCards():void {
         try{
             var cardInitInfos:Array = getCardInitInfos();
-               
-            DodontoF_Main.getInstance().initCards( cardInitInfos );
-            PopUpManager.removePopUp(this);
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().initCards( cardInitInfos, initCardsResult );
         } catch(error:Error) {
             this.status = error.message;
         }
     }
+    
+    private function initCardsResult(event:Event):void {
+        var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+        var result:String = jsonData.result;
+        
+        if( result != "OK" ) {
+            Alert.show("result");
+            return;
+        }
+        
+        DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isCardPickUpVisible", jsonData.cardExist);
+        DodontoF_Main.getInstance().getGuiInputSender().getSender().resetCharactersUpdateTime();
+        PopUpManager.removePopUp(this);
+    }
+    
        
     ]]>
   </mx:Script>

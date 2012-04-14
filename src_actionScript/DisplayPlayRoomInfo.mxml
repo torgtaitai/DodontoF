@@ -41,10 +41,11 @@
         var chatChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
         var canUseExternalImage:Boolean = DodontoF_Main.getInstance().canUseExternalImage();
         var canVisit:Boolean = DodontoF_Main.getInstance().canVisit();
+        var backgroundImage:String = Config.getInstance().getBackgroundImage();
         
         var window:ChangePlayRoomWindow = DodontoF.popup(ChangePlayRoomWindow, true) as ChangePlayRoomWindow;
         window.initParams(roomNumber);
-        window.setPlayRoomInfo(playRoomName, password, chatChannelNames, canUseExternalImage, canVisit);
+        window.setPlayRoomInfo(playRoomName, password, chatChannelNames, canUseExternalImage, canVisit, backgroundImage);
         
         PopUpManager.removePopUp(this);
     }

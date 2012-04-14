@@ -141,17 +141,14 @@
         }
         Log.logging("create");
         
-        var map:Map = DodontoF_Main.getInstance().getMap();
-                var globalPoint:Point = localToGlobal( new Point(localPoint.x, localPoint.y) );
-        var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
-        
-        var dorpMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+        var globalPoint:Point = localToGlobal( new Point(localPoint.x, localPoint.y) );
+        var dropMapPoint:Point = DodontoF_Main.getInstance().getMap().getCharacterPointFromGlobalPoint(globalPoint);
         
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-                var obj:Object = FloorTile.getJsonData(tileImageUrl_text,
-                                                       tileWidth.value, tileHeight.value,
-                                                       0,
-                                                       dorpMapPoint.x, dorpMapPoint.y);
+        var obj:Object = FloorTile.getJsonData(tileImageUrl_text,
+                                               tileWidth.value, tileHeight.value,
+                                               0,
+                                               dropMapPoint.x, dropMapPoint.y);
         guiInputSender.getSender().addCharacter(obj);
     }
     

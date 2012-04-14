@@ -119,7 +119,7 @@
                              position:String):void {
         this.addChild(component);
         
-        this.title = titleText;
+        this.title = "カットイン：" + titleText;
         if( position != null ) {
             this.position = position;
         }

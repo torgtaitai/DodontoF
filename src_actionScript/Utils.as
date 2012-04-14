@@ -17,6 +17,7 @@ package {
     import mx.containers.TabNavigator;
     import mx.controls.Alert;
     import mx.controls.ComboBox;
+    import mx.controls.Image;
     import mx.controls.Label;
     import mx.controls.ToolTip;
     import mx.core.UIComponent;
@@ -25,12 +26,13 @@ package {
     import mx.utils.URLUtil;
     import mx.controls.SWFLoader;
     import flash.system.Capabilities;
+    import mx.utils.StringUtil;
     
     
     public class Utils {
         
         public static function timer(seconds:int, action:Function):void {
-            var timer : Timer = new Timer(seconds * 1000, 1);
+            var timer:Timer = new Timer(seconds * 1000, 1);
             timer.addEventListener(TimerEvent.TIMER, function(event:TimerEvent) : void {
                     action();
                 });
@@ -113,7 +115,6 @@ package {
                 component.setStyle("borderSkin", CustomSkin);
             }
         }
-        
         
         
         /*　イニシアティブの算出方法について
@@ -415,10 +416,15 @@ package {
         }
         
         static public function cutChatTailWhenMarked(chatMessage:String, tail:String):String {
-            var index1:int = chatMessage.lastIndexOf("@");
-            var index2:int = chatMessage.lastIndexOf("＠");
+            var marks:Array = ["@", "＠"];
             
-            var index:int = (index1 > index2) ? index1 : index2;
+            var index:int = -1;
+            for each(var mark:String in marks) {
+                index = chatMessage.lastIndexOf(mark + tail);
+                if( index != -1 ) {
+                    break;
+                }
+            }
             
             if(index == -1) {
                 return chatMessage;
@@ -568,6 +574,42 @@ package {
                 return false;
             }
             return true;
+        }
+        
+        static public function getTimeTextForChat(time:Number):String {
+            var date:Date = new Date();
+            //time = time - date.getTimezoneOffset();
+            date.setTime(time * 1000);
+            
+            var dateString:String =
+                StringUtil.substitute("{0}:{1}：", 
+                                      formatZero(date.hours, 2),
+                                      formatZero(date.minutes, 2));
+            /*
+            var dateString:String = 
+                StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}.{6}", 
+                                      formatZero(date.fullYear, 2),
+                                      formatZero(date.month, 2),
+                                      formatZero(date.date, 2),
+                                      formatZero(date.hours, 2),
+                                      formatZero(date.minutes, 2),
+                                      formatZero(date.seconds, 2),
+                                      formatZero(date.milliseconds, 2));
+            */
+            
+            return dateString;
+        }
+        
+        static private function formatZero(number:Number, count:uint):String {
+            var string:String = String(number);
+            while (string.length < count) {
+                string = "0" + string;
+            }
+            return string;
+        }
+        
+        static public function isEqual(obj1:Object, obj2:Object):Boolean {
+            return (mx.utils.ObjectUtil.compare(obj1, obj2) == 0);
         }
         
     }

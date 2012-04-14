@@ -50,14 +50,14 @@
         
         map = DodontoF_Main.getInstance().getMap();
         
-        dragDropForDrow.addDropEvent( map.getCardLayer() );
+        dragDropForDrow.addDropEvent( map.getView() );
         
         init();
     }
     
     protected function init():void {
         title = "カード選択";
-        howToLabel.text = "山札のカードは以下の通り。抜き取りたいカードをドラッグしてカード置き場（緑のマットの上）にドロップしてください。";
+        howToLabel.text = "山札のカードは以下の通り。抜き取りたいカードをドラッグしてマップにドロップしてください。";
     }
     
     public function closeWindow():void {

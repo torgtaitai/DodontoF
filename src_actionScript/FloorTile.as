@@ -21,7 +21,6 @@ package {
         private var imageUrl:String;
         private var width:int;
         private var height:int;
-        private var rotation:int = 0;
         
         private var thisObj:FloorTile;
         
@@ -46,12 +45,12 @@ package {
                                            createPositionX:int,
                                            createPositionY:int):Object {
             var draggable:Boolean = true;
-            var jsonData:Object = MovablePiece.getJsonData(getTypeStatic(), createPositionX, createPositionY, draggable);
+            var jsonData:Object = MovablePiece.getJsonData(getTypeStatic(), createPositionX,
+                                                           createPositionY, draggable, rotation);
             
             jsonData.imageUrl = imageUrl;
             jsonData.width = width;
             jsonData.height = height;
-            jsonData.rotation = rotation;
             
             return jsonData;
         }
@@ -62,7 +61,6 @@ package {
             jsonData.imageUrl = imageUrl;
             jsonData.width = width;
             jsonData.height = height;
-            jsonData.rotation = this.rotation;
             
             return jsonData;
         }
@@ -73,7 +71,6 @@ package {
             this.imageUrl = params.imageUrl;
             this.width = params.width;
             this.height = params.height;
-            this.rotation = params.rotation;
             
             super(params);
             
@@ -88,15 +85,18 @@ package {
             return false;
         }
         
+        
+        private var menuList:Array = new Array();
+        
         override protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "タイルの固定／固定解除", this.getContextMenuItemMoveLock);
-            addMenuItem(menu, "右回転",    this.getContextMenuItemFunctionObRotateCharacter( 90), true);
-            addMenuItem(menu, "180度回転", this.getContextMenuItemFunctionObRotateCharacter(180));
-            addMenuItem(menu, "左回転",    this.getContextMenuItemFunctionObRotateCharacter(270));
-            addMenuItem(menu, "フロアタイルの削除", this.getContextMenuItemRemoveCharacter, true);
+            menuList.push( addMenuItem(menu, "タイルの固定／固定解除", this.getContextMenuItemMoveLock) );
+            menuList.push( addMenuItem(menu, "右回転",    this.getContextMenuItemFunctionObRotateCharacter( 90), true) );
+            menuList.push( addMenuItem(menu, "180度回転", this.getContextMenuItemFunctionObRotateCharacter(180)) );
+            menuList.push( addMenuItem(menu, "左回転",    this.getContextMenuItemFunctionObRotateCharacter(270)) );
+            menuList.push( addMenuItem(menu, "フロアタイルの削除", this.getContextMenuItemRemoveCharacter, true) );
             
             view.contextMenu = menu;
         }
@@ -109,10 +109,10 @@ package {
         
         protected function getContextMenuItemFunctionObRotateCharacter(rotationDiff:Number):Function {
             return function(event:ContextMenuEvent):void {
-                var rotation:Number = thisObj.rotation;
+                var rotation:Number = getRotation();
                 rotation += rotationDiff;
                 rotation = ( rotation % 360 );
-                thisObj.rotation = rotation;
+                setRotation( rotation );
                 
                 thisObj.loadViewImage();
                 sender.changeCharacter( thisObj.getJsonData() );
@@ -150,14 +150,16 @@ package {
             this.editable = b;
             view.setIsDrawRound(this.editable);
             drawTile();
+            
+            for each(var menu:ContextMenuItem in menuList) {
+                    menu.visible = b;
+                }
         }
         
         override public function loadViewImage():void {
-            var name:String = this.imageUrl;
-            var rotation:int = 0;
-            view.loadImageWidthHeightRotation(name, this.imageUrl,
+            view.loadImageWidthHeightRotation(this.imageUrl,
                                               this.width, this.height,
-                                              this.rotation);
+                                              getRotation());
         }
         
         override protected function update(params:Object):void {
@@ -218,5 +220,20 @@ package {
             return getHeight() * getSquareLength();
         }
         
-    }
+        override public function canMoveMode():Boolean {
+            if( ! super.canMoveMode() ) {
+                return false;
+            }
+            return this.editable;
+        }
+        
+        override public function getDraggable():Boolean {
+            if( ! super.getDraggable() ) {
+                return false;
+            }
+            return this.editable;
+        }
+        
+
+   }
 }

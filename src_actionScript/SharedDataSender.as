@@ -20,16 +20,20 @@ package {
     import ym.net.HTTPPostBinary;
     import flash.geom.Point;
     import flash.events.DataEvent;
+    import mx.utils.UIDUtil;
     
     
     public class SharedDataSender {
         
         protected var loadParams:Object = null;
         
-        protected var uniqueId:String = "";
+        private var uniqueId:String = "";
+        private var strictlyUniqueId:String = UIDUtil.createUID();
         
         protected var refreshTimeoutSecond:int = 10;
         protected var refreshTimeoutPadding:int = 10;
+        protected var refreshIntervalFirstPaddingSecond:Number = 5;
+        protected var refreshIntervalSecond:Number = 1.5;
         protected var retryWaitSeconds:int = 1;
         
         
@@ -40,6 +44,7 @@ package {
         protected var lastUpdateTimes:Object = getInitLastUpdateTimes();
         protected var receiver:SharedDataReceiver = newReceiverForInitialize();
         protected var refreshLoader:URLLoader = null;
+        protected var refreshIndex:int = 0;
         
         
         public function SharedDataSender() {
@@ -55,8 +60,26 @@ package {
             return this.uniqueId;
         }
         
-        public function setRefreshTimeout(timeout:int):void {
+        public function isOwnUniqueId(targetId:String):Boolean {
+            var parats:Array = targetId.split("\t");
+            var targetUniqeId:String = parats[0];
+            return ( targetUniqeId == getUniqueId() );
+        }
+        
+        public function getStrictlyUniqueId():String {
+            return this.uniqueId + "\t" + this.strictlyUniqueId;
+        }
+        
+        public function isOwnStrictlyUniqueId(targetStrictlyId:String):Boolean {
+            return ( targetStrictlyId == getStrictlyUniqueId() );
+        }
+        
+        public function setRefreshTimeout(timeout:Number):void {
             this.refreshTimeoutSecond = timeout;
+        }
+        
+        public function setRefreshInterval(value:Number):void {
+            this.refreshIntervalSecond = value;
         }
         
         public function setMap(map_:Map):void {
@@ -216,7 +239,7 @@ package {
                 return;
             }
             
-            DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPalleteData );
+            DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPaletteSaveData );
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("シナリオデータ読み込みに成功しました。", false);
         }
         
@@ -342,8 +365,6 @@ package {
             Log.logging("checkLastUpdateTimes begin.");
             Log.logging("checkLastUpdateTimes type", type);
             
-            this.lastUpdateTimes[type] = timeValue;
-            
             if( isReplayMode() ) {
                 return true;
             }
@@ -383,12 +404,24 @@ package {
             startRefreshCheckTimer();
         }
         
-        
-        protected var refreshCheckTimer:Timer = null;
-        
         protected function startRefreshCheckTimer():void {
+			if( isCommet() ) {
+                startRefreshCheckTimerForCommet();
+			} else {
+                startRefreshCheckTimerForNotCommet();
+            }
+        }
+        
+        protected function startRefreshCheckTimerForCommet():void {
             var timeoutMilliSecond:int = (refreshTimeoutSecond + refreshTimeoutPadding) * 1000;
             setInterval(completeRefreshCheckTimer, timeoutMilliSecond);
+        }
+        
+        private function startRefreshCheckTimerForNotCommet():void {
+            var timeoutMilliSecond:int = refreshIntervalSecond * 1000;
+            Log.loggingTuning("refresh setInterval timeoutMilliSecond", timeoutMilliSecond);
+            
+            setInterval(refresh, timeoutMilliSecond);
         }
         
         protected var preRefreshIndex:int = 0;
@@ -408,6 +441,9 @@ package {
             Log.loggingErrorOnStatus("サーバとの接続でエラーが発生しました。再接続します。");
             
             isRetry = true;
+            
+            //接続断が発生したので一旦履歴をクリアーに。
+            clearRecord();
             
             if( refreshLoader != null ) {
                 closeRefreshLoader();
@@ -453,15 +489,35 @@ package {
             this.sendCommandData(params);
         }
         
-        protected var refreshIndex:int = 0;
+        private function inclimentRefreshIndex():void {
+            refreshIndex++;
+        }
+        
+        private var isCommetMode:Boolean = false;
+        
+        private function isCommet():Boolean {
+            return isCommetMode;
+        }
+        
+        public function setCommet(b:Boolean):void {
+            isCommetMode = b;
+            Log.loggingTuning("isCommetMode", isCommetMode);
+        }
+        
+        
+        public function refreshNext():void {
+            inclimentRefreshIndex();
+            
+			if( isCommet() ) {
+                refresh();
+            }
+        }
         
         public function refresh(obj:Object = null):void {
             if( isStopRefreshOn ) {
                 return;
             }
-            
-            this.refreshIndex++;
-            
+			
             var userName:String = getUserName();
             
             var jsonData:Object = {
@@ -473,6 +529,10 @@ package {
             
             if( DodontoF_Main.getInstance().isVisiterMode() ) {
                 jsonData["isVisiter"] = true;
+            }
+            
+            if( getReciever().isSessionRecording() ) {
+                jsonData["isGetOwnRecord"] = true;
             }
             
             if( DodontoF_Main.getInstance().getMentenanceModeOn() ) {
@@ -517,16 +577,22 @@ package {
         }
         
         public function changeMap(mapImageUrl:String, 
+                                  mirrored:Boolean,
                                   mapWidth:int,
                                   mapHeight:int, 
                                   gridColor:uint,
+                                  gridInterval:int,
+                                  isAlternately:Boolean,
                                   mapMarks:Array):void {
             var changeMapJsonData:Object = {
                 "mapType": "imageGraphic",
                 "imageSource": mapImageUrl,
+                "mirrored": mirrored,
                 "xMax": mapWidth,
                 "yMax": mapHeight,
                 "gridColor": gridColor,
+                "gridInterval": gridInterval,
+                "isAlternately": isAlternately,
                 "mapMarks": mapMarks};
             
             Log.logging("changeMapJsonData");
@@ -535,7 +601,7 @@ package {
             
             var params:String = getParamString("changeMap", [["mapData", jsonParams]]);
             Log.logging("var params:String : " + params);
-            sendCommandData(params);
+            this.sendCommandData(params);
         }
         
         public function deleteImage(imageUrlList:Array,
@@ -561,7 +627,7 @@ package {
             };
             var addCardData:String = getEncodedJsonString( jsonData );
             var params:String = this.getParamString("addCard", [["addCardData", addCardData]]);
-            sendCommandData(params);
+            this.sendCommandData(params);
         }
         
         public function addCardZone(ownerId:String,
@@ -578,10 +644,18 @@ package {
             };
             var dataString:String = getEncodedJsonString( jsonData );
             var params:String = this.getParamString("addCardZone", [["data", dataString]]);
-            sendCommandData(params);
+            this.sendCommandData(params);
         }
         
         public function addCharacter(characterJsonData:Object, keyName:String = "name"):void {
+            try {
+                addCharacterWithError(characterJsonData, keyName);
+            } catch( e:Error ) {
+                Log.loggingException("SharedDataSender.addCharacter()", e);
+            }
+        }
+        
+        public function addCharacterWithError(characterJsonData:Object, keyName:String):void {
             Log.logging("SharedDataSender.addCharacter() begin characterJsonData", characterJsonData);
             
             var jsonParams:String = getEncodedJsonString(characterJsonData);
@@ -595,7 +669,7 @@ package {
             receiver.addCharacterInOwnMap(characterJsonData);
             
             Log.logging("SharedDataSender.sendCommandData(params) begin");
-            sendCommandData(params, printAddFailedCharacterName);
+            this.sendCommandData(params, printAddFailedCharacterName);
             Log.logging("SharedDataSender.sendCommandData(params) end");
             
             Log.logging("SharedDataSender.addCharacter() end");
@@ -659,7 +733,7 @@ package {
             
             var params:String = getParamString("changeCharacter", [["params", jsonParams]]);
             Log.logging("var params:String : " + params);
-            sendCommandData(params);
+            this.sendCommandData(params);
         }
         
         /*
@@ -773,6 +847,7 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       backgroundImage:String,
                                        gameType:String,
                                        viewStates:Object,
                                        playRoomIndex:int,
@@ -783,6 +858,7 @@ package {
                 "chatChannelNames": chatChannelNames,
                 "canUseExternalImage": canUseExternalImage,
                 "canVisit": canVisit,
+                "backgroundImage": backgroundImage,
                 "gameType": gameType,
                 "viewStates": viewStates
             };
@@ -896,6 +972,7 @@ package {
             
             params.push(["Command", commandName]);
             params.push(["saveDataDirIndex", this.saveDataDirIndex]);
+            params.push(["commandSender", getStrictlyUniqueId()]);
             
             Log.logging("paramString creating...");
             var paramString:String = new String();
@@ -936,13 +1013,20 @@ package {
                 'chatMessageDataLog': 0,
                 'time': 0,
                 'effects': 0,
-                'playRoomInfo': 0
+                'playRoomInfo': 0,
+                'record': 0,
+                'recordIndex': 0
             };
             return lastUpdateTimes;
         }
         
         public function resetLastUpdateTimeOfInitiativeTimer():void {
             resetLastUpdateTime('time');
+        }
+        
+        public function resetCharactersUpdateTime():void {
+            resetLastUpdateTime('characters');
+            clearRecord();
         }
         
         protected function resetLastUpdateTime(type:String):void {
@@ -1003,6 +1087,9 @@ package {
                 if( oldLoader != refreshLoader ) {
                     closeLoader(oldLoader);
                 }
+                
+                //接続断が発生したので一旦履歴をクリアーに。
+                clearRecord();
             }
             
             loader.addEventListener(IOErrorEvent.IO_ERROR, wrappedCallBackForError);
@@ -1011,6 +1098,15 @@ package {
             
             return loader;
         }
+        
+        private function clearRecord():void {
+            resetLastUpdateTime('recordIndex');
+            resetLastUpdateTime('record');
+            
+            Log.logging("clearRecord called.");
+        }
+        
+            
         
         protected function sendCommandDataCatched(paramsString:String,
                                                 callBack:Function,
@@ -1021,12 +1117,14 @@ package {
             
             var request:URLRequest = getUrlRequestForSendCommandData(paramsString);
             
+            /*
             if( callBack == null ) {
                 Log.loggingTuning("sendToURL begin");
                 sendToURL(request);
                 Log.loggingTuning("sendToURL end");
                 return;
             }
+            */
             
             var loader:URLLoader = null;
             
@@ -1049,7 +1147,7 @@ package {
             return Utils.getJsonString(jsonData);
         }
         
-        public static function getEncodedJsonString(jsonData:Object):String {
+        public function getEncodedJsonString(jsonData:Object):String {
             return Utils.getEncodedJsonString(jsonData);
         }
         
@@ -1104,13 +1202,13 @@ package {
             this.sendCommandData(params);
         }
         
-        public function initCards(cardTypes:Array):void {
+        public function initCards(cardTypes:Array, resultFunction:Function):void {
             var jsonData:Object = {
                 "cardTypeInfos": cardTypes
             };
             var jsonParams:String = getEncodedJsonString( jsonData );
             var params:String = this.getParamString("initCards", [["params", jsonParams]]);
-            this.sendCommandData(params);
+            this.sendCommandData(params, resultFunction);
         }
         
         public function shuffleForNextRandomDungeon(mountName:String, mountId:String):void {

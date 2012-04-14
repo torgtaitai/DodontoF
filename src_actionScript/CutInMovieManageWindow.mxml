@@ -2,9 +2,9 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="300"
-   height="210"
-   title="動画カットイン" 
+   width="350"
+   height="280"
+   title="カットイン" 
    showCloseButton="true"
    >
 <!--
@@ -34,6 +34,16 @@
                    doubleClick="sendCutIn()"
                    >
 	    <mx:columns>
+          <mx:DataGridColumn headerText="末尾発動：チャット末尾がタイトル一致なら発動"
+                             dataField="isTail"
+                             textAlign="center"
+                             width="40">
+            <mx:itemRenderer>
+              <mx:Component>
+                <mx:CheckBox click="CutInMovieManageWindow.changeEnableState(data)"  selected="{(data.isTail == null ? true : data.isTail)}"/>
+              </mx:Component>
+            </mx:itemRenderer>
+          </mx:DataGridColumn>
 		  <mx:DataGridColumn headerText="タイトル"
                              dataField="message"
                              textAlign="center"
@@ -49,16 +59,20 @@
 	    </mx:columns>
 	  </mx:DataGrid>
       
+<!--
       <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
         <mx:Button id="openEditBoxButton" label="編集＞＞"  click="openEditBox()" />
         <mx:Spacer width="100%" />
         <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
+-->
       
-      <mx:HBox id="editBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:HBox id="editBox" height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
         <mx:Button label="追加" click="addCutInEffect()" />
         <mx:Button label="変更" click="changeCutInEffect()" />
         <mx:Button label="削除"  click="removeCutInEffect()" />
+        <mx:Spacer width="100%" />
+        <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
     </mx:Box>
     
@@ -185,6 +199,7 @@
         window.init(cutInInfo, index);
     }
 
+<!--
     private function openEditBox():void {
         var editBoxHeigth:int = 30;
     
@@ -197,6 +212,18 @@
             editBox.height = 0;
             openEditBoxButton.label = "編集＞＞"
         }
+    }
+-->
+
+    static public function changeEnableState(params:Object):void {
+        if( params.isTail == null ) {
+            params.isTail = true;
+        }
+        
+        params.isTail =( ! params.isTail );
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.changeEffect(params);
     }
 
     ]]>

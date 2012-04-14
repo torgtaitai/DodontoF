@@ -160,7 +160,7 @@
                 var globalPoint:Point = localToGlobal( new Point(view.x + 175 , view.y + 55) );
                 var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
                 
-                var dropMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+                var dropMapPoint:Point = map.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
                 
                 Log.logging("dropMapPoint.x", dropMapPoint.x);
                 Log.logging("dropMapPoint.y", dropMapPoint.y);

@@ -25,15 +25,22 @@ package {
             return "CardZone";
         }
         
+        public function CardZone(params:Object) {
+            super(params);
+            setTitleVisible(false);
+            view.alpha = 0.5;
+            view.setLineDiameter( 0 );
+        }
+        
         override public function isTrashable():Boolean {
             return false;
         }
         
-        override public function canSnapOnPositionX():Boolean {
+        override public function canExtendOnPositionX():Boolean {
             return false;
         }
         
-        override public function canSnapOnPositionY():Boolean {
+        override public function canExtendOnPositionY():Boolean {
             return false;
         }
         
@@ -64,11 +71,6 @@ package {
             return characterJsonData;
         }
         
-        public function CardZone(params:Object) {
-            super(params);
-            setTitleVisible(false);
-        }
-        
         override protected function setParams(params:Object):void {
             super.setParams(params);
         }
@@ -78,19 +80,22 @@ package {
         }
         
         override protected function getHeightSize():Number {
-            return 4;
+            return 2;
         }
         
         override public function isPickupable():Boolean {
             return false;
         }
         
+        override public function getRoundColor():int {
+            return 0xFFFFCC;
+        }
         override protected function getCardBackColor(message:String):uint {
             return 0xFFFFCC;
         }
         
         override public function getLoadImageUrl():String {
-            return "<font size=\"70\">" + this.getTitleText() + "</font>"
+            return "<p align='center'><font size=\"70\"><br><br><br>" + this.getTitleText() + "</font></p>"
         }
         
         override public function getTitleText():String {
@@ -118,11 +123,11 @@ package {
         }
         
         public function getCenterX():Number {
-            return getX() + ((getWidthSize() - 2) / 2 * Map.getSquareLength());
+            return getX() + ( 1 * Map.getSquareLength() );
         }
         
         public function getCenterY():Number {
-            return getY() + ((getHeightSize() - 3) * Map.getSquareLength());
+            return getY() + ( -2 * Map.getSquareLength() );
         }
         
         override protected function initContextMenu():void {
@@ -143,7 +148,6 @@ package {
             loadViewImage();
             sender.changeCharacter( getJsonData() );
             
-
             var cards:Array = getMap().getTargetTypes( [Card.getTypeStatic()] );
             
             for(var i:int = 0 ; i < cards.length ; i++) {

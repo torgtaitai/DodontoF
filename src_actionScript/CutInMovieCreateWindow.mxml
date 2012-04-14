@@ -44,6 +44,10 @@
                       snapInterval="0.01"
                       />
         </mx:FormItem>
+	    <mx:FormItem label="チャット末尾で起動" toolTip="チャットの行末尾がタイトルと一致した場合にカットインを発動するかの指定\r例えば「 → 失敗」とするとダイス結果に対してカットインを発動させることができるようになります。">
+          <mx:CheckBox id="isTail" selected="true"/>
+	      <mx:Label text="チャット末尾がタイトルと一致した場合にカットインを表示します" />
+        </mx:FormItem>
       </mx:Form>
       
       <mx:Box height="100%" width="50%">
@@ -57,12 +61,12 @@
         
 	    <mx:FormItem label="表示位置:" >
           <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false" toolTip="カットインの表示位置を指定します。">
-            <mx:Object label="中央"     data="center" />
-            <mx:Object label="上部中央" data="up" />
-            <mx:Object label="上部右"   data="up,right" />
-            <mx:Object label="上部左"   data="up,left" />
-            <mx:Object label="中央右"   data="right" />
-            <mx:Object label="中央左"   data="left" />
+            <mx:Object label="左上"   data="up,left"  />
+            <mx:Object label="右上"   data="up,right" />
+            <mx:Object label="上"     data="up"       />
+            <mx:Object label="中央"   data="center"   />
+            <mx:Object label="右"     data="right"    />
+            <mx:Object label="左"     data="left"     />
           </mx:ComboBox>
         </mx:FormItem>
         
@@ -127,6 +131,8 @@
     }
     
     override protected function setup():void {
+        positionCoboBox.selectedIndex = 3;
+        
         initPreview();
         imageSelecter.addPreview(previewBox, 200);
         imageSelecter.setMoviewFileSelectable(true);
@@ -211,6 +217,7 @@
             "soundSource": soundSource,
             "isSoundLoop": isSoundLoop,
             "volume": volume.value,
+            "isTail": isTail.selected,
             "width": imageWidth.value,
             "height": imageHeight.value,
             "position" : position,

@@ -19,10 +19,6 @@ package {
             refreshedCount = 0;
         }
         
-        override protected function refreshNext():void {
-            refreshedCount++;
-            //do NOT refresh next.
-        }
     }
 }
 

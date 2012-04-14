@@ -57,7 +57,10 @@
 
     public function execute():void {
         try {
-            var counters:Array = input.text.split(/[\s　]+/);
+            var text:String = input.text;
+            text.replace(/[\s　]+/, ' ');
+            text.replace(/\s$/, '');
+            var counters:Array = text.split(/\s/);
             DodontoF_Main.getInstance().getRoundTimer().sendCounterNames(counters);
             DodontoF_Main.getInstance().getInitiativeWindow().setFontSize(fontSize.value);
             

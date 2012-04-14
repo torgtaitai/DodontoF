@@ -121,12 +121,9 @@
         
         view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                 view.stopDrag();
-            
-                var map:Map = DodontoF_Main.getInstance().getMap();
-                var globalPoint:Point = localToGlobal( new Point(view.x + 250 , view.y + 25) );
-                var mapLocalPoint:Point = map.getCharacterLayer().globalToLocal( globalPoint );
                 
-                var dropMapPoint:Point = MovablePiece.getSnapViewPoint(mapLocalPoint.x, mapLocalPoint.y, Map.getSquareLength());
+                var globalPoint:Point = localToGlobal( new Point(view.x + 250 , view.y + 25) );
+                var dropMapPoint:Point = DodontoF_Main.getInstance().getMap().getCharacterPointFromGlobalPoint(globalPoint);
                 
                 Log.logging("dropMapPoint.x", dropMapPoint.x);
                 Log.logging("dropMapPoint.y", dropMapPoint.y);

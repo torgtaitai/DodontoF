@@ -93,9 +93,12 @@ package {
         }
         
         public function changeMap(mapImageUrl:String,
+                                  mirrored:Boolean,
                                   mapWidth:int,
                                   mapHeight:int,
                                   gridColor:uint,
+                                  gridInterval:int,
+                                  isAlternately:Boolean,
                                   mapMarks:Array):void {
             if( ( mapHeight < 1 ) ||
                 ( mapHeight > ChangeMapWindow.getMapMaxHeigth() )) {
@@ -107,7 +110,8 @@ package {
                 throw new Error("横マス数の入力値が不正です。1〜" + ChangeMapWindow.getMapMaxWidth() + "の整数を入力してください。");
             }
             
-            sender.changeMap(mapImageUrl, mapWidth, mapHeight, gridColor, mapMarks);
+            sender.changeMap(mapImageUrl, mirrored, mapWidth, mapHeight,
+                             gridColor, gridInterval, isAlternately, mapMarks);
         }
         
         public function deleteImage(imageUrlList:Array,
@@ -116,6 +120,7 @@ package {
         }
         
         public function getAndCheckAddCharacterParams(characterName:String, imageUrl:String,
+                                                      mirrored:Boolean,
                                                       size:int, isHide:Boolean,
                                                       initiative:Number, info:String,
                                                       counters:Object, statusAlias:Object,
@@ -156,6 +161,7 @@ package {
             var characterParams:Object = new Object;
             characterParams.name = characterName;
             characterParams.imageUrl = imageUrl;
+            characterParams.mirrored = mirrored;
             characterParams.size = size;
             characterParams.isHide = isHide;
             characterParams.initiative = initiative;
@@ -167,7 +173,7 @@ package {
             return characterParams;
         }
         
-        public function addCharacter(name:String, imageUri:String,
+        public function addCharacter(name:String, imageUri:String, mirrored:Boolean,
                                      size:int, isHide:Boolean,
                                      initiative:Number, info:String,
                                      characterPositionX:int, characterPositionY:int,
@@ -175,7 +181,7 @@ package {
                                      url:String):void {
             
             var characterJsonData:Object =
-                Character.getJsonData(name, imageUri,
+                Character.getJsonData(name, imageUri, mirrored,
                                       size, isHide,
                                       initiative, info, 0,
                                       characterPositionX, characterPositionY,
@@ -359,7 +365,7 @@ package {
         }
         
         public function changeCharacter(character:Character,
-                                        name:String, imageUri:String,
+                                        name:String, imageUri:String, mirrored:Boolean,
                                         size:int, isHide:Boolean,
                                         initiative:Number, info:String,
                                         counters:Object, statusAlias:Object,
@@ -385,6 +391,7 @@ package {
             
             character.setName(name);
             character.setImageUrl(imageUri);
+            character.setMirrored(mirrored);
             character.setSize(size);
             character.setHide(isHide);
             character.setInitiative(initiative);
@@ -392,6 +399,7 @@ package {
             character.setCounters(counters);
             character.setStatusAlias(statusAlias);
             character.setUrl(url);
+            character.updateRefresh();
             
             sender.changeCharacter( character.getJsonData() );
             
@@ -570,7 +578,8 @@ package {
                 "senderName": chatCharacterName,
                 "message" : message,
                 "color" : color,
-                "uniqueId" : sender.getUniqueId(),
+                //"uniqueId" : sender.getUniqueId(),
+                "uniqueId" : sender.getStrictlyUniqueId(),
                 "messageIndex" : messageIndex,
                 "channel": channel };
             
@@ -621,13 +630,15 @@ package {
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
                                        canVisit:Boolean,
+                                       backgroundImage:String,
                                        gameType:String,
                                        viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             checkPlayRoom(playRoomName, playRoomPassword, chatChannelNames);
             sender.changePlayRoom(playRoomName, playRoomPassword, chatChannelNames,
-                                  canUseExternalImage, canVisit, gameType, viewStates, 
+                                  canUseExternalImage, canVisit, backgroundImage,
+                                  gameType, viewStates, 
                                   playRoomIndex, resultFunction);
         }
         

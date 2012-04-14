@@ -136,7 +136,7 @@
         var image:ImageSprite = new ImageSprite();
         var url:String = Config.getInstance().getUrlString(data.imageName);
         var size:int = 1;
-        image.loadImage(data.name, url, size);
+        image.loadImage(url, size);
         
         var nameTextField:TextField = getNameTextField(data.name);
         image.addChild(nameTextField);

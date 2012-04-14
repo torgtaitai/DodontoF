@@ -10,9 +10,9 @@ function getDodontofBusyAll() {
     getDodontofBusy("安定版その２",           "dodontof_stable2",   "http://dodontof.dip.jp/DodontoF/DodontoF.swf");
     getDodontofBusy("らぁさんの安定版",       "dodontof_raa1",      "http://www.raa0121.info/DodontoF/DodontoF.swf");
     getDodontofBusy("らぁさんの安定版その２", "dodontof_raa2",      "http://raa0121.shiracha.net/DodontoF/DodontoF.swf");
+    getDodontofBusy("らぁさんの安定版その３", "dodontof_raa3",      "http://nakako.raa0121.info/DodontoF/DodontoF.swf");
     getDodontofBusy("たぐっちゃんの安定版",   "dodontof_taguchan1", "http://smile-b.xsrv.jp/dodon2/DodontoF.swf");
     getDodontofBusy("最新版",                 "dodontof_newest",    "http://www.dodontof.com/DodontoF/DodontoF.swf");
-//    getDodontofBusy("おためし版",             "dodontof_test",      "http://www.dodontof.com/DodontoF_New/DodontoF.swf");
 }
 
 function getDodontofBusy(title, target, baseUrl) {
@@ -21,12 +21,17 @@ function getDodontofBusy(title, target, baseUrl) {
 	document.getElementById(target).innerHTML = getUrlLinkText((title + "：不明"), baseUrl);
 	
 	url = url.replace(/DodontoF.swf$/, "");
-	url = url.replace(/DodontoFServer.rb$/, "");
+	url = url.replace(/DodontoFServer.rb.*$/, "");
 	url = url.replace(/\/$/, "");
 	
-	url = url + "/getInfo.rb?callback=?"
+	// url = url + "/getInfo.rb?callback=?"
+	url = url + "/DodontoFServer.rb?webif=getBusyInfo&callback=?"
     
     jQuery.getJSON(url, function(data) {
+        if( data.result != "OK" ) {
+            return;
+        }
+        
         var percentage = data.loginCount / data.maxLoginCount * 100;
         percentage = Math.floor( percentage );
         var busyInfo = "" + data.loginCount + "/" + data.maxLoginCount + "(" + percentage + "%)";
@@ -54,9 +59,9 @@ function getUrlLinkText(text, url) {
     <div id="dodontof_stable2"></div>
     <div id="dodontof_raa1"></div>
     <div id="dodontof_raa2"></div>
+    <div id="dodontof_raa3"></div>
     <div id="dodontof_taguchan1"></div>
     <div id="dodontof_newest"></div>
-<!--    <div id="dodontof_test"></div> -->
   </font>
 </div>
 </body>

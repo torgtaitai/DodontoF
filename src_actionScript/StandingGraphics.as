@@ -17,6 +17,8 @@ package {
     
     public class StandingGraphics {
         
+        static private var imageLoaderEventHash:Object = new Object();
+        
         private var standingGraphicInfosOriginal:Array = new Array();
         private var imageInfos:Array = new Array(getMaxLeftIndex());
         private var baseX:int = 0;
@@ -44,6 +46,7 @@ package {
             var name:String = info.name;
             var state:String = info.state;
             var source:String = info.source;
+            var mirrored:Boolean = info.mirrored;
             var leftIndex:int = info.leftIndex;
             if( leftIndex == 0 ) {
                 leftIndex = 1;
@@ -56,14 +59,15 @@ package {
                 return;
             }
             
-            var info:Object = {
+            var target:Object = {
                 "name" : name,
                 "state" : state,
                 "source" : source,
+                "mirrored": mirrored,
                 "leftIndex" : leftIndex
             };
             
-            standingGraphicInfosOriginal.push(info);
+            standingGraphicInfosOriginal.push(target);
         }
         
         public function isDisplayStateOn():Boolean {
@@ -337,6 +341,8 @@ package {
             var source:String = findResult.info.source;
             source = Config.getInstance().getUrlString(source);
             
+            var mirrored:Boolean = findResult.info.mirrored;
+            
             var speakImageResult:Object = findTargetInfo(name, state + speakMarker, chatMessage);
             if( speakImageResult.info != null ) {
                 var kuchipaku:Object = {
@@ -345,6 +351,16 @@ package {
                 filterImageInfos.splice(0, 0, kuchipaku);
             }
             
+            adjustmentPosition(chatWindowX, chatWindowY, chatWindowWidth);
+            
+            printImage(leftIndex, filterImageInfos, name, source, mirrored);
+            
+            return result;
+        }
+        
+        
+        
+        private function adjustmentPosition(chatWindowX:int, chatWindowY:int, chatWindowWidth:int):void {
             //ウィンドサイズの分高さを調整。
             baseY = chatWindowY - 30;
 
@@ -353,19 +369,32 @@ package {
             
             //幅一杯だと見栄えが悪いので調整
             baseWidth = chatWindowWidth - 10;
+        }
+        
+        
+        private function printImage(leftIndex:int, filterImageInfos:Array, name:String,
+                                    source:String, mirrored:Boolean):void {
+            Log.logging("printImage begin"); 
             
-            var imageCompleteHandlerFunction:Function = getImageCompleteHandler(leftIndex, filterImageInfos, name);
+            var imageCompleteHandlerFunction:Function = getImageCompleteHandler(leftIndex, filterImageInfos, name, source, mirrored);
+            
             var existEvent:Event = imageLoaderEventHash[source] as Event;
-            if( existEvent != null ) {
-                imageCompleteHandlerFunction(existEvent);
-            } else {
+            Log.logging("imageLoaderEventHash source", source); 
+            
+            if( existEvent == null ) {
+                Log.logging("existEvent is null, so loadImage called."); 
                 loadImage(source, imageCompleteHandlerFunction);
+            } else {
+                Log.logging("existEvent is NOT null, get image from Hash DB"); 
+                imageCompleteHandlerFunction(existEvent);
             }
             
-            return result;
+            Log.logging("printImage end"); 
         }
         
         private function loadImage(source:String, imageCompleteHandlerFunction:Function):void {
+            Log.logging("loadImage begin source", source);
+            
             source = Config.getInstance().getUrlString(source);
             
             var imageLoader:Loader = new Loader();
@@ -373,31 +402,27 @@ package {
             imageLoader.load(new URLRequest(source));
         }
         
-        private function getImageCompleteHandler(leftIndex:int, filterImageInfos:Array, name:String):Function {
+        private function getImageCompleteHandler(leftIndex:int, filterImageInfos:Array,
+                                                 name:String, source:String, mirrored:Boolean):Function {
             return function(event:Event):void {
-                imageCompleteHandler(event, leftIndex, filterImageInfos, name);
+                imageCompleteHandler(event, leftIndex, filterImageInfos, name, source, mirrored);
             };
-        }
-        
-        private var imageLoaderEventHash:Object = new Object();
-        
-        private function saveEventHash(event:Event):void {
-            var loaderInfo:LoaderInfo = event.currentTarget as LoaderInfo;
-            var source:String = loaderInfo.url;
-            imageLoaderEventHash[source] = event;
         }
         
         private var imageWidthRate:Number = 1;//0.4;
         
-        private function imageCompleteHandler(event:Event, leftIndex:int, filterImageInfos:Array, name:String):void {
-            saveEventHash(event);
+        private function imageCompleteHandler(event:Event, leftIndex:int, filterImageInfos:Array,
+                                              name:String, source:String, mirrored:Boolean):void {
             
-            var imageLoader:Loader = event.target.loader;
+            Log.loggingTuning("imageCompleteHandler begin name", name);
+            
+            saveEventHash(event, source);
+            
+            var image:Loader = event.target.loader;
             
             var imageHeigthMinimum:int = 200;
-            var imageSizeInfo:Object = Utils.getSizeInfo(imageLoader, 0, 0, imageHeigthMinimum);
+            var imageSizeInfo:Object = Utils.getSizeInfo(image, 0, 0, imageHeigthMinimum);
             
-            var image:Loader = imageLoader;
             image.height = imageSizeInfo.height;
             image.width = imageSizeInfo.width;
             
@@ -423,7 +448,23 @@ package {
             image.x = baseX + leftPadding;
             image.y = baseY - image.height;
             
-            addImage(leftIndex, imageLoader, filterImageInfos, name);
+            if( mirrored ) {
+                image.scaleX = -1;
+                image.x += image.width;
+            }
+            
+            addImage(leftIndex, image, filterImageInfos, name);
+            
+            Log.logging("imageCompleteHandler end");
+        }
+        
+        private function saveEventHash(event:Event, source:String):void {
+            Log.logging("saveEventHash begin"); 
+            
+            var loaderInfo:LoaderInfo = event.currentTarget as LoaderInfo;
+            
+            imageLoaderEventHash[source] = event;
+            Log.logging("saveEventHash end"); 
         }
         
         private function addImage(leftIndex:int, imageLoader:Loader, filterImageInfos:Array, name:String):void {

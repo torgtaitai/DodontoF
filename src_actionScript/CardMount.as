@@ -49,7 +49,6 @@ package {
             
             characterJsonData.type = getTypeStatic();
             characterJsonData.cardCount = 0;
-            characterJsonData.nextCardId = MovablePiece.getDefaultId();
             
             return characterJsonData;
         }
@@ -59,13 +58,11 @@ package {
             
             characterJsonData.type = getTypeStatic();
             characterJsonData.cardCount = this.cardCount;
-            characterJsonData.nextCardId = this.nextCardId;
             
             return characterJsonData;
         }
         
         private var cardCount:int = 0;
-        private var nextCardId:String = MovablePiece.getDefaultId();
         
         public function CardMount(params:Object) {
             super(params);
@@ -158,7 +155,7 @@ package {
             } else {
                 DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを引きました。");
             }
-
+            
             
             sender.drawCard( isOpen_,
                              getSelfOwnerId(),
@@ -173,8 +170,6 @@ package {
         
         private function getNewCardImgId():String {
             var newCardImgId:String = MovablePiece.getDefaultId();
-            
-            'nextCardId'
             return newCardImgId;
         }
         

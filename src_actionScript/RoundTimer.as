@@ -195,6 +195,11 @@ package {
             for(var i:int = 0 ; i < names.length ; i++) {
                 var name:String = names[i];
                 name = name.replace(/^＊/, '*');
+                
+                if( name == "" ) {
+                    continue;
+                }
+                
                 counterNames.push( name);
             }
         }

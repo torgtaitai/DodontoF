@@ -151,14 +151,17 @@
             
             if( isFirstLoadFinished ) {
                 Log.logging("talk Text");
-                //new TextTalker().sendTexts(tmpBuffer);
+                new TextTalker().sendTexts(tmpBuffer);
+                //new BouyomiChan().sendTexts(tmpBuffer);
             }
             
             return true;
         }
         
         private function addLabelCount(count:int):void {
-            nocheckCount += count;
+            if( isNoCheckCounting ) {
+                nocheckCount += count;
+            }
             printLabelCount();
         }
         
@@ -260,7 +263,6 @@
         }
         
         
-        
         public function resizeChatLog(novelticMode:NovelticMode):void {
             this.setLastText( novelticMode );
             clearChatMessageLog();
@@ -271,6 +273,19 @@
             }
         }
         
+        private var isNoCheckCounting:Boolean = true;
+        
+        public function isNoCheckCountingMode():Boolean {
+            return isNoCheckCounting;
+        }
+        
+        public function stopNoCheckCount():void {
+            isNoCheckCounting = false;
+        }
+        
+        public function startNoCheckCount():void {
+            isNoCheckCounting = true;
+        }
         
     ]]>
   </mx:Script>

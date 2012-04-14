@@ -5,13 +5,9 @@ package {
     
     public class SharedDataSenderDummy extends SharedDataSender {
         
-        private var receiver:SharedDataReceiverDummy;
+        //private var receiver:SharedDataReceiverDummy;
         private var resultFunction:Function;
         private var thisObj:SharedDataSender ;
-        
-        public function getRefreshedCount():int {
-            return receiver.getRefreshedCount();
-        }
         
         public function init():void {
             thisObj = this;
@@ -36,7 +32,6 @@ package {
         
         override protected function sendCommandDataCatched(paramsString:String,
                                                            callBack:Function,
-                                                           callBackForError:Function,
                                                            isRefresh:Boolean = false):void {
             
             var wrappedCallBack:Function = callBack;
@@ -60,10 +55,9 @@ package {
                                          wrappedCallBackError, isRefresh);
         }
         
-        override protected function startRefreshTimeout():void {
+        override protected function startRefreshCheckTimer():void {
             //NO action
         }
-
     }
 }
 

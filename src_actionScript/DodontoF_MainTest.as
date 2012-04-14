@@ -24,15 +24,16 @@ package {
         private var currentTestTitle:String = "";
         
         private function setup():void {
-            dodontoF.dodontoFSpacer.height = 0;
-            dodontoF.diceWindowPanel.width = 10;
-            dodontoF.initiativeListWindowBase.width = 50;
-            dodontoF.chatDiceBox.percentHeight = 100;
+            //dodontoF.dodontoFSpacer.height = 0;
+            //dodontoF.diceWindowPanel.width = 10;
+            //dodontoF.initiativeListWindowBase.width = 50;
+            //dodontoF.chatDiceBox.percentHeight = 100;
             
             sender.init();
             
-            this.getGuiInputSender().setSaveDataDirIndex("3");
-            sender.removeRoom();
+            var roomNumber:int = 3;
+            this.getGuiInputSender().setSaveDataDirIndex(roomNumber);
+            sender.removePlayRoom([roomNumber], null, true);
         }
         
         private function teardown():void {
@@ -76,10 +77,10 @@ package {
         }
         
         private function log(message:String):void {
-            dodontoF.chatWindow.addMessageToChatLog("test", message, "000000", 100);
+            getChatWindow().addMessageToChatLog(0, "test", message, "000000", 100, "");
         }
         private function logError(message:String):void {
-            dodontoF.chatWindow.addMessageToChatLog("Asserto!!!", message, "ff0000", 100);
+            getChatWindow().addMessageToChatLog(0, "Asserto!!!", message, "ff0000", 100, "");
         }
         
         override public function login():void {
@@ -109,11 +110,17 @@ package {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.addCharacter("sampleCharacterName2", //name
                                         "./saveData/characterImages/chara08_a2_81.gif", //url
+                                        false, //mirrored
                                         1, //size
+                                        false, //hide
                                         99, //initiative
                                         "info message", //info
                                         0, //x
-                                        0); //y
+                                        0, //y
+                                        "", //dogTag
+                                        [], //counters
+                                        null, //statusAlias
+                                        ""); //url
             
             setResultCheckFunction( this.test_addCharacter_3 );
             sender.refresh();

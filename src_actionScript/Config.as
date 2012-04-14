@@ -13,7 +13,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.35.09(2012/02/19)";
+        private var version:String = "Ver.1.36.06.01(2012/04/14)";
         
         public function getVersion():String {
             return version;
@@ -120,10 +120,6 @@ package {
             return getDodontoFServerCgiUrl();
         }
         
-        public function getImageDataUploaderUrl():String {
-            return getUrlString("imageUploader.rb");
-        }
-        
         public function getUrlString(url:String):String {
             if( url == null ) {
                 return url;
@@ -132,6 +128,8 @@ package {
             if( url == "" ) {
                 return url;
             }
+            
+            url = changeUrlByUploadDirInfo(url);
             
             if(localUrlPrefix != null) {
                 if( url.search(localUrlPrefix) == 0 ) {
@@ -277,10 +275,10 @@ package {
                              function(v:Boolean):void {isSnapMovablePiece = v} );
             loadToggleState( serverInfo, info, "isAdjustImageSize",
                              function(v:Boolean):void {isAdjustImageSize = v} );
-            loadToggleState( serverInfo, info, "isCardVisible",
-                             getDodontoFM().getMap().setVisibleCardLayer );
             loadToggleState( serverInfo, info, "isStandingGraphicVisible",
                              getDodontoFM().getChatWindow().setStandingGraphicsDisplayState );
+            loadToggleState( serverInfo, info, "isCutInVisible",
+                             setCutInDisplayState );
             loadToggleState( serverInfo, info, "isPositionVisible",
                              getDodontoFM().getMap().setVisibleGridPositionLayer );
             loadToggleState( serverInfo, info, "isGridVisible",
@@ -289,6 +287,7 @@ package {
             loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isChatVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
 
             Log.logging("loadViewStateInfo info", info);
@@ -296,6 +295,15 @@ package {
             saveViewStateInfo();
         }
         
+        private var isCutInVisible:Boolean = true;
+        public function setCutInDisplayState(b:Boolean):void {
+            isCutInVisible = b;
+        }
+        
+        public function getCutInDisplayState():Boolean {
+            return isCutInVisible;
+        }
+            
         private function loadToggleStateForRisizableWindow(serverInfo:Object, menuName:String):void {
             Log.logging("loadToggleStateForRisizableWindow menuName", menuName);
             
@@ -354,8 +362,8 @@ package {
             
             saveMainManuStateToInfo(info, "isSnapMovablePiece");
             saveMainManuStateToInfo(info, "isAdjustImageSize");
-            saveMainManuStateToInfo(info, "isCardVisible");
             saveMainManuStateToInfo(info, "isStandingGraphicVisible");
+            saveMainManuStateToInfo(info, "isCutInVisible");
             saveMainManuStateToInfo(info, "isPositionVisible");
             saveMainManuStateToInfo(info, "isGridVisible");
             
@@ -416,6 +424,50 @@ package {
         
         [Bindable]
             static public var windowAlpha:Number = 0.85;
+        
+        
+        private var imageUploadDirInfo:Object = {};
+        
+        public function setImageUploadDirInfo(info:Object):void {
+            imageUploadDirInfo = info;
+        }
+        
+        private function changeUrlByUploadDirInfo(url:String):String {
+            Log.logging("Config.changeUrlByUploadDirInfo Begin url", url);
+            
+            Log.logging("imageUploadDirInfo", imageUploadDirInfo);
+            
+            for(var marker:String in imageUploadDirInfo) {
+                Log.logging("marker", marker);
+                var dir:String = imageUploadDirInfo[marker];
+                url = url.replace(marker, dir);
+            }
+            
+            Log.logging("Config.changeUrlByUploadDirInfo End url", url);
+            return url;
+        }
+        
+        
+        private var backgroundImage:String = null;
+        
+        public function getBackgroundImage():String {
+            return backgroundImage;
+        }
+        
+        public function setBackgroundImage(imageUrl:String):void {
+            if( imageUrl == null ) {
+                return;
+            }
+            
+            backgroundImage = imageUrl;
+            
+            Log.logging("setBackImage imageUrl", imageUrl);
+            imageUrl = getUrlString(imageUrl);
+            Log.logging("setBackImage changed imageUrl", imageUrl);
+            
+            DodontoF_Main.getInstance().getDodontoF().setStyle("backgroundImage", imageUrl);
+        }
+        
         
     }
 }

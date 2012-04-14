@@ -4,22 +4,6 @@ class Card
   
   @@cardsListInfos = [
     
-=begin
-    { 'type' => 'trump_jorker3',
-      'title' => 'トランプ',
-      'fileName' => 'cards/trump_jorker3.txt',
-    },
-    
-    { 'type' => 'trump_3',
-      'title' => 'トランプ',
-      'fileName' => 'cards/trump_3.txt',
-    },
-    { 'type' => 'trump_2',
-      'title' => 'トランプ',
-      'fileName' => 'cards/trump_2.txt',
-    },
-    
-=end
     { 'type' => 'trump_swf',
       'title' => 'トランプ',
       'fileName' => 'cards/trump_swf.txt',

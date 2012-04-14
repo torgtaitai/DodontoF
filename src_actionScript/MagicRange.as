@@ -203,7 +203,7 @@ package {
             var diffPoint:Point = new Point(halfSquareLength,
                                             halfSquareLength * -1);
             view.setIsDrawRound(false);
-            view.loadImage(this.name, getCenterImageUrl(), size, diffPoint);
+            view.loadImage(getCenterImageUrl(), size, diffPoint);
         }
         
         override protected function initDraw(x:Number, y:Number):void {

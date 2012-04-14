@@ -189,10 +189,17 @@ package {
         }
         
         private var updateCounter:int = 0;
+        private var updatePassCount:int = getUpdatePassCount();
+        
+        private function getUpdatePassCount():int {
+            var frameRate:int =  DodontoF_Main.getInstance().stage.frameRate;
+            var updatePassCount:int = frameRate / 30;
+            return updatePassCount;
+        }
         
         private function updateDice(event:Event):void {
             updateCounter++;
-            if( updateCounter < 1) {
+            if( updateCounter < updatePassCount ) {
                 return;
             }
             updateCounter = 0;

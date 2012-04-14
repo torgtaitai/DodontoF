@@ -6,18 +6,14 @@ package {
     public class ChangePlayRoomWindow extends CreatePlayRoomWindow {
         import mx.managers.PopUpManager;
         
-        //private static var character:Character;
-        /*
-        public static function setCharacter(character_:Character):void {
-            character = character_;
-        }
-        */
+        private var backgroundImage:String;
         
         public function setPlayRoomInfo(name:String,
                                         password:String,
                                         chatChannelNames:Array,
                                         canUseExternalImage:Boolean,
-                                        canVisitValue:Boolean):void {
+                                        canVisitValue:Boolean,
+                                        backgroundImage_:String):void {
             this.validateNow();
             
             playRoomName.text = name;
@@ -36,6 +32,7 @@ package {
             chatChannelNames.shift();
             chatChannelNamesText.text = chatChannelNames.join("　");
             
+            backgroundImage = backgroundImage_;
         }
         
         override protected function init():void {
@@ -75,6 +72,7 @@ package {
                                               chatChannelNames,
                                               canUseExternalImage.selected,
                                               canVisit.selected,
+                                              backgroundImage,
                                               getGameType(),
                                               getViewStates(),
                                               playRoomIndex,

@@ -5,6 +5,8 @@
    width="420"
    height="150"
    title="墓場" 
+   close="closeEvent()"
+   showCloseButton="true"
    > 
 
   <mx:Form width="100%">
@@ -14,10 +16,11 @@
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Spacer width="50%" />
+    <mx:Spacer width="45%" />
     <mx:Button id="executeButton" label="復活" click="this.resurrectCharacter()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
-    <mx:Spacer width="50%" />
+    <mx:Spacer width="10%" />
+    <mx:Button label="キャンセル" click="closeEvent()" />
+    <mx:Spacer width="45%" />
     <mx:Button id="clearButton" label="墓地を空にする" click="this.clearGraveyard()" />
   </mx:HBox>
   
@@ -113,6 +116,9 @@
         }
     }
 
+    public function closeEvent():void {
+        PopUpManager.removePopUp(this);
+    }
 
     ]]>
   </mx:Script>

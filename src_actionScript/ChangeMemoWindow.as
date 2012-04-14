@@ -25,7 +25,10 @@ package {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
                 memo.setMessage( message.text );
+                memo.loadViewImage();
                 guiInputSender.getSender().changeCharacter( memo.getJsonData() );
+                
+                memo.updateByOwn();
                 
                 PopUpManager.removePopUp(this);
             } catch(error:Error) {

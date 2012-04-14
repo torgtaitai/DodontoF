@@ -55,6 +55,7 @@
     override protected function setup():void {
         try {
             imageSelecter.addPreview(previewImage, 200);
+            imageSelecter.visibleMirrored();
             
             if( source.text == "" ) {
                 source.text = loadingMessage;
@@ -114,6 +115,7 @@
             "name": characterName.text,
             "state": state.text,
             "source": sourceText,
+            "mirrored": imageSelecter.isMirrored(),
             "leftIndex": leftIndex.value
         };
     

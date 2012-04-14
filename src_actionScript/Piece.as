@@ -9,6 +9,7 @@ package {
         function getViewX():Number;
         function getViewY():Number;
         function getDraggable():Boolean;
+        function getJsonData():Object;
         function init(map_:Map, x:Number, y:Number):void;
         function remove():void;
         function setDraggable(value:Boolean):void;

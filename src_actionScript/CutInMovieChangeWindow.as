@@ -36,6 +36,13 @@ package {
             }
             volume.value = parseFloat(cutInInfo.volume);
             
+            if( cutInInfo.isTail == null ) {
+                isTail.selected = true;
+            } else {
+                isTail.selected = cutInInfo.isTail;
+            }
+            
+            
             Utils.selectComboBox(positionCoboBox, cutInInfo.position);
         }
         

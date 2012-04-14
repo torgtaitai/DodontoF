@@ -18,6 +18,7 @@ package {
             characterName.text = info.name;
             state.text = info.state;
             source.text = info.source;
+            imageSelecter.setMirrored(info.mirrored);
             
             leftIndex.value = ((parseInt(info.leftIndex) == 0) ? 1 : parseInt(info.leftIndex));
         }

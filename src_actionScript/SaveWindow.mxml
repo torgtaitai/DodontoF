@@ -40,8 +40,8 @@
     }
     
     protected function executeServerSave():void {
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.save(this.resultFuction);
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.save(this.resultFuction);
     }
     
     protected function getReadyMessage():String {
@@ -52,7 +52,7 @@
         try {
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             
-            if( jsonData.resultText != "OK" ) {
+            if( jsonData.result != "OK" ) {
                 Alert.show(jsonData.resultText);
                 return;
             }
@@ -75,6 +75,9 @@
                                             function():void {
                                                 PopUpManager.removePopUp(thisObj);
                                             });
+            saveButton.enabled = false;
+            
+            loadingMessage.text = "保存中…";
         } catch(error:Error) {
             this.status = error.message;
         }

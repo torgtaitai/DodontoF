@@ -1189,6 +1189,7 @@
         imageSelecter.addPreview(previewImage, 200);
         
         characterImageUrl.text = loadingMessage;
+        imageSelecter.setMirrored(false);
         
         initCounterColumns();
         init();
@@ -1380,6 +1381,7 @@
     public function setCharacterOnButton():void {
         try{
             var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+            var mirrored:Boolean = imageSelecter.isMirrored();
             var initiative:Number = Utils.getInitiative(characterInitiative.value, characterInitiativeModify.value);
             var counters:Object = new Object();
             
@@ -1392,6 +1394,7 @@
             sendCharacterData(
                               characterName.text,
                               imageUrl,
+                              mirrored,
                               characterSize.value,
                               isHide.selected,
                               initiative,
@@ -1409,6 +1412,7 @@
 
     public function sendCharacterData(name:String,
                                       imageUri:String,
+                                      mirrored:Boolean,
                                       size:int,
                                       isHide:Boolean,
                                       initiative:Number,

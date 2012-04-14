@@ -246,7 +246,7 @@ package {
             initDraw(getX(), getY());
         }
         
-        override public function canSnapOnPositionX():Boolean {
+        override public function canExtendOnPositionX():Boolean {
             return true;
         }
         
@@ -273,7 +273,7 @@ package {
         private function drawDice():void {
             var imageUrl:String = getDiceImageUrl();
             var size:int = 1;
-            view.loadImage("" + this.number, imageUrl, size);
+            view.loadImage(imageUrl, size);
             
             printToolTip();
         }

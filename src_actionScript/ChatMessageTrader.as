@@ -80,7 +80,7 @@ package {
             var messageIndex:int = sendMessageIndex++;
             
             try{
-                var time:Number = 0; //(new Date().getTime() / 1000);
+                var time:Number = (new Date().getTime() / 1000);
                 var isReplayChatMessage:Boolean = false;
                 addMessageToChatLog(channel, name, chatMessage, color, time, localMessageUniqueId,
                                     isReplayChatMessage, sendto, messageIndex);
@@ -141,8 +141,12 @@ package {
             printAddedMessageToChatMessageLog();
         }
         
-        private function getOwnUniqueId():String {
-            return DodontoF_Main.getInstance().getGuiInputSender().getSender().getUniqueId();
+        private function isOwnUniqueId(targetId:String):Boolean {
+            return DodontoF_Main.getInstance().getGuiInputSender().getSender().isOwnUniqueId(targetId);
+        }
+        
+        private function isOwnStrictlyUniqueId(targetId:String):Boolean {
+            return DodontoF_Main.getInstance().getGuiInputSender().getSender().isOwnStrictlyUniqueId(targetId);
         }
         
         private function isPrintableMessageOnSecretMessage(chatSenderUniqueId:String, sendto:String):Boolean {
@@ -157,7 +161,7 @@ package {
                 return true;
             }
             
-            if( sendto == getOwnUniqueId() ) {
+            if( isOwnUniqueId(sendto) ) {
                 //秘話指定先が自分なら表示可能
                 return true;
             }
@@ -180,7 +184,7 @@ package {
             }
             
             
-            return ( getOwnUniqueId() == chatSenderUniqueId );
+            return ( isOwnStrictlyUniqueId( chatSenderUniqueId ) );
         }
         
         
@@ -231,12 +235,36 @@ package {
             
             senderName = escapeHtml(senderName);
             chatMessage = escapeHtml(chatMessage);
-            var separator:String = "：";
             
             if( isReplayChatMessage ) {
                 separator = "：<br>";
             }
             
+            var messageLine:String = getChatMessageForPrintHtml(chatMessage, senderName, color,
+                                                                time, chatWindow.getDisplayTime(), sendto);
+            chatWindow.getChatChannle(channel).addBuffer(messageLine, time);
+            
+            //printUpdateDateString(time);
+            chatWindow.playAddMessageSound(senderName);
+            chatWindow.setUserNames(senderName);
+            
+            Log.logging("addMessageToChatLog end");
+            return true;
+        }
+        
+        static private var separator:String = "：";
+        
+        static public function getChatMessageSeparator():String {
+            return separator;
+        }
+        
+        
+        public function getChatMessageForPrintHtml(chatMessage:String, 
+                                                   senderName:String, 
+                                                   color:String,
+                                                   time:Number,
+                                                   isDisplayTime:Boolean,
+                                                   sendto:String = ""):String {
             var messageLine:String = 
                 "<font color='#" + color + "'>"
                 + "<b>"
@@ -246,14 +274,11 @@ package {
                 + separator
                 + chatMessage + "</font>";
             
-            chatWindow.getChatChannle(channel).addBuffer(messageLine, time);
+            if( isDisplayTime ) {
+                messageLine = Utils.getTimeTextForChat(time) + messageLine;
+            }
             
-            //printUpdateDateString(time);
-            chatWindow.playAddMessageSound(senderName);
-            chatWindow.setUserNames(senderName);
-            
-            Log.logging("addMessageToChatLog end");
-            return true;
+            return messageLine;
         }
         
         static public function isValidSendTo(sendto:String):Boolean {

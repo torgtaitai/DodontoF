@@ -305,6 +305,10 @@
             var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
             var data:ChatSendData = new ChatSendData(chatWindow.getSelectedChatChannleIndex(),
                                                      input.text, name.text, state.text);
+            if( state.text == "" ) {
+                data.setStateEmpty();
+            }
+            
             data.setColor(colorPicker.selectedColor);
             
             chatWindow.sendChatMessageByChatSendData(data);

@@ -59,6 +59,7 @@
         var mapWidth:int = map.getWidth();
         var mapHeight:int = map.getHeight();
         var imageUrl:String = map.getImageUrl();
+        var mirrored:Boolean = map.isMirrored();
         var mapMarks:Array = (isInit ? map.getMarks() : previewLoader.getResult());
         
         if( imageUrl == "" ) {
@@ -70,6 +71,7 @@
         var count:int = Math.max(widthCount, heightCount);
         
         previewLoader.setLoadImageCompleate( function():void {
+                thisObj.previewLoader.setMirrored(mirrored);
                 thisObj.previewLoader.clearSquares();
                 thisObj.previewLoader.drawGrid();
                 thisObj.previewLoader.drawSquare( mapMarks, thisObj.getColor, thisObj.setColor );
@@ -109,7 +111,12 @@
     
         var map:Map = DodontoF_Main.getInstance().getMap();
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        guiInputSender.changeMap(map.getImageUrl(), map.getWidth(), map.getHeight(), map.getGridColor(), mapMarks);
+        guiInputSender.changeMap(map.getImageUrl(), map.isMirrored(),
+                                 map.getWidth(), map.getHeight(),
+                                 map.getGridColor(),
+                                 map.getGridInterval(),
+                                 map.isAlternatelyMode(),
+                                 mapMarks);
     
         PopUpManager.removePopUp(this);
     }

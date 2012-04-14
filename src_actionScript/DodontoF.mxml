@@ -78,13 +78,6 @@
       <mx:CheckBox id="isRepeat" label="繰り返し" selected="false"
                    visible="false" width="0"
                    />
-
-      <mx:Button id="displayCard"
-                 paddingLeft="2" paddingRight="2" 
-                 label="カード"
-                 toggle="true" 
-                 click="selectMenuByManuName('isCardVisible', displayCard.selected)"
-                 />
     </mx:HBox>
     
   </mx:ApplicationControlBar>
@@ -276,6 +269,10 @@
     
     public static function popup(className:Class, modal:Boolean = false):IFlexDisplayObject {
         modal = false;
+        return popupForce(className, modal);
+    }
+    
+    public static function popupForce(className:Class, modal:Boolean = false):IFlexDisplayObject {
         var window:IFlexDisplayObject = PopUpManager.createPopUp(thisObj, className, modal);
         return window;
     }
@@ -286,6 +283,7 @@
         dodontoF_Main.setChatWindow( popup(ChatWindow, false), "isChatVisible");
         dodontoF_Main.setChatPaletteWindow( popup(ChatPalette2, false), "isChatPaletteVisible" );
         dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
+        dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
         
         dodontoF_Main.initWindowForTiny();
     }
@@ -347,13 +345,11 @@
             dodontoF_Main.setChatPaletteVisible( toggled );
         } else if( menuName == "isInitiativeListVisible" ) {
             InitiativeWindow.getInstance().setVisibleState( toggled );
-        } else if( menuName == "isCardVisible" ) {
-            var visibleCard:Boolean = toggled;
-            dodontoF_Main.getMap().setVisibleCardLayer( visibleCard );
-            Config.getInstance().saveViewStateInfo();
         } else if( menuName == "isStandingGraphicVisible" ) {
-            var standingState:Boolean = toggled;
-            dodontoF_Main.getChatWindow().setStandingGraphicsDisplayState( standingState );
+            dodontoF_Main.getChatWindow().setStandingGraphicsDisplayState( toggled );
+            Config.getInstance().saveViewStateInfo();
+        } else if( menuName == "isCutInVisible" ) {
+            Config.getInstance().setCutInDisplayState(toggled);
             Config.getInstance().saveViewStateInfo();
         } else if( menuName == "isMapVisible" ) {
             var visibleMap:Boolean = toggled;
@@ -393,10 +389,14 @@
             }
         } else if( menuName == "clearCards" ) {
             dodontoF_Main.clearCards();
+        } else if( menuName == "isCardPickUpVisible" ) {
+            dodontoF_Main.setCardPickUpVisible( toggled );
         } else if( menuName == "openInitCardWindow" ) {
             popup(InitCardWindow, true);
         } else if( menuName == "changeMap" ) {
             popup(ChangeMapWindow, true);
+        } else if( menuName == "createChit" ) {
+            popup(AddChitWindow, true);
         } else if( menuName == "changeFloorTile" ) {
             popup(ChangeFloorTileWindow, true);
         } else if( menuName == "saveMap" ) {
@@ -685,6 +685,7 @@
     private function changeMentenanceMode():void {
         dodontoF_Main.setMentenanceModeOn( mentenanceModeButton.selected );
     }
+    
     
     private function graveyardDragEnterHandler(event:DragEvent):void {
         //if(myTree.indexToItemRenderer(myTree.calculateDropIndex(event)) != null) {

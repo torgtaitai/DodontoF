@@ -86,6 +86,11 @@ package {
             return jsonData;
         }
         
+        public function getJsonDataEmptyId():Object {
+            var jsonData:Object = getJsonData();
+            jsonData.imgId = defaultId;
+            return jsonData;
+        }
         public function getJsonData():Object {
             var jsonData:Object = new Object();
             
@@ -214,6 +219,10 @@ package {
             return item;
         }
         
+        protected function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {
+            sendDelete();
+        }
+        
         public function sendDelete():void {
             sender.removeCharacter(this);
             deleteFromMap();
@@ -221,12 +230,9 @@ package {
         
         public function deleteFromMap():void {
             this.remove();
-            DodontoF_Main.getInstance().getMap().removeExistPieces(this);
+            getMap().removeExistPieces(this);
         }
         
-        protected function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {
-            sendDelete();
-        }
         
         public function remove():void {
             if( view == null ) {
@@ -304,7 +310,7 @@ package {
                     }
                     
                     thisObj.zoomLittleForTeachDraggable();
-                    thisObj.snapMovablePieceViewPosition( true );
+                    thisObj.extendMovablePieceViewPosition( true );
                 });
             
             view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
@@ -313,43 +319,15 @@ package {
                     }
                     
                     thisObj.shrinkLittleForTeachDraggable();
-                    thisObj.snapMovablePieceViewPosition( false );
+                    thisObj.extendMovablePieceViewPosition( false );
                 });
             
             initEvent();
             initRotater();
             //            initTurnUper();
         }
-        /*        
-        //[Embed(source='image/cursor/uragaesi_b50.swf')]
-        [Embed(source='image/cursor/uragaesi_a50.swf')]
-        [Bindable]
-        private var turnUpMarkerImageSource:Class;
         
-        private function initTurnUper():void {
-            var marker:Image = new Image();
-            marker.source = turnUpMarkerImageSource;
-            marker.width = getOwnWidth() * 0.4;
-            marker.height = marker.width;
-            marker.x = marker.width * -1;
-            marker.y = (getOwnHeight() - marker.height * 1.5) / 2;
-            marker.visible = false;
-            view.addChild( marker );
-            
-            view.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
-                    marker.visible = true;
-                });
-            view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
-                    marker.visible = false;
-                });
-            
-        }
-        */
-        
-        public function shrinkLittleForTeachDraggable():void {
-            this.view.scaleX = 1.0;
-            this.view.scaleY = 1.0;
-        }
+        private var isLittleZoomed:Boolean = true;
         
         public function zoomLittleForTeachDraggable():void {
             //移動不可なら「ちょっと拡大」はしない。
@@ -357,15 +335,46 @@ package {
                 return;
             }
             
+            if( ! canLittleZoom() ) {
+                return;
+            }
+            
+            isLittleZoomed = true;
+            
             var zoomPix:int = 3;
             var zoomRate:Number = 1 + (zoomPix / this.getOwnWidth());
+            
             this.view.scaleX = zoomRate;
             this.view.scaleY = zoomRate;
         }
         
+        public function shrinkLittleForTeachDraggable():void {
+            if( ! isLittleZoomed ) {
+                return;
+            }
+            
+            this.view.scaleX = 1.0;
+            this.view.scaleY = 1.0;
+        }
         
-        public function snapMovablePieceViewPosition(isListed:Boolean = false):void {
-            map.snapMovablePieceViewPosition( new Point(positionX, positionY), isListed );
+        public function canLittleZoom():Boolean {
+            var point:Point = new Point(positionX, positionY);
+            var samePosition:Array = map.getSamePositionMovablePieciesOrderdByViewIndex(point);
+            return (samePosition.length == 1);
+        }
+        
+        private function extendMovablePieceViewPosition(isListed:Boolean):void {
+            if( canExtend() ) {
+                map.extendMovablePieceViewPosition( new Point(positionX, positionY), isListed );
+            }
+        }
+        
+        public function setPickuped():void {
+            extendMovablePieceViewPosition(false);
+        }
+        
+        public function canExtend():Boolean {
+            return true;
         }
         
         public function setDraggable(value:Boolean):void {
@@ -447,16 +456,24 @@ package {
         }
         
         private var isUpdateCalled:Boolean = false;
+        
         protected function update(params:Object):void {
             setRotation( params.rotation );
-            
-            if( rotater != null ) {
-                rotater.update();
-            }
+            updateRotater();
             
             isUpdateCalled = true;
         }
-
+        
+        protected function updateRotater():void {
+            if( rotater != null ) {
+                rotater.update();
+            }
+        }
+        
+        public function updateByOwn():void {
+            this.update( this.getJsonData() );
+        }
+        
         public function move(x:Number, y:Number, isForce:Boolean = false):Boolean {
             if( ! isForce ) {
                 if( isDragging() ) {
@@ -483,7 +500,7 @@ package {
                 }
             }
             
-            this.snapMovablePieceViewPosition();
+            this.setPickuped();
             
             return isMoved;
         }
@@ -588,11 +605,11 @@ package {
         }
         
         
-        public function canSnapOnPositionX():Boolean {
+        public function canExtendOnPositionX():Boolean {
             return false;
         }
         
-        public function canSnapOnPositionY():Boolean {
+        public function canExtendOnPositionY():Boolean {
             return false;
         }
         
@@ -612,33 +629,12 @@ package {
             return getWidth();
         }
         
-        public static function getSnapViewPoint(viewX:Number, viewY:Number, squareLength:int):Point {
-            var x:Number = getSnapPositionFromViewPosition(viewX, squareLength);
-            var y:Number = getSnapPositionFromViewPosition(viewY, squareLength);
-            
-            return new Point(x, y);
-        }
-        
         public function snapViewPosition():Boolean {
-            var point:Point = getSnapViewPoint(view.x, view.y, getSquareLength());
+            var point:Point = getMap().getSnapViewPoint(view.x, view.y, getSquareLength());
             view.x = point.x * getSquareLength();
             view.y = point.y * getSquareLength();
             
             return move(point.x, point.y, true);
-        }
-        
-        private static function getSnapPositionFromViewPosition(p:Number, squareLength:int):Number {
-            Log.logging("p : " + p);
-            
-            var newP:Number = (p / squareLength);
-            
-            if( Config.getInstance().isSnapMovablePieceMode() ) {
-                newP = Math.round( newP );
-            }
-            
-            Log.logging("newP : " + newP);
-            
-            return newP;
         }
         
         protected function initDraw(x:Number, y:Number):void {
@@ -660,7 +656,10 @@ package {
         public function getViewRotationDiff():Number {
             return 0;
         }
+        
         public function loadViewImage():void {
+            updateRotater();
+            
             if( rotater != null ) {
                 rotater.setBaseRotation( this.rotation + getViewRotationDiff() );
             }

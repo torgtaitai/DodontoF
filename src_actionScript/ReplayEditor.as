@@ -27,6 +27,7 @@ package {
             editHistoryJsonData_Chat(jsonData, newHistory);
             
             pushJsonDataUnlessNull( jsonData, "characters", newHistory );
+            pushJsonDataUnlessNull( jsonData, "record", newHistory );
             pushJsonDataUnlessNull( jsonData, "roundTimeData", newHistory );
             pushJsonDataUnlessNull( jsonData, "mapData", newHistory );
             pushJsonDataUnlessNull( jsonData, "effects", newHistory );

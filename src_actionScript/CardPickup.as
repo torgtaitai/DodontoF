@@ -1,9 +1,9 @@
 //--*-coding:utf-8-*--
 
 package {
-    public class CardPickup extends Card {
+    public class CardPickUp extends Card {
         
-        public function CardPickup(params:Object) {
+        public function CardPickUp(params:Object) {
             super(params);
         }
         

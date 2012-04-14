@@ -61,13 +61,18 @@ package {
             }
             
             var lines:Array = chatMessage.split( chatLineSpliter );
-            var line:String = lines[0];
             
             for(var i:int = 0 ; i < cutInInfos.length ; i++) {
                 var cutInInfo:Object = cutInInfos[i];
+                
+                var isTailEnable:Boolean = (cutInInfo.isTail == null ? true : cutInInfo.isTail);
+                if( ! isTailEnable ) {
+                    continue;
+                }
+                
                 var tailMessage:String = cutInInfo.message;
                 
-                if( ! isTail(line, tailMessage) ) {
+                if( ! isTail(lines, tailMessage) ) {
                     continue;
                 }
                 
@@ -93,16 +98,31 @@ package {
             return getCutInMessage(newParams);
         }
         
-        private function isTail(line:String, tail:String):Boolean {
+        private function isTail(lines:Array, tail:String):Boolean {
+            for each(var line:String in lines) {
+                if( isTailLine(line, tail) ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private function isTailLine(line:String, tail:String):Boolean {
+            Log.logging("isTail line", line);
+            Log.logging("isTail tail", tail);
+            
             var index:int = line.lastIndexOf(tail);
             if( index == -1 ) {
+                Log.logging("false1");
                 return false;
             }
             
             if( index != (line.length - tail.length) ) {
+                Log.logging("false2");
                 return false;
             }
             
+            Log.logging("true");
             return true;
         }
         
@@ -143,6 +163,11 @@ package {
             
             if( ! effectable ) {
                 Log.logging("effectable false");
+                return message;
+            }
+            
+            if( ! Config.getInstance().getCutInDisplayState() ) {
+                Log.logging("Config.getInstance().getCutInDisplayState() false");
                 return message;
             }
             

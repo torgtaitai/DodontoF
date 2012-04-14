@@ -22,6 +22,7 @@ package {
     public class Character extends InitiativedMovablePiece {
         
         protected var imageUrl:String = "";
+        protected var mirrored:Boolean = false;
         protected var size:int = 1;
         private var isHide:Boolean = false;
         private var dogTag:String = "";
@@ -56,6 +57,7 @@ package {
         
         public static function getJsonData(name:String,
                                            imageUrl:String,
+                                           mirrored:Boolean,
                                            size:int,
                                            isHide:Boolean,
                                            initiative:Number,
@@ -76,6 +78,7 @@ package {
                                                     draggable, rotation);
             
             jsonData.imageName = imageUrl;
+            jsonData.mirrored = mirrored;
             jsonData.size = size;
             jsonData.isHide = isHide;
             jsonData.dogTag = dogTag;
@@ -88,6 +91,7 @@ package {
             var jsonData:Object = super.getJsonData();
             
             jsonData.imageName = getImageUrl();
+            jsonData.mirrored = isMirrored();
             jsonData.size = getSize();
             jsonData.isHide = isHideMode();
             jsonData.dogTag = this.dogTag;
@@ -98,6 +102,10 @@ package {
         
         public function setImageUrl(url_:String):void {
             this.imageUrl = url_;
+        }
+        
+        public function setMirrored(b:Boolean):void {
+            this.mirrored = b;
         }
         
         public function setSize(size_:int):void {
@@ -122,6 +130,7 @@ package {
             initTextField(dogTagTextField);
             
             this.imageUrl = params.imageName;
+            this.mirrored = params.mirrored;
             this.size = params.size;
             this.isHide = params.isHide;
             setDogTag( params.dogTag );
@@ -152,6 +161,10 @@ package {
             return imageUrl;
         }
         
+        public function isMirrored():Boolean {
+            return mirrored;
+        }
+        
         public function getSize():int {
             return size;
         }
@@ -160,7 +173,7 @@ package {
             return size;
         }
         
-        override public function canSnapOnPositionX():Boolean {
+        override public function canExtendOnPositionX():Boolean {
             return true;
         }
         
@@ -329,18 +342,22 @@ package {
             
             Log.logging("character local params changed.");
             this.imageUrl = params.imageName;
+            this.mirrored = params.mirrored;
             this.size = params.size;
             setHide( params.isHide );
             setDogTag( params.dogTag );
             setUrl( params.url );
             
-            loadViewImage();
-            updateStatusMarker();
-            
-            setNameTag();
-            setCenterTextFields();
+            updateRefresh();
             
             Log.loggingTuning("=>analyzeChangedCharacterChanged Characteris changed End");
+        }
+        
+        public function updateRefresh():void {
+            loadViewImage();
+            updateStatusMarker();
+            setNameTag();
+            setCenterTextFields();
         }
         
         private var statusMarkerIndexs:Array = [];
@@ -454,7 +471,8 @@ package {
         }
         
         override public function loadViewImage():void {
-            view.loadImageWidthHeightRotation(this.name, this.imageUrl,
+            view.setMirrored( this.mirrored );
+            view.loadImageWidthHeightRotation(this.imageUrl,
                                               this.size, this.size,
                                               getRotation());
             
