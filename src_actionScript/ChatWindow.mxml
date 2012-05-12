@@ -68,6 +68,10 @@
                            >
               </mx:ComboBox>
               
+              <mx:Image id="botTableButton" source="{botTableIcon}" click="manageDiceBotTable()"
+                        toolTip="ダイスボット表追加・変更・削除"
+                        />
+
               <mx:Image id="novelticModeButton" source="{novelticModeIcon}" click="changeNovelticMode()" />
               <mx:CheckBox id="isHideNovelticWindow" label="自動ログ隠し" fontSize="10"
                            toolTip="シフトキー・Ctrlキーを押しながらのマウス操作でもログは隠れなくなります。"
@@ -112,10 +116,17 @@
     </mx:VDividedBox>
   </mx:Box>
   
+  <mx:Glow id="glowEffectForChatError"
+           duration="500" repeatCount="3"
+           alphaFrom="1.0" alphaTo="0.0" 
+           blurXFrom="20.0" blurXTo="70.0" 
+           blurYFrom="20.0" blurYTo="70.0" 
+           color="0xFF0000"/>
+  
   <mx:Style>
 .nocheckTabStyle { fill-colors: #FFF04B, #FFFFCC; }
 
-.maximizeRestoreButton
+.maximizeRestoreButtonStyle
 {
 	up-skin:        	Embed("/image/icons/maximize_up.png");
 	over-skin:      	Embed("/image/icons/maximize_over.png");
@@ -130,6 +141,10 @@
   <mx:Script>
     <![CDATA[
 
+        [Embed(source='image/icons/page_white_gear.png')]
+        [Bindable]
+        private static var botTableIcon:Class;
+        
         [Embed(source='image/icons/page_white_get.png')]
         [Bindable]
         private static var fileUploadIcon:Class;
@@ -190,6 +205,10 @@
         [Bindable]
         private static var talkSilentIcon:Class;
         
+        [Embed(source='image/icons/comment_delete.png')]
+        [Bindable]
+        private static var sendChatMessageErrorIcon:Class;
+        
         [Bindable]
         private var diceBotHelpText:String;
         
@@ -210,7 +229,9 @@
         import mx.managers.ToolTipManager;
         import mx.utils.StringUtil;
         import mx.core.UIComponent;
-
+        import mx.controls.Spacer;
+        import mx.core.UIComponentCachePolicy;
+        
         private static var instance:ChatWindow;
         
         private var thisObj:ChatWindow;
@@ -578,6 +599,7 @@
         
         private var controlsHolder:HBox;
         private var maximizeRestoreButton:Button;
+        private var sendErrorNotifyButton:UIComponent;
         
         override protected function createChildren():void {
             super.createChildren();
@@ -587,34 +609,78 @@
                 titleBar.addChild(headerDivider);
             }
             
-            if ( ! controlsHolder ) {
-                controlsHolder = new HBox();
-                controlsHolder.setStyle("paddingRight", getStyle("paddingRight"));
-                controlsHolder.setStyle("horizontalAlign", "right");
-                controlsHolder.setStyle("verticalAlign", "middle");
-                controlsHolder.setStyle("horizontalGap", 3);
-                rawChildren.addChild(controlsHolder);
-                Log.logging("controlsHolder created.");
-                
-                if( ! statusTextField ) {
-                    rawChildren.setChildIndex(controlsHolder, 1);
-                }
-            }
-            
-            if ( ! maximizeRestoreButton ) {
-                maximizeRestoreButton = new Button();
-                maximizeRestoreButton.width = 14;
-                maximizeRestoreButton.height = 14;
-                maximizeRestoreButton.styleName = "maximizeRestoreButton";
-                controlsHolder.addChild(maximizeRestoreButton);
-                Log.logging("maximizeRestoreButton created.");
-            }
-            
-            addMaixizeEventListeners();
+            initControlsHolder();
+            initSendErrorNotifyButton();
+            initMaximizeRestoreButton();
         }
         
-        private function addMaixizeEventListeners():void {
-            maximizeRestoreButton.addEventListener(MouseEvent.CLICK, onClickMaximizeRestoreButton);
+        private function initControlsHolder():void {
+            if ( controlsHolder != null ) {
+                return;
+            }
+            
+            controlsHolder = new HBox();
+            controlsHolder.setStyle("paddingRight", getStyle("paddingRight"));
+            controlsHolder.setStyle("horizontalAlign", "right");
+            controlsHolder.setStyle("verticalAlign", "middle");
+            controlsHolder.setStyle("horizontalGap", 3);
+            rawChildren.addChild(controlsHolder);
+            Log.logging("controlsHolder created.");
+            
+            if( ! statusTextField ) {
+                rawChildren.setChildIndex(controlsHolder, 1);
+            }
+        }
+        
+        private function initMaximizeRestoreButton():void {
+            if ( maximizeRestoreButton != null) {
+                return;
+            }
+            
+            var button:Button = new Button();
+            button.width = 14;
+            button.height = 14;
+            button.styleName = "maximizeRestoreButtonStyle";
+            
+            button.addEventListener(MouseEvent.CLICK, onClickMaximizeRestoreButton);
+            
+            controlsHolder.addChild(button);
+            maximizeRestoreButton = button;
+            
+            Log.logging("maximizeRestoreButton created.");
+        }
+        
+        private function initSendErrorNotifyButton():void {
+            if( sendErrorNotifyButton != null ) {
+                return;
+            }
+            
+            var image:Image = new Image();
+            image.source = sendChatMessageErrorIcon;
+            image.width = 16;
+            image.height = 16;
+            image.toolTip = "チャット送信エラー";
+            image.addEventListener(MouseEvent.CLICK, function(event:MouseEvent = null):void {
+                    SendChatMessageFailedWindow.setWindowVisible(true);
+                });
+            image.visible = false;
+            image.useHandCursor = true;
+            
+            controlsHolder.addChild(image);
+            sendErrorNotifyButton = image;
+            
+            var spacer:Spacer = new Spacer();
+            spacer.width = 10;
+            controlsHolder.addChild(spacer);
+        }
+        
+        public function setSendErrorNotifyButtonEnable(b:Boolean):void {
+            sendErrorNotifyButton.visible = b;
+            
+            if( b ) {
+                Utils.glowEffect( sendErrorNotifyButton,
+                                  glowEffectForChatError );
+            }
         }
         
         private var originalHeigth:int = 100;
@@ -725,9 +791,17 @@
             setTalkButton();
         }
         
-        private function initDiceBotInfos():void {
+        public function initDiceBotInfos():void {
             var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
             diceBotGameType.dataProvider = diceBotInfos;
+        }
+        
+        public function setDiceBotInfos(diceBotInfos:Array):void {
+            var gameType:String = diceBotGameType.selectedItem.gameType;
+            diceBotGameType.dataProvider = diceBotInfos;
+            Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            
+            initDicePatterns();
         }
         
         private function wheelEvent(event:MouseEvent):void {
@@ -998,22 +1072,6 @@
             chatMessageInput.callLater(function():void { chatMessageInput.text = ""; });
         }
         
-        /*
-        private var sendManyCount:int = 0;
-        public function sendChatMessageLocalMany():void {
-            var message:String = chatMessageInput.text;
-            sendManyCount = 1;
-            
-            var seconds:int = 1;
-            var count:int = 1000;
-            var timer : Timer = new Timer(seconds * 1000, count);
-            timer.addEventListener(TimerEvent.TIMER, function(event:TimerEvent) : void {
-                    sendChatMessage(message + " " + sendManyCount++);
-                });
-            timer.start();
-        }
-        */
-        
         public function sendChatMessageForDiceRollResult(channel:int, chatMessage:String):void {
             var isCheckDiceRoll:Boolean = false
             sendChatMessage(channel, chatMessage, isCheckDiceRoll);
@@ -1101,6 +1159,11 @@
         }
         
         
+        public function sendChatMessageAgain(data:ChatSendData):void {
+            chatMessageTrader.sendMessage(data);
+        }
+        
+        
         private function getDiceRollText(targetText:String):String {
             if( ! isDiceBotOn ) {
                 return null;
@@ -1121,6 +1184,10 @@
         }
         
         private var dicePatternsList:Object = new Object();
+        
+        private function initDicePatterns():void {
+            dicePatternsList = new Object();
+        }
         
         private function getDicePatterns():Array {
             var diceIndex:int = diceBotGameType.selectedIndex;
@@ -1162,12 +1229,13 @@
         private function sendDiceBotChatMessage(chatSendData:ChatSendData, gameType:String = ""):void {
             chatMessageInput.text = "";
             
-            chatSendData.replaceMessage("　", " ");
             var randomSeed:int = Dice.getRandomNumber(0xffff);
+            chatSendData.setDiceBotData(randomSeed, gameType, sendDiceBotChatMessageResult);
+            chatSendData.replaceMessage("　", " ");
+            chatSendData.setNameFromChatWindow();
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.sendDiceBotChatMessage(chatSendData, randomSeed, gameType,
-                                                  sendDiceBotChatMessageResult);
+            guiInputSender.sendChatMessage(chatSendData);
         }
     
         
@@ -1270,40 +1338,24 @@
             return chatMessageTrader;
         }
         
-        public function addMessageToChatLog(channel:int,
-                                            senderName:String,
-                                            chatMessage:String,
-                                            color:String,
+        public function addMessageToChatLog(data:ChatSendData,
                                             time:Number,
                                             chatSenderUniqueId:String,
                                             isReplayChatMessage:Boolean = false):void {
-            chatMessageTrader.addMessageToChatLog(channel,
-                                                  senderName, 
-                                                  chatMessage,
-                                                  color,
+            chatMessageTrader.addMessageToChatLog(data,
                                                   time,
                                                   chatSenderUniqueId,
                                                   isReplayChatMessage);
         }
         
-        public function addMessageToChatLogParts(channel:int,
-                                                 senderName:String,
-                                                 chatMessage:String,
-                                                 color:String,
+        public function addMessageToChatLogParts(data:ChatSendData,
                                                  time:Number,
                                                  chatSenderUniqueId:String,
-                                                 messageIndex:int = -1,
-                                                 sendto:String = null,
                                                  isReplayChatMessage:Boolean = false):Boolean {
             
-            return chatMessageTrader.addMessageToChatLogParts(channel,
-                                                              senderName,
-                                                              chatMessage,
-                                                              color,
+            return chatMessageTrader.addMessageToChatLogParts(data,
                                                               time,
                                                               chatSenderUniqueId,
-                                                              messageIndex,
-                                                              sendto,
                                                               isReplayChatMessage);
         }
         
@@ -1520,7 +1572,7 @@
         }
         
         public function openCreateCutInWindow():void {
-            DodontoF.popup(CutInMovieManageWindow, false);
+            DodontoF.popup(ManageCutInMovieWindow, false);
         }
         
         private var soundChannel:SoundChannel;
@@ -1701,6 +1753,12 @@
             }
             return true;
         }
+        
+        
+        public function manageDiceBotTable():void {
+            var window:ManageBotTableWindow = DodontoF.popup(ManageBotTableWindow, true) as ManageBotTableWindow;
+        }
+        
         
         public function changeNovelticMode():void {
             var toChangeModeName:String = (novelticMode.isNovelticModeOn() ? 

@@ -375,15 +375,17 @@ package {
                 var chatMessage:String = chatMessageData['message'];
                 var color:String = chatMessageData['color'];
                 var chatSenderUniqueId:String = chatMessageData['uniqueId'];
-                var messageIndex:int = chatMessageData['messageIndex'];
                 var sendto:String = chatMessageData['sendto'];
                 var channel:int = chatMessageData['channel'];
                 
+                var data:ChatSendData = new ChatSendData(channel, chatMessage);
+                data.setNameAndState( senderName );
+                data.setColorString(color);
+                data.setSendto(sendto);
+                
                 var isValidMessage:Boolean = ChatWindow.getInstance()
-                    .addMessageToChatLogParts(channel,
-                                              senderName, chatMessage,
-                                              color, writtenTime, chatSenderUniqueId,
-                                              messageIndex, sendto);
+                    .addMessageToChatLogParts(data, writtenTime, chatSenderUniqueId);
+                
                 if( isValidMessage ) {
                     Log.logging("chatMessageDataSet", chatMessageDataSet);
                     result.push(chatMessageDataSet);
@@ -615,27 +617,27 @@ package {
         private function analyzeRemoveCharacterForRecord(removeIds:Object):void {
             Log.logging("analyzeRemoveCharacterForRecord Begin removeIds", removeIds);
             
-            var characterDataList:Array = new Array();
             for each(var removeId:String in removeIds) {
-                var data:Object = {'imgId': removeId};
-                characterDataList.push(data);
-            }
-            Log.logging("characterDataList", characterDataList);
-            
-            for(var i:int = 0 ; i < map.getExistPiecesCount() ; i++) {
-                var existCharacter:Piece = map.getExistPiece(i);
-                Log.logging("analyzeRemoveCharacter existCharacter ", existCharacter);
-                
-                var exist:Object = findExistCharacterData(characterDataList, existCharacter);
-                if( exist == null ) {
-                    continue;
-                }
-                
-                Log.logging("remove targetCharacter", exist);
-                existCharacter.remove();
+                removeCharacterFromMap(removeId);
             }
             
             Log.logging("analyzeRemoveCharacterForRecord End");
+        }
+        
+        private function removeCharacterFromMap(removeId:String):void {
+            for(var i:int = 0 ; i < map.getExistPiecesCount() ; i++) {
+                var existCharacter:MovablePiece = map.getExistPiece(i) as MovablePiece;
+                Log.logging("removeCharacterFromMap existCharacter ", existCharacter);
+                
+                if( existCharacter == null ) {
+                    continue;
+                }
+                
+                if( removeId == existCharacter.getId() ) {
+                    existCharacter.deleteFromMap();
+                    return;
+                }
+            }
         }
         
         private function analyzeRemoveCharacter(characterDataList:Object):void {

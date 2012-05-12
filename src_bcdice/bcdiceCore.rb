@@ -51,6 +51,7 @@ $point_counter = {};
 
 
 require 'CardTrader'
+require 'TableFileData'
 require 'diceBot/DiceBot'
 require 'dice/AddDice'
 require 'dice/UpperDice'
@@ -65,6 +66,7 @@ class BCDiceMaker
     @cardTrader.initValues;
     
     @counterInfos = {};
+    @tableFileData = TableFileData.new
     
     @master = "";
     @quitFunction = nil
@@ -75,7 +77,7 @@ class BCDiceMaker
   attr_accessor :diceBot
   
   def newBcDice
-    bcdice = BCDice.new(self, @cardTrader, @diceBot, @counterInfos)
+    bcdice = BCDice.new(self, @cardTrader, @diceBot, @counterInfos, @tableFileData)
     
     return bcdice
   end
@@ -85,7 +87,7 @@ end
 
 class BCDice
   
-  def initialize(parent, cardTrader, diceBot, counterInfos)
+  def initialize(parent, cardTrader, diceBot, counterInfos, tableFileData)
     @parent = parent
     
     setDiceBot(diceBot)
@@ -93,13 +95,17 @@ class BCDice
     @cardTrader = cardTrader
     @cardTrader.setBcDice(self)
     @counterInfos = counterInfos
+    @tableFileData = tableFileData
     
-
     @nick_e = ""
     @tnick = ""
     @isMessagePrinted = false
     @rands = nil
     @isKeepSecretDice = true
+  end
+  
+  def setDir(dir, prefix)
+    @tableFileData.setDir(dir, prefix)
   end
   
   def isKeepSecretDice(b)
@@ -302,7 +308,7 @@ class BCDice
     sendMessageToChannels(messages);
   end
   
-
+  
   def isMaster()
     return ((@nick_e == @parent.master) or (@parent.master == ""))
   end
@@ -318,8 +324,8 @@ class BCDice
     
     sendMessageToChannels("ViewMode#{@diceBot.sendMode}に変更しました");
   end
-
-
+  
+  
   def setUpplerRollThreshold()
     return unless( isMaster() )
     
@@ -332,7 +338,7 @@ class BCDice
       sendMessageToChannels("上方無限ロールの閾値設定を解除しました");
     end
   end
-
+  
   def setRerollLimit()
     return unless( isMaster() )
     
@@ -345,8 +351,8 @@ class BCDice
       sendMessageToChannels("個数振り足しロールの回数を無限に設定しました");
     end
   end
-
-
+  
+  
   def setDataSendMode()
     return unless( isMaster() )
     
@@ -366,8 +372,8 @@ class BCDice
     
     sendMessageToChannels(output)
   end
-
-
+  
+  
   def setSortMode()
     return unless( isMaster() )
     
@@ -381,7 +387,7 @@ class BCDice
       sendMessageToChannels("ソート無しに変更しました")
     end
   end
-
+  
   def setCardMode()
     return unless( isMaster() )
     
@@ -465,7 +471,7 @@ class BCDice
     
     debug("executePointCounter end")
   end
-
+  
   def addPlot(arg)
     debug("addPlot begin arg", arg)
     
@@ -503,8 +509,8 @@ class BCDice
     output_msg = "GameType = " + @diceBot.gameType + ", ViewMode = " + @diceBot.sendMode + ", Sort = " + @diceBot.sortType;
     sendMessageToOnlySender(output_msg);
   end
-
-
+  
+  
   def printHelp()
     
     sendMessageToOnlySender("・加算ロール　　　　　　　　(xDn) (n面体ダイスをx個)");
@@ -544,7 +550,7 @@ class BCDice
     sendMessageToOnlySender("・カード機能ヘルプ　　　　　　(c-help)");
     sendMessageToOnlySender("  -- END ---");
   end
-
+  
   def setChannel(channel)
     debug("setChannel called channel", channel)
     @channel = channel
@@ -574,8 +580,8 @@ class BCDice
     end
     
     if(/(^|\s+)#{$OPEN_DICE}(\s+|$)/i =~ @message)
-        # シークレットロールの表示
-        printSecretRoll()
+      # シークレットロールの表示
+      printSecretRoll()
     end
     
     # ポイントカウンター関係
@@ -714,15 +720,15 @@ class BCDice
     @cardTrader.setTnick( @tnick )
     @cardTrader.executeCard(@message, @channel)
     debug('executeCard end')
-  end  
+  end
   
-###########################################################################
-#**                         各種コマンド処理
-###########################################################################
-
-#=========================================================================
-#**                           コマンド分岐
-#=========================================================================
+  ###########################################################################
+  #**                         各種コマンド処理
+  ###########################################################################
+  
+  #=========================================================================
+  #**                           コマンド分岐
+  #=========================================================================
   def dice_command   # ダイスコマンドの分岐処理
     arg = @message.upcase
     output_msg = '1';
@@ -750,7 +756,7 @@ class BCDice
       output_msg = dice.rollDice(arg)
       if( /S[-\d]+D[\d+-]+/ =~ arg )     # 隠しロール
         secret_flg = true if(output_msg != '1');
-        end
+      end
       
     when /[\d]+B[\d]+([<>=]+[\d]+)?($|\s)/i
       debug("バラバラロール検出")
@@ -795,11 +801,54 @@ class BCDice
       if( secretMarker )   # 隠しロール
         secret_flg = true if(output_msg != '1');
       end
+    else
+      output_msg, secret_flg = getTableDataResult(arg)
+      return output_msg, secret_flg if(output_msg != '1');
     end
     
     debug("arg", arg)
     
     return output_msg, secret_flg;
+  end
+  
+  
+  def getTableDataResult(arg)
+    debug("getTableDataResult Begin")
+    
+    output_msg = '1'
+    secret_flg = false
+    
+    dice, title, table, secret_flg = @tableFileData.getTableData(arg, @diceBot.gameType)
+    debug("dice", dice)
+    
+    if( table.nil? )
+      debug("table is null")
+      return output_msg, secret_flg
+    end
+    
+    value = 0
+    
+    case dice
+    when /D66/i
+      value = getD66Value(0)
+    when /(\d+)D(\d+)/i
+      diceCount = $1
+      diceMax = $2
+      value, = roll(diceCount, diceMax)
+    else
+      table = []
+    end
+    
+    debug("value", value)
+    
+    result_msg = table.find{|i| i.first === value}
+    if( result_msg.nil? )
+      return output_msg, secret_flg
+    end
+    
+    output_msg = "#{nick_e}:#{title}(#{value}) ＞ #{result_msg}"
+    
+    return output_msg, secret_flg
   end
   
   
@@ -855,7 +904,7 @@ class BCDice
           dice_now += dice_n;
           
           debug('@diceBot.sendMode', @diceBot.sendMode)
-          if( @diceBot.sendMode >= 2 ) 
+          if( @diceBot.sendMode >= 2 )
             dice_st_n += "," unless( dice_st_n.empty? );
             dice_st_n += "#{dice_n}";
           end
@@ -910,7 +959,7 @@ class BCDice
     #debug('randFromRands(max)')
     return randFromRands(max)
   end
-    
+  
   def randNomal(max)
     Kernel.rand(max)
   end
@@ -998,7 +1047,7 @@ class BCDice
     ( (dice_cnt > 0) and ((round < @diceBot.rerollLimitCount) or (@diceBot.rerollLimitCount == 0)) )
   end
   
-####################             D66ダイス        ########################
+  ####################             D66ダイス        ########################
   def d66dice(string)
     string = string.upcase
     secret_flg = false
@@ -1034,7 +1083,7 @@ class BCDice
       # 大小でスワップするタイプ
       if(dice_a < dice_b)
         output = dice_a * 10 + dice_b;
-      else 
+      else
         output = dice_a + dice_b * 10;
       end
     else
@@ -1045,8 +1094,8 @@ class BCDice
     return output;
   end
   
-
-####################        その他ダイス関係      ########################
+  
+  ####################        その他ダイス関係      ########################
   def openSecretRoll(channel, mode)
     debug("openSecretRoll begin")
     channel = channel.upcase
@@ -1147,14 +1196,14 @@ class BCDice
     nick = getNick()
     $plotPrintChannels[nick] = @channel;
   end
-
-
-#==========================================================================
-#**                            その他の機能
-#==========================================================================
+  
+  
+  #==========================================================================
+  #**                            その他の機能
+  #==========================================================================
   def choise_random(string)
     output = "1";
-
+    
     unless(/(^|\s)((S)?choise\[([^,]+(,[^,]+)+)\])($|\s)/i =~ string)
       return output
     end
@@ -1173,15 +1222,15 @@ class BCDice
     
     return output;
   end
-
-#==========================================================================
-#**                            結果判定関連
-#==========================================================================
+  
+  #==========================================================================
+  #**                            結果判定関連
+  #==========================================================================
   def getMarshaledSignOfInequality(text)
     return "" if( text.nil? )
     return marshalSignOfInequality(text)
   end
-
+  
   def marshalSignOfInequality(signOfInequality)  # 不等号の整列
     case signOfInequality
     when /(<=|=<)/
@@ -1206,12 +1255,12 @@ class BCDice
     
     if( diff.is_a?(String) )
       unless( /\d/ =~ diff )
-        return suc 
+        return suc
       end
       diff = diff.to_i
     end
     
-    case signOfInequality 
+    case signOfInequality
     when /(<=|=<)/
       if( dice_now <= diff)
         suc += 1
@@ -1240,9 +1289,9 @@ class BCDice
     
     return suc;
   end
-
-
-####################       ゲーム別成功度判定      ########################
+  
+  
+  ####################       ゲーム別成功度判定      ########################
   def check_suc(*check_param)
     
     total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max = *check_param
@@ -1304,23 +1353,23 @@ class BCDice
     
     return ""
   end
-
+  
   def check_nDx(total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max)  # ゲーム別成功度判定(ダイスごちゃ混ぜ系)
     debug('check_nDx begin diff', diff)
     success = check_hit(total_n, signOfInequality, diff);
     debug('check_nDx success', success)
     
     if(success >= 1)
-        return " ＞ 成功";
+      return " ＞ 成功";
     end
     
     return " ＞ 失敗";
   end
   
-###########################################################################
-#**                              出力関連
-###########################################################################
-
+  ###########################################################################
+  #**                              出力関連
+  ###########################################################################
+  
   def broadmsg(output_msg, nick)
     debug("broadmsg output_msg, nick", output_msg, nick)
     debug("@nick_e", @nick_e)
@@ -1353,11 +1402,11 @@ class BCDice
     @ircClient.sendMessageToChannels(message)
     @isMessagePrinted = true
   end
-
   
-####################         テキスト前処理        ########################
+  
+  ####################         テキスト前処理        ########################
   def parren_killer(string)
-   debug("parren_killer input", string)
+    debug("parren_killer input", string)
     
     while( /^(.*?)\[(\d+[Dd]\d+)\](.*)/ =~ string )
       str_before = "";
@@ -1433,7 +1482,7 @@ class BCDice
       
       afterText = $4
       afterText ||= "";
-
+      
       if(rangeBegin < rangeEnd)
         range = (rangeEnd - rangeBegin + 1)
         debug('range', range)
@@ -1451,7 +1500,7 @@ class BCDice
   
   def paren_k(string)
     kazu_o = 0;
-
+    
     unless (/([\d\/*+-]+)/ =~ string)
       return kazu_o
     end

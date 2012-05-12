@@ -27,11 +27,12 @@ package {
     import mx.controls.SWFLoader;
     import flash.system.Capabilities;
     import mx.utils.StringUtil;
+    import mx.effects.Glow;
     
     
     public class Utils {
         
-        public static function timer(seconds:int, action:Function):void {
+        public static function timer(seconds:Number, action:Function):void {
             var timer:Timer = new Timer(seconds * 1000, 1);
             timer.addEventListener(TimerEvent.TIMER, function(event:TimerEvent) : void {
                     action();
@@ -610,6 +611,20 @@ package {
         
         static public function isEqual(obj1:Object, obj2:Object):Boolean {
             return (mx.utils.ObjectUtil.compare(obj1, obj2) == 0);
+        }
+        
+        static public function glowEffect(target:Object, glow:Glow = null):void {
+            glowEffects( [target], glow);
+        }
+        
+        static public function glowEffects(targets:Array, glow:Glow = null):void {
+            
+            if( glow == null ) {
+                glow = DodontoF_Main.getInstance().getDodontoF().getGlowEffect();
+            }
+            
+            glow.end();
+            glow.play( targets );
         }
         
     }

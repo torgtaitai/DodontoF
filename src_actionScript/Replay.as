@@ -360,14 +360,20 @@ package {
                 return 0;
             }
             
+            var name:String = messageData[1];
+            var message:String = messageData[2];
+            var color:String = messageData[3];
+            var time:Number = messageData[4];
+            var uniqueId:String = messageData[5];
+            
+            var data:ChatSendData = new ChatSendData(channel, message, name);
+            data.setColorString(color);
+            
             DodontoF_Main.getInstance().getChatWindow().clearPublicChatMessageLog();
             DodontoF_Main.getInstance().getChatWindow()
-                .addMessageToChatLog(channel,
-                                     messageData[1],
-                                     messageData[2],
-                                     messageData[3],
-                                     messageData[4],
-                                     messageData[5],
+                .addMessageToChatLog(data,
+                                     time,
+                                     uniqueId,
                                      true);
             
             return getChatSleepTimeFromMessageData(messageData);

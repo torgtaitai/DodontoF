@@ -3,7 +3,7 @@
 package {
     import mx.managers.PopUpManager;
     
-    public class CutInMovieChangeWindow extends CutInMovieCreateWindow {
+    public class ChangeCutInMovieWindow extends AddCutInMovieWindow {
         
         private var index:int = 0;
         private var effectId:String = "";

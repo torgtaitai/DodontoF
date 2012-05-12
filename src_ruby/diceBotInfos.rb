@@ -17,7 +17,7 @@ $diceBotInfos =
       '\d+[\+\-\*\/]', #a+xDn のような加減算用
       'D66', #D66ダイス
       'make', #ランダムジェネレータ用
-      # 'choise\[', #ランダム選択　(choise[A, B, C])
+      'choise\[', #ランダム選択　(choise[A, B, C])
     ],
     :info => <<INFO_MESSAGE_TEXT
 【ダイスボット】(Faceless氏の「ボーンズ＆カーズ」を流用)
@@ -34,6 +34,7 @@ $diceBotInfos =
 　10B6>=4 ：10d6を振り4以上のダイス目の個数を数える
 　(8/2)D(4+6)<=(5*3)：個数・ダイス・達成値には四則演算も使用可能
 　C(10-4*3/2+2)：C(計算式）で計算だけの実行も可能
+　choise[a,b,c]：列挙した要素から一つを選択表示。ランダム攻撃対象決定などに。
 　S3d6 ： 上記各コマンドの先頭に「S」を付けると結果を他の人には見せないシークレットロールに
 INFO_MESSAGE_TEXT
   },
@@ -148,11 +149,15 @@ INFO_MESSAGE_TEXT
     :gameType => 'Cthulhu',
     :prefixs => ['RES\(\d+'],
     :info => <<INFO_MESSAGE_TEXT
-クリティカル(決定的成功)、スペシャル、ファンブル(致命的失敗)の自動判定を行います。
+・1D100の目標値判定で、クリティカル(決定的成功)／スペシャル／ファンブル(致命的失敗)の自動判定。
+　例）1D100<=50
+　　　Cthulhu : (1D100<=50) → 96 → 致命的失敗
+
 ・抵抗ロール　(RES(x-n))
 　RES(自分の能力値-相手の能力値)で記述します。
 　抵抗ロールに変換して成功したかどうかを表示します。
-　例）RES(12-10)　　　res(10-15)
+　例）RES(12-10)
+　　　Cthulhu : (1d100<=60) → 35 → 成功
 INFO_MESSAGE_TEXT
   },
   {
@@ -210,17 +215,21 @@ INFO_MESSAGE_TEXT
   {
     :name => 'シノビガミ',
     :gameType => 'ShinobiGami',
-    :prefixs => ['ST', 'FT', 'ET', 'WT', 'BT', 'CST', 'MST', 'DST', 'TST', 'NST', 'KST', 'TKST', 'GST', 'GWT', 'GAST', 'KYST', 'JBST'],
+    :prefixs => ['ST', 'FT', 'ET', 'WT', 'BT', 'CST', 'MST', 'DST', 'TST', 'NST', 'KST', 'TKST', 'GST', 'GWT', 'GAST', 'KYST', 'JBST', 'KFT', 'KWT', 'MT', 'RTT'],
     :info => <<INFO_MESSAGE_TEXT
 ・各種表
 　・(無印)シーン表　ST／ファンブル表　FT／感情表　ET
-　　　／変調表　WT／戦場表　BT
+　　　／変調表　WT／戦場表　BT／異形表　MT／ランダム特技決定表　RTT
 　・(弐)都市シーン表　CST／館シーン表　　MST／出島シーン表　DST
 　・(参)トラブルシーン表　TST／日常シーン表　NST／回想シーン表　KST
 　・(死)東京シーン表　TKST／戦国シーン表　GST
 　・(乱)戦国変調表　GWT
 　・(リプレイ戦1〜2巻)学校シーン表　GAST／京都シーン表　KYST
 　　　／神社仏閣シーン表　JBST
+　・(怪)怪ファンブル表　KFT／怪変調表　KWT
+　・（その他）秋空に雪舞えばシーン表　KST／災厄シーン表　CLST
+　　／出島EXシーン表　DXST／斜歯ラボシーン表　HLST
+　　／夏の終わりシーン表　NTST／培養プラントシーン表　　PLST
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },

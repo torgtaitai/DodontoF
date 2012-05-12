@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="430" height="200"
+   title="送信失敗チャットの再送" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box height="100%" width="100%">
+	<mx:DataGrid id="list"
+                 width="100%"
+                 height="100%"
+                 showHeaders="false"
+                 dataProvider="{listData}"
+                 editable="false"
+                 allowMultipleSelection="false"
+                 doubleClickEnabled="true"
+                 doubleClick="sendMessage()"
+                 >
+	  <mx:columns>
+		<mx:DataGridColumn headerText="Failed Data"
+                           dataField="text"
+                           />
+      </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%">
+      <mx:Spacer width="50%" />
+      <mx:Button label="再送" click="sendMessage()" />
+      <mx:Spacer width="50%" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.collections.ArrayCollection;
+    import mx.core.UIComponent;
+    
+    [Bindable]
+    private var listData:ArrayCollection = new ArrayCollection();
+    
+    static private var self:SendChatMessageFailedWindow = null;
+    
+    static public function setData(data:ChatSendData):void {
+        if( self == null ) {
+            self = DodontoF.popup(SendChatMessageFailedWindow, false) as SendChatMessageFailedWindow;
+            setWindowVisible( false );
+        }
+        
+        self.setData(data);
+        setNotify(true);
+    }
+    
+    static public function setNotify(b:Boolean):void {
+        Log.logging("setNotify Begin");
+        DodontoF_Main.getInstance().getChatWindow().setSendErrorNotifyButtonEnable(b);
+        
+        if ( b ) {
+            Log.logging("setNotify message");
+            Log.loggingErrorOnStatus("送信エラー[" + self.listData.length + "]");
+        }
+        Log.logging("setNotify End");
+    }
+    
+    static public function setWindowVisible(b:Boolean):void {
+        Log.logging("setWindowVisible b", b);
+        
+        self.visible = b;
+    }
+    
+    public function sendMessage():void {
+        
+        var index:int = list.selectedIndex;
+        var obj:Object = listData.removeItemAt(index);
+        
+        var data:ChatSendData = obj.data;
+        if( data == null ) {
+            return;
+        }
+        
+        DodontoF_Main.getInstance().getChatWindow().sendChatMessageAgain(data);
+        
+        if( listData.length == 0 ) {
+            setNotify(false);
+            closeAction();
+        }
+    }
+    
+    public function setData(data:ChatSendData):void {
+        var obj:Object = new Object();
+        obj.data = data;
+        obj.text = data.getMessage();
+        
+        listData.addItem(obj);
+    }
+    
+    override protected function closeAction():void {
+        Log.logging("closeAction Begin");
+        
+        Log.loggingErrorOnStatus("");
+        setWindowVisible( false );
+        Log.logging("closeAction End");
+    }
+    
+    
+    ]]>
+  </mx:Script>
+  
+</torgtaitai:CommonPopupWindow>

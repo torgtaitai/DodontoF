@@ -23,12 +23,9 @@ package {
             cutInInfos = cutInInfos_;
         }
         
-        protected var dodontoF:DodontoF;
-        protected var bSoundOn:Boolean = true;
-        protected var effectable:Boolean = true;
+        protected var effectable:Boolean = false;
 
         public function CutInBase():void {
-            dodontoF = DodontoF_Main.getInstance().getDodontoF();
         }
         
         protected function getMarkString():String {
@@ -36,6 +33,10 @@ package {
         }
         
         public function getCutInMessage(params:Object):String {
+            if( params == null ) {
+                params = new Object();
+            }
+            
             var paramsString:String = JSON.encode(params);
             return (getMarkString() + paramsString);
         }
@@ -95,7 +96,10 @@ package {
             
             newParams["chatMessage"] = message;
             
-            return getCutInMessage(newParams);
+            var result:String = getCutInMessage(newParams);
+            Log.logging("getCutInMessageWithChatMessage result", result);
+            
+            return result;
         }
         
         private function isTail(lines:Array, tail:String):Boolean {
@@ -130,24 +134,22 @@ package {
             effectable = b;
         }
         
-        public function setSoundOn(b:Boolean):void {
-            bSoundOn = b;
-        }
-        
         protected function getWindowTitle(params:Object):String {
             return "【" + params.message + "】";
         }
         
         protected function getPrintMessageText(params:Object):String {
+            Log.logging("getPrintMessageText params", params);
+            
             if( params.chatMessage != null ) {
                 return params.chatMessage;
             }
             
             return "【" + params.message + "】";
-            //return "DUMMY";
         }
         
         public function effect(effectString:String):String {
+            Log.logging("effectString Begin");
             var paramsString:String = effectString.substring( getMarkString().length );
             Log.logging("paramsString", paramsString);
             
@@ -155,11 +157,11 @@ package {
             var params:Object = {};
             try {
                 params = JSON.decode(paramsString);
-                Log.logging("params", params);
                 message = getPrintMessageText(params);
             } catch (error:Error) {
-                message = paramsString
+                message = "params error[" + paramsString + "]";
             }
+            Log.logging("message", message);
             
             if( ! effectable ) {
                 Log.logging("effectable false");
@@ -173,6 +175,7 @@ package {
             
             executeEffect(params);
             
+            Log.logging("effectString End message", message);
             return message;
         }
         

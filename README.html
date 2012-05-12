@@ -12,12 +12,15 @@
 </p>
 
 <br/>
-<p align="left"><a id="howtobook" href="http://www.melonbooks.com/index.php?main_page=product_info&products_id=IT0000147432">使用方法については、どどんとふ解説書も参照下さい。<br/></a></p>
+<p align="left"><a href="#howtobook">使用方法については、どどんとふ解説書も参照下さい。</a></br>
+って言うか下記の解説は相当古いので解説書読んだ方がいいです絶対。</br>
+<a href="#howToSetting">自前サーバの設置方法</a>なんかは下記解説にしか載ってないのでこちらでいいんですけどね。</br>
+</p>
 <br/>
   
 <p>
   <h2 id="index">目次</h2>
-<!-- INDEX-AREA --><ul><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><ul><font size='3'><li><a href='#login'>ログイン</a></li></font><font size='3'><li><a href='#map'>マップ関連の操作</a></li></font><ul><font size='2'><li><a href='#changeMap'>マップの変更</a></li></font><font size='2'><li><a href='#mapMask'>マップマスクの操作</a></li></font><font size='2'><li><a href='#zoomMap'>マップの拡大縮小</a></li></font><font size='2'><li><a href='#moveMap'>マップの移動</a></li></font></ul><font size='3'><li><a href='#character'>キャラクター関連の操作</a></li></font><ul><font size='2'><li><a href='#addCharacter'>キャラクターの追加</a></li></font><font size='2'><li><a href='#moveCharacter'>キャラクターの移動</a></li></font><font size='2'><li><a href='#changeCharacter'>キャラクターの変更</a></li></font><font size='2'><li><a href='#removeCharacter'>キャラクターの削除</a></li></font><font size='2'><li><a href='#returnCharacter'>キャラクター削除の取り消し</a></li></font><font size='2'><li><a href='#addMacgicRange'>魔法範囲の作成</a></li></font><font size='2'><li><a href='#changeMagicRange'>魔法範囲の変更</a></li></font><font size='2'><li><a href='#removeMagicRange'>魔法範囲の削除</a></li></font><font size='2'><li><a href='#returnMagicRange'>魔法範囲削除の取り消し</a></li></font></ul><font size='3'><li><a href='#initiative'>イニシアティブ表示関連</a></li></font><ul><font size='2'><li><a href='#initiativeList'>イニシアティブ情報の表示</a></li></font><font size='2'><li><a href='#addRound'>イニシアティブ情報欄によるラウンド進行</a></li></font></ul><font size='3'><li><a href='#chat'>チャット関連</a></li></font><ul><font size='2'><li><a href='#sendChat'>チャット機能</a></li></font><font size='2'><li><a href='#saveChatLog'>チャットログ保存機能</a></li></font><font size='2'><li><a href='#chatRefreshChaim'>チャット更新着信音</a></li></font><font size='2'><li><a href='#wakeupAlarm'>目覚ましアラーム機能</a></li></font></ul><font size='3'><li><a href='#card'>カード</a></li></font><ul><font size='2'><li><a href='#displayCard'>カード表示</a></li></font><font size='2'><li><a href='#cardZoom'>カード拡大・縮小</a></li></font><font size='2'><li><a href='#cardControl'>カードの操作</a></li></font></ul><font size='3'><li><a href='#dice'>ダイス関連</a></li></font><ul><font size='2'><li><a href='#visualDice'>ビジュアルダイス機能</a></li></font><font size='2'><li><a href='#diceBot'>ダイスボット機能</a></li></font></ul><font size='3'><li><a href='#image'>画像関連</a></li></font><ul><font size='2'><li><a href='#imageFileUploader'>画像ファイルアップローダ</a></li></font><font size='2'><li><a href='#imageUrlUploader'>画像URLアップローダ</a></li></font><font size='2'><li><a href='#imageWebCameraUploader'>WEBカメラ画像アップローダー</a></li></font><font size='2'><li><a href='#removeImage'>画像削除</a></li></font></ul><font size='3'><li><a href='#saveLoad'>セーブ・ロード関連</a></li></font><ul><font size='2'><li><a href='#save'>セーブ</a></li></font><font size='2'><li><a href='#load'>ロード</a></li></font><font size='2'><li><a href='#replay'>リプレイ録画・再生機能</a></li></font></ul></ul><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#howToVersionUp'>バージョンアップ方法</a></li></font><font size='3'><li><a href='#othersSetting'>その他</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#HTTPPostBinary_class'>HTTPPostBinary class</a></li></font><font size='2'><li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#cardGraphics'>カード用データ</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
+<!-- INDEX-AREA --><ul><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><ul><font size='3'><li><a href='#login'>ログイン</a></li></font><font size='3'><li><a href='#map'>マップ関連の操作</a></li></font><ul><font size='2'><li><a href='#changeMap'>マップの変更</a></li></font><font size='2'><li><a href='#mapMask'>マップマスクの操作</a></li></font><font size='2'><li><a href='#zoomMap'>マップの拡大縮小</a></li></font><font size='2'><li><a href='#moveMap'>マップの移動</a></li></font></ul><font size='3'><li><a href='#character'>キャラクター関連の操作</a></li></font><ul><font size='2'><li><a href='#addCharacter'>キャラクターの追加</a></li></font><font size='2'><li><a href='#moveCharacter'>キャラクターの移動</a></li></font><font size='2'><li><a href='#changeCharacter'>キャラクターの変更</a></li></font><font size='2'><li><a href='#removeCharacter'>キャラクターの削除</a></li></font><font size='2'><li><a href='#returnCharacter'>キャラクター削除の取り消し</a></li></font><font size='2'><li><a href='#addMacgicRange'>魔法範囲の作成</a></li></font><font size='2'><li><a href='#changeMagicRange'>魔法範囲の変更</a></li></font><font size='2'><li><a href='#removeMagicRange'>魔法範囲の削除</a></li></font><font size='2'><li><a href='#returnMagicRange'>魔法範囲削除の取り消し</a></li></font></ul><font size='3'><li><a href='#initiative'>イニシアティブ表示関連</a></li></font><ul><font size='2'><li><a href='#initiativeList'>イニシアティブ情報の表示</a></li></font><font size='2'><li><a href='#addRound'>イニシアティブ情報欄によるラウンド進行</a></li></font></ul><font size='3'><li><a href='#chat'>チャット関連</a></li></font><ul><font size='2'><li><a href='#sendChat'>チャット機能</a></li></font><font size='2'><li><a href='#saveChatLog'>チャットログ保存機能</a></li></font><font size='2'><li><a href='#chatRefreshChaim'>チャット更新着信音</a></li></font><font size='2'><li><a href='#wakeupAlarm'>目覚ましアラーム機能</a></li></font></ul><font size='3'><li><a href='#card'>カード</a></li></font><ul><font size='2'><li><a href='#displayCard'>カード表示</a></li></font><font size='2'><li><a href='#cardZoom'>カード拡大・縮小</a></li></font><font size='2'><li><a href='#cardControl'>カードの操作</a></li></font></ul><font size='3'><li><a href='#dice'>ダイス関連</a></li></font><ul><font size='2'><li><a href='#visualDice'>ビジュアルダイス機能</a></li></font><font size='2'><li><a href='#diceBot'>ダイスボット機能</a></li></font></ul><font size='3'><li><a href='#image'>画像関連</a></li></font><ul><font size='2'><li><a href='#imageFileUploader'>画像ファイルアップローダ</a></li></font><font size='2'><li><a href='#imageUrlUploader'>画像URLアップローダ</a></li></font><font size='2'><li><a href='#imageWebCameraUploader'>WEBカメラ画像アップローダー</a></li></font><font size='2'><li><a href='#removeImage'>画像削除</a></li></font></ul><font size='3'><li><a href='#saveLoad'>セーブ・ロード関連</a></li></font><ul><font size='2'><li><a href='#save'>セーブ</a></li></font><font size='2'><li><a href='#load'>ロード</a></li></font><font size='2'><li><a href='#replay'>リプレイ録画・再生機能</a></li></font></ul><font size='3'><li><a href='#howtobook'>どどんとふ解説書</a></li></font></ul><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#othersSetting'>お知らせメッセージの変更</a></li></font><font size='3'><li><a href='#howToVersionUp'>バージョンアップ方法</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#HTTPPostBinary_class'>HTTPPostBinary class</a></li></font><font size='2'><li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#cardGraphics'>カード用データ</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
 </p>
 
 <h2 id="aboutDodontoF">「どどんとふ」って何？</h2>
@@ -367,6 +370,9 @@ Goole配下の全ての画像、たとえばイメージ検索で表示された
 ファイル選択画面が出るので、先ほど保存した録画ファイル（〜.rec）を選択します。<br>
 後は操作しないで待って頂ければ、録画したプレイ内容が順次再生されます。<br>
 
+<h3 id="howtobook">どどんとふ解説書</h2>
+その他詳細な使用方法については、<b><a id="howtobook" href="http://www.melonbooks.com/index.php?main_page=product_info&products_id=IT0000151638">どどんとふ解説書</a></b>を参照ください。</br>
+
 
 <h2 id="howToSetting">設置方法</h2>
 
@@ -379,36 +385,128 @@ Goole配下の全ての画像、たとえばイメージ検索で表示された
 慣れないうちは上記から「安定版」と書かれたバージョンを使用してください。
 チャレンジャーな貴方は以下から「最新版」をご利用ください。<br>
 <a href="http://www.dodontof.com/DodontoF/newestVersion.html">http://www.dodontof.com/DodontoF/newestVersion.html</a><br>
-DodontoF.zipを展開します。<br>
-展開したら、<br>
-　DodontoFServer.rb<br>
-のファイルの先頭行にRubyへのパスを記載してください。<br>
-このファイルは文字コードがUTF-8、改行コードはUNIX方式になります。このためサクラエディタ等のそれ相応のエディタで編集するよう、またパス編集時にRubyのスクリプトのコマンド引数を変更しないように注意してください。(Rubyであれば  -Ku は削除しないでください)<br>
-パスはサーバに依存するため、各自で調べてください。<br>
-xrea の場合、初期値のままで問題ありません。多分。<br>
+DodontoF_xx_xx_xx.zipを展開します。<br>
 <br>
-上記編集が完了したら、src_actionScript ディレクトリを除いた全てのファイルをCGI用サーバに転送してください。<br>
+展開した中身が以下のようなディレクトリ構成になっていることを確認します。<br>
+<br>
+DodontoF_WebSet<br>
+　｜<br>
+　＋public_html<br>
+　｜　｜<br>
+　｜　＋DodontoF<br>
+　｜　｜<br>
+　｜　＋imageUploadSpace<br>
+　｜<br>
+　＋saveData<br>
+<br>
+構成を確認したらその中のファイル<br>
+<br>
+　DodontoF_WebSet/public_html/DodontoF/DodontoFServer.rb<br>
+<br>
+の先頭行に Ruby へのパスを記載してください。<br>
+パスの情報は使用するCGIサーバの指示に従ってください<br>
+<ul>
+<li>xreaなら「<a href="http://www.xrea.com/?action=spec">ここの●CGI/SSI を参照</a>」</li>
+<li>@PAGEなら「<a href="http://www10.atwiki.jp/atpagesguide/pages/27.html#id_6c25e82a">CGIのパスを教えてください</a>」</li>
+<li>ロリポップサーバなら「<a href="http://lolipop.jp/manual/hp/cgi/#search_word=cgi">ここのCGI・SSI・PHPの設定などについて、のパスの記載</a>」</li>
+<li>エックスサーバなら「<a href="http://www.xserver.ne.jp/man_program_soft.php">ここのコマンドパス一覧を参照</a>」</li>
+</ul>
+を確認してください。（と言いつつ 最初の３社では変更の必要は現状ありません。）<br>
+<br>
+このファイルは文字コードがUTF-8、改行コードはUNIX方式になります。<br>
+このためサクラエディタ等のそれ相応のエディタで編集するよう、またパス編集時にRubyのスクリプトのコマンド引数を変更しないように注意してください。<br>
+具体的には、デフォルトの<br>
+<br>
+#!/usr/local/bin/ruby -Ku<br>
+<br>
+を変更するのであれば、<br>
+<br>
+#!/usr/sbin/ruby -Ku<br>
+<br>
+のように -Ku は変えないでおいてください。<br>
+<br>
+パスの編集が完了したら、CGIサーバにファイルの転送を行います。<br>
 　注：ファイルの転送は必ず全ファイルともバイナリモードで行ってください。<br>
 　　上述の文字コードの関係上、アスキーモードで転送してしまうとサーバの処理が失敗することになります。。<br>
 　　WinddowsではFFFTPという転送ツールが実績もありお勧めです。「B」マークのアイコンを押してバイナリ転送してください。<br>
 <br>
-転送後、以下のとおりファイル・ディレクトリの権限(属性)を変更します。<br>
+一般的にはCGIサーバのディレクトリは<br>
 <br>
-・「実行権限あり（705）」に変えるディレクトリ（データ用）<br>
-　(DodontoFディレクトリ本体）<br>
-　saveData<br>
-　imageUploadSpace<br>
-　imageUploadSpace/smallImages<br>
-　saveDataTempSpace<br>
-　fileUploadSpace<br>
-　replayDataUploadSpace<br>
+/ （＜ルートディレクトリ<br>
+　｜<br>
+　＋public_html（＜ディレクトリ。この下に公開用のファイルを置く）<br>
+　｜<br>
+　＋その他ディレクトリ<br>
 <br>
-・「実行権限あり（700）」に変えるファイル<br>
-　DodontoFServer.rb<br>
+という構成になっています。<br>
 <br>
-・「書き込み権限あり（600）」に変えるファイル<br>
-　log.txt<br>
-　log.txt.0<br>
+＃　もしも使用しているサーバに pubilc_html が存在しない場合は…<br>
+＃　しょうがないのでCGIサーバのどこかに DodontoF_WebSet をそのままゴロっと置いてください。<br>
+＃　例えば、 /anyDirecory の下におくとすれば<br>
+＃　/anyDirecory<br>
+＃　　｜<br>
+＃　　＋DodontoF_WebSet<br>
+＃　　　　｜<br>
+＃　　　　＋public_html<br>
+＃　　　　｜<br>
+＃　　　　：<br>
+＃　　こんな感じですね。<br>
+＃　後は / を /anyDirecory と読み替えてください。<br>
+<br>
+<br>
+構成を確認できたら、どどんとふ展開した時に出来る<br>
+<br>
+　DodontoF_WebSet/public_html<br>
+<br>
+の中身を、CGIサーバの<br>
+<br>
+　/public_html<br>
+<br>
+の下に転送してください。<br>
+<br>
+また、どどんとふ展開時の<br>
+ DodontoF_WebSet/saveData<br>
+は、CGIサーバの public_html と同じ階層においてください。<br>
+つまり、置いた後のCGIサーバの状態は<br>
+<br>
+/<br>
+　｜<br>
+　＋public_html<br>
+　｜　｜<br>
+　｜　＋DodontoF<br>
+　｜　｜<br>
+　｜　＋imageUploadSpace<br>
+　｜<br>
+　＋saveData<br>
+<br>
+になります。どどんとふ展開時の DodontoF_WebSet の中身をそのままCGIサーバに突っ込む感じですね。<br>
+<br>
+転送が完了したら、以下の記載のとおりファイル・ディレクトリの権限(属性)を変更します。<br>
+<br>
+/<br>
+　｜<br>
+　＋public_html<br>
+　｜　｜<br>
+　｜　＋DodontoF -> 705(実行権限あり)<br>
+　｜　　｜<br>
+　｜　　＋DodontoFServer.rb -> 700(実行権限あり)<br>
+　｜　　｜<br>
+　｜　　＋log.txt -> 600(書き込み権限あり)<br>
+　｜　　｜<br>
+　｜　　＋log.txt.0 -> 600(書き込み権限あり)<br>
+　｜　　｜<br>
+　｜　　＋imageUploadSpace -> 705(実行権限あり)<br>
+　｜　　｜　｜<br>
+　｜　　｜　＋smallImages -> 705(実行権限あり)<br>
+　｜　　｜<br>
+　｜　　＋saveDataTempSpace -> 705(実行権限あり)<br>
+　｜　　｜<br>
+　｜　　＋fileUploadSpace -> 705(実行権限あり)<br>
+　｜　　｜<br>
+　｜　　＋replayDataUploadSpace -> 705(実行権限あり)<br>
+　｜<br>
+　＋saveData -> 705(実行権限あり)<br>
+<br>
 <br>
 上記の設定で大低のレンタルサーバの指定通りになると思います。<br>
 参考までに、各レンタルサーバの設定については<br>
@@ -416,64 +514,44 @@ xrea の場合、初期値のままで問題ありません。多分。<br>
 <li>xreaなら「<a href="http://www.xrea.com/?action=spec">ここの■推奨パーミッション</a>」</li>
 <li>@PAGEなら「<a href="http://www10.atwiki.jp/atpagesguide/pages/27.html#id_7a08792f">@PAGESのCGIガイドのRuby箇所</a>」</li>
 <li>ロリポップサーバなら「<a href="http://lolipop.jp/manual/hp/cgi/#search_word=cgi">ここの設定するパーミッションの値</a>」</li>
+<li>エックスサーバなら「<a href="http://www.xserver.ne.jp/faq_service_cgi.php">ここのパーミッション設定はどうすればいいですか？</a>」</li>
 </ul>
 を参照下さい。<br>
 ＃ここに記載の無いサーバについての情報も随時募集中です。<br>
 <br>
-最後にディレクトリの設置場所を変更します。<br>
-以下の変更を行わない場合、次回「どどんとふ」をバージョンアップ際に画像ファイルやセーブデータが消える場合があります。<br>
+以上で設置作業は完了です。<br>
 <br>
-まず、画像ファイルアップロード用のディレクトリ<br>
+<a href="#howToCheckSetting">動作確認</a>を行いましょう。
+問題があるようであれば、もう一度設定を見直してみて下さい。<br>
 <br>
-　imageUploadSpace<br>
+また、余力があるようであれば<a href="#othersSetting">お知らせメッセージの変更</a>も行っておきましょう。<br>
+自分専用スペースであることをアピールできるとステキですねっ！<br>
 <br>
-を DodontoF ディレクトリと同じ階層（つまり今の1つ上のディレクトリ）に移動します。<br>
-次にセーブファイルディレクトリ<br>
+ここまで完了すれば運用環境は完了です。<br>
+お疲れ様でした。<br>
 <br>
-　saveData<br>
 <br>
-の設置場所をWEB上から見えないパスに変更します。<br>
-具体例を挙げると、<br>
-<br>
-/public_html/DodontoF/DodontoFServer.rb<br>
-/public_html/DodontoF/imageUploadSpace<br>
-/public_html/DodontoF/saveData<br>
-<br>
-が初期設置であれば、<br>
-<br>
-/public_html/DodontoF/DodontoFServer.rb<br>
-/public_html/imageUploadSpace<br>
-/saveData<br>
-<br>
-と言った配置に変えます。<br>
-(imageUploadSpaceはWEB上から参照可能なディレクトリにするよう注意してください。)<br>
-次に、<br>
-src_ruby/config.rb<br>
-の<br>
-<br>
-$SAVE_DATA_DIR = '.'<br>
-<br>
-$imageUploadDir = "./imageUploadSpace"<br>
-<br>
-を、それぞれ上記で変更したパスを指すように変更します。<br>
-相対パスの場合の基点は DodontoF.swf になります。<br>
-上記の例の場合なら<br>
-<br>
-$SAVE_DATA_DIR = '../..'<br>
-<br>
-$imageUploadDir = "../imageUploadSpace"<br>
-<br>
-とします。<br>
+よりコダワリの設定を行いたい方は次の項も確認ください。。<br>
 <br>
 <h3 id="dodontoFSettingMySQL">設置方法その２：MySQLサーバ編</h3>
 次に、MySQLというデータベースを使用してセーブデータの管理を行う場合について。<br>
 「MySQLって何？データベースって聞いたことあるようなないような」<br>
 と言う方はググって調べるか、あるいは諦めましょう。<br>
-この設定を行うと「どどんとふ」の動作が軽くなるのですが、設定しなくても従来通りに使用は可能ですのでそこまで問題にはなりませｎ。<br>
 <br>
-では設定方法について。ファイル<br>
+この設定を行うと「どどんとふ」の動作が軽くなる場合があります。<br>
+逆に言えば、軽くならない場合もあります。<br>
+そもそも、設定しなくても従来通りに使用は可能ですのでそこまで問題にはなりません。<br>
 <br>
-src_ruby/config.rb<br>
+ですので、初めてサーバを立てるのであればこの設定は無理して実施する必要はありません。<br>
+判っている人が、より快適さを追求するのであれば、こちらにTryしましょう。<br>
+そして不具合があるようなら戻しましょう。<br>
+＃遊べればいいんですよ遊べれば！<br>
+<br>
+<br>
+では設定方法について。<br>
+ファイル<br>
+<br>
+　src_ruby/config.rb<br>
 の
 <pre><code>
 #MySQLを使用する場合のDB設定。
@@ -500,6 +578,9 @@ $dbType = "mysql"
 <br>
 以上で設置作業は完了です。<br>
 <br>
+<a href="#howToCheckSetting">動作確認</a>を行ってください。<br>
+<br>
+<br>
 <h3 id="howToCheckSetting">動作確認方法</h3>
 ブラウザをを立ち上げて、アップロードしたCGIサーバの<br>
  DodontoFServer.rb<br>
@@ -521,37 +602,44 @@ $dbType = "mysql"
 を開いてください。<br>
 「どどんとふ」のログイン画面が表示されれば成功です。<br>
 <br>
-最後に、デフォルトで登録されている画像のキャッシュを作成します。<br>
-この手順は飛ばしても運用上支障はありません。ちょっと動作が速くなる程度なので、気にしない方は飛ばしてください。<br>
-(あなたのどどんとふへのURL)/DodontoF.swf?createSmallImage=on<br>
-でURLを開いて、画面の支持にしたがってボタンを操作してください。<br>
-画像の表示高速化用にキャッシュが作成されます。<br>
+<br>
+<h3 id="othersSetting">お知らせメッセージの変更</h3>
+ログイン画面にに表示される「お知らせ」は loginMessage.html を書き換えることで変更可能です。<br>
+身内だけの使用なのか、他の人も使っていいのか、サーバのメンテナンス時期やサークルのPR等をここに記述するとわかりやすいでしょう。<br>
+変更後にログイン画面を表示して内容を確認するのを忘れないようにね！<br>
 <br>
 以上で設置に必要な作業は完了です。<br>
 お疲れ様でした。<br>
 <br>
+<br>
 <h3 id="howToVersionUp">バージョンアップ方法</h3>
 上記の手順をすべて実施した上で、最新版の「どどんとふ」へバージョンをあげる場合。<br>
 構築済みの既存「どどんとふ」環境から<br>
-src_ruby/config.rb<br>
+　/pubilc_html/DodontoF/src_ruby/config.rb<br>
 だけを取り出しておきましょう。<br>
 <br>
 そして、<br>
 <a href="http://www.dodontof.com/ja/home/dodontofdownload.html">http://www.dodontof.com/ja/home/dodontofdownload.html</a><br>
 からDodontoF.zip を入手し、中身を展開。<br>
 先ほど取り出した<br>
-src_ruby/config.rb<br>
+　/pubilc_html/DodontoF/src_ruby/config.rb<br>
 の設定内容を展開した同一ファイルに適用していきます。<br>
 <br>
 そのまま上書きで差し替えると新しく追加された設定が無効になる可能性がありますので、<br>
 <a href="http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge.html">WinMerge</a>辺りのソフトで差分を確認しつつ適用してやってください。<br>
 <br>
-それができたら、後は既存の環境にFTPを使用して全てのファイルの上書きを行ってください。<br>
+それができたら、媒体の中身の<br>
+<br>
+　DodontoF_WebSet/pubilc_html/DodontoF<br>
+<br>
+を既存環境の<br>
+<br>
+　/pubilc_html/DodontoF<br>
+<br>
+にディレクトリ毎全て上書きを行ってください。<br>
+<br>
 後は<a href="#howToCheckSetting">動作確認方法</a>を参考に動作チェックを行ってください。<br>
 <br>
-<br>
-<h3 id="othersSetting">その他</h3>
-ログイン画面にに表示される「お知らせ」は loginMessage.html を書き換えることで変更可能です。<br>
 <br>
 MySQLデータベース機能はお試し版のため従来の機能と両立する方法もあります。<br>
 その場合は、<br>
@@ -570,16 +658,16 @@ DodontoF.swf<br>
 <br>
 <br>
 <h2 id="forDevelopment">開発向けの詳細</h2>
-
+<br>
 以下はソースコードの中身に興味がある人用の情報です。<br>
 単純に利用するだけであれば読まなくでも問題ありません。<br>
-
+<br>
 <h3 id="aboutCompile">コンパイル方法について</h3>
 「どどんとふ」でコンパイルして作成する必要があるのはFlex(ActionScript)の生成ファイル<br>
 DodontoF.swf<br>
 のみです。<br>
 以下、Windowsでのコンパイル方法について述べます。<br>
-
+<br>
 <h3 id="aboutCompileInWindows">Windowsでのコンパイル方法</h3>
 コンパイルには<br>
 <a href="http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+3">http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+3</a><br>
@@ -603,7 +691,7 @@ mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isG
 <br>
 上記以外はRubyのコードになりますのでファイルを直接編集してもらえれば反映されます。<br>
 ソースコードの内、〜Testで終わるファイルはUnitTest用ですので通常の運用では変更する必要はありません。<br>
-
+<br>
 <h2 id="aboutLicense">ライセンスについて</h2>
 以下、各種同根ファイルを含めたライセンスについて。<br>
 <br>
@@ -721,6 +809,61 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2012/05/12 Ver.1.36.13<br>
+・カットインでプレビューが表示できなくなっていた問題を修正。りおねすさん指摘ありがとうっ！<br>
+・リリース媒体のディレクトリ構成を改善。<br>
+　saveData, imageUploadSpace を DodontoF ディレクトリの上になる構成を媒体に固め、 config.rb の手動変更を不要に。<br>
+　またこれに伴いインストール手順とバージョンアップ手順も更新。<br>
+<br>
+2012/05/07 Ver.1.36.12<br>
+・ダイスボットの表追加をどどんとふ側から出来るように機能追加。チャットウィンドウのダイスボット指定の右隣のアイコンから実行可能。<br>
+・ログイン時のユーザー名表示が常に「どどんとふ」になっていた問題を修正。<br>
+・メニューの「シナリオデータ作成」を「全データセーブ」に変更<br>
+　「シナリオデータ読み込み」を「全データロード(旧：シナリオデータ読み込み)」に変更<br>
+・セーブ・全データセーブの画面構成を変更。<br>
+・ログイン画面のログイン状況として、現在ログインしている人のいるルームを表示する機能を追加。<br>
+・ログイン画面のルーム削除ボタンの位置を変更。（拡張機能から標準へ）<br>
+<br>
+2012/04/24 Ver.1.36.11<br>
+・extratablesディレクトリへの表追加で、ゲーム指定しない場合の処理に対応。<br>
+・choiseコマンド追加。<br>
+　choise[a,b,c]　で、列挙した要素から一つを選択して表示。ランダム攻撃対象決定などに。<br>
+　例１）choise[PC1,PC2,PC3]<br>
+　　　diceBot : (CHOISE[PC1,PC2,PC3]) → PC3<br>
+　例２）CHOISE「PC1、PC2、PC3、PC4」<br>
+　　　diceBot : (CHOISE[PC1,PC2,PC3,PC4]) → PC4<br>
+・クトゥルフのダイスボット説明文を整理。<br>
+<br>
+2012/04/21 Ver.1.36.10<br>
+・ダイスボットをボーンズ＆カーズVer2.01.15対応へ変更。<br>
+　シノビガミの表として<br>
+　　　　　・怪ファンブル表　　　　　KFT<br>
+　　　　　・怪変調表　　　　　　　　KWT<br>
+　　　　　・異形表　　　　　　　　　MT<br>
+　　　　　・ランダム特技決定表　　　RTT<br>
+　　　　　・秋空に雪舞えばシーン表　KST<br>
+　　　　　・災厄シーン表　　　　　　CLST<br>
+　　　　　・出島EXシーン表　　　　　DXST<br>
+　　　　　・斜歯ラボシーン表　　　　HLST<br>
+　　　　　・夏の終わりシーン表　　　NTST<br>
+　　　　　・培養プラントシーン表　　PLST<br>
+　を追加。<br>
+・extratablesディレクトリに追加したい表データを入れればゲーム中に使用できるようになりました。<br>
+つまり、自前サーバの人しか今は使えない機能です。<br>
+詳しくはB＆CのREADME.txtの「７．オリジナルの表追加」を参照願います。<br>
+ただし現状、特定のゲームへの表の追加しかサポートしていません。<br>
+<br>
+2012/04/21 Ver.1.36.09<br>
+・日本語ファイル名の場合に画像アップロードが上手く動かない問題に対応。九龍さんありがとうっ！<br>
+<br>
+2012/04/18 Ver.1.36.08<br>
+・チャット送信失敗時に内部で再送を行うように変更。再送回数は src_ruby/config.rb の $retryCountLimit に定義。<br>
+・再送も全て失敗したなら、チャットウィンドウ右上に送信失敗通知アイコンを出し、そこから再送信用ができるように機能追加。<br>
+<br>
+2012/04/15 Ver.1.36.07<br>
+・キャラクター削除時に削除者以外の環境では内部的にキャラクターが残ってしまう（イニシアティブ表やマップの残滓として）障害を対応。<br>
+・試作機能の射線測定モードが紛れ込んでいたので削除。<br>
+<br>
 2012/04/14 Ver.1.36.06.01<br>
 ・秘話機能でコンボボックスが押せない問題を修正。四季さん指摘ありがとうっ！<br>
 <br>

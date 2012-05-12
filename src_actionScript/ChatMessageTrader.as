@@ -25,8 +25,7 @@ package {
         private var systemMessageSenderName:String = "どどんとふ";
         private var systemMessageColor:String = "00AA00";
         private var thisObj:ChatMessageTrader;
-        
-        private var loadingLimitSeconds:int = 15;
+        private var guiInputSender:GuiInputSender;
         
         private var voter:Voter;
         
@@ -34,8 +33,9 @@ package {
         public function ChatMessageTrader(chatWindow_:ChatWindow) {
             thisObj = this;
             
+            guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             chatWindow = chatWindow_;
-            cutInList = [new CutInMovie()];//, new CutInImage()];
+            cutInList = [new CutInMovie(), new CutInCommandGetDiceBotInfos()];//, new CutInImage()];
             
             voter  = new Voter(chatWindow);
         }
@@ -61,92 +61,92 @@ package {
             return true;
         }
         
-        private var sendMessageIndex:int = 0;
         
-        public function sendMessage(chatSendData:ChatSendData):void {
-            
-            var name:String = chatSendData.getName() + "\t" + chatSendData.getState();
-            var color:String = chatSendData.getColor();
-            var sendto:String = chatSendData.getSendto();
-            var chatMessage:String = chatSendData.getMessage();
-            var channel:int = chatSendData.getChannel();
-            
+        public function sendMessage(data:ChatSendData):void {
             
             //不正なダイスロールならここで終了
-            if( checkInvalidDiceRoll(chatMessage, chatSendData.isDiceRollResult()) ) {
+            if( checkInvalidDiceRoll(data.getMessage(), data.isDiceRollResult()) ) {
                 return;
             }
             
-            var messageIndex:int = sendMessageIndex++;
+            data.setNameFromChatWindow();
+            data.setSendtoFromChatWindow();
             
             try{
-                var time:Number = (new Date().getTime() / 1000);
-                var isReplayChatMessage:Boolean = false;
-                addMessageToChatLog(channel, name, chatMessage, color, time, localMessageUniqueId,
-                                    isReplayChatMessage, sendto, messageIndex);
-                
-                var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-                guiInputSender.sendChatMessage(name, chatMessage, color, messageIndex, sendto,
-                                               DodontoF_Main.getInstance().getChatWindow().getSelectedChatChannleIndex());
+                addMessageToChatLogWhenSendMessage(data);
+                guiInputSender.sendChatMessage(data);
             } catch(error:Error) {
                 this.status = error.message;
             }
         }
         
+        private function addMessageToChatLogWhenSendMessage(data:ChatSendData):void {
+            if( data.isDiceRoll() ) {
+                return;
+            }
+            
+            if( ! data.isFirstSend() ) {
+                return;
+            }
+            
+            var time:Number = (new Date().getTime() / 1000);
+            var isReplayChatMessage:Boolean = false;
+            addMessageToChatLog(data, time, localMessageUniqueId, isReplayChatMessage);
+        }
+        
         
         public function addLocalMessage(message:String):void {
-            addMessageToChatLog(ChatWindow.getInstance().publicChatChannel, systemMessageSenderName, message, systemMessageColor, 0, "dummy");
+
+            var data:ChatSendData = new ChatSendData(ChatWindow.getInstance().publicChatChannel,
+                                                     message,
+                                                     systemMessageSenderName);
+            data.setColorString(systemMessageColor);
+            data.setStateEmpty();
+            
+            addMessageToChatLog(data, 0, "dummy");
         }
         
         public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true):void {
             var isRoomResult:Boolean = true;
             var message:String = "";
             
-            var channel:int = ChatWindow.getInstance().publicChatChannel;
-            channel = ChatWindow.getInstance().changeChatChannelNumberForSystemLog(channel);
+            var channel:int = chatWindow.publicChatChannel;
+            channel = chatWindow.changeChatChannelNumberForSystemLog(channel);
+            
+            var data:ChatSendData = new ChatSendData(channel, message, systemMessageSenderName);
+            data.setColorString(systemMessageColor);
+            data.setStateEmpty();
             
             if( isPrintName ) {
-                var data:ChatSendData = new ChatSendData(channel, "");
-                message += "「" + data.getName() + "」";
+                var name:String = chatWindow.getChatCharacterName();
+                message += "「" + name + "」";
                 data.setMessage(message);
                 message = data.getMessage();
             }
             message += messageBase;
             
-            var messageIndexTmp:int = -1;
+            data.setMessage(message);
             
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.sendChatMessage(systemMessageSenderName, message, systemMessageColor, messageIndexTmp,
-                                           null, channel);
+            guiInputSender.sendChatMessage(data);
         }
         
-        public function addMessageToChatLog(channel:int,
-                                            senderName:String,
-                                            chatMessage:String,
-                                            color:String,
+        public function addMessageToChatLog(data:ChatSendData,
                                             time:Number,
                                             chatSenderUniqueId:String,
-                                            isReplayChatMessage:Boolean = false,
-                                            sendto:String = null,
-                                            messageIndex:int = -1):void {
-            addMessageToChatLogParts(channel,
-                                     senderName,
-                                     chatMessage,
-                                     color,
+                                            isReplayChatMessage:Boolean = false):void {
+            addMessageToChatLogParts(data,
                                      time,
                                      chatSenderUniqueId,
-                                     messageIndex,
-                                     sendto,
                                      isReplayChatMessage);
             printAddedMessageToChatMessageLog();
         }
         
         private function isOwnUniqueId(targetId:String):Boolean {
-            return DodontoF_Main.getInstance().getGuiInputSender().getSender().isOwnUniqueId(targetId);
+            return guiInputSender.getSender().isOwnUniqueId(targetId);
         }
         
         private function isOwnStrictlyUniqueId(targetId:String):Boolean {
-            return DodontoF_Main.getInstance().getGuiInputSender().getSender().isOwnStrictlyUniqueId(targetId);
+            return guiInputSender.getSender().isOwnStrictlyUniqueId(targetId);
         }
         
         private function isPrintableMessageOnSecretMessage(chatSenderUniqueId:String, sendto:String):Boolean {
@@ -171,7 +171,7 @@ package {
         
         private function isOwnMessage(senderName:String, chatSenderUniqueId:String):Boolean {
             //初回読み込みタイミングなら常に全メッセージ表示
-            if( DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever().isFirstChatRefresh() ) {
+            if( guiInputSender.getSender().getReciever().isFirstChatRefresh() ) {
                 return false;
             }
             
@@ -190,17 +190,19 @@ package {
         
         //関数の戻り値は「リプレイログに保存できる、正しいメッセージかどうか」を示します。
         //このため、自分自身の発言は画面に表示する処理を行いませんがtrueとみなします。
-        public function addMessageToChatLogParts(channel:int,
-                                                 senderName:String,
-                                                 chatMessage:String,
-                                                 color:String,
+        public function addMessageToChatLogParts(chatSendData:ChatSendData,
                                                  time:Number,
                                                  chatSenderUniqueId:String,
-                                                 messageIndex:int = -1,
-                                                 sendto:String = null,
                                                  isReplayChatMessage:Boolean = false
                                                  ):Boolean {
             Log.logging("addMessageToChatLog called");
+
+            var senderName:String = chatSendData.getNameAndState();
+            var color:String = chatSendData.getColor();
+            var sendto:String = chatSendData.getSendto();
+            var chatMessage:String = chatSendData.getMessage();
+            var channel:int = chatSendData.getChannel();
+
             
             if( DodontoF_Main.getInstance().isReplayMode() ) {
                 if( ! isReplayChatMessage ) {
@@ -308,7 +310,6 @@ package {
         
         private function getEffectable(channel:int):Boolean {
             
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             if( guiInputSender.getSender().getReciever().isFirstChatRefresh() ) {
                 return false;
             }
@@ -350,12 +351,13 @@ package {
                 var cutIn:CutInBase = cutInList[i];
                 var matchResult:Object = cutIn.matchCutIn(chatMessage);
                 if( matchResult.resultData == null ) {
+                    Log.logging("ChatMessageTrader.checkEffect matchResult.resultData == null");
                     continue;
                 }
                 
-                cutIn.setSoundOn( chatWindow.isSoundOnMode() );
                 cutIn.setEffectable(effectable);
                 result.chatMessage = cutIn.effect( matchResult.resultData.chatMessage );
+                break;
             }
             
             return result;
@@ -405,7 +407,6 @@ package {
                     chatWindow.scrollChatMessageLogIfPositionIsLast(channel, isScrollFoced);
                 });
         }
-        
         
     }
 }

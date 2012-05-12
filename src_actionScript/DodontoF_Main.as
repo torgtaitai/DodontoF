@@ -924,8 +924,30 @@ package {
         
         private var diceBotInfos:Array = new Array();
         
-        public function setDiceBotInfos(info:Array):void {
-            diceBotInfos = info;
+        public function getDiceBotInfosResult(obj:Object):void {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            setDiceBotInfos( jsonData );
+        }
+        
+        public function setDiceBotInfos(jsonData:Object):void {
+            Log.logging("setDiceBotInfos Begin");
+            
+            var infos:Array = jsonData as Array;
+            
+            if( infos == null ) {
+                Log.logging("infos is NULL");
+                return;
+            }
+            
+            diceBotInfos = infos;
+            
+            if( chatWindow == null ) {
+                return;
+            }
+            
+            chatWindow.setDiceBotInfos(diceBotInfos);
+            
+            Log.logging("setDiceBotInfos End");
         }
         
         public function getDiceBotInfos():Array {
@@ -1030,12 +1052,13 @@ package {
      children: [
         {label:"セーブ", data:"save"},
         {label:"ロード", data:"load"},
+        {type:"separator"},
+        {label:"全データセーブ", data:"saveScenarioData"},
+        {label:"全データロード(旧：シナリオデータ読み込み)", data:"uploadScenarioData"},
+        {type:"separator"},
         {label:"チャットログ保存", data:"saveLog"},
         {label:"録画開始", data:"startSessionRecording", enabled:"true"},
         {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
-        {type:"separator"},
-        {label:"シナリオデータ作成", data:"saveScenarioData"},
-        {label:"シナリオデータ読み込み", data:"uploadScenarioData"},
         {type:"separator"},
         {label:"ログアウト", data:"logout", enabled:"true"},
                 ]},
@@ -1093,7 +1116,6 @@ package {
         {label:"フロアタイル変更モード", data:"changeFloorTile"},
         {label:"マップマスク追加", data:"addMapMask"},
         {label:"簡易マップ作成", data:"createMapEasy"},
-        {label:"射線測定モード", data:"setRulerMode"},
         {type:"separator"},
         {label:"マップ状態保存", data:"saveMap"},
         {label:"マップ切り替え", data:"loadMap"},

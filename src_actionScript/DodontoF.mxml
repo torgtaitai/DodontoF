@@ -184,6 +184,8 @@
         
         dodontoF_Main.setDodontoF(this);
         
+        Log.loggingTuning("isMySqlMode()", dodontoF_Main.isMySqlMode());
+        
         if( ! Config.getInstance().isAdobeAir() ) {
             initForSetup();
             return;

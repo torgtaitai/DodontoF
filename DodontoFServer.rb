@@ -459,7 +459,7 @@ class DodontoFServer
   def saveCharacterHsitory(saveData)
     logging("saveCharacterHsitory begin")
     
-    before = Marshal.load(Marshal.dump(saveData['characters']))
+    before = deepCopy( saveData['characters'] )
     logging(before, "saveCharacterHsitory BEFORE")
     yield
     after = saveData['characters']
@@ -482,6 +482,10 @@ class DodontoFServer
       end
     end
     logging("saveCharacterHsitory end")
+  end
+  
+  def deepCopy(obj)
+    Marshal.load( Marshal.dump(obj) )
   end
   
   def getNotExistCharacters(first, second)
@@ -690,6 +694,11 @@ class DodontoFServer
       ['saveScenario', hasReturn], 
       ['load', hasReturn], 
       ['loadScenario', hasReturn], 
+      ['getDiceBotInfos', hasReturn], 
+      ['getBotTableInfos', hasReturn], 
+      ['addBotTable', hasReturn], 
+      ['changeBotTable', hasReturn], 
+      ['removeBotTable', hasReturn], 
       ['requestReplayDataList', hasReturn], 
       ['uploadReplayData', hasReturn], 
       ['removeReplayData', hasReturn], 
@@ -1010,7 +1019,6 @@ class DodontoFServer
       "message" => message,
       "color" => color,
       "uniqueId" => '0',
-      "messageIndex" => 0,
       "channel" => channel,
     }
     logging("sendWebIfChatText chatData", chatData)
@@ -1776,26 +1784,26 @@ class DodontoFServer
     return gameInfo[:name]
   end
   
-  def getAllLoginInfo()
-    count = getAllLoginCount()
-    return count
-    # percentage = (100 * count / $aboutMaxLoginCount).to_i
-    # allLoginInfo = "#{count}/#{$aboutMaxLoginCount}(#{percentage}%)"
-    # return allLoginInfo
-  end
-  
   def getAllLoginCount()
-    limitTime = (Time.now.to_f - (60 * 60 * 24))
-    
+    # limitTime = (Time.now.to_f - (60 * 60 * 24))
     roomNumberRange = (0 .. $saveDataMaxCount)
-    loginUserCountList = getLoginUserCountList( roomNumberRange, limitTime )
+    loginUserCountList = getLoginUserCountList( roomNumberRange) #, limitTime )
     
     total = 0
+    userList = []
+    
     loginUserCountList.each do |key, value|
+      next if( value == 0 ) 
+      
       total += value
+      userList << [key, value]
     end
     
-    return total
+    userList.sort!
+    
+    logging(total, "getAllLoginCount total")
+    logging(userList, "getAllLoginCount userList")
+    return total, userList
   end
   
   def getFamousGames
@@ -1849,14 +1857,11 @@ class DodontoFServer
     uniqueId = params['uniqueId'];
     uniqueId ||= Time.now.to_f.to_s;
     
-    allLoginInfo = getAllLoginInfo()
-    writeAllLoginInfo( allLoginInfo )
+    allLoginCount, loginUserCountList = getAllLoginCount()
+    writeAllLoginInfo( allLoginCount )
     
     loginMessage = getLoginMessage()
     cardInfos = $card.collectCardTypeAndTypeName()
-    
-    #ダイスボットの情報読み出し
-    require 'diceBotInfos'
     
     result = {
       "loginMessage" => loginMessage,
@@ -1870,14 +1875,15 @@ class DodontoFServer
       "playRoomMaxNumber" => ($saveDataMaxCount - 1),
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
-      "allLoginInfo" => allLoginInfo.to_i,
+      "allLoginCount" => allLoginCount.to_i,
+      "loginUserCountList" => loginUserCountList,
       "maxLoginCount" => $aboutMaxLoginCount.to_i,
       "skinImage" => $skinImage,
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
       "canTalk" => $canTalk,
+      "retryCountLimit" => $retryCountLimit,
       "imageUploadDirInfo" => {$localUploadDirMarker => $imageUploadDir},
-      "diceBotInfos" => $diceBotInfos,
       "mapMaxWidth" => $mapMaxWidth,
       "mapMaxHeigth" => $mapMaxHeigth,
     }
@@ -1887,8 +1893,8 @@ class DodontoFServer
     return result
   end
   
-  def writeAllLoginInfo( allLoginInfo )
-    text = "#{allLoginInfo}"
+  def writeAllLoginInfo( allLoginCount )
+    text = "#{allLoginCount}"
     
     saveFileName = $loginCountFile
     saveFileLock = getSaveFileLockReadOnlyRealFile(saveFileName)
@@ -1951,8 +1957,71 @@ class DodontoFServer
     end
     
     return loginMessage
-    
   end
+  
+  def getDiceBotInfos()
+    logging("getDiceBotInfos() Begin")
+    
+    require 'diceBotInfos'
+    diceBotInfos = deepCopy( $diceBotInfos )
+    
+    commandInfos = getGameCommandInfos
+    
+    commandInfos.each do |commandInfo|
+      logging(commandInfo, "commandInfos.each commandInfos")
+      setDiceBotPrefix(diceBotInfos, commandInfo)
+    end
+    
+    logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
+    logging($diceBotInfos, "getDiceBotInfos $diceBotInfos")
+    
+    return diceBotInfos
+  end
+  
+  def setDiceBotPrefix(diceBotInfos, commandInfo)
+    gameType = commandInfo[:gameType]
+    
+    if( gameType.empty? )
+      setDiceBotPrefixToAll(diceBotInfos, commandInfo)
+      return
+    end
+    
+    botInfo = diceBotInfos.find{|i| i[:gameType] == gameType}
+    setDiceBotPrefixToOne(botInfo, commandInfo)
+  end
+  
+  def setDiceBotPrefixToAll(diceBotInfos, commandInfo)
+    diceBotInfos.each do |botInfo|
+      setDiceBotPrefixToOne(botInfo, commandInfo)
+    end
+  end
+  
+  def setDiceBotPrefixToOne(botInfo, commandInfo)
+    logging(botInfo, "botInfo")
+    return if(botInfo.nil?)
+    
+    prefixs = botInfo[:prefixs]
+    return if( prefixs.nil? )
+    
+    prefixs << commandInfo[:command]
+  end
+  
+  @@diceBotTablePrefix = 'diceBotTable_'
+  
+  def getGameCommandInfos
+    logging('getGameCommandInfos Begin')
+    require 'customDiceBot.rb'
+    
+    bot = CgiDiceBot.new
+    dir = getDiceBotExtraTableDirName
+    logging(dir, 'dir')
+    
+    commandInfos = bot.getGameCommandInfos(dir, @@diceBotTablePrefix)
+    logging(commandInfos, "getGameCommandInfos End commandInfos")
+    
+    return commandInfos
+  end
+  
   
   def createDir(playRoomIndex)
     @saveDirInfo.setSaveDataDirIndex(playRoomIndex)
@@ -2194,7 +2263,7 @@ class DodontoFServer
   def saveScenario()
     logging("saveScenario begin")
     dir = getRoomLocalSpaceDirName
-    mkdir(dir)
+    makeDir(dir)
     
     params = getParamsFromRequestData()
     @saveScenarioBaseUrl = params['baseUrl']
@@ -2205,7 +2274,8 @@ class DodontoFServer
     makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
     makeScenariDefaultSaveFile(dir, saveDataAll)
     
-    scenarioFile = makeScenarioFile(dir)
+    baseName = getNewSaveFileBaseName("DodontoFFullBackup");
+    scenarioFile = makeScenarioFile(dir, baseName)
     
     result = {}
     result['result'] = "OK"
@@ -2379,7 +2449,7 @@ class DodontoFServer
   end
   
   
-  def makeScenarioFile(dir)
+  def makeScenarioFile(dir, fileBaseName = "scenario")
     logging("makeScenarioFile begin")
     
     require 'zlib'
@@ -2388,7 +2458,7 @@ class DodontoFServer
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
     
-    scenarioFile = 'scenario.tar.gz'
+    scenarioFile = fileBaseName + '.tar.gz'
     tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
     
     fileNames = Dir.glob('*')
@@ -2482,9 +2552,15 @@ class DodontoFServer
   end
   
   def getNewSaveFileName(extension)
+    baseName = getNewSaveFileBaseName("DodontoF");
+    saveFileName = baseName + ".#{extension}"
+    return fileJoin($saveDataTempDir, saveFileName).untaint
+  end
+
+  def getNewSaveFileBaseName(prefix);
     now = Time.now
-    saveFileName = now.strftime("DodontoF_%Y_%m%d_%H%M%S_#{now.usec}.#{extension}")
-    return fileJoin($saveDataTempDir, saveFileName)
+    baseName = now.strftime(prefix + "_%Y_%m%d_%H%M%S_#{now.usec}")
+    return baseName.untaint
   end
 
   
@@ -2589,6 +2665,8 @@ class DodontoFServer
       end
     end
     
+    diceBotInfos = getDiceBotInfos()
+    
     logging("isPasswordLocked", isPasswordLocked);
     
     result = {
@@ -2601,7 +2679,10 @@ class DodontoFServer
       'isPasswordLocked' => isPasswordLocked,
       'isMentenanceModeOn' => isMentenanceModeOn,
       'isWelcomeMessageOn' => isWelcomeMessageOn,
+      'diceBotInfos' => diceBotInfos,
     }
+    
+    logging(result, "checkRoomStatus End result")
     
     return result
   end
@@ -2690,6 +2771,155 @@ class DodontoFServer
     
     return "ファイルサイズが最大値(#{size_MB}MB)以上のためアップロードに失敗しました。"
   end
+  
+  def getBotTableInfos()
+    logging("getBotTableInfos Begin")
+    result = {
+      "resultText"=> "OK",
+    }
+    
+    dir = getDiceBotExtraTableDirName
+    result["tableInfos"] = getBotTableInfosFromDir(dir)
+    
+    logging(result, "result")
+    logging("getBotTableInfos End")
+    return result
+  end
+  
+  def getBotTableInfosFromDir(dir)
+    logging(dir, 'getBotTableInfosFromDir dir')
+    
+    require 'TableFileData'
+    
+    isLoadCommonTable = false
+    tableFileData = TableFileData.new( isLoadCommonTable )
+    tableFileData.setDir(dir, @@diceBotTablePrefix)
+    tableInfos = tableFileData.getAllTableInfo
+    
+    logging(tableInfos, "getBotTableInfosFromDir tableInfos")
+    tableInfos.sort!{|a, b| a[:command].to_i <=> b[:command].to_i}
+    
+    logging(tableInfos, 'getBotTableInfosFromDir result tableInfos')
+    
+    return tableInfos
+  end
+  
+  
+  
+  def addBotTable()
+    result = {}
+    result['resultText'] = addBotTableMain()
+    
+    if( result['resultText'] != "OK" )
+      return result
+    end
+    
+    result = getBotTableInfos()
+    return result
+  end
+  
+  def addBotTableMain()
+    logging("addBotTableMain Begin")
+    
+    dir = getDiceBotExtraTableDirName
+    makeDir(dir)
+    params = getParamsFromRequestData()
+    
+    require 'TableFileData'
+    
+    resultText = 'OK'
+    begin
+      creator = TableFileCreator.new(dir, @@diceBotTablePrefix, params)
+      creator.execute
+    rescue Exception => e
+      loggingException(e)
+      resultText = e.to_s
+    end
+    
+    logging(resultText, "addBotTableMain End resultText")
+    
+    return resultText
+  end
+  
+  
+  
+  def changeBotTable()
+    result = {}
+    result['resultText'] = changeBotTableMain()
+    
+    if( result['resultText'] != "OK" )
+      return result
+    end
+    
+    result = getBotTableInfos()
+    return result
+  end
+  
+  def changeBotTableMain()
+    logging("changeBotTableMain Begin")
+    
+    dir = getDiceBotExtraTableDirName
+    params = getParamsFromRequestData()
+    
+    require 'TableFileData'
+    
+    resultText = 'OK'
+    begin
+      creator = TableFileEditer.new(dir, @@diceBotTablePrefix, params)
+      creator.execute 
+    rescue Exception => e
+      loggingException(e)
+      resultText = e.to_s
+    end
+    
+    logging(resultText, "changeBotTableMain End resultText")
+    
+    return resultText
+  end
+  
+  
+  
+  def removeBotTable()
+    removeBotTableMain()
+    return getBotTableInfos()
+  end
+  
+  def removeBotTableMain()
+    logging("removeBotTableMain Begin")
+    
+    params = getParamsFromRequestData()
+    command = params["command"]
+    
+    dir = getDiceBotExtraTableDirName
+    
+    require 'TableFileData'
+    
+    isLoadCommonTable = false
+    tableFileData = TableFileData.new( isLoadCommonTable )
+    tableFileData.setDir(dir, @@diceBotTablePrefix)
+    tableInfos = tableFileData.getAllTableInfo
+    
+    tableInfo = tableInfos.find{|i| i[:command] == command}
+    logging(tableInfo, "tableInfo")
+    return if( tableInfo.nil? )
+    
+    fileName = tableInfo[:fileName]
+    logging(fileName, "fileName")
+    return if( fileName.nil? )
+    
+    logging("isFile exist?")
+    return unless( File.exist?(fileName) )
+    
+    begin
+      File.delete(fileName)
+    rescue Exception => e
+      loggingException(e)
+    end
+    
+    logging("removeBotTableMain End")
+  end
+  
+  
   
   def requestReplayDataList()
     logging("requestReplayDataList begin")
@@ -2901,7 +3131,7 @@ class DodontoFServer
     fileUploadDir = getRoomLocalSpaceDirName
     
     clearDir(fileUploadDir)
-    mkdir(fileUploadDir)
+    makeDir(fileUploadDir)
     
     fileMaxSize = $scenarioDataMaxSize # Mbyte
     scenarioFile = nil
@@ -3021,8 +3251,17 @@ class DodontoFServer
   end
   
   def isAllowedFileExt(fileName)
+    extName = getAllowedFileExtName(fileName)
+    return ( not extName.nil? )
+  end
+  
+  def getAllowedFileExtName(fileName)
     rule = /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/
-    return ( rule =~ fileName )
+    
+    return nil unless( rule === fileName )
+    
+    extName = "." + $1
+    return extName
   end
   
   def getRoomLocalSpaceDirName
@@ -3035,8 +3274,8 @@ class DodontoFServer
     return dir
   end
   
-  def mkdir(dir)
-    loggingForce(dir, "mkdir dir")
+  def makeDir(dir)
+    loggingForce(dir, "makeDir dir")
     
     if( File.exist?(dir) )
       if( File.directory?(dir) )
@@ -3357,6 +3596,7 @@ class DodontoFServer
     begin
       imageFileName = getRequestData("imageFileName")
       logging(imageFileName, "imageFileName")
+      
       imageData = getRequestData_forUploadImageData("imageData")
       smallImageData = getRequestData_forUploadImageData("smallImageData")
       
@@ -3369,6 +3609,7 @@ class DodontoFServer
       
       saveDir = $imageUploadDir
       imageFileNameBase = getNewFileName(imageFileName, "img")
+      logging(imageFileNameBase, "imageFileNameBase")
       
       uploadImageFileName = fileJoin(saveDir, imageFileNameBase)
       logging(uploadImageFileName, "uploadImageFileName")
@@ -3430,13 +3671,12 @@ class DodontoFServer
   
   def getNewFileName(fileName, preFix = "")
     @newFileNameIndex ||= 0
-    extName = ""
-    if( /\.([^\.]+)$/ =~ fileName )
-      extName = $1
-    end
+    
+    extName = getAllowedFileExtName(fileName)
+    extName ||= ""
     logging(extName, "extName")
     
-    result = preFix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @newFileNameIndex.to_s + "." + extName
+    result = preFix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @newFileNameIndex.to_s + extName
     
     return result.untaint
   end
@@ -3700,7 +3940,6 @@ class DodontoFServer
       "message" => message,
       "color" => color,
       "uniqueId" => '0',
-      "messageIndex" => 0,
       "channel" => channel
     }
     
@@ -3729,7 +3968,8 @@ class DodontoFServer
     
     require 'customDiceBot.rb'
     bot = CgiDiceBot.new
-    result = bot.roll(message, gameType)
+    dir = getDiceBotExtraTableDirName
+    result = bot.roll(message, gameType, dir, @@diceBotTablePrefix)
     
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/, '')
@@ -3737,6 +3977,10 @@ class DodontoFServer
     logging(result, 'rollDice result')
     
     return result, bot.isSecret
+  end
+  
+  def getDiceBotExtraTableDirName
+    getRoomLocalSpaceDirName
   end
   
   def sendChatMessageMany
@@ -3784,7 +4028,6 @@ class DodontoFServer
       ( timeDiff > ($oldMessageTimeout) )
     end
   end
-  
   
   
   def saveAllChatMessage(chatMessageData)

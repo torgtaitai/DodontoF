@@ -22,6 +22,7 @@ class BCDiceGuiApp < Wx::App
     BCDiceDialog.new.show_modal
     return false
   end
+  
 end
 
 $debugText = nil
@@ -471,6 +472,11 @@ ZettaiReido
   def printText(message)
     # Wx::message_box(message.inspect, 'bcdice')
     @testOutput.append_text( "#{message}\r\n" )
+  end
+  
+  def close(force = false)
+    on_stop
+    super
   end
   
   def on_stop

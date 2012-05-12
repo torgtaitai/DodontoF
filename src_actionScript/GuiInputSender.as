@@ -2,6 +2,7 @@
 package {
     import mx.utils.StringUtil;
     import flash.net.FileReference;
+    import flash.events.Event;
     
 	public class GuiInputSender {
         
@@ -556,17 +557,12 @@ package {
             sender.getLoginInfo(resultFunction, uniqueId);
         }
         
-        public function sendDiceBotChatMessage(chatSendData:ChatSendData,
-                                               randomSeed:int, gameType:String, callBack:Function):void {
-            sender.sendDiceBotChatMessage(chatSendData,
-                                          randomSeed, gameType, callBack);
-        }
-        
-        public function sendChatMessage(chatCharacterName:String, message:String,
-                                        color:String, messageIndex:int,
-                                        sendto:String = null,
-                                        channel:int = 0):void {
-            if( chatCharacterName.length == 0 ) {
+        public function sendChatMessage(chatSendData:ChatSendData):void {
+            var name:String = chatSendData.getNameAndState();
+            var message:String = chatSendData.getMessage();
+            var callBack:Function = chatSendData.getCallBack();
+            
+            if( name.length == 0 ) {
                 throw new Error("発言者を入力してください。");
             }
             if( message.length == 0 ) {
@@ -574,20 +570,7 @@ package {
                 return;
             }
             
-            var jsonData:Object = {
-                "senderName": chatCharacterName,
-                "message" : message,
-                "color" : color,
-                //"uniqueId" : sender.getUniqueId(),
-                "uniqueId" : sender.getStrictlyUniqueId(),
-                "messageIndex" : messageIndex,
-                "channel": channel };
-            
-            if( ChatMessageTrader.isValidSendTo(sendto) ) {
-                jsonData.sendto = sendto;
-            }
-            
-            sender.sendChatMessage(jsonData);
+            sender.sendChatMessage(chatSendData, callBack);
         }
         
         public function sendChatMessageMany(chatCharacterName:String, chatMessage:String, color:String):void {

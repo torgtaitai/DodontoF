@@ -40,7 +40,7 @@
                              width="40">
             <mx:itemRenderer>
               <mx:Component>
-                <mx:CheckBox click="CutInMovieManageWindow.changeEnableState(data)"  selected="{(data.isTail == null ? true : data.isTail)}"/>
+                <mx:CheckBox click="ManageCutInMovieWindow.changeEnableState(data)"  selected="{(data.isTail == null ? true : data.isTail)}"/>
               </mx:Component>
             </mx:itemRenderer>
           </mx:DataGridColumn>
@@ -91,6 +91,7 @@
         Log.loggingTuning("=>setup() Begin");
         try {
             Resizer.addResize(this,new Point(100,50));
+            cutIn.setEffectable(true);
         } catch(error:Error) {
             this.status = error.message;
         }
@@ -136,7 +137,7 @@
     private function addCutInEffect():void {
         status = "";
     
-        DodontoF.popup(CutInMovieCreateWindow, true);
+        DodontoF.popup(AddCutInMovieWindow, true);
     }
 
     private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object, index:int):void {
@@ -194,8 +195,8 @@
             return;
         }
     
-        var window:CutInMovieChangeWindow =
-        DodontoF.popup(CutInMovieChangeWindow, true) as CutInMovieChangeWindow;
+        var window:ChangeCutInMovieWindow =
+        DodontoF.popup(ChangeCutInMovieWindow, true) as ChangeCutInMovieWindow;
         window.init(cutInInfo, index);
     }
 

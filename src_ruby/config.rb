@@ -10,8 +10,8 @@ $aboutMaxLoginCount = 50
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.36.06.01"
-$versionDate = "2012/04/14"
+$versionOnly = "Ver.1.36.13"
+$versionDate = "2012/05/12"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -55,13 +55,13 @@ $UPLOAD_REPALY_DATA_MAX_SIZE = 5.0
 $UPLOAD_FILE_MAX_SIZE = 10.0
 
 #プレイルームデータ(saveData)の相対パス。
-$SAVE_DATA_DIR = '.'
+$SAVE_DATA_DIR = "../.."
 
 #ロックファイル作成先のチューニング用。nilなら $SAVE_DATA_DIR と同一になります。
 $SAVE_DATA_LOCK_FILE_DIR = nil
 
 #各画像(キャラクター・マップ)の保存パス
-$imageUploadDir = "./imageUploadSpace"
+$imageUploadDir = "../imageUploadSpace"
 
 #イメージディレクトリを示すマーカー文字列
 $localUploadDirMarker = '###IMAGE_UPLOADL_SPACE###'
@@ -178,9 +178,11 @@ $canTalk = true
 $recordMaxCount = 5
 
 #通信方式を擬似Commet方式にするなら true に。
-#その場合応答は速くなりますが、CPUやネットワーフ負荷が上がります。
+#その場合応答は速くなりますが、CPUやネットワークの負荷が上がります。
 $isCommet = false
 
 #擬似Commetを使わない場合のクライアント側での再読み込み待ち時間
-$refreshIntervalForNotCommet = 1.5
+$refreshIntervalForNotCommet = 2.0
 
+#チャットの送信失敗時の再送上限回数。これを超えると送信失敗扱いになります。
+$retryCountLimit = 3

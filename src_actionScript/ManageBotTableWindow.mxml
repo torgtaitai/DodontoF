@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="700"
+   height="300"
+   title="ダイスボット用表管理"
+   showCloseButton="true"
+   >
+  
+  <mx:DataGrid id="dataGrid"
+               width="100%"
+               height="100%"
+               dataProvider="{tableInfos}"
+               editable="false"
+               doubleClickEnabled="true"
+               doubleClick="openEditWindow()"
+               >
+	<mx:columns>
+	  <mx:DataGridColumn headerText="コマンド名"
+                         dataField="command"
+                         textAlign="center"
+                         width="100"/>
+	  <mx:DataGridColumn headerText="表タイトル"
+                         dataField="title"
+                         textAlign="center"
+                         width="400"/>
+	</mx:columns>
+  </mx:DataGrid>
+  
+  <mx:HBox height="25" width="100%" verticalAlign="middle" horizontalAlign="center" >
+    <mx:Spacer width="50%" />
+    <mx:Button label="新規作成" click="openAddWindow()"  />
+    <mx:Spacer width="20" />
+    <mx:Button label="コピー作成" click="openAddCloneWindow()"  />
+    <mx:Spacer width="20" />
+    <mx:Button label="変更" click="openEditWindow()"  />
+    <mx:Spacer width="20" />
+    <mx:Button label="削除"  click="removeFromList()" />
+    <mx:Spacer width="50%" />
+    <mx:Button label="キャンセル"  click="closeAction()" />
+  </mx:HBox>
+      
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    import mx.controls.Alert;
+    import mx.collections.ArrayCollection;
+    import mx.events.CloseEvent;
+    
+    [Bindable]
+    private var tableInfos:ArrayCollection = new ArrayCollection();
+    
+    private var guiInputSender:GuiInputSender;
+    private var sender:SharedDataSender;
+    private var thisObj:ManageBotTableWindow;
+    
+    override protected function setup():void {
+        thisObj = this;
+        
+        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        sender = guiInputSender.getSender();
+        getBotTableInfos();
+    }
+    
+    
+    private function getBotTableInfos(obj:Object = null):void {
+        sender.getBotTableInfos( this.getBotTableInfosResultNotGetDiceBotInfos );
+    }
+    
+    public function getBotTableInfosResultNotGetDiceBotInfos(obj:Object):void {
+        var checkFunction:Function = null;
+        var isGetDiceBotInfos:Boolean = false;
+        getBotTableInfosResult(obj, checkFunction, isGetDiceBotInfos);
+    }
+    
+    public function getBotTableInfosResult(obj:Object, checkFunction:Function = null,
+                                           isGetDiceBotInfos:Boolean = true):void {
+        Log.loggingTuning("=>getBotTableInfosResult Begin obj", obj);
+        
+        try {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            Log.loggingTuning("jsonData", jsonData);
+            
+            if( checkFunction != null ) {
+                var result:Boolean =  checkFunction(jsonData);
+                if( ! result ) {
+                    return;
+                }
+            }
+            
+            Log.loggingTuning("jsonData.tableInfos", jsonData.tableInfos);
+            tableInfos = new ArrayCollection( jsonData.tableInfos );
+            
+            if( isGetDiceBotInfos ) {
+                new CutInCommandGetDiceBotInfos().sendCommand();
+            }
+            
+        } catch(e:Error) {
+            Log.loggingError("exception : " + e);
+        }
+        
+        Log.loggingTuning("=>getBotTableInfosResult() End");
+    }
+    
+    private function openAddWindow():void {
+        var window:AddBotTableWindow = DodontoF.popup(AddBotTableWindow, true) as AddBotTableWindow;
+        window.init( this );
+    }
+    
+    private function openAddCloneWindow():void {
+        var window:AddBotTableWindow = DodontoF.popup(AddBotTableWindow, true) as AddBotTableWindow;
+        window.setVisiblePrintSampleButton( false );
+        setBotTableWindowParams( window );
+    }
+    
+    private function openEditWindow():void {
+        var window:ChangeBotTableWindow = DodontoF.popup(ChangeBotTableWindow, true) as ChangeBotTableWindow;
+        setBotTableWindowParams( window );
+    }
+    
+    private function setBotTableWindowParams(window:AddBotTableWindow):void {
+        var data:Object = getSelectData();
+        if( data == null ) {
+            return;
+        }
+        
+        var command:String = data.command;
+        var dice:String = data.dice;
+        var title:String = data.title;
+        var text:String = getTableText(data.table);
+        
+        window.init( this, command, dice, title, text );
+    }
+    
+    private function getSelectData():Object {
+        var index:int = dataGrid.selectedIndex;
+        var data:Object = tableInfos[index];
+        return data;
+    }
+    
+    static public function getTableText(tableData:Object):String {
+        Log.logging("tableData", tableData);
+        
+        var result:String = "";
+        /*
+        for(var number:String in tableData) {
+            Log.logging("number", number);
+            var text:String = tableData[number];
+            result += "" + number + ":" + text + "\n";
+        }
+        */
+        var array:Array = tableData as Array;
+        if( array == null ) {
+            return result;
+        }
+        
+        for each(var data:Array in array) {
+            result += "" + data[0] + ":" + data[1] + "\n";
+        }
+        return result;
+    }
+    
+    
+    public function addBotTable(command:String, dice:String, title:String, table:String,
+                              checkFunction:Function):void {
+        
+        var resultFunction:Function = function(obj:Object):void {
+            thisObj.getBotTableInfosResult(obj, checkFunction);
+        }
+        
+        sender.addBotTable(command, dice, title, table, resultFunction);
+    }
+    
+    
+    public function changeBotTable(command:String, dice:String, title:String, table:String,
+                                   originalCommand:String,
+                                   checkFunction:Function):void {
+        
+        var resultFunction:Function = function(obj:Object):void {
+            thisObj.getBotTableInfosResult(obj, checkFunction);
+        }
+        
+        sender.changeBotTable(command, dice, title, table, originalCommand, resultFunction);
+    }
+    
+    
+    private function removeFromList():void {
+        var index:int = dataGrid.selectedIndex;
+        
+        var data:Object = tableInfos[index];
+        if( data == null ) {
+            return;
+        }
+        
+        var message:String = "" + data.command + "(" + data.title  + ")\n" + "を削除します。よろしいですか？";
+        var result:Alert = Alert.show(message, "削除確認", 
+                                      Alert.OK | Alert.CANCEL, null, 
+                                      function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
+                                              sender.removeBotTable(data.command, getBotTableInfosResult);
+                                          }});
+    }
+    
+    
+    private function dummy():void {
+    }
+    
+    
+    /*
+    public function removeReplayData():void {
+        var index:int = dataGrid.selectedIndex;
+        
+        var replayData:Object = tableInfos[index];
+        if( replayData == null ) {
+            return;
+        }
+        
+        var targetReplayData:Object = {
+            "title": replayData.title,
+            "url": replayData.url
+        };
+        Log.loggingTuning("ReplayUploadWindow.removeReplayData replayData", replayData);
+        
+        var message:String = "タイトル：" + replayData.title  + "\nのリプレイデータを削除します。よろしいですか？";
+        var result:Alert = Alert.show(message, "リプレイデータ削除確認", 
+                                      Alert.OK | Alert.CANCEL, null, 
+                                      function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
+                                              guiInputSender.removeReplayData(targetReplayData,
+                                                                              requestTableListResult);
+                                          }});
+    }
+    */
+    
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

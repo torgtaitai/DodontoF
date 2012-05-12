@@ -256,8 +256,7 @@ package {
             setViewForeground();
             this.setPickuped();
             
-            DodontoF_Main.getInstance().getDodontoF().getGlowEffect().end();
-            DodontoF_Main.getInstance().getDodontoF().getGlowEffect().play( [view] );
+            Utils.glowEffect( view );
         }
         
         public function pickupToCenter():void {

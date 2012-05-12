@@ -21,6 +21,7 @@ package {
     import flash.geom.Point;
     import flash.events.DataEvent;
     import mx.utils.UIDUtil;
+    import flash.events.TimerEvent;
     
     
     public class SharedDataSender {
@@ -546,7 +547,7 @@ package {
             Log.logging("refreshData params", params);
             
             var isRefresh:Boolean = true;
-            sendCommandData(params, receiver.analyzeRefreshResponse, isRefresh);
+            sendCommandData(params, receiver.analyzeRefreshResponse, null, isRefresh);
         }
         
         protected function getUserName():String {
@@ -736,57 +737,77 @@ package {
             this.sendCommandData(params);
         }
         
-        /*
-        public function sendDiceBotChatMessage(chatSendData:ChatSendData, randomSeed:int, gameType:String,
-                                               callBack:Function):void {
-            Log.logging("SharedDataSender.sendDiceBotChatMessage begin");
-            var request:URLRequest = new URLRequest();
-            request.url = Config.getInstance().getDiceBotCgiUrl();
-            request.method = URLRequestMethod.POST;
+        public function sendChatMessage(chatSendData:ChatSendData, callBack:Function):void {
+            Log.logging("sendChatMessage, chatSendData", chatSendData);
             
-            var variables:URLVariables = new URLVariables();
-            variables.channel = chatSendData.getChannel();
-            variables.name = chatSendData.getName();
-            variables.state = chatSendData.getState();
-            variables.sendto = chatSendData.getSendto();
-            variables.color = chatSendData.getColor();
-            variables.message = chatSendData.getMessage();
-            variables.randomSeed = randomSeed;
-            variables.gameType = gameType;
+            if( chatSendData.isDiceRoll() ) {
+                sendDiceBotChatMessage(chatSendData, callBack);
+                return;
+            }
             
-            request.data = variables;
-            
-            var loader:URLLoader = new URLLoader();
-            loader.addEventListener(Event.COMPLETE, callBack);
-            loader.load(request);
-            Log.logging("SharedDataSender.sendDiceBotChatMessage end");
-        }
-        */
-        
-        public function sendDiceBotChatMessage(chatSendData:ChatSendData, randomSeed:int, gameType:String,
-                                               callBack:Function):void {
             var jsonData:Object = {
-                "channel" : chatSendData.getChannel(),
-                "name" : chatSendData.getName(),
-                "state" : chatSendData.getState(),
-                "sendto" : chatSendData.getSendto(),
-                "color" : chatSendData.getColor(),
+                "senderName": chatSendData.getNameAndState(),
                 "message" : chatSendData.getMessage(),
-                "randomSeed" : randomSeed,
-                "gameType" : gameType};
+                "channel": chatSendData.getChannel(),
+                "color" : chatSendData.getColor(),
+                "uniqueId" : this.getStrictlyUniqueId() };
             
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            Log.logging("jsonParams : " + jsonParams);
+            var sendto:String = chatSendData.getSendto();
+            if( ChatMessageTrader.isValidSendTo(sendto) ) {
+                jsonData.sendto = sendto;
+            }
             
-            var params:String = this.getParamString("sendDiceBotChatMessage", [["params", jsonParams]]);
-            this.sendCommandData(params, callBack);
-        }
-        
-        public function sendChatMessage(jsonData:Object):void {
             var jsonParams:String = getEncodedJsonString( jsonData );
             var params:String = this.getParamString("sendChatMessage", [["params", jsonParams]]);
             
-            this.sendCommandData(params);
+            var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
+            this.sendCommandData(params, callBack, errorFunction);
+        }
+        
+        public function sendDiceBotChatMessage(chatSendData:ChatSendData, callBack:Function):void {
+            var jsonData:Object = {
+                "name" : chatSendData.getNameAndState(),
+                "state" : chatSendData.getState(),
+                "message" : chatSendData.getMessage(),
+                "channel" : chatSendData.getChannel(),
+                "color" : chatSendData.getColor(),
+                "sendto" : chatSendData.getSendto(),
+                "randomSeed" : chatSendData.getRandSeed(),
+                "gameType" : chatSendData.getGameType()};
+            
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            Log.logging("jsonParams : ", jsonParams);
+            
+            var params:String = this.getParamString("sendDiceBotChatMessage", [["params", jsonParams]]);
+            
+            var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
+            this.sendCommandData(params, callBack, errorFunction);
+        }
+        
+        
+        private function getChatMessageErrorFunction(data:ChatSendData):Function {
+            var errorFunction:Function = function(event:Event):void {
+                
+                data.inclimentRetryCount();
+                
+                if( data.isInRetryLimit() ) {
+                    retryChatSend(data);
+                } else {
+                    data.clearRetryCount();
+                    SendChatMessageFailedWindow.setData(data);
+                }
+            }
+            
+            return errorFunction;
+        }
+        
+        private function retryChatSend(data:ChatSendData):void {
+            var second:Number = 0.5;
+            
+            Utils.timer(second, function():void {
+                    Log.loggingTuning("retry");
+                    DodontoF_Main.getInstance().getChatWindow().sendChatMessageAgain(data);
+                });
         }
         
         
@@ -802,15 +823,106 @@ package {
         }
         
         
+        public function getDiceBotInfos():void {
+            Log.logging("SharedDataSender.getDiceBotInfos Begin");
+            
+            var jsonData:Object = {
+                //特にデータなし
+            };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("getDiceBotInfos", [["params", jsonParams]]);
+            
+            var resultFunction:Function = DodontoF_Main.getInstance().getDiceBotInfosResult;
+            
+            this.sendCommandData(params, resultFunction);
+            
+            Log.logging("SharedDataSender.getDiceBotInfos End");
+        }
+        
+        public function getBotTableInfos(resultFunction:Function):void {
+            Log.logging("SharedDataSender.getBotTableInfos Begin");
+            
+            var jsonData:Object = {
+                //特にデータなし
+            };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("getBotTableInfos", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+            
+            Log.logging("SharedDataSender.getBotTableInfos End");
+        }
+        
+        
+        public function addBotTable(command:String, dice:String, title:String, table:String,
+                                    resultFunction:Function):void {
+            Log.logging("SharedDataSender.addBotTable Begin");
+            
+            var jsonData:Object = {
+                "command" : command,
+                "dice" : dice,
+                "title" : title,
+                "table" : table
+            };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("addBotTable", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+            
+            Log.logging("SharedDataSender.addBotTable End");
+        }
+        
+        
+        public function changeBotTable(command:String, dice:String, title:String, table:String,
+                                       originalCommand:String,
+                                       resultFunction:Function):void {
+            Log.logging("SharedDataSender.changeBotTable Begin");
+            
+            var jsonData:Object = {
+                "command" : command,
+                "dice" : dice,
+                "title" : title,
+                "table" : table,
+                "originalCommand" : originalCommand
+            };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("changeBotTable", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+            
+            Log.logging("SharedDataSender.changeBotTable End");
+        }
+        
+        
+        public function removeBotTable(command:String, resultFunction:Function):void {
+            Log.logging("SharedDataSender.removeBotTable Begin");
+            
+            var jsonData:Object = {
+                "command" : command
+            };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("removeBotTable", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+            
+            Log.logging("SharedDataSender.removeBotTable End");
+        }
+        
+        
+        
         protected function sendCommandData(paramsString:String,
-                                        callBack:Function = null,
-                                        isRefresh:Boolean = false):void {
+                                           callBack:Function = null,
+                                           errorCallBack:Function = null,
+                                           isRefresh:Boolean = false):void {
+            
             Log.loggingTuning("==>Begin sendCommandData");
             Log.logging("sendCommandData paramsString : ", paramsString);
             
             try {
                 sendCommandDataCatched(paramsString,
                                        callBack,
+                                       errorCallBack,
                                        isRefresh);
             } catch( e:Error ) {
                 Log.loggingException("SharedDataSender.sendCommandData()", e);
@@ -1069,7 +1181,8 @@ package {
             }
         }
         
-        protected function getUrlLoaderForSendCommand(callBack:Function):URLLoader {
+        protected function getUrlLoaderForSendCommand(callBack:Function,
+                                                      errorCallBack:Function):URLLoader {
             
             Log.logging("loader begin");
             var loader:URLLoader = new URLLoader();
@@ -1083,6 +1196,10 @@ package {
             loader.addEventListener(Event.COMPLETE, wrappedCallBack);
             
             var wrappedCallBackForError:Function = function(event:Event):void {
+                if( errorCallBack != null ) {
+                    errorCallBack(event);
+                }
+                
                 var oldLoader:URLLoader = URLLoader(event.target);
                 if( oldLoader != refreshLoader ) {
                     closeLoader(oldLoader);
@@ -1109,8 +1226,9 @@ package {
             
         
         protected function sendCommandDataCatched(paramsString:String,
-                                                callBack:Function,
-                                                isRefresh:Boolean = false):void {
+                                                  callBack:Function,
+                                                  errorCallBack:Function,
+                                                  isRefresh:Boolean = false):void {
             if( paramsString == null ) {
                 return;
             }
@@ -1130,13 +1248,13 @@ package {
             
             if( isRefresh ) {
                 if( refreshLoader == null ) {
-                    refreshLoader = getUrlLoaderForSendCommand(callBack);
+                    refreshLoader = getUrlLoaderForSendCommand(callBack, errorCallBack);
                 }
                 closeRefreshLoader();
                 
                 loader = refreshLoader;
             } else {
-                loader = getUrlLoaderForSendCommand(callBack);
+                loader = getUrlLoaderForSendCommand(callBack, errorCallBack);
             }
             
             loader.load(request);

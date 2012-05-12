@@ -75,7 +75,7 @@ package {
         
         public static function loggingErrorOnStatus(text:String, obj:Object = "noLogPrint"):void {
             var isOnStatus:Boolean = true;
-            loggingByLevel(text, error, obj, isOnStatus);
+            loggingByLevel(text, fatalError, obj, isOnStatus);
         }
         
         private static var logWindow:LogWindow;
@@ -152,18 +152,18 @@ package {
             printSystemLog(logMessage, ChatWindow.getInstance().publicChatChannel);
         }
         
-        static private function printSystemLog(logMessage:String, channel:int):void {
+        static private function printSystemLog(message:String, channel:int):void {
             channel = ChatWindow.getInstance().changeChatChannelNumberForSystemLog(channel);
             
-            var senderName:String = "";
+            var name:String = "";
             var color:String = "00AA00";
             var time:Number = (new Date().getTime() / 1000);
             
+            var data:ChatSendData = new ChatSendData(channel, message, name);
+            data.setColorString(color);
+            
             ChatWindow.getInstance()
-                .addMessageToChatLog(channel,
-                                     senderName, 
-                                     logMessage,
-                                     color,
+                .addMessageToChatLog(data,
                                      time,
                                      "logger");
         }
