@@ -2260,6 +2260,9 @@ class DodontoFServer
     saveFileName = @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
   
+  @@fullBackupFileBaseName = "DodontoFFullBackup"
+  @@scenarioFIleExtName = '.tar.gz'
+  
   def saveScenario()
     logging("saveScenario begin")
     dir = getRoomLocalSpaceDirName
@@ -2274,7 +2277,8 @@ class DodontoFServer
     makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
     makeScenariDefaultSaveFile(dir, saveDataAll)
     
-    baseName = getNewSaveFileBaseName("DodontoFFullBackup");
+    removeOldScenarioFile(dir)
+    baseName = getNewSaveFileBaseName(@@fullBackupFileBaseName);
     scenarioFile = makeScenarioFile(dir, baseName)
     
     result = {}
@@ -2449,6 +2453,16 @@ class DodontoFServer
   end
   
   
+  def removeOldScenarioFile(dir)
+    fileNames = Dir.glob("#{dir}/#{@@fullBackupFileBaseName}*#{@@scenarioFIleExtName}")
+    fileNames = fileNames.collect{|i| i.untaint}
+    logging(fileNames, "removeOldScenarioFile fileNames")
+    
+    fileNames.each do |fileName|
+      File.delete(fileName)
+    end
+  end
+  
   def makeScenarioFile(dir, fileBaseName = "scenario")
     logging("makeScenarioFile begin")
     
@@ -2458,7 +2472,7 @@ class DodontoFServer
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
     
-    scenarioFile = fileBaseName + '.tar.gz'
+    scenarioFile = fileBaseName + @@scenarioFIleExtName
     tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
     
     fileNames = Dir.glob('*')
