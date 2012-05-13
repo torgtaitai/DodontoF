@@ -126,6 +126,7 @@ package {
             message += messageBase;
             
             data.setMessage(message);
+            data.setSendToOwnself();
             
             guiInputSender.sendChatMessage(data);
         }

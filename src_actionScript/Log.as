@@ -161,6 +161,7 @@ package {
             
             var data:ChatSendData = new ChatSendData(channel, message, name);
             data.setColorString(color);
+            data.setSendToOwnself();
             
             ChatWindow.getInstance()
                 .addMessageToChatLog(data,

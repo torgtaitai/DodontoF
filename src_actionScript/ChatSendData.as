@@ -13,6 +13,7 @@ package {
         private var sendto:String;
         private var message:String = "";
         private var channel:int = 0;
+        private var isSendToOwnself:Boolean = false;
         
         private var randomSeed:int = 0;
         private var gameType:String = null;
@@ -190,6 +191,18 @@ package {
         
         public function clearRetryCount():void {
             retryCount = 0;
+        }
+        
+        public function setSendToOwnself():void {
+            isSendToOwnself = true;
+        }
+        
+        public function getStrictlyUniqueId(sender:SharedDataSender):String {
+            if( isSendToOwnself ) {
+                return "dummy";
+            }
+            
+            return sender.getStrictlyUniqueId();
         }
         
     }

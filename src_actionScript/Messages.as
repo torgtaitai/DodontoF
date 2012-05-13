@@ -49,8 +49,8 @@ package {
         private var messageBaseList:Object = 
 {
     "noSmallImageDir" : "サムネイル画像格納用ディレクトリ「{0}」がありません。マニュアルの「設置方法」の「imageUploadSpace/smallImages」についての記載を参照しディレクトリの作成を実施して下さい。",
-    "canNotLoginBecauseMentenanceNow" : "現在メンテナンス作業中のためログインすることが出来ません。",
-    "canNotRefreshBecauseMentenanceNow" : "現在メンテナンス作業中のためサーバからの応答が取得できません。\nエラーが発生したため更新を停止しました。再度ログインしなおしてください。",
+    "canNotLoginBecauseMentenanceNow" : "現在メンテナンス作業中のためログインすることが出来ません。しばらくお待ち下さい。",
+    "canNotRefreshBecauseMentenanceNow" : "メンテナンス作業が発生したためサーバ接続が途絶しました。\nしばらく待ったうえで、再度ログインしてください。",
     //
     "dragMeForFloorTile" : "ドラッグ＆ドロップするとマップにタイルを貼り付けることが出来ます。",
     "dragMeForChit" : "チットを配置したいところにドラッグしてください",

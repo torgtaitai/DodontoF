@@ -750,7 +750,7 @@ package {
                 "message" : chatSendData.getMessage(),
                 "channel": chatSendData.getChannel(),
                 "color" : chatSendData.getColor(),
-                "uniqueId" : this.getStrictlyUniqueId() };
+                "uniqueId" : chatSendData.getStrictlyUniqueId(this) };
             
             var sendto:String = chatSendData.getSendto();
             if( ChatMessageTrader.isValidSendTo(sendto) ) {

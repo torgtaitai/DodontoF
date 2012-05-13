@@ -189,6 +189,7 @@ package {
             if( jsonData.warning ) {
                 var warningMessage:String = Messages.getMessageFromWarningInfo(jsonData.warning);
                 Log.loggingFatalError(warningMessage);
+                Alert.show(warningMessage);
                 sender.stopRefresh();
                 return false;
             }
