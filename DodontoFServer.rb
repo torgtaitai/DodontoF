@@ -716,6 +716,7 @@ class DodontoFServer
       ['exitWaitingRoomCharacter', hasReturn],
       ['enterWaitingRoomCharacter', hasReturn], 
       ['sendDiceBotChatMessage', hasReturn],
+      ['deleteChatLog', hasReturn], 
       
       ['logout', hasNoReturn], 
       ['changeCharacter', hasNoReturn],
@@ -1010,7 +1011,8 @@ class DodontoFServer
     gameType = getWebIfRequestText('bot')
     logging(gameType, 'gameType')
     
-    rollResult, isSecret = rollDice(message, gameType)
+    rollResult, isSecret, randResults = rollDice(message, gameType, false)
+    
     message = message + rollResult
     logging(message, "diceRolled message")
     
@@ -1370,6 +1372,7 @@ class DodontoFServer
     end
     
     refreshData = getParamsFromRequestData()
+    logging(refreshData, "refreshData")
     
     @lastUpdateTimes = refreshData['lastUpdateTimes']
     logging(@lastUpdateTimes, "@lastUpdateTimes");
@@ -1863,6 +1866,8 @@ class DodontoFServer
     loginMessage = getLoginMessage()
     cardInfos = $card.collectCardTypeAndTypeName()
     
+    diceBotInfos = getDiceBotInfos()
+    
     result = {
       "loginMessage" => loginMessage,
       "cardInfos" => cardInfos,
@@ -1881,11 +1886,13 @@ class DodontoFServer
       "skinImage" => $skinImage,
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
+      "loginTimeLimitSecond" => $loginTimeLimitSecond,
       "canTalk" => $canTalk,
       "retryCountLimit" => $retryCountLimit,
       "imageUploadDirInfo" => {$localUploadDirMarker => $imageUploadDir},
       "mapMaxWidth" => $mapMaxWidth,
       "mapMaxHeigth" => $mapMaxHeigth,
+      'diceBotInfos' => diceBotInfos,
     }
     
     logging(result, "result")
@@ -2679,8 +2686,6 @@ class DodontoFServer
       end
     end
     
-    diceBotInfos = getDiceBotInfos()
-    
     logging("isPasswordLocked", isPasswordLocked);
     
     result = {
@@ -2693,7 +2698,6 @@ class DodontoFServer
       'isPasswordLocked' => isPasswordLocked,
       'isMentenanceModeOn' => isMentenanceModeOn,
       'isWelcomeMessageOn' => isWelcomeMessageOn,
-      'diceBotInfos' => diceBotInfos,
     }
     
     logging(result, "checkRoomStatus End result")
@@ -3934,10 +3938,13 @@ class DodontoFServer
     channel = params['channel']
     sendto = params['sendto']
     gameType = params['gameType']
+    isNeedResult = params['isNeedResult']
     
-    rollResult, isSecret = rollDice(message, gameType)
+    rollResult, isSecret, randResults = rollDice(message, gameType, isNeedResult)
+    
     logging(rollResult, 'rollResult')
     logging(isSecret, 'isSecret')
+    logging(randResults, "randResults")
     
     secretResult = ""
     if( isSecret )
@@ -3945,6 +3952,8 @@ class DodontoFServer
     else
       message = message + rollResult
     end
+    
+    message = getChatRolledMessage(message, randResults);
     
     senderName = name
     senderName << ("\t" + state) unless( state.empty? )
@@ -3976,26 +3985,54 @@ class DodontoFServer
     return result
   end
   
-  def rollDice(message, gameType)
+  def rollDice(message, gameType, isNeedResult)
     logging(message, 'rollDice message')
     logging(gameType, 'rollDice gameType')
     
     require 'customDiceBot.rb'
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
-    result = bot.roll(message, gameType, dir, @@diceBotTablePrefix)
+    result, randResults = bot.roll(message, gameType, dir, @@diceBotTablePrefix, isNeedResult)
     
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/, '')
     
     logging(result, 'rollDice result')
     
-    return result, bot.isSecret
+    if( bot.isSecret )
+      randResults = nil
+    end
+    
+    return result, bot.isSecret, randResults
   end
   
   def getDiceBotExtraTableDirName
     getRoomLocalSpaceDirName
   end
+  
+  
+  def getChatRolledMessage(message, randResults)
+    logging("getChatRolledMessage Begin")
+    logging(message, "message")
+    logging(randResults, "randResults")
+    
+    if( randResults.nil? )
+      logging("randResults is nil")
+      return message
+    end
+    
+    
+    data = {
+      "chatMessage" => message,
+      "randResults" => randResults,
+    }
+    
+    text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
+    logging(text, "getChatRolledMessage End text")
+    
+    return text
+  end
+  
   
   def sendChatMessageMany
     100.times{ sendChatMessage }
@@ -4011,9 +4048,7 @@ class DodontoFServer
     chatMessageData = nil
     
     changeSaveData(@saveFiles['chatMessageDataLog']) do |saveData|
-      
-      chatMessageDataLog = saveData['chatMessageDataLog']
-      chatMessageDataLog ||= []
+      chatMessageDataLog = getChatMessageDataLog(saveData)
       
       deleteOldChatMessageData(chatMessageDataLog);
       
@@ -4022,8 +4057,8 @@ class DodontoFServer
       
       chatMessageDataLog.push(chatMessageData)
       chatMessageDataLog.sort!
+      
       logging(chatMessageDataLog, "chatMessageDataLog")
-      saveData['chatMessageDataLog'] = chatMessageDataLog
       logging(saveData['chatMessageDataLog'], "saveData['chatMessageDataLog']");
     end
     
@@ -4041,6 +4076,45 @@ class DodontoFServer
       
       ( timeDiff > ($oldMessageTimeout) )
     end
+  end
+  
+  
+  def deleteChatLog
+    trueSaveFileName = @saveFiles['chatMessageDataLog']
+    deleteChatLogBySaveFile(trueSaveFileName)
+    
+    result = {'result' => "OK" }
+    return result
+  end
+  
+  def deleteChatLogBySaveFile(trueSaveFileName)
+    changeSaveData(trueSaveFileName) do |saveData|
+      chatMessageDataLog = getChatMessageDataLog(saveData)
+      chatMessageDataLog.clear
+    end
+    
+    deleteChatLogAll()
+  end
+  
+  def deleteChatLogAll()
+    logging("deleteChatLogAll Begin")
+    
+    file = @saveDirInfo.getTrueSaveFileName($chatMessageDataLogAll)
+    logging(file, "file")
+    
+    if( File.exist?(file) )
+      locker = getSaveFileLock(file)
+      locker.lock do 
+        File.delete(file)
+      end
+    end
+      
+    logging("deleteChatLogAll End")
+  end
+  
+    
+  def getChatMessageDataLog(saveData)
+    getArrayInfoFromHash(saveData, 'chatMessageDataLog')
   end
   
   

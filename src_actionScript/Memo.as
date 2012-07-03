@@ -139,7 +139,8 @@ package {
         }
         
         override public function loadViewImage():void {
-            var imageUrl:String = "image/memo.png";
+            //var imageUrl:String = "image/memo.png";
+            var imageUrl:String = "image/memo2.png";
             var size:int = 1;
             view.loadImageWidthHeight(imageUrl, size, size);
             

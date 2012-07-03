@@ -13,7 +13,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.37.00(2012/05/14)"
+$version = "Ver.1.37.10(2012/07/04)"
 
 class SaveDataManagerOnMySql
   def initialize
@@ -507,6 +507,13 @@ SQL
     logging("loadSaveFileDataForChatType end")
   end
   
+  def deleteChatLogBySaveFile(trueSaveFileName)
+    dirName = File.dirname(trueSaveFileName)
+    tableName = getChatTableName(dirName)
+    
+    deleteTable(tableName)
+    createChatTable(tableName)
+  end
   
 end
 
@@ -553,6 +560,9 @@ class MySqlAccesser
     @@saveDataManager.loadSaveFileDataForChatType(trueSaveFileName, saveDataForChat)
   end
   
+  def deleteChatLogBySaveFile(trueSaveFileName)
+    @@saveDataManager.deleteChatLogBySaveFile(trueSaveFileName)
+  end
 end
 
 
@@ -727,6 +737,9 @@ class DodontoFServer_MySql < DodontoFServer
     super
   end
   
+  def deleteChatLogBySaveFile(trueSaveFileName)
+    getDataAccesser().deleteChatLogBySaveFile(trueSaveFileName)
+  end
   
   def getTestResponseText
     "「どどんとふ（MySQL）」の動作環境は正常に起動しています。";

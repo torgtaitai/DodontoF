@@ -286,6 +286,7 @@
         dodontoF_Main.setChatPaletteWindow( popup(ChatPalette2, false), "isChatPaletteVisible" );
         dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
         dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
+        dodontoF_Main.setButtonWindow( popup(ButtonBox, false), "isButtonBoxVisible" );
         
         dodontoF_Main.initWindowForTiny();
     }
@@ -316,7 +317,7 @@
         } else if( menuName == "load" ) {
             popup(LoadWindow, true);
         } else if( menuName == "saveLog" ) {
-            DodontoF_Main.getInstance().getChatWindow().saveChatLogHtml();
+            DodontoF_Main.getInstance().getChatWindow().saveChatLog();
         } else if( menuName == "startSessionRecording" ) {
             findMainMenuItem("startSessionRecording").enabled = false;
             findMainMenuItem("stopSessionRecording").enabled = true;
@@ -345,6 +346,8 @@
             dodontoF_Main.setDiceBoxVisible( toggled );
         } else if( menuName == "isChatPaletteVisible" ) {
             dodontoF_Main.setChatPaletteVisible( toggled );
+        } else if( menuName == "isButtonBoxVisible" ) {
+            dodontoF_Main.setButtonBoxVisible( toggled );
         } else if( menuName == "isInitiativeListVisible" ) {
             InitiativeWindow.getInstance().setVisibleState( toggled );
         } else if( menuName == "isStandingGraphicVisible" ) {
@@ -541,6 +544,10 @@
         displayPlayRoomInfoButton.enabled = true;
     }
     
+    private function getSender():SharedDataSender {
+        return dodontoF_Main.getGuiInputSender().getSender();
+    }
+    
     private function updateChatWindowSendtoBox():void {
         dodontoF_Main.getChatWindow().updateChatWindowSendtoBox( Utils.clone(loginUserInfo),
                                                                  dodontoF_Main.getUniqueId() );
@@ -581,16 +588,23 @@
         
         for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
             var userInfo:Object = loginUserInfo[i];
-            message += userInfo["userName"] + "（ユーザーＩＤ：" + userInfo["userId"] + "）\n";
+            var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
+            message += userInfo.userName + "（ユーザーＩＤ：" + uniqueId + "）\n";
         }
         
         window.init(message);
     }
     
+    private function getUniqueIdFromUserInfo(userInfo:Object):String {
+        var uniqueId:String = getSender().getUniqueIdFromStrictlyUniqueId(userInfo.userId);
+        return uniqueId;
+    }
+    
     public function getUserNameByUniqueId(targetUniqueId:String):String {
         for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
             var userInfo:Object = loginUserInfo[i];
-            if( userInfo.userId == targetUniqueId ) {
+            var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
+            if( uniqueId == targetUniqueId ) {
                 return userInfo.userName;
             }
         }
@@ -598,6 +612,48 @@
         return "???";
     }
     
+    public function getLoingUserUsingCharacterList():Array {
+        var characters:Array = [];
+        
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
+            var userInfo:Object = loginUserInfo[i];
+            
+            var character:Character = dodontoF_Main.getMap().findCharacterByName(userInfo.userName);
+            
+            if( character == null ) {
+                continue;
+            }
+            
+            if( getSender().isOwnStrictlyUniqueId(userInfo.userId) ) {
+                characters.splice(0, 0, character);
+                continue;
+            }
+            
+            characters.push(character);
+        }
+        
+        return characters;
+    }
+    
+    
+    public function getOwnCharacter():Character {
+        for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
+            var userInfo:Object = loginUserInfo[i];
+            
+            if( ! getSender().isOwnStrictlyUniqueId(userInfo.userId) ) {
+                continue;
+            }
+            
+            var character:Character = dodontoF_Main.getMap().findCharacterByName(userInfo.userName);
+            if( character != null ) {
+                return character;
+            }
+        }
+        
+        return null;
+    }
+    
+
     public function collectMainMenuInfos():Array {
         var targetTyep:String = "check";
         var result:Array = new Array();

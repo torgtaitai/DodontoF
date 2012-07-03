@@ -218,7 +218,7 @@ package {
         }
         
         
-        public function setContexMenu(menu:ContextMenu):void {
+        public function setContextMenu(menu:ContextMenu):void {
             upperLayer.contextMenu = menu;
         }
         

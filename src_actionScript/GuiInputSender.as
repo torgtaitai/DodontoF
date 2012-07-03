@@ -400,6 +400,7 @@ package {
             character.setCounters(counters);
             character.setStatusAlias(statusAlias);
             character.setUrl(url);
+            
             character.updateRefresh();
             
             sender.changeCharacter( character.getJsonData() );
@@ -448,6 +449,8 @@ package {
             magicRange.setInfo(info);
             magicRange.setTimeRange(timeRange);
             
+            magicRange.updateRefresh();
+            
             sender.changeCharacter( magicRange.getJsonData() );
             
             Log.logging("changeMagicRange end");
@@ -493,6 +496,8 @@ package {
             magicRange.setColor( parseInt(color) );
             magicRange.setInfo(info);
             magicRange.setTimeRange(timeRange);
+            
+            magicRange.updateRefresh();
             
             sender.changeCharacter( magicRange.getJsonData() );
             

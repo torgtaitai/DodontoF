@@ -355,9 +355,13 @@ package {
             this.timeRange = parseInt(params.timeRange);
             this.createRound = parseInt(params.createRound);
             
-            initDraw(getX(), getY());
+            updateRefresh();
             
             Log.loggingTuning("=>analyzeChangedCharacterChanged MagicRange changed End");
+        }
+        
+        override public function updateRefresh():void {
+            initDraw(getX(), getY());
         }
    }
 }

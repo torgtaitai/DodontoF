@@ -42,7 +42,7 @@ package {
                 mapMarker.setPaintMode( isPaint.selected );
                 mapMarker.setWidth( mapMarkerWidth.value );
                 mapMarker.setHeight( mapMarkerHeigth.value );
-                mapMarker.loadViewImage();
+                mapMarker.updateImage();
                 
                 guiInputSender.getSender().changeCharacter( mapMarker.getJsonData() );
                 PopUpManager.removePopUp(this);

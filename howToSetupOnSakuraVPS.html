@@ -129,29 +129,6 @@ mysql &gt; GRANT ALL ON <span class="o">[</span>Database名<span class="o">]</sp
 <p>　DodontoFServer.rb
 　WebCameraCaptureImageUploader.rb</p>
 </div>
-<div class="section" id="perl">
-<h4>perl のパス<a class="headerlink" href="#perl" title="Permalink to this headline">¶</a></h4>
-<p>perl がインストールされている場所を調べます</p>
-<div class="highlight-bash"><div class="highlight"><pre>which perl
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>大抵の場合は下記です</p>
-<p class="last">/usr/bin/perl</p>
-</div>
-<p>下記のファイルの第一行を書き換えます。詳細はどどんとふのマニュアルを読んでください。</p>
-<p>　customBot.pl</p>
-</div>
-<div class="section" id="id8">
-<h4>他の方法<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
-<p>シンボリックリンクを作るという手段もあります</p>
-<div class="highlight-bash"><div class="highlight"><pre>sudo ln -s /usr/bin/perl /usr/local/bin/perl
-sudo ln -s /usr/bin/ruby /usr/local/bin/ruby
-</pre></div>
-</div>
-</div>
-</div>
 <div class="section" id="id9">
 <h3>設置<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>ウェブサーバとして公開するディレクトリにDodontoFのソースをコピーします</p>
@@ -172,7 +149,7 @@ sudo cp -Rp * /var/dodontoF/
 <div>詳しくはどどんとふのマニュアルを読んでください。</div></blockquote>
 <p>以下は、前述した場所でファイルを展開した場合です。参考になれば。</p>
 <div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd</span> /var/dodontoF
-chmod 755 DodontoFServer.rb WebCameraCaptureImageUploader.rb customBot.pl saveData imageUploadSpace imageUploadSpace/smallImages saveDataTempSpace fileUploadSpace replayDataUploadSpace
+chmod 755 DodontoFServer.rb WebCameraCaptureImageUploader.rb saveData imageUploadSpace imageUploadSpace/smallImages saveDataTempSpace fileUploadSpace replayDataUploadSpace
 chmod 666 log.txt log.txt.0
 </pre></div>
 </div>
@@ -229,8 +206,6 @@ chmod 666 log.txt log.txt.0
 </li>
 <li><a class="reference internal" href="#id7">どどんとふの設定</a><ul>
 <li><a class="reference internal" href="#ruby">ruby のパス</a></li>
-<li><a class="reference internal" href="#perl">perl のパス</a></li>
-<li><a class="reference internal" href="#id8">他の方法</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#id9">設置</a></li>

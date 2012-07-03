@@ -1,0 +1,141 @@
+<body onLoad="getDodontofBusyAll()" >
+  <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+
+  <script type="text/javascript"><!--
+
+function getDodontofBusyAll() {
+     getDodontofBusyImage("#dodontof_stable1");
+     getDodontofBusyImage("#dodontof_raa2");
+     getDodontofBusyImage("#dodontof_raa3");
+     getDodontofBusyImage("#dodontof_taguchan");
+     getDodontofBusyImage("#dodontof_kurumi");
+     getDodontofBusyImage("#dodontof_newest");
+}
+     
+function getDodontofBusyImage(target) {
+    var title = $(target).html();
+    
+    if( $(target).attr('isSleep') == "true" ) {
+        $(target).html( "--%<br>" + title );
+        return;
+    }
+    
+    $(target).html( "loading...<br>" + title );
+    
+    var url = $(target).parent().attr('href');
+    url = getBusyInfoUrl(url);
+    
+    jQuery.getJSON(url, function(data) {
+	    getBusyInfoResult(target, title, data)
+	});
+}
+
+function getBusyInfoUrl(url) {
+    url = url.replace(/DodontoF.swf$/, "");
+    url = url.replace(/DodontoFServer.rb.*$/, "");
+    url = url.replace(/\/$/, "");
+    url = url + "/DodontoFServer.rb?webif=getBusyInfo&callback=?";
+    
+    return url;
+}
+
+function getBusyInfoResult(target, title, data) {
+    if( data.result != "OK" ) {
+	return ;
+    }
+    
+    var percentage = data.loginCount / data.maxLoginCount * 100;
+    percentage = Math.floor( percentage );
+    
+    var busyInfoFull = "" + data.loginCount + "/" + data.maxLoginCount + "(" + percentage + "%)";
+    var busyInfo = "" + percentage + "%";
+    var htmlText = busyInfo + "<br>" + title;
+    $(target).html(htmlText);
+    
+    var imageUrl = getImageUrl(percentage);
+    var image = $(target).parent().children('img');
+    image.attr('src', imageUrl);
+    
+    $(target).parent().attr('title', data.version);
+}
+
+function getImageUrl(percentage) {
+    var prefix = "l_";
+    var imageUrl = "p00.gif";
+    
+    if( percentage > 100 ) {
+	imageUrl = "over100.gif";
+    } else if ( percentage > 75) {
+	imageUrl = "over75.gif";
+    } else if ( percentage > 50) {
+	imageUrl = "over50.gif";
+    } else if ( percentage > 25) {
+	imageUrl = "over25.gif";
+    } else {
+	imageUrl = "over0.gif";
+    }
+    
+    imageUrl = "images/" + prefix + imageUrl;
+    
+    return imageUrl;
+}
+
+function getUrlLinkText(text, url) {
+    var htmlText = "<u><a href='" + url + "' target='_blank'>" + text + "</a></u>";
+    return htmlText;
+}
+
+
+// -->
+  </script>
+  
+  <div id="dodontofList" >
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://www.taruki.com/%7Etakeru/DodontoF/DodontoF.swf">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	    <div id="dodontof_stable1">åˆéÆ</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://raa0121.shiracha.net/DodontoF/DodontoF.swf">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	    <div id="dodontof_raa2" isSleep="true">ÇÁÇüÇ≥ÇÒÇQ</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://nakako.raa0121.info/DodontoF/DodontoF.swf">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	  <div id="dodontof_raa3">ÇÁÇüÇ≥ÇÒÇR</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://smile-b.xsrv.jp/dodon2/DodontoF.swf">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	    <div id="dodontof_taguchan">ÇΩÇÆÇ¡ÇøÇ·ÇÒ</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://ec2-54-248-99-4.ap-northeast-1.compute.amazonaws.com/">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	    <div id="dodontof_kurumi">Ç≠ÇÈÇ›Ç≥ÇÒ</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <a target="_blank" href="http://www.dodontof.com/DodontoF/DodontoF.swf">
+	    <img src="images/l_equal0.gif" width="65" height="62" />
+	    <div id="dodontof_newest">ç≈êVî≈</div>
+	  </a>
+    </div>
+    
+    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
+	  <img src="images/baloon3.gif" />
+    </div>
+    
+  </div>
+</body>

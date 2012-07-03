@@ -108,10 +108,7 @@ package {
                 return;
             }
             
-            var objText:String = obj as String;
-            if( objText == null ) {
-                objText = Utils.getJsonString(obj);
-            }
+            var objText:String = getObjectString(obj);
             
             if( objText != noLogPrintTag ) {
                 text = text + " : " + objText;
@@ -139,13 +136,28 @@ package {
                 return;
             }
             
-            var logMessage:String = ("Log[" + level + "]:" + text);
+            //var logMessage:String = ("Log[" + level + "]:" + text);
+            var logMessage:String = text;
             
             printSystemLog(logMessage, ChatWindow.getInstance().lastChatChannel);
             
             if( logLevel <= fatalError ) {
                 printSystemLog(logMessage, ChatWindow.getInstance().publicChatChannel);
             }
+        }
+        
+        static public function getObjectString(obj:Object):String {
+            var objText:String = obj as String;
+            if( objText != null ) {
+                return objText;
+            }
+            
+            var data:ChatSendData = obj as ChatSendData;
+            if( data != null ) {
+                return data.toString();
+            }
+            
+            return Utils.getJsonString(obj);
         }
         
         static public function printSystemLogPublic(logMessage:String):void {

@@ -186,6 +186,8 @@ package {
             Log.loggingTuning("=>analyzeChangedCharacterChanged Initiatived changed End");
         }
         
+        public function updateRefresh():void {
+        }
         
         public function getStatusInfos():Array {
             var window:InitiativeWindow = DodontoF_Main.getInstance().getInitiativeWindow();

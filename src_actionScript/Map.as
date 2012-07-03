@@ -141,6 +141,20 @@ package {
         public function findExistCharacter(characterData:Object):Piece {
             return findExistCharacterById(characterData.imgId);
         }
+
+        public function findCharacterByName(name:String):Character {
+            var characters:Array = findExistPiecesByTypeName(Character.getTypeStatic());
+            
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var character:Character = characters[i];
+                
+                if( character.getName() == name ) {
+                    return character;
+                }
+            }
+            
+            return null;
+        }
         
         public function getTargetTypes(targetTypes:Array):Array {
             var results:Array = new Array();

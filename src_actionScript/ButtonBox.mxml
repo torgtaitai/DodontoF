@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   visible="false"
+   showCloseButton="true"
+   >
+  
+  <mx:Tile id="diceList" width="100%" height="100%"
+      paddingLeft="0"
+      paddingRight="0"
+           >
+  </mx:Tile>
+  
+  <mx:Script>
+
+    <![CDATA[
+    
+        import flash.geom.Point;
+        import mx.containers.HBox;
+        import mx.controls.Alert;
+        import mx.controls.Button;
+        import mx.controls.Menu;
+        import mx.controls.TextInput;
+        import mx.core.Application;
+        import mx.core.IFlexDisplayObject;
+        import mx.core.UIComponent;
+        import mx.events.MenuEvent;
+        import mx.events.MenuEvent;
+        import mx.utils.StringUtil;
+        
+        
+        //{0} 対象キャラクター名
+        //{1} 対象カウンター名
+        //{2} 修正値
+        private var buttonInfos:Array = null;
+        
+        private var buttonInfosDefault:Array = [
+    {label:"HPダメージ",
+     counterName: "HP",
+     operator: "minus",
+     modifyValue: "1D6+1",
+     messageFormat:"{0}の{1}を{2}"},
+    {label:"HP5回復",
+     counterName: "HP",
+     operator: "plus",
+     modifyValue: "5",
+     messageFormat:"{0}の{1}を{2}"},
+    {label:"イニシロール",
+     counterName: "#INI",
+     operator: "equal",
+     modifyValue: "1D20+1",
+     messageFormat:"{0}のイニシアティブを{2}へ"},
+    {label:"侵食率",
+     counterName: "侵食率",
+     operator: "plus",
+     modifyValue: "1D10",
+     messageFormat:"{0}の{1}を{2}"},
+    {}];
+    /*
+    {label:"ゆうこや",
+     counterName: "夢",
+     operator: "plus",
+     modifyValue: 1,
+     messageFormat:"いいねっ！->{0}の夢に+{2}"}
+    */
+        
+        
+        static private var thisObj:ButtonBox;
+        
+        static public function getInstance():ButtonBox {
+            return thisObj;
+        }
+        
+        public function setInitPosition():void {
+            setLoadAddAction( loadSaveDataFromLocalCash );
+            
+            if( loadPosition() ) {
+                return;
+            }
+            
+            setInitPositionDefault();
+        }
+
+        
+        private function loadSaveDataFromLocalCash(info:Object):void {
+            var buttonInfosSaveData:Array = Utils.getJsonDataFromString(info.buttonInfos) as Array;
+            if( buttonInfosSaveData == null ) {
+                return;
+            }
+            
+            buttonInfos = buttonInfosSaveData;
+        }
+        
+        
+        override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+            var info:Object = super.getWindowInfoSaveData(this);
+            info.buttonInfos = Utils.getJsonString(buttonInfos);
+            
+            return info;
+        }
+        
+        
+        override public function setInitPositionDefault():void {
+            this.x = 30;
+            this.y = 70
+            this.width = 230;
+            //this.height = 80;
+            this.height = 140;
+        }
+    
+        override public function getSaveInfoKeyName():String {
+            return "ButtonBox";
+        }
+        
+        private var dice:Dice = null;
+        
+        override public function setup():void {
+            thisObj = this;
+            setTitle();
+            setInitPosition();
+            
+            initButtons();
+            setContextMenu();
+        }
+        
+        public function setTitle():void {
+            this.title="カウンター リモコン"
+        }
+        
+        private function setContextMenu():void {
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            
+            MovablePiece.addMenuItem(menu, "カウンター追加", function():void{
+                    var window:ChangeButtonBoxWindow = DodontoF.popup(ChangeButtonBoxWindow, true) as ChangeButtonBoxWindow;
+                });
+            
+            this.contextMenu = menu;
+        }
+        
+        private function initButtons():void {
+            if( buttonInfos == null ) {
+                buttonInfos = buttonInfosDefault;
+            }
+            
+            clearButtons();
+            
+            for(var i:int = 0 ; i < buttonInfos.length ; i++) {
+                var params:Object = buttonInfos[i];
+                if( params.label == null ) {
+                    continue;
+                }
+                
+                var button:Button = createButton(params, i);
+                diceList.addChild(button);
+            }
+            
+            savePosition();
+        }
+        
+        private function clearButtons():void {
+            var buttonList:Array = diceList.getChildren();
+            
+            for(var i:int = 0 ; i < buttonList.length ; i++) {
+                var button:Button = buttonList[i] as Button;
+                if( button == null ) {
+                    continue;
+                }
+                
+                try {
+                    diceList.removeChild(button);
+                } catch (e:Error) {
+                    Log.loggingError("diceList.removeChild error");
+                }
+            }
+        }
+        
+        private function createButton(params:Object, index:int):Button {
+            var button:Button = new Button();
+            
+            button.label = params.label;
+            button.height = 50;
+            button.maxWidth = 200;
+            button.setStyle("paddingLeft", 0);
+            button.setStyle("paddingRight", 0);
+            button.setStyle("fontSize", 10);
+            
+            button.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+                    Log.logging("click!");
+                    thisObj.popupCharacterList(button, index);
+                    Log.logging("click end");
+                });
+            
+            initCharacterListPopupContextMenu(button, index);
+            
+            return button;
+        }
+        
+        private function initCharacterListPopupContextMenu(button:Button, index:int):void {
+            var menu:ContextMenu = new ContextMenu();
+            menu.hideBuiltInItems();
+            
+            MovablePiece.addMenuItem(menu, "カウンター設定", function():void{
+                    var window:ChangeButtonBoxWindow = DodontoF.popup(ChangeButtonBoxWindow, true) as ChangeButtonBoxWindow;
+                    window.setParams( buttonInfos[index], index );
+                });
+            
+            MovablePiece.addMenuItem(menu, "ボタン削除", function():void{
+                    buttonInfos.splice(index, 1);
+                    initButtons();
+                });
+            
+            button.contextMenu = menu;
+        }
+        
+        
+        private function popupCharacterList(source:Object, index:int):void {
+            Log.logging("popupCharacterList Begin");
+            Log.logging("index", index);
+            
+            setTitle();
+            
+            var params:Object = buttonInfos[index];
+            Log.logging("params", params);
+            
+            var parent:UIComponent = source as UIComponent;
+            var menuData:Array = getCharacterListMenuData(params);
+            popupMenu(parent, menuData, clickPopupCharacterListHandler);
+            
+            Log.logging("popupCharacterList End");
+        }
+        
+        
+        private function getCharacterListMenuData(params:Object):Array {
+            var characters:Array = DodontoF_Main.getInstance().getDodontoF().getLoingUserUsingCharacterList();
+            var menuData:Array = [];
+            
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var character:Character = characters[i];
+                pushMenuData(menuData, character, params);
+            }
+            
+            
+            var others:Array = getOtherCharactersMenu(characters, params);
+            
+            if( others.length > 0 ) {
+                var childrenInfo:Object = {
+                    label: "その他",
+                    children: others };
+                
+                menuData.push(childrenInfo);
+            }
+            
+            return menuData;
+        }
+        
+        private function pushMenuData(menuData:Array, character:Character, params:Object):void {
+            var info:Object = {
+                label: character.getName(),
+                character: character,
+                params: params,
+                type: "normal" };
+            
+            menuData.push(info);
+        }
+        
+        private function getOtherCharactersMenu(exists:Array, params:Object):Array {
+            var menuData:Array = [];
+            var characters:Array = DodontoF_Main.getInstance().getMap().findExistPiecesByTypeName(Character.getTypeStatic());
+            characters.sort( function(a:Character, b:Character):int {
+                    return a.getName().localeCompare(b.getName());} );
+            
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var character:Character = characters[i];
+                
+                if( isInclude(exists, character) ) {
+                    continue;
+                }
+                
+                pushMenuData(menuData, character, params);
+            }
+            
+            
+            return menuData;
+        }
+        
+        
+        private function isInclude(exists:Array, character:Character):Boolean {
+            for(var i:int = 0 ; i < exists.length ; i++) {
+                if( exists[i].getId() == character.getId() ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private function popupMenu(parent:UIComponent, menuData:Array, handler:Function):void {
+            var menu:Menu = Menu.createMenu(parent, menuData);
+            menu.addEventListener("itemClick", handler);
+            
+            var point:Point = parent.localToGlobal(new Point(0, 0));
+            menu.show(point.x + parent.width, point.y);
+        }
+        
+        
+        private function clickPopupCharacterListHandler(event:MenuEvent):void {
+            var character:Character = event.item.character;
+            if( character == null ) {
+                return;
+            }
+            
+            var params:Object = event.item.params;
+            if( params == null ) {
+                return;
+            }
+            
+            changeCharacterCounter(character, params);
+        }
+        
+        
+        private var initiativeCounterName:String = "#INI";
+        
+        private function changeCharacterCounter(character:Character, params:Object):void {
+            var counterName:String = params.counterName;
+            
+            if( counterName == initiativeCounterName ) {
+                changeCharacterCounterForInitiative(character, params);
+                return;
+            }
+            
+            changeCharacterCounterCommon(character, params, counterName);
+            
+        }
+        
+        private function changeCharacterCounterForInitiative(character:Character, params:Object):void {
+            var modifyValue:String = params.modifyValue;
+            var operator:String = params.operator;
+            var messageFormat:String = params.messageFormat;
+            
+            var initiative:Number = character.getInitiative();
+            var initiativeInt:int = Utils.getInitiativeInt( initiative );
+            var initiativeModify:int = Utils.getInitiativeModify( initiative );
+            
+            var modifyResult:Object = getModifiedValue(initiativeInt, modifyValue, operator);
+            initiativeInt = modifyResult.value;
+            initiative = Utils.getInitiative(initiativeInt, initiativeModify);
+            
+            character.setInitiative(initiative);
+            
+            var message:String = 
+                StringUtil.substitute(messageFormat, 
+                                      character.getName(),   //{0} 相手
+                                      "イニシアティブ値",    //{1} カウンター名
+                                      modifyResult.text);    //{2} 修正値
+            
+            sendCharacterChange(character, message);
+        }
+        
+        
+        private function changeCharacterCounterCommon(character:Character, params:Object, counterName:String):void {
+            var modifyValue:String = params.modifyValue;
+            var operator:String = params.operator;
+            var messageFormat:String = params.messageFormat;
+            
+            var isExistCounterName:Boolean = InitiativeWindow.getInstance().isExistCounterName(counterName);
+            
+            if( counterName == "#INI" ) {
+                isExistCounterName = true;
+            }
+            
+            if( ! isExistCounterName ) {
+                var errorMessage:String = "カウンター値に「" + counterName + "」は存在しません";
+                this.title = errorMessage;
+                Log.printSystemLogPublic(errorMessage);
+                return;
+            }
+            Log.logging("no error.");
+            
+            var value:int = character.getCounter(counterName);
+            var modifyResult:Object = getModifiedValue(value, modifyValue, operator);
+            character.setCounter(counterName, modifyResult.value);
+            
+            var message:String = 
+                StringUtil.substitute(messageFormat, 
+                                      character.getName(),   //{0} 相手
+                                      counterName,           //{1} カウンター名
+                                      modifyResult.text);    //{2} 修正値
+            
+            sendCharacterChange(character, message);
+        }
+        
+        private function sendCharacterChange(character:Character, message:String):void {
+            DodontoF_Main.getInstance().getGuiInputSender().getSender()
+            .changeCharacter( character.getJsonData(),
+                              function(event:Event):void {
+                                  sendMessage(message);
+                              } );
+        }
+        
+        private function getModifiedValue(value:int, modifyValueString:String, operator:String):Object {
+            var valueInfo:Object = getValueInfoFromDiceText(modifyValueString);
+            var modifyValue:int = valueInfo.value;
+            Log.logging("modifyValue", modifyValue);
+            Log.logging("valueInfo.text", valueInfo.text);
+            
+            var text:String = "";
+            if( operator == "plus" ) {
+                value = (value + modifyValue);
+                text = "+" + modifyValue + valueInfo.text;
+            } else if( operator == "minus" ) {
+                value = (value - modifyValue);
+                text = "-" + modifyValue + valueInfo.text;
+            } else if( operator == "equal" ) {
+                value = modifyValue;
+                text = "" + modifyValue + valueInfo.text;
+            } else {
+                throw "operator:" + operator + "is invalid!";
+            }
+            
+            var result:Object = {
+                value: value,
+                text: text };
+            
+            Log.logging("getModifiedValue result", result);
+            return result;
+        }
+        
+        private function getValueInfoFromDiceText(diceText:String):Object {
+            var params:Object = getDiceParamsFromDiceText(diceText);
+            Log.logging("params", params);
+            
+            if( params.value != null ) {
+                return {text:"",
+                        value: params.value};
+            }
+            
+            var text:String = "(" + diceText + "→";
+            var value:int = 0;
+            
+            for(var i:int = 0 ; i < params.diceCount ; i++) {
+                if( i != 0 ) {
+                    text += ",";
+                }
+                
+                var randValue:int = Dice.getRandomNumber(params.diceType);
+                text += randValue
+                value += randValue
+            }
+            
+            text += getModifyString(params.modify) + ")";
+            value += params.modify;
+            
+            var valueInfo:Object = {
+                text: text,
+                value: value
+            };
+            
+            return valueInfo;
+        }
+        
+        private function getDiceParamsFromDiceText(text:String):Object {
+            Log.logging("getValueFromDiceText text", text);
+            
+            var diceReg:RegExp = /(\d+)D(\d+)((\+|\-)\d+)?/i
+            var diceMatchResult:Object = diceReg.exec(text);
+            
+            if( diceMatchResult == null ) {
+                Log.logging("NOT match, so parseInt");
+                return {value: parseInt(text)};
+            }
+            
+            var diceCount:int = parseInt(diceMatchResult[1]);
+            var diceType:int = parseInt(diceMatchResult[2]);
+            var modify:int = 0
+            if( diceMatchResult[3] != null ) {
+                modify = parseInt(diceMatchResult[3]);
+            }
+            
+            var params:Object = {diceCount:diceCount,
+                                 diceType: diceType,
+                                 modify: modify};
+            Log.logging("getDiceParamsFromDiceText result params", params);
+            return params
+        }
+        
+        
+        private function getModifyString(modify:int):String { 
+            if( modify > 0 ) {
+                return "+" + modify;
+            } else if( modify < 0 ) {
+                return "" + modify;
+            }
+            
+            return "";
+        }
+        
+        
+        private function sendMessage(message:String):void {
+            var window:ChatWindow = ChatWindow.getInstance();
+            window.sendChatMessage(window.publicChatChannel, message);
+        }
+        
+        
+        public function changeButtonInfo(params:Object, index:int):void {
+            if( index == -1 ) {
+                buttonInfos.push(params);
+            } else {
+                editButtonInfo (params, index);
+            }
+            
+            initButtons();
+        }
+        
+        
+        public function editButtonInfo(params:Object, index:int):void {
+            var buttonInfo:Object = buttonInfos[index];
+            if( buttonInfo == null ) {
+                return;
+            }
+            
+            for(var key:String in buttonInfo) {
+                buttonInfo[key] = params[key];
+            }
+        }
+        
+    ]]>
+    
+  </mx:Script>
+  
+</torgtaitai:ResizableWindow>

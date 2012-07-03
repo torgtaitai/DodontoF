@@ -150,7 +150,8 @@ package {
                 return;
             }
             
-            DodontoF_Main.getInstance().getDiceBox().createDice("d" + maxNumber, getId(), changeNumber);
+            var params:Object = null;
+            DodontoF_Main.getInstance().getDiceBox().createDice("d" + maxNumber, params, getId(), changeNumber);
         }
 
         

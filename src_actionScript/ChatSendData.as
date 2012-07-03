@@ -7,9 +7,9 @@ package {
     
     public class ChatSendData {
         
-        private var color:int = -1;
         private var name:String;
         private var state:String;
+        private var color:int = -1;
         private var sendto:String;
         private var message:String = "";
         private var channel:int = 0;
@@ -20,15 +20,17 @@ package {
         private var callBack:Function = null;
         
         private var isDiceRollResultFlag:Boolean = false;
+        private var isStateEmpty:Boolean = false;
         
         private var retryCount:int = 0;
         static private var retryCountLimit:int = 3;
         
+        static private var tailReturn:RegExp = /\r+$/;
+        
+        
         static public function setRetryCountLimit(limit:int):void {
             retryCountLimit = limit;
         }
-        
-        static private var tailReturn:RegExp = /\r+$/;
         
         public function ChatSendData(channel_:int,
                                      message_:String,
@@ -80,8 +82,6 @@ package {
             name = getValue(name, getChatWindw().getChatCharacterName());
         }
         
-        
-        private var isStateEmpty:Boolean = false;
         
         public function getNameAndState():String {
             return getNameOnly() + "\t" + getState();
@@ -203,6 +203,29 @@ package {
             }
             
             return sender.getStrictlyUniqueId();
+        }
+        
+        public function toString():String {
+            var result:String = "\n";
+            result += getParamText("name", name);
+            result += getParamText("state", state);
+            result += getParamText("color", "" + color);
+            result += getParamText("sendto", sendto);
+            result += getParamText("message", message);
+            result += getParamText("channel", "" + channel);
+            result += getParamText("isSendToOwnself", "" + isSendToOwnself);
+            result += getParamText("randomSeed", "" + randomSeed);
+            result += getParamText("gameType", gameType);
+            result += getParamText("callBack", (callBack == null ? "null" : "exist"));
+            result += getParamText("isDiceRollResultFlag", "" + isDiceRollResultFlag);
+            result += getParamText("retryCount", "" + retryCount);
+            result += getParamText("retryCountLimit", "" + retryCountLimit);
+            result += getParamText("isStateEmpty", "" + isStateEmpty);
+            return result;
+        }
+        
+        private function getParamText(name:String, param:String):String {
+            return name + " :" + param + "\n";
         }
         
     }

@@ -6,12 +6,12 @@ $debug = false
 
 
 #サーバで許容できると思うログイン人数を記載。大体でいいです。
-$aboutMaxLoginCount = 50
+$aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.37.00"
-$versionDate = "2012/05/14"
+$versionOnly = "Ver.1.37.10"
+$versionDate = "2012/07/04"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -28,10 +28,10 @@ $oldMessageTimeout = 180
 $refreshInterval = 0.5
 
 #プレイルームの最大数
-$saveDataMaxCount = 1000;
+$saveDataMaxCount = 100
 
 #ログイン画面で一括取得できる最大プレイルーム数
-$playRoomGetRangeMax = 100
+$playRoomGetRangeMax = 10
 
 #墓場に保存されるキャラクターの最大数
 $graveyardLimit = 30
@@ -113,9 +113,6 @@ $mentenanceModePassword = nil
 #ログアウト時のメッセージも抑止
 $isWelcomeMessageOn = true
 
-#ダイスボットスクリプトへのパス -> B&C2では不要になりました。
-# $diceBoxCgiUrl = "customBot.pl"
-
 #セーブデータの管理方法(nil/"mysql")
 # $dbType = nil
 $dbType = nil
@@ -178,11 +175,16 @@ $canTalk = true
 $recordMaxCount = 5
 
 #通信方式を擬似Commet方式にするなら true に。
-#その場合応答は速くなりますが、CPUやネットワークの負荷が上がります。
-$isCommet = false
+#サーバ応答時に即座にクライアントに返答するには falseに。
+$isCommet = true
 
 #擬似Commetを使わない場合のクライアント側での再読み込み待ち時間
 $refreshIntervalForNotCommet = 2.0
 
 #チャットの送信失敗時の再送上限回数。これを超えると送信失敗扱いになります。
 $retryCountLimit = 3
+
+#ログインしていられる最大時間。
+# 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
+#（開発環境用なので、通常は変更不要）
+$loginTimeLimitSecond = 0

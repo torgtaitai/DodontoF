@@ -17,7 +17,7 @@ $diceBotInfos =
       '\d+[\+\-\*\/]', #a+xDn のような加減算用
       'D66', #D66ダイス
       'make', #ランダムジェネレータ用
-      'choise\[', #ランダム選択　(choise[A, B, C])
+      'choice\[', #ランダム選択　(choice[A, B, C])
     ],
     :info => <<INFO_MESSAGE_TEXT
 【ダイスボット】(Faceless氏の「ボーンズ＆カーズ」を流用)
@@ -34,7 +34,7 @@ $diceBotInfos =
 　10B6>=4 ：10d6を振り4以上のダイス目の個数を数える
 　(8/2)D(4+6)<=(5*3)：個数・ダイス・達成値には四則演算も使用可能
 　C(10-4*3/2+2)：C(計算式）で計算だけの実行も可能
-　choise[a,b,c]：列挙した要素から一つを選択表示。ランダム攻撃対象決定などに。
+　choice[a,b,c]：列挙した要素から一つを選択表示。ランダム攻撃対象決定などに。
 　S3d6 ： 上記各コマンドの先頭に「S」を付けると結果を他の人には見せないシークレットロールに
 INFO_MESSAGE_TEXT
   },
@@ -248,6 +248,15 @@ INFO_MESSAGE_TEXT
     :info => <<INFO_MESSAGE_TEXT
 個数振り足しロール(xRn)の閾値を6にセット、バラバラロール(xBn)の目標値を5以上にセットします。
 BコマンドとRコマンド時に、グリッチの表示を行います。
+INFO_MESSAGE_TEXT
+  },
+  {
+    :name => '真・女神転生TRPG　覚醒編',
+    :gameType => 'SMTKakuseihen',
+    :prefixs => [],
+    :info => <<INFO_MESSAGE_TEXT
+1D100<=(目標値) でスワップ・通常・逆スワップ判定を自動判定
+威力ダイスは nU6[6] (nはダイス個数)でロール可能です。
 INFO_MESSAGE_TEXT
   },
   {
@@ -759,6 +768,16 @@ INFO_MESSAGE_TEXT
     :prefixs => [],
     :info => <<INFO_MESSAGE_TEXT
 1D100<=m 方式の判定で成否、クリティカル・ファンブルを自動判定
+INFO_MESSAGE_TEXT
+  },
+  {
+    :name => 'NJSLYRBATTLE',
+    :gameType => 'NjslyrBattle',
+    :prefixs => [],
+    :info => <<INFO_MESSAGE_TEXT
+カラテロール：2d6<=(カラテ点)
+例）2d6<=5
+　(2D6<=5) ＞ 2[1,1] ＞ 2 ＞ 成功 重点 3 溜まる
 INFO_MESSAGE_TEXT
   },
 ]

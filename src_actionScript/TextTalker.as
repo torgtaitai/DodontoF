@@ -32,17 +32,60 @@ package {
                 return;
             }
             
-            var index:int = text.indexOf( ChatMessageTrader.getChatMessageSeparator() );
-            Log.logging("index", index);
-            if( index != -1 ) {
-                text = text.slice(index + 1);
-            }
-            Log.logging("text", text);
-            
-            buffer = text;
+            buffer = getBuffer(text);
             Log.loggingTuning("sendText buffer", buffer);
             
             send();
+        }
+        
+        static private var diceBotResultRegExp:RegExp = /\A(.+?)( +.*)?\r.+→ *(.+)\Z/m;
+        
+        static private function getBuffer(text:String):String {
+            Log.logging("getBuffer Begin text", text);
+                
+            var index:int = text.indexOf( ChatMessageTrader.getChatMessageSeparator() );
+            Log.logging("index", index);
+            
+            if( index != -1 ) {
+                text = text.slice(index + 1);
+            }
+            
+            Log.logging("text", text);
+            
+            var result:Object = diceBotResultRegExp.exec(text);
+            
+            if( result == null ) {
+                Log.logging("diceRoll not matched");
+                return text;
+            }
+            
+            var roll:String = result[1];
+            var message:String = getMessage(result[2]);
+            var rollResult:String = result[3];
+            Log.logging("roll", roll);
+            Log.logging("rollResult", rollResult);
+            
+            text = roll + message + "、" + rollResult;
+            Log.logging("getBuffer result", text);
+            
+            return text;
+        }
+        
+        static private function getMessage(text:String):String {
+            if( text == null ) {
+                return "";
+            }
+            
+            var result:Object = /「(.+)」/.exec(text);
+            
+            if( result == null ) {
+                return "";
+            }
+            
+            var message:String = "、" + result[1];
+            Log.logging("getMessage result", message);
+            
+            return message;
         }
         
         private function isTalkMode():Boolean {
@@ -54,38 +97,9 @@ package {
             return window.isTalkMode();
         }
         
-        private var isPlaying:Boolean;
-        private var sound:Sound;
-        private var soundChannel:SoundChannel;
-        
-        /*
-        private function send():void {
-            Log.loggingTuning("onConnect begin");
-            
-            var query:String = getQuery();
-            Log.loggingTuning("query", query);
-            
-            //var url:String = "talkerProxy.rb";
-            var url:String = "talkerProxy.php";
-            url = Config.getInstance().getUrlString(url);
-            
-            var request:URLRequest = new URLRequest(url);
-            request.method = URLRequestMethod.POST;
-            var variables:URLVariables = new URLVariables();
-            variables.data = query;
-            request.data = variables;
-            
-            sound = new Sound();
-            sound.addEventListener(Event.COMPLETE, onSoundLoadComplete);
-            sound.load(request);
-            Log.loggingTuning("request", request);
-            
-            isPlaying = true;
-            
-            Log.loggingTuning("onConnect end");
-        }
-        */
-        
+        //private var sound:Sound;
+        static private var sounds:Array = new Array();
+        static private var soundChannel:SoundChannel;
         
         private function send():void {
             Log.logging("onConnect begin");
@@ -94,25 +108,21 @@ package {
             Log.logging("ttsUrl", ttsUrl);
             
             var proxyUrl:String = "talkerProxy.php";
-            //var proxyUrl:String = "talkerProxy.rb";
             var request:URLRequest = new URLRequest(proxyUrl);
             request.method = URLRequestMethod.POST;
             var variables:URLVariables = new URLVariables();
             variables.url = ttsUrl;
             request.data = variables;
             
-            sound = new Sound();
+            var sound:Sound = new Sound();
             sound.addEventListener(Event.COMPLETE, onSoundLoadComplete);
             sound.load(request);
-            
-            isPlaying = true;
+            sounds.push(sound);
             
             Log.logging("onConnect end");
         }
         
         private function getGoogleTextToSpeachUrl():String {
-            //var url:String = "http://translate.google.com/translate_tts";
-            //var url:String = "http://translate.google.com/translate_tts?q=%E3%81%8A%E3%81%AF%E3%82%88%E3%81%86"
             var readText:String = getReadText();
             var ttsUrl:String = "http://translate.google.com/translate_tts"
                 + "?tl=ja"
@@ -140,24 +150,42 @@ package {
         
         private function onSoundLoadComplete(event:Event):void {
             try {
-                Log.loggingTuning("Sound loaded begin");
-                soundChannel = sound.play();
-                soundChannel.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
-                Log.loggingTuning("Sound loaded end");
+                playSound();
             } catch(e:Error) {
                 Log.loggingException("onSoundLoadComplete error", e);
             }
         }
         
-        private function onSoundComplete(event:Event):void {
-            Log.loggingTuning("Sound completed begin");
-            soundChannel.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
-            sound.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
-            isPlaying = false;
+        private function playSound():void {
+            if( isPlaying() ) {
+                Log.logging("playSound stop");
+                return;
+            }
+            Log.logging("playSound start");
+            
+            //var sound:Sound = sounds[0];
+            var sound:Sound = sounds.shift();
+            if( sound == null ) {
+                return;
+            }
+            
+            soundChannel = sound.play();
+            soundChannel.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
+        }
         
+        static private function isPlaying():Boolean {
+            return (soundChannel != null);
+        }
+        
+        private function onSoundComplete(event:Event):void {
+            //var sound:Sound = sounds.shift();
+            //sound.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
+            //soundChannel.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
             soundChannel = null;
-            sound = null;
-            Log.loggingTuning("Sound Completed end");
+            
+            Log.logging("Sound Completed end");
+            
+            playSound();
         }
     }
 }

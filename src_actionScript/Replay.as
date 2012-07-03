@@ -360,13 +360,14 @@ package {
                 return 0;
             }
             
-            var name:String = messageData[1];
+            var nameAndState:String = messageData[1];
             var message:String = messageData[2];
             var color:String = messageData[3];
             var time:Number = messageData[4];
             var uniqueId:String = messageData[5];
             
-            var data:ChatSendData = new ChatSendData(channel, message, name);
+            var data:ChatSendData = new ChatSendData(channel, message);
+            data.setNameAndState(nameAndState);
             data.setColorString(color);
             
             DodontoF_Main.getInstance().getChatWindow().clearPublicChatMessageLog();

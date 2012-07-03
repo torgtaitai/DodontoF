@@ -142,7 +142,7 @@ package
             return window.isVerticalResizable();
             
         }
-        private static function setResizeModeWhenCnaNotVerticalResize(target:UIComponent):void {
+        private static function setResizeModeWhenCanNotVerticalResize(target:UIComponent):void {
             if( isVerticalResizable(target) ) {
                 return;
             }
@@ -156,96 +156,98 @@ package
         }
 		
 		private static function onMouseMove(event:MouseEvent):void {
-			
 			var target:UIComponent = UIComponent(event.currentTarget);
+            setCursorOnMouseMove(target);
+            setPopUpMode(target);
+        }
+			
+		private static function setCursorOnMouseMove(target:UIComponent):void {
 			var point:Point = new Point(target.x,target.y);
 			
 			_isResizing = true;
 			
-			if( ! resizeTarget ) {
+			if( resizeTarget != null ) {
+                return;
+            }
+            
+            var posX:Number = target.parent.mouseX;
+            var posY:Number = target.parent.mouseY;
+            
+            if(posX >= (point.x + target.width - _resizeAreaMargin) && 
+               posY >= (point.y + target.height - _resizeAreaMargin)) {
+                changeCursor(CONST_CUR_LEFT_OBLIQUE, -6, -6); 
+                resizeMode = CONST_MODE_RIGHT | CONST_MODE_BOTTOM;
                 
-				var posX:Number = target.parent.mouseX;
-				var posY:Number = target.parent.mouseY;
+                setResizeModeWhenCanNotVerticalResize(target);
                 
-				if(posX >= (point.x + target.width - _resizeAreaMargin) && 
-                   posY >= (point.y + target.height - _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_LEFT_OBLIQUE, -6, -6); 
-					resizeMode = CONST_MODE_RIGHT | CONST_MODE_BOTTOM;
-                    
-                    setResizeModeWhenCnaNotVerticalResize(target);
-                    
-				}else if(posX <= (point.x + _resizeAreaMargin) && 
-                         posY <= (point.y + _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_LEFT_OBLIQUE, -6, -6);
-					resizeMode = CONST_MODE_LEFT | CONST_MODE_TOP;
-                    
-                    setResizeModeWhenCnaNotVerticalResize(target);
-                    
-				}else if(posX <= (point.x + _resizeAreaMargin) &&
-                         posY >= (point.y + target.height - _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_RIGHT_OBLIQUE, -6, -6);
-					resizeMode = CONST_MODE_LEFT | CONST_MODE_BOTTOM;
-                    
-                    setResizeModeWhenCnaNotVerticalResize(target);
-                    
-				}else if(posX >= (point.x + target.width - _resizeAreaMargin) &&
-                         posY <= (point.y + _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_RIGHT_OBLIQUE, -6, -6);
-					resizeMode = CONST_MODE_RIGHT | CONST_MODE_TOP;
-                    
-                    setResizeModeWhenCnaNotVerticalResize(target);
-                    
-				}else if(posX >= (point.x + target.width - _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_HORIZONTAL, -9, -9);
-					resizeMode = CONST_MODE_RIGHT;
-                    
-				}else if(posX <= (point.x + _resizeAreaMargin)) {
-                    
-					changeCursor(CONST_CUR_HORIZONTAL, -9, -9);
-					resizeMode = CONST_MODE_LEFT;
-                    
-				}else if(posY >= (point.y + target.height - _resizeAreaMargin)) {
-                    if( isVerticalResizable(target) ) {
-                        changeCursor(CONST_CUR_VERTICAL, -9, -9);
-                        resizeMode = CONST_MODE_BOTTOM;
-                    }
-                    
-				}else if(posY <= (point.y + _resizeAreaMargin)) {
-                    if( isVerticalResizable(target) ) {
-                        changeCursor(CONST_CUR_VERTICAL, -9, -9);
-                        resizeMode = CONST_MODE_TOP;
-                    }
-                    
-				}else{
-                    
-					changeCursor(null, 0, 0);
-					resizeMode = CONST_MODE_NONE;
-					_isResizing = false;
-                    
-				}
+            }else if(posX <= (point.x + _resizeAreaMargin) && 
+                     posY <= (point.y + _resizeAreaMargin)) {
                 
-				if(target.getStyle("resizer_isPopUp")) {
-                    
-					if(resizeMode != CONST_MODE_NONE) {
-						target.isPopUp = false;
-					}else{
-						target.isPopUp = true;
-					}
-				}
-			}
-			
+                changeCursor(CONST_CUR_LEFT_OBLIQUE, -6, -6);
+                resizeMode = CONST_MODE_LEFT | CONST_MODE_TOP;
+                
+                setResizeModeWhenCanNotVerticalResize(target);
+                
+            }else if(posX <= (point.x + _resizeAreaMargin) &&
+                     posY >= (point.y + target.height - _resizeAreaMargin)) {
+                
+                changeCursor(CONST_CUR_RIGHT_OBLIQUE, -6, -6);
+                resizeMode = CONST_MODE_LEFT | CONST_MODE_BOTTOM;
+                
+                setResizeModeWhenCanNotVerticalResize(target);
+                
+            }else if(posX >= (point.x + target.width - _resizeAreaMargin) &&
+                     posY <= (point.y + _resizeAreaMargin)) {
+                
+                changeCursor(CONST_CUR_RIGHT_OBLIQUE, -6, -6);
+                resizeMode = CONST_MODE_RIGHT | CONST_MODE_TOP;
+                
+                setResizeModeWhenCanNotVerticalResize(target);
+                
+            }else if(posX >= (point.x + target.width - _resizeAreaMargin)) {
+                
+                changeCursor(CONST_CUR_HORIZONTAL, -9, -9);
+                resizeMode = CONST_MODE_RIGHT;
+                
+            }else if(posX <= (point.x + _resizeAreaMargin)) {
+                
+                changeCursor(CONST_CUR_HORIZONTAL, -9, -9);
+                resizeMode = CONST_MODE_LEFT;
+                
+            }else if(posY >= (point.y + target.height - _resizeAreaMargin)) {
+                if( isVerticalResizable(target) ) {
+                    changeCursor(CONST_CUR_VERTICAL, -9, -9);
+                    resizeMode = CONST_MODE_BOTTOM;
+                }
+                
+            }else if(posY <= (point.y + _resizeAreaMargin)) {
+                if( isVerticalResizable(target) ) {
+                    changeCursor(CONST_CUR_VERTICAL, -9, -9);
+                    resizeMode = CONST_MODE_TOP;
+                }
+                
+            } else {
+                resetCursor();
+            }
+        }
+        
+		private static function setPopUpMode(target:UIComponent):void {
+            if( target.getStyle("resizer_isPopUp") == null ) {
+                return;
+            }
+            
+            target.isPopUp = (resizeMode == CONST_MODE_NONE);
 		}
 		
+		private static function resetCursor():void {
+            changeCursor(null, 0, 0);
+            resizeMode = CONST_MODE_NONE;
+            _isResizing = false;
+        }
+        
 		private static function onMouseOut(event:MouseEvent):void{
 			if( ! resizeTarget) {
-				_isResizing = false;
-				changeCursor(null, 0, 0);
-				resizeMode = CONST_MODE_NONE;
+                resetCursor();
 			}
 		}
 		
@@ -302,7 +304,7 @@ package
 			
 		}
 
-		private static function changeCursor(curClass:Class,offX:Number,offY:Number):void{
+		private static function changeCursor(curClass:Class, offX:Number, offY:Number):void{
 			
 			if(resizeCursor == curClass) {
                 return;

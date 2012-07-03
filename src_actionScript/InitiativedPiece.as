@@ -27,5 +27,6 @@ package {
         function hasStatus():Boolean;
         function getStatusName(key:String):String;
         function getUrl():String;
+        function updateRefresh():void;
     }
 }

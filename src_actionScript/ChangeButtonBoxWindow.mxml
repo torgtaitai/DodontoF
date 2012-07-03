@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="330"
+   height="205"
+   title="カウンターリモコンエディター" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Form
+       paddingTop="1" paddingBottom="1" 
+       paddingRight="1" paddingLeft="1" >
+      
+	  <mx:FormItem label="ボタン名:">
+      <mx:TextInput id="labelName" height="25" width="100%" text="HP減少" />
+      </mx:FormItem>
+      
+	  <mx:FormItem label="対象カウンター名:">
+        <mx:TextInput id="counterName" height="25" width="100%" text="HP" toolTip="イニシアティブは「#INI」で指定できます。" />
+      </mx:FormItem>
+      
+	  <mx:FormItem label="修正値:">
+        <mx:HBox width="100%" height="25">
+          <mx:ComboBox id="operator" toolTip="現状値に加減算するか、値を差し替えるかを選択できます。">
+            <mx:Array>
+              <mx:Object label="＋" data="plus" />
+              <mx:Object label="−" data="minus" />
+              <mx:Object label="＝" data="equal" />
+            </mx:Array>
+          </mx:ComboBox>
+          
+          <mx:TextInput id="modifyValue" height="25" width="100" text="1" toolTip="数値あるいは「2D6+1」形式が記入可能です" />
+        </mx:HBox>
+      </mx:FormItem>
+      
+	  <mx:FormItem label="表示メッセージ:">
+        <mx:TextInput id="messageFormat" height="25" width="100%" text="\{0\}の\{1\}を\{2\}した"
+                      toolTip="使用可能な置換文字：&#13;\{0\}：対象キャラクター名&#13;\{1\}：対象カウンター名&#13;\{2\}：修正値"
+                      />
+      </mx:FormItem>
+      
+    </mx:Form>
+    
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="設定" click="execute()" />
+      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    
+    private var index:int = -1;
+    
+    public function setParams(params:Object, index_:int):void {
+        this.index = index_;
+        
+        if( params == null ) {
+            operator.selectedIndex = 0;
+            return;
+        }
+        
+        labelName.text = params.label;
+        
+        Utils.selectComboBox(operator, params.operator, "data");
+        modifyValue.text = params.modifyValue;
+        counterName.text = params.counterName;
+        messageFormat.text = params.messageFormat;
+    }
+       
+    override protected function setup():void {
+    }
+    
+    
+    public function execute():void {
+        var params:Object = new Object();
+        params.label = labelName.text;
+        params.operator = operator.selectedItem.data;
+        params.modifyValue = modifyValue.text;
+        params.counterName = counterName.text;
+        params.messageFormat = getMessageFormat();
+        
+        ButtonBox.getInstance().changeButtonInfo(params, index);
+        
+        PopUpManager.removePopUp(this);
+    }
+    
+    private function getMessageFormat():String {
+        var text:String = messageFormat.text;
+        text = Utils.changeZenkakuToHankakuOnNumber(text);
+        return text.replace(/｛(\d+)｝/g, "{$1}");
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

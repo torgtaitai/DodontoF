@@ -28,6 +28,7 @@ package {
     import flash.system.Capabilities;
     import mx.utils.StringUtil;
     import mx.effects.Glow;
+    import mx.events.CloseEvent;
     
     
     public class Utils {
@@ -625,6 +626,52 @@ package {
             
             glow.end();
             glow.play( targets );
+        }
+        
+        
+        static public function getTimeText(seconds:Number):String {
+            if( seconds < 60 ) {
+                return "" + seconds.toFixed(1) + "秒";
+            }
+            
+            var minute:Number = (seconds / 60)
+            if( minute < 60 ) {
+                return "" + minute.toFixed(1) + "分";
+            }
+            
+            var hours:Number = (seconds / 60 / 60)
+            return "" + hours.toFixed(1) + "時間";
+        }
+        
+        
+        static public function getComplementarColor(baseColor:uint):uint {
+            var red:int   = baseColor / 0x10000;
+            var green:int = (baseColor / 0x100) & 0xFF;
+            var blue:int  = baseColor & 0xFF;
+            
+            var max:int = Math.max(red, green, blue);
+            var min:int = Math.min(red, green, blue);
+            
+            var total:int = max + min;
+            
+            var newRed:int   = total - red;
+            var newGreen:int = total - green;
+            var newBlue:int  = total - blue;
+            
+            var color:uint = newRed * 0x10000 + newGreen * 0x100 + newBlue;
+            
+            return color;
+        }
+        
+        static public function askByAlert(title:String, question:String, action:Function):void {
+            var result:Alert = Alert.show(question, title, 
+                                          Alert.OK | Alert.CANCEL, null, 
+                                          function(e:CloseEvent) : void {
+                                              if (e.detail == Alert.OK) {
+                                                  action();
+                                              }
+                                          }
+                                          );
         }
         
     }

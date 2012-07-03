@@ -27,7 +27,6 @@ package {
     import mx.containers.Box;
     import mx.controls.Alert;
     import mx.core.IFlexDisplayObject;
-    import mx.events.CloseEvent;
     import mx.managers.BrowserManager;
     import mx.utils.StringUtil;
     
@@ -485,12 +484,8 @@ package {
                 return;
             }
             
-            var result:Alert = Alert.show("ログアウトしてよろしいですか？", "ログアウト確認", 
-                                          Alert.OK | Alert.CANCEL, null, 
-                                          function(e : CloseEvent) : void {
-                                              if (e.detail == Alert.OK) {
-                                                  thisObj.logoutExecute();
-                                              }});
+            Utils.askByAlert("ログアウト確認", "ログアウトしてよろしいですか？", 
+                             function():void { thisObj.logoutExecute() });
         }
         
         public function logoutExecute():void {
@@ -755,6 +750,19 @@ package {
             chatPalette.setVisibleState(v);
         }
         
+        private var buttonBox:ButtonBox;
+        
+        public function setButtonWindow(window:IFlexDisplayObject, eventName:String):void {
+            buttonBox = window as ButtonBox;
+            buttonBox.setChangeVisibleEvent( function(visible:Boolean):void {
+                    dodontoF.changeMainMenuToggle(eventName, visible);
+                });
+        }
+        
+        public function setButtonBoxVisible(v:Boolean):void {
+            buttonBox.setVisibleState(v);
+        }
+        
         private var diceBox:DiceBox;
         
         public function setDiceWindow(window:IFlexDisplayObject, eventName:String):void {
@@ -997,6 +1005,25 @@ package {
             isWelcomeMessageOn = b;
         }
         
+        private var loginTimeLimitSecond:int = 0;
+        
+        public function setLoginTimeLimitSecond(time:int):void {
+            loginTimeLimitSecond = time;
+        }
+        
+        public function getLoginTimeLimitSecond():int {
+            return loginTimeLimitSecond;
+        }
+        
+        public function getLoginTimeLimitSecondMessage():String {
+            if( loginTimeLimitSecond <= 0 ) {
+                return null;
+            }
+            
+            return Messages.getMessage("loginTimeLimitWarning",
+                                       [Utils.getTimeText(loginTimeLimitSecond)]);
+        }
+        
         public function initForFirstRefresh():void {
             chatWindow.initForFirstRefresh(isWelcomeMessageOn);
             dodontoF.findMainMenuItem("pass_display").enabled = true;
@@ -1066,6 +1093,7 @@ package {
     {label:"表示", data:"pass_display", enabled:"true",
      children: [
         {label:"チャットパレット表示", data:"isChatPaletteVisible", type:"check", toggled:false},
+        {label:"カウンターリモコン表示", data:"isButtonBoxVisible", type:"check", toggled:false},
         {type:"separator"},
         
         {label:"チャット表示", data:"isChatVisible", type:"check", toggled:true},
@@ -1140,6 +1168,7 @@ package {
             }
     
     /*
+     */
     ,
     {label:"ログ", data:"pass", 
      children: [
@@ -1150,6 +1179,7 @@ package {
         {label:"errorLog", data:"errorLog"}, 
         {label:"fatalErrorLog", data:"fatalErrorLog"} 
                 ]} 
+    /* 
     */
                     ];
         }

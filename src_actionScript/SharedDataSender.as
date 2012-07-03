@@ -61,14 +61,20 @@ package {
             return this.uniqueId;
         }
         
+        private var uniqueIdSeparator:String = "\t";
+        
         public function isOwnUniqueId(targetId:String):Boolean {
-            var parats:Array = targetId.split("\t");
-            var targetUniqeId:String = parats[0];
+            var targetUniqeId:String = getUniqueIdFromStrictlyUniqueId(targetId);
             return ( targetUniqeId == getUniqueId() );
         }
         
+        public function getUniqueIdFromStrictlyUniqueId(strictlyUniqueId:String):String {
+            var parats:Array = strictlyUniqueId.split(uniqueIdSeparator);
+            return parats[0];
+        }
+        
         public function getStrictlyUniqueId():String {
-            return this.uniqueId + "\t" + this.strictlyUniqueId;
+            return this.uniqueId + uniqueIdSeparator + this.strictlyUniqueId;
         }
         
         public function isOwnStrictlyUniqueId(targetStrictlyId:String):Boolean {
@@ -407,22 +413,24 @@ package {
         
         protected function startRefreshCheckTimer():void {
 			if( isCommet() ) {
-                startRefreshCheckTimerForCommet();
+                refreshTimerId = startRefreshCheckTimerForCommet();
 			} else {
-                startRefreshCheckTimerForNotCommet();
+                refreshTimerId = startRefreshCheckTimerForNotCommet();
             }
         }
         
-        protected function startRefreshCheckTimerForCommet():void {
+        private var refreshTimerId:uint = 0;
+        
+        protected function startRefreshCheckTimerForCommet():uint {
             var timeoutMilliSecond:int = (refreshTimeoutSecond + refreshTimeoutPadding) * 1000;
-            setInterval(completeRefreshCheckTimer, timeoutMilliSecond);
+            return setInterval(completeRefreshCheckTimer, timeoutMilliSecond);
         }
         
-        private function startRefreshCheckTimerForNotCommet():void {
+        private function startRefreshCheckTimerForNotCommet():uint {
             var timeoutMilliSecond:int = refreshIntervalSecond * 1000;
             Log.loggingTuning("refresh setInterval timeoutMilliSecond", timeoutMilliSecond);
             
-            setInterval(refresh, timeoutMilliSecond);
+            return setInterval(refresh, timeoutMilliSecond);
         }
         
         protected var preRefreshIndex:int = 0;
@@ -471,6 +479,11 @@ package {
         
         public function stopRefresh():void {
             isStopRefreshOn = true;
+            
+            if( refreshTimerId != 0 ) {
+                clearInterval( refreshTimerId );
+                refreshTimerId = 0;
+            }
         }
         
         public function isStopRefresh():Boolean {
@@ -524,7 +537,7 @@ package {
             var jsonData:Object = {
                 "lastUpdateTimes": this.lastUpdateTimes,
                 "refreshIndex": this.refreshIndex,
-                "uniqueId": this.uniqueId,
+                "uniqueId": this.getStrictlyUniqueId(), //this.uniqueId,
                 "userName": userName
             };
             
@@ -728,13 +741,13 @@ package {
             this.sendCommandData(params);
         }
         
-        public function changeCharacter(characterJsonData:Object):void {
+        public function changeCharacter(characterJsonData:Object, resultFunction:Function = null):void {
             var jsonParams:String = getEncodedJsonString(characterJsonData);
             Log.logging("jsonParams : " + jsonParams);
             
             var params:String = getParamString("changeCharacter", [["params", jsonParams]]);
             Log.logging("var params:String : " + params);
-            this.sendCommandData(params);
+            this.sendCommandData(params, resultFunction);
         }
         
         public function sendChatMessage(chatSendData:ChatSendData, callBack:Function):void {
@@ -775,6 +788,8 @@ package {
                 "randomSeed" : chatSendData.getRandSeed(),
                 "gameType" : chatSendData.getGameType()};
             
+            addIsNeedResultParam(jsonData);
+            
             var jsonParams:String = getEncodedJsonString(jsonData);
             Log.logging("jsonParams : ", jsonParams);
             
@@ -784,6 +799,18 @@ package {
             this.sendCommandData(params, callBack, errorFunction);
         }
         
+        private function addIsNeedResultParam(jsonData:Object):void {
+            var diceBox:DiceBox = DodontoF_Main.getInstance().getDiceBox();
+            if( diceBox == null ) {
+                return;
+            }
+            
+            if( ! diceBox.visible ) {
+                return;
+            }
+            
+            jsonData.isNeedResult = true;
+        }
         
         private function getChatMessageErrorFunction(data:ChatSendData):Function {
             var errorFunction:Function = function(event:Event):void {
@@ -823,6 +850,7 @@ package {
         }
         
         
+        //現状未使用。
         public function getDiceBotInfos():void {
             Log.logging("SharedDataSender.getDiceBotInfos Begin");
             
@@ -918,6 +946,11 @@ package {
             
             Log.loggingTuning("==>Begin sendCommandData");
             Log.logging("sendCommandData paramsString : ", paramsString);
+            
+            if( isStopRefreshOn ) {
+                Log.loggingFatalError("サーバとの接続が切断されました。操作を行う事は出来ません");
+                return;
+            }
             
             try {
                 sendCommandDataCatched(paramsString,
@@ -1544,5 +1577,14 @@ package {
             var params:String = this.getParamString("getTrushMountCardInfos", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
+        
+        public function deleteChatLog(resultFunction:Function):void {
+            var jsonData:Object = {
+            };
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("deleteChatLog", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+        
     }
 }

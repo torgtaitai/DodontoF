@@ -439,11 +439,13 @@
         }
         
         InitCardWindow.setCardInfos( jsonData.cardInfos );
+        setDiceBotInfos(jsonData);
         
         Log.logging("result jsonData.uniqueId", jsonData.uniqueId);
-        
         saveUniqeId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId );
+        
+        DodontoF_Main.getInstance().setLoginTimeLimitSecond( jsonData.loginTimeLimitSecond );
         DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout );
         DodontoF_Main.getInstance().setRefreshInterval( jsonData.refreshInterval );
         DodontoF_Main.getInstance().setCommet( jsonData.isCommet );
@@ -744,8 +746,6 @@
             enableLoginButton();
             
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
-            
-            setDiceBotInfos(jsonData);
             
             var isRoomExist:Boolean = jsonData.isRoomExist;
             Log.logging("isRoomExist", isRoomExist);

@@ -186,9 +186,9 @@ package {
         }
         
         public function checkValidRefreshResponse(jsonData:Object):Boolean {
-            if( jsonData.warning ) {
-                var warningMessage:String = Messages.getMessageFromWarningInfo(jsonData.warning);
-                Log.loggingFatalError(warningMessage);
+            var warningMessage:String = getRefreshResponseWarning(jsonData);
+            if( warningMessage != "" ) {
+                ChatWindow.getInstance().addLocalMessage(warningMessage);
                 Alert.show(warningMessage);
                 sender.stopRefresh();
                 return false;
@@ -213,6 +213,40 @@ package {
             
             return true;
         }
+        
+        private function getRefreshResponseWarning(jsonData:Object):String {
+            if( jsonData.warning == null ) {
+                return getTimeLimitMessage();
+            }
+            
+            var warningMessage:String = Messages.getMessageFromWarningInfo(jsonData.warning);
+            return warningMessage;
+        }
+        
+        private var timeLimit:Date;
+        
+        private function getTimeLimitMessage():String {
+            var limitSecond:int = DodontoF_Main.getInstance().getLoginTimeLimitSecond();
+            
+            if( limitSecond <= 0 ) {
+                return "";
+            }
+            
+            if( timeLimit == null ) {
+                timeLimit = new Date();
+                var limitMilliSecond:Number = timeLimit.getTime() + limitSecond * 1000;
+                timeLimit.setTime(limitMilliSecond);
+            }
+            
+            var lastMilliSecond:Number = timeLimit.getTime() - new Date().getTime();
+            if( lastMilliSecond > 0 ) {
+                //Log.logging("lastSecond", lastMilliSecond / 1000);
+                return "";
+            }
+            
+            return Messages.getMessage("loginTimeLimitHasComes", [limitSecond]);
+        }
+        
         
         public function analyzeRefreshResponseCatchedCallByJsonData(jsonData:Object):Boolean {
             Log.logging("analyzeRefreshResponseCatchedCallByJsonData Begin jsonData", jsonData);

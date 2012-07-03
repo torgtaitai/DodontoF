@@ -76,6 +76,7 @@
               <mx:CheckBox id="isHideNovelticWindow" label="自動ログ隠し" fontSize="10"
                            toolTip="シフトキー・Ctrlキーを押しながらのマウス操作でもログは隠れなくなります。"
                            width="0" selected="true" visible="false" />
+              <mx:Image id="deleteChatLogButton" source="{deleteChatLogIcon}" click="deleteChatLog()" toolTip="チャットログ全削除" />
               <mx:Image id="chatFontSetButton" source="{chatFontIcon}" click="setChatFontWindow()" toolTip="チャット文字設定" />
               <mx:Image id="soundStatusImage" click="changeSoundState()" />
               <mx:Image id="voteImage" source="{voteIcon}" click="chatMessageTrader.vote()" toolTip="点呼／投票" />
@@ -104,10 +105,12 @@
                            />
             </mx:Box>
             
+            
             <mx:Box id="sendButtonBox" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
               <mx:Button id="sendMessageButton" label="送信" height="18" width="60" click="sendChatMessageLocal()" />
-              <mx:Button label="ログ保存" height="18" width="60" click="saveChatLogHtml()" paddingLeft="2" paddingRight="2" />
+              <mx:Button label="ログ保存" height="18" width="60" click="saveChatLog()" paddingLeft="2" paddingRight="2" />
             </mx:Box>
+            
           </mx:HBox>
           
         </mx:Box>
@@ -165,6 +168,10 @@
         [Bindable]
         private static var soundOnIcon:Class;
     
+        [Embed(source='image/icons/page_white_delete.png')]
+        [Bindable]
+        private static var deleteChatLogIcon:Class;
+    
         [Embed(source='image/icons/font.png')]
         [Bindable]
         private static var chatFontIcon:Class;
@@ -216,21 +223,23 @@
         static private var canTalk:Boolean = false;
         
         
-        import mx.containers.dividedBoxClasses.BoxDivider;
         import flash.events.Event;
         import flash.net.URLRequest;
         import mx.collections.ArrayCollection;
+        import mx.containers.dividedBoxClasses.BoxDivider;
         import mx.controls.Alert;
+        import mx.controls.Menu;
+        import mx.controls.Spacer;
         import mx.controls.Text;
         import mx.core.Application;
+        import mx.core.UIComponent;
+        import mx.core.UIComponentCachePolicy;
         import mx.events.CloseEvent;
         import mx.events.FlexEvent;
+        import mx.events.MenuEvent;
         import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
         import mx.utils.StringUtil;
-        import mx.core.UIComponent;
-        import mx.controls.Spacer;
-        import mx.core.UIComponentCachePolicy;
         
         private static var instance:ChatWindow;
         
@@ -407,6 +416,8 @@
             this.x = 0;
             this.y = screenHeigth - this.height;
             this.width = screenWidth - diceBoxWidth - 10;
+            
+            super.setInitPositionDefault();
         }
     
         override public function getSaveInfoKeyName():String {
@@ -1125,23 +1136,47 @@
                 return;
             }
             
-            Log.logging("isCheckDiceRoll", isCheckDiceRoll)
-            if( isCheckDiceRoll ) {
-                var diceRollMessage:String = getDiceRollText(data.getMessage());
-                Log.logging("diceRollMessage", diceRollMessage)
-                
-                if( diceRollMessage != null ) {
-                    data.setMessage(diceRollMessage);
-                    var gameType:String = getGameType();
-                    Log.logging("sendDiceBotChatMessage(data, gameType) gameType", gameType)
-                    sendDiceBotChatMessage(data, gameType);
-                    return;
-                }
+            clearDice();
+            
+            if( checkDiceRoll(data, isCheckDiceRoll) ) {
+                return;
             }
             
             Log.logging("chatMessageTrader.sendMessage(data)");
             chatMessageTrader.sendMessage(data);
         }
+        
+        private function clearDice():void {
+            if( DodontoF_Main.getInstance().getDiceBox() == null ) {
+                return;
+            }
+            
+            DodontoF_Main.getInstance().getDiceBox().clearRolledDice();
+        }
+        
+        private function checkDiceRoll(data:ChatSendData, isCheckDiceRoll:Boolean):Boolean {
+            Log.logging("isCheckDiceRoll", isCheckDiceRoll);
+                
+            if( ! isCheckDiceRoll ) {
+                return false;
+            }
+            
+            var diceRollMessage:String = getDiceRollText(data.getMessage());
+            Log.logging("diceRollMessage", diceRollMessage);
+                
+            if( diceRollMessage == null ) {
+                return false;
+            }
+            
+            
+            data.setMessage(diceRollMessage);
+            var gameType:String = getGameType();
+            Log.logging("sendDiceBotChatMessage(data, gameType) gameType", gameType);
+            sendDiceBotChatMessage(data, gameType);
+            
+            return true;
+        }
+        
         
         public function chatMessageTrader_sendMessage_selectedChat(chatMessage:String):void {
             var channel:int = getSelectedChatChannleIndex();
@@ -1367,6 +1402,14 @@
             if( isWelcomeMessageOn ) {
                 sendSystemMessage("がログインしました。");
             }
+
+
+            
+            var message:String = DodontoF_Main.getInstance().getLoginTimeLimitSecondMessage();
+            Log.logging("message", message);
+            if( message != null ) {
+                addLocalMessage(message);
+            }
             
             //初回ログイン用スクロール
             scrollChatMessageLogIfPositionIsLast(getSelectedChatChannleIndex(), true);
@@ -1454,51 +1497,92 @@
             return userNameArray;
         }
     
-        public function saveChatLogHtml():void {
+        public function saveChatLog():void {
             var window:SaveChatLogWindow = DodontoF.popup(SaveChatLogWindow, true) as SaveChatLogWindow;
             window.init(this);
         }
         
         public function saveTargetChannelChatLogHtml(channel:int, isHtmlFormat:Boolean):void {
-            var allChatLogList:Array = getChatChannle(channel).getAllChatLogList();
+            var chatLogList:Array = getChatChannle(channel).getAllChatLogList();
+            
+            var changedChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
+            var channelName:String = changedChannelNames[channel];
+            
+            saveChatLogByChatLogList(chatLogList, isHtmlFormat, channelName);
+        }
+        
+        static public function saveChatLogByChatLogList(chatLogList:Array,
+                                                        isHtmlFormat:Boolean, channelName:String):void  {
+            
+            var chatLogText:String = getChatLogTextByChatLogList(chatLogList, isHtmlFormat);
+            
             if( isHtmlFormat ) {
-                saveChatLogHtmlByChatLogList(allChatLogList);
+                saveChatLogHtml(chatLogText, channelName);
             } else {
-                var chatLogText:String = Utils.htmlToText(allChatLogList.join('\n'));
-                
-                var enterText:String = Utils.getEnterText();
-                chatLogText = chatLogText.replace("\r", enterText);
-                
-                saveChatLogHtmlFromString(chatLogText, "txt");
+                saveChatLogText(chatLogText);
             }
         }
         
-        static public function saveChatLogHtmlByChatLogList(chatLogList:Array):void {
+        static public function saveChatLogHtml(chatLogText:String,
+                                                channelName:String):void {
             
             if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
                 Alert.show("この機能を使用するにはFlashPlayerのバージョン10以上が必要です。");
             }
             
-            
-            var chatLogHtml:String = "";
-            chatLogHtml += "<?xml version='1.0' encoding='UTF-8'?>\n";
-            chatLogHtml += "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>\n";
-            chatLogHtml += "<html xmlns='http://www.w3.org/1999/xhtml' lang='ja'>\n";
-            chatLogHtml += "  <head>\n";
-            chatLogHtml += "    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />\n";
-            chatLogHtml += "    <title>チャットログ</title>\n";
-            chatLogHtml += "  </head>\n";
-            chatLogHtml += "  <body>\n";
-            
-            for(var i:int = 0 ; i < chatLogList.length ; i++) {
-                var line:String = chatLogList[i];
-                chatLogHtml += line.replace(/\r/g, "<br>\r\n") + "<br>\r\n";
+            var title:String = "チャットログ";
+            if( channelName != "" ) {
+                title += "：" + channelName;
             }
             
-            chatLogHtml += "  </body>\n";
+            var enterText:String = Utils.getEnterText();
+            
+            var chatLogHtml:String = "";
+            chatLogHtml += "<?xml version='1.0' encoding='UTF-8'?>" + enterText;
+            chatLogHtml += "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>" + enterText;
+            chatLogHtml += "<html xmlns='http://www.w3.org/1999/xhtml' lang='ja'>" + enterText;
+            chatLogHtml += "  <head>" + enterText;
+            chatLogHtml += "    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />" + enterText;
+            chatLogHtml += "    <title>" + title + "</title>" + enterText;
+            chatLogHtml += "  </head>" + enterText;
+            chatLogHtml += "  <body>" + enterText;
+            
+            chatLogHtml += chatLogText;
+            
+            chatLogHtml += "  </body>" + enterText;
             chatLogHtml += "</html>";
             
             saveChatLogHtmlFromString(chatLogHtml);
+        }
+        
+        static public function getChatLogTextByChatLogList(chatLogList:Array,
+                                                           isHtmlFormat:Boolean):String {
+            var enterText:String = Utils.getEnterText();
+            
+            if( isHtmlFormat ) {
+                enterText = "<br>" + enterText;
+            }
+            
+            var chatText:String = "";
+            
+            for(var i:int = 0 ; i < chatLogList.length ; i++) {
+                var text:String = chatLogList[i];
+                
+                if( ! isHtmlFormat ) {
+                    text = Utils.htmlToText(text);
+                }
+                
+                text = text.replace(/\n/g, "\r");
+                text = text.replace(/\r/g, enterText) + enterText;
+                
+                chatText += text;
+            }
+            
+            return chatText;
+        }
+        
+        static public function saveChatLogText(chatLogText:String):void {
+            saveChatLogHtmlFromString(chatLogText, "txt");
         }
         
         static private function saveChatLogHtmlFromString(chatLogHtml:String, ext:String = "html"):void {
@@ -1896,6 +1980,21 @@
         public function sendGood():void {
             chatMessageTrader_sendMessage_publicChatChannel("【いいねっ！】");
         }
+        
+        
+        public function deleteChatLog():void {
+            var announce:Function = 
+                function():void { sendSystemMessage("の全チャットログ削除が正常に終了しました。") };
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            
+            Utils.askByAlert("チャットログ削除確認", "チャットログを全て削除します。よろしいですか？", 
+                             function():void {
+                                 Utils.askByAlert("再確認", "削除したログは復旧できませんが、本当によろしいですか？", 
+                                                  function():void { guiInputSender.getSender().deleteChatLog(announce) });
+                             });
+        }
+        
         
     ]]>
   </mx:Script>

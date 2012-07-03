@@ -10,6 +10,9 @@ package {
     import mx.controls.Image;
     import mx.core.UIComponent;
     import mx.controls.Alert;
+    import flash.media.Sound;
+    import flash.media.SoundChannel;
+    import flash.media.SoundTransform;
     
     
     public class Dice {
@@ -18,6 +21,11 @@ package {
             return Math.floor(value * max) + 1;
         }
         
+
+        [Embed(source="sound/diceRoll.mp3")]
+        [Bindable]
+        private var DiceRollSound:Class;
+        private var rollSoundChannel:SoundChannel;
         
         private static var mersenneTwister:MersenneTwister = createMersenneTwister();
             
@@ -72,9 +80,13 @@ package {
             return parent.height;
         }
         
-        public function addDice(diceType:String, imgId:String, resultFunction:Function):void {
-            if( diceTypes.length >= this.limitCount ){
-                Log.loggingError("dice total count is " + diceTypes.length + "(limit : " + this.limitCount + ")");
+        public function addDice(diceType:String, params:Object,
+                                imgId:String, resultFunction:Function,
+                                isWaning:Boolean = true):void {
+            if( diceTypes.length >= this.limitCount ) {
+                if( isWaning ) {
+                    Log.loggingError("dice total count is " + diceTypes.length + "(limit : " + this.limitCount + ")");
+                }
                 return;
             }
             
@@ -86,9 +98,14 @@ package {
                 clearDice();
             }
             
+            if( params == null ) {
+                params = {};
+            }
+            
             var diceTypeInfo:Object = 
-                {"diceType":diceType,
-                 "imgId": imgId,
+                {"diceType" : diceType,
+                 "params" : params,
+                 "imgId" : imgId,
                  "resultFunction" : resultFunction};
             this.diceTypes.push(diceTypeInfo);
             
@@ -114,6 +131,7 @@ package {
         
         public function clearDice():void {
             Log.loggingTuning("clearDice start");
+            stopRollSound();
             
             for(var i:int = 0 ; i < this.dice.length ; i++) {
                 parent.removeChild(this.dice[i].view);
@@ -125,6 +143,28 @@ package {
             this.diceTypes = [];
             
             resetParent();
+        }
+        
+        public function clearRolledDice():void {
+            if( this.diceTypes.length == 0 ) {
+                return;
+            }
+            
+            if( ! isAllDiceEnded() ) {
+                return;
+            }
+            
+            clearDice();
+        }
+        
+        
+        private function stopRollSound():void {
+            if( rollSoundChannel != null ) {
+                try {
+                    rollSoundChannel.stop();
+                } catch(e:Error) {
+                }
+            }
         }
         
         private function resetParent():void {
@@ -162,7 +202,9 @@ package {
                 
                 diceInfo.number = i;
                 diceInfo.diceType = this.diceTypes[i].diceType;
+                diceInfo.params   = this.diceTypes[i].params;
                 diceInfo.resultFunction = this.diceTypes[i].resultFunction;
+                
                 Log.logging("diceInfo.diceType", diceInfo.diceType);
                 setDiceView( diceInfo );
                 Log.logging("setDiceView end.");
@@ -212,13 +254,75 @@ package {
             if( isAllDiceEnded() ) {
                 this.stopAnimation();
                 this.moveSamePositionDice();
-                this.sendResult();
+                this.executeResult();
             }
+        }
+        
+        private function executeResult():void {
+            var resultText:String = getResultText();
+            
+            if( resultText != null ) {
+                printResult(resultText);
+                return;
+            }
+            
+            sendResult();
+        }
+        
+        private function printResult(resultText:String):void {
+            Log.logging("Dice.printResult Begin");
+            
+            if( resultText == "" ) {
+                return;
+            }
+            
+            var targetInfo:Object = getResultTargetDiceImage();
+            var image:Image = targetInfo.stopedDice;
+            
+            var baloon:MessageBaloon = new MessageBaloon();
+            baloon.init( image );
+            baloon.printMessage(resultText);
+            
+            var index:int = ( parent.numChildren - 1 );
+            parent.setChildIndex(targetInfo.view, index);
+        }
+        
+        private function getResultTargetDiceImage():Object {
+            var targetInfo:Object = this.dice[0];
+            
+            var minX:Number = DodontoF_Main.getInstance().getDodontoF().getScreenWidth();
+            var yLimit:int = ChatWindow.getInstance().height;
+            
+            for(var i:int = 0;  i < this.dice.length ; i++){
+                var diceInfo:Object = this.dice[i];
+                
+                if( diceInfo.view.y > yLimit ) {
+                    continue;
+                }
+                
+                if( minX > diceInfo.view.x ) {
+                    minX = diceInfo.view.x;
+                    targetInfo = diceInfo;
+                }
+            }
+            
+            return targetInfo;
         }
         
         private function sendResult():void {
             var message:String = getDiceResultsText();
             ChatWindow.getInstance().sendDiceRollResultMessageForChatWindowUser(message);
+        }
+        
+        private function getResultText():String {
+            for(var i:int = 0;  i < this.dice.length ; i++){
+                var diceInfo:Object = this.dice[i];
+                var resultText:String =  diceInfo.params.resultText;
+                if( resultText != null ) {
+                    return diceInfo.params.resultText;
+                }
+            }
+            return null;
         }
         
         private function getDiceTypesInfo():Object {
@@ -382,7 +486,7 @@ package {
             
             diceInfo.state = "move";
         }
-        
+
         private function changeDirection(diceInfo:Object):void {
             if( diceInfo.direct == null ) {
                 diceInfo.direct = "min";
@@ -408,8 +512,7 @@ package {
                 return false;
             }
             
-            diceInfo.stopedDice.visible = false;
-            diceInfo.rotateDice.visible = true;
+            setRollDiceVisible(diceInfo, false);
             diceInfo.direct = "max";
             
             return true;
@@ -420,8 +523,7 @@ package {
                 return false;
             }
             
-            diceInfo.stopedDice.visible = true;
-            diceInfo.rotateDice.visible = false;
+            setRollDiceVisible(diceInfo, true);
             diceInfo.direct = "min";
             
             return true;
@@ -437,7 +539,7 @@ package {
                 diceInfo.vx *= -1;
             }
             
-            if( this.isFolling(diceInfo) ) {
+            if( this.isBoundOnFloor(diceInfo) ) {
                 this.updateDiceOneFolling(diceInfo);
             }
             
@@ -445,7 +547,7 @@ package {
             diceInfo.view.x = diceInfo.x;
         }
         
-        private function isFolling(diceInfo:Object):Boolean {
+        private function isBoundOnFloor(diceInfo:Object):Boolean {
             return ((diceInfo.accelerationY < 0) && (diceInfo.y > diceInfo.boundBasePositionY));
         }
         
@@ -465,7 +567,13 @@ package {
             return (diceInfo.view.y < diceInfo.lastPositionY);
         }
         
-        private function getRoolResult(diceType:String):int {
+        private function getRoolResult(diceInfo:Object):int {
+            
+            if( diceInfo.params.resultValue != null ) {
+                return diceInfo.params.resultValue;
+            }
+            
+            var diceType:String = diceInfo.diceType;
             var max:int = DiceInfo.getDiceTypeInfo(diceType, "max") as int;
             var result:int = getRandomNumber(max)
             return result;
@@ -480,7 +588,7 @@ package {
             diceInfo.view.y = diceInfo.y;
             changeDirectionMax(diceInfo);
             
-            var resultValue:int = getRoolResult(diceInfo.diceType);
+            var resultValue:int = getRoolResult(diceInfo);
             changeDiceImageToResult(diceInfo, diceInfo.diceType, resultValue);
             var getResultValue:Function = DiceInfo.getDiceTypeInfo(diceInfo.diceType, "getResultValue") as Function;
             resultValue = getResultValue(resultValue);
@@ -498,19 +606,21 @@ package {
                     thisObj.clearDice();
                 });
             
+			diceInfo.view.addEventListener(MouseEvent.MOUSE_MOVE, function(event:MouseEvent):void {
+                    event.stopPropagation();
+                });
+            
             Log.loggingTuning("dice roll is end.")
         }
         
         private function setDiceView(diceInfo:Object):void {
-            var diceType:String = diceInfo.diceType;
-            
             var view:UIComponent = new UIComponent(); 
             parent.addChild(view);
             view.addEventListener(MouseEvent.MOUSE_DOWN, thisObj.recordCastStartTime);
             view.addEventListener(MouseEvent.MOUSE_UP, thisObj.castDice);
             
-            var stopedDice:Image = getDiceViewImageStop(diceType);
-            var rotateDice:Image = getDiceViewImageRotate(diceType);
+            var stopedDice:Image = getDiceViewImageStop(diceInfo);
+            var rotateDice:Image = getDiceViewImageRotate(diceInfo);
             view.addChild( stopedDice );
             view.addChild( rotateDice );
             
@@ -533,9 +643,10 @@ package {
         private function clearDiceFromMenu(event:ContextMenuEvent):void {
             clearDice();
         }
-        
-        private function getDiceViewImageStop(diceType:String):Image {
+
+        private function getDiceViewImageStop(diceInfo:Object):Image {
             var image:Image = new Image();
+            var diceType:String = diceInfo.diceType;
             
             image.source = DiceInfo.getDiceMaxNumberImage(diceType);
             image.width = diceSize;
@@ -545,10 +656,12 @@ package {
             return image;
         }
         
-        private function getDiceViewImageRotate(diceType:String):Image {
+        private function getDiceViewImageRotate(diceInfo:Object):Image {
             var image:Image = new Image();
+            var diceType:String = diceInfo.diceType;
+            var resultValue:int = getRoolResult(diceInfo);
             
-            image.source = DiceInfo.getDiceImage(diceType, 1);
+            image.source = DiceInfo.getDiceImage(diceType, resultValue);
             image.width = diceSize;
             image.height = diceSize;
             image.visible = false;
@@ -561,8 +674,7 @@ package {
         private function changeDiceImageToResult(diceInfo:Object, diceType:String, resultValue:int):void {
             Log.logging("changeDiceImageToResult start");
             
-            diceInfo.stopedDice.visible = true;
-            diceInfo.rotateDice.visible = false;
+            setRollDiceVisible(diceInfo, true);
             
             var image:Image = diceInfo.stopedDice;
             Log.logging("diceType", diceType);
@@ -570,6 +682,21 @@ package {
             image.source = DiceInfo.getDiceImage(diceType, resultValue);
             
             Log.logging("changeDiceImageToResult end");
+        }
+        
+        private function setRollDiceVisible(diceInfo:Object, isStoped:Boolean):void {
+            var resultValue:int = getRoolResult(diceInfo);
+            var source:Class = DiceInfo.getDiceImage(diceInfo.diceType, resultValue);
+            
+            diceInfo.stopedDice.visible = isStoped;
+            diceInfo.rotateDice.visible = ( ! isStoped);
+            
+            if( isStoped ) {
+                diceInfo.rotateDice.source = source;
+            } else {
+                diceInfo.stopedDice.source = source;
+            }
+            
         }
         
         private function getStartPosition(i:int, diceCount:int):Object {
@@ -626,6 +753,7 @@ package {
             castStartTime = new Date().time;
         }
         
+        /*
         private function getCastPower():Number {
             var castEndTime:Number = new Date().time;
             var diffTime:Number = (castEndTime - castStartTime);
@@ -638,19 +766,37 @@ package {
             var powerRatePerTime:Number = ( (castMaxPower - castMinPower) / castMaxWaitTime );
             return (powerRatePerTime * diffTime + castMinPower);
         }
+        */
         
-        private function castDice(event:MouseEvent):void {
-            castPower = getCastPower();
-            castDiceWithPower();
+        public function castDice(event:MouseEvent = null):void {
+            //castPower = getCastPower();
+            setCastDiceState();
+            
+            playRollSound();
         }
         
-        private function castDiceWithPower():void {
+        private function setCastDiceState():void {
             for(var i:int = 0 ; i < this.dice.length ; i++) {
                 if(this.dice[i].state == "stop") {
                     this.dice[i].state = "start";
                     Log.loggingTuning("cast dice start");
                 }
             }
+        }
+        
+        
+        private function playRollSound():void {
+            if( ChatWindow.getInstance() == null ) {
+                return;
+            }
+
+            if( ! ChatWindow.getInstance().isSoundOnMode() ) {
+                return;
+            }
+            
+            stopRollSound();
+            var rollSound:Sound = new DiceRollSound() as Sound;
+            rollSoundChannel = rollSound.play();
         }
     }
 }

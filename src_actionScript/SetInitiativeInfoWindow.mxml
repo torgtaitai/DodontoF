@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="250"
-   title="入力" 
+   title="イニシアティブ表設定"
    showCloseButton="true"
    >
   
@@ -17,9 +17,27 @@
       <mx:Label text="(注)この設定は同一プレイルームの全員に影響します。" />
     </mx:Box>
     <mx:HBox width="100%" height="100%">
-      <mx:Label id="inputLabel" text="入力:" />
-      <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />
+      <mx:Label  text="カウンター名一覧:" />
+      <mx:TextInput id="counterNames" width="100%" text="" />
     </mx:HBox>
+    
+    
+<!--
+    <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
+    
+    
+    <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
+      <mx:HBox width="100%" height="100%">
+        <mx:Label text="カウント値変更ボタン設定:" />
+        <mx:TextInput id="input" width="100%" text="" />
+      </mx:HBox>
+      <mx:Label text="「」" />
+    </mx:Box>
+-->
+    
+    
+    <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
+    
     
     <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
       <mx:HBox width="100%" height="100%">
@@ -28,6 +46,7 @@
       </mx:HBox>
       <mx:Label text="(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。" />
     </mx:Box>
+    
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="実行" click="execute()" />
@@ -41,14 +60,7 @@
     import mx.controls.Label;
     
     public function init(initText:String):void {
-        
-        var isPassword:Boolean = false;
-        
-        this.title = "カウンター名入力";
-        this.inputLabel.text = "カウンター名一覧:";
-        input.text = initText;
-        input.displayAsPassword = isPassword;
-        
+        counterNames.text = initText;
         fontSize.value = DodontoF_Main.getInstance().getInitiativeWindow().getFontSize();
     }
     
@@ -57,7 +69,7 @@
 
     public function execute():void {
         try {
-            var text:String = input.text;
+            var text:String = counterNames.text;
             text.replace(/[\s　]+/, ' ');
             text.replace(/\s$/, '');
             var counters:Array = text.split(/\s/);

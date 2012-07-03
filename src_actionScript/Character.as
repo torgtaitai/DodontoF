@@ -202,7 +202,7 @@ package {
             openUrlMenu = addMenuItem(menu, "データ参照先URLを開く", thisObj.getContextMenuItemOpenUrl, true);
             setUrlMenuVisible();
             
-            view.setContexMenu(menu);
+            view.setContextMenu(menu);
         }
         
         protected function getContextMenuItemOpenUrl(event:ContextMenuEvent):void {
@@ -353,7 +353,7 @@ package {
             Log.loggingTuning("=>analyzeChangedCharacterChanged Characteris changed End");
         }
         
-        public function updateRefresh():void {
+        override public function updateRefresh():void {
             loadViewImage();
             updateStatusMarker();
             setNameTag();
@@ -364,6 +364,8 @@ package {
         private var statusMarkerWidth:int = 0;
         
         private function updateStatusMarker():void {
+            Log.logging("updateStatusMarker Begin");
+            
             if( view == null ) {
                 return;
             }
@@ -381,6 +383,8 @@ package {
             refreshMarkerImage(newStatusMarkerIndexs, newStatusMarkerWidth);
             statusMarkerIndexs = newStatusMarkerIndexs;
             statusMarkerWidth = newStatusMarkerWidth;
+            
+            Log.logging("updateStatusMarker End");
         }
         
         

@@ -53,6 +53,8 @@
         
         this.x = screenWidth - this.width;
         this.y = screenHeigth - this.height;
+        
+        super.setInitPositionDefault();
     }
     
     override public function getSaveInfoKeyName():String {
@@ -75,18 +77,25 @@
     }
     
     private function initDice():void {
-        //DodontoF_Main.getInstance().getDodontoF().diceRollPlace);
         var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
         dice = new Dice(chatWindow.getDiceRollPlace(), chatWindow);
     }
     
-    public function createDice(diceType:String, imgId:String = null, resultFunction:Function = null):void {
-        //dice.addDice(diceType, this.x, this.y, imgId, resultFunction);
-        dice.addDice(diceType, imgId, resultFunction);
+    public function createDice(diceType:String, params:Object = null, imgId:String = null, resultFunction:Function = null):void {
+        var isWaning:Boolean = false;
+        dice.addDice(diceType, params, imgId, resultFunction, isWaning);
     }
     
     public function clearDice():void {
         dice.clearDice();
+    }
+    
+    public function clearRolledDice():void {
+        dice.clearRolledDice();
+    }
+    
+    public function castDice():void {
+        dice.castDice();
     }
     
     ]]>

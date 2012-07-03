@@ -16,7 +16,7 @@
             var versionNoString:String = fullVersionString.split(" ")[1].split(",")[0];//10
             var showString:String = "「どどんとふ」の利用にはFlash Playerのバージョンアップが必要です。";
             if( parseInt(versionNoString) > 9 ) {
-                showString = "どどんとふReay!(Flash Ver." + versionNoString + ")";//(Flash Ver.10)
+                showString = "どどんとふReady!(Flash Ver." + versionNoString + ")";//(Flash Ver.10)
             }
             Alert.show( showString );
         }

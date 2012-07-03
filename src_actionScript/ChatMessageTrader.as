@@ -35,7 +35,7 @@ package {
             
             guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             chatWindow = chatWindow_;
-            cutInList = [new CutInMovie(), new CutInCommandGetDiceBotInfos()];//, new CutInImage()];
+            cutInList = [new CutInMovie(), new CutInCommandGetDiceBotInfos(), new CutInCommandRollVisualDice()];
             
             voter  = new Voter(chatWindow);
         }
@@ -63,6 +63,7 @@ package {
         
         
         public function sendMessage(data:ChatSendData):void {
+            Log.logging("ChatMessageTrader.sendMessage Begin data", data);
             
             //不正なダイスロールならここで終了
             if( checkInvalidDiceRoll(data.getMessage(), data.isDiceRollResult()) ) {

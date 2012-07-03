@@ -96,6 +96,7 @@
         }
         
         public function setInitPositionDefault():void {
+            savePosition();
         }
         
         public function loadPosition():Boolean {

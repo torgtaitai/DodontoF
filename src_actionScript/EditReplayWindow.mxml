@@ -341,7 +341,10 @@
             chatLogList.push( messageLine );
         }
         
-        ChatWindow.saveChatLogHtmlByChatLogList(chatLogList);
+        var chatLogText:String = ChatWindow.getChatLogTextByChatLogList(chatLogList, isHtmlFormat);
+        var isHtmlFormat:Boolean = true;
+        var channelName:String = "";
+        ChatWindow.saveChatLogByChatLogList(chatLogList, isHtmlFormat, channelName);
     }
     
     public function saveEditReplayData():void {

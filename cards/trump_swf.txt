@@ -55,3 +55,10 @@ cards/trump_swf/spadeK.swf	スペードのK
 cards/trump_swf/joker.swf	ジョーカー
 cards/trump_swf/joker.swf	ジョーカー
 cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー
+cards/trump_swf/joker.swf	ジョーカー

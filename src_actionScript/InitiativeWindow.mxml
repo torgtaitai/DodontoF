@@ -1278,6 +1278,19 @@
           return getRoundTimer().getCounterNames();
       }
       
+      public function isExistCounterName(counterName:String):Boolean {
+          var names:Array = getCounterNames();
+          
+          for(var i:int = 0 ; i < names.length ; i++) {
+              if( names[i] == counterName ) {
+                  return true;
+              }
+          }
+          
+          return false;
+      }
+      
+      
       private var preCounterNames:Array = new Array();
       
       private function initColumns():void {
@@ -1653,7 +1666,7 @@
       override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
           var info:Object = super.getWindowInfoSaveData(this);
           
-          info.columnInfos = getColumnInfosFromSaveData(info);
+          info.columnInfos = getColumnInfosFromSaveData();
           info.fontSize = getFontSize();
           
           return info;
@@ -1665,13 +1678,16 @@
           savePosition();
       }
       
-      private function getColumnInfosFromSaveData(info:Object):Object {
+      private function getColumnInfosFromSaveData():Object {
           var columnInfos:Object = new Object();
           
           var columns:Array = initiativeInfoListView.columns;
           for(var i:int = 0 ; i < columns.length ; i++) {
               var column:DataGridColumn = columns[i];
               var title:String = column.headerText;
+              if( title == "" ) {
+                  continue;
+              }
               
               var data:Object = {
                   "width" : column.width,
@@ -1698,6 +1714,10 @@
               var column:DataGridColumn = columns[i];
               
               var title:String = column.headerText;
+              if( title == "" ) {
+                  continue;
+              }
+              
               var data:Object = columnInfos[title];
               if( data == null ) {
                   continue;
@@ -1708,6 +1728,8 @@
           }
           
           columnInfos = null;
+          
+          savePosition();
       }
       
       public function setInitPosition():void {
@@ -1722,6 +1744,7 @@
       
       private function loadOthers(info:Object):void {
           columnInfos = info.columnInfos;
+          Log.logging("loadOthers info.columnInfos", info.columnInfos);
           
           if( info.fontSize != null ) {
               setFontSize( info.fontSize );
@@ -1744,6 +1767,8 @@
           this.x = screenWidth - this.width;
           this.y = DodontoF_Main.getInstance().getDodontoF().getMainBarHeight();
           this.height = screenHeigth - diceBoxHeigth - heightPadding - this.y;
+          
+          super.setInitPositionDefault();
       }
       
       private function setAllButtonsStatus(isEnable:Boolean):void {
@@ -1826,6 +1851,7 @@
           
           Log.loggingTuning("changed", changed);
           if( changed ) {
+              piece.updateRefresh();
               DodontoF_Main.getInstance().getGuiInputSender().getSender().changeCharacter( piece.getJsonData() );
           }
       }

@@ -160,19 +160,22 @@ package {
             if( params.color != null ) {
                 this.color = parseInt(params.color);
             }
-            view.setRoundColor(this.color);
-            view.setBackGroundColor(this.color);
-            
             this.isPaint = (params.isPaint == null ? false : params.isPaint);
-            view.setIsDrawBack( this.isPaint );
-            
             this.width = (params.width == null ? 1 : params.width);
             this.height = (params.height == null ? 1 : params.height);
             
-            initDraw(getX(), getY());
-            printInfo();
+            updateImage();
             
             Log.loggingTuning("=>analyzeChangedCharacterChanged MapMask is changed End");
+        }
+        
+        public function updateImage():void {
+            view.setRoundColor(this.color);
+            view.setBackGroundColor(this.color);
+            view.setIsDrawBack( this.isPaint );
+            initDraw(getX(), getY());
+            printInfo();
+            loadViewImage();
         }
         
         override protected function droped():void {
