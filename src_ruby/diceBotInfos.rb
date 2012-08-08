@@ -698,6 +698,20 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    :name => 'りゅうたま',
+    :gameType => 'Ryutama',
+    :prefixs => ['R\d+'],
+    :info => <<INFO_MESSAGE_TEXT
+ロール判定
+　Rx,y>=t（x,y：使用する能力値、t：目標値）
+　1ゾロ、クリティカルも含めて判定結果を表示します
+　能力値１つでの判定は Rx>=t で行えます
+例）
+　R8,6>=13
+　Ryutama : (R8,6>=13) ＞ 6(8)+6(6) ＞ 12 ＞ クリティカル成功
+INFO_MESSAGE_TEXT
+  },
+  {
     :name => 'ルーンクエスト',
     :gameType => 'RuneQuest',
     :prefixs => [],

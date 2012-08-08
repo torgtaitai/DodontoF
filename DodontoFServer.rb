@@ -710,6 +710,7 @@ class DodontoFServer
       ['createPlayRoom', hasReturn], 
       ['changePlayRoom', hasReturn], 
       ['removePlayRoom', hasReturn], 
+      ['removeOldPlayRoom', hasReturn], 
       ['getImageTagsAndImageList', hasReturn], 
       ['addCharacter', hasReturn],
       ['getWaitingRoomInfo', hasReturn], 
@@ -900,36 +901,72 @@ class DodontoFServer
     end
   end
   
-  
   def getWebIfChatText
     logging("getWebIfChatText begin")
     
-    seconds = getRequestData('sec')
-    saveData = getWebIfChatTextFromSecond(seconds)
+    time= getWebIfRequestNumber('time', -1)
+    unless( time == -1 )
+      saveData = getWebIfChatTextFromTime(time)
+    else
+      seconds = getRequestData('sec')
+      saveData = getWebIfChatTextFromSecond(seconds)
+    end
+    
     saveData['result'] = 'OK'
     
     return saveData
   end
   
-  def getWebIfChatTextFromSecond(seconds)
-    
-    targetTime = getTargetTimeForGetWebIfChatText(seconds)
-    logging(seconds, "seconds")
-    logging(targetTime, "targetTime")
+  
+  def getWebIfChatTextFromTime(time)
+    logging(time, 'getWebIfChatTextFromTime time')
     
     saveData = {}
-    @lastUpdateTimes = {'chatMessageDataLog' => targetTime}
+    @lastUpdateTimes = {'chatMessageDataLog' => time}
+    refreshLoop(saveData)
+    
+    deleteExtraChatText(time, saveData)
+    
+    logging(saveData, 'getWebIfChatTextFromTime saveData')
+    
+    return saveData
+  end
+  
+  
+  def getWebIfChatTextFromSecond(seconds)
+    logging(seconds, 'getWebIfChatTextFromSecond seconds')
+    
+    time = getTimeForGetWebIfChatText(seconds)
+    logging(seconds, "seconds")
+    logging(time, "time")
+    
+    saveData = {}
+    @lastUpdateTimes = {'chatMessageDataLog' => time}
     getCurrentSaveData() do |targetSaveData, saveFileTypeName|
       saveData.merge!(targetSaveData)
     end
+    
+    deleteExtraChatText(time, saveData)
     
     logging("getCurrentSaveData end saveData", saveData)
     
     return saveData
   end
   
+  def deleteExtraChatText(time, saveData)
+    logging(time, 'deleteExtraChatText time')
+    
+    chats = saveData['chatMessageDataLog']
+    return if( chats.nil? )
+    
+    chats.delete_if do |writtenTime, data|
+      logging(writtenTime, 'writtenTime')
+      (writtenTime < time)
+    end
+  end
   
-  def getTargetTimeForGetWebIfChatText(seconds)
+  
+  def getTimeForGetWebIfChatText(seconds)
     case seconds
     when "all"
       return 0
@@ -1631,7 +1668,7 @@ class DodontoFServer
     return playRoomName
   end
   
-  def getLoginUserCountList( roomNumberRange, limitTime = nil )
+  def getLoginUserCountList( roomNumberRange )
     loginUserCountList = {}
     roomNumberRange.each{|i| loginUserCountList[i] = 0 }
     
@@ -1645,15 +1682,6 @@ class DodontoFServer
       end
       
       trueSaveFileName = saveFiles.first
-      
-      unless( limitTime.nil? )
-        accessTimes = getSaveDataLastAccessTimes( index .. index )
-        accessTime = accessTimes[index].to_f
-        
-        if( accessTime < limitTime )
-          next
-        end
-      end
       
       loginUserInfo = updateLoginUserInfo(trueSaveFileName)
       loginUserCountList[index] = loginUserInfo.size
@@ -1692,6 +1720,59 @@ class DodontoFServer
   def getSaveDataLastAccessTimes( roomNumberRange )
     @saveDirInfo.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
   end
+  
+  
+  def removeOldPlayRoom()
+    roomNumberRange = (0 .. $saveDataMaxCount)
+    accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
+    result = removeOldRoomFromAccessTimes(accessTimes)
+    return result
+  end
+  
+  def removeOldRoomFromAccessTimes(accessTimes)
+    logging("removeOldRoom Begin")
+    if( $removeOldPlayRoomLimitDays <= 0 )
+      return accessTimes
+    end
+    
+    logging(accessTimes, "accessTimes")
+    
+    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
+    
+    ignoreLoginUser = true
+    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+    logging(result, "removePlayRoomByParams result")
+    
+    return result
+  end
+  
+  def getDeleteTargetRoomNumbers(accessTimes)
+    logging(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
+    
+    roomNumbers = []
+    
+    accessTimes.each do |index, time|
+      logging(index, "index")
+      logging(time, "time")
+      
+      next if( time.nil? ) 
+      
+      timeDiffSeconds = (Time.now - time)
+      logging(timeDiffSeconds, "timeDiffSeconds")
+      
+      limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
+      logging(limitSeconds, "limitSeconds")
+      
+      if( timeDiffSeconds > limitSeconds )
+        logging( index, "roomNumbers added index")
+        roomNumbers << index
+      end
+    end
+    
+    logging(roomNumbers, "roomNumbers")
+    return roomNumbers
+  end
+  
   
   def findEmptyRoomNumber()
     emptyRoomNubmer = -1
@@ -1788,9 +1869,8 @@ class DodontoFServer
   end
   
   def getAllLoginCount()
-    # limitTime = (Time.now.to_f - (60 * 60 * 24))
     roomNumberRange = (0 .. $saveDataMaxCount)
-    loginUserCountList = getLoginUserCountList( roomNumberRange) #, limitTime )
+    loginUserCountList = getLoginUserCountList( roomNumberRange )
     
     total = 0
     userList = []
@@ -1854,7 +1934,6 @@ class DodontoFServer
   
   def getLoginInfo()
     logging("getLoginInfo begin")
-    
     params = getParamsFromRequestData()
     
     uniqueId = params['uniqueId'];
@@ -1887,6 +1966,7 @@ class DodontoFServer
       "isPaformanceMonitor" => $isPaformanceMonitor,
       "fps" => $fps,
       "loginTimeLimitSecond" => $loginTimeLimitSecond,
+      "removeOldPlayRoomLimitDays" => $removeOldPlayRoomLimitDays,
       "canTalk" => $canTalk,
       "retryCountLimit" => $retryCountLimit,
       "imageUploadDirInfo" => {$localUploadDirMarker => $imageUploadDir},
@@ -1899,6 +1979,7 @@ class DodontoFServer
     logging("getLoginInfo end")
     return result
   end
+  
   
   def writeAllLoginInfo( allLoginCount )
     text = "#{allLoginCount}"
@@ -2224,7 +2305,12 @@ class DodontoFServer
     
     roomNumbers = params['roomNumbers']
     ignoreLoginUser = params['ignoreLoginUser']
-    logging(ignoreLoginUser, 'ignoreLoginUser')
+    
+    removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+  end
+  
+  def removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+    logging(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
     
     deletedRoomNumbers = []
     #部屋に人がまだる場合はこの配列に入れて、後で確認を取ってから削除します。
@@ -2236,6 +2322,8 @@ class DodontoFServer
       logging(roomNumber, 'roomNumber')
       
       resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser)
+      logging(resultText, "checkRemovePlayRoom resultText")
+      
       case resultText
       when "OK"
         @saveDirInfo.removeSaveDir(roomNumber)
@@ -3063,8 +3151,7 @@ class DodontoFServer
   
   
   def deleteOldUploadFile()
-    oneHour = (1 * 60 * 60)
-    deleteOldFile($fileUploadDir, oneHour, File.join($fileUploadDir, "dummy.txt"))
+    deleteOldFile($fileUploadDir, $uploadFileTimeLimitSeconds, File.join($fileUploadDir, "dummy.txt"))
   end
   
   def deleteOldFile(saveDir, limitSecond, excludeFileName = nil)
@@ -3953,7 +4040,7 @@ class DodontoFServer
       message = message + rollResult
     end
     
-    message = getChatRolledMessage(message, randResults);
+    message = getChatRolledMessage(message, isSecret, randResults);
     
     senderName = name
     senderName << ("\t" + state) unless( state.empty? )
@@ -3999,10 +4086,6 @@ class DodontoFServer
     
     logging(result, 'rollDice result')
     
-    if( bot.isSecret )
-      randResults = nil
-    end
-    
     return result, bot.isSecret, randResults
   end
   
@@ -4011,10 +4094,17 @@ class DodontoFServer
   end
   
   
-  def getChatRolledMessage(message, randResults)
+  def getChatRolledMessage(message, isSecret, randResults)
     logging("getChatRolledMessage Begin")
     logging(message, "message")
+    logging(isSecret, "isSecret")
     logging(randResults, "randResults")
+    
+    if( isSecret )
+      message = "シークレットダイス"
+    end
+    
+    randResults = getRandResults(randResults, isSecret)
     
     if( randResults.nil? )
       logging("randResults is nil")
@@ -4031,6 +4121,19 @@ class DodontoFServer
     logging(text, "getChatRolledMessage End text")
     
     return text
+  end
+  
+  def getRandResults(randResults, isSecret)
+    logging(randResults, 'getRandResults randResults')
+    logging(isSecret, 'getRandResults isSecret')
+    
+    if(isSecret)
+      randResults = randResults.collect{|value, max| [0, 0] }
+    end
+    
+    logging(randResults, 'getRandResults result')
+    
+    return randResults
   end
   
   

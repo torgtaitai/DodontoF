@@ -63,11 +63,6 @@ package {
         
         private var uniqueIdSeparator:String = "\t";
         
-        public function isOwnUniqueId(targetId:String):Boolean {
-            var targetUniqeId:String = getUniqueIdFromStrictlyUniqueId(targetId);
-            return ( targetUniqeId == getUniqueId() );
-        }
-        
         public function getUniqueIdFromStrictlyUniqueId(strictlyUniqueId:String):String {
             var parats:Array = strictlyUniqueId.split(uniqueIdSeparator);
             return parats[0];
@@ -800,6 +795,7 @@ package {
         }
         
         private function addIsNeedResultParam(jsonData:Object):void {
+            /*
             var diceBox:DiceBox = DodontoF_Main.getInstance().getDiceBox();
             if( diceBox == null ) {
                 return;
@@ -808,7 +804,7 @@ package {
             if( ! diceBox.visible ) {
                 return;
             }
-            
+            */
             jsonData.isNeedResult = true;
         }
         
@@ -1314,6 +1310,15 @@ package {
             var jsonParams:String = getEncodedJsonString( jsonData );
             
             var params:String = this.getParamString("removePlayRoom", [["params", jsonParams]]);
+            this.sendCommandData(params, resultFunction);
+        }
+        
+        public function removeOldPlayRoom(resultFunction:Function):void {
+            var jsonData:Object = {
+            };
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            
+            var params:String = this.getParamString("removeOldPlayRoom", [["params", jsonParams]]);
             this.sendCommandData(params, resultFunction);
         }
         

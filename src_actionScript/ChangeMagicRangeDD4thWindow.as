@@ -19,13 +19,13 @@ package {
             
             magicRangeName.text = magicRange.getName();
             
-            //magicRangeType.text = magicRange.getRangeType();
             ChangeMagicRangeWindow.selectMagicRangeType(magicRangeType, magicRange.getRangeType());
             
             magicRangeRadius.value = magicRange.getRadius();
             magicRangeColorPicker.selectedColor = magicRange.getColor();
             magicRangeTimeRange.value = magicRange.getTimeRange();
             magicRangeInfo.text = magicRange.getInfo();
+            isShowOnInitiativeWindow.selected = ( ! magicRange.isHideMode());
         }
         
         override public function execute():void {
@@ -43,7 +43,8 @@ package {
                                                      magicRangeType.selectedItem.data,
                                                      ("0x" + magicRangeColorPicker.selectedColor.toString(16)),
                                                      magicRangeInfo.text,
-                                                     magicRangeTimeRange.value);
+                                                     magicRangeTimeRange.value,
+                                                     isHide());
                 
                 PopUpManager.removePopUp(this);
             } catch(error:Error) {

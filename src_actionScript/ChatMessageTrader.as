@@ -35,7 +35,7 @@ package {
             
             guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             chatWindow = chatWindow_;
-            cutInList = [new CutInMovie(), new CutInCommandGetDiceBotInfos(), new CutInCommandRollVisualDice()];
+            cutInList = [new CutInCommandRollVisualDice(), new CutInMovie(), new CutInCommandGetDiceBotInfos()];
             
             voter  = new Voter(chatWindow);
         }
@@ -143,10 +143,6 @@ package {
             printAddedMessageToChatMessageLog();
         }
         
-        private function isOwnUniqueId(targetId:String):Boolean {
-            return guiInputSender.getSender().isOwnUniqueId(targetId);
-        }
-        
         private function isOwnStrictlyUniqueId(targetId:String):Boolean {
             return guiInputSender.getSender().isOwnStrictlyUniqueId(targetId);
         }
@@ -163,7 +159,7 @@ package {
                 return true;
             }
             
-            if( isOwnUniqueId(sendto) ) {
+            if( isOwnStrictlyUniqueId(sendto) ) {
                 //秘話指定先が自分なら表示可能
                 return true;
             }
@@ -331,25 +327,36 @@ package {
             
             var effectable:Boolean = getEffectable(channel);
             
+            result.chatMessage = checkCutInEffect(result.chatMessage, effectable);
             
-            if( effectable && chatWindow.isToMyAlarm( chatMessage ) ) {
-                chatWindow.playSound(chatMessage);
+            if( effectable && chatWindow.isToMyAlarm( result.chatMessage ) ) {
+                chatWindow.playSound( result.chatMessage );
             }
             
             var filterImageInfos:Array = new Array();
-            result.chatMessage = voter.received( chatMessage, effectable, filterImageInfos );
+            result.chatMessage = voter.received( result.chatMessage, effectable, filterImageInfos );
             
-            var printResult:Object = chatWindow.printStandingGraphics(senderName,
-                                                                      result.chatMessage,
-                                                                      effectable,
-                                                                      filterImageInfos);
+            var printResult:Object
+                = chatWindow.printStandingGraphics(senderName,
+                                                   result.chatMessage,
+                                                   effectable,
+                                                   filterImageInfos);
             
             if( printResult != null ) {
                 result.senderName = printResult.senderName;
                 result.chatMessage = printResult.chatMessage;
             }
             
+            return result;
+        }
+        
+        private function checkCutInEffect(chatMessage:String,
+                                          effectable:Boolean):String {
+            
             for(var i:int = 0 ; i < cutInList.length ; i++) {
+                Log.logging("cutInList i", i);
+                Log.logging("match target chatMessage", chatMessage);
+                
                 var cutIn:CutInBase = cutInList[i];
                 var matchResult:Object = cutIn.matchCutIn(chatMessage);
                 if( matchResult.resultData == null ) {
@@ -357,12 +364,16 @@ package {
                     continue;
                 }
                 
+                Log.logging("matched matchResult", matchResult);
+                
                 cutIn.setEffectable(effectable);
-                result.chatMessage = cutIn.effect( matchResult.resultData.chatMessage );
-                break;
+                chatMessage = cutIn.effect( matchResult.resultData.chatMessage );
+                //break;
             }
             
-            return result;
+            Log.logging("checkCutInEffect result", chatMessage);
+            
+            return chatMessage;
         }
         
         private function getFaildMessageTextArea(message:String):TextArea {

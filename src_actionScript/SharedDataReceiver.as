@@ -344,6 +344,7 @@ package {
             DodontoF_Main.getInstance().getReplay().setActiveChannel(replayConfig.channelNames);
             DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isGridVisible", replayConfig.grid);
             DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isPositionVisible", replayConfig.position);
+            ChatWindow.getInstance().setChatBackgroundColor(replayConfig.chatBackgroundColor);
         }
         
         private var isFirstChatRefreshFlag:Boolean = true;

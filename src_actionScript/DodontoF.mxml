@@ -549,8 +549,7 @@
     }
     
     private function updateChatWindowSendtoBox():void {
-        dodontoF_Main.getChatWindow().updateChatWindowSendtoBox( Utils.clone(loginUserInfo),
-                                                                 dodontoF_Main.getUniqueId() );
+        dodontoF_Main.getChatWindow().updateChatWindowSendtoBox( Utils.clone(loginUserInfo) );
     }
     
     public function getLoginUserCount(isIncludeVisiter:Boolean):int {
@@ -601,14 +600,22 @@
     }
     
     public function getUserNameByUniqueId(targetUniqueId:String):String {
+        Log.logging("getUserNameByUniqueId Begin targetUniqueId", targetUniqueId);
+        
         for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
             var userInfo:Object = loginUserInfo[i];
-            var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
+            
+            //var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
+            var uniqueId:String = userInfo.userId;
+            Log.logging("check uniqueId", uniqueId);
+            
             if( uniqueId == targetUniqueId ) {
+                Log.logging("matched.");
                 return userInfo.userName;
             }
         }
         
+        Log.logging("uniqueId NOT found.");
         return "???";
     }
     

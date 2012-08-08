@@ -24,6 +24,10 @@ package {
             if( randResults == null ) {
                 return;
             }
+            if( randResults.length == 0 ) {
+                return;
+            }
+            
             Log.logging("randResults", randResults);
             
             var resultText:String = getRollResultText(params);
@@ -39,7 +43,7 @@ package {
                 var value:int = result[0];
                 var diceType:int = result[1];
                 
-                if( isValidDiceType(diceType) ) {
+                if( DiceInfo.isValidDiceMax(diceType) ) {
                     if( diceType == 100 ) {
                         addDice(100, getD10Value(value / 10), resultText);
                         addDice( 10, getD10Value(value % 10), resultText);
@@ -86,16 +90,6 @@ package {
             }
             
             return message.slice(index + 1);
-        }
-        
-        private function isValidDiceType(diceType:int):Boolean {
-            var supported:Array = [4, 6, 8, 10, 12, 20, 100];
-            for each(var type:int in supported) {
-                    if( type == diceType ) {
-                        return true;
-                    }
-                }
-            return false;
         }
         
         private function addDice(diceType:int, value:int, text:String):void {

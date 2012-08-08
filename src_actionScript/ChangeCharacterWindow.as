@@ -25,8 +25,8 @@ package {
             
             characterSize.value = character.getSize();
             isHide.selected = character.isHideMode();
-            characterInitiative.value = Utils.getInitiativeInt(character.getInitiative());
-            characterInitiativeModify.value = Utils.getInitiativeModify(character.getInitiative());
+            //characterInitiative.value = Utils.getInitiativeInt(character.getInitiative());
+            //characterInitiativeModify.value = Utils.getInitiativeModify(character.getInitiative());
             characterOtherInfo.text = character.getInfo();
             statusAlias = character.getStatusAlias();
             url.text = character.getUrl();
@@ -36,6 +36,10 @@ package {
             printPreview();
         }
         
+        override protected function initInitiative(counterInfo:Object):void {
+            counterInfo["initiativeInt"] = Utils.getInitiativeInt(character.getInitiative());
+            counterInfo["initiativeModify"] = Utils.getInitiativeModify(character.getInitiative());
+        }
         
         public override function sendCharacterData(name:String,
                                                    imageUrl:String,

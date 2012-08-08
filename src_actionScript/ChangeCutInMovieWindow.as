@@ -42,8 +42,7 @@ package {
                 isTail.selected = cutInInfo.isTail;
             }
             
-            
-            Utils.selectComboBox(positionCoboBox, cutInInfo.position);
+            Utils.selectComboBox(positionCoboBox, cutInInfo.position, 'data', 3);
         }
         
         override public function imageLoadComplete():void {

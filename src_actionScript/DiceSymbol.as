@@ -19,6 +19,7 @@ package {
         private var owner:String = null;
         private var thisObj:DiceSymbol;
         private var openMenu:ContextMenuItem = null;
+        private var hideMenu:ContextMenuItem = null;
         private var allMenus:Array = new Array();
         
         public static function getTypeStatic():String {
@@ -107,7 +108,7 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            openMenu = addMenuItem(menu, "ダイス目を公開する", this.getContextMenuItemHideDice, true);
+            openMenu = addMenuItem(menu, "ダイス目を公開する", this.getContextMenuItemOpenDice, true);
             
             allMenus.push( addMenuItem(menu, "ダイスを振る", this.rollDice) );
             
@@ -125,19 +126,36 @@ package {
                                            separatorBefore) );
             }
             
+            hideMenu = addMenuItem(menu, "ダイスを隠す", this.getContextMenuItemHideDice, true);
+            allMenus.push( hideMenu );
+            
             allMenus.push( addMenuItem(menu, "ダイスの削除", this.getContextMenuItemRemoveCharacter, true) );
             
             view.contextMenu = menu;
         }
         
-        private function getContextMenuItemHideDice(event:ContextMenuEvent):void {
-            openDice();
+        private function getContextMenuItemOpenDice(event:ContextMenuEvent):void {
+            openDice(true);
         }
         
-        private function openDice():void {
-            this.owner = null;
+        private function getContextMenuItemHideDice(event:ContextMenuEvent):void {
+            openDice(false);
+        }
+        
+        private function openDice(isOpen:Boolean):void {
+            
+            var targetOwner:String = null;
+            if( ! isOpen ) {
+                targetOwner = DodontoF_Main.getInstance().getStrictlyUniqueId();
+            }
+            this.owner = targetOwner;
+            
+            if( ChatWindow.getInstance() != null ) {
+                this.ownerName = ChatWindow.getInstance().getChatCharacterName();
+            }
+            
+            updateRefresh();
             sender.changeCharacter( getJsonData() );
-            setHideMode();
         }
         
         override protected function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {
@@ -198,16 +216,22 @@ package {
             
             this.number = params.number;
             this.owner = params.owner;
+            this.ownerName = params.ownerName;
             
+            updateRefresh();
+        }
+        
+        public function updateRefresh():void {
             initDraw(getX(), getY());
-            
             setHideMode();
         }
         
-        private function setAllMenuEnable(b:Boolean):void {
+        private function setAllMenuEnable():void {
+            var isVisible:Boolean = isDiceVisible();
+            
             for(var i:int = 0 ; i < allMenus.length ; i++) {
                 var menu:ContextMenuItem = allMenus[i];
-                menu.visible = b;
+                menu.visible = isVisible;
             }
         }
         
@@ -231,13 +255,14 @@ package {
             if( isOpenMode() ) {
                 view.setBackGroundColor();
                 view.setLineColor();
-                setAllMenuEnable( true );
-                openMenu.visible = false;
             } else {
-                setAllMenuEnable( false );
                 view.setBackGroundColor(0x000000);
                 view.setLineColor(0x996600);
             }
+            
+            setAllMenuEnable();
+            openMenu.visible = ( ! isOpenMode() );
+            hideMenu.visible = ( isOpenMode() );
             
             view.initBaseColor();
             printToolTip();
@@ -257,6 +282,10 @@ package {
             }
             
             if( this.owner == DodontoF_Main.getInstance().getUniqueId() ) {
+                return true;
+            }
+            
+            if( this.owner == DodontoF_Main.getInstance().getStrictlyUniqueId() ) {
                 return true;
             }
             

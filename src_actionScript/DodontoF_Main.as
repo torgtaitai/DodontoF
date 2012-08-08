@@ -408,7 +408,6 @@ package {
             
             hideForTiny(characterWindow.otherInfos);
             hideForTiny(characterWindow.characterSizeBox);
-            hideForTiny(characterWindow.hideCheckBox);
             characterWindow.height = 400;
         }
         
@@ -608,6 +607,10 @@ package {
         
         public function getUniqueId():String {
             return sender.getUniqueId();
+        }
+        
+        public function getStrictlyUniqueId():String {
+            return sender.getStrictlyUniqueId();
         }
         
         public function clearCards():void {
@@ -1168,7 +1171,6 @@ package {
             }
     
     /*
-     */
     ,
     {label:"ログ", data:"pass", 
      children: [
@@ -1179,7 +1181,6 @@ package {
         {label:"errorLog", data:"errorLog"}, 
         {label:"fatalErrorLog", data:"fatalErrorLog"} 
                 ]} 
-    /* 
     */
                     ];
         }

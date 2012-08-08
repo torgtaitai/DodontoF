@@ -113,7 +113,7 @@
            preview = preview_;
            
            setPreviewSize(size);
-           setLoadCompleteIvent();
+           setLoadCompleteEvent();
            
            previewSpace.addChild(preview);
        }
@@ -126,7 +126,7 @@
            preview.width  = size;
        }
        
-       private function setLoadCompleteIvent():void {
+       private function setLoadCompleteEvent():void {
            var previewLoader:PreviewLoader = preview as PreviewLoader;
            if( previewLoader != null ) {
                previewLoader.setLoadImageCompleate( completeHandler );

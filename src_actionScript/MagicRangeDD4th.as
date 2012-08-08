@@ -29,28 +29,29 @@ package {
                                            initiative:Number,
                                            info:String,
                                            characterPositionX:int,
-                                           characterPositionY:int):Object {
-            var characterJsonData:Object = {
-                "feets": feets,
-                "rangeType": type,
-                "color": color,
-                "createRound": createRound,
-                "timeRange": timeRange,
-                
-                "imageName": "",
-                "name": name,
-                "size": 0,
-                "initiative": initiative,
-                "info": info,
-
-                "imgId": "0",
-                "type": getTypeStatic(),
-                "x": characterPositionX,
-                "y": characterPositionY,
-                "draggable": true
-            };
+                                           characterPositionY:int,
+                                           isHide:Boolean):Object {
+            var draggable:Boolean = true;
+            var counters:Object = null;
+            var statusAlias:Object = null;
+            var rotation:Number = 0;
             
-            return characterJsonData;
+            var jsonData:Object = 
+                InitiativedMovablePiece.getJsonData(getTypeStatic(),
+                                                    name, initiative, info, counters, statusAlias,
+                                                    characterPositionX, characterPositionY,
+                                                    draggable, rotation);
+            jsonData.feets = feets;
+            jsonData.rangeType = type;
+            jsonData.color = color;
+            jsonData.createRound = createRound;
+            jsonData.timeRange = timeRange;
+            jsonData.isHide = isHide;
+                
+            jsonData.imageName = "";
+            jsonData.size = 0;
+            
+            return jsonData;
         }
         
         static private var closeBurst:Object = {data:"closeBurstDD4th",

@@ -10,8 +10,8 @@ $aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.37.10"
-$versionDate = "2012/07/04"
+$versionOnly = "Ver.1.38.02"
+$versionDate = "2012/08/07"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -28,7 +28,7 @@ $oldMessageTimeout = 180
 $refreshInterval = 0.5
 
 #プレイルームの最大数
-$saveDataMaxCount = 100
+$saveDataMaxCount = 10
 
 #ログイン画面で一括取得できる最大プレイルーム数
 $playRoomGetRangeMax = 10
@@ -188,3 +188,10 @@ $retryCountLimit = 3
 # 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
 #（開発環境用なので、通常は変更不要）
 $loginTimeLimitSecond = 0
+
+#簡易アップロード機能でアップロードしたファイルの保持時間（秒）
+$uploadFileTimeLimitSeconds = (1 * 60 * 60)
+
+#古いプレイルームを一括削除する時の指定日数（日である点に注意）
+# 0 以下の値の場合、処理されません。
+$removeOldPlayRoomLimitDays = 0

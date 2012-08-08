@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="800"
+   width="850"
    height="470"
    title="ログイン" 
    >
@@ -98,6 +98,10 @@
     </mx:HBox>
     
     <mx:HBox id="extendBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
+      <mx:Spacer width="150" />
+      <mx:Button id="removeOldPlayRoomButton" label="古いプレイルームを削除" click="this.removeOldPlayRoom()"
+                 visible="{removeOldPlayRoomLimitDays > 0}"
+                 fontWeight="normal"/>
       <mx:Spacer width="100%" />
       <mx:Button label="リプレイ編集" click="editReplayData();" fontWeight="normal" />
       <mx:Button label="リプレイ投稿" click="uploadReplayData();" fontWeight="normal" />
@@ -154,6 +158,9 @@
     private var thisObj:LoginWindow;
     private var autoLoginRoom:int = 0;
     private var defaultCharacterName:String = "ななしさん";
+
+    [Bindable]
+    private var removeOldPlayRoomLimitDays:Number = 0;
     
     
     override protected function setup():void {
@@ -451,6 +458,8 @@
         DodontoF_Main.getInstance().setCommet( jsonData.isCommet );
         ChangeMapWindow.setMaxWidthHeigth( jsonData.mapMaxWidth, jsonData.mapMaxHeigth );
         
+        removeOldPlayRoomLimitDays = jsonData.removeOldPlayRoomLimitDays;
+        
         ChatWindow.setTalk(jsonData.canTalk);
         ChatSendData.setRetryCountLimit(jsonData.retryCountLimit);
         
@@ -657,6 +666,17 @@
         }
     }
 
+    public function removeOldPlayRoom():void {
+        Utils.askByAlert("一括削除確認",
+                         ""+ removeOldPlayRoomLimitDays + "日以上前の、古いプレイルームの一括削除を行います。\nよろしいですか？",
+                         function():void {
+                             guiInputSender.removeOldPlayRoom(function(event:Event=null):void {
+                                     thisObj.playRoomStatesList = new Object();
+                                     thisObj.getPlayRoomStates();
+                                 });
+                         });
+    }
+    
     private function askDeleteWhenUserExist(roomNumber:int):void {
         var message:String = "No."+ roomNumber + "にログインしているユーザーがまだいるようです。\n削除してよいですか？";
         var ignoreLoginUser:Boolean = true;

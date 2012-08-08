@@ -3,19 +3,39 @@ package {
     public class DiceInfo {
         
         public static function getDiceImage(diceType:String, number:int):Class {
+            if( number == 0 ) {
+                return secretDice;
+            }
+            
             var imageList:Array = getDiceImageList(diceType);
             return imageList[ number - 1 ];
         }
         
         public static function getDiceMaxNumberImage(diceType:String):Class {
+            if( isSecretDiceType(diceType) ) {
+                return secretDice;
+            }
+            
             var imageList:Array = getDiceImageList(diceType);
             var image:Class = imageList[imageList.length - 1];
             return image;
         }
         
-        static public function getDiceImageUrlGlobal(max:int, num:int):String {
-            return "./image/diceImage/" + max + "_dice/" + max + "_dice[" + num + "].gif";
+        private static function isSecretDiceType(diceType:String):Boolean {
+            return ( diceType == "d0" );
         }
+        
+        static public function getDiceImageUrlGlobal(max:int, number:int):String {
+            if( max == 0 ) {
+                return "./image/diceImage/secretDice.png";
+            }
+            
+            return "./image/diceImage/" + max + "_dice/" + max + "_dice[" + number + "].png";
+        }
+        
+		[Embed(source='../image/diceImage/unknown.png')]
+        private static var secretDice:Class;
+        private static var d0List:Array = [secretDice];
         
         //d4
 		[Embed(source='../image/diceImage/4_dice/4_dice[1].png')]
@@ -180,6 +200,7 @@ package {
         
         
         private static var diceTypeInfos:Object = {
+            "d0"  : {"max": 0, "maxString":   "0", "imageList" :  d0List, "getResultValue" : noChange},
             "d4"  : {"max": 4, "maxString":   "4", "imageList" :  d4List, "getResultValue" : noChange},
             "d6"  : {"max": 6, "maxString":   "6", "imageList" :  d6List, "getResultValue" : noChange},
             "d8"  : {"max": 8, "maxString":   "8", "imageList" :  d8List, "getResultValue" : noChange},
@@ -190,6 +211,12 @@ package {
          "d100-10": {"max":10, "maxString": "%10", "imageList" : d10List, "getResultValue" : changeToD100_10Result}
         };
         
+        
+        public static function isValidDiceMax(max:int):Boolean {
+            var diceType:String = 'd' + max;
+            var info:Object = diceTypeInfos[diceType];
+            return (info != null);
+        }
         
         public static function getDiceTypeInfo(diceType:String, infoName:String):Object {
             return diceTypeInfos[diceType][infoName];

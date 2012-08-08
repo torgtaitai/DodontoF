@@ -56,7 +56,9 @@
         </mx:FormItem>
         
 	    <mx:FormItem label="表示位置:" >
-          <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false" toolTip="カットインの表示位置を指定します。">
+          <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false"
+                       selectedIndex="3"
+                       toolTip="カットインの表示位置を指定します。">
             <mx:Object label="左上"   data="up,left"  />
             <mx:Object label="右上"   data="up,right" />
             <mx:Object label="上"     data="up"       />
@@ -127,8 +129,6 @@
     }
     
     override protected function setup():void {
-        positionCoboBox.selectedIndex = 3;
-        
         initPreview();
         imageSelecter.addPreview(previewBox, 200);
         imageSelecter.setMoviewFileSelectable(true);
@@ -251,6 +251,7 @@
         }
         
         var commandText:String = cutIn.getCutInMessage(params);
+        cutIn.setEffectable(true);
         cutIn.effect(commandText);
     }
 

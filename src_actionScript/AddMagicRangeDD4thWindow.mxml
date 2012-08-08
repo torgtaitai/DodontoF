@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="500"
-   height="300"
+   height="315"
    close="PopUpManager.removePopUp(this)"
    >
   
@@ -28,6 +28,7 @@
 	<mx:FormItem label="その他:">
 	  <mx:TextInput id="magicRangeInfo" text="" />
 	</mx:FormItem>
+    <mx:CheckBox id="isShowOnInitiativeWindow" label="イニシアティブ表に表示する" selected="true" />
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
@@ -68,15 +69,16 @@
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.addMagicRangeDD4th(magicRangeName.text,
-                                         getFeets(),
-                                         magicRangeType.selectedItem.data,
-                                         ("0x" + magicRangeColorPicker.selectedColor.toString(16)),
-                                         magicRangeTimeRange.value,
-                                         roundTimer.getCurrentRound(),
-                                         roundTimer.getCurrentInitiative(),
-                                         magicRangeInfo.text,
-                                         characterPositionX,
-                                         characterPositionY);
+                                              getFeets(),
+                                              magicRangeType.selectedItem.data,
+                                              ("0x" + magicRangeColorPicker.selectedColor.toString(16)),
+                                              magicRangeTimeRange.value,
+                                              roundTimer.getCurrentRound(),
+                                              roundTimer.getCurrentInitiative(),
+                                              magicRangeInfo.text,
+                                              characterPositionX,
+                                              characterPositionY,
+                                              isHide());
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {
@@ -88,6 +90,10 @@
         var radius:int = magicRangeRadius.value;
         var feets:int = radius * 5;
         return feets;
+    }
+    
+    protected function isHide():Boolean {
+        return ( ! isShowOnInitiativeWindow.selected )
     }
     
     

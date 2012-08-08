@@ -81,7 +81,7 @@ package {
                 return;
             }
             
-            clearExistImages(null);
+            clearAllExistImages();
         }
         
         
@@ -256,6 +256,20 @@ package {
             }
         }
         
+        public function clearAllExistImages():void {
+            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
+                var imageInfo:Object = this.imageInfos[i] as Object;
+                if( imageInfo == null ) {
+                    continue;
+                }
+                
+                var component:UIComponent = imageInfo.component as UIComponent;
+                var leftIndex:int = i;
+                removeImageComponent(component, leftIndex);
+                this.imageInfos[leftIndex] = null;
+            }
+        }
+        
         public function clearExistImages(name:String, leftIndex:int = -1):void {
             Log.logging("clearExistImages name", name);
             Log.logging("clearExistImages leftIndex", leftIndex);
@@ -267,21 +281,35 @@ package {
                 }
                 
                 var component:UIComponent = imageInfo.component as UIComponent;
-                var imageCharacterName:String = imageInfo.name as String;
+                var imageName:String = imageInfo.name as String;
+                Log.logging("imageName", imageName);
+                Log.logging("imageInfos loop index i", i);
                 
-                //立ち絵が削除対象となるのは、「全削除指定時」「同一立ち位置」「同一キャラクター名称」のいずれかのみ
-                //それ以外なら半透明化するだけ。
-                if( ( leftIndex != -1 ) &&
-                    ( leftIndex != i ) &&
-                    ( imageCharacterName != name ) ) {
-                    
-                    component.alpha = noTargetImageAplha;
+                if( isDeleteImage(i, leftIndex, imageName, name) ) {
+                    Log.logging("削除");
+                    removeImageComponent(component, i);
+                    this.imageInfos[i] = null;
                     continue;
                 }
                 
-                removeImageComponent(component, leftIndex);
-                this.imageInfos[leftIndex] = null;
+                Log.logging("半透明化");
+                component.alpha = noTargetImageAplha;
             }
+            
+            Log.logging("clearExistImages End");
+        }
+        
+        private function isDeleteImage(index:int, leftIndex:int, 
+                                       imageName:String, name:String):Boolean {
+            if( imageName == name ) {
+                return true;
+            }
+            
+            if( leftIndex == index ) {
+                return true;
+            }
+            
+            return false;
         }
         
         private function removeImageComponent(component:UIComponent, leftIndex:int):void {

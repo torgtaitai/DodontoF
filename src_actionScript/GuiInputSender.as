@@ -249,7 +249,8 @@ package {
                                       createRound:Number,
                                       initiative:Number,
                                       info:String,
-                                      characterPositionX:int, characterPositionY:int):void {
+                                      characterPositionX:int, characterPositionY:int,
+                                      isHide:Boolean):void {
             Log.logging("GuiInputSender addMagicRange characterPositionX", characterPositionX);
             Log.logging("GuiInputSender addMagicRange characterPositionY", characterPositionY);
             Log.logging("timeRange", timeRange);
@@ -283,7 +284,8 @@ package {
                                        createRound,
                                        initiative,
                                        info,
-                                       characterPositionX, characterPositionY);
+                                       characterPositionX, characterPositionY,
+                                       isHide);
             sender.addCharacter(characterJsonData);
 
             Log.logging("addMagicRange end");
@@ -298,7 +300,8 @@ package {
                                            initiative:Number,
                                            info:String,
                                            characterPositionX:int,
-                                           characterPositionY:int):void {
+                                           characterPositionY:int,
+                                           isHide:Boolean):void {
             Log.logging("GuiInputSender addMagicRange characterPositionX", characterPositionX);
             Log.logging("GuiInputSender addMagicRange characterPositionY", characterPositionY);
             Log.logging("timeRange", timeRange);
@@ -332,7 +335,8 @@ package {
                                             createRound,
                                             initiative,
                                             info,
-                                            characterPositionX, characterPositionY);
+                                            characterPositionX, characterPositionY,
+                                            isHide);
             Log.logging("addMagicRangeDD4th sender.addCharacter begin");
             sender.addCharacter(characterJsonData);
             Log.logging("addMagicRangeDD4th sender.addCharacter end");
@@ -414,7 +418,8 @@ package {
                                          rangeType:String,
                                          color:String,
                                          info:String,
-                                         timeRange:int):void {
+                                         timeRange:int,
+                                         isHide:Boolean):void {
             Log.logging("changeMagicRange start");
             Log.logging("name", name);
             Log.logging("rangeType", rangeType);
@@ -448,6 +453,7 @@ package {
             magicRange.setColor( parseInt(color) );
             magicRange.setInfo(info);
             magicRange.setTimeRange(timeRange);
+            magicRange.setHide(isHide);
             
             magicRange.updateRefresh();
             
@@ -457,12 +463,13 @@ package {
         }
         
         public function changeMagicRangeDD4th(magicRange:MagicRange,
-                                         name:String,
-                                         feets:int,
-                                         rangeType:String,
-                                         color:String,
-                                         info:String,
-                                         timeRange:int):void {
+                                              name:String,
+                                              feets:int,
+                                              rangeType:String,
+                                              color:String,
+                                              info:String,
+                                              timeRange:int,
+                                              isHide:Boolean):void {
             Log.logging("changeMagicRangeDD4th start");
             Log.logging("name", name);
             Log.logging("rangeType", rangeType);
@@ -496,6 +503,7 @@ package {
             magicRange.setColor( parseInt(color) );
             magicRange.setInfo(info);
             magicRange.setTimeRange(timeRange);
+            magicRange.setHide(isHide);
             
             magicRange.updateRefresh();
             
@@ -654,6 +662,10 @@ package {
         
         public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
             sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser);
+        }
+        
+        public function removeOldPlayRoom(resultFunction:Function):void {
+            sender.removeOldPlayRoom(resultFunction);
         }
         
         public function removeReplayData(replayData:Object, resultFunction:Function):void {

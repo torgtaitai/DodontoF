@@ -20,6 +20,7 @@ package {
         private var color:int = 0x000000;
         private var createRound:int = 0;
         private var timeRange:int = 0;
+        private var isHide:Boolean = false;
         
         public static function getTypeStatic():String {
             return "magicRangeMarker"
@@ -35,35 +36,36 @@ package {
         
         public static function getJsonData(name:String,
                                            feets:int,
-                                           type:String,
+                                           rangeType:String,
                                            color:String,
                                            timeRange:Number,
                                            createRound:Number,
                                            initiative:Number,
                                            info:String,
                                            characterPositionX:int,
-                                           characterPositionY:int):Object {
-            var characterJsonData:Object = {
-                "feets": feets,
-                "rangeType": type,
-                "color": color,
-                "createRound": createRound,
-                "timeRange": timeRange,
-                
-                "imageName": "",
-                "name": name,
-                "size": 0,
-                "initiative": initiative,
-                "info": info,
-                
-                "imgId": "0",
-                "type": getTypeStatic(),
-                "x": characterPositionX,
-                "y": characterPositionY,
-                "draggable": true
-            };
+                                           characterPositionY:int,
+                                           isHide:Boolean = false):Object {
+            var draggable:Boolean = true;
+            var counters:Object = null;
+            var statusAlias:Object = null;
+            var rotation:Number = 0;
             
-            return characterJsonData;
+            var jsonData:Object = 
+                InitiativedMovablePiece.getJsonData(getTypeStatic(),
+                                                    name, initiative, info, counters, statusAlias,
+                                                    characterPositionX, characterPositionY,
+                                                    draggable, rotation);
+            jsonData.feets = feets;
+            jsonData.rangeType = rangeType;
+            jsonData.color = color;
+            jsonData.createRound = createRound;
+            jsonData.timeRange = timeRange;
+            jsonData.isHide = isHide;
+            
+            jsonData.imageName = "";
+            jsonData.size = 0;
+            
+            return jsonData;
         }
         
         
@@ -75,6 +77,7 @@ package {
             jsonData.color = getColor();
             jsonData.createRound = getCreateRound();
             jsonData.timeRange = getTimeRange();
+            jsonData.isHide = this.isHide;
             
             return jsonData;
         }
@@ -138,6 +141,14 @@ package {
         
         public function setTimeRange(timeRange_:int):void {
             timeRange = timeRange_;
+        }
+        
+        override public function isHideMode():Boolean {
+            return this.isHide;
+        }
+        
+        public function setHide(b:Boolean):void {
+            this.isHide = b;
         }
         
         public function getRestRoundLocal():int {
@@ -354,6 +365,7 @@ package {
             this.color = params.color;
             this.timeRange = parseInt(params.timeRange);
             this.createRound = parseInt(params.createRound);
+            this.isHide = params.isHide;
             
             updateRefresh();
             

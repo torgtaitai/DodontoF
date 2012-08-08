@@ -352,7 +352,7 @@
             setDisplayTime( info["isDisplayTime"] );
             setChatFontSize( info["chatFontSize"] );
             setChatFontColor( info["chatFontColor"] );
-            setChatBackgroundColor( info["chatBackgroundColor"] );
+            setChatBackgroundColor( info["chatBackgroundColor"], true );
             
             var numberString:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
             setDiceBotGameType( info[getDiceBotGameTypeKeyName()] );
@@ -1808,11 +1808,21 @@
             return chatBackgroundColor;
         }
         
-        public function setChatBackgroundColor(color:String):void {
+        public function setChatBackgroundColor(color:String, isInitSetting:Boolean = false):void {
+            if(color == null) {
+                return;
+            }
+            
             chatBackgroundColor = color;
             eachChatChannel(function(i:ChatMessageLogBox):void { i.setBackGroundColor(color); });
             chatMessageInput.setStyle('backgroundColor', '0x' + color);
             novelticMode.setChatBackgroundColor(color);
+            
+            if( isInitSetting ) {
+                return;
+            }
+            
+            DodontoF_Main.getInstance().getChatPaletteWindow().setChatBackgroundColor(color);
         }
         
         public function getPublicChatMessageLogList():Array {
@@ -1908,9 +1918,9 @@
         
         private var preDataProvider:Array = [];
         
-        public function updateChatWindowSendtoBox(loginUserInfo:Array, uniqueId:String):void {
+        public function updateChatWindowSendtoBox(loginUserInfo:Array):void {
             var selected:String = getSendtoBoxSelectedString();
-            var dataProvider:Array = getSendtoDataProvider(loginUserInfo, uniqueId);
+            var dataProvider:Array = getSendtoDataProvider(loginUserInfo);
             
             Log.logging("preDataProvider", preDataProvider);
             Log.logging("dataProvider", dataProvider);
@@ -1936,12 +1946,13 @@
             return selected;
         }
         
-        private function getSendtoDataProvider(loginUserInfo:Array,uniqueId:String):Array {
+        private function getSendtoDataProvider(loginUserInfo:Array):Array {
             var dataProvider:Array = [];
             
             for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
                 var userInfo:Object = loginUserInfo[i];
                 
+                var uniqueId:String = DodontoF_Main.getInstance().getStrictlyUniqueId();
                 if( userInfo.userId == uniqueId ) {
                     continue;
                 }

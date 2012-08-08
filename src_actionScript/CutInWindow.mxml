@@ -115,7 +115,7 @@
 
     public function addCutIn(component:DisplayObject,
                              titleText:String,
-                             displaySeconds:int,
+                             displaySeconds:Number,
                              position:String):void {
         this.addChild(component);
         

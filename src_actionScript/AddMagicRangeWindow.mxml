@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="500"
-   height="300"
+   height="315"
    title="魔法範囲追加" 
    showCloseButton="true"
    >
@@ -33,15 +33,19 @@
     <mx:ColorPicker id="magicRangeColorPicker" showTextField="true" selectedColor="0x000000" />
 	</mx:FormItem>
 	<mx:FormItem label="持続時間:">
-	  <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" />
+      <mx:HBox width="100%" horizontalGap="0">
+        <mx:Label id="magicRangeRestTime" text="" width="0"/>
+	    <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" change="setMagicRangeRestTime()" />
+      </mx:HBox>
 	</mx:FormItem>
 	<mx:FormItem label="その他:">
 	  <mx:TextInput id="magicRangeInfo" text="" />
 	</mx:FormItem>
+    <mx:CheckBox id="isShowOnInitiativeWindow" label="イニシアティブ表に表示する" selected="true" />
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button label="追加" click="this.addMagicRange()" />
+    <mx:Button label="追加" click="execute()" />
     <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 
@@ -61,8 +65,18 @@
     }
     
     override protected function setup():void {
+        init();
     }
     
+    protected function init():void {
+    }
+    
+    public function setMagicRangeRestTime():void {
+    }
+    
+    public function execute():void {
+        addMagicRange();
+    }
     
     public function addMagicRange():void {
         try{
@@ -78,12 +92,17 @@
                                          roundTimer.getCurrentInitiative(),
                                          magicRangeInfo.text,
                                          characterPositionX,
-                                         characterPositionY);
+                                         characterPositionY,
+                                         isHide());
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {
             this.status = error.message;
         }
+    }
+    
+    protected function isHide():Boolean {
+        return ( ! isShowOnInitiativeWindow.selected )
     }
     
     ]]>

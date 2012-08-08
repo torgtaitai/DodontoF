@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="150"
+   height="180"
    title="リプレイ環境設定" 
    showCloseButton="true"
    >
@@ -14,6 +14,11 @@
   <mx:CheckBox id="position" label="座標文字を表示する" selected="true"
                height="100%"
                />
+  <mx:HBox width="100%">
+    <mx:Label text="チャットウィンドウ背景色:" />
+    <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0x000000"
+                    toolTip="チャット背景色設定" />
+  </mx:HBox>
 <!--  
   <mx:Label text="表示するチャットタブ名（スペース区切りで）：" width="100%" />
   <mx:TextInput id="channelNames" text="メイン　雑談" width="100%" />
@@ -44,7 +49,8 @@
             
             var replayConfig:Object = {
                 "grid" : grid.selected,
-                "position" : position.selected
+                "position" : position.selected,
+                "chatBackgroundColor" : ChatFontWindow.getColor(chatBackgroundColorPicker)
 //              "channelNames" : channelNames.text.split(/[\s　]+/)
             };
             

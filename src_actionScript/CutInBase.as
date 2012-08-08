@@ -47,6 +47,10 @@ package {
         
         static private var chatLineSpliter:RegExp = /(\r|\n)/;
         
+        protected function isCheckTailMatch():Boolean {
+            return false;
+        }
+        
         public function matchCutIn(chatMessage:String):Object {
             Log.logging("chatMessage", chatMessage);
             
@@ -61,6 +65,15 @@ package {
                 return result;
             }
             
+            if( isCheckTailMatch() ) {
+                return checkTailMatch(chatMessage, result);
+            }
+            
+            return result;
+        }
+        
+        
+        private function checkTailMatch(chatMessage:String, result:Object):Object {
             var lines:Array = chatMessage.split( chatLineSpliter );
             
             for(var i:int = 0 ; i < cutInInfos.length ; i++) {

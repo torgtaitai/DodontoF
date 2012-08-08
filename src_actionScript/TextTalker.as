@@ -79,7 +79,7 @@ package {
             var result:Object = /「(.+)」/.exec(text);
             
             if( result == null ) {
-                return "";
+                return text;
             }
             
             var message:String = "、" + result[1];

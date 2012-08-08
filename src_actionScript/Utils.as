@@ -187,7 +187,7 @@ package {
         }
         
         
-        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data"):int {
+        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data", defaultIndex:int = 0):int {
             comboBox.validateNow();
             
             var list:ArrayCollection = comboBox.dataProvider as  ArrayCollection;
@@ -202,7 +202,7 @@ package {
                 }
             }
             
-            comboBox.selectedIndex = 0;
+            comboBox.selectedIndex = defaultIndex;
             return -1;
         }
         

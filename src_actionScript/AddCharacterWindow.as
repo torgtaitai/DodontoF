@@ -19,6 +19,9 @@ package {
             executeButton.label = "追加";
             
             initCounterValues();
+            
+            characterImageUrl.text = "./image/defaultImageSet/pawn/pawnBlack.png";
+            printPreview();
         }
         
         public override function sendCharacterData(name:String,

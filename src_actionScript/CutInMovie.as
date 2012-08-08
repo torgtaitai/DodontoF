@@ -64,7 +64,13 @@ package {
         }
         
         
+        override protected function isCheckTailMatch():Boolean {
+            return true;
+        }
+        
+        
         override protected function executeEffect(params_:Object):void {
+            Log.logging("CutInMovie.executeEffect Begin");
             params = params_;
             
             cutInWindow = CutInWindow.getWindow(params.cutInTag);
@@ -99,12 +105,19 @@ package {
             var displayObject:DisplayObject = imageLoader;
             var component:UIComponent = new UIComponent();
             component.addChild(displayObject);
-            cutInWindow.addCutIn(component, getWindowTitle(params), parseFloat(params.displaySeconds), params.position);
+            addCutInToCutinWindow(component);
             defaultWidth = parseInt(params.width);
             defaultHeight = parseInt(params.height);
             
             var sourceUrl:String = params.source;
             imageLoader.load( new URLRequest(sourceUrl) );
+        }
+        
+        private function addCutInToCutinWindow(component:DisplayObject):void {
+            cutInWindow.addCutIn(component,
+                                 getWindowTitle(params),
+                                 parseFloat(params.displaySeconds),
+                                 params.position);
         }
         
         private function ioErrorHandler(event:Event):void {
@@ -177,7 +190,7 @@ package {
             
             initCutInFlv(cutInFlv);
             
-            cutInWindow.addCutIn(cutInFlv, getWindowTitle(params), parseFloat(params.displaySeconds), params.position);
+            addCutInToCutinWindow(cutInFlv);
             cutInWindow.setCutInStopFunction(function():void {
                     soundChannel.stop();
                     cutInFlv.stop();
@@ -228,7 +241,7 @@ package {
             
             var component_youtube:UIComponent = new UIComponent();
             component_youtube.addChild(youtubeMovie);
-            cutInWindow.addCutIn(component_youtube, getWindowTitle(params), parseFloat(params.displaySeconds), params.position);
+            addCutInToCutinWindow(component_youtube);
             
             cutInWindow.setCutInStopFunction(function():void {
                     soundChannel.stop();

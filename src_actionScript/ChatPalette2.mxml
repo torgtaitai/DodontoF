@@ -78,6 +78,10 @@
     override public function setup():void {
         initChatPalet();
         setInitPosition();
+        
+        if( ChatWindow.getInstance() ) {
+            setChatBackgroundColor(ChatWindow.getInstance().getChatBackgroundColor());
+        }
     }
     
     private function initChatPalet():void {
@@ -490,6 +494,29 @@
     
     private function changeLogVisible(event:MouseEvent, visible:Boolean):void {
         DodontoF_Main.getInstance().getChatWindow().changeLogVisible(event, visible);
+    }
+    
+    public function setChatBackgroundColor(color:String):void {
+        //chatMessageInput.setStyle('backgroundColor', '0x' + color);
+        
+        for(var i:int = 0 ; i < tabSpace.numChildren ; i++) {
+            var info:Object = tabEditors[i];
+            if(info == null) {
+                continue;
+            }
+            
+            var inputList:List = tabEditors[i].list as List;
+            if(inputList == null) {
+                continue;
+            }
+            inputList.setStyle('backgroundColor', '0x' + color);
+            
+            var input:TextInput = tabEditors[i].input as TextInput;
+            if(input == null) {
+                continue;
+            }
+            input.setStyle('backgroundColor', '0x' + color);
+        }
     }
     
              ]]>
