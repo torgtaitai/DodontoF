@@ -65,6 +65,35 @@ $record = 'record.json'
 
 
 class DodontoFServer
+
+  def initialize(saveDirInfo, cgi, content_type)
+    @cgi = cgi
+    @content_type = content_type
+    @saveDirInfo = saveDirInfo
+    
+    initSaveFiles( getRequestData("saveDataDirIndex") )
+    
+    @isAddMarker = true
+    @jsonpCallBack = nil
+    @isRecordEmpty = false
+    
+    @diceBotTablePrefix = 'diceBotTable_'
+    @fullBackupFileBaseName = "DodontoFFullBackup"
+    @scenarioFIleExtName = '.tar.gz'
+  end
+  
+  def initSaveFiles(roomNumber)
+    @saveDirInfo.init(roomNumber, $saveDataMaxCount, $SAVE_DATA_DIR)
+    
+    @saveFiles = {}
+    $saveFiles.each do |saveDataKeyName, saveFileName|
+      logging(saveDataKeyName, "saveDataKeyName")
+      logging(saveFileName, "saveFileName")
+      @saveFiles[saveDataKeyName] = @saveDirInfo.getTrueSaveFileName(saveFileName)
+    end
+    
+  end
+  
   
   def getRequestData(key)
     logging(key, "getRequestData key")
@@ -144,30 +173,6 @@ class DodontoFServer
     logging(jsonDataForFileUploader, "jsonDataForFileUploader");
     
     return jsonDataForFileUploader
-  end
-  
-  def initialize(saveDirInfo, cgi, content_type)
-    @cgi = cgi
-    @content_type = content_type
-    @saveDirInfo = saveDirInfo
-    
-    initSaveFiles( getRequestData("saveDataDirIndex") )
-    
-    @isAddMarker = true
-    @jsonpCallBack = nil
-    @isRecordEmpty = false
-  end
-  
-  def initSaveFiles(roomNumber)
-    @saveDirInfo.init(roomNumber, $saveDataMaxCount, $SAVE_DATA_DIR)
-    
-    @saveFiles = {}
-    $saveFiles.each do |saveDataKeyName, saveFileName|
-      logging(saveDataKeyName, "saveDataKeyName")
-      logging(saveFileName, "saveFileName")
-      @saveFiles[saveDataKeyName] = @saveDirInfo.getTrueSaveFileName(saveFileName)
-    end
-    
   end
   
   attr :isAddMarker
@@ -261,7 +266,7 @@ class DodontoFServer
     begin
       if( isLongChatLog(typeName) )
         saveData = loadSaveFileForLongChatLog(typeName, saveFileName)
-      elsif( isCharacterType(typeName) )
+      elsif( $isUseRecord and isCharacterType(typeName) )
         logging("isCharacterType")
         saveData = loadSaveFileForCharacter(typeName, saveFileName)
       else
@@ -318,9 +323,6 @@ class DodontoFServer
     return saveData
   end
   
-  #自分が送ったコマンドであっても結果を取得したい場合にはここに記載する
-  @@recordCommandsByForce = ['addCharacter']
-  
   def getRecordSaveDataFromCash()
     recordIndex = @lastUpdateTimes['recordIndex']
     
@@ -370,10 +372,12 @@ class DodontoFServer
     #自分のコマンドでも…Record送信して欲しいときはあるよねっ！
     return true if( @isGetOwnRecord )
     
+    #自分が送ったコマンドであっても結果を取得しないといけないコマンド名はここに列挙
     #キャラクター追加なんかのコマンドは字自分のコマンドでも送信しないとダメなんだよね
-    return true if( @@recordCommandsByForce.include?(command) )
+    recordCommandsByForce = ['addCharacter']
+    return true if( recordCommandsByForce.include?(command) )
     
-    #基本、自分が送ったコマンドは受け取りたくないんだけどね
+    #でも基本的には、自分が送ったコマンドは受け取りたくないんですよ
     return false if( currentSender == sender )
     
     return true
@@ -2094,8 +2098,6 @@ class DodontoFServer
     prefixs << commandInfo[:command]
   end
   
-  @@diceBotTablePrefix = 'diceBotTable_'
-  
   def getGameCommandInfos
     logging('getGameCommandInfos Begin')
     require 'customDiceBot.rb'
@@ -2104,7 +2106,7 @@ class DodontoFServer
     dir = getDiceBotExtraTableDirName
     logging(dir, 'dir')
     
-    commandInfos = bot.getGameCommandInfos(dir, @@diceBotTablePrefix)
+    commandInfos = bot.getGameCommandInfos(dir, @diceBotTablePrefix)
     logging(commandInfos, "getGameCommandInfos End commandInfos")
     
     return commandInfos
@@ -2355,9 +2357,6 @@ class DodontoFServer
     saveFileName = @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
   
-  @@fullBackupFileBaseName = "DodontoFFullBackup"
-  @@scenarioFIleExtName = '.tar.gz'
-  
   def saveScenario()
     logging("saveScenario begin")
     dir = getRoomLocalSpaceDirName
@@ -2373,7 +2372,7 @@ class DodontoFServer
     makeScenariDefaultSaveFile(dir, saveDataAll)
     
     removeOldScenarioFile(dir)
-    baseName = getNewSaveFileBaseName(@@fullBackupFileBaseName);
+    baseName = getNewSaveFileBaseName(@fullBackupFileBaseName);
     scenarioFile = makeScenarioFile(dir, baseName)
     
     result = {}
@@ -2549,7 +2548,7 @@ class DodontoFServer
   
   
   def removeOldScenarioFile(dir)
-    fileNames = Dir.glob("#{dir}/#{@@fullBackupFileBaseName}*#{@@scenarioFIleExtName}")
+    fileNames = Dir.glob("#{dir}/#{@fullBackupFileBaseName}*#{@scenarioFIleExtName}")
     fileNames = fileNames.collect{|i| i.untaint}
     logging(fileNames, "removeOldScenarioFile fileNames")
     
@@ -2567,7 +2566,7 @@ class DodontoFServer
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
     
-    scenarioFile = fileBaseName + @@scenarioFIleExtName
+    scenarioFile = fileBaseName + @scenarioFIleExtName
     tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
     
     fileNames = Dir.glob('*')
@@ -2899,7 +2898,7 @@ class DodontoFServer
     
     isLoadCommonTable = false
     tableFileData = TableFileData.new( isLoadCommonTable )
-    tableFileData.setDir(dir, @@diceBotTablePrefix)
+    tableFileData.setDir(dir, @diceBotTablePrefix)
     tableInfos = tableFileData.getAllTableInfo
     
     logging(tableInfos, "getBotTableInfosFromDir tableInfos")
@@ -2935,7 +2934,7 @@ class DodontoFServer
     
     resultText = 'OK'
     begin
-      creator = TableFileCreator.new(dir, @@diceBotTablePrefix, params)
+      creator = TableFileCreator.new(dir, @diceBotTablePrefix, params)
       creator.execute
     rescue Exception => e
       loggingException(e)
@@ -2971,7 +2970,7 @@ class DodontoFServer
     
     resultText = 'OK'
     begin
-      creator = TableFileEditer.new(dir, @@diceBotTablePrefix, params)
+      creator = TableFileEditer.new(dir, @diceBotTablePrefix, params)
       creator.execute 
     rescue Exception => e
       loggingException(e)
@@ -3002,7 +3001,7 @@ class DodontoFServer
     
     isLoadCommonTable = false
     tableFileData = TableFileData.new( isLoadCommonTable )
-    tableFileData.setDir(dir, @@diceBotTablePrefix)
+    tableFileData.setDir(dir, @diceBotTablePrefix)
     tableInfos = tableFileData.getAllTableInfo
     
     tableInfo = tableInfos.find{|i| i[:command] == command}
@@ -4079,7 +4078,7 @@ class DodontoFServer
     require 'customDiceBot.rb'
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
-    result, randResults = bot.roll(message, gameType, dir, @@diceBotTablePrefix, isNeedResult)
+    result, randResults = bot.roll(message, gameType, dir, @diceBotTablePrefix, isNeedResult)
     
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/, '')

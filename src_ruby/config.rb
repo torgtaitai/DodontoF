@@ -10,8 +10,8 @@ $aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.38.02"
-$versionDate = "2012/08/07"
+$versionOnly = "Ver.1.38.03"
+$versionDate = "2012/08/08"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -195,3 +195,10 @@ $uploadFileTimeLimitSeconds = (1 * 60 * 60)
 #古いプレイルームを一括削除する時の指定日数（日である点に注意）
 # 0 以下の値の場合、処理されません。
 $removeOldPlayRoomLimitDays = 0
+
+
+#キャラクターの情報を前回との差分レベルで管理する方式（Record方式と勝手に命名）
+#コマの連続移動で移動したコマが手戻りする事がなくなり使いやすい反面、
+#サーバの負荷が高くなります。
+#運用負荷を見て、有効(true)無効（false)を切り替えて下さい。
+$isUseRecord = true

@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="400"
-   height="215"
+   width="440"
+   height="220"
    title="プレイルーム作成" 
    showCloseButton="true"
    >
@@ -91,7 +91,7 @@
       
     </mx:Box>
     
-    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="作成" click="execute()" />
       <mx:Button label="キャンセル" click="closeAction()" />
     </mx:HBox>
