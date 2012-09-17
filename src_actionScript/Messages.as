@@ -59,6 +59,8 @@ package {
     "noPasswordPlayRoomNumber" : "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。パスワードは空にしてください。",
     "loginTimeLimitHasComes" : "ログイン時間の上限（{0}秒）が経過しました。サーバとの接続を切断します。",
     "loginTimeLimitWarning" : "このサーバでは{0}以上ログインすると接続が切断されます。実プレイには向きませんのでご注意下さい。",
+    "noEmptyPlayRoom" : "空きプレイルームが見つかりませんでした",
+    "errorPassword" : "パスワードが間違っています。",
     "9999" : "dummy"
 };
         

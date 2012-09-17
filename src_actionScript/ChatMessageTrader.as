@@ -148,22 +148,27 @@ package {
         }
         
         private function isPrintableMessageOnSecretMessage(chatSenderUniqueId:String, sendto:String):Boolean {
+            Log.logging("ChatMessageTrader.isPrintableMessageOnSecretMessage Begin");
+            
+            Log.logging("chatSenderUniqueId", chatSenderUniqueId);
+            Log.logging("localMessageUniqueId", localMessageUniqueId);
             
             if( chatSenderUniqueId == localMessageUniqueId ) {
-                //"送信者が自分なら表示可能"
+                Log.logging("送信者が自分なら表示可能");
                 return true;
             }
             
             if( ! isValidSendTo(sendto) ) {
-                //秘話指定無しなので表示可能
+                Log.logging("秘話指定無しなので表示可能");
                 return true;
             }
             
             if( isOwnStrictlyUniqueId(sendto) ) {
-                //秘話指定先が自分なら表示可能
+                Log.logging("秘話指定先が自分なら表示可能");
                 return true;
             }
             
+            Log.logging("残念、表示不能です。");
             return false;
         }
         

@@ -10,8 +10,8 @@ $aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.38.03"
-$versionDate = "2012/08/08"
+$versionOnly = "Ver.1.39.00"
+$versionDate = "2012/09/14"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -101,7 +101,11 @@ $deletablePassedSeconds = 10
 #ダイスボットの有効(true)、無効(false)の設定
 $isDiceBotOn = true
 
-#デバッグ用：メンテナンスモード起動用のパスワード。nilならメンテナンスモード無し
+#デバッグ用：メンテナンス用の管理用パスワード。nilなら指定なしでメンテナンスモードに移行できません。
+#　設定している場合 DodontoF.swf?mode=admin　にアクセスすることで、「管理用パスワード」を入力できるようになります。
+#　パスワードを正しく入力すると、パスワードの掛かった部屋でもログインし、内部の状況を確認する事ができます。
+#パスワードは以下の様に指定します。
+# $mentenanceModePassword = "pasuwaado"
 $mentenanceModePassword = nil
 
 #デバッグ用：0以上の値を設定するとそのプレイルームへ自動的にログインします
@@ -196,9 +200,14 @@ $uploadFileTimeLimitSeconds = (1 * 60 * 60)
 # 0 以下の値の場合、処理されません。
 $removeOldPlayRoomLimitDays = 0
 
-
 #キャラクターの情報を前回との差分レベルで管理する方式（Record方式と勝手に命名）
 #コマの連続移動で移動したコマが手戻りする事がなくなり使いやすい反面、
 #サーバの負荷が高くなります。
 #運用負荷を見て、有効(true)無効（false)を切り替えて下さい。
 $isUseRecord = true
+
+#プレイルーム作成時に認証パスワードを要求するかどうかの指定。
+#指定すると認証パスワードが合致しない限り新しい部屋を作製できません。
+#指定方法は下記の通り。空白文字列だとパスワード無し。
+# $createPlayRoomPassword="abc"
+$createPlayRoomPassword = ""

@@ -269,8 +269,8 @@
             return diceRollPlace;
         }
         
-        public function getChatFontColorValue():int {
-            return parseInt(getChatFontColor());
+        public function getChatFontColorValue():uint {
+            return parseInt( "0x" + getChatFontColor() );
         }
         
         public function getChatFontColor():String {
@@ -1109,6 +1109,7 @@
         
         public function sendChatMessage(channel:int, chatMessage:String, isCheckDiceRoll:Boolean = true):void {
             Log.logging("sendChatMessage begin");
+            
             var data:ChatSendData = new ChatSendData(channel, chatMessage);
             sendChatMessageByChatSendData(data, isCheckDiceRoll);
         }
@@ -1161,18 +1162,25 @@
                 return false;
             }
             
-            var diceRollMessage:String = getDiceRollText(data.getMessage());
+            var diceRollData:Object = getDiceRollText(data.getMessage());
+            
+            var diceRollMessage:String = diceRollData.message;
             Log.logging("diceRollMessage", diceRollMessage);
                 
             if( diceRollMessage == null ) {
                 return false;
             }
             
+            var repeatCount:int = diceRollData.repeatCount;
+            Log.logging("repeatCount", repeatCount);
             
             data.setMessage(diceRollMessage);
+            
             var gameType:String = getGameType();
+            var randomSeed:int = Dice.getRandomNumber(0xffff);
             Log.logging("sendDiceBotChatMessage(data, gameType) gameType", gameType);
-            sendDiceBotChatMessage(data, gameType);
+            data.setDiceBotData(randomSeed, gameType, repeatCount, sendDiceBotChatMessageResult);
+            sendDiceBotChatMessage(data);
             
             return true;
         }
@@ -1199,23 +1207,52 @@
         }
         
         
-        private function getDiceRollText(targetText:String):String {
+        private function getDiceRollText(text:String):Object {
+            var result:Object = new Object();
+            
             if( ! isDiceBotOn ) {
-                return null;
+                return result;
             }
             
-            var targetText:String = Utils.changeZenkakuToHankakuOnDiceBot(targetText);
+            var text:String = Utils.changeZenkakuToHankakuOnDiceBot(text);
             var patterns:Array = getDicePatterns();
             
             for(var i:int = 0; i < patterns.length ; i++) {
                 var pattern:RegExp = patterns[i];
+                Log.logging("pattern", pattern);
                 
-                if( isMatchGamePreFixByTargetPattern( targetText, pattern ) ) {
-                    return targetText;
+                var matchResult:Object = pattern.exec(text);
+                Log.logging("matchResult", matchResult);
+                
+                if( matchResult == null ) {
+                    continue;
                 }
+                
+                result.message = matchResult[3];
+                result.repeatCount = getRepeatCount(matchResult[2]);
+                break;
             }
             
-            return null;
+            Log.logging("result", result);
+            
+            return result;
+        }
+        
+        private function getRepeatCount(obj:Object):int {
+            var repeatCount:int = 1;
+            
+            var valueString:String = obj as String;
+            if( valueString == null ) {
+                return repeatCount;
+            }
+            
+            repeatCount = parseInt(valueString);
+            
+            if( repeatCount == 0 ) {
+                repeatCount = 1;
+            }
+            
+            return repeatCount;
         }
         
         private var dicePatternsList:Object = new Object();
@@ -1251,8 +1288,8 @@
             var prefixs:Array = diceBotGameType.dataProvider[index].prefixs;
             
             for each(var prefix:String in prefixs) {
-                    patterns.push( new RegExp("^" + prefix, "i") );
-                    patterns.push( new RegExp("^S" + prefix, "i") );
+                    patterns.push( new RegExp("^((\\d+)\\s+)?(S" + prefix + ".*)", "i") );
+                    patterns.push( new RegExp("^((\\d+)\\s+)?(" + prefix + ".*)", "i") );
                 }
         }
         
@@ -1261,16 +1298,15 @@
             return ( index == 0 );
         }
         
-        private function sendDiceBotChatMessage(chatSendData:ChatSendData, gameType:String = ""):void {
+        private function sendDiceBotChatMessage(data:ChatSendData):void {
             chatMessageInput.text = "";
             
-            var randomSeed:int = Dice.getRandomNumber(0xffff);
-            chatSendData.setDiceBotData(randomSeed, gameType, sendDiceBotChatMessageResult);
-            chatSendData.replaceMessage("　", " ");
-            chatSendData.setNameFromChatWindow();
+            data.replaceMessage("　", " ");
+            data.setNameFromChatWindow();
+            //data.setSendtoFromChatWindow();
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.sendChatMessage(chatSendData);
+            guiInputSender.sendChatMessage(data);
         }
     
         
@@ -1283,35 +1319,57 @@
         
         public function sendDiceBotChatMessageResult(obj:Object):void {
             Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) Begin");
-        
+            
             try {
                 var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
-                var isSecret:Boolean = jsonData.isSecret;
-                Log.logging("isSecret", isSecret);
+                var array:Array = jsonData as Array;
+                Log.logging("jsonData array", array);
                 
-                if( ! isSecret ) {
-                    Log.logging("result NOT isSecret");
+                if( array == null ) {
+                    Log.loggingTuning("=>sendDiceBotChatMessageResult array is null");
                     return;
                 }
                 
-                var channel:int = jsonData.channel;
-                var name:String = jsonData.name;
-                var state:String = jsonData.state;
-                var sendto:String = jsonData.sendto;
-                var color:String = jsonData.color;
+                for each(var data:Object in array) {
+                        sendDiceBotChatMessageResultOne(data);
+                }
                 
-                var message:String = jsonData.message;
-                var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
-                data.setColorString(color);
-                data.setDiceRollResult();
-                SecretDiceWindow.printMessage(data);
             } catch(e:Error) {
                 Log.loggingException("ChatWindow.sendDiceBotChatMessageResult()", e);
             }
-        
+            
             Log.loggingTuning("=>sendDiceBotChatMessageResult(event:Event) End");
         }
-
+        
+        private function sendDiceBotChatMessageResultOne(jsonData:Object):void {
+            if( jsonData == null ) {
+                Log.logging("jsonData is null");
+                return;
+            }
+            
+            var isSecret:Boolean = jsonData.isSecret;
+            Log.logging("isSecret", isSecret);
+            
+            if( ! isSecret ) {
+                Log.logging("result NOT isSecret");
+                return;
+            }
+            
+            Log.logging("jsonData", jsonData);
+            
+            var channel:int = jsonData.channel;
+            var name:String = jsonData.name;
+            var state:String = jsonData.state;
+            var sendto:String = jsonData.sendto;
+            var color:String = jsonData.color;
+            
+            var message:String = jsonData.message;
+            var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
+            data.setColorString(color);
+            data.setDiceRollResult();
+            SecretDiceWindow.printMessage(data);
+        }
+        
         public function sendDiceRollResultMessageForChatWindowUser(diceRolledText:String):void {
             var channel:int = getSelectedChatChannleIndex();
             var data:ChatSendData = new ChatSendData(channel, diceRolledText);
@@ -1330,13 +1388,6 @@
         
         public function addLocalMessage(message:String):void {
             chatMessageTrader.addLocalMessage(message);
-        }
-        
-        public function sendChatMessageMany():void {
-            var chatMessage:String = chatMessageInput.text;
-            
-            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.sendChatMessageMany(chatCharacterName.text, chatMessage, chatFontColor);
         }
         
         private var userNames:Object = new Array();

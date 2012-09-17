@@ -17,6 +17,7 @@ package {
         
         private var randomSeed:int = 0;
         private var gameType:String = null;
+        private var repeatCount:int = 1;
         private var callBack:Function = null;
         
         private var isDiceRollResultFlag:Boolean = false;
@@ -155,9 +156,10 @@ package {
         }
         
         
-        public function setDiceBotData(seed:int, type:String, callBack_:Function):void {
+        public function setDiceBotData(seed:int, type:String, count:int, callBack_:Function):void {
             randomSeed = seed;
             gameType = type;
+            repeatCount = count;
             callBack = callBack_;
         }
         
@@ -167,6 +169,10 @@ package {
         
         public function getGameType():String {
             return gameType;
+        }
+        
+        public function getRepeatCount():int {
+            return repeatCount;
         }
         
         public function isDiceRoll():Boolean {
@@ -216,6 +222,7 @@ package {
             result += getParamText("isSendToOwnself", "" + isSendToOwnself);
             result += getParamText("randomSeed", "" + randomSeed);
             result += getParamText("gameType", gameType);
+            result += getParamText("repeatCount", "" + repeatCount);
             result += getParamText("callBack", (callBack == null ? "null" : "exist"));
             result += getParamText("isDiceRollResultFlag", "" + isDiceRollResultFlag);
             result += getParamText("retryCount", "" + retryCount);

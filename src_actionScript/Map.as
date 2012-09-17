@@ -2,26 +2,28 @@
 
 package {
     
-    import mx.utils.ArrayUtil;
-    import mx.controls.Alert;
-    import flash.events.ContextMenuEvent;
-    import flash.events.MouseEvent;
-    import flash.events.KeyboardEvent;
-    import flash.ui.ContextMenu;
-    import flash.ui.ContextMenuItem;
-    import flash.text.TextField;
-    import flash.text.TextFieldAutoSize;
-    import flash.geom.Point;
-    import mx.core.UIComponent;
-    import flash.utils.ByteArray;
-    import flash.utils.getQualifiedClassName;
-    import flash.events.Event;
-    import flash.events.MouseEvent;
     import flash.display.Bitmap;
     import flash.display.BitmapData;
+    import flash.display.BlendMode;
+    import flash.display.Graphics;
+    import flash.display.Sprite;
+    import flash.events.ContextMenuEvent;
+    import flash.events.Event;
+    import flash.events.KeyboardEvent;
+    import flash.events.MouseEvent;
     import flash.geom.Matrix;
+    import flash.geom.Point;
+    import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
+    import flash.ui.ContextMenu;
+    import flash.ui.ContextMenuItem;
+    import flash.ui.Keyboard;
+    import flash.utils.ByteArray;
+    import flash.utils.getQualifiedClassName;
+    import mx.controls.Alert;
+    import mx.core.UIComponent;
+    import mx.utils.ArrayUtil;
     import net.hires.debug.Stats;
-    import flash.ui.Keyboard
     
     
     public class Map {
@@ -47,6 +49,8 @@ package {
         protected var imageLayer:ImageSprite = new ImageSprite();
         protected var mapTileLayer:UIComponent = new UIComponent();
         protected var marksLayer:UIComponent = new UIComponent();
+        
+        private var mapPainter:MapPainter = new MapPainter();
         
         protected var overMapLayer:UIComponent = new UIComponent();
         
@@ -501,7 +505,6 @@ package {
         
         public function Map() {
             thisObj = this;
-            
             initMapLayerEvent();
         }
 
@@ -532,6 +535,9 @@ package {
             baseLayer.addChild(imageLayer);
             baseLayer.addChild(mapTileLayer);
             baseLayer.addChild(marksLayer);
+            
+            baseLayer.addChild( mapPainter.getOtherDrawLayer() );
+            mapPainter.init(this);
             
             baseLayer.addChild(overMapLayer);
             
@@ -727,10 +733,10 @@ package {
         
         /*
         private function setKeyDownEvent():void {
-            Log.loggingTest("setKeyDownEvent Begin");
+            Log.logging("setKeyDownEvent Begin");
             
             var zoomEvent:Function = function (event:KeyboardEvent):void {
-                Log.loggingTest("setKeyDownEvent zoomEvent");
+                Log.logging("setKeyDownEvent zoomEvent");
                 
                 var isZoom:Boolean = false;
                 
@@ -747,23 +753,53 @@ package {
         }
         */
         
+        
+        public function undoDrawOnMap(resultFunction:Function):void {
+            mapPainter.undoDrawOnMap(resultFunction);
+        }
+        
+        public function setDrawState(size:int, color:uint, isErase:Boolean):void {
+            mapPainter.setDrawState(size, color, isErase);
+        }
+        
+        public function setDrawMode(b:Boolean):void {
+            mapPainter.setDrawMode(b);
+        }
+        
+        public function getDrawMode():Boolean {
+            return mapPainter.getDrawMode();
+        }
+        
+        
         private function setMouseDownEvent():void {
             baseLayer.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                    baseLayer.startDrag();
+                    
+                    if( getDrawMode() ) {
+                        mapPainter.beginDrawByPen(event);
+                    } else {
+                        baseLayer.startDrag();
+                        Character.unSelectAllCharacters();
+                    }
+                    
                     event.stopPropagation();
                 });
         }
-
+        
         private function setMouseUpEvent():void {
             baseLayer.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
-                    baseLayer.stopDrag();
+                    if( getDrawMode() ) {
+                        mapPainter.endDrawByPen(event);
+                    } else {
+                        baseLayer.stopDrag();
+                    }
                 });
         }
-
+        
         
         public function stopDrag():void {
             baseLayer.stopDrag();
         }
+        
         
         //centerといいながら、画面構成を鑑みて全体幅・高さの0.4倍の場所を中央と定義しています。
         private function getCenter():Point {
@@ -905,6 +941,11 @@ package {
         
         public function getMarks():Array {
             return squareColors;
+        }
+        
+        
+        public function changeDraws(draws:Array):void {
+            mapPainter.changeDraws(draws);
         }
         
         public function changeMap(imageUri_:String, mirrored_:Boolean,

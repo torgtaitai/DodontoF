@@ -722,6 +722,8 @@ class DodontoFServer
       ['enterWaitingRoomCharacter', hasReturn], 
       ['sendDiceBotChatMessage', hasReturn],
       ['deleteChatLog', hasReturn], 
+      ['sendChatMessageAll', hasReturn],
+      ['undoDrawOnMap', hasReturn],
       
       ['logout', hasNoReturn], 
       ['changeCharacter', hasNoReturn],
@@ -746,8 +748,9 @@ class DodontoFServer
       ['clearCharacterByType', hasNoReturn],
       ['moveCharacter', hasNoReturn],
       ['changeMap', hasNoReturn],
+      ['drawOnMap', hasNoReturn],
+      ['clearDrawOnMap', hasNoReturn],
       ['sendChatMessage', hasNoReturn],
-      ['sendChatMessageMany', hasNoReturn],
       ['changeRoundTime', hasNoReturn],
       ['addEffect', hasNoReturn], 
       ['changeEffect', hasNoReturn], 
@@ -1374,6 +1377,11 @@ class DodontoFServer
     counterNames = getWebIfRequestArray('counter', nil, ',')
     return if( counterNames.nil? )
     
+    changeCounterNames(counterNames)
+  end
+  
+  def changeCounterNames(counterNames)
+    logging(counterNames, "changeCounterNames(counterNames)")
     changeSaveData(@saveFiles['time']) do |saveData|
       saveData['roundTimeData'] ||= {}
       roundTimeData = saveData['roundTimeData']
@@ -1977,6 +1985,7 @@ class DodontoFServer
       "mapMaxWidth" => $mapMaxWidth,
       "mapMaxHeigth" => $mapMaxHeigth,
       'diceBotInfos' => diceBotInfos,
+      'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
     }
     
     logging(result, "result")
@@ -2127,6 +2136,8 @@ class DodontoFServer
       params = getParamsFromRequestData()
       logging(params, "params")
       
+      checkCreatePlayRoomPassword(params['createPassword'])
+      
       playRoomName = params['playRoomName']
       playRoomPassword = params['playRoomPassword']
       chatChannelNames = params['chatChannelNames']
@@ -2137,12 +2148,14 @@ class DodontoFServer
       
       if( playRoomIndex == -1 )
         playRoomIndex = findEmptyRoomNumber()
-        raise Exception.new("空きプレイルームが見つかりませんでした") if(playRoomIndex == -1)
+        raise Exception.new("noEmptyPlayRoom") if(playRoomIndex == -1)
         loggingForce(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
       end
       logging(playRoomName, 'playRoomName')
       logging('playRoomPassword is get')
       logging(playRoomIndex, 'playRoomIndex')
+      
+      checkSetPassword(playRoomPassword, playRoomIndex)
       
       createDir(playRoomIndex)
       
@@ -2179,6 +2192,16 @@ class DodontoFServer
     logging('createDir finished')
     
     return result
+  end
+  
+  def checkCreatePlayRoomPassword(password)
+    logging('checkCreatePlayRoomPassword Begin')
+    logging(password, 'password')
+    
+    return if( $createPlayRoomPassword.empty? )
+    return if( $createPlayRoomPassword == password )
+    
+    raise Exception.new("errorPassword")
   end
   
   def addViewStatesToSaveData(saveData, viewStates)
@@ -2231,6 +2254,9 @@ class DodontoFServer
     rescue => e
       loggingException(e)
       resultText = e.to_s
+    rescue Exception => e
+      loggingException(e)
+      resultText = e.to_s
     end
     
     result = {
@@ -2242,13 +2268,15 @@ class DodontoFServer
   end
   
   
-  def checkSetPassword(playRoomPassword)
+  def checkSetPassword(playRoomPassword, roomNumber = nil)
     return if( playRoomPassword.empty? )
     
-    roomNumber = @saveDirInfo.getSaveDataDirIndex
+    if( roomNumber.nil? )
+      roomNumber = @saveDirInfo.getSaveDataDirIndex
+    end
     
     if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
-      raise "noPasswordPlayRoomNumber"
+      raise Exception.new("noPasswordPlayRoomNumber")
     end
   end
   
@@ -2919,7 +2947,11 @@ class DodontoFServer
       return result
     end
     
+    logging("addBotTableMain called")
+    
     result = getBotTableInfos()
+    logging(result, "addBotTable result")
+    
     return result
   end
   
@@ -3379,7 +3411,7 @@ class DodontoFServer
   end
   
   def makeDir(dir)
-    loggingForce(dir, "makeDir dir")
+    logging(dir, "makeDir dir")
     
     if( File.exist?(dir) )
       if( File.directory?(dir) )
@@ -3550,6 +3582,7 @@ class DodontoFServer
   
   def loadSaveFileDataFilterByTargets(saveDataAll, targets)
     targets.each do |target|
+      logging('loadSaveFileDataFilterByTargets(saveDataAll, targets)')
       case target
       when "map"
         mapData = getLoadData(saveDataAll, 'map', 'mapData', {})
@@ -3569,6 +3602,9 @@ class DodontoFServer
         effects = getLoadData(saveDataAll, 'effects', 'effects', [])
         effects = effects.delete_if{|i| (i["type"] != nil)}
         addEffectData(effects)
+      when "initiative"
+        roundTimeData = getLoadData(saveDataAll, 'time', 'roundTimeData', {})
+        changeInitiativeData(roundTimeData)
       else
         loggingForce(target, "invalid load target type")
       end
@@ -4017,9 +4053,47 @@ class DodontoFServer
     
     params = getParamsFromRequestData()
     
+    repeatCount = getDiceBotRepeatCount(params)
+    
+    message = params['message']
+    
+    results = []
+    repeatCount.times do |i|
+      oneMessage = message
+      
+      if( repeatCount > 1 )
+        oneMessage = message + " #" + (i + 1).to_s
+      end
+      
+      logging(oneMessage, "sendDiceBotChatMessage oneMessage")
+      result = sendDiceBotChatMessageOnece(params, oneMessage)
+      logging(result, "sendDiceBotChatMessageOnece result")
+      
+      next if( result.nil? )
+      results << result
+    end
+    
+    logging(results, "sendDiceBotChatMessage results")
+    
+    return results
+  end
+  
+  def getDiceBotRepeatCount(params)
+    repeatCountLimit = 20
+    
+    repeatCount = params['repeatCount']
+    
+    repeatCount ||= 1
+    repeatCount = 1 if( repeatCount < 1 )
+    repeatCount = repeatCountLimit if( repeatCount > repeatCountLimit )
+    
+    return repeatCount
+  end
+  
+  def sendDiceBotChatMessageOnece(params, message)
+    params = params.clone
     name = params['name']
     state = params['state']
-    message = params['message']
     color = params['color']
     channel = params['channel']
     sendto = params['sendto']
@@ -4136,8 +4210,41 @@ class DodontoFServer
   end
   
   
-  def sendChatMessageMany
-    100.times{ sendChatMessage }
+  def sendChatMessageAll
+    logging("sendChatMessageAll Begin")
+    
+    result = {'result' => "NG" }
+    
+    return result if( $mentenanceModePassword.nil? )
+    chatData = getParamsFromRequestData()
+    
+    password = chatData["password"]
+    logging(password, "password check...")
+    return result unless( password == $mentenanceModePassword )
+    
+    logging("adminPoassword check OK.")
+    
+    rooms = []
+    
+    $saveDataMaxCount.times do |roomNumber|
+      logging(roomNumber, "loop roomNumber")
+      
+      initSaveFiles(roomNumber)
+      
+      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+      next unless( isExist?(trueSaveFileName) )
+      
+      logging(roomNumber, "sendChatMessageAll to No.")
+      sendChatMessageByChatData(chatData)
+      
+      rooms << roomNumber
+    end
+    
+    result['result'] = "OK"
+    result['rooms'] = rooms
+    logging(result, "sendChatMessageAll End, result")
+    
+    return result
   end
   
   def sendChatMessage
@@ -4259,13 +4366,77 @@ class DodontoFServer
     logging("changeMap start.")
     
     changeSaveData(@saveFiles['map']) do |saveData|
-      
-      saveData['mapData'] ||= {}
-      logging(saveData['mapData'], "saveData['mapData']")
-      
-      saveData['mapData'] = mapData
+      draws = getDraws(saveData)
+      setMapData(saveData, mapData)
+      draws.each{|i| setDraws(saveData, i)}
     end
   end
+  
+  
+  def setMapData(saveData, mapData)
+    saveData['mapData'] ||= {}
+    saveData['mapData'] = mapData
+  end
+  
+  def getMapData(saveData)
+    saveData['mapData'] ||= {}
+    return saveData['mapData']
+  end
+  
+  
+  def drawOnMap
+    logging('drawOnMap Begin')
+    
+    params = getParamsFromRequestData()
+    data = params['data']
+    logging(data, 'data')
+    
+    changeSaveData(@saveFiles['map']) do |saveData|
+      setDraws(saveData, data)
+    end
+    
+    logging('drawOnMap End')
+  end
+  
+  def setDraws(saveData, data)
+    return if( data.nil? )
+    return if( data.empty? )
+    
+    info = data.first
+    if( info['imgId'].nil? )
+      info['imgId'] = createCharacterImgId('draw_')
+    end
+    
+    draws = getDraws(saveData)
+    draws << data
+  end
+  
+  def getDraws(saveData)
+    mapData = getMapData(saveData)
+    mapData['draws'] ||= []
+    return mapData['draws']
+  end
+  
+  def clearDrawOnMap
+    changeSaveData(@saveFiles['map']) do |saveData|
+      draws = getDraws(saveData)
+      draws.clear
+    end
+  end
+  
+  def undoDrawOnMap
+    result = {
+      'data' => nil
+    }
+    
+    changeSaveData(@saveFiles['map']) do |saveData|
+      draws = getDraws(saveData)
+      result['data'] = draws.pop
+    end
+    
+    return result
+  end
+  
   
   def addEffect
     effectData = getRequestDataJsonData('effectData')
@@ -5686,10 +5857,13 @@ class DodontoFServer
   
   
   def changeRoundTime
+    jsRoundTimeData = getRequestData('roundTimeData')
+    roundTimeData = getJsonDataFromText(jsRoundTimeData)
+    changeInitiativeData(roundTimeData)
+  end
+  
+  def changeInitiativeData(roundTimeData)
     changeSaveData(@saveFiles['time']) do |saveData|
-      jsRoundTimeData = getRequestData('roundTimeData')
-      roundTimeData = getJsonDataFromText(jsRoundTimeData)
-      
       saveData['roundTimeData'] = roundTimeData;
     end
   end

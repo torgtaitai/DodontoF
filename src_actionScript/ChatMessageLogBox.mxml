@@ -259,7 +259,7 @@
         }
         
         static private function getScrollLimitHeight(chatFontSize:int):int {
-            return (chatFontSize * 2 + 100);
+            return (chatFontSize * 30 + 100);
         }
         
         

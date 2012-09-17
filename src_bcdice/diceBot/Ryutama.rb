@@ -4,7 +4,7 @@ class Ryutama < DiceBot
   
   def initialize
     super
-    @validDiceTypes = [4, 6, 8, 10, 12]
+    @validDiceTypes = [20, 12, 10, 8, 6, 4, 2]
   end
   
   def gameType
@@ -23,33 +23,42 @@ class Ryutama < DiceBot
 MESSAGETEXT
   end
   
-  def dice_command(string, nick_e)
-    debug('Ryutama dice_command begin')
-    rollRyutama(string, nick_e);
+  def rollDiceCommandResult(string)
+    debug('Ryutama rollDiceCommandResult begin')
+    result = rollRyutama(string)
+    
+    if( result.empty? )
+      result = "1"
+    end
+    
+    return result
   end
   
-  def rollRyutama(string, name)
+  def rollRyutama(string)
     debug('rollRyutama begin')
-    unless( /^R(\d+)(,(\d+))?(>=(\d+))?/ === string )
-      debug('unless!!!')
+    unless( /^R(\d+)(,(\d+))?([\+\-\d]+)?(>=(\d+))?/ === string )
+      debug('unmatched!')
       return ''
     end
     debug('matched')
     
     dice1 = $1.to_i
     dice2 = $3.to_i
-    difficulty = $5
+    modifyString = $4
+    difficulty = $6
     
     dice1, dice2 = getDiceType(dice1, dice2)
     if( dice1 == 0 )
       return ''
     end
     
+    modifyString ||= ''
+    modify = parren_killer("(" + modifyString + ")").to_i
     difficulty = getDiffculty(difficulty)
     
     value1 = getRollValue(dice1)
     value2 = getRollValue(dice2)
-    total = value1 + value2
+    total = value1 + value2 + modify
     
     result = getResultText(value1, value2, dice1, dice2, difficulty, total)
     unless( result.empty? )
@@ -58,9 +67,10 @@ MESSAGETEXT
     
     value1Text = "#{value1}(#{dice1})"
     value2Text = ((value2 == 0) ? "" : "+#{value2}(#{dice2})")
+    modifyText = getModifyString(modify)
     
-    baseText = getBaseText(dice1, dice2, difficulty)
-    output = "#{name}: (#{baseText}) ＞ #{value1Text}#{value2Text} ＞ #{total}#{result}";
+    baseText = getBaseText(dice1, dice2, modify, difficulty)
+    output = "(#{baseText}) ＞ #{value1Text}#{value2Text}#{modifyText} ＞ #{total}#{result}";
     return output
   end
   
@@ -110,6 +120,7 @@ MESSAGETEXT
   def isValidDiceOne(dice)
     @validDiceTypes.include?(dice)
   end
+  
   
   def getDiffculty(difficulty)
     
@@ -166,11 +177,15 @@ MESSAGETEXT
     return false
   end
   
-  def getBaseText(dice1, dice2, difficulty)
+  def getBaseText(dice1, dice2, modify, difficulty)
     baseText = "R#{dice1}"
+    
     if( dice2 != 0 )
       baseText += ",#{dice2}"
     end
+    
+    baseText += getModifyString(modify)
+    
     unless( difficulty.nil? )
       baseText += ">=#{difficulty}"
     end
@@ -178,4 +193,12 @@ MESSAGETEXT
     return baseText
   end
   
+  def getModifyString(modify)
+    if( modify > 0 )
+      return "+" + modify.to_s
+    elsif( modify < 0 )
+      return modify.to_s
+    end
+    return ''
+  end
 end

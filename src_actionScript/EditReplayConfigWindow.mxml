@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="180"
+   height="210"
    title="リプレイ環境設定" 
    showCloseButton="true"
    >
@@ -14,9 +14,12 @@
   <mx:CheckBox id="position" label="座標文字を表示する" selected="true"
                height="100%"
                />
+  <mx:CheckBox id="dice" label="座標文字を表示する" selected="true"
+               height="100%"
+               />
   <mx:HBox width="100%">
     <mx:Label text="チャットウィンドウ背景色:" />
-    <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0x000000"
+    <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0xFFFFFF"
                     toolTip="チャット背景色設定" />
   </mx:HBox>
 <!--  
@@ -38,10 +41,16 @@
     override protected function setup():void {
     }
     
+    public function init(replayConfig:Object):void {
+        grid.selected = replayConfig.grid;
+        position.selected = replayConfig.position;
+        dice.selected = replayConfig.dice;
+    }
+    
     private var resultCallBack:Function;
     
     public function setResultCallBack(func:Function):void {
-	resultCallBack = func;
+        resultCallBack = func;
     }
     
     public function execute():void {
@@ -50,6 +59,7 @@
             var replayConfig:Object = {
                 "grid" : grid.selected,
                 "position" : position.selected,
+                "dice" : dice.selected,
                 "chatBackgroundColor" : ChatFontWindow.getColor(chatBackgroundColorPicker)
 //              "channelNames" : channelNames.text.split(/[\s　]+/)
             };

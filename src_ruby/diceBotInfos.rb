@@ -111,6 +111,24 @@ INFO_MESSAGE_TEXT
 　・射撃攻撃ファンブル表　SFT
 INFO_MESSAGE_TEXT
   },
+
+  {
+    :name => 'カードランカー',
+    :gameType => 'CardRanker',
+    :prefixs => ['RM'],
+    :info => <<INFO_MESSAGE_TEXT
+ランダムでモンスターカードを選ぶ (RM)
+場所表 (ST)
+街中場所表 (CST)
+郊外場所表 (OST)
+学園場所表 (SST)
+運命表 (DT)
+大会運命表 (TDT)
+学園運命表 (SDT)
+崩壊運命表 (CDT)
+INFO_MESSAGE_TEXT
+  },
+
   {
     :name => 'カオスフレア',
     :gameType => 'Chaos Flare',
@@ -120,6 +138,7 @@ INFO_MESSAGE_TEXT
 ファンブル時は達成値を-20します。
 INFO_MESSAGE_TEXT
   },
+
   {
     :name => 'ガンドッグ',
     :gameType => 'Gundog',
@@ -147,7 +166,7 @@ INFO_MESSAGE_TEXT
   {
     :name => 'クトゥルフ',
     :gameType => 'Cthulhu',
-    :prefixs => ['RES\(\d+'],
+    :prefixs => ['RES\(\d+', 'CBR\(\d+,\d+\)'],
     :info => <<INFO_MESSAGE_TEXT
 ・1D100の目標値判定で、クリティカル(決定的成功)／スペシャル／ファンブル(致命的失敗)の自動判定。
 　例）1D100<=50
@@ -158,6 +177,11 @@ INFO_MESSAGE_TEXT
 　抵抗ロールに変換して成功したかどうかを表示します。
 　例）RES(12-10)
 　　　Cthulhu : (1d100<=60) → 35 → 成功
+
+・組み合わせ判定　(CBR(x,y))
+　目標値 x と y で％ロールを行い、成功したかどうかを表示します。
+　例）CBR(50,20)
+　　　Cthulhu : (1d100<=70,20) → 22[成功,失敗] → 失敗
 INFO_MESSAGE_TEXT
   },
   {
@@ -321,6 +345,12 @@ INFO_MESSAGE_TEXT
 　修正値が数字のみの場合は、固定値として処理されます。
 　クリティカルする場合は止まるまで自動で振りますが、固定値や修正値の適用は最初の一回だけです。
 　例）K20$+1　　　K10+5$9　　　k10-5@9$+2　　　k10[9]+10$9
+
+・首切り刀用レーティング上昇 r10
+　例）K20r10　K30+24@8R10　K40+24@8$12r10
+
+・グレイテストフォーチュンは末尾に gt
+　例）K20gf　K30+24@8GF　K40+24@8$12r10gf
 INFO_MESSAGE_TEXT
   },
   {

@@ -115,6 +115,25 @@ package {
                              gridColor, gridInterval, isAlternately, mapMarks);
         }
         
+        public function drawOnMap(data:Array):void {
+            if( data == null ) {
+                return;
+            }
+            if( data.length == 0 ) {
+                return;
+            }
+            
+            sender.drawOnMap(data);
+        }
+        
+        public function clearDrawOnMap():void {
+            sender.clearDrawOnMap();
+        }
+        
+        public function undoDrawOnMap(resultFunction:Function):void {
+            sender.undoDrawOnMap(resultFunction);
+        }
+        
         public function deleteImage(imageUrlList:Array,
                                     resultFunction:Function):void {
             sender.deleteImage(imageUrlList, resultFunction);
@@ -570,6 +589,9 @@ package {
             sender.getLoginInfo(resultFunction, uniqueId);
         }
         
+        public function sendChatMessageAll(name:String, message:String, password:String):void {
+            sender.sendChatMessageAll(name, message, password);
+        }
         public function sendChatMessage(chatSendData:ChatSendData):void {
             var name:String = chatSendData.getNameAndState();
             var message:String = chatSendData.getMessage();
@@ -586,18 +608,6 @@ package {
             sender.sendChatMessage(chatSendData, callBack);
         }
         
-        public function sendChatMessageMany(chatCharacterName:String, chatMessage:String, color:String):void {
-            if( chatCharacterName.length == 0 ) {
-                throw new Error("発言者を入力してください。");
-            }
-            if( chatMessage.length == 0 ) {
-                //throw new Error("空メッセージは送信できません。");
-                return;
-            }
-            
-            sender.sendChatMessageMany(chatCharacterName, chatMessage, color);
-        }
-        
         private function checkPlayRoom(playRoomName:String,
                                        playRoomPassword:String,
                                        chatChannelNames:Array):void {
@@ -606,7 +616,8 @@ package {
             }
         }
         
-        public function createPlayRoom(playRoomName:String,
+        public function createPlayRoom(createPassword:String,
+                                       playRoomName:String,
                                        playRoomPassword:String,
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
@@ -616,7 +627,7 @@ package {
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             checkPlayRoom(playRoomName, playRoomPassword, chatChannelNames);
-            sender.createPlayRoom(playRoomName, playRoomPassword, chatChannelNames, 
+            sender.createPlayRoom(createPassword, playRoomName, playRoomPassword, chatChannelNames, 
                                   canUseExternalImage, canVisit, gameType, viewStates, 
                                   playRoomIndex, resultFunction);
         }

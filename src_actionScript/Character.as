@@ -199,10 +199,78 @@ package {
             
             addMenuItem(menu, "キャラクターの変更", thisObj.getItemPopUpChangeWindow);
             addMenuItem(menu, "キャラクターの削除", thisObj.getContextMenuItemRemoveCharacter, true);
+            addMenuItem(menu, "キャラクターの複製", thisObj.cloneCharacter, true);
             openUrlMenu = addMenuItem(menu, "データ参照先URLを開く", thisObj.getContextMenuItemOpenUrl, true);
             setUrlMenuVisible();
             
             view.setContextMenu(menu);
+        }
+        
+        protected function cloneCharacter(event:ContextMenuEvent):void {
+            Log.logging("cloneCharacter begin");
+            cloneCharacterAction();
+        }
+        
+        private function cloneCharacterAction(point:Point = null):void {
+            var index:int = getNewDogTagIndex();
+            cloneCharacterByIndex(index, point);
+        }
+        
+        private function cloneCharacterByIndex(index:int, point:Point, retryCount:int = 0):Boolean {
+            Log.logging("cloneCharacterByIndex index", index);
+            Log.logging("retryCount", retryCount);
+            if( retryCount > 5 ) {
+                return false;
+            }
+            
+            var baseName:String = getBaseName();
+            var jsonData:Object = getJsonDataEmptyId();
+            jsonData.name = baseName + "_" + index;
+            jsonData.dogTag = "" + index;
+            
+            if( point != null ) {
+                jsonData.x = point.x;
+                jsonData.y = point.y;
+            }
+            
+            var retryAction:Function = function():Boolean{ return cloneCharacterByIndex(index + 1, point, retryCount + 1); };
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.getSender().addCharacter(jsonData, null, retryAction);
+            Log.logging("addCharacter");
+            
+            return true;
+        }
+        
+        private function getNewDogTagIndex():int {
+            var baseName:String = getBaseName();
+            var newIndex:int = 1;
+            
+            var characters:Array = getMap().getCharacters();
+            for each (var character:Character in characters) {
+                    if( character.getBaseName() != baseName ) {
+                        continue;
+                    }
+                    
+                    Log.logging("character.getBaseName()", character.getBaseName());
+                    Log.logging("character.getDogTag()", character.getDogTag());
+                    var index:int = parseInt( character.getDogTag() );
+                    newIndex = Math.max(newIndex, index);
+                }
+            
+            newIndex++;
+            Log.logging("newIndex", newIndex);
+            
+            return newIndex;
+        }
+        
+        public function getBaseName():String {
+            var result:Object = /(.+)_(\d+)/.exec( getName() );
+            if( result == null ) {
+                return getName();
+            }
+            
+            return result[1];
         }
         
         protected function getContextMenuItemOpenUrl(event:ContextMenuEvent):void {
@@ -246,10 +314,12 @@ package {
             
             //Ctrlキーを押しながらのクリックで一括削除用の選択<->選択解除へ。
             //一度でもCtrlキーを離してキャラクターをクリックしたら解除へ。
+            //あるいはマップをクリックしても選択解除されます。
             if( event.ctrlKey ) {
-                clickCharacterForBatchDelete();
+                clickCharacterForBatchDelete(event);
                 return;
             }
+            
             unSelectAllCharacters();
             
             super.mouseDownEvent(event);
@@ -257,12 +327,34 @@ package {
         
         static private var charactersForBatchDelete:Array = new Array();
         
-        public function clickCharacterForBatchDelete():void {
+        public function clickCharacterForBatchDelete(event:MouseEvent):void {
             if( isInclude(charactersForBatchDelete, this) ) {
                 unSelectCharacterForBatchDelete();
+                dragDropForClone.removeDropEvent();
             } else {
                 selectCharacterForBatchDelete();
+                dragDropForClone.addDropEvent( getMap().getOverMapLayer() );
+                dragForCloneEvent(event);
             }
+        }
+        
+        static private var dragDropForClone:DragDrop = new DragDrop();        
+        
+        public function dragForCloneEvent(event:MouseEvent):void {
+            var value:Object = {
+                "character" : this };
+            
+            dragDropForClone.dragStartHandler(event,
+                                              this.getView(),
+                                              getSquareLength(), getSquareLength(),
+                                              value, this.cloneCharacterByDrag);
+        }
+        
+        private function cloneCharacterByDrag(obj:Object = null):void {
+            var point:Point = getMap().getMouseCurrentPoint();
+            cloneCharacterAction(point);
+            
+            unSelectAllCharacters();
         }
         
         private function isInclude(array:Array, target:Object):Boolean {
@@ -292,7 +384,7 @@ package {
             this.changeSelectedColor();
         }
         
-        public function unSelectAllCharacters():void {
+        static public function unSelectAllCharacters():void {
             while( charactersForBatchDelete.length > 0 ) {
                 var character:Character = charactersForBatchDelete.pop();
                 character.changeSelectedColor();
@@ -436,6 +528,10 @@ package {
             }
             
             view.addChildInner( statusMarkerBase );
+        }
+        
+        private function getDogTag():String {
+            return this.dogTag;
         }
         
         private function setDogTag(dogTag_:String):void {

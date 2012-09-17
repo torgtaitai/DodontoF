@@ -26,7 +26,6 @@
         import mx.core.IFlexDisplayObject;
         import mx.core.UIComponent;
         import mx.events.MenuEvent;
-        import mx.events.MenuEvent;
         import mx.utils.StringUtil;
         
         

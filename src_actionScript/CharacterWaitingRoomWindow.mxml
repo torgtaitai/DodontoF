@@ -58,7 +58,6 @@
         squareLength = Map.getSquareLength();
         
         dragDropForExit.addDropEvent( map.getOverMapLayer() );
-        
         dragDropForEnter.addDropEvent( this );
         
         getWaitingRoomInfo();

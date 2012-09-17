@@ -333,8 +333,15 @@ package {
             return true;
         }
         
+        private var isFirstReplayConfigChek:Boolean = true;
+        
         private function analyzeReplayConfig(replayConfig:Object):void {
             Log.logging("analyzeReplayConfig replayConfig", replayConfig);
+            
+            if( isFirstReplayConfigChek ) {
+                DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isDiceVisible", true);
+                isFirstReplayConfigChek = false;
+            }
             
             if( replayConfig == null ) {
                 return;
@@ -344,6 +351,12 @@ package {
             DodontoF_Main.getInstance().getReplay().setActiveChannel(replayConfig.channelNames);
             DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isGridVisible", replayConfig.grid);
             DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isPositionVisible", replayConfig.position);
+            
+            if( replayConfig.dice == null ) {
+                replayConfig.dice = true;
+            }
+            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isDiceVisible", replayConfig.dice);
+            
             ChatWindow.getInstance().setChatBackgroundColor(replayConfig.chatBackgroundColor);
         }
         
@@ -435,6 +448,7 @@ package {
         }
         
         private function analyzeMap(mapData:Object):void {
+            Log.logging("analyzeMap Begin");
             if( mapData.mapType != "imageGraphic" ) {
                 return;
             }
@@ -443,6 +457,9 @@ package {
                           mapData.xMax, mapData.yMax,
                           mapData.gridColor, mapData.gridInterval, mapData.isAlternately);
             map.changeMarks(mapData.mapMarks);
+            map.changeDraws(mapData.draws);
+            
+            Log.logging("analyzeMap End");
         }
         
         

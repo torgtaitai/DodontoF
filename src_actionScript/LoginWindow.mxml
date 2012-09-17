@@ -76,7 +76,7 @@
                     change="savePlayerInfo()"
                     />
       
-      <mx:Spacer width="50" />
+      <mx:Spacer id="yourNameSpace" width="50" />
       
       <mx:Label text="現在のログイン状況：" />
 <!--
@@ -130,6 +130,19 @@
     </mx:HBox>
     
   </mx:Box>
+  
+  <mx:HBox id="broadCastMessageBox" height="0" width="100%" enabled="false" visible="false" >
+    <mx:Box width="150" height="100%">
+      <mx:Label text="全部屋への一斉送信メッセージ" />
+      <mx:HBox width="100%" height="100%">
+        <mx:Label text="発言者："/>
+        <mx:TextInput id="broadCastMessageName" width="100%" enabled="false" visible="false"
+                      text="システム管理者" />
+      </mx:HBox>
+    </mx:Box>
+    <mx:TextArea id="broadCastMessageText" height="100%" width="100%" enabled="false" visible="false" />
+    <mx:Button id="broadCastMessageButton" label="全部屋へ一斉発言" click="sendMessageAll()" enabled="false" visible="false" />
+  </mx:HBox>
   
   <mx:Script>
     <![CDATA[
@@ -220,11 +233,42 @@
     }
     
     private function setAdminMode():void {
-        if( DodontoF_Main.getInstance().isMode("admin") ) {
-            adminPassword.percentHeight = 100;
-            adminPassword.percentWidth = 100;
-            adminPassword.enabled = true;
+        if( ! DodontoF_Main.getInstance().isMode("admin") ) {
+            return;
         }
+        
+        yourNameSpace.width = 0;
+        
+        adminPassword.percentHeight = 100;
+        adminPassword.width = 100;
+        adminPassword.enabled = true;
+        
+        broadCastMessageBox.height = 50;
+        broadCastMessageBox.visible = true;
+        broadCastMessageBox.enabled = true;
+        
+        broadCastMessageName.visible = true;
+        broadCastMessageName.enabled = true;
+        
+        broadCastMessageText.visible = true;
+        broadCastMessageText.enabled = true;
+        
+        broadCastMessageButton.visible = true;
+        broadCastMessageButton.enabled = true;
+    }
+    
+    private function sendMessageAll():void {
+        Log.logging("sendMessageAll Begin");
+        try { 
+            guiInputSender.sendChatMessageAll(broadCastMessageName.text,
+                                              broadCastMessageText.text,
+                                              adminPassword.text);
+        } catch (error:Error) {
+            Log.loggingException("sendMessageAll", error);
+        }
+        
+        broadCastMessageText.text = "";
+        Log.logging("sendMessageAll Begin");
     }
 
     private function clickPlayRoomStateInfo():void {
@@ -430,12 +474,14 @@
     }
     
     private var loginUserCountList:Object;
+    private var isNeedCreatePassword:Boolean = false;
     
     private function setLoginInitialInfo(jsonData:Object):void {
         if( jsonData.fps != null ) {
             stage.frameRate = jsonData.fps;
         }
         
+        isNeedCreatePassword = jsonData.isNeedCreatePassword 
         Config.getInstance().setImageUploadDirInfo(jsonData.imageUploadDirInfo);
         
         playRoomGetRangeMax = jsonData.playRoomGetRangeMax;
@@ -792,7 +838,7 @@
             
             if( ! isRoomExist ) {
                 var createPlayRoomWindow:CreatePlayRoomWindow = DodontoF.popup(CreatePlayRoomWindow, true) as CreatePlayRoomWindow;
-                createPlayRoomWindow.initParams(roomNumber, enterPlayRoomFunction);
+                createPlayRoomWindow.initParams(roomNumber, isNeedCreatePassword, enterPlayRoomFunction);
                 
                 return;
             }
@@ -823,7 +869,7 @@
         enableLoginButton(false);
         
         var createPlayRoomWindow:CreatePlayRoomWindow = DodontoF.popup(CreatePlayRoomWindow, true) as CreatePlayRoomWindow;
-        createPlayRoomWindow.initParams(-1,
+        createPlayRoomWindow.initParams(-1, isNeedCreatePassword,
                                         function(roomIndex:int):void {
                                             //プレイルームを作り終わったらそのルームナンバーへＵＲＬから直接ログイン
                                             loginByRoomNumber(roomIndex);

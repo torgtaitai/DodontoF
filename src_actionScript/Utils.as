@@ -366,11 +366,12 @@ package {
                     continue;
                 }
                 
-                if( (targetChar == " ") || (targetChar == "　") ) {
-                    isDiceStringEnd = true;
-                } else {
-                    targetChar = getChangedCharacterZenkakuToHankaku(targetChar, startCode, endCode, changeStartCode);
-                }
+                //if( (targetChar == " ") || (targetChar == "　") ) {
+                //    isDiceStringEnd = true;
+                //} else {
+                //    targetChar = getChangedCharacterZenkakuToHankaku(targetChar, startCode, endCode, changeStartCode);
+                //}
+                targetChar = getChangedCharacterZenkakuToHankaku(targetChar, startCode, endCode, changeStartCode);
                 
                 resultString += targetChar;
             }

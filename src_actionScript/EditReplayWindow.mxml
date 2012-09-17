@@ -436,7 +436,8 @@
         if( jsonData.replayConfig ) {
             result.dataType = "リプレイ再生時設定";
             result.detail = "グリッド表示" + (jsonData.replayConfig.grid ? "あり" : "なし")
-            + "、座標文字" + (jsonData.replayConfig.position ? "あり" : "なし");
+            + "、座標文字" + (jsonData.replayConfig.position ? "あり" : "なし")
+            + "、ダイス表示" + ( jsonData.replayConfig.dice ? "あり" : "なし");
 //            + "、チャットタブ：" + jsonData.replayConfig.channelNames.join(",");
         }
         

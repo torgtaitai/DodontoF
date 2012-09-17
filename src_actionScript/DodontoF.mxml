@@ -32,15 +32,21 @@
                 click="popup(AddMemoWindow, true)"
                  />
       
+      <mx:Button id="openDrawWindow"
+                 icon="{DrawMapWindow.pencilIcon}"
+                 label="手書き"
+                 click="DrawMapWindow.open(openDrawWindow)"
+                 toggle="true"
+                 />
       <mx:Spacer width="50%" />
       
       <mx:Button id="graveyard"
-                label="墓場"
-                click="popup(GraveyardWindow, true)"
-                dragEnter="graveyardDragEnterHandler(event);" 
-                dragOver="graveyardDragOver(event)"
-                dragDrop="graveyardDragDropHandler(event)"
-                dragExit="graveyardDragExitHandler(event)"
+                 label="墓場"
+                 click="popup(GraveyardWindow, true)"
+                 dragEnter="graveyardDragEnterHandler(event);" 
+                 dragOver="graveyardDragOver(event)"
+                 dragDrop="graveyardDragDropHandler(event)"
+                 dragExit="graveyardDragExitHandler(event)"
                 />
       
       <mx:Spacer width="50%" />

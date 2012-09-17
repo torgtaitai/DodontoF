@@ -12,6 +12,15 @@
           verticalGap="1" horizontalGap="1" >
     
 	<mx:Label text="新規プレイルームを作成します。" />
+      
+    <mx:HBox id="createPasswordBox" enabled="false" visible="false"
+             height="0" width="100%" horizontalAlign="center" verticalAlign="middle" >
+      <mx:HRule width="50" strokeWidth="1" shadowColor="black" strokeColor="black"/>
+	  <mx:Label text="認証パスワード:" />
+      <mx:TextInput id="createPassword" width="100%" text="" />
+      <mx:HRule width="50" strokeWidth="1" shadowColor="black" strokeColor="black"/>
+    </mx:HBox>
+      
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
 	  <mx:Label text="プレイルーム名:" />
       <mx:TextInput id="playRoomName" width="100%" text="" />
@@ -109,12 +118,26 @@
     protected var canselFunction:Function;
     protected var playRoomIndex:int;
     
-    public function initParams(playRoomIndex_:int, resultFunction_:Function = null, canselFunction_:Function = null):void {
+    public function initParams(playRoomIndex_:int, isNeedCreatePassword:Boolean, 
+                               resultFunction_:Function = null, canselFunction_:Function = null):void {
         playRoomIndex = playRoomIndex_;
         resultFunction = resultFunction_;
         canselFunction = canselFunction_;
         playRoomName.text = "仮プレイルーム（削除可能）";
         playRoomName.toolTip = "プレイルーム名を設定しない場合、仮使用とみなして削除されます。\n正式に利用する場合には正しく名前をつけましょう。";
+        
+        setCreatePasswordMod(isNeedCreatePassword);
+    }
+    
+    private function setCreatePasswordMod(isNeedCreatePassword:Boolean):void {
+        if( ! isNeedCreatePassword ) {
+            return;
+        }
+        
+        createPasswordBox.enabled = true;
+        createPasswordBox.visible = true;
+        createPasswordBox.height = 35;
+        this.height += createPasswordBox.height;
     }
     
     override protected function setup():void {
@@ -236,7 +259,8 @@
         
         try {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.createPlayRoom(playRoomName.text,
+            guiInputSender.createPlayRoom(createPassword.text,
+                                          playRoomName.text,
                                           playRoomPassword.text,
                                           chatChannelNames,
                                           canUseExternalImage.selected,

@@ -322,10 +322,53 @@ package {
                     thisObj.extendMovablePieceViewPosition( false );
                 });
             
+            setWheelEvent();
+            
             initEvent();
             initRotater();
             //            initTurnUper();
         }
+        
+        
+        private function setWheelEvent():void {
+            view.addEventListener(MouseEvent.MOUSE_WHEEL, function (event:MouseEvent):void {
+                    
+                    if( ! thisObj.canExtend() ) {
+                        return;
+                    }
+                    
+                    var isUp:Boolean = (event.delta > 0);
+                    thisObj.rotateViewIndex(isUp);
+                    thisObj.extendMovablePieceViewPosition( true );
+                    
+                    event.stopPropagation();
+                });
+        }
+        
+        
+        private function rotateViewIndex(isUp:Boolean):void {
+            var point:Point = new Point(getX(), getY());
+            var pieceList:Array = getMap().getSamePositionMovablePieciesOrderdByViewIndex(point);
+            
+            if( pieceList.length <= 1 ) {
+                return;
+            }
+            
+            var first:MovablePiece = pieceList[0] as MovablePiece;
+            var last:MovablePiece = pieceList[pieceList.length - 1] as MovablePiece;
+            
+            if( first == null || last == null ) {
+                return;
+            }
+            
+            if( isUp ) {
+                first.setViewForeground();
+            } else {
+                var index:int = first.getViewIndex();
+                last.setViewIndex(index);
+            }
+        }
+        
         
         private var isLittleZoomed:Boolean = true;
         

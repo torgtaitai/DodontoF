@@ -2,12 +2,15 @@
 
 package {
     
-    import mx.core.UIComponent;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.geom.Point;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
+    import mx.controls.Menu;
+    import mx.core.UIComponent;
+    import mx.events.MenuEvent;
     import mx.managers.PopUpManager;
     
     public class DiceSymbol extends MovablePiece {
@@ -126,6 +129,12 @@ package {
                                            separatorBefore) );
             }
             
+            if( this.maxNumber > limitMaxNumber ) {
+                hideMenu = addMenuItem(menu, "ダイス目を10以上に", 
+                                       this.getContextMenuItemSetDiceOver10Function(),
+                                       true);
+            }
+            
             hideMenu = addMenuItem(menu, "ダイスを隠す", this.getContextMenuItemHideDice, true);
             allMenus.push( hideMenu );
             
@@ -138,6 +147,31 @@ package {
             openDice(true);
         }
         
+        private function getContextMenuItemSetDiceOver10Function():Function {
+            var from:int = limitMaxNumber + 1;
+            var to:int = this.maxNumber;
+            
+            return function(event:ContextMenuEvent):void {
+                var parent:UIComponent = event.mouseTarget as UIComponent;
+                var menuData:Array = [];
+                for(var i:int = from ; i <= to ; i++) {
+                    var index:int = i;
+                    
+                    var childrenInfo:Object = {
+                        label: "" + index,
+                        index: index
+                    };
+                    menuData.push(childrenInfo);
+                }
+                
+                var menu:Menu = Menu.createMenu(parent, menuData);
+                
+                menu.addEventListener("itemClick", getMenuItemChangeNumberSubMenu);
+                var point:Point = parent.localToGlobal(new Point(0, 0));
+                menu.show(point.x + parent.width, point.y);
+            }
+        }
+            
         private function getContextMenuItemHideDice(event:ContextMenuEvent):void {
             openDice(false);
         }
@@ -190,6 +224,11 @@ package {
             return function(event:ContextMenuEvent):void {
                 thisObj.changeNumber(targetNumber);
             };
+        }
+        
+        public function getMenuItemChangeNumberSubMenu(event:MenuEvent):void {
+            var index:int = event.item.index;
+            thisObj.changeNumber(index);
         }
         
         /*

@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   x="220"
+   y="250"
+   width="300"
+   height="200"
+   creationComplete="setup()"
+   >
+  
+  <mx:HBox width="100%">
+    <mx:Button id="paint"
+               icon="{pencilIcon}"
+               click="setMapDrawMode(true)"
+               toggle="true"
+               selected="true"
+               verticalGap="0"
+               horizontalGap="0"
+               width="25"
+               />
+    
+    <mx:Button id="eraser"
+               icon="{eraserIcon}"
+               click="setMapDrawMode(false)"
+               toggle="true"
+               width="25"
+               />
+      
+    <mx:Spacer width="10" />
+	<mx:Label text="色:" />
+    <mx:ColorPicker id="colorPicker" showTextField="true" selectedColor="0x000000" change="setDrawState()"/>
+    
+    <mx:Spacer width="100%" />
+
+    <mx:Button id="undo"
+               toolTip="取り消し（アンドゥ）"
+               icon="{undoIcon}"
+               click="undoDrawOnMap()"
+               width="25"
+               />
+      
+    <mx:Button id="redo"
+               toolTip="取り消しの取り消し（リドゥ）"
+               icon="{redoIcon}"
+               click="redoDrawOnMap()"
+               width="25"
+               />
+    
+    <mx:Spacer width="10" />
+  </mx:HBox>
+  
+  <mx:Spacer height="10" />
+  
+  <mx:HBox width="100%" >
+    <mx:Label text="太さ:" />
+    <mx:HSlider id="lineWeight" 
+                width="200"
+                showTrackHighlight="true"
+                minimum="1" maximum="200" value="3"
+                snapInterval="1"
+                tickInterval="50"
+                change="setLineWeight(lineWeight.value)" />
+  </mx:HBox>
+  <mx:NumericStepper id="lineWeightStep"
+                     minimum="1" maximum="200" value="3"
+                     change="setLineWeight(lineWeightStep.value)" />
+  
+  <mx:Spacer height="15" />
+  
+  <mx:HBox width="100%">
+    <mx:ProgressBar id="lineCounter"
+                    width="100%" height="20"
+                    indeterminate="false"
+                    mode="manual"
+                    label="%1"
+                    />
+    
+    <mx:Button id="clearDraw"
+               label="全削除"
+               click="clearDrawOnMap()"
+               />
+  </mx:HBox>
+  
+  <mx:Script>
+    <![CDATA[
+     
+    [Embed(source='image/icons/ico_pen1-5.gif')]
+    [Bindable]
+    public static var pencilIcon:Class;
+    
+    [Embed(source='image/icons/ico_eraser1_1.gif')]
+    [Bindable]
+    private static var eraserIcon:Class;
+    
+    [Embed(source='image/icons/arrow_undo.png')]
+    [Bindable]
+    private static var undoIcon:Class;
+    
+    [Embed(source='image/icons/arrow_redo.png')]
+    [Bindable]
+    private static var redoIcon:Class;
+    
+	import mx.managers.CursorManager;
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    
+    static private var thisObj:DrawMapWindow;
+    static private var parentButton:Button;
+    
+    private var paintLineWeight:int = 3;
+    private var eraserLineWeight:int = 3;
+    static private var lineCountLimit:int = 3000;
+    static private var totalLineCount:int = 0;
+    
+    static public function setLineCount(count:int):void {
+        totalLineCount = count;
+        
+        if( thisObj != null ) {
+            thisObj.setLineCountLocal();
+        }
+    }
+    
+    public function setLineCountLocal():void {
+        lineCounter.setProgress(totalLineCount, lineCountLimit);
+        printLineCounterLabel();
+    }
+    
+    private function printLineCounterLabel():void {
+        var message:String = "";
+
+        var percent:int = (100 * totalLineCount / lineCountLimit);
+        if( percent > 100 ) {
+            message +="描き込み量：大量！";
+        } else if( percent > 60 ) {
+            message +="描き込み量：多い";
+        } else if( percent > 30 ) {
+            message +="描き込み量：普通";
+        } else {
+            message +="描き込み量：軽い";
+        }
+        
+        message += "(%1ポイント)";
+        lineCounter.label = message;
+    }
+    
+    static public function open(button:Button):void {
+        parentButton = button;
+        
+        if( thisObj == null ) {
+            thisObj = DodontoF.popup(DrawMapWindow, true) as DrawMapWindow;
+            thisObj.setEvents();
+        }
+        
+        var isDrawMode:Boolean = button.selected;
+        
+        thisObj.visible = isDrawMode;
+        getMap().setDrawMode( isDrawMode );
+        
+        if( isDrawMode ) {
+            init();
+        } else {
+            thisObj.changeCursor( false );
+        }
+    }
+    
+    private function setEvents():void {
+        thisObj.addEventListener(MouseEvent.ROLL_OUT, rollOutFromWindow);
+        getMap().getOverMapLayer().addEventListener(MouseEvent.ROLL_OVER, rollOutFromWindow);
+        
+        parentButton.addEventListener(MouseEvent.ROLL_OVER, rollOverToWindow);
+    }
+    
+    private function rollOutFromWindow(event:MouseEvent):void {
+        thisObj.visible = false;
+        thisObj.changeCursor( true );
+    }
+    
+    private function rollOverToWindow(event:MouseEvent):void {
+        if( parentButton.selected ) {
+            thisObj.changeCursor( false );
+            thisObj.visible = true;
+        }
+    }
+    
+    override protected function startDragging(event:MouseEvent):void {
+        //ドラッグを許可しない！
+    }
+    
+    protected function setup():void {
+        this.opaqueBackground = 0xEFEEEF;
+        this.x = parentButton.x + 10;
+        this.y = parentButton.y + parentButton.height + 7;
+        this.lineCounter.minimum = 0;
+        this.lineCounter.maximum = lineCountLimit;
+        
+        colorPicker.selectedColor = ChatWindow.getInstance().getChatFontColorValue();
+        init();
+    }
+    
+    private function init():void {
+        setMapDrawMode(true);
+        setLineCountLocal();
+    }
+    
+    private function setLineWeight(value:int):void {
+        lineWeightStep.value = value;
+        lineWeight.value = value;
+        
+        if( isPaintMode() ) {
+            paintLineWeight = lineWeight.value;
+        } else {
+            eraserLineWeight = lineWeight.value;
+        }
+        
+        setDrawState();
+    }
+    
+    private function setMapDrawMode(isPaint:Boolean):void {
+        paint.selected = isPaint;
+        eraser.selected = (! isPaint);
+        
+        lineWeight.value = (isPaint ? paintLineWeight : eraserLineWeight );
+        lineWeightStep.value = lineWeight.value;
+        
+        setDrawState();
+    }
+    
+    private function isPaintMode():Boolean {
+        return paint.selected;
+    }
+    
+    private function changeCursor(isChanged:Boolean):void {
+        CursorManager.removeCursor(CursorManager.currentCursorID);
+        
+        if( ! isChanged ) {
+            return;
+        }
+        
+        var isDrawMode:Boolean = getMap().getDrawMode();
+        if( ! isDrawMode ) {
+            return;
+        }
+        
+        var cursor:Class = null;
+        var offX:Number = 0;
+        var offY:Number = 0;
+        
+        if( paint.selected ) {
+            cursor = pencilIcon;
+            offX = 0;
+            offY = -13;
+        } else {
+            cursor = eraserIcon;
+            offX = 0
+            offY = -11;
+        }
+        
+        
+        if( cursor != null ) {
+            CursorManager.setCursor(cursor, 2, offX, offY);
+        }
+    }
+    
+    private function setDrawState():void {
+        getMap().setDrawState(lineWeight.value, colorPicker.selectedColor, eraser.selected);
+    }
+    
+    
+    static private var redoDataList:Array = new Array();
+    
+    static public function clearRedoList():void {
+        redoDataList = new Array();
+    }
+    
+    private function undoDrawOnMap():void {
+        getMap().undoDrawOnMap( getUndoResult );
+    }
+    
+    private function getUndoResult(obj:Object):void {
+        var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+        
+        var data:Array = jsonData.data as Array;
+        if( data == null ) {
+            return;
+        }
+        
+        redoDataList.push(data);
+    }
+    
+    private function redoDrawOnMap():void {
+        var data:Array = redoDataList.pop();
+        if( data == null ) {
+            return;
+        }
+        
+        DodontoF_Main.getInstance().getGuiInputSender().drawOnMap( data );
+    }
+    
+    
+    static private function getMap():Map {
+        return DodontoF_Main.getInstance().getMap();
+    }
+    
+    private function clearDrawOnMap():void {
+        Utils.askByAlert("マップ描消去",
+                         "マップの全描き込みを削除してよいですか？",
+                         function():void {
+                             DodontoF_Main.getInstance().getGuiInputSender().clearDrawOnMap();
+                             parentButton.selected = false;
+                             open(parentButton);
+                         }
+                         );
+    }
+    
+    
+        ]]>
+  </mx:Script>
+  
+</mx:TitleWindow>

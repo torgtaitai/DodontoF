@@ -613,6 +613,36 @@ package {
             this.sendCommandData(params);
         }
         
+        public function drawOnMap(data:Array):void {
+            var jsonData:Object = {
+                "data" : data
+            }
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            var params:String = getParamString("drawOnMap", [["params", jsonParams]]);
+            
+            this.sendCommandData(params);
+            Log.logging("drawLineOnMap End");
+        }
+        
+        public function clearDrawOnMap():void {
+            var jsonData:Object = {
+            }
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            var params:String = getParamString("clearDrawOnMap", [["params", jsonParams]]);
+            
+            this.sendCommandData(params);
+        }
+        
+        public function undoDrawOnMap(resultFunction:Function):void {
+            var jsonData:Object = {
+            }
+            var jsonParams:String = getEncodedJsonString(jsonData);
+            var params:String = getParamString("undoDrawOnMap", [["params", jsonParams]]);
+            
+            this.sendCommandData(params, resultFunction);
+        }
+        
+        
         public function deleteImage(imageUrlList:Array,
                                     resultFunction:Function):void {
             var jsonData:Object = {
@@ -656,15 +686,18 @@ package {
             this.sendCommandData(params);
         }
         
-        public function addCharacter(characterJsonData:Object, keyName:String = "name"):void {
+        public function addCharacter(characterJsonData:Object, keyName:String = null, action:Function = null):void {
+            if( keyName == null ) {
+                keyName = "name";
+            }
             try {
-                addCharacterWithError(characterJsonData, keyName);
+                addCharacterWithError(characterJsonData, keyName, action);
             } catch( e:Error ) {
                 Log.loggingException("SharedDataSender.addCharacter()", e);
             }
         }
         
-        public function addCharacterWithError(characterJsonData:Object, keyName:String):void {
+        public function addCharacterWithError(characterJsonData:Object, keyName:String, action:Function):void {
             Log.logging("SharedDataSender.addCharacter() begin characterJsonData", characterJsonData);
             
             var jsonParams:String = getEncodedJsonString(characterJsonData);
@@ -678,22 +711,30 @@ package {
             receiver.addCharacterInOwnMap(characterJsonData);
             
             Log.logging("SharedDataSender.sendCommandData(params) begin");
-            this.sendCommandData(params, printAddFailedCharacterName);
+            this.sendCommandData(params, getPrintAddFailedCharacterName(action));
             Log.logging("SharedDataSender.sendCommandData(params) end");
             
             Log.logging("SharedDataSender.addCharacter() end");
         }
         
-        public function printAddFailedCharacterName(event:Object):void {
-            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-            var addFailedCharacterNames:Array = jsonData.addFailedCharacterNames;
-            if( addFailedCharacterNames.length == 0 ) {
-                return;
+        public function getPrintAddFailedCharacterName(action:Function):Function {
+            return function(event:Object):void {
+                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                var addFailedCharacterNames:Array = jsonData.addFailedCharacterNames;
+                if( addFailedCharacterNames.length == 0 ) {
+                    return;
+                }
+                
+                if( action != null ) {
+                    if( action() ) {
+                        return;
+                    }
+                }
+                
+                var message:String = "\"" + addFailedCharacterNames.join("\" \"") + "\"という名前のキャラクターはすでに存在するため追加に失敗しました。";
+                //DodontoF_Main.getInstance().getChatWindow().sendSystemMessage(message, false);
+                DodontoF_Main.getInstance().getChatWindow().addLocalMessage(message);
             }
-            var message:String = "\"" + addFailedCharacterNames.join("\" \"") + "\"という名前のキャラクターはすでに存在するため追加に失敗しました。";
-            
-            //DodontoF_Main.getInstance().getChatWindow().sendSystemMessage(message, false);
-            DodontoF_Main.getInstance().getChatWindow().addLocalMessage(message);
         }
         
         public function moveCharacter(movablePiece:MovablePiece, x:Number, y:Number):void {
@@ -745,6 +786,35 @@ package {
             this.sendCommandData(params, resultFunction);
         }
         
+        public function sendChatMessageAll(name:String, message:String, password:String):void {
+            Log.logging("sendChatMessageAll Begin");
+            
+            var jsonData:Object = {
+                "senderName": name,
+                "message" : message,
+                "password": password,
+                "channel": 0,
+                "color" : Utils.getColorString(0x000000),
+                "uniqueId" : getStrictlyUniqueId() };
+            
+            var jsonParams:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("sendChatMessageAll", [["params", jsonParams]]);
+            
+            this.sendCommandData(params, sendChatMessageAllCallBack);
+            Log.logging("sendChatMessageAll End");
+        }
+        
+        public function sendChatMessageAllCallBack(event:Event):void {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            Log.logging("sendChatMessageAllCallBack jsonData", jsonData);
+            if( jsonData["result"] == "OK" ) {
+                //Alert.show("送信成功");
+                Alert.show("成功\r送信した部屋：" + Utils.getJsonString(jsonData["rooms"]));
+            } else {
+                Alert.show("送信失敗");
+            }
+        }
+        
         public function sendChatMessage(chatSendData:ChatSendData, callBack:Function):void {
             Log.logging("sendChatMessage, chatSendData", chatSendData);
             
@@ -781,6 +851,7 @@ package {
                 "color" : chatSendData.getColor(),
                 "sendto" : chatSendData.getSendto(),
                 "randomSeed" : chatSendData.getRandSeed(),
+                "repeatCount" : chatSendData.getRepeatCount(),
                 "gameType" : chatSendData.getGameType()};
             
             addIsNeedResultParam(jsonData);
@@ -831,18 +902,6 @@ package {
                     Log.loggingTuning("retry");
                     DodontoF_Main.getInstance().getChatWindow().sendChatMessageAgain(data);
                 });
-        }
-        
-        
-        public function sendChatMessageMany(chatCharacterName:String, message:String, color:String):void {
-            var jsonData:Object = {
-                "senderName": chatCharacterName,
-                "message" : message,
-                "color" : color
-            };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("sendChatMessageMany", [["params", jsonParams]]);
-            this.sendCommandData(params);
         }
         
         
@@ -959,7 +1018,8 @@ package {
             Log.loggingTuning("==>End sendCommandData");
         }
         
-        public function createPlayRoom(playRoomName:String,
+        public function createPlayRoom(createPassword:String,
+                                       playRoomName:String,
                                        playRoomPassword:String,
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
@@ -969,6 +1029,7 @@ package {
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             var jsonData:Object = {
+                "createPassword": createPassword,
                 "playRoomName": playRoomName,
                 "playRoomPassword": playRoomPassword,
                 "chatChannelNames": chatChannelNames,

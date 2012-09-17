@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="450"
+   height="475"
    title="ロード" 
    showCloseButton="true"
    >
@@ -36,6 +36,7 @@
         <mx:CheckBox id="standingGraphicInfos" label="立ち絵" />
         <mx:CheckBox id="cutIn" label="カットイン" />
         <mx:CheckBox id="card" label="カード" />
+        <mx:CheckBox id="initiative" label="イニシアティブ表" />
       </mx:Box>
     </mx:HBox>
     
@@ -93,6 +94,11 @@
         if( cutIn.selected ) {
             targets.push( "cutIn" );
         }
+        if( initiative.selected ) {
+            targets.push( "initiative" );
+        }
+        
+        Log.logging("targets", targets);
         
         var params:Object = {
             'targets' : targets
@@ -119,7 +125,7 @@
             
             try {
                 var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
-                Log.logging("jsonData", Utils.getJsonString(jsonData));
+                Log.logging("getExecuteResult jsonData", jsonData);
                 var resultText:String = jsonData.resultText;
                 Log.logging("load resultText", resultText);
                 

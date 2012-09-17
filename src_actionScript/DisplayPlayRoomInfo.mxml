@@ -44,7 +44,7 @@
         var backgroundImage:String = Config.getInstance().getBackgroundImage();
         
         var window:ChangePlayRoomWindow = DodontoF.popup(ChangePlayRoomWindow, true) as ChangePlayRoomWindow;
-        window.initParams(roomNumber);
+        window.initParams(roomNumber, false);
         window.setPlayRoomInfo(playRoomName, password, chatChannelNames, canUseExternalImage, canVisit, backgroundImage);
         
         PopUpManager.removePopUp(this);

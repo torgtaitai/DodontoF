@@ -313,7 +313,7 @@ package
             CursorManager.removeCursor(CursorManager.currentCursorID);
             if(curClass) {
                 CursorManager.setCursor(curClass,2, offX, offY);
-            }							
+            }
             resizeCursor = curClass;
 		}
         
