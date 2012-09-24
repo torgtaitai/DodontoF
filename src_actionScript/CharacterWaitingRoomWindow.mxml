@@ -47,8 +47,8 @@
     }
     
     private var map:Map;
-    private var dragDropForExit:DragDrop = new DragDrop();
-    private var dragDropForEnter:DragDrop = new DragDrop();
+    private var dragDropForExit:DragDrop = new DragDrop("exit waitingRoom");
+    private var dragDropForEnter:DragDrop = new DragDrop("enter waitingRoom");
     private var squareLength:Number;
     
     override protected function setup():void {

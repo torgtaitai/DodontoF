@@ -675,6 +675,9 @@ package {
                                           );
         }
         
+        static public function getComplementaryColor(color:uint):uint {
+            return 0xFFFFFF - color;
+        }
     }
 }
 

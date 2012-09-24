@@ -213,7 +213,7 @@ package {
             //textField.autoSize = TextFieldAutoSize.CENTER;
             textField.background = false;
             //textField.backgroundColor = this.color;
-            textField.textColor = 0xFFFFFF - this.color;
+            textField.textColor = Utils.getComplementaryColor( this.color );
             textField.text = text.split(/\r/)[0];
             textField.x = textX;
             textField.y = textY;

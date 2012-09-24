@@ -12,6 +12,8 @@ package {
     import flash.geom.Point;
     import mx.controls.Alert;
     import mx.core.UIComponent;
+    import mx.core.Application;
+    
     
     public class MapPainter {
         
@@ -30,8 +32,8 @@ package {
         private var lineDrawType:String = "line";
         private var eraseDrawType:String = "erase";
         
-        private var isStraightLineMode:Boolean = false;
-        private var isStraightLineOnSquareMode:Boolean = false;
+        private var isStraightLine:Boolean = false;
+        private var preStraightLineMode:Boolean = false;
         
         private var map:Map;
         
@@ -205,43 +207,52 @@ package {
             isDrawMode = b;
             
             setPenShade( isDrawMode );
+            
+            if( isDrawMode ) {
+                Application.application.parent.addEventListener(KeyboardEvent.KEY_DOWN, undoRedo);
+            } else {
+                Application.application.parent.removeEventListener(KeyboardEvent.KEY_DOWN, undoRedo);
+            }
         }
         
         private function setPenShade(isSet:Boolean):void {
             try {
                 if( isSet ) {
                     Log.logging("setPenShade isDrawMode ON");
-                    preDrawTargetLayer.addEventListener(Event.ENTER_FRAME, printPenShade);
+                    Application.application.parent.addEventListener(MouseEvent.MOUSE_MOVE, printPenShade);
                 } else {
                     Log.logging("setPenShade isDrawMode OFF");
-                    preDrawTargetLayer.removeEventListener(Event.ENTER_FRAME, printPenShade);
+                    Application.application.parent.removeEventListener(MouseEvent.MOUSE_MOVE, printPenShade);
                 }
             } catch (e:Error) {
+                Log.loggingException("MapPainter.setPenShade", e);
             }
         }
         
-        private var shadePrintCounter:int = 0;
-        private var shadePrintCountTime:int = 5;
-        
-        private function printPenShade(event:Event):void {
-            
-            //毎回カーソルに影（書き込み予定筆跡）を描くと重いので適当に飛ばす。
-            shadePrintCounter++;
-            if( shadePrintCounter < shadePrintCountTime ) {
+        private function undoRedo(event:KeyboardEvent):void {
+            if( ! event.ctrlKey ) {
                 return;
             }
-            shadePrintCounter = 0;
             
+            if( event.keyCode == String("Z").charCodeAt(0) ) {
+                DrawMapWindow.getInstance().undoDrawOnMap();
+            }
             
+            if( event.keyCode == String("Y").charCodeAt(0) ) {
+                DrawMapWindow.getInstance().redoDrawOnMap();
+            }
+        }
+        
+        private function printPenShade(event:Event):void {
             preDrawTargetLayer.graphics.clear();
-            preDrawTargetLayer.blendMode = ( isEraseMode ? BlendMode.ERASE : BlendMode.LAYER );
             preDrawTargetLayer.graphics.lineStyle(drawLineWeight, drawColor);
+            preDrawTargetLayer.blendMode = ( isEraseMode ? BlendMode.ERASE : BlendMode.LAYER );
             
             var x:Number = DodontoF_Main.getInstance().getDodontoF().mouseX;
             var y:Number = DodontoF_Main.getInstance().getDodontoF().mouseY;
             
             var point:Point = preDrawTargetLayer.globalToLocal( new Point(x, y) );
-            preDrawTargetLayer.graphics.moveTo(point.x, point.y);
+            preDrawTargetLayer.graphics.moveTo(point.x, point.y)
             preDrawTargetLayer.graphics.lineTo(point.x + 0.5, point.y + 0.5);
         }
         
@@ -268,12 +279,27 @@ package {
             drawTargetLayer.blendMode = ( isEraseMode ? BlendMode.ERASE : BlendMode.LAYER );
         }
         
+        public function setStraightLineMode(b:Boolean):void {
+            isStraightLine = b;
+        }
+        
+        private function isVerticalHorizontalLine(event:MouseEvent):Boolean {
+            return  event.shiftKey;
+        }
+        
+        private function isSnapOnSquare(event:MouseEvent):Boolean {
+            return  event.ctrlKey;
+        }
+        
+        private function isStraightLineMode(event:MouseEvent):Boolean {
+            if( isStraightLine ) {
+                return true;
+            }
+            return  (event.altKey || event.ctrlKey || event.shiftKey);
+        }
         
         public function beginDrawByPen(event:MouseEvent):void {
             clearOwnDrawingLine();
-            
-            isStraightLineMode = event.shiftKey || event.ctrlKey;
-            isStraightLineOnSquareMode = event.ctrlKey;
             
             var info:Object = {
                 "type" : getCurrentLineDrawType(),
@@ -281,21 +307,32 @@ package {
                 "color" : drawColor };
             ownDrawingLine.push( info );
             
-            drawTargetLayer.graphics.lineStyle(info.weight, info.color);
-            drawTargetLayer.graphics.moveTo(event.localX, event.localY);
-            
-            var firstPoint:Array = getDrawPoint(event.localX, event.localY);
+            var firstPoint:Array = getDrawPoint(event.localX, event.localY, event);
             ownDrawingLine.push( firstPoint );
             
-            if( ! isStraightLineMode ) {
+            initPen(false);
+            
+            if( ! isStraightLineMode(event) ) {
                 // クリックのみでも点を描くため
                 var point:Point = new Point(event.localX + 0.5, event.localY + 0.5);
                 drawTargetLayer.graphics.lineTo(point.x, point.y);
                 ownDrawingLine.push([point.x, point.y]);
             }
             
+            preStraightLineMode = isStraightLineMode(event);
+            
             setPenShade(false);
-            drawTargetLayer.addEventListener(Event.ENTER_FRAME, drawLineByPen); 
+            Application.application.parent.addEventListener(MouseEvent.MOUSE_MOVE, drawLineByPen);
+        }
+        
+        private function initPen(isClear:Boolean = true):void {
+            if( isClear ) {
+                drawTargetLayer.graphics.clear();
+            }
+            drawTargetLayer.graphics.lineStyle(drawLineWeight, drawColor);
+            
+            var firstPoint:Array = ownDrawingLine[1];
+            drawTargetLayer.graphics.moveTo(firstPoint[0], firstPoint[1]);
         }
         
         private function clearOwnDrawingLine():void {
@@ -312,7 +349,7 @@ package {
             return lineDrawType;
         }
         
-        private function drawLineByPen(event:Event):void {
+        private function drawLineByPen(event:MouseEvent):void {
             if( ownDrawingLine.length <= 1 ) {
                 return;
             }
@@ -326,43 +363,113 @@ package {
                 return;
             }
             
-            drawTargetLayer.graphics.lineTo(x, y);
-            
-            if( isStraightLineMode ) {
-                drawStraightLine(x, y);
+            if( isStraightLineMode(event) ) {
+                drawStraightLine(x, y, event);
             } else {
-                ownDrawingLine.push( [x, y] );
+                drawFreeLine(x, y, event);
+            }
+            
+            preStraightLineMode = isStraightLineMode(event);
+        }
+        
+        private function drawFreeLine(x:Number, y:Number, event:MouseEvent):void {
+            if( preStraightLineMode != isStraightLineMode(event) ) {
+                drawPastFreeLine();
+            }
+            
+            drawTargetLayer.graphics.lineTo(x, y);
+            ownDrawingLine.push( [x, y] );
+        }
+        
+        private function drawPastFreeLine():void {
+            initPen();
+            
+            var pastBeginIndex:int = 2; //配列の0は情報、1はinitPenで初期化されるので、2から描画開始。
+            
+            for(var i:int = pastBeginIndex ; i < ownDrawingLine.length ; i++) {
+                var point:Array = ownDrawingLine[i];
+                drawTargetLayer.graphics.lineTo(point[0], point[1]);
             }
         }
         
-        private function drawStraightLine(x:Number, y:Number):void {
-            var point:Array = getDrawPoint(x, y);
+        private function drawStraightLine(x:Number, y:Number, event:MouseEvent):void {
+            initPen();
             
-            drawTargetLayer.graphics.clear();
-            drawTargetLayer.graphics.lineStyle(drawLineWeight, drawColor);
-            
-            var firstPoint:Array = ownDrawingLine[1];
-            drawTargetLayer.graphics.moveTo(firstPoint[0], firstPoint[1]);
+            var point:Array = getDrawPoint(x, y, event);
             drawTargetLayer.graphics.lineTo(point[0], point[1]);
         }
         
-        private function getDrawPoint(x:Number, y:Number):Array {
-            if( isStraightLineOnSquareMode ) {
-                var point:Point = map.getSnapViewPoint(x, y, Map.getSquareLength());
-                x = point.x * Map.getSquareLength();
-                y = point.y * Map.getSquareLength();
+        private function getDrawPoint(x:Number, y:Number, event:MouseEvent):Array {
+            var point:Array = [x, y];
+            
+            if( isSnapOnSquare(event) ) {
+                point = getSnapedXY(x, y);
+            } else if( isVerticalHorizontalLine(event) ) {
+                point = getVerticalHorizontalLine(x, y);
             }
             
+            return point;
+        }
+        
+        private function getSnapedXY(x:Number, y:Number):Array {
+            var point:Point = map.getSnapViewPoint(x, y, Map.getSquareLength());
+            x = point.x * Map.getSquareLength();
+            y = point.y * Map.getSquareLength();
             return [x, y];
         }
         
-        public function endDrawByPen(event:MouseEvent):void {
-            if( isStraightLineMode ) {
-                var point:Array = getDrawPoint(drawTargetLayer.mouseX, drawTargetLayer.mouseY);
-                ownDrawingLine.push( point );
+        private function getVerticalHorizontalLine(x2:Number, y2:Number):Array {
+            if( ownDrawingLine.length < 2 ) {
+                return [x2, y2];
             }
             
-            drawTargetLayer.removeEventListener(Event.ENTER_FRAME, drawLineByPen);
+            var firstPoint:Array = ownDrawingLine[1];
+            
+            var x1:Number = firstPoint[0];
+            var y1:Number = firstPoint[1];
+            
+            var xLength:Number = Math.abs(x2 - x1);
+            var yLength:Number = Math.abs(y2 - y1);
+            
+            if( xLength > yLength ) {
+                if( xLength / 2 > yLength) {
+                    return [x2, y1];
+                }
+                
+                var diffY:Number = ((y2 - y1) > 0) ? xLength : -xLength;
+                return [x2, y1 + diffY];
+            }
+            
+            if( yLength / 2 > xLength) {
+                return [x1, y2];
+            }
+            
+            var diffX:Number = ((x2 - x1) > 0) ? yLength : -yLength;
+            return [x1 + diffX, y2];
+            
+            /*
+            var radian:Number = Math.atan2(xLength, yLength);
+            var angle:Number = radian / Math.PI;
+            
+            if( angle > 0.75 ) {
+                return [x2, y2];
+            } else if( angle > 0.5 ) {
+                return [x2, y2];
+            }
+            */
+        }
+        
+        
+        public function endDrawByPen(event:MouseEvent):void {
+            if( isStraightLineMode(event) ) {
+                var lastPoint:Array = getDrawPoint(drawTargetLayer.mouseX, drawTargetLayer.mouseY, event);
+                
+                ownDrawingLine = [ownDrawingLine[0],
+                                  ownDrawingLine[1],
+                                  lastPoint];
+            }
+            
+            Application.application.parent.removeEventListener(MouseEvent.MOUSE_MOVE, drawLineByPen);
             setPenShade(true);
             
             sendOwnDraws();

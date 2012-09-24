@@ -326,6 +326,7 @@ package {
         }
         
         static private var charactersForBatchDelete:Array = new Array();
+        static private var dragDropForClone:DragDrop = new DragDrop("clone Character");
         
         public function clickCharacterForBatchDelete(event:MouseEvent):void {
             if( isInclude(charactersForBatchDelete, this) ) {
@@ -337,8 +338,6 @@ package {
                 dragForCloneEvent(event);
             }
         }
-        
-        static private var dragDropForClone:DragDrop = new DragDrop();        
         
         public function dragForCloneEvent(event:MouseEvent):void {
             var value:Object = {
@@ -355,6 +354,7 @@ package {
             cloneCharacterAction(point);
             
             unSelectAllCharacters();
+            dragDropForClone.removeDropEvent();
         }
         
         private function isInclude(array:Array, target:Object):Boolean {

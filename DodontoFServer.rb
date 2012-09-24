@@ -1873,7 +1873,8 @@ class DodontoFServer
   
   def getGameName(gameType)
     require 'diceBotInfos'
-    gameInfo = $diceBotInfos.find{|i| i[:gameType] == gameType}
+    diceBotInfos = DiceBotInfos.new.getInfos
+    gameInfo = diceBotInfos.find{|i| i[:gameType] == gameType}
     
     return '--' if( gameInfo.nil? )
     
@@ -2064,7 +2065,7 @@ class DodontoFServer
     logging("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
-    diceBotInfos = deepCopy( $diceBotInfos )
+    diceBotInfos = DiceBotInfos.new.getInfos
     
     commandInfos = getGameCommandInfos
     
@@ -2074,7 +2075,6 @@ class DodontoFServer
     end
     
     logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
-    logging($diceBotInfos, "getDiceBotInfos $diceBotInfos")
     
     return diceBotInfos
   end
@@ -4113,7 +4113,7 @@ class DodontoFServer
       message = message + rollResult
     end
     
-    message = getChatRolledMessage(message, isSecret, randResults);
+    message = getChatRolledMessage(message, isSecret, randResults, params)
     
     senderName = name
     senderName << ("\t" + state) unless( state.empty? )
@@ -4167,7 +4167,7 @@ class DodontoFServer
   end
   
   
-  def getChatRolledMessage(message, isSecret, randResults)
+  def getChatRolledMessage(message, isSecret, randResults, params)
     logging("getChatRolledMessage Begin")
     logging(message, "message")
     logging(isSecret, "isSecret")
@@ -4188,6 +4188,7 @@ class DodontoFServer
     data = {
       "chatMessage" => message,
       "randResults" => randResults,
+      "uniqueId" => params['uniqueId'],
     }
     
     text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
@@ -4913,11 +4914,15 @@ class DodontoFServer
     mountName = addCardData['mountName']
     isUpDown = addCardData['isUpDown']
     canDelete = addCardData['canDelete']
+    isOpen = addCardData['isOpen']
+    isBack = addCardData['isBack']
     
     changeSaveData(@saveFiles['characters']) do |saveData|
       cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete)
       cardData["x"] = addCardData['x']
       cardData["y"] = addCardData['y']
+      cardData["isOpen"] = isOpen unless( isOpen.nil? )
+      cardData["isBack"] = isBack unless( isBack.nil? )
       
       characters = getCharactersFromSaveData(saveData)
       characters << cardData

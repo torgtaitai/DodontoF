@@ -752,7 +752,8 @@ package {
             this.ownerName = thisUserName;
             
             if( ! isBackPrint ) {
-                if( this.canDelete ) {
+                //if( this.canDelete ) {
+                if( this.mountName == "messageCard" ){
                     ChatWindow.getInstance().sendSystemMessage("がメッセージカードを開きました。");
                 }
             }

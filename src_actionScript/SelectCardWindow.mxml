@@ -41,7 +41,7 @@
     
     private var thisObj:SelectCardWindow;
     
-    private var dragDropForDrow:DragDrop = new DragDrop();
+    private var dragDropForDrow:DragDrop = new DragDrop("drow card from CardMount");
     
     private var map:Map;
     

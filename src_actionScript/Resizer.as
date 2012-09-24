@@ -39,7 +39,7 @@ package
 		private static var resizeTarget:UIComponent;
 		private static var resizeMode:Number = 0;
 		private static var _isResizing:Boolean = false;
-		private static var _resizeAreaMargin:Number = 4;
+		private static var _resizeAreaMargin:Number = 6;
 
 		private static var resizeRect:Rectangle;		
 		private static var oldRect:Rectangle;

@@ -924,11 +924,10 @@
         
         private function setDiceBotHelpText():void {
             saveChatInfos();
-            var helpText:String = diceBotGameType.dataProvider[0].info;
-            
+            var helpText:String = getBaseHelpText();
             var item:Object = diceBotGameType.selectedItem;
             
-            if( item.gameType == '' ) {
+            if( item.gameType == '' || item.gameType == 'DiceBot' ) {
                 helpText += "==【その他】===============================\n";
                 helpText += "ゲーム固有の判定がある場合はこの場所に記載されます。";
             } else {
@@ -937,6 +936,19 @@
             }
             
             diceBotHelpText = helpText;
+        }
+        
+        private function getBaseHelpText():String {
+            var helpText:String = '';
+            
+            for each (var item:Object in diceBotGameType.dataProvider ) {
+                    if( item.gameType == 'DiceBot' ) {
+                        helpText = item.info;
+                        break;
+                    }
+                }
+            
+            return helpText;
         }
         
         private static var isDiceBotOn:Boolean = true;

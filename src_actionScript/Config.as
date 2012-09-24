@@ -4,6 +4,7 @@ package {
     import flash.net.SharedObject;
     import flash.net.URLRequest;
     import mx.controls.Alert;
+    import flash.events.MouseEvent;
     
     public class Config {
         static private var thisObj:Config = new Config();
@@ -13,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.39.00(2012/09/14)";
+        private var version:String = "Ver.1.39.02(2012/09/25)";
         
         public function getVersion():String {
             return version;
@@ -65,6 +66,12 @@ package {
             return SharedObject.getLocal(saveDataKey + "_" + getPlayRoomNumber());
         }
         
+        
+        private var mouseEvent:MouseEvent;
+        public function setMouseEvent(event:MouseEvent):void {
+            mouseEvent = event;
+        }
+        
         private var isSnapMovablePiece:Boolean= true;
         
         public function setSnapMovablePiece(b:Boolean):void {
@@ -73,9 +80,13 @@ package {
         }
         
         public function isSnapMovablePieceMode():Boolean {
+            if( mouseEvent != null ) {
+                if( mouseEvent.altKey ) {
+                    return false;
+                }
+            }
             return isSnapMovablePiece;
         }
-        
         
         static public function isAdjustImageSizeDefault():Boolean {
             return true;

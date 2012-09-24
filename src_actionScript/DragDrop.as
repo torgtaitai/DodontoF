@@ -17,14 +17,19 @@ package {
         
         private var dropValueKey:String = "dropValueKey";
         private var dropAction:Function;
+        private var name:String = "";
         
-        
-        public function DragDrop():void {
+        public function DragDrop(name_:String):void {
             thisObj = this;
+            name = name_;
         }
         
         
         public function addDropEvent(component:UIComponent):void {
+            removeDropEvent();
+            
+            Log.logging("DragDrop.addDropEvent at ", name);
+            
             layer = component;
             layer.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             layer.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
@@ -39,6 +44,8 @@ package {
             if( layer ==  null ) {
                 return;
             }
+            
+            Log.logging("DragDrop.removeDropEvent at ", name);
             
             layer.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             layer.removeEventListener(DragEvent.DRAG_OVER, dragOverHandler);

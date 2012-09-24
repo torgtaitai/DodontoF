@@ -15,20 +15,60 @@ package {
         override protected function executeCommand(params:Object):void {
             Log.logging("CutInCommandRollVisualDice.executeCommand params", params);
             
-            if( ! isDiceBoxVisible() ) {
-                Log.logging("diceBox invisible.");
+            //addCard(params);
+            rollDice(params);
+        }
+        
+        
+        private var cardRankerRandomChoice:RegExp = /CardRanker : .*ランダムモンスター選択.+：(.+)/m;
+        
+        private function addCard(params:Object):void {
+            
+            if( ChatWindow.getInstance().diceBotGameType.selectedItem.gameType != "CardRanker" ) {
+                Log.logging("カードランカーではないので、この処理は無し");
                 return;
             }
             
-            var randResults:Array = params.randResults;
-            if( randResults == null ) {
-                return;
-            }
-            if( randResults.length == 0 ) {
+            if( params.uniqueId != DodontoF_Main.getInstance().getStrictlyUniqueId() ) {
+                Log.logging("自分自身の発言でないなら、カード追加処理は無し");
                 return;
             }
             
+            Log.logging("CutInCommandRollVisualDice.addCard params.chatMessage", params.chatMessage);
+            var result:Object = cardRankerRandomChoice.exec(params.chatMessage);
+            Log.logging("addCard match result", result);
+            if( result == null ) {
+                return;
+            }
+            
+            Log.logging("カードランカーカードを自動作製！");
+            
+            var monsterName:String = result[1];
+            Log.logging("monsterName", monsterName);
+            
+            //var color:uint = 0xFFFFFF;//Utils.getComplementaryColor( ChatWindow.getInstance().getChatFontColorValue() );
+            //DodontoF_Main.getInstance().getGuiInputSender().addMapMarker(monsterName, color, true, 1, 1, 6, 0);
+            //return;
+            
+            var imageName:String = 'cards/cardRanker/Ningyo.png';
+            if( (count++ % 2) != 0 ) {
+                imageName = 'cards/cardRanker/Red_4.png';
+            }
+            DodontoF_Main.getInstance().getGuiInputSender().getSender()
+                .addCardRankerCard(imageName,
+                                   imageName,
+                                   100, 100);
+        }
+        private var count:int = 0;
+        
+        private function rollDice(params:Object):void {
+            var randResults:Array = getRandResults(params);
             Log.logging("randResults", randResults);
+            
+            if( randResults == null ) {
+                Log.logging("randResults is null.");
+                return;
+            }
             
             var resultText:String = getRollResultText(params);
             Log.logging("resultText", resultText);
@@ -55,6 +95,23 @@ package {
             
             var diceBox:DiceBox = getDiceBox();
             diceBox.castDice();
+        }
+        
+        private function getRandResults(params:Object):Array {
+            if( ! isDiceBoxVisible() ) {
+                Log.logging("diceBox invisible.");
+                return null;
+            }
+            
+            var randResults:Array = params.randResults;
+            if( randResults == null ) {
+                return null;
+            }
+            if( randResults.length == 0 ) {
+                return null;
+            }
+            
+            return randResults;
         }
         
         private function getD10Value(value:int):int {

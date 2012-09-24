@@ -9,9 +9,10 @@
    >
   
   <mx:HBox width="100%">
-    <mx:Button id="paint"
+    <mx:Button id="pencil"
                icon="{pencilIcon}"
-               click="setMapDrawMode(true)"
+               click="setMapDrawMode(pencilMode)"
+               toolTip="Altで直線&#13;Shiftで一定角&#13;Ctrlでマス目端点"
                toggle="true"
                selected="true"
                verticalGap="0"
@@ -19,9 +20,22 @@
                width="25"
                />
     
+<!--
+    <mx:Button id="line"
+               icon="{lineIcon}"
+               click="setMapDrawMode(lineMode)"
+               toolTip="Shiftで45度刻み&#13;Ctrlでマス目に吸着"
+               toggle="true"
+               selected="true"
+               verticalGap="0"
+               horizontalGap="0"
+               width="25"
+               />
+-->
+    
     <mx:Button id="eraser"
                icon="{eraserIcon}"
-               click="setMapDrawMode(false)"
+               click="setMapDrawMode(eraserMode)"
                toggle="true"
                width="25"
                />
@@ -84,11 +98,15 @@
   <mx:Script>
     <![CDATA[
      
-    [Embed(source='image/icons/ico_pen1-5.gif')]
+    [Embed(source='image/icons/pencil.gif')]
     [Bindable]
     public static var pencilIcon:Class;
     
-    [Embed(source='image/icons/ico_eraser1_1.gif')]
+    [Embed(source='image/icons/line.gif')]
+    [Bindable]
+    public static var lineIcon:Class;
+    
+    [Embed(source='image/icons/eraser.gif')]
     [Bindable]
     private static var eraserIcon:Class;
     
@@ -108,7 +126,7 @@
     static private var thisObj:DrawMapWindow;
     static private var parentButton:Button;
     
-    private var paintLineWeight:int = 3;
+    private var pencilLineWeight:int = 3;
     private var eraserLineWeight:int = 3;
     static private var lineCountLimit:int = 3000;
     static private var totalLineCount:int = 0;
@@ -119,6 +137,10 @@
         if( thisObj != null ) {
             thisObj.setLineCountLocal();
         }
+    }
+    
+    static public function getInstance():DrawMapWindow {
+        return thisObj;
     }
     
     public function setLineCountLocal():void {
@@ -198,8 +220,12 @@
         init();
     }
     
+    private var eraserMode:int = 0;
+    private var pencilMode:int = 1;
+    private var lineMode:int = 2;
+    
     private function init():void {
-        setMapDrawMode(true);
+        setMapDrawMode(pencilMode);
         setLineCountLocal();
     }
     
@@ -207,8 +233,8 @@
         lineWeightStep.value = value;
         lineWeight.value = value;
         
-        if( isPaintMode() ) {
-            paintLineWeight = lineWeight.value;
+        if( isPencilMode() ) {
+            pencilLineWeight = lineWeight.value;
         } else {
             eraserLineWeight = lineWeight.value;
         }
@@ -216,18 +242,20 @@
         setDrawState();
     }
     
-    private function setMapDrawMode(isPaint:Boolean):void {
-        paint.selected = isPaint;
-        eraser.selected = (! isPaint);
+    private function setMapDrawMode(mode:int):void {
+        eraser.selected = (mode == eraserMode);
+        pencil.selected = (mode == pencilMode);
+        //line.selected = (mode == lineMode);
         
-        lineWeight.value = (isPaint ? paintLineWeight : eraserLineWeight );
+        lineWeight.value = ( mode == eraserMode ? eraserLineWeight  : pencilLineWeight );
         lineWeightStep.value = lineWeight.value;
         
         setDrawState();
     }
     
-    private function isPaintMode():Boolean {
-        return paint.selected;
+    private function isPencilMode():Boolean {
+        //return (pencil.selected || line.selected);
+        return pencil.selected;
     }
     
     private function changeCursor(isChanged:Boolean):void {
@@ -246,7 +274,7 @@
         var offX:Number = 0;
         var offY:Number = 0;
         
-        if( paint.selected ) {
+        if( isPencilMode() ) {
             cursor = pencilIcon;
             offX = 0;
             offY = -13;
@@ -263,7 +291,7 @@
     }
     
     private function setDrawState():void {
-        getMap().setDrawState(lineWeight.value, colorPicker.selectedColor, eraser.selected);
+        getMap().setDrawState(lineWeight.value, colorPicker.selectedColor, eraser.selected, false);//line.selected);
     }
     
     
@@ -273,7 +301,7 @@
         redoDataList = new Array();
     }
     
-    private function undoDrawOnMap():void {
+    public function undoDrawOnMap():void {
         getMap().undoDrawOnMap( getUndoResult );
     }
     
@@ -288,7 +316,7 @@
         redoDataList.push(data);
     }
     
-    private function redoDrawOnMap():void {
+    public function redoDrawOnMap():void {
         var data:Array = redoDataList.pop();
         if( data == null ) {
             return;

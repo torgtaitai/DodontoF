@@ -12,6 +12,7 @@ package {
         private static var mapTag:String = "マップ画像";
         private static var floorTileTag:String = "フロアタイル画像";
         private static var standingGraphicsTag:String = "立ち絵";
+        private static var monsterTag:String = "モンスター";
         
         
         public static function getAllTag():String {
@@ -38,8 +39,12 @@ package {
             return standingGraphicsTag;
         }
         
+        public static function getMonsterTag():String {
+            return monsterTag;
+        }
+        
         public static function getDefinedTagList():Array {
-            return [characterTag, standingGraphicsTag, mapTag, floorTileTag];
+            return [characterTag, monsterTag, standingGraphicsTag, mapTag, floorTileTag];
         }
         
         static public function getTags(text:String):Array {

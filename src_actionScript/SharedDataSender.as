@@ -653,6 +653,24 @@ package {
             this.sendCommandData(params, resultFunction);
         }
         
+        public function addCardRankerCard(imageName:String, imageNameBack:String, x:int, y:int):void {
+            var jsonData:Object = {
+                "isText" : false,
+                "imageName" : imageName,
+                "imageNameBack" : imageNameBack,
+                "mountName" : "CardRanker",
+                "isUpDown" : false,
+                "canDelete" : true,
+                "x" : x,
+                "y" : y,
+                "isBack" : false,
+                "isOpen" : true
+            };
+            var addCardData:String = getEncodedJsonString( jsonData );
+            var params:String = this.getParamString("addCard", [["addCardData", addCardData]]);
+            this.sendCommandData(params);
+        }
+        
         public function addMessageCard(imageName:String, imageNameBack:String, x:int, y:int):void {
             var jsonData:Object = {
                 "isText" : true,
@@ -852,7 +870,8 @@ package {
                 "sendto" : chatSendData.getSendto(),
                 "randomSeed" : chatSendData.getRandSeed(),
                 "repeatCount" : chatSendData.getRepeatCount(),
-                "gameType" : chatSendData.getGameType()};
+                "gameType" : chatSendData.getGameType(),
+                "uniqueId" : chatSendData.getStrictlyUniqueId(this) };
             
             addIsNeedResultParam(jsonData);
             

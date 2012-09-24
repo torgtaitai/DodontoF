@@ -300,8 +300,12 @@ package {
                         return;
                     }
                     
+                    Config.getInstance().setMouseEvent(event);
+                    
                     draggingPiece.stopDragging();
                     draggingPiece = null;
+                    
+                    Config.getInstance().setMouseEvent(null);
                 });
             
             view.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {

@@ -35,7 +35,10 @@ package {
             
             guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             chatWindow = chatWindow_;
-            cutInList = [new CutInCommandRollVisualDice(), new CutInMovie(), new CutInCommandGetDiceBotInfos()];
+            cutInList = [new CutInCommandRollVisualDice(),
+                         new CutInMovie(), 
+                         //new CutInCommandAddCharacter(),
+                         new CutInCommandGetDiceBotInfos()];
             
             voter  = new Voter(chatWindow);
         }

@@ -758,8 +758,9 @@ package {
             mapPainter.undoDrawOnMap(resultFunction);
         }
         
-        public function setDrawState(size:int, color:uint, isErase:Boolean):void {
+        public function setDrawState(size:int, color:uint, isErase:Boolean, isLine:Boolean):void {
             mapPainter.setDrawState(size, color, isErase);
+            mapPainter.setStraightLineMode(isLine);
         }
         
         public function setDrawMode(b:Boolean):void {

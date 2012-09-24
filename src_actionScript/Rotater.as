@@ -216,7 +216,7 @@ package {
                         return;
                     }
                     
-                    var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, event.ctrlKey);
+                    var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, event);
                     thisObj.drawRotateImage(rotation);
                 });
             
@@ -225,7 +225,7 @@ package {
         private function addMouseUpEventToRotateMarker():void {
             rotateMarker.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                     event.stopPropagation();
-                    stopRotationFunction(event.ctrlKey);
+                    stopRotationFunction(event);
                 });
             
         }
@@ -248,10 +248,10 @@ package {
                 });
         }
         
-        private function stopRotationFunction(isCtrkPressed:Boolean):void {
+        private function stopRotationFunction(event:MouseEvent = null):void {
             rotateMarker.stopDrag();
             
-            var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, isCtrkPressed);
+            var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, event);
             
             thisObj.initMarkerPosition(rotateMarker);
             rotateMarker.visible = false;
@@ -281,16 +281,16 @@ package {
         private function rotateAction(obj:Object):void {
             var event:MouseEvent = obj.event;
             //event.stopPropagation();
-            stopRotationFunction(event.ctrlKey);
+            stopRotationFunction( event );
         }
         
         public function stopRotation():void {
-            stopRotationFunction(false);
+            stopRotationFunction();
         }
         
         static public function stopRotation():void {
             if( rotatingObject != null ) {
-                rotatingObject.stopRotationFunction(false);
+                rotatingObject.stopRotationFunction();
             }
             rotatingObject = null;
         }
@@ -310,13 +310,15 @@ package {
             return rotation;
         }
         
-        private function getRotationOnMarker(dx:Number, dy:Number, isCtrlKey:Boolean):Number {
+        private function getRotationOnMarker(dx:Number, dy:Number, event:MouseEvent = null):Number {
+            var isAltKey:Boolean = (event == null ? false : event.altKey);
+            
             var rotation:Number = getRotationFromXY(dx, dy);
             
             rotation -= getBaseDiffRotation();//54;
             rotation += 180;
             
-            if( ! isCtrlKey ) {
+            if( ! isAltKey ) {
                 var currentRotation:Number = piece.getRotation();
                 var totalRotation:Number = currentRotation + rotation;
                 
