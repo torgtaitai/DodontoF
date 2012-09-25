@@ -817,9 +817,13 @@ class DodontoFServer
     case commandName
     when 'getBusyInfo'
       return getBusyInfo
+    when 'getServerInfo'
+      return getWebIfServerInfo
+    when 'getRoomList'
+      return getWebIfRoomList
     end
     
-    loginWebInterface
+    loginOnWebInterface
     
     case commandName
     when 'chat'
@@ -844,7 +848,7 @@ class DodontoFServer
   end
   
   
-  def loginWebInterface
+  def loginOnWebInterface
     roomNumberText = getRequestData('room')
     if( isInvalidRequestParam(roomNumberText) )
       raise "プレイルーム番号(room)を指定してください"
@@ -1035,6 +1039,42 @@ class DodontoFServer
     return jsonData
   end
   
+  def getWebIfServerInfo()
+    jsonData = {
+      "maxRoom" => ($saveDataMaxCount - 1),
+      'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
+      'result' => 'OK',
+    }
+    
+    if( getWebIfRequestBoolean("card", false) )
+      cardInfos = $card.collectCardTypeAndTypeName()
+      jsonData["cardInfos"] = cardInfos
+    end
+    
+    if( getWebIfRequestBoolean("dice", false) )
+      require 'diceBotInfos'
+      diceBotInfos = DiceBotInfos.new.getInfos
+      jsonData['diceBotInfos'] = getDiceBotInfos()
+    end
+    
+    return jsonData
+  end
+  
+  def getWebIfRoomList()
+    logging("getWebIfRoomList Begin")
+    minRoom = getWebIfRequestInt('minRoom', 0)
+    maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
+    
+    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
+    
+    jsonData = {
+      :playRoomStates => playRoomStates,
+      :result => 'OK',
+    }
+    
+    logging("getWebIfRoomList End")
+    return jsonData
+  end
   
   def sendWebIfChatText
     logging("sendWebIfChatText begin")
@@ -1830,7 +1870,6 @@ class DodontoFServer
     roomNumberRange = (minRoom .. maxRoom)
     playRoomStates = []
     
-    loginUserCountList = getLoginUserCountList( roomNumberRange )
     loginUsersList = getLoginUserList( roomNumberRange )
     playRoomPasswordLockStates = getPlayRoomPasswordLockStates( roomNumberRange )
     saveDataLastAccesTimes = getSaveDataLastAccessTimes( roomNumberRange )
@@ -1840,14 +1879,13 @@ class DodontoFServer
     
     roomNumberRange.each do |i|
       createdState = false
-      loginUserCount = loginUserCountList[i]
       loginUsers = loginUsersList[i];
       logging("loginUsers", loginUsers);
       playRoomName = playRoomNames[i]
-      passwordLockState = (playRoomPasswordLockStates[i] ? "有り" : "--")
-      canVisit = (canVisitList[i] ? "可" : "--")
+      passwordLockState = playRoomPasswordLockStates[i]
+      canVisit = canVisitList[i]
       timeStamp = saveDataLastAccesTimes[i]
-      gameName = getGameName( gameTypeList[i] )
+      gameType = gameTypeList[i] # getGameName( gameTypeList[i] )
       
       timeString = ""
       unless( timeStamp.nil? )
@@ -1858,11 +1896,10 @@ class DodontoFServer
         'passwordLockState' => passwordLockState,
         'index' => sprintf("%3d", i),
         'playRoomName' => playRoomName,
-        'loginUserCount' => loginUserCount,
         'loginUsers' => loginUsers,
         'lastUpdateTime' => timeString,
         'canVisit' => canVisit,
-        'gameName' => gameName,
+        'gameType' => gameType,
       }
       
       playRoomStates << playRoomState
@@ -1948,7 +1985,6 @@ class DodontoFServer
   def getLoginInfo()
     logging("getLoginInfo begin")
     params = getParamsFromRequestData()
-    
     uniqueId = params['uniqueId'];
     uniqueId ||= Time.now.to_f.to_s;
     

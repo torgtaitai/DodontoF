@@ -965,6 +965,20 @@ package {
             return Utils.clone(diceBotInfos);
         }
         
+        public function getDiceBotName(gameType:String):String {
+            if( gameType == "diceBot" ) {
+                gameType = "DiceBot";
+            }
+            
+            for each(var info:Object in diceBotInfos) {
+                    if( info['gameType'] == gameType ) {
+                        return info["name"];
+                    }
+                }
+            
+            return gameType;
+        }
+        
         
         public function initWindowPosition():void {
             initiativeWindow.setInitPositionDefault();

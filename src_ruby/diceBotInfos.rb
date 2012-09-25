@@ -875,6 +875,8 @@ INFO_MESSAGE_TEXT
       @infos << diceBot.info
     end
     
+    @infos.each{|i| i.delete(:fileName)}
+    
     return @infos
   end
   

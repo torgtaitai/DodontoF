@@ -10,7 +10,7 @@ $aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.39.02"
+$versionOnly = "Ver.1.39.03"
 $versionDate = "2012/09/25"
 $version = "#{$versionOnly}(#{$versionDate})"
 

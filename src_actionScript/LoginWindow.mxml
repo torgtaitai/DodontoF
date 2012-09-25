@@ -431,9 +431,15 @@
             var index:int = minRoomNumber / playRoomGetRangeMax;
             
             var jsonData:Array = result.playRoomStates as Array;
+            for each(var data:Object in jsonData ) {
+                    data.loginUserCount = data.loginUsers.length;
+                    data.passwordLockState = (data.passwordLockState ? "有り" : "--");
+                    data.canVisit = (data.canVisit ? "可" : "--");
+                    data.gameName = DodontoF_Main.getInstance().getDiceBotName(data.gameType);
+                }
             playRoomStates = new ArrayCollection(jsonData);
             
-            playRoomStatesList[index] =playRoomStates;
+            playRoomStatesList[index] = playRoomStates;
         } catch(e:Error) {
             Log.loggingException("getPlayRoomStatesResult", e);
         }
