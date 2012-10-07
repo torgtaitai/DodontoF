@@ -47,7 +47,7 @@ package {
             sender.clearLastUpdateTimes();
         }
         
-        public function load_(params:Object, resultFunction:Function):void {
+        public function load(params:Object, resultFunction:Function):void {
             sender.load(params, resultFunction);
         }
         
@@ -82,11 +82,6 @@ package {
             }
             
             return "ルーム" + number;
-        }
-        
-        public function uploadImageFile(fileReferenceForImageUpload:FileReference,
-                                        params:Object):void {
-            sender.uploadImageFile(fileReferenceForImageUpload, params);
         }
         
         public function uploadImageData(params:Object, resultFunction:Function, errorFunction:Function):void {

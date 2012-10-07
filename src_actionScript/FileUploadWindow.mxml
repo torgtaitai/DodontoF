@@ -71,17 +71,20 @@
         };
         
         var sender:SharedDataSender = DodontoF_Main.getInstance().getGuiInputSender().getSender();
-        sender.sendFileUpload(fileReferenceForUpload, "uploadFile", params);
+        //sender.sendFileUpload(fileReferenceForUpload, "uploadFile", params);
+        sender.sendFileBytesUpload(fileReferenceForUpload, "uploadFile", params, uploadImageFileResult);
         
-        fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
+        //fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
     }
     
-    public function uploadImageFileResult(dataEvent:DataEvent):void {
+    //public function uploadImageFileResult(dataEvent:DataEvent):void {
+    public function uploadImageFileResult(dataEvent:Object):void {
         Log.loggingTuning("=>uploadImageFileResult(event:Event) Begin");
         try {
             uploadButton.enabled = true;
             
-            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            //var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(dataEvent);
             Log.loggingTuning("jsonData", jsonData);
             result.text = (jsonData.resultText);
             

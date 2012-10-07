@@ -12,24 +12,40 @@
 </p>
 <hr/>
 <br/>
-<p><b>【注：どどんとふを初めて使う方へ】</b></p>
-　どどんとふで遊ぶだけなら、<b>ダウンロードは必要ありません</b>。<br/>
-　<a href="http://www.dodontof.com/">「どどんとふ＠えくすとり〜む」TOPページ</a>からクローバーのアイコンを選択して、適当などどんとふサーバへアクセスしてみてください。スグ使えます。遊べます。<br/>
+
+<p><b id="forBegining">【注：どどんとふを初めて使う方へ】</b></p>
+
+どどんとふはWEBツールですので、<b>使用するためにダウンロードは必要ありません</b>。<br/>
+<a href="http://www.dodontof.com/">「どどんとふ＠えくすとり〜む」TOPページ</a>から<br/>
 <br/>
-<hr/>
+<img src="./image/transparent.gif" height="20" width="16" align="left"/>
+<img src="./image/clover.gif" align="left"/>
+<img src="./image/transparent.gif" height="20" width="16" align="left"/>
+クローバーのアイコンを選択して、好きなどどんとふサーバを開いて下さい。<br/>
+それだけで どどんとふを動かすことが出来ます<br/>
 <br/>
-<p align="left"><a href="#howtobook">使用方法については、どどんとふ解説書も参照下さい。</a></br>
-</br>
-って言うか下記の解説は相当古いので解説書読んだ方がいいです絶対。</br>
-<a href="#howToSetting">自前サーバの設置方法</a>なんかは下記解説にしか載ってないのでこちらでいいんですけどね。</br>
+
+<br/><hr/><br/>
+
+<h2 id="howtobook">どどんとふ解説書</h2>
+<p align="left">
+どどんとふの使用方法については<br>
+　　<a href="http://www.melonbooks.com/index.php?main_page=product_info&products_id=IT0000151638">
+<img src="./image/DManual201112.jpg" /><br>
+こちらの解説書を参照下さい。</a><br>
 </p>
-<br/>
-<hr/>
-<br/>
+
+<br/><hr/><br/>
+
+<p>
+このマニュアルではどどんとふの<a href="#howToSetting">自前サーバの設置方法</a>や技術的な観点について記載しています。</br>
+</p>
+
+<br/><hr/><br/>
   
 <p>
   <h2 id="index">目次</h2>
-<!-- INDEX-AREA --><ul><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><ul><font size='3'><li><a href='#login'>ログイン画面</a></li></font><font size='3'><li><a href='#map'>マップ関連の操作</a></li></font><ul><font size='2'><li><a href='#changeMap'>マップの変更</a></li></font><font size='2'><li><a href='#mapMask'>マップマスクの操作</a></li></font><font size='2'><li><a href='#zoomMap'>マップの拡大縮小</a></li></font><font size='2'><li><a href='#moveMap'>マップの移動</a></li></font></ul><font size='3'><li><a href='#character'>キャラクター関連の操作</a></li></font><ul><font size='2'><li><a href='#addCharacter'>キャラクターの追加</a></li></font><font size='2'><li><a href='#moveCharacter'>キャラクターの移動</a></li></font><font size='2'><li><a href='#changeCharacter'>キャラクターの変更</a></li></font><font size='2'><li><a href='#removeCharacter'>キャラクターの削除</a></li></font><font size='2'><li><a href='#returnCharacter'>キャラクター削除の取り消し</a></li></font><font size='2'><li><a href='#addMacgicRange'>魔法範囲の作成</a></li></font><font size='2'><li><a href='#changeMagicRange'>魔法範囲の変更</a></li></font><font size='2'><li><a href='#removeMagicRange'>魔法範囲の削除</a></li></font><font size='2'><li><a href='#returnMagicRange'>魔法範囲削除の取り消し</a></li></font></ul><font size='3'><li><a href='#initiative'>イニシアティブ表示関連</a></li></font><ul><font size='2'><li><a href='#initiativeList'>イニシアティブ情報の表示</a></li></font><font size='2'><li><a href='#addRound'>イニシアティブ情報欄によるラウンド進行</a></li></font></ul><font size='3'><li><a href='#chat'>チャット関連</a></li></font><ul><font size='2'><li><a href='#sendChat'>チャット機能</a></li></font><font size='2'><li><a href='#saveChatLog'>チャットログ保存機能</a></li></font><font size='2'><li><a href='#chatRefreshChaim'>チャット更新着信音</a></li></font><font size='2'><li><a href='#wakeupAlarm'>目覚ましアラーム機能</a></li></font></ul><font size='3'><li><a href='#card'>カード</a></li></font><ul><font size='2'><li><a href='#displayCard'>カード表示</a></li></font><font size='2'><li><a href='#cardZoom'>カード拡大・縮小</a></li></font><font size='2'><li><a href='#cardControl'>カードの操作</a></li></font></ul><font size='3'><li><a href='#dice'>ダイス関連</a></li></font><ul><font size='2'><li><a href='#visualDice'>ビジュアルダイス機能</a></li></font><font size='2'><li><a href='#diceBot'>ダイスボット機能</a></li></font></ul><font size='3'><li><a href='#image'>画像関連</a></li></font><ul><font size='2'><li><a href='#imageFileUploader'>画像ファイルアップローダ</a></li></font><font size='2'><li><a href='#imageUrlUploader'>画像URLアップローダ</a></li></font><font size='2'><li><a href='#imageWebCameraUploader'>WEBカメラ画像アップローダー</a></li></font><font size='2'><li><a href='#removeImage'>画像削除</a></li></font></ul><font size='3'><li><a href='#saveLoad'>セーブ・ロード関連</a></li></font><ul><font size='2'><li><a href='#save'>セーブ</a></li></font><font size='2'><li><a href='#load'>ロード</a></li></font><font size='2'><li><a href='#replay'>リプレイ録画・再生機能</a></li></font></ul><font size='3'><li><a href='#howtobook'>どどんとふ解説書</a></li></font></ul><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#cgiServerSetting'>CGIサーバの用意</a></li></font><ul><font size='2'><li><a href='#cgiServerSettingOnCommonRentalServer'>一般的なレンタルサーバを使用する場合</a></li></font><font size='2'><li><a href='#cgiServerSettingOnSakuraVPS'>さくらVPSを使用する場合</a></li></font></ul><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#othersSetting'>お知らせメッセージの変更</a></li></font><font size='3'><li><a href='#howToVersionUp'>バージョンアップ方法</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font></ul><font size='4'><li><a href='#aboutWebIf'>WEB IFについて</a></li></font><ul><font size='3'><li><a href='#whatIsWebIf'>WEB IFとは？</a></li></font><font size='3'><li><a href='#webIfBasicFormat'>基本フォーマット</a></li></font><font size='3'><li><a href='#webIf_getBusyInfo'>getBusyInfo：サーバ負荷情報の取得</a></li></font><font size='3'><li><a href='#webIf_getServerInfo'>getServerInfo：サーバの各種情報取得</a></li></font><font size='3'><li><a href='#webIf_getRoomList'>getRoomList：部屋情報一覧の取得</a></li></font><font size='3'><li><a href='#webIf_chat'>chat：チャットデータの取得</a></li></font><font size='3'><li><a href='#webIf_talk'>talk：チャットへの発言</a></li></font><font size='3'><li><a href='#webIf_getChatColor'>getChatColor：文字色取得</a></li></font><font size='3'><li><a href='#webIf_addCharacter'>addCharacter：キャラクター追加</a></li></font><font size='3'><li><a href='#webIf_changeCharacter'>changeCharacter：キャラクターの変更</a></li></font><font size='3'><li><a href='#webIf_getRoomInfo'>getRoomInfo：プレイルーム情報取得</a></li></font><font size='3'><li><a href='#webIf_setRoomInfo'>setRoomInfo：プレイルームの情報設定</a></li></font><font size='3'><li><a href='#webIf_addMemo'>addMemo：共有メモ追加</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#HTTPPostBinary_class'>HTTPPostBinary class</a></li></font><font size='2'><li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#cardGraphics'>カード用データ</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
+<!-- INDEX-AREA --><ul><font size='4'><li><a href='#howtobook'>どどんとふ解説書</a></li></font><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#cgiServerSetting'>CGIサーバの用意</a></li></font><ul><font size='2'><li><a href='#cgiServerSettingOnCommonRentalServer'>一般的なレンタルサーバを使用する場合</a></li></font><font size='2'><li><a href='#cgiServerSettingOnSakuraVPS'>さくらVPSを使用する場合</a></li></font></ul><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#othersSetting'>お知らせメッセージの変更</a></li></font><font size='3'><li><a href='#howToVersionUp'>バージョンアップ方法</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font><font size='3'><li><a href='#aboutDiceBot'>ダイスボットの実装について</a></li></font></ul><font size='4'><li><a href='#aboutWebIf'>WEB IFについて</a></li></font><ul><font size='3'><li><a href='#whatIsWebIf'>WEB IFとは？</a></li></font><font size='3'><li><a href='#webIfBasicFormat'>基本フォーマット</a></li></font><font size='3'><li><a href='#webIf_getBusyInfo'>getBusyInfo：サーバ負荷情報の取得</a></li></font><font size='3'><li><a href='#webIf_getServerInfo'>getServerInfo：サーバの各種情報取得</a></li></font><font size='3'><li><a href='#webIf_getRoomList'>getRoomList：部屋情報一覧の取得</a></li></font><font size='3'><li><a href='#webIf_chat'>chat：チャットデータの取得</a></li></font><font size='3'><li><a href='#webIf_talk'>talk：チャットへの発言</a></li></font><font size='3'><li><a href='#webIf_getChatColor'>getChatColor：文字色取得</a></li></font><font size='3'><li><a href='#webIf_addCharacter'>addCharacter：キャラクター追加</a></li></font><font size='3'><li><a href='#webIf_changeCharacter'>changeCharacter：キャラクターの変更</a></li></font><font size='3'><li><a href='#webIf_getRoomInfo'>getRoomInfo：プレイルーム情報取得</a></li></font><font size='3'><li><a href='#webIf_setRoomInfo'>setRoomInfo：プレイルームの情報設定</a></li></font><font size='3'><li><a href='#webIf_addMemo'>addMemo：共有メモ追加</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li></font><font size='2'><li><a href='#as3-msgpack'>as3-msgpack</a></li></font><font size='2'><li><a href='#msgpack-pure'>msgpack-pure</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#cardGraphics'>カード用データ</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
 </p>
 
 <h2 id="aboutDodontoF">「どどんとふ」って何？</h2>
@@ -37,9 +53,12 @@
 ブラウザだけで全ての操作が可能。<br>
 マップ表示もキャラクター配置もチャットもイニシアティブ管理も、さらには動画や音楽の共有まで楽しめます。<br>
 OSをほとんど気にせず動作します。WindowsでもMacでもUNIXでもOK。<br>
-マップは四角形で区切られたいわゆる「スクウェアマップ」タイプです。D&amp;D3rd,3.5th,4thやウォーハンマー、あるいはソードワールド2.0やアリアンロッドといったTRPGで利用できます。<br>
-とりあえず使ってみたい人は続けて次の「<a href="#execteEnviroment">実行環境</a>」「<a href="#howToUse">使用方法</a>」を読んでください。<br>
+<br>
+マップは四角形で区切られたいわゆる「スクウェアマップ」タイプです。D＆D4版などが代表例ですね。<br>
+とりあえず使ってみたい人は冒頭の<a href="#forBegining">【注：どどんとふを初めて使う方へ】</a>と「<a href="#howtobook">どどんとふ解説書</a>」を確認ください。<br>
+<br>
 自分で「どどんとふ」を設置してみたい！と思った方は「<a href="#howToSetting">設置方法</a>」を参照してください。<br>
+<br>
 
 <h2 id="execteEnviroment">実行環境</h2>
 「どどんとふ」を使用するには、インターネットに接続可能なPCとブラウザ、そしてブラウザへのAdobe Flash Playerのインストールが必須になります。<br>
@@ -51,348 +70,27 @@ Flashって何？という方はすでに入っている可能性もあります
 にアクセスしてみてください。<br>
 何も画面が表示されないなど不具合があった場合に上記のリンクからFlash Playerをインストールして再度接続してみてください。<br>
 
+<br>
 <h2 id="howToUse">使用方法</h2>
 <a href="#howtobook">使用方法の詳細については、どどんとふ解説書を参照下さい</a>。</br>
-ここでは、大まかな操作方法についてのみ述べます。<br>
-</p>
-
-<h3 id="login">ログイン画面</h3>
-「どどんとふ」では複数のプレイルーム（マップ・キャラクターの一式）を管理することができます。<br>
-このため、ログイン時にどのプレイルームにアクセスするかを選択する必要があります。<br>
-マップは「プレイルームNo.」で管理されています。<br>
-現在のプレイルーム状況が一覧で表示されますので、その中から選択し「ログイン」ボタンを押してください。<br>
-また、プレイ途中に別のプレイルームに移動したくなった場合には画面を開きなおして再度ログインしてください。<br>
-
-<h3 id="map">マップ関連の操作</h3>
-<h4 id="changeMap">マップの変更</h4>
-画面上部のメニューから「マップ」＝＞「マップの変更」を選択。<br>
-出てきた画面に各データを入力し「変更」ボタンを押します。(*1)<br>
-しばらく待つとマップが更新されます。<br>
-なお、マップ画像には自動的にスクウェアが表示されます。<br>
-1スクウェアは50×50ピクセルになります。<br>
-
-<h4 id="mapMask">マップマスクの操作</h4>
-画面上部のメニューから「マップ」＝＞「マップマスクの追加」、あるいはマップ上で右クリックメニューから「マップマスクの追加」を選択。<br>
-出てきた画面に各データを入力し「追加」ボタンを押すとマップが追加されます。<br>
-マスク上で右クリックメニューから削除・固定ができます。<br>
-いったん固定したマスクはマップ上から移動できなくなるため削除するしかありません。<br>
-
-<h4 id="zoomMap">マップの拡大縮小</h4>
-マップ上にマウスカーソルを置いて、マウスホイールを上下するとカーソル位置を中心にマップの拡大・縮小ができます。<br>
-メニューにある虫眼鏡アイコンでも拡大・縮小できます。<br>
-この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
-
-<h4 id="moveMap">マップの移動</h4>
-マップ上でマウスをクリックしドラッグしてください。<br>
-この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
 <br>
 
-<h3 id="character">キャラクター関連の操作</h3>
-注意：魔法範囲もキャラクターと（ほぼ）同様に扱います。<br>
-
-<h4 id="addCharacter">キャラクターの追加</h4>
-マップ上で右クリックし「キャラクターの追加」を選択します。<br>
-キャラクター追加画面が表示されるので、各データを入力し「追加」ボタンを押します。(*1)<br>
-キャラクターはマップのクリックした地点に配置されます。<br>
-キャラクターが作成されるとイニシアティブ情報欄に情報が追加されます（後述）<br>
-
-<h4 id="moveCharacter">キャラクターの移動</h4>
-追加したキャラクターを移動する場合には、キャラクターの画像上でマウスボタンをクリックしドラッグしてください。<br>
-ドロップした場所に移動します。<br>
-移動したキャラクターは最前面に（他のキャラクターよりも上に）表示されます。<br>
-
-<h4 id="changeCharacter">キャラクターの変更</h4>
-キャラクターの画像で右クリック、メニューが出てくるのでその中から「キャラクターの変更」をクリックします。<br>
-画面が表示されますので、変更したいデータを入力し「変更」ボタンを押します。<br>
-
-<h4 id="removeCharacter">キャラクターの削除</h4>
-キャラクターの画像で右クリック、メニューが出てくるのでその中から「キャラクターの削除」をクリックします。<br>
-削除したキャラクターは「墓地」から元の配置に戻すことができます。（後述）<br>
-キャラクターが削除されるとイニシアティブ情報欄の情報も削除されます（後述）<br>
-
-<h4 id="returnCharacter">キャラクター削除の取り消し</h4>
-画面上部のメニューから「変更」＝＞「墓地」を選択。<br>
-墓地画面から削除を取り消したいキャラクターを選択し「復活」ボタンを押します。<br>
-キャラクターが削除前に配置されていた場所に再配置されます。<br>
-
-<h4 id="addMacgicRange">魔法範囲の作成</h4>
-キャラクターと同様にマップ上で右クリックし「魔法範囲の追加」を選択します。<br>
-魔法範囲は作成時に有効ラウンド数を指定することで、イニシアティブ管理票に残り有効ラウンド数が表示されるようになります。<br>
-バインドなど範囲系魔法の持続時間管理に活用してください。<br>
-
-<h4 id="changeMagicRange">魔法範囲の変更</h4>
-キャラクターと同様に魔法範囲の上で右クリック、メニューが出ますので、その中から「魔法範囲の変更」をクリックします。<br>
-
-<h4 id="removeMagicRange">魔法範囲の削除</h4>
-キャラクターと同様に魔法範囲の上で右クリック、メニューが出ますので、その中から「魔法範囲の削除」を選びます。<br>
-
-<h4 id="returnMagicRange">魔法範囲削除の取り消し</h4>
-キャラクターと同様に「墓地」から魔法範囲の「復活」を実行します。<br>
-
-<h3 id="initiative">イニシアティブ表示関連</h3>
-
-<h4 id="initiativeList">イニシアティブ情報の表示</h4>
-イニシアティブ情報欄は常に画面に表示されています。<br>
-キャラクター（や魔法範囲）を追加すると表示欄に追加されたキャラクターのイニシアティブ情報が追加されます。<br>
-
-<h4 id="addRound">イニシアティブ情報欄によるラウンド進行</h4>
-イニシアティブ情報欄には現在イニシアティブを持っているキャラクターの情報を黄色く強調表示してあります。<br>
-「次へ」ボタンを押すと、現在のイニシアティブ番号を次のキャラクターに進めることができます。<br>
-「戻る」ボタンを押すと、現在のイニシアティブ番号をひとつ前のキャラクターに戻すことができます。<br>
-イニシアティブをどんどん進め、一番最後のキャラクターまでたどり着くと次の「ラウンド」に進みます。<br>
-同一のイニシアティブ値のキャラクターがいる場合には敏捷の高い方が優先になるなどの対処が必要になります。<br>
-この場合、イニシアティブの高いほうの値に小数点以下で差分をつけると管理しやすいと思います。<br>
-たとえば イニシアティブが共に16のキャラクターがいた場合、敏捷度の高いほうのイニシアティブを 16.1 と入力します。<br>
-
-<h3 id="chat">チャット関連</h3>
-<h4 id="sendChat">チャット機能</h4>
-チャット画面は常に表示されています。<br>
-名前欄には発言者の名前を入力し、その下のメッセージ欄にチャットのメッセージを入力してください。<br>
-メッセージ欄でリターンキーを押すか「送信」ボタンを押すとメッセージが送信されます。<br>
-他のテキストファイルからコピーするなどすればメッセージ欄に改行文字も入力できます。<br>
-また発言者の横の四角ボタンを押すと色選択画面が表示され、文字の色を変えることができます。<br>
-
-<h4 id="saveChatLog">チャットログ保存機能</h4>
-チャット画面の「ログ保存」ボタンを押すことでHTML形式でチャットログが表示されます。<br>
-
-<h4 id="chatRefreshChaim">チャット更新着信音</h4>
-チャットに新しいメッセージの着信があった際に、効果音を鳴らすかどうかを選択します。<br>
-このチェックは後述の目覚ましアラームの音を発生するか、にも併用します。<br>
-静かな環境をお好みの方はチェックを外しておいてください。
-
-<h4 id="wakeupAlarm">目覚ましアラーム機能</h4>
-チャット画面の「目覚まし」ボタンを押すと目覚ましアラーム送信画面が表示されます<br>
-同一プレイルームの全員にアラームを送付する場合には＜全員＞を<br>
-それ以外はアラームを送付したいプレイヤー名を選択・あるいは入力してください。<br>
-指定した相手にのみ目覚ましアラームが鳴ります<br>
-アラームは sound/alarm.mp3 ファイルを使用していますので、任意のファイルを同一名で差し替えることで音を変更することができます。<br>
-寝オチプレイヤーを起こすのに、あるいはメンバーへの呼びかけ等に使用してください。<br>
-なお、スピーカー型アイコンが停止表示の際にはアラームはなりません。（ログイン直後は停止状態）<br>
-
-
-<h3 id="card">カード</h3>
-
-<h4 id="displayCard">カード表示</h4>
-画面上部メインメニューの「カード」＝＞「」
-<br>
-
-<h4 id="cardZoom">カード拡大・縮小</h4>
-カード置き場の上にカーソルを置いて、マウスホイールを上下するとカーソル位置を中心にカード置き場の拡大・縮小ができます。<br>
-この操作は自分の画面だけに影響し、他のプレイヤーの画面は変更されません。<br>
-
-<h4 id="cardControl">カードの操作</h4>
-画面上部メインメニューの「カード」からカードの削除・初期化ができます。<br>
-カードはトーキョーN◎VAのニューロデッキ、トランプ、TORGドラマデッキに対応しています。<br>
-カードの初期化時にはカードの組毎に「山札」と「捨て札」の2つの山が作成されます。<br>
-「山札」の右クリックメニューからカードを引くことができます。<br>
-カードは自分にだけ見えるように引く方法（非公開状態）と、全員に見えるように引く方法（公開状態）があります。<br>
-引いたカードの右クリックメニューから非公開カードを公開に、公開カードを非公開にすることもできます。<br>
-使用し終わったカードは「捨て札」の上にドラッグして置いてください。<br>
-カードが「捨て札」の上に移動し、その後「捨て札」に吸い込まれます。<br>
-一度捨てたカードは「捨て札」の右クリックメニューから取り出すことができます。<br>
-
-<h3 id="dice">ダイス関連</h3>
-
-<h4 id="visualDice">ビジュアルダイス機能</h4>
-チャット欄でのダイスロールは実用的ですが、これでは物寂しいあなたのための機能。<br>
-画面右下のダイス表示欄をクリックするとそのダイスがマップ上に表示されます。最大で50個まで表示できます。<br>
-マップ上に表示されたダイスをクリックすると一斉にダイスロールされます。<br>
-ロール後、実行結果がメッセージ欄に表示されます。<br>
-ダイナミック且つ無意味。<br>
-
-<h4 id="diceBot">ダイスボット機能</h4>
-本機能はFacelessさんの「ボーンズ＆カーズ(bcdice.pl)」を元に作成しています。（ありがとうFacelessさん！）<br>
-このため、「どどんとふ」のチャットが不調な場合等にIRCを併用される際には、上記のダイスボットを使用するとスムーズに移行することができると思います。<br>
-<br>
-ダイスボットとは：<br>
-チャット上でダイスロールを行うことができる機能です。<br>
-例）「ななしさん」がチャットに「2d6 攻撃！」と入力した場合<br>
-　　ななしさん：2d6 攻撃！<br>
-　　diceBot: (2d6) → 7<br>
-これで、2d6の結果が「7」であることが分かります。<br>
-また例のようにダイスロール文字の後ろに半角スペースもしくは全角スペースを空ければ、好きなメッセージが追加できます。<br>
-ダイスロール文字には以下のパターンがあります。(例の英字は全て小文字ですが、大文字でもかまいません。)<br>
-<br>
-　3d6 → ダイスをロールして合算結果を出力する。<br>
-例）diceBot: (3d6) → 12<br>
-<br>
-　3d6+1>=11 →目標値11に対して合算結果が超えたかの判定を行う。<br>
-例）diceBot: (3d6+1>=11) → 6+1 → 7 → 失敗<br>
-　1d100<=50　のように下方にも判定可能<br>
-例）diceBot : (1d100<=50) → 23 → 成功<br>
-<br>
-　3B6 →ダイスを合算せず、バラバラに出力だけを行う。<br>
-例）diceBot : (3B6) → 2,1,4<br>
-<br>
-　3u6[6] →ダイスが6の場合に振り足し（上方無限）。（シャドウランや天羅用）<br>
-例）diceBot : (3u6[6]) → 2,13,2 → 合計 17<br>
-　10u6>=4 →更に天羅やシャドウランに特化して、10個ダイスを振り4を超えた個数を数える。<br>
-例）ShadowRun : (10U6[6]>=4) → 1,1,1,1,3,4,4,4,4,5 → 成功数5<br>
-<br>
-　[1...3]D[1...6] →ランダム数値の埋め込み<br>
-ダイスの個数がランダムに変化するなど、コマンド中に乱数を埋め込む必要がある時には<br>
-「[Min...Max]」(Min=乱数の最小値, Max=乱数の最大値。どちらも自然数)と書くと<br>
-乱数を埋め込むことが出来ます。<br>
-例)<br>
-[1...5]D6　　　([2...4]+2)D10　　　×[(2+3)...8]D6（←これはNG<br>
-<br>
-<br>
-【ソードワールド、ソードワールド2.0専用】<br>
-　K20+3→20のレーティング表の結果に+3した値を取得。<br>
-例）SwordWorld2.0 : KeyNo.20+3 → 2D:5 → 3+3 → 6<br>
-　K10+5[9]→10のレーティング表を9クリティカルで結果に+5した値を取得。<br>
-例）SwordWorld2.0 : KeyNo.10[9]+5 → 2D:9,5 → 7+5 → 12 → 1回転<br>
-<br>
-【ウォーハンマー専用】<br>
-　whH10 →クリティカル表結果出力。"WH部位 クリティカル値"の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。<br>
-例）Warhammer :腕部CT表(29+5) → 09:大動脈に傷が及んだ。コンマ数秒の内に損傷した肩から血を噴出して倒れる。ショックと失血により、ほぼ即死する。サドンデス×<br>
-<br>
-　wh60 →命中判定。"WH(命中値)@(種別)"の形で指定します。<br>
-部位は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。<br>
-「2H(二足)」「2W(有翼二足)」「4(四足)」「4H(半人四足)」「4W(有翼四足)」「W(鳥類)」となります。<br>
-命中判定を行って、当たれば部位も表示します。<br>
-なお、種別指定を省略すると「二足」、「@」だけにすると全種別の命中部位を表示します。(コマンドを忘れた時の対応です)<br>
-例）以下、各種出力例<br>
-wh60<br>
-Warhammer : (WH60) → 1 → 成功(成功度5) 二足:頭部<br>
-Wh43@4W<br>
-Warhammer : (WH43) → 1 → 成功(成功度4) 有翼四足:頭部<br>
-WH65@<br>
-Warhammer : (WH65) → 2 → 成功(成功度6) 二足:右腕 有翼二足:右腕 四足:胴体 半人四足:右腕 有翼四足:右翼 鳥:右翼<br>
-<br>
-【Chill専用】<br>
-　SR7 →ストライク・ランク・チャートに従って自動でダイスロールを行い、負傷とスタミナロスを計算します<br>
-例）Chill : (SR7:4d10, 1d10) → 20, 2 → スタミナ損失20, 負傷2<br>
-<br>
-【デモンパラサイト専用】<br>
-URGEx →"URGE衝動レベル"の形で指定します。<br>
-衝動表に従って自動でダイスロールを行い、結果を表示します。<br>
-ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。<br>
-"nURGE衝動レベル"と頭にNを付けると「新衝動表」、頭にAを付けると「誤作動表」<br>
-頭にMを付けると「ミュータント衝動表」になります。<br>
-<br>
-例）URGE1　nurge2　AURGE3　murge4　Surge5<br>
-<br>
-【シノビガミ専用】<br>
-BT→戦場表を振る<br>
-ET→感情表を振る<br>
-FT→ファンブル表を振る<br>
-ST→シーン表を振る<br>
-WT→変調表を振る<br>
-CST→都市シーン表を振る<br>
-MST→館シーン表を振る<br>
-DST→出島シーン表を振る<br>
-<br>
-<br>
-【ダブルクロス専用】<br>
-ダブルクロスの判定　(xDX@c)<br>
-ダブルクロス2ndおよび3rdの判定コマンド。<br>
-"(個数)DX(修正)@(クリティカル値)"で指定します。<br>
-加算減算のみ修正値も付けられます。<br>
-内部で読み替えています。<br>
-例）<br>
-10dx　　　10dx+5@8　　　5DX10+7-3@7<br>
-<br>
-ET→感情表を振る<br>
-例）<br>
-DoubleCross : 感情表(6-89) → ○憧憬(どうけい) - 不快感(ふかいかん)<br>
-<br>
-【トンネルズ＆トロールズ専用】<br>
-T&T バーサーク　　　　　(nBS+x)  (n:ダイス数, x:修正)<br>
-T&T ハイパーバーサーク　(nHBS+x) (n:ダイス数, x:修正)<br>
-<br>
-【ダークブレイズ専用】<br>
-判定　　(DBx,y#m)(DBxy#m)(DB@x@y#m) (x:能力値, y:技能値, m:修正)<br>
-掘り出し袋表　　(BTx) (x:ダイス数)<br>
-<br>
-<br>
-【ガンドッグ・ゼロ専用】<br>
-・ダメージペナルティ表　　(～DPTx) (x:修正)<br>
-　　射撃DP表(SDPT)、格闘DP表(MDPT)、車両DP表(VDPT)、汎用DP表(GDPT)<br>
-・ファンブル表　　　　　　(～FTx)  (x:修正)<br>
-　　射撃F表(SFT)、格闘F表(MFT)、投擲F表(TFT)<br>
-<br>
-<br>
-【ナイトウィザード専用】<br>
-・判定ロール (nNW+m@x#y) <br>
-　　(n:基本値+常時, m:否常時+状態異常, x:クリティカル値, y:ファンブル値)<br>
-<br>
-<br>
-<h3 id="image">画像関連</h3>
-<h4 id="imageFileUploader">画像ファイルアップローダ</h4>
-キャラクターあるいはマップに使用するための画像をサーバに転送することができます。<br>
-画面上部の「画像アップロード」ボタンを押すと画像アップロード用画面が表示されますので、ローカルのファイルを指定して転送実施してください。<br>
-画像は「地図」と「キャラクター画像」の2種類が選べます。<br>
-共に2MBのファイルサイズの画像までしかアップロードできません。<br>
-またファイル数は500が上限のため、それを超える場合は一番古いファイルが自動的に削除されます。<br>
-（サーバ作成者用注釈：これら上限値はファイル config.rb 内で $UPLOAD_IMAGE_MAX_SIZE および $UPLOAD_IMAGE_MAX_COUNT としてとして定義されていますので、書き換えることで変更が可能です。）<br>
-
-<h4 id="imageUrlUploader">画像URLアップローダ</h4>
-上記の「画像ファイルアップローダ」に似ていますが、ローカルファイルではなく外部URLを登録できます。<br>
-実際にはファイルを転送するわけではなくURLが記録されるだけですので、ファイル転送に比べて容量の上限もなく高速です。<br>
-ただし指定できる画像には厳しい制限があります。(*1)<br>
-一番手軽な利用方法はGoogleの画像検索からURLを取得する方法です。<br>
-
-<h4 id="imageWebCameraUploader">WEBカメラ画像アップローダー</h4>
-WEBカメラを接続した状態でメニューの「WEBカメラ画像アップローダー」を選択。<br>
-画面の指示に従って「撮影」「アップロード」を順次実行すると、WEBカメラで撮影した画像をキャラクター画像としてアップロードできます。<br>
-
-<h4 id="removeImage">画像削除</h4>
-上記の画像ファイルアップローダ・画像URLアップローダでアップロードした画像情報を削除します。<br>
-一覧で表示されている画像をクリックすると画像が選択状態になります。<br>
-再度クリックで選択解除。<br>
-「一括削除」ボタンを押すと選択状態の画像が全て削除されます。<br>
-<br>
-<br>
-(*1)画像の指定に関する注意点<br>
-キャラクターやマップの作成・変更では画像にURLが指摘できますが以下の制限があります。<br>
-・JPEG/PNG/GIF のみ指定可能。アニメーションGIFは最初の1フレーム目しか表示されません。<br>
-・同一のドメイン下のファイルは指定できます。<br>
-たとえば、 http://www.dodontof.com/DodontoF/DodontoF.swf が「どどんとふ」の画面であれば、<br>
-http://www.dodontof.com/ で始まるファイルなら指定できます。<br>
-・同一ドメイン以外でも指定できる場合があります。<br>
-Goole配下の全ての画像、たとえばイメージ検索で表示された画像は指定可能です。<br>
-またYahoo配下のファイルも同様に指定可能です。<br>
-これは技術的な話で言うとFlashの設定ポリシー(crossdomain.xml)をサーバ管理者が設定(許可)しているかで決まります。 <br>
-つまりGoogleとYahooは積極的にFlash系ツールへの情報公開を行っている、と言えます。<br>
-その他の各サイトが対応しているかは個別に調べる必要がありますが、残念ながら大抵のサイトは非公開だと考えてもらった方が良いでしょう。<br>
-
-
-<h3 id="saveLoad">セーブ・ロード関連</h3>
-
-<h4 id="save">セーブ</h4>
-上部メニューの「ファイル」＞「セーブ」からセーブ画面が起動します。<br>
-起動後しばらくすると「セーブ」ボタンが押せる状態となります。<br>
-セーブを実行するとローカルにセーブファイルを保存することができます。<br>
-保存されるデータは、マップ画像・サイズ・簡易マップ・キャラクターや魔法範囲等のコマ、イニシアティブ状態、などほぼ全てになります。<br>
-マップだけ、のように一部データのみのセーブ・ロードには現状対応していません。<br>
-
-<h4 id="load">ロード</h4>
-上部メニューの「ファイル」＞「ロード」からロード画面が起動します。<br>
-セーブ時に保存したセーブファイルをロードすることで、ほぼそのままの環境に復旧することができます。<br>
-
-<h4 id="replay">リプレイ録画・再生機能</h4>
-操作したプレイ内容をPC上に保存し、いつでも再生（リプレイ）出来る機能です。<br>
-上部メニューの「ファイル」−＞「録画開始」を押すと録画開始。<br>
-適当に操作を実施したら、同じく<br>
-上部メニューの「ファイル」−＞「録画終了」を押して録画を終了。<br>
-録画ファイル（〜.rec）の保存画面が出ますので、PC上にファイルを保存してください。<br>
-再生するには一旦ログイン画面に戻り、ログイン画面の右下「リプレイ再生」ボタンを押します。<br>
-ファイル選択画面が出るので、先ほど保存した録画ファイル（〜.rec）を選択します。<br>
-後は操作しないで待って頂ければ、録画したプレイ内容が順次再生されます。<br>
-
-<h3 id="howtobook">どどんとふ解説書</h2>
-その他詳細な使用方法については、<b><a id="howtobook" href="http://www.melonbooks.com/index.php?main_page=product_info&products_id=IT0000151638">どどんとふ解説書</a></b>を参照ください。</br>
-<br>
-
-
+<br><hr />
 <h2 id="howToSetting">設置方法</h2>
 
-「どどんとふ」を自前のサーバに設置してみよう、と思った人用の情報です。<br>
-使うだけの人や「サーバって何？」という人は読み飛ばしてOKです。<br>
-
-
-
+「どどんとふ」は公開されているサーバを使う事で誰でも利用が可能ですが、<br>
+大抵の場合、公開サーバは多数の人が使用しているため重いです。<br>
+この対策として、自分たち専用のサーバを用意することで快適な環境を作製する事ができます。<br>
+<b>定期的にオンセを実施する方は自前サーバの設置を検討してください。　是　非　。</b><br>
+<br>
+<br>
+<font size= "5">　　<a href="install/index.html">サ　ー　バ　の　設　置　手　順　は　こ　ち　ら</a></font>
+<br>
+<br>
+<br>
+以下は、サーバ設置時の技術的な内容について記述します。<br>
+上記の設置手順を見て、不明点がありましたら以下を参照してください。<br>
+<br>
 <h3 id="cgiServerSetting">CGIサーバの用意</h3>
 まず、Rubyの動くCGIサーバが必要です。<br>
 <br>
@@ -738,6 +436,28 @@ mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isG
 ソースコードの内、〜Testで終わるファイルはUnitTest用ですので通常の運用では変更する必要はありません。<br>
 <br>
 
+<h3 id="aboutDiceBot">ダイスボットの実装について</h3>
+どどんとふには標準で大量のダイスボットが付いていますが、それでも不足していたり、新しい機能を追加したくなる場合があるでしょう。<br>
+そんな場合にはRubyのスクリプトで対応が可能です。<br>
+<br>
+ダイスボット関連のソースコードは<br>
+　src_bcdice/diceBot/<br>
+にありますので、新しく作製する場合は既存のコードを参考に<br>
+_Template.rb<br>
+を雛形にして作製すると良いでしょう。<br>
+<br>
+また既存のダイスボットを拡張した場合には、サーバにアップロードする前にローカル環境で<br>
+src_ruby ディレクトリで<br>
+<br>
+ruby createDiceInfos.rb<br>
+<br>
+とコマンドを実行しておいてください。<br>
+これで diceBotInfos.rb ファイルが更新され拡張したダイスボットの内容がどどんとふ側で読み込めるようになります。<br>
+＃内容的には、ダイスボットの内容をCGIで毎回読み出さずに済むようにdiceBotInfos.rbファイルにまとめています。<br>
+<br>
+完成したダイスボットは作者に送付するとどどんとふに取り込んでもらえるかもしれませんよ！<br>
+<br>
+<br>
 <h2 id="aboutWebIf">WEB IFについて</h2>
 
 <h3 id="whatIsWebIf">WEB IFとは？</h3>
@@ -1122,10 +842,6 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 　<a href="http://code.google.com/p/tubeloc/">tubeloc[http://code.google.com/p/tubeloc/]</a><br>
  　＝＞FlashでYoutubeの動画を再生するためのライブラリ。Apache License 2.0ライセンス。<br>
 
-<h4 id="HTTPPostBinary_class">HTTPPostBinary class</h4>
-　<a href="http://blog.ymatsusaka.com/2007/05/20/httppostbinary-class-connects-your-flash-program-to-general-webservice/">http://blog.ymatsusaka.com/2007/05/20/httppostbinary-class-connects-your-flash-program-to-general-webservice/</a><br>
- 　＝＞ActionScriptで画像とデータを同時にアップロードするためのライブラリ。LGPLライセンス。<br>
-
 <h4 id="Hi-ReS-Stats">Hi-ReS-Stats</h4>
 　<a href="https://github.com/mrdoob/Hi-ReS-Stats">Hi-ReS-Stats[https://github.com/mrdoob/Hi-ReS-Stats]</a><br>
  　＝＞Flashのパフォーマンスを測定するためのライブラリ。MITライセンス。<br>
@@ -1139,6 +855,14 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 　<a href="http://rubyforge.org/projects/ruwiki/">http://rubyforge.org/projects/ruwiki/</a><br>
  　＝＞Rubyでtar.gzファイルを解凍するためのライブラリ。GPL, Rubyデュアルライセンス。<br>
 　　　どどんとふ付属のライブラリは改造版のため、オリジナルは上記サイトから取得願います。<br>
+
+<h4 id="as3-msgpack">as3-msgpack</h4>
+　<a href="https://github.com/loteixeira/as3-msgpack">https://github.com/loteixeira/as3-msgpack</a><br>
+ 　＝＞ActionScript3用のMessagePackライブラリ。Apache License 2.0ライセンス。<br>
+
+<h4 id="msgpack-pure">msgpack-pure</h4>
+　<a href="https://github.com/nayutaya/msgpack-pure">https://github.com/nayutaya/msgpack-pure</a><br>
+ 　＝＞Ruby用のMessagePackライブラリ。ライセンス不明記。<br>
 
 
 <h4 id="icons">各種アイコン用画像集</h4>
@@ -1180,6 +904,31 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2012/10/05 Ver.1.39.06<br>
+・定期更新処理での日時判定処理の修正。（内部時間の保持方法をUNIX積算秒(小数点）のからUNIX積算ミリ秒（整数）に変更）<br>
+・立ち絵の画像を左右反転にした場合、チャットの末尾に＠立ち絵 書式で指定すると表示が狂う問題を修正。<br>
+・一部データだけのロードが正しく動かなかった問題を修正。<br>
+・カットインが削除が出来なかった問題を修正。<br>
+・サーバの処理を軽量化（不要なデータ読み込みを削除）<br>
+・ファイルアップロード等でSWFファイル読み込んだ場合に音が鳴り続けるのを、鳴らないように改善。<br>
+・シノビガミのダイスボットのコマンド記述誤りを修正。（秋空に雪舞えばシーン表　KST→AKST）<br>
+・初回ログインジに表示されるデフォルトユーザー名を「ななしさん」固定から src_ruby/config.rb の $defaultUserNames で可変に変更。<br>
+<br>
+2012/10/01 Ver.1.39.05<br>
+・README.htmlを大幅改定<br>
+・サーバのインストール手順を追加。りこりすさんありがとうっ！<br>
+・キャラクターが削除できない不具合を修正。<br>
+・ダイスボット表追加機能が全く動かなくなっていたので修正。<br>
+・ダイスボット表追加機能で追加したばかりのダイスボットが他のプレイヤーから見えない不具合を修正。<br>
+・立ち絵指定時に、立ち絵を指定していないキャラクターのコマ絵が立ち絵として使われなくなる障害を修正。<br>
+・新規部屋作成時にカウンターリモコンを有効に出来ない不具合を修正。<br>
+・イニシアティブ表のカウンター最大・最小値を10桁に。<br>
+<br>
+2012/09/29 Ver.1.39.04<br>
+・クライアント->サーバのデータ送信をJONからMessagePackに変更。全体をリファクタリング。<br>
+　-> レンタルサーバではなく自前サーバの人は、 src_ruby/config.rb の $isMessagePackInstalled の設定を変えることで高速化が期待できます。<br>
+・index.htmlを追加。<br>
+<br>
 2012/09/25 Ver.1.39.03<br>
 ・WEB IFにgetBuyInfo、getServerInfo、getRoomList を追加。READMEに記述追加。<br>
 ・イニシアティブ表の値が10までしか設定できない不具合を解除(99999〜-99999に変更)<br>

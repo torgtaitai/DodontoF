@@ -14,6 +14,7 @@ package {
         private var message:String = "";
         private var channel:int = 0;
         private var isSendToOwnself:Boolean = false;
+        private var isReadLocal:Boolean = true;
         
         private var randomSeed:int = 0;
         private var gameType:String = null;
@@ -77,6 +78,8 @@ package {
             var params:Array = nameAndState.split("\t");
             name = params[0];
             state = params[1];
+            
+            isReadLocal = false;
         }
         
         public function setNameFromChatWindow():void {
@@ -99,6 +102,11 @@ package {
         public function getState():String {
             if( isStateEmpty ) {
                 return "";
+            }
+            
+            if( ! isReadLocal ) {
+                var result:String = (state == null ? "" : state);
+                return result;
             }
             
             return getValue(state, getComboBoxText(getChatWindw().standingGraphicsStates));

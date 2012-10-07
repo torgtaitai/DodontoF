@@ -137,12 +137,9 @@
         
         Log.logging("Utils.getEncodedJsonString(tagInfo)", Utils.getEncodedJsonString(tagInfo));
         
-        var params:Object = [["string", "imageFileName", imageFileName],
-                             ["string", "tagInfo", Utils.getEncodedJsonString(tagInfo)],
-                             //["binary", "imageData", imageData, "image/png", imageFileName],
-                             ["binary", "smallImageData", smallImageData, "image/png", imageFileName + ".png"]];
-        
-        Log.logging( "uploadSmallImage passed." );
+        var params:Object = {"imageFileName": imageFileName,
+                             "tagInfo": Utils.getEncodedJsonString(tagInfo),
+                             "smallImageData": smallImageData};
         
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.uploadImageData(params, uploadImageFileResult, ioErrorHandler);

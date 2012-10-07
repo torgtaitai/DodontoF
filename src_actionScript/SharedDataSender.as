@@ -17,7 +17,6 @@ package {
     import flash.net.URLVariables;
     import flash.utils.*;
     import mx.controls.Alert;
-    import ym.net.HTTPPostBinary;
     import flash.geom.Point;
     import flash.events.DataEvent;
     import mx.utils.UIDUtil;
@@ -29,7 +28,8 @@ package {
         protected var loadParams:Object = null;
         
         private var uniqueId:String = "";
-        private var strictlyUniqueId:String = UIDUtil.createUID();
+        
+        private var strictlyUniqueId:String = createUniqueString();
         
         protected var refreshTimeoutSecond:int = 10;
         protected var refreshTimeoutPadding:int = 10;
@@ -66,6 +66,10 @@ package {
         public function getUniqueIdFromStrictlyUniqueId(strictlyUniqueId:String):String {
             var parats:Array = strictlyUniqueId.split(uniqueIdSeparator);
             return parats[0];
+        }
+        
+        public function getStrictlyUniqueIdForRefresh():Array {
+            return [Number(uniqueId), Number(strictlyUniqueId)];
         }
         
         public function getStrictlyUniqueId():String {
@@ -106,28 +110,25 @@ package {
         }
         
         public function checkRoomStatus(roomNumber:int, adminPassword:String, resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "roomNumber" : roomNumber,
                 "adminPassword" : adminPassword
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            
-            var params:String = getParamString("checkRoomStatus", [["checkRoomStatusData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("checkRoomStatus", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function loginPassword(roomNumber:int, password:String,
                                       visiterMode:Boolean, resultFunction:Function):void {
             Log.logging("SharedDataSender.login");
-            var jsonData:Object = {
+            var data:Object = {
                 "roomNumber" : roomNumber,
                 "password" : password,
                 "visiterMode" : visiterMode
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = getParamString("loginPassword", [["loginData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("loginPassword", data);
+            sendCommandData(obj, resultFunction);
         }
         
         protected var saveFileExtension:String = "sav";
@@ -149,23 +150,22 @@ package {
         }
         
         public function saveScenario(chatPalleteData:String, resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "chatPalleteData": chatPalleteData,
                 "baseUrl": Utils.getOwnBaseUrl() };
-            var jsonParams:String = getEncodedJsonString(jsonData);
             
-            var params:String = this.getParamString("saveScenario",  [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("saveScenario",  data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function save(resultFunction:Function):void {
-            var params:String = this.getParamString("save", [["extension", saveFileExtension]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("save", saveFileExtension, "extension")
+            sendCommandData(obj, resultFunction);
         }
         
         public function saveMap(resultFunction:Function):void {
-            var params:String = this.getParamString("saveMap", [["extension", mapSaveFileExtension]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("saveMap", mapSaveFileExtension, "extension")
+            sendCommandData(obj, resultFunction);
         }
         
         public function load(params:Object, resultFunction:Function):void {
@@ -199,10 +199,11 @@ package {
                 }
                 
                 if( resultFunction != null ) {
-                    fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, resultFunction);//Event.COMPLETE, resultFunction);
+                    //fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, resultFunction);//Event.COMPLETE, resultFunction);
                 }
                 
-                thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
+                //thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
+                thisObj.sendFileBytesUpload(fileReference, commandName, thisObj.loadParams, resultFunction);
             }
         }
         
@@ -251,33 +252,43 @@ package {
         public function requestReplayDataList(resultFunction:Function):void {
             Log.logging("SharedDataSender.requestReplayDataList Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 //特にデータなし
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("requestReplayDataList", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("requestReplayDataList", data);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.requestReplayDataList End");
         }
         
-        public function uploadImageFile(fileReferenceForImageUpload:FileReference,
-                                        params:Object):void {
-            Log.loggingTuning("uploadImageFile called");
-            
-            var commandName:String = "uploadImageFile";
-            if( isIgnoreCommandAtMentenanceMode(commandName) ) {
-                return;
-            }
-            
-            if( isIgnoreCommandAtVisiterMode(commandName) ) {
-                return;
-            }
-            
-            sendFileUpload(fileReferenceForImageUpload, "uploadImageFile", params);
+        public function sendFileBytesUpload(fileReference:FileReference,
+                                            commandName:String,
+                                            data:Object = null,
+                                            resultFunction:Function = null):void {
+            fileReference.addEventListener(Event.COMPLETE,
+                                           getSendFileBytesUpload2(fileReference, commandName, data, resultFunction));
+            fileReference.load();
         }
         
+        public function getSendFileBytesUpload2(fileReference:FileReference,
+                                                commandName:String,
+                                                data:Object = null,
+                                                resultFunction:Function = null):Function {
+            return function(e:Event):void {
+                if( data == null ) {
+                    data = new Object();
+                }
+                
+                data["fileData"] = fileReference.data;
+                data["fileName"] = fileReference.name;
+                
+                var obj:Object = getParamObject(commandName, data);
+                sendCommandData(obj, resultFunction);
+            }
+        }
+        
+        /*
         public function sendFileUpload(fileReferenceForLocal:FileReference,
                                        commandName:String,
                                        params:Object = null):void {
@@ -285,8 +296,8 @@ package {
             
             request.method = URLRequestMethod.POST;
             var jsonData:Object = {
-                "Command" : commandName,
-                "saveDataDirIndex" : this.saveDataDirIndex
+                "cmd" : commandName,
+                "room" : this.saveDataDirIndex
             };
             
             if( params != null ) {
@@ -307,71 +318,30 @@ package {
             fileReferenceForLocal.upload(request);
             Log.loggingTuning("fileReferenceForLocal.upload(request) called.");
         }
+        */
         
-        
-        public function uploadImageData(params_obj:Object, resultFunction:Function, errorFunction:Function):void {
-            Log.loggingTuning("SharedDataSenderBody.uploadImageData begin");
+        public function uploadImageData(params:Object, resultFunction:Function, errorFunction:Function):void {
+            Log.loggingTuning("SharedDataSenderBody.uploadImageData Begin");
             
-            var params:Array = params_obj as Array;
-            var httpdata:HTTPPostBinary = new HTTPPostBinary();
+            var obj:Object = getParamObject("uploadImageData", params);
+            sendCommandData(obj, resultFunction, errorFunction);
             
-            //(params_key:String, data:ByteArray, mimetype:String, filename:String = null)
-            
-            Log.logging("params.length", params.length);
-            while( params.length > 0 ) {
-                var param:Array = params.shift();
-                var type:String = param.shift();
-                
-                if( type == "binary" ) {
-                    Log.logging("addBinary param[0]:" + param[0] + ", param[1], param[2]:" + param[2] + ", param[3]:" + param[3]);
-                    Log.logging("param[1] is null : " + (param[1] == null));
-                    httpdata.addBinary(param[0], param[1], param[2], param[3]);
-                } else if( type == "string" ) {
-                    Log.logging("addString param[0]:" + param[0] + ", param[1]:" + param[1]);
-                    httpdata.addString(param[0], param[1]);
-                } else {
-                    Log.loggingError("other type in uploadImageData");
-                }
-            }
-            
-            httpdata.addString("Command", "uploadImageData");
-            httpdata.addString("saveDataDirIndex", "" + this.saveDataDirIndex);
-            
-            var request:URLRequest = new URLRequest();
-            request.url = Config.getInstance().getDodontoFServerCgiUrl();
-            request.contentType = httpdata.contentType;
-            request.method = httpdata.method;
-            request.data = httpdata.encodeData();
-            
-            Log.logging("loader.load() setting");
-            var loader: URLLoader = new URLLoader();
-            
-            loader.addEventListener(IOErrorEvent.IO_ERROR, errorFunction);
-            loader.addEventListener(Event.UNLOAD, errorFunction);
-            loader.addEventListener(Event.COMPLETE, resultFunction);
-            
-            Log.logging("loader.load() begin");
-            Log.logging("request.url", request.url);
-            try {
-                loader.load(request);
-            } catch (e:Error) {
-                Log.loggingException("uploadImageData", e);
-                throw e;
-            }
-            Log.logging("loader.load() end");
-            
-            Log.loggingTuning("uploadImageData end");
+            Log.loggingTuning("SharedDataSenderBody.uploadImageData End");
         }
         
-        public function checkLastUpdateTimes(type:String, jsonLastUpdateTimes:Object):Boolean {
+        public function checkLastUpdateTimes(type:String, lastUpdateTimes:Object):Boolean {
             Log.logging("checkLastUpdateTimes begin.");
             Log.logging("checkLastUpdateTimes type", type);
+            
+            if( lastUpdateTimes == null ) {
+                return false;
+            }
             
             if( isReplayMode() ) {
                 return true;
             }
             
-            var timeValue:Number = jsonLastUpdateTimes[type];
+            var timeValue:Number = lastUpdateTimes[type];
             Log.logging("timeValue", timeValue);
             
             if( this.lastUpdateTimes[type] > timeValue ) {
@@ -383,21 +353,17 @@ package {
         }
         
         public function resurrectCharacter(resurrectCharacterId:String, resultFunction:Function):void {
-            var jsonData:Object = {"imgId" : resurrectCharacterId};
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            
-            var params:String = getParamString("resurrectCharacter", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var data:Object = {"imgId" : resurrectCharacterId};
+            var obj:Object = getParamObject("resurrectCharacter", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function sendRoundTimeData(round:int, initiative:Number, counterNames:Array):void {
-            var jsonData:Object = {"round": round,
+            var data:Object = {"round": round,
                                    "initiative": initiative,
                                    "counterNames": counterNames};
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            
-            var params:String = this.getParamString("changeRoundTime", [["roundTimeData", jsonParams]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("changeRoundTime", data);
+            sendCommandData(obj);
         }
         
         
@@ -488,14 +454,11 @@ package {
         public function logout():void {
             stopRefresh();
             
-            var logoutJsonData:Object = {
+            var data:Object = {
                 "uniqueId": uniqueId};
             
-            var jsonParams:String = getEncodedJsonString(logoutJsonData);
-            Log.logging("jsonParams : " + jsonParams);
-            
-            var params:String = getParamString("logout", [["logoutData", jsonParams]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("logout", data);
+            sendCommandData(obj);
         }
         
         private function inclimentRefreshIndex():void {
@@ -529,33 +492,29 @@ package {
 			
             var userName:String = getUserName();
             
-            var jsonData:Object = {
-                "lastUpdateTimes": this.lastUpdateTimes,
-                "refreshIndex": this.refreshIndex,
-                "uniqueId": this.getStrictlyUniqueId(), //this.uniqueId,
-                "userName": userName
+            var data:Object = {
+                "times": this.lastUpdateTimes,
+                "rIndex": this.refreshIndex,
+                "name": userName
             };
             
             if( DodontoF_Main.getInstance().isVisiterMode() ) {
-                jsonData["isVisiter"] = true;
+                data["isVisiter"] = true;
             }
             
             if( getReciever().isSessionRecording() ) {
-                jsonData["isGetOwnRecord"] = true;
+                data["isGetOwnRecord"] = true;
             }
             
             if( DodontoF_Main.getInstance().getMentenanceModeOn() ) {
-                jsonData.uniqueId = -1;
+                data.uniqueId = -1;
             }
             
-            var refreshData:String = getEncodedJsonString(jsonData);
-            Log.logging("refreshData", refreshData);
-            
-            var params:String = getParamString("refresh", [["params", refreshData]]);
-            Log.logging("refreshData params", params);
+            var obj:Object = getParamObject("refresh", data);
+            Log.logging("refreshData obj", obj);
             
             var isRefresh:Boolean = true;
-            sendCommandData(params, receiver.analyzeRefreshResponse, null, isRefresh);
+            sendCommandData(obj, receiver.analyzeRefreshResponse, null, isRefresh);
         }
         
         protected function getUserName():String {
@@ -593,7 +552,7 @@ package {
                                   gridInterval:int,
                                   isAlternately:Boolean,
                                   mapMarks:Array):void {
-            var changeMapJsonData:Object = {
+            var data:Object = {
                 "mapType": "imageGraphic",
                 "imageSource": mapImageUrl,
                 "mirrored": mirrored,
@@ -604,57 +563,48 @@ package {
                 "isAlternately": isAlternately,
                 "mapMarks": mapMarks};
             
-            Log.logging("changeMapJsonData");
-            var jsonParams:String = getEncodedJsonString(changeMapJsonData);
-            Log.logging("jsonParams : " + jsonParams);
-            
-            var params:String = getParamString("changeMap", [["mapData", jsonParams]]);
-            Log.logging("var params:String : " + params);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("changeMap", data);
+            sendCommandData(obj);
         }
         
-        public function drawOnMap(data:Array):void {
-            var jsonData:Object = {
-                "data" : data
+        public function drawOnMap(array:Array):void {
+            var data:Object = {
+                "data" : array
             }
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            var params:String = getParamString("drawOnMap", [["params", jsonParams]]);
+            var obj:Object = getParamObject("drawOnMap", data);
             
-            this.sendCommandData(params);
+            sendCommandData(obj);
             Log.logging("drawLineOnMap End");
         }
         
         public function clearDrawOnMap():void {
-            var jsonData:Object = {
+            var data:Object = {
             }
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            var params:String = getParamString("clearDrawOnMap", [["params", jsonParams]]);
+            var obj:Object = getParamObject("clearDrawOnMap", data);
             
-            this.sendCommandData(params);
+            sendCommandData(obj);
         }
         
         public function undoDrawOnMap(resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
             }
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            var params:String = getParamString("undoDrawOnMap", [["params", jsonParams]]);
+            var obj:Object = getParamObject("undoDrawOnMap", data);
             
-            this.sendCommandData(params, resultFunction);
+            sendCommandData(obj, resultFunction);
         }
         
         
         public function deleteImage(imageUrlList:Array,
                                     resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "imageUrlList": imageUrlList
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("deleteImage", [["imageData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("deleteImage", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function addCardRankerCard(imageName:String, imageNameBack:String, x:int, y:int):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "isText" : false,
                 "imageName" : imageName,
                 "imageNameBack" : imageNameBack,
@@ -666,13 +616,12 @@ package {
                 "isBack" : false,
                 "isOpen" : true
             };
-            var addCardData:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("addCard", [["addCardData", addCardData]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("addCard", data);
+            sendCommandData(obj);
         }
         
         public function addMessageCard(imageName:String, imageNameBack:String, x:int, y:int):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "isText" : true,
                 "imageName" : imageName,
                 "imageNameBack" : imageNameBack,
@@ -682,9 +631,8 @@ package {
                 "x" : x,
                 "y" : y
             };
-            var addCardData:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("addCard", [["addCardData", addCardData]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("addCard", data);
+            sendCommandData(obj);
         }
         
         public function addCardZone(ownerId:String,
@@ -693,15 +641,14 @@ package {
             var owner:String = "";
             drawCardOnLocal(CardZone.getJsonData, owner, MovablePiece.getDefaultId(), x, y);
             
-            var jsonData:Object = {
+            var data:Object = {
                 "owner" : ownerId,
                 "ownerName" : ownerName,
                 "x" : x,
                 "y" : y
             };
-            var dataString:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("addCardZone", [["data", dataString]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("addCardZone", data);
+            sendCommandData(obj);
         }
         
         public function addCharacter(characterJsonData:Object, keyName:String = null, action:Function = null):void {
@@ -715,22 +662,19 @@ package {
             }
         }
         
-        public function addCharacterWithError(characterJsonData:Object, keyName:String, action:Function):void {
-            Log.logging("SharedDataSender.addCharacter() begin characterJsonData", characterJsonData);
+        public function addCharacterWithError(data:Object, keyName:String, action:Function):void {
+            Log.logging("SharedDataSender.addCharacter() begin characterData", data);
             
-            var jsonParams:String = getEncodedJsonString(characterJsonData);
-            Log.logging("jsonParams", jsonParams);
-            
-            var params:String = getParamString("addCharacter", [["characterData", jsonParams]]);
-            Log.logging("var params:String", params);
+            var clonedData:Object = Utils.clone(data);
+            var obj:Object = getParamObject("addCharacter", clonedData);
             
             Log.logging("receiver.addCharacterInOwnMap(characterJsonData) begin");
-            characterJsonData[keyName] = "(作成中・・・)" + characterJsonData[keyName];
-            receiver.addCharacterInOwnMap(characterJsonData);
+            data[keyName] = "(作成中・・・)" + data[keyName];
+            receiver.addCharacterInOwnMap(data);
             
-            Log.logging("SharedDataSender.sendCommandData(params) begin");
-            this.sendCommandData(params, getPrintAddFailedCharacterName(action));
-            Log.logging("SharedDataSender.sendCommandData(params) end");
+            Log.logging("SharedDataSender.sendCommandData(obj) begin");
+            sendCommandData(obj, getPrintAddFailedCharacterName(action));
+            Log.logging("SharedDataSender.sendCommandData(obj) end");
             
             Log.logging("SharedDataSender.addCharacter() end");
         }
@@ -756,12 +700,12 @@ package {
         }
         
         public function moveCharacter(movablePiece:MovablePiece, x:Number, y:Number):void {
-            Log.logging("moveCharacter start.");
-            var moveData:String = getEncodedJsonString( {"imgId": movablePiece.getId(), "x": x, "y": y});
-            Log.logging("moveData", moveData);
+            var data:Object =  {"imgId": movablePiece.getId(),
+                                "x": x,
+                                "y": y};
             
-            var params:String = this.getParamString("moveCharacter", [["characterData", moveData]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("moveCharacter", data);
+            sendCommandData(obj);
         }
         
         public function removeCharacter(piece:Piece):void {
@@ -790,24 +734,19 @@ package {
         }
         
         protected function removeCharacterByRemoveInfos(removeInfos:Array):void {
-            var jsonParams:String = getEncodedJsonString( removeInfos );
-            var params:String = this.getParamString("removeCharacter", [["removeCharacterData", jsonParams]]);
-            this.sendCommandData(params);
+            var obj:Object = getParamObject("removeCharacter", removeInfos);
+            sendCommandData(obj);
         }
         
-        public function changeCharacter(characterJsonData:Object, resultFunction:Function = null):void {
-            var jsonParams:String = getEncodedJsonString(characterJsonData);
-            Log.logging("jsonParams : " + jsonParams);
-            
-            var params:String = getParamString("changeCharacter", [["params", jsonParams]]);
-            Log.logging("var params:String : " + params);
-            this.sendCommandData(params, resultFunction);
+        public function changeCharacter(data:Object, resultFunction:Function = null):void {
+            var obj:Object = getParamObject("changeCharacter", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function sendChatMessageAll(name:String, message:String, password:String):void {
             Log.logging("sendChatMessageAll Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "senderName": name,
                 "message" : message,
                 "password": password,
@@ -815,10 +754,9 @@ package {
                 "color" : Utils.getColorString(0x000000),
                 "uniqueId" : getStrictlyUniqueId() };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("sendChatMessageAll", [["params", jsonParams]]);
+            var obj:Object = getParamObject("sendChatMessageAll", data);
             
-            this.sendCommandData(params, sendChatMessageAllCallBack);
+            sendCommandData(obj, sendChatMessageAllCallBack);
             Log.logging("sendChatMessageAll End");
         }
         
@@ -841,7 +779,7 @@ package {
                 return;
             }
             
-            var jsonData:Object = {
+            var data:Object = {
                 "senderName": chatSendData.getNameAndState(),
                 "message" : chatSendData.getMessage(),
                 "channel": chatSendData.getChannel(),
@@ -850,18 +788,17 @@ package {
             
             var sendto:String = chatSendData.getSendto();
             if( ChatMessageTrader.isValidSendTo(sendto) ) {
-                jsonData.sendto = sendto;
+                data.sendto = sendto;
             }
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("sendChatMessage", [["params", jsonParams]]);
+            var obj:Object = getParamObject("sendChatMessage", data);
             
             var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
-            this.sendCommandData(params, callBack, errorFunction);
+            sendCommandData(obj, callBack, errorFunction);
         }
         
         public function sendDiceBotChatMessage(chatSendData:ChatSendData, callBack:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "name" : chatSendData.getNameAndState(),
                 "state" : chatSendData.getState(),
                 "message" : chatSendData.getMessage(),
@@ -873,15 +810,12 @@ package {
                 "gameType" : chatSendData.getGameType(),
                 "uniqueId" : chatSendData.getStrictlyUniqueId(this) };
             
-            addIsNeedResultParam(jsonData);
+            addIsNeedResultParam(data);
             
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            Log.logging("jsonParams : ", jsonParams);
-            
-            var params:String = this.getParamString("sendDiceBotChatMessage", [["params", jsonParams]]);
+            var obj:Object = getParamObject("sendDiceBotChatMessage", data);
             
             var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
-            this.sendCommandData(params, callBack, errorFunction);
+            sendCommandData(obj, callBack, errorFunction);
         }
         
         private function addIsNeedResultParam(jsonData:Object):void {
@@ -928,16 +862,15 @@ package {
         public function getDiceBotInfos():void {
             Log.logging("SharedDataSender.getDiceBotInfos Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 //特にデータなし
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getDiceBotInfos", [["params", jsonParams]]);
+            var obj:Object = getParamObject("getDiceBotInfos", data);
             
             var resultFunction:Function = DodontoF_Main.getInstance().getDiceBotInfosResult;
             
-            this.sendCommandData(params, resultFunction);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.getDiceBotInfos End");
         }
@@ -945,13 +878,12 @@ package {
         public function getBotTableInfos(resultFunction:Function):void {
             Log.logging("SharedDataSender.getBotTableInfos Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 //特にデータなし
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getBotTableInfos", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("getBotTableInfos", data);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.getBotTableInfos End");
         }
@@ -961,16 +893,15 @@ package {
                                     resultFunction:Function):void {
             Log.logging("SharedDataSender.addBotTable Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "command" : command,
                 "dice" : dice,
                 "title" : title,
                 "table" : table
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("addBotTable", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("addBotTable", data);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.addBotTable End");
         }
@@ -981,7 +912,7 @@ package {
                                        resultFunction:Function):void {
             Log.logging("SharedDataSender.changeBotTable Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "command" : command,
                 "dice" : dice,
                 "title" : title,
@@ -989,9 +920,8 @@ package {
                 "originalCommand" : originalCommand
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("changeBotTable", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("changeBotTable", data);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.changeBotTable End");
         }
@@ -1000,42 +930,17 @@ package {
         public function removeBotTable(command:String, resultFunction:Function):void {
             Log.logging("SharedDataSender.removeBotTable Begin");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "command" : command
             };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("removeBotTable", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("removeBotTable", data);
+            sendCommandData(obj, resultFunction);
             
             Log.logging("SharedDataSender.removeBotTable End");
         }
         
         
-        
-        protected function sendCommandData(paramsString:String,
-                                           callBack:Function = null,
-                                           errorCallBack:Function = null,
-                                           isRefresh:Boolean = false):void {
-            
-            Log.loggingTuning("==>Begin sendCommandData");
-            Log.logging("sendCommandData paramsString : ", paramsString);
-            
-            if( isStopRefreshOn ) {
-                Log.loggingFatalError("サーバとの接続が切断されました。操作を行う事は出来ません");
-                return;
-            }
-            
-            try {
-                sendCommandDataCatched(paramsString,
-                                       callBack,
-                                       errorCallBack,
-                                       isRefresh);
-            } catch( e:Error ) {
-                Log.loggingException("SharedDataSender.sendCommandData()", e);
-            }
-            Log.loggingTuning("==>End sendCommandData");
-        }
         
         public function createPlayRoom(createPassword:String,
                                        playRoomName:String,
@@ -1047,7 +952,7 @@ package {
                                        viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "createPassword": createPassword,
                 "playRoomName": playRoomName,
                 "playRoomPassword": playRoomPassword,
@@ -1058,9 +963,8 @@ package {
                 "viewStates": viewStates,
                 "playRoomIndex": playRoomIndex
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("createPlayRoom", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("createPlayRoom", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function changePlayRoom(playRoomName:String,
@@ -1073,7 +977,7 @@ package {
                                        viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "playRoomName": playRoomName,
                 "playRoomPassword": playRoomPassword,
                 "chatChannelNames": chatChannelNames,
@@ -1083,63 +987,62 @@ package {
                 "gameType": gameType,
                 "viewStates": viewStates
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("changePlayRoom", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("changePlayRoom", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function requestImageList(resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getImageList", [["imageData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("getImageList", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function requestImageTagInfosAndImageList(resultFunction:Function):void {
-            var params:String = this.getParamString("getImageTagsAndImageList", []);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("getImageTagsAndImageList");
+            sendCommandData(obj, resultFunction);
         }
         
         public function clearGraveyard(resultFunction:Function):void {
-            var params:String = this.getParamString("clearGraveyard", []);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("clearGraveyard");
+            sendCommandData(obj, resultFunction);
         }
         
         public function requestGraveyard(resultFunction:Function):void {
-            var params:String = this.getParamString("getGraveyardCharacterData", []);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("getGraveyardCharacterData");
+            sendCommandData(obj, resultFunction);
         }
         
         public function getWaitingRoomInfo(resultFunction:Function):void {
-            var params:String = this.getParamString("getWaitingRoomInfo", []);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("getWaitingRoomInfo");
+            sendCommandData(obj, resultFunction);
         }
         
         public function getPlayRoomStates(minRoom:int, maxRoom:int, resultFunction:Function):void {
-            var jsonData:Object = {"minRoom": minRoom,
+            var data:Object = {"minRoom": minRoom,
                                    "maxRoom" : maxRoom };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getPlayRoomStates", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("getPlayRoomStates", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
-            var jsonData:Object = {"uniqueId": uniqueId};
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getLoginInfo", [["params", jsonParams]]);
+            var data:Object = {"uniqueId": uniqueId};
             
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("getLoginInfo", data);
+            
+            sendCommandData(obj, resultFunction);
         }
 
         public function uploadImageUrl(imageUrl:String, tagInfo:Object, resultFunction:Function):void {
-            var jsonData:Object = {"imageUrl": imageUrl,
+            var data:Object = {"imageUrl": imageUrl,
                                    "tagInfo" : tagInfo };
             
-            var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = this.getParamString("uploadImageUrl", [["imageData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("uploadImageUrl", data);
+            sendCommandData(obj, resultFunction);
         }
 
 
@@ -1178,42 +1081,6 @@ package {
             }
             
             return isIgnoreCommand(commandName, visiterCommands);
-        }
-        
-        protected function getParamString(commandName:String, params:Array):String {
-            Log.logging("getParamString begin");
-            
-            if( isIgnoreCommandAtMentenanceMode(commandName) ) {
-                return null;
-            }
-            
-            if( isIgnoreCommandAtVisiterMode(commandName) ) {
-                return null;
-            }
-            
-            params.push(["Command", commandName]);
-            params.push(["saveDataDirIndex", this.saveDataDirIndex]);
-            params.push(["commandSender", getStrictlyUniqueId()]);
-            
-            Log.logging("paramString creating...");
-            var paramString:String = new String();
-            
-            Log.logging("params analyzing ");
-            for(var i:int = 0 ; i < params.length ; i++) {
-                var param:Array = params[i] as Array;
-                
-                if( i != 0 ) {
-                    paramString += "&";
-                }
-                
-                paramString += param[0];
-                paramString += "=";
-                paramString += param[1];
-            }
-            
-            Log.logging("getParamString paramString: " + paramString);
-            
-            return paramString;
         }
         
         public function startSessionRecording():void {
@@ -1269,16 +1136,17 @@ package {
             }
         }
         
-        protected function getUrlRequestForSendCommandData(paramsString:String):URLRequest {
-            Log.logging("var request:URLRequest = new URLRequest();");
+        protected function getUrlRequestForSendCommandData(params:Object):URLRequest {
+            Log.logging("getUrlRequestForSendCommandData params", params);
+            
             var request:URLRequest = new URLRequest();
             request.url = Config.getInstance().getDodontoFServerCgiUrl();
             request.method = URLRequestMethod.POST;
             
             Log.logging("POST to", request.url);
-            Log.logging("var variables:URLVariables = new URLVariables(paramsString);");
-            var variables:URLVariables = new URLVariables(paramsString);
-            request.data = variables;
+            
+            var bytes:ByteArray = Utils.getMessagePack(params);
+            request.data = bytes;
             
             return request;
         }
@@ -1334,42 +1202,6 @@ package {
         
             
         
-        protected function sendCommandDataCatched(paramsString:String,
-                                                  callBack:Function,
-                                                  errorCallBack:Function,
-                                                  isRefresh:Boolean = false):void {
-            if( paramsString == null ) {
-                return;
-            }
-            
-            var request:URLRequest = getUrlRequestForSendCommandData(paramsString);
-            
-            /*
-            if( callBack == null ) {
-                Log.loggingTuning("sendToURL begin");
-                sendToURL(request);
-                Log.loggingTuning("sendToURL end");
-                return;
-            }
-            */
-            
-            var loader:URLLoader = null;
-            
-            if( isRefresh ) {
-                if( refreshLoader == null ) {
-                    refreshLoader = getUrlLoaderForSendCommand(callBack, errorCallBack);
-                }
-                closeRefreshLoader();
-                
-                loader = refreshLoader;
-            } else {
-                loader = getUrlLoaderForSendCommand(callBack, errorCallBack);
-            }
-            
-            loader.load(request);
-            Log.logging("loader end");
-        }
-        
         public static function getJsonString(jsonData:Object):String {
             return Utils.getJsonString(jsonData);
         }
@@ -1383,87 +1215,82 @@ package {
         }
         
         public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "roomNumbers": roomNumbers,
                 "ignoreLoginUser": ignoreLoginUser
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = this.getParamString("removePlayRoom", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("removePlayRoom", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function removeOldPlayRoom(resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
             
-            var params:String = this.getParamString("removeOldPlayRoom", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("removeOldPlayRoom", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function removeReplayData(replayData:Object, resultFunction:Function):void {
             Log.loggingTuning("SharedDataSender.removeReplayData replayData", replayData);
             
-            var jsonParams:String = getEncodedJsonString( replayData );
-            
-            var params:String = this.getParamString("removeReplayData", [["replayData", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            var obj:Object = getParamObject("removeReplayData", replayData);
+            sendCommandData(obj, resultFunction);
         }
         
-        public function addEffect(params_:Object):void {
-            var jsonParams:String = getEncodedJsonString( params_ );
-            var params:String = this.getParamString("addEffect", [["effectData", jsonParams]]);
-            this.sendCommandData(params);
+        public function addEffect(data:Object):void {
+            var obj:Object = getParamObject("addEffect", data);
+            sendCommandData(obj);
         }
         
-        public function changeEffect(params_:Object):void {
-            var jsonParams:String = getEncodedJsonString( params_ );
-            var params:String = this.getParamString("changeEffect", [["effectData", jsonParams]]);
-            this.sendCommandData(params);
+        public function changeEffect(data:Object):void {
+            var obj:Object = getParamObject("changeEffect", data);
+            sendCommandData(obj);
         }
         
         public function removeEffect(effectId:String):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "effectId": effectId
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("removeEffect", [["effectData", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("removeEffect", data);
+            sendCommandData(obj);
         }
         
-        public function changeImageTags(params_:Object):void {
-            var jsonParams:String = getEncodedJsonString( params_ );
-            var params:String = this.getParamString("changeImageTags", [["tagsData", jsonParams]]);
-            this.sendCommandData(params);
+        public function changeImageTags(data:Object):void {
+            var obj:Object = getParamObject("changeImageTags", data);
+            sendCommandData(obj);
         }
         
         public function initCards(cardTypes:Array, resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "cardTypeInfos": cardTypes
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("initCards", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("initCards", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function shuffleForNextRandomDungeon(mountName:String, mountId:String):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName": mountName,
                 "mountId": mountId
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("shuffleForNextRandomDungeon", [["params", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("shuffleForNextRandomDungeon", data);
+            sendCommandData(obj);
         }
         
         public function clearCards():void {
-            var jsonData:Object = {
+            var data:Object = {
                 "types": [Card.getTypeStatic(), CardMount.getTypeStatic()]
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("clearCharacterByType", [["clearData", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("clearCharacterByType",  data);
+            sendCommandData(obj);
         }
         
         
@@ -1495,7 +1322,7 @@ package {
             
             drawCardOnLocal(Card.getJsonData, owner, newCardImgId, x, y);
             
-            var jsonData:Object = {
+            var data:Object = {
                 "isOpen": isOpen,
                 "mountName": mountName,
                 "owner": owner,
@@ -1505,18 +1332,18 @@ package {
                 "imgId": imgId,
                 "count": count
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("drawCard", [["params", jsonParams]]);
+            
+            var obj:Object = getParamObject("drawCard", data);
             
             var resultFunction:Function = function(event:Event):void {
-                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-                var result:String = jsonData.result;
+                var data:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+                var result:String = data.result;
                 if( result != "OK" ) {
                     receiver.removeCharacterOnlyOwnMap(event);
                 }
             };
             
-            this.sendCommandData(params, resultFunction);
+            sendCommandData(obj, resultFunction);
         }
         
         private function getCloneCardJsonData(cardJsonData:Object, x:int, y:int):Object {
@@ -1532,21 +1359,21 @@ package {
         }
         
         public function exitWaitingRoomCharacter(characterId:String, x:int, y:int, resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "characterId" : characterId,
                 "x" : x,
                 "y" : y};
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("exitWaitingRoomCharacter", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("exitWaitingRoomCharacter", data);
+            sendCommandData(obj, resultFunction);
         }
 
         public function enterWaitingRoomCharacter(characterId:String, resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "characterId" : characterId};
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("enterWaitingRoomCharacter", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("enterWaitingRoomCharacter", data);
+            sendCommandData(obj, resultFunction);
         }
 
         public function drawTargetCard( cardJsonData:Object,
@@ -1562,7 +1389,7 @@ package {
             cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
             receiver.addCharacterInOwnMap(cardJsonData);
             
-            var jsonData:Object = {
+            var data:Object = {
                 "owner" : ownerId,
                 "ownerName" : ownerName,
                 "mountId" : mountId,
@@ -1571,9 +1398,9 @@ package {
                 "x": x,
                 "y": y
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("drawTargetCard", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("drawTargetCard", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function drawTargetTrushCard( cardJsonData:Object,
@@ -1588,87 +1415,182 @@ package {
             cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
             receiver.addCharacterInOwnMap(cardJsonData);
             
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName" : mountName,
                 "targetCardId" : targetCardId,
                 "x": x,
                 "y": y,
                 "mountId" : mountId
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("drawTargetTrushCard", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("drawTargetTrushCard", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function returnCard( mountName:String,
                                     x:int,
                                     y:int,
                                     id_:String ):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName": mountName,
                 "x": x,
                 "y": y,
                 "imgId": id_
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("returnCard", [["params", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("returnCard", data);
+            sendCommandData(obj);
         }
         
         
         public function shuffleCards( mountName:String, id_:String, isShuffle:Boolean ):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName": mountName,
                 "mountId": id_,
                 "isShuffle": isShuffle
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("shuffleCards", [["params", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("shuffleCards", data);
+            sendCommandData(obj);
         }
         
         public function dumpTrushCard( targetCardId:String, mountName:String, id_:String ):void {
-            var jsonData:Object = {
+            var data:Object = {
                 "dumpedCardId": targetCardId,
                 "mountName": mountName,
                 "trushMountId": id_
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("dumpTrushCards", [["data", jsonParams]]);
-            this.sendCommandData(params);
+            
+            var obj:Object = getParamObject("dumpTrushCards", data);
+            sendCommandData(obj);
         }
         
         public function getMountCardInfos(mountNameForDisplay:String, mountName:String, mountId:String, resultFunction:Function):void {
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + mountNameForDisplay + "」の山札を参照しています。");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName": mountName,
                 "mountId": mountId
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getMountCardInfos", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("getMountCardInfos", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function getTrushMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
             var cardName:String = InitCardWindow.getCardName(mountName);
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + cardName + "」の捨て札を参照しています。");
             
-            var jsonData:Object = {
+            var data:Object = {
                 "mountName": mountName,
                 "mountId": mountId
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("getTrushMountCardInfos", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("getTrushMountCardInfos", data);
+            sendCommandData(obj, resultFunction);
         }
         
         public function deleteChatLog(resultFunction:Function):void {
-            var jsonData:Object = {
+            var data:Object = {
             };
-            var jsonParams:String = getEncodedJsonString( jsonData );
-            var params:String = this.getParamString("deleteChatLog", [["params", jsonParams]]);
-            this.sendCommandData(params, resultFunction);
+            
+            var obj:Object = getParamObject("deleteChatLog", data);
+            sendCommandData(obj, resultFunction);
+        }
+        
+        
+        protected function getParamObject(commandName:String, data:Object = null, paramsName:String = "params"):Object {
+            Log.logging("getParamObject Begin");
+            
+            if( isIgnoreCommandAtMentenanceMode(commandName) ) {
+                return null;
+            }
+            
+            if( isIgnoreCommandAtVisiterMode(commandName) ) {
+                return null;
+            }
+            
+            var result:Object = new Object();
+            
+            if( data != null ) {
+                result[paramsName] = data;
+            }
+            
+            result["cmd"] = commandName;
+            result["room"] = this.saveDataDirIndex;
+            result["own"] = getStrictlyUniqueId();
+            
+            Log.logging("getParamObject result", result);
+            
+            return result;
+        }
+        
+        protected function sendCommandData(obj:Object,
+                                           callBack:Function = null,
+                                           errorCallBack:Function = null,
+                                           isRefresh:Boolean = false):void {
+            
+            Log.loggingTuning("==>Begin sendCommandData");
+            Log.logging("sendCommandData obj : ", obj);
+            
+            if( isStopRefreshOn ) {
+                Log.loggingFatalError("サーバとの接続が切断されました。操作を行う事は出来ません");
+                return;
+            }
+            
+            try {
+                sendCommandDataCatched(obj,
+                                       callBack,
+                                       errorCallBack,
+                                       isRefresh);
+            } catch( e:Error ) {
+                Log.loggingException("SharedDataSender.sendCommandData()", e);
+            }
+            Log.loggingTuning("==>End sendCommandData");
+        }
+        
+        protected function sendCommandDataCatched(obj:Object,
+                                                  callBack:Function,
+                                                  errorCallBack:Function,
+                                                  isRefresh:Boolean = false):void {
+            if( obj == null ) {
+                return;
+            }
+            
+            var request:URLRequest = getUrlRequestForSendCommandData(obj);
+            
+            /*
+            if( callBack == null ) {
+                Log.loggingTuning("sendToURL begin");
+                sendToURL(request);
+                Log.loggingTuning("sendToURL end");
+                return;
+            }
+            */
+            
+            var loader:URLLoader = null;
+            
+            if( isRefresh ) {
+                if( refreshLoader == null ) {
+                    refreshLoader = getUrlLoaderForSendCommand(callBack, errorCallBack);
+                }
+                closeRefreshLoader();
+                
+                loader = refreshLoader;
+            } else {
+                loader = getUrlLoaderForSendCommand(callBack, errorCallBack);
+            }
+            
+            loader.load(request);
+            Log.logging("loader end");
+        }
+        
+        //一意な文字列作成用
+        //マトモにやると文字数多すぎるので適当に時刻から作製
+        private function createUniqueString():String {
+            // UIDUtil.createUID(); //マジメなやり方
+            
+            return new Date().time.toString(36);
         }
         
     }

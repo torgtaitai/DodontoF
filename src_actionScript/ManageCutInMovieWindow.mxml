@@ -102,6 +102,8 @@
         status = "";
     
         var index:int = cutInInfosList.selectedIndex;
+        Log.logging("getCutInInfoAndIndex selectedIndex", index);
+        
         if( index == -1 ) {
             status = "カットインを選択してください。";
             return [null, index];
@@ -139,7 +141,26 @@
     
         DodontoF.popup(AddCutInMovieWindow, true);
     }
-
+    
+    
+    private function removeCutInEffect():void {
+        status = "";
+        
+        var info:Array = getCutInInfoAndIndex();
+        var cutInInfo:Object = info[0];
+        var index:int = info[1];
+        
+        if( cutInInfo == null ) {
+            return;
+        }
+        
+        if( cutInInfo.effectId == null ) {
+            return;
+        }
+        
+        checkQuestionForRemoveCutInfEffect(cutInInfo, index);
+    }
+    
     private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object, index:int):void {
         var message:String = "";
         message += "タイトル：" + cutInInfo.message + "\n";
@@ -153,28 +174,10 @@
                            removeCutInEffectAfterCheck(cutInInfo, index);
                        }});
     }
-
-    private function removeCutInEffect():void {
-        status = "";
     
-        var results:Array = getCutInInfoAndIndex();
-        var cutInInfo:Object = results[0];
-        var index:int = results[1];
-    
-        if( cutInInfo == null ) {
-            return;
-        }
-    
-        if( cutInInfo.effectId == null ) {
-            return;
-        }
-    
-        checkQuestionForRemoveCutInfEffect(cutInInfo, index);
-    }
-
     private function removeCutInEffectAfterCheck(cutInInfo:Object, index:int):void {
-        DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
-    
+        //DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
+        
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.removeEffect(cutInInfo.effectId);
     }
@@ -183,9 +186,9 @@
     private function changeCutInEffect():void {
         status = "";
     
-        var results:Array = getCutInInfoAndIndex();
-        var cutInInfo:Object = results[0];
-        var index:int = results[1];
+        var info:Array = getCutInInfoAndIndex();
+        var cutInInfo:Object = info[0];
+        var index:int = info[1];
     
         if( cutInInfo == null ) {
             return;

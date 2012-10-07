@@ -111,7 +111,7 @@
         try {
             var params:Object = getLoadParams();
             var resultFunction:Function = getExecuteResult(params);
-            DodontoF_Main.getInstance().getGuiInputSender().load_(params, resultFunction);
+            DodontoF_Main.getInstance().getGuiInputSender().load(params, resultFunction);
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {

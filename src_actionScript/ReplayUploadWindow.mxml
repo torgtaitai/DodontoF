@@ -169,17 +169,20 @@
         };
         
         var sender:SharedDataSender = guiInputSender.getSender();
-        sender.sendFileUpload(fileReferenceForUpload, "uploadReplayData", params);
+        //sender.sendFileUpload(fileReferenceForUpload, "uploadReplayData", params);
+        sender.sendFileBytesUpload(fileReferenceForUpload, "uploadReplayData", params, uploadReplayDataResult);
         
-        fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadReplayDataResult);
+        //fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadReplayDataResult);
     }
     
-    public function uploadReplayDataResult(dataEvent:DataEvent):void {
+    //public function uploadReplayDataResult(dataEvent:DataEvent):void {
+    public function uploadReplayDataResult(dataEvent:Object = null):void {
         Log.loggingTuning("=>uploadReplayDataResult(event:Event) Begin");
         try {
             selectButton.enabled = true;
             
-            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            //var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(dataEvent);
             Log.loggingTuning("jsonData", jsonData);
             
             result.text = (jsonData.resultText);

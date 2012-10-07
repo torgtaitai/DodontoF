@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.39.03(2012/09/25)";
+        private var version:String = "Ver.1.39.06(2012/10/05)";
         
         public function getVersion():String {
             return version;
@@ -296,6 +296,7 @@ package {
                              getDodontoFM().getMap().setVisibleGridLayer );
             
             loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isButtonBoxVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isChatVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");

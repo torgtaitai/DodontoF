@@ -5,10 +5,10 @@ class DiceBotInfos
   def initialize
     
     noneDiceBot = {
-    :name => 'ダイスボット(指定無し)',
-    :gameType => 'DiceBot',
-    :fileName => 'DiceBot',
-    :prefixs => [
+    'name' => 'ダイスボット(指定無し)',
+    'gameType' => 'DiceBot',
+    'fileName' => 'DiceBot',
+    'prefixs' => [
       '\d+D\d*', #加算ロール　(xDn)
       '\d+B\d+', #バラバラロール　(xBn)
       '\d+R\d+', #個数振り足しロール　(xRn)
@@ -22,7 +22,7 @@ class DiceBotInfos
       'make', #ランダムジェネレータ用
       'choice\[', #ランダム選択　(choice[A, B, C])
     ],
-    :info => <<INFO_MESSAGE_TEXT
+    'info' => <<INFO_MESSAGE_TEXT
 【ダイスボット】チャットにダイス用の文字を入力するとダイスロールが可能
 入力例）２ｄ６＋１　攻撃！
 出力例）2d6+1　攻撃！
@@ -44,21 +44,21 @@ INFO_MESSAGE_TEXT
     @infos = [noneDiceBot,
 ### DICE_BOT_INFO_BEGIN
   {
-    :name => 'アリアンロッド',
-    :gameType => 'Arianrhod',
-    :fileName => 'Arianrhod',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'アリアンロッド',
+    'gameType' => 'Arianrhod',
+    'fileName' => 'Arianrhod',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 ・クリティカル、ファンブルの自動判定を行います。(クリティカル時の追加ダメージも表示されます)
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'アルスマギカ',
-    :gameType => 'ArsMagica',
-    :fileName => 'ArsMagica',
-    :prefixs => ['ArS'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'アルスマギカ',
+    'gameType' => 'ArsMagica',
+    'fileName' => 'ArsMagica',
+    'prefixs' => ['ArS'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・ストレスダイス　(ArSx+y)
 　"ArS(ボッチダイス)+(修正)"です。判定にも使えます。Rコマンド(1R10+y[m])に読替をします。
 　ボッチダイスと修正は省略可能です。(ボッチダイスを省略すると1として扱います)
@@ -69,11 +69,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'バルナ・クロニカ',
-    :gameType => 'BarnaKronika',
-    :fileName => 'BarnaKronika',
-    :prefixs => ['\d+BK','\d+BA','\d+BKC\d+','\d+BAC\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'バルナ・クロニカ',
+    'gameType' => 'BarnaKronika',
+    'fileName' => 'BarnaKronika',
+    'prefixs' => ['\d+BK','\d+BA','\d+BKC\d+','\d+BAC\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・通常判定　nBK
 　ダイス数nで判定ロールを行います。
 　セット数が1以上の時はセット数も表示します。
@@ -87,11 +87,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ブラッド・クルセイド',
-    :gameType => 'BloodCrusade',
-    :fileName => 'BloodCrusade',
-    :prefixs => ['RT','ST','IST','BRT','CHT','SHT','DHT','LHT','EHT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ブラッド・クルセイド',
+    'gameType' => 'BloodCrusade',
+    'fileName' => 'BloodCrusade',
+    'prefixs' => ['RT','ST','IST','BRT','CHT','SHT','DHT','LHT','EHT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・各種表
 　・関係属性表         RT
 　・シーン表           ST
@@ -106,11 +106,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'カードランカー',
-    :gameType => 'CardRanker',
-    :fileName => 'CardRanker',
-    :prefixs => ['RM'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'カードランカー',
+    'gameType' => 'CardRanker',
+    'fileName' => 'CardRanker',
+    'prefixs' => ['RM'],
+    'info' => <<INFO_MESSAGE_TEXT
 ランダムでモンスターカードを選ぶ (RM)
 場所表 (ST)
 街中場所表 (CST)
@@ -123,21 +123,21 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'カオスフレア',
-    :gameType => 'Chaos Flare',
-    :fileName => 'ChaosFlare',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'カオスフレア',
+    'gameType' => 'Chaos Flare',
+    'fileName' => 'ChaosFlare',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功(差分値の計算も)の自動判定を行います。
 ファンブル時は達成値を-20します。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'Chill',
-    :gameType => 'Chill',
-    :fileName => 'Chill',
-    :prefixs => ['SR\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'Chill',
+    'gameType' => 'Chill',
+    'fileName' => 'Chill',
+    'prefixs' => ['SR\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・ストライク・ランク　(SRx)
 　"SRストライク・ランク"の形で記入します。
 　ストライク・ランク・チャートに従って自動でダイスロールを行い、
@@ -147,11 +147,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'クトゥルフ',
-    :gameType => 'Cthulhu',
-    :fileName => 'Cthulhu',
-    :prefixs => ['RES\(\d+','CBR\(\d+,\d+\)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'クトゥルフ',
+    'gameType' => 'Cthulhu',
+    'fileName' => 'Cthulhu',
+    'prefixs' => ['RES\(\d+','CBR\(\d+,\d+\)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・1D100の目標値判定で、クリティカル(決定的成功)／スペシャル／ファンブル(致命的失敗)の自動判定。
 　例）1D100<=50
 　　　Cthulhu : (1D100<=50) → 96 → 致命的失敗
@@ -169,22 +169,22 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'クトゥルフテック',
-    :gameType => 'CthulhuTech',
-    :fileName => 'CthulhuTech',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'クトゥルフテック',
+    'gameType' => 'CthulhuTech',
+    'fileName' => 'CthulhuTech',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 テストのダイス計算を実装。
 成功、失敗、クリティカル、ファンブルの自動判定。
 コンバットテスト(防御側有利なので「>=」ではなく「>」で入力)の時はダメージダイスも表示。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ダークブレイズ',
-    :gameType => 'DarkBlaze',
-    :fileName => 'DarkBlaze',
-    :prefixs => ['DB','BT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ダークブレイズ',
+    'gameType' => 'DarkBlaze',
+    'fileName' => 'DarkBlaze',
+    'prefixs' => ['DB','BT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・行為判定　(DBxy#n)
 　行為判定専用のコマンドです。
 　"DB(能力)(技能)#(修正)"でロールします。Rコマンド(3R6+n[x,y]>=m mは難易度)に読替をします。
@@ -198,11 +198,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'デモンパラサイト',
-    :gameType => 'DemonParasite',
-    :fileName => 'DemonParasite',
-    :prefixs => ['(N|A|M|U|C|)?URGE\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'デモンパラサイト',
+    'gameType' => 'DemonParasite',
+    'fileName' => 'DemonParasite',
+    'prefixs' => ['(N|A|M|U|C|)?URGE\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・衝動表　(URGEx)
 　"URGE衝動レベル"の形で指定します。
 　衝動表に従って自動でダイスロールを行い、結果を表示します。
@@ -218,11 +218,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ダブルクロス2nd,3rd',
-    :gameType => 'DoubleCross',
-    :fileName => 'DoubleCross',
-    :prefixs => ['(\d+dx|ET)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ダブルクロス2nd,3rd',
+    'gameType' => 'DoubleCross',
+    'fileName' => 'DoubleCross',
+    'prefixs' => ['(\d+dx|ET)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定コマンド　(xDX+y@c or xDXc+y)
 　"(個数)DX(修正)@(クリティカル値)"もしくは"(個数)DX(クリティカル値)(修正)"で指定します。
 　加算減算のみ修正値も付けられます。
@@ -238,40 +238,40 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'アースドーン',
-    :gameType => 'EarthDawn',
-    :fileName => 'EarthDawn',
-    :prefixs => ['\d+e\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'アースドーン',
+    'gameType' => 'EarthDawn',
+    'fileName' => 'EarthDawn',
+    'prefixs' => ['\d+e\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ステップダイス　(xEn+k)
 ステップx、目標値n、カルマダイスkでステップダイスをロールします。
 振り足しも自動。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'Eclipse Phase',
-    :gameType => 'EclipsePhase',
-    :fileName => 'EclipsePhase',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'Eclipse Phase',
+    'gameType' => 'EclipsePhase',
+    'fileName' => 'EclipsePhase',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 1D100<=m 方式の判定で成否、クリティカル・ファンブルを自動判定
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'エルリック！',
-    :gameType => 'Elric!',
-    :fileName => 'Elric',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'エルリック！',
+    'gameType' => 'Elric!',
+    'fileName' => 'Elric',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 貫通、クリティカル、ファンブルの自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'エムブリオマシン',
-    :gameType => 'EmbryoMachine',
-    :fileName => 'EmbryoMachine',
-    :prefixs => ['(EM\t+|HLT|MFT|SFT)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'エムブリオマシン',
+    'gameType' => 'EmbryoMachine',
+    'fileName' => 'EmbryoMachine',
+    'prefixs' => ['(EM\t+|HLT|MFT|SFT)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定ロール(EMt+m@c#f)
 　目標値t、修正値m、クリティカル値c(省略時は20)、ファンブル値f(省略時は2)で攻撃判定を行います。
 　命中した場合は命中レベルと命中部位も自動出力します。
@@ -283,11 +283,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ゲヘナ・アナスタシス',
-    :gameType => 'GehennaAn',
-    :fileName => 'GehennaAn',
-    :prefixs => ['(\d+G\d+|\d+GA\d+)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ゲヘナ・アナスタシス',
+    'gameType' => 'GehennaAn',
+    'fileName' => 'GehennaAn',
+    'prefixs' => ['(\d+G\d+|\d+GA\d+)'],
+    'info' => <<INFO_MESSAGE_TEXT
 戦闘判定と通常判定に対応。幸運の助け、連撃増加値(戦闘判定)、闘技チット(戦闘判定)を自動表示します。
 ・戦闘判定　(nGAt+m)
 　ダイス数n、目標値t、修正値mで戦闘判定を行います。
@@ -298,21 +298,21 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ガンドッグ',
-    :gameType => 'Gundog',
-    :fileName => 'Gundog',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ガンドッグ',
+    'gameType' => 'Gundog',
+    'fileName' => 'Gundog',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功、クリティカル、ファンブルとロールの達成値の自動判定を行います。
 nD9ロールも対応。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ガンドッグ・ゼロ',
-    :gameType => 'GundogZero',
-    :fileName => 'GundogZero',
-    :prefixs => ['(.DPT|.FT)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ガンドッグ・ゼロ',
+    'gameType' => 'GundogZero',
+    'fileName' => 'GundogZero',
+    'prefixs' => ['(.DPT|.FT)'],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功、クリティカル、ファンブルとロールの達成値の自動判定を行います。
 nD9ロールも対応。
 ・ダメージペナルティ表　　(〜DPTx) (x:修正)
@@ -324,20 +324,20 @@ nD9ロールも対応。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '比叡山炎上',
-    :gameType => 'Hieizan',
-    :fileName => 'Hieizan',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '比叡山炎上',
+    'gameType' => 'Hieizan',
+    'fileName' => 'Hieizan',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 大成功、自動成功、失敗、自動失敗、大失敗の自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ハンターズムーン',
-    :gameType => 'HuntersMoon',
-    :fileName => 'HuntersMoon',
-    :prefixs => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ハンターズムーン',
+    'gameType' => 'HuntersMoon',
+    'fileName' => 'HuntersMoon',
+    'prefixs' => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
 ・各種表
@@ -359,20 +359,20 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '無限のファンタジア',
-    :gameType => 'InfiniteFantasia',
-    :fileName => 'InfiniteFantasia',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '無限のファンタジア',
+    'gameType' => 'InfiniteFantasia',
+    'fileName' => 'InfiniteFantasia',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功レベルの自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'マギカロギア',
-    :gameType => 'MagicaLogia',
-    :fileName => 'MagicaLogia',
-    :prefixs => ['WT','CT','ST','FT','AT','BGT','DAT','FAT','WIT','RTT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'マギカロギア',
+    'gameType' => 'MagicaLogia',
+    'fileName' => 'MagicaLogia',
+    'prefixs' => ['WT','CT','ST','FT','AT','BGT','DAT','FAT','WIT','RTT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・各種表
 　　変調表　　　　WT
 　　運命変転表　　CT
@@ -388,11 +388,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '迷宮デイズ',
-    :gameType => 'MeikyuDays',
-    :fileName => 'MeikyuDays',
-    :prefixs => ['\d+MD','DRT','DNT','DBT','DHT','KST','CAT','CFT','FWT','T1T','T2T','T3T','T4T','MPT','APT','DCT','MCT','PCT','LCT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '迷宮デイズ',
+    'gameType' => 'MeikyuDays',
+    'fileName' => 'MeikyuDays',
+    'prefixs' => ['\d+MD','DRT','DNT','DBT','DHT','KST','CAT','CFT','FWT','T1T','T2T','T3T','T4T','MPT','APT','DCT','MCT','PCT','LCT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定　(nMD+m)
 　迷宮デイズ判定用コマンドです。Rコマンドに読替されます。
 　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。
@@ -412,11 +412,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '迷宮キングダム',
-    :gameType => 'MeikyuKingdom',
-    :fileName => 'MeikyuKingdom',
-    :prefixs => ['\d+MK','LRT','ORT','CRT','ART','FRT','TBT','CBT','SBT','VBT','FBT','ABT','WBT','LBT','THT','CHT','SHT','VHT','KDT','KCT','KMT','CAT','FWT','CFT','TT','NT','ET','MPT','T1T','T2T','T3T','T4T','T5T','NAME.*','DFT','IDT\d*','WIT','LIT','RIT','SIT','RWIT','RUIT','IFT','\d+RET','PNT\d*','MLT\d*','KNT\d+','WORD\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '迷宮キングダム',
+    'gameType' => 'MeikyuKingdom',
+    'fileName' => 'MeikyuKingdom',
+    'prefixs' => ['\d+MK','LRT','ORT','CRT','ART','FRT','TBT','CBT','SBT','VBT','FBT','ABT','WBT','LBT','THT','CHT','SHT','VHT','KDT','KCT','KMT','CAT','FWT','CFT','TT','NT','ET','MPT','T1T','T2T','T3T','T4T','T5T','NAME.*','DFT','IDT\d*','WIT','LIT','RIT','SIT','RWIT','RUIT','IFT','\d+RET','PNT\d*','MLT\d*','KNT\d+','WORD\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定　(nMK+m)
 　迷宮キングダム判定用コマンドです。Rコマンドに読替されます。
 　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。
@@ -446,11 +446,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'モノトーン・ミュージアム',
-    :gameType => 'MonotoneMusium',
-    :fileName => 'MonotoneMusium',
-    :prefixs => ['OT','DT','WDT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'モノトーン・ミュージアム',
+    'gameType' => 'MonotoneMusium',
+    'fileName' => 'MonotoneMusium',
+    'prefixs' => ['OT','DT','WDT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　・通常判定　　　　　　2D6+m>=t[c,f]
 　　修正値m,目標値t,クリティカル値c,ファンブル値fで判定ロールを行います。
@@ -464,22 +464,22 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'NJSLYRBATTLE',
-    :gameType => 'NJSLYRBATTLE',
-    :fileName => 'NjslyrBattle',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'NJSLYRBATTLE',
+    'gameType' => 'NJSLYRBATTLE',
+    'fileName' => 'NjslyrBattle',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 カラテロール：2d6<=(カラテ点)
 例）2d6<=5
 　(2D6<=5) ＞ 2[1,1] ＞ 2 ＞ 成功 重点 3 溜まる
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ネクロニカ',
-    :gameType => 'Nechronica',
-    :fileName => 'Nechronica',
-    :prefixs => ['(\d+NC|\d+NA)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ネクロニカ',
+    'gameType' => 'Nechronica',
+    'fileName' => 'Nechronica',
+    'prefixs' => ['(\d+NC|\d+NA)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定　(nNC+m)
 　ダイス数n、修正値mで判定ロールを行います。
 　ダイス数が2以上の時のパーツ破損数も表示します。
@@ -489,11 +489,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ナイトウィザード',
-    :gameType => 'NightWizard',
-    :fileName => 'NightWizard',
-    :prefixs => ['\d+NW'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ナイトウィザード',
+    'gameType' => 'NightWizard',
+    'fileName' => 'NightWizard',
+    'prefixs' => ['\d+NW'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定用コマンド　(nNW+m@x#y)
 　"(常時特殊能力含む基本値)NW(常時以外の特殊能力及び状態異常)@(クリティカル値)#(ファンブル値)"でロールします。
 　Rコマンド(2R6m[n,m]c[x]f[y]>=t tは目標値)に読替されます。
@@ -502,21 +502,21 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ナイトメアハンター=ディープ',
-    :gameType => 'NightmareHunterDeep',
-    :fileName => 'NightmareHunterDeep',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ナイトメアハンター=ディープ',
+    'gameType' => 'NightmareHunterDeep',
+    'fileName' => 'NightmareHunterDeep',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 加算ロール時に６の個数をカウントして、その４倍を自動的に加算します。
 (出目はそのまま表示で合計値が6懼��10の読み替えになります)
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'パラサイトブラッド',
-    :gameType => 'ParasiteBlood',
-    :fileName => 'ParasiteBlood',
-    :prefixs => ['(N|A|M|U|C|)?URGE\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'パラサイトブラッド',
+    'gameType' => 'ParasiteBlood',
+    'fileName' => 'ParasiteBlood',
+    'prefixs' => ['(N|A|M|U|C|)?URGE\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・衝動表　(URGEx)
 　"URGE衝動レベル"の形で指定します。
 　衝動表に従って自動でダイスロールを行い、結果を表示します。
@@ -532,11 +532,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ピーカーブー',
-    :gameType => 'Peekaboo',
-    :fileName => 'Peekaboo',
-    :prefixs => ['SET','PSET','OET','IBT','SBT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ピーカーブー',
+    'gameType' => 'Peekaboo',
+    'fileName' => 'Peekaboo',
+    'prefixs' => ['SET','PSET','OET','IBT','SBT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
 ・各種表
@@ -551,29 +551,29 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ペンドラゴン',
-    :gameType => 'Pendragon',
-    :fileName => 'Pendragon',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ペンドラゴン',
+    'gameType' => 'Pendragon',
+    'fileName' => 'Pendragon',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 クリティカル、成功、失敗、ファンブルの自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ファンタズムアドベンチャー',
-    :gameType => 'PhantasmAdventure',
-    :fileName => 'PhantasmAdventure',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ファンタズムアドベンチャー',
+    'gameType' => 'PhantasmAdventure',
+    'fileName' => 'PhantasmAdventure',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 成功、失敗、決定的成功、決定的失敗の表示とクリティカル・ファンブル値計算の実装。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '六門世界2nd',
-    :gameType => 'RokumonSekai2',
-    :fileName => 'RokumonSekai2',
-    :prefixs => ['\d+RS'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '六門世界2nd',
+    'gameType' => 'RokumonSekai2',
+    'fileName' => 'RokumonSekai2',
+    'prefixs' => ['\d+RS'],
+    'info' => <<INFO_MESSAGE_TEXT
 通常判定　　　　　　aRSm<=t
 能力値a,修正値m,目標値tで判定ロールを行います。
 Rコマンド(3R6m<=t[a])に読み替えます。
@@ -582,29 +582,29 @@ Rコマンド(3R6m<=t[a])に読み替えます。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ロールマスター',
-    :gameType => 'RoleMaster',
-    :fileName => 'RoleMaster',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ロールマスター',
+    'gameType' => 'RoleMaster',
+    'fileName' => 'RoleMaster',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 上方無限ロール(xUn)の境界値を96にセットします。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ルーンクエスト',
-    :gameType => 'RuneQuest',
-    :fileName => 'RuneQuest',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ルーンクエスト',
+    'gameType' => 'RuneQuest',
+    'fileName' => 'RuneQuest',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 クリティカル、エフェクティブ(効果的成功)、ファンブルの自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'りゅうたま',
-    :gameType => 'Ryutama',
-    :fileName => 'Ryutama',
-    :prefixs => ['R\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'りゅうたま',
+    'gameType' => 'Ryutama',
+    'fileName' => 'Ryutama',
+    'prefixs' => ['R\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ロール判定
 　Rx,y>=t（x,y：使用する能力値、t：目標値）
 　1ゾロ、クリティカルも含めて判定結果を表示します
@@ -615,21 +615,21 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '真・女神転生TRPG　覚醒編',
-    :gameType => 'SMTKakuseihen',
-    :fileName => 'ShinMegamiTenseiKakuseihen',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '真・女神転生TRPG　覚醒編',
+    'gameType' => 'SMTKakuseihen',
+    'fileName' => 'ShinMegamiTenseiKakuseihen',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 1D100<=(目標値) でスワップ・通常・逆スワップ判定を自動判定
 威力ダイスは nU6[6] (nはダイス個数)でロール可能です。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'サタスペ',
-    :gameType => 'Satasupe',
-    :fileName => 'Satasupe',
-    :prefixs => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'サタスペ',
+    'gameType' => 'Satasupe',
+    'fileName' => 'Satasupe',
+    'prefixs' => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定コマンド　(nR>=x[y,z])
 　nが最大ロール回数、xが難易度、yが目標成功度、zがファンブル値です。
 　yとzは省略可能です。
@@ -654,30 +654,30 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'シャドウラン',
-    :gameType => 'ShadowRun',
-    :fileName => 'ShadowRun',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'シャドウラン',
+    'gameType' => 'ShadowRun',
+    'fileName' => 'ShadowRun',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 上方無限ロール(xUn)の境界値を6にセットします。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'シャドウラン第４版',
-    :gameType => 'ShadowRun4',
-    :fileName => 'ShadowRun4',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'シャドウラン第４版',
+    'gameType' => 'ShadowRun4',
+    'fileName' => 'ShadowRun4',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 個数振り足しロール(xRn)の閾値を6にセット、バラバラロール(xBn)の目標値を5以上にセットします。
 BコマンドとRコマンド時に、グリッチの表示を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '真空学園',
-    :gameType => 'ShinkuuGakuen',
-    :fileName => 'ShinkuuGakuen',
-    :prefixs => ['CRL','CSW','CLS','CSS','CSP','CAX','CCL','CMA','CBX','CPR','CST','RL','SW','LS','SS','SP','AX','CL','BW','MA','BX','PR','ST'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '真空学園',
+    'gameType' => 'ShinkuuGakuen',
+    'fileName' => 'ShinkuuGakuen',
+    'prefixs' => ['CRL','CSW','CLS','CSS','CSP','CAX','CCL','CMA','CBX','CPR','CST','RL','SW','LS','SS','SP','AX','CL','BW','MA','BX','PR','ST'],
+    'info' => <<INFO_MESSAGE_TEXT
 RLx：技能ベースｘで技能チェックのダイスロール
 RLx>=y：この書式なら目標値 ｙ で判定結果出力
 　例）RL10　　RL22>=50
@@ -694,11 +694,11 @@ SWx：武器（剣）を技能ベースｘでダイスロール。技発動ま�
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'シノビガミ',
-    :gameType => 'ShinobiGami',
-    :fileName => 'ShinobiGami',
-    :prefixs => ['ST','FT','ET','WT','BT','CST','MST','DST','TST','NST','KST','TKST','GST','GWT','GAST','KYST','JBST','KFT','KWT','MT','RTT'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'シノビガミ',
+    'gameType' => 'ShinobiGami',
+    'fileName' => 'ShinobiGami',
+    'prefixs' => ['ST','FT','ET','WT','BT','CST','MST','DST','TST','NST','KST','TKST','GST','GWT','GAST','KYST','JBST','KFT','KWT','MT','RTT'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・各種表
 　・(無印)シーン表　ST／ファンブル表　FT／感情表　ET
 　　　／変調表　WT／戦場表　BT／異形表　MT／ランダム特技決定表　RTT
@@ -716,20 +716,20 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ソードワールド',
-    :gameType => 'SwordWorld',
-    :fileName => 'SwordWorld',
-    :prefixs => ['K\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ソードワールド',
+    'gameType' => 'SwordWorld',
+    'fileName' => 'SwordWorld',
+    'prefixs' => ['K\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・SW　レーティング表　　　　　(Kx[c]+m$f) (x:キー, c:クリティカル値, m:ボーナス, f:出目修正)
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ソードワールド2.0',
-    :gameType => 'SwordWorld2.0',
-    :fileName => 'SwordWorld2_0',
-    :prefixs => ['K\d+'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ソードワールド2.0',
+    'gameType' => 'SwordWorld2.0',
+    'fileName' => 'SwordWorld2_0',
+    'prefixs' => ['K\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
 自動的成功、成功、失敗、自動的失敗の自動判定を行います。
 
 ・レーティング表　(Kx)
@@ -760,11 +760,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'トーグ',
-    :gameType => 'TORG',
-    :fileName => 'Torg',
-    :prefixs => ['(TG|RT|Result|IT|Initimidate|TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage|BT|bonus|total)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'トーグ',
+    'gameType' => 'TORG',
+    'fileName' => 'Torg',
+    'prefixs' => ['(TG|RT|Result|IT|Initimidate|TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage|BT|bonus|total)'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・判定　(TGm)
 　TORG専用の判定コマンドです。
 　"TG(技能基本値)"でロールします。Rコマンドに読替されます。
@@ -780,20 +780,20 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '特命転攻生',
-    :gameType => 'TokumeiTenkousei',
-    :fileName => 'TokumeiTenkousei',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '特命転攻生',
+    'gameType' => 'TokumeiTenkousei',
+    'fileName' => 'TokumeiTenkousei',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 「1の出目でEPP獲得」、判定時の「成功」「失敗」「ゾロ目で自動振り足し」を自動判定。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'トンネルズ＆トロールズ',
-    :gameType => 'Tunnels & Trolls',
-    :fileName => 'TunnelsAndTrolls',
-    :prefixs => ['(\d+H?BS)'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'トンネルズ＆トロールズ',
+    'gameType' => 'Tunnels & Trolls',
+    'fileName' => 'TunnelsAndTrolls',
+    'prefixs' => ['(\d+H?BS)'],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功、自動失敗の自動判定とゾロ目の振り足し経験値の自動計算を行います。
 SAVEの難易度を「レベル」で表記することが出来ます。
 例えば「2Lv」と書くと「25」に置換されます。
@@ -812,20 +812,20 @@ SAVEの難易度を「レベル」で表記することが出来ます。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ワープス',
-    :gameType => 'WARPS',
-    :fileName => 'WARPS',
-    :prefixs => [],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ワープス',
+    'gameType' => 'WARPS',
+    'fileName' => 'WARPS',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
 失敗、成功度の自動判定を行います。
 INFO_MESSAGE_TEXT
   },
   {
-    :name => 'ウォーハンマー',
-    :gameType => 'Warhammer',
-    :fileName => 'Warhammer',
-    :prefixs => ['WH'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => 'ウォーハンマー',
+    'gameType' => 'Warhammer',
+    'fileName' => 'Warhammer',
+    'prefixs' => ['WH'],
+    'info' => <<INFO_MESSAGE_TEXT
 ・クリティカル表(whHxx/whAxx/whBxx/whLxx)
 　"WH部位 クリティカル値"の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。
 　例）whH10 whA5 WHL4
@@ -839,11 +839,11 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
-    :name => '絶対隷奴',
-    :gameType => 'ZettaiReido',
-    :fileName => 'ZettaiReido',
-    :prefixs => ['\d+\-2DR'],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '絶対隷奴',
+    'gameType' => 'ZettaiReido',
+    'fileName' => 'ZettaiReido',
+    'prefixs' => ['\d+\-2DR'],
+    'info' => <<INFO_MESSAGE_TEXT
 m-2DR+n>=x　：m(基本能力),n(修正値),x(目標値) DPの取得の有無も表示されます。
 INFO_MESSAGE_TEXT
   },
@@ -855,7 +855,7 @@ INFO_MESSAGE_TEXT
   def getInfos
     
     ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-    ignoreBotNames += @infos.collect {|i| i[:fileName]}
+    ignoreBotNames += @infos.collect {|i| i['fileName']}
     
     @orders = getDiceBotOrder
     deleteInfos()
@@ -875,7 +875,7 @@ INFO_MESSAGE_TEXT
       @infos << diceBot.info
     end
     
-    @infos.each{|i| i.delete(:fileName)}
+    @infos.each{|i| i.delete('fileName')}
     
     return @infos
   end
@@ -884,13 +884,13 @@ INFO_MESSAGE_TEXT
     logging(@orders, '@orders')
     
     @infos.delete_if do |info|
-      not @orders.include?(info[:name])
+      not @orders.include?(info['name'])
     end
   end
   
   def sortInfos
     @infos = @infos.sort_by do |info|
-      index = @orders.index(info[:name])
+      index = @orders.index(info['name'])
       index ||= 999
       index.to_i
     end

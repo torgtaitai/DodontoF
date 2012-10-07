@@ -13,7 +13,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.39.03(2012/09/25)"
+$version = "Ver.1.39.06(2012/10/05)"
 
 class SaveDataManagerOnMySql
   def initialize
@@ -748,7 +748,7 @@ class DodontoFServer_MySql < DodontoFServer
 end
 
 
-def mainMySql(cgi)
+def mainMySql(cgiParams)
   
   saveDataManager = SaveDataManagerOnMySql.new
   
@@ -756,7 +756,7 @@ def mainMySql(cgi)
   MySqlAccesser.setSaveDataManager(saveDataManager)
   SaveDirInfoMySql.setSaveDataManager(saveDataManager)
   
-  server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgi, cgi.content_type)
+  server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgiParams)
   
   printResult(server)
 end
@@ -764,12 +764,12 @@ end
 
 
 if( $0 === __FILE__ )
-  cgi = getCgi()
-  
   initLog();
   
+  cgiParams = getCgiParams()
   
-  mainMySql(cgi)
+  
+  mainMySql(cgiParams)
   
 end
 

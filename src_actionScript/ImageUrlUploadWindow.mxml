@@ -69,7 +69,8 @@
         }
         
         var volume:Number = 0;
-        Utils.setImageVolume(preview, volume);
+        var isPlayMovie:Boolean = false;
+        Utils.setImageVolume(preview, volume, isPlayMovie);
     }
     
 

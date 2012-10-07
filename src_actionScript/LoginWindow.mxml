@@ -170,8 +170,7 @@
     private var isReplay:Boolean;
     private var thisObj:LoginWindow;
     private var autoLoginRoom:int = 0;
-    private var defaultCharacterName:String = "ななしさん";
-
+    
     [Bindable]
     private var removeOldPlayRoomLimitDays:Number = 0;
     
@@ -211,6 +210,18 @@
         
         setAdminMode();
     }
+    
+    private var defaultUserNames:Array = ["ななしさん"];
+    
+    private function getDefaultName():String {
+        var index:int = Dice.getRandomNumber(defaultUserNames.length) - 1;
+        Log.logging("getDefaultName index", index);
+        var name:String = defaultUserNames[index];
+        Log.logging("getDefaultName name", name);
+        
+        return name;
+    }
+
     
     [Bindable]
     private var menuArray:Array;
@@ -302,15 +313,21 @@
     private function loadDefaultCharacterName():String {
         var info:Object = ChatWindow.getPlayerInfo();
         if( info == null ) {
-            return defaultCharacterName;
+            return getDefaultName();
         }
         
         var name:String = info["characterName"];
         if( name == null ) {
-            return defaultCharacterName;
+            return getDefaultName();
         }
         
         return name;
+    }
+    
+    
+    private function setDefaultUserNames(names:Array):void {
+        defaultUserNames = names;
+        yourName.text = loadDefaultCharacterName();
     }
     
     private function saveUniqeId(uniqueId:String):void {
@@ -319,7 +336,7 @@
             loginInfo = new Object();
         }
         
-        loginInfo.uniqueId = uniqueId;
+        loginInfo.uid1 = uniqueId;
         
         Config.getInstance().saveLoginInfo( loginInfo );
     }
@@ -329,7 +346,7 @@
         
         var loginInfo:Object = Config.getInstance().loadLoginInfo();
         if( loginInfo != null ) {
-            uniqueId = loginInfo.uniqueId;
+            uniqueId = loginInfo.uid1;
         }
         Log.logging("load local uniqueId", uniqueId);
         guiInputSender.getLoginInfo(this.getLoginInfoResult, uniqueId);
@@ -502,7 +519,7 @@
         
         Log.logging("result jsonData.uniqueId", jsonData.uniqueId);
         saveUniqeId( jsonData.uniqueId );
-        DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId );
+        DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
         
         DodontoF_Main.getInstance().setLoginTimeLimitSecond( jsonData.loginTimeLimitSecond );
         DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout );
@@ -511,6 +528,8 @@
         ChangeMapWindow.setMaxWidthHeigth( jsonData.mapMaxWidth, jsonData.mapMaxHeigth );
         
         removeOldPlayRoomLimitDays = jsonData.removeOldPlayRoomLimitDays;
+        
+        setDefaultUserNames(jsonData.defaultUserNames);
         
         ChatWindow.setTalk(jsonData.canTalk);
         ChatSendData.setRetryCountLimit(jsonData.retryCountLimit);

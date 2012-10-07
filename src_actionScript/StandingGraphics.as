@@ -184,42 +184,50 @@ package {
                                        state:String,
                                        chatMessage:String = "",
                                        pushCharacterInfoFinction:Function = null):Object {
+            Log.logging("Standinggraphicinfos.findTargetInfo Begin");
+            Log.logging("name", name);
+            Log.logging("state", state);
+            Log.logging("chatMessage", chatMessage);
+            
             var result:Object = {
                 'info':null,
                 'chatMessage':chatMessage
             };
             
-            Log.logging("chatMessage", chatMessage);
-            
             var standingGraphicInfos:Array = getStandingGraphicInfos( pushCharacterInfoFinction );
+            
             for(var i:int = 0 ; i < standingGraphicInfos.length ; i++) {
                 var info:Object = standingGraphicInfos[i];
-                if( name == info.name ) {
-                    if( state == info.state ) {
-                        result.info = info;
-                    }
-                    
-                    if( chatMessage == "" ) {
-                        continue;
-                    }
-                    
-                    if( info.state == "" ) {
-                        continue;
-                    }
-                    
-                    Log.logging('isHitTailAnyLine info.state', info.state);
-                    if( isHitTailAnyLine(chatMessage, info.state) ) {
-                        Log.logging('isHitTailAnyLine chatMessage', chatMessage);
-                        Log.logging('isHitTailAnyLine info', info);
-                        
-                        //チャット文字の末尾が 〜〜@(カットイン名)　のような名前なら、末尾を削除。
-                        result.info = info;
-                        result.chatMessage = Utils.cutChatTailWhenMarked(chatMessage, info.state);
-                        break;
-                    }
+                if( name != info.name ) {
+                    continue;
+                }
+                
+                Log.logging("name == info.name");
+                
+                if( state == info.state ) {
+                    Log.logging("state == info.state", state);
+                    result.info = info;
+                }
+                
+                if( chatMessage == "" ) {
+                    Log.logging("chatMessage == '', so continue");
+                    continue;
+                }
+                
+                if( info.state == "" ) {
+                    Log.logging("info.state == '', so continue");
+                    continue;
+                }
+                
+                if( isHitTailAnyLine(chatMessage, state) ) {
+                    //チャット文字の末尾が 〜〜@(カットイン名)　のような名前なら、末尾を削除。
+                    result.info = info;
+                    result.chatMessage = Utils.cutChatTailWhenMarked(chatMessage, info.state);
+                    break;
                 }
             }
             
+            Log.logging("Standinggraphicinfos.findTargetInfo End result", result);
             return result;
         }
         
@@ -332,6 +340,9 @@ package {
                               chatWindowX:int,
                               chatWindowY:int,
                               chatWindowWidth:int):Object {
+            Log.logging("StandingGraphics.print Begin");
+            Log.logging("nameBase", nameBase);
+
             var name:String = nameBase;
             var state:String = "";
             
@@ -347,11 +358,14 @@ package {
             }
             
             if( name == "" ) {
+                Log.logging("StandingGraphics.print End, name == null, result", result);
                 return result;
             }
             
+            Log.logging("findTargetInfo calling...");
             var findResult:Object = findTargetInfo(name, state, chatMessage);
             if(findResult.info == null) {
+                Log.logging("StandingGraphics.print End, findResult.info == null, result", result);
                 return result;
             }
             
@@ -359,10 +373,12 @@ package {
             
             var leftIndex:int = findResult.info.leftIndex;
             if( leftIndex == 0 ) {
+                Log.logging("leftIndex == 0, result", result);
                 leftIndex = 1;
             }
             
             if( ! effectable ) {
+                Log.logging("StandingGraphics.print End, effectable == false, result", result);
                 return result;
             }
             
@@ -371,6 +387,7 @@ package {
             
             var mirrored:Boolean = findResult.info.mirrored;
             
+            Log.logging("findTargetInfo 2nd calling...");
             var speakImageResult:Object = findTargetInfo(name, state + speakMarker, chatMessage);
             if( speakImageResult.info != null ) {
                 var kuchipaku:Object = {
@@ -383,6 +400,7 @@ package {
             
             printImage(leftIndex, filterImageInfos, name, source, mirrored);
             
+            Log.logging("StandingGraphics.print End, result", result);
             return result;
         }
         

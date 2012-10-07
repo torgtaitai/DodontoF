@@ -131,6 +131,12 @@ package {
                 return resultEvent.result;
             }
             
+            var dataEvent:DataEvent = obj as DataEvent;
+            if( dataEvent != null ) {
+                Log.loggingTuning("result is DataEvent");
+                return getJsonDataFromDataEvent(dataEvent);
+            }
+            
             var event:Event = obj as Event;
             if( event == null ) {
                 Log.loggingTuning("result is NOT Event");
@@ -151,6 +157,39 @@ package {
             
             return jsonData;
         }
+
+
+        /*
+        public static function getJsonDataFromResultEvent(obj:Object):Object {
+            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent begin");
+            Log.logging("obj", obj);
+            
+            var resultEvent:ResultEvent = obj as ResultEvent;
+            if( resultEvent != null ) {
+                Log.loggingTuning("result is resultEvent");
+                return resultEvent.result;
+            }
+            
+            var event:Event = obj as Event;
+            if( event == null ) {
+                Log.loggingTuning("result is NOT Event");
+                return obj;
+            }
+            
+            Log.loggingTuning("result is Event");
+            
+            // var loader:URLLoader = URLLoader(event.target);
+            var bytes:ByteArray = obj as ByteArray;
+            Log.loggingTuning("pass1");
+            Log.logging("bytes", bytes);
+            
+            var data:Object = Utils.getMessagePackDataFromBytes(bytes);
+            
+            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent end, data", data);
+            
+            return data;
+        }
+        */
         
         public static function getJsonDataFromDataEvent(dataEvent:DataEvent):Object {
             var jsonString:String = dataEvent.data;
@@ -254,6 +293,14 @@ package {
             if( jsonData == null ) {
                 //Log.loggingError("jsonData is null");
                 return false;
+            }
+            
+            
+            if( ! DodontoF_Main.getInstance().isReplayMode() ) {
+                if( jsonData.lastUpdateTimes == null ) {
+                    Log.logging("lastUpdateTimes is null, this is empty response data.");
+                    return true;
+                }
             }
             
             if( ! DodontoF_Main.getInstance().isReplayMode() ) {
@@ -400,7 +447,6 @@ package {
             var result:Array = new Array();
             
             var chatMessageDataLog:Array = chatMessageDataLogObj as Array;
-            Log.logging("chatMessageDataLog", chatMessageDataLog);
             
             var lastWrittenTime:Number = this.chatMessageDataLastWrittenTime;
             
@@ -428,7 +474,7 @@ package {
                 var channel:int = chatMessageData['channel'];
                 
                 var data:ChatSendData = new ChatSendData(channel, chatMessage);
-                data.setNameAndState( senderName );
+                data.setNameAndState(senderName);
                 data.setColorString(color);
                 data.setSendto(sendto);
                 

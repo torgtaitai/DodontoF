@@ -202,7 +202,7 @@ package {
                                                  isReplayChatMessage:Boolean = false
                                                  ):Boolean {
             Log.logging("addMessageToChatLog called");
-
+            
             var senderName:String = chatSendData.getNameAndState();
             var color:String = chatSendData.getColor();
             var sendto:String = chatSendData.getSendto();
@@ -328,6 +328,8 @@ package {
         }
         
         private function checkEffect(channel:int, chatMessage:String, senderName:String):Object {
+            Log.logging("checkEffect Begin");
+            
             var result:Object = {
                 "chatMessage" : chatMessage, 
                 "senderName"  : senderName
@@ -336,6 +338,12 @@ package {
             var effectable:Boolean = getEffectable(channel);
             
             result.chatMessage = checkCutInEffect(result.chatMessage, effectable);
+            Log.logging("result.chatMessage", result.chatMessage);
+            
+            if( result.chatMessage == null ) {
+                Log.logging("checkEffect End, chatMessage is null, result", result);
+                return result;
+            }
             
             if( effectable && chatWindow.isToMyAlarm( result.chatMessage ) ) {
                 chatWindow.playSound( result.chatMessage );
@@ -355,6 +363,7 @@ package {
                 result.chatMessage = printResult.chatMessage;
             }
             
+            Log.logging("checkEffect End, result", result);
             return result;
         }
         

@@ -156,8 +156,8 @@ package {
             var imageInfo:Object = Utils.getSizeInfo(imageLoader, defaultWidth, defaultHeight);
             imageLoader.width = imageInfo.width;
             imageLoader.height = imageInfo.height;
-            
-            Utils.setImageVolume(imageLoader, this.volume);
+            var isPlayMovie:Boolean = true;
+            Utils.setImageVolume(imageLoader, this.volume, isPlayMovie);
             var soundChannel:SoundChannel = playSound();
             
             cutInWindow.setSize(imageInfo.width, imageInfo.height);

@@ -26,11 +26,11 @@ def getInfo(info_and_fileName)
   
   return <<INFO_TEXT
   {
-    :name => '#{info[:name]}',
-    :gameType => '#{info[:gameType]}',
-    :fileName => '#{botName}',
-    :prefixs => [#{getPrefixsText(info)}],
-    :info => <<INFO_MESSAGE_TEXT
+    'name' => '#{info[:name]}',
+    'gameType' => '#{info[:gameType]}',
+    'fileName' => '#{botName}',
+    'prefixs' => [#{getPrefixsText(info)}],
+    'info' => <<INFO_MESSAGE_TEXT
 #{info[:info].chomp}
 INFO_MESSAGE_TEXT
   },

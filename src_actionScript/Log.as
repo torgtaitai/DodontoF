@@ -5,6 +5,7 @@ package {
     import mx.utils.StringUtil;
     import mx.managers.PopUpManager;
     import mx.controls.Alert;
+    import flash.utils.ByteArray;
     
     
     public class Log {
@@ -155,6 +156,11 @@ package {
             var data:ChatSendData = obj as ChatSendData;
             if( data != null ) {
                 return data.toString();
+            }
+            
+            var bytes:ByteArray = obj as ByteArray;
+            if( bytes != null ) {
+                return bytes.toString();
             }
             
             return Utils.getJsonString(obj);

@@ -10,8 +10,8 @@ $aboutMaxLoginCount = 30
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.39.03"
-$versionDate = "2012/09/25"
+$versionOnly = "Ver.1.39.06"
+$versionDate = "2012/10/05"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -42,7 +42,7 @@ $IS_SAVE_LONG_CHAT_LOG = true
 #チャットログ大量保管時の保管ライン数
 $chatMessageDataLogAllLineMax = 500
 
-#アップロード可能なファイルサイズの上限(MB)
+#アップロード可能な画像ファイルのファイルサイズ上限(MB)
 $UPLOAD_IMAGE_MAX_SIZE = 10.0
 
 #保持する画像の上限数(上限を超えた場合古いものから削除)
@@ -51,7 +51,7 @@ $UPLOAD_IMAGE_MAX_COUNT = 2000
 #アップロード可能なリプレイデータのファイルサイズ上限(MB)
 $UPLOAD_REPALY_DATA_MAX_SIZE = 5.0
 
-#アップロード可能なファイルのファイルサイズ上限(MB)
+#アップロード可能な一時アップロードのファイルサイズ上限(MB)
 $UPLOAD_FILE_MAX_SIZE = 10.0
 
 #プレイルームデータ(saveData)の相対パス。
@@ -211,6 +211,19 @@ $isUseRecord = true
 #指定方法は下記の通り。空白文字列だとパスワード無し。
 # $createPlayRoomPassword="abc"
 $createPlayRoomPassword = ""
+
+
+#レンタルサーバではなく自前サーバ等でRubyスクリプトのインストールが可能な場合、
+# gem install msgpack
+#を実行し、下記の設定を
+# $isMessagePackInstalled = true
+#に変更してください。処理が早くなります。
+$isMessagePackInstalled = false
+
+#デフォルトで表示されるユーザー名
+#配列なので、 ["abc", "def"] のように複数記述すると、どれかがランダムで表示されます。
+#基本変更する必要はありません。誰得機能。
+$defaultUserNames = ["ななしさん"]
 
 #ダイスボット一覧に表示するダイスボットの名前順序
 #標準添付ののダイスボットで表示したくない物ははここから削除して下さい。

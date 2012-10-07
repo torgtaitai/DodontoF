@@ -1534,9 +1534,8 @@
         }
     
         public function isToMyAlarm(chatMessage:String):Boolean {
-            Log.logging("chatMessage", chatMessage);
+            Log.logging("ChatWindow.isToMyAlarm chatMessage", chatMessage);
             Log.logging("getAlarmStringPrefix(allUserName)", getAlarmStringPrefix(allUserName));
-            Log.logging("chatMessage", chatMessage);
             
             if( (chatMessage.indexOf( getAlarmStringPrefix(allUserName)) == 0) ||
                 (chatMessage.indexOf( getAlarmStringPrefix(chatCharacterName.text))) == 0) {

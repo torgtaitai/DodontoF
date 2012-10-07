@@ -43,8 +43,7 @@
     import mx.managers.PopUpManager;
     import mx.controls.TextArea;
     import mx.controls.Alert;
-    import ym.net.HTTPPostBinary;
-    
+    import org.libspark.utils.ForcibleLoader;
     
     private var fileReferenceForUpload:FileReferenceList = new FileReferenceList();
     private var previewLoaderComponentList:Array = new Array();
@@ -146,6 +145,9 @@
             var movieImageUrl:String = Config.getInstance().getFileImageUrl();
             var request:URLRequest = new URLRequest(movieImageUrl);
             previewLoader.load( request );
+        } else if( Utils.isSwfFile( fileReference.name ) ) {
+            var fLoader:ForcibleLoader = new ForcibleLoader( previewLoader );
+            fLoader.loadBytes( fileReference.data );
         } else {
             previewLoader.loadBytes(fileReference.data);
         }
@@ -169,6 +171,8 @@
             return;
         }
         
+        var isPlayMovie:Boolean = false;
+        Utils.setImageVolume(loaderInfo.content, 0, isPlayMovie);
         var previewLoader:Loader = loaderInfo.loader as Loader;
         
         var rates:Object = getSmallImageRates(previewLoader);
@@ -262,12 +266,10 @@
                                             successResult:Function, errorResult:Function):void {
         Log.logging("ImageUploadWindow.uploadSmallImage begin");
         
-        //(type(binary/string):String, // params_key:String, data:ByteArray, mimetype:String, filename:String = null)
-        var params:Object = [["string", "imageFileName", imageFileName],
-                             ["string", "tagInfo", Utils.getEncodedJsonString(tagInfo)],
-                             ["binary", "imageData", imageData, "image/png", imageFileName],
-                             ["binary", "smallImageData", smallImageData, "image/png", imageFileName + ".png"]];
-        
+        var params:Object = {"imageFileName": imageFileName,
+                             "tagInfo": tagInfo,
+                             "imageData": imageData,
+                             "smallImageData": smallImageData };
         try {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.uploadImageData(params, successResult, errorResult);

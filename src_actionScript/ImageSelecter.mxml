@@ -5,6 +5,7 @@
         horizontalAlign="center"
         verticalAlign="middle"
         height="100%" width="100%" minHeight="0" minWidth="0"
+        creationComplete="constructor();"
         >
   <mx:HBox id="imageSelectBox"
            verticalAlign="middle"
@@ -108,6 +109,22 @@
        private var selectedColor:uint = 0xFFAAAA;
        private var preview:UIComponent;
        
+       public function constructor():void {
+           addEventListener(Event.REMOVED_FROM_STAGE,
+                            function(e:Event):void {
+                                removeEventListener(Event.REMOVED_FROM_STAGE, arguments.callee);
+                                destruct();
+                            }
+                            );
+       }
+       
+       private function destruct():void {
+           Log.logging("ImageSelecter.destruct Begin");
+           
+           Utils.stopMoviewPlay(preview);
+           
+           Log.logging("ImageSelecter.destruct End");
+       }  
        
        public function addPreview(preview_:UIComponent, size:int = 300):void {
            preview = preview_;
@@ -129,26 +146,22 @@
        private function setLoadCompleteEvent():void {
            var previewLoader:PreviewLoader = preview as PreviewLoader;
            if( previewLoader != null ) {
-               previewLoader.setLoadImageCompleate( completeHandler );
+               previewLoader.setLoadImageCompleate( previewCompleteHandler );
            } else {
-               preview.addEventListener(Event.COMPLETE, completeHandler);
+               preview.addEventListener(Event.COMPLETE, previewCompleteHandler);
            }
        }
        
        
-       private function completeHandler(event:Event = null):void {
+       private function previewCompleteHandler(event:Event = null):void {
            Log.logging("ImageSelecter.completeHander begin");
            
            changeMirror();
            
-           var preview:Image = event.currentTarget as Image;
-           if( preview == null ) {
-               Log.logging("ImageSelecter.completeHander preview is null");
-               return;
-           }
-           
-           var volume:Number = 0;
-           Utils.setImageVolume(preview, volume);
+           var previewTarget:Object = event.currentTarget;
+           var volume:Number = 1;
+           var isPlayMovie:Boolean = true;
+           Utils.setImageVolume(previewTarget, volume, isPlayMovie);
        }
        
        public function getImageUrlChanger():ImageUrlChanger {
@@ -457,6 +470,8 @@
        }
        
        public function imageClickEvent(event:MouseEvent):void {
+           Utils.stopMoviewPlay(preview);
+           
            var imageBox:Box = event.currentTarget as Box;
            var imageInfo:Object = findImageInfoFromBox(imageBox);
            var imageUrl:String = imageInfo["imageUrl"] as String;

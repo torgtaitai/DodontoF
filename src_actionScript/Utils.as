@@ -29,7 +29,8 @@ package {
     import mx.utils.StringUtil;
     import mx.effects.Glow;
     import mx.events.CloseEvent;
-    
+    import org.msgpack.MessagePack;
+    import flash.display.Sprite;
     
     public class Utils {
         
@@ -70,6 +71,29 @@ package {
             }
             
             return jsonData;
+        }
+        
+        public static function getMessagePack(data:Object):ByteArray {
+            //var bytes:ByteArray = MessagePack.encode(data);
+            var bytes:ByteArray = MessagePack.encoder.write(data);
+            return bytes;
+        }
+        
+        public static function getMessagePackDataFromBytes(bytes:ByteArray):Object {
+            if( bytes == null ) {
+                return new Object();
+            }
+            
+            var data:Object = null;
+            
+            try {
+                //data = MessagePack.decode(bytes);
+                data = MessagePack.decoder.read(bytes);
+            } catch( e:Error ) {
+                //Log.loggingException("SharedDataReceiver.getMessagePackDataFromBytes()", e);
+            }
+            
+            return data;
         }
         
         
@@ -520,19 +544,70 @@ package {
             return true;
         }
         
-        static public function setImageVolume(obj:Object, volume:Number):void {
+        
+        //flash.display::AVM1Movie -> MovieClip
+        static public function setImageVolume(obj:Object, volume:Number, isPlayMovie:Boolean):void {
             Log.logging("setImageVolume volume", volume);
             
-            var swf:SWFLoader = obj as SWFLoader;
-            if( swf == null ) {
-                Log.logging("setImageVolume obj is NOT SWFLoader");
+            var sprite:Sprite = obj as Sprite;
+            if( sprite == null ) {
+                Log.logging("setImageVolume obj is NOT Sprite");
+                return;
+            }
+            Log.logging("setImageVolume obj is Sprite");
+            
+            var soundTransform:SoundTransform = new SoundTransform(volume);
+            sprite.soundTransform = soundTransform;
+            
+            if( ! isPlayMovie ) {
+                stopMovie(obj);
+            }
+        }
+        
+        static private function stopMovie(obj:Object):void {
+            
+            var movieClip:MovieClip = obj as MovieClip;
+            if( movieClip == null ) {
+                Log.logging("setImageVolume obj is NOT MovieClip");
                 return;
             }
             
-            var soundTransform:SoundTransform = new SoundTransform(volume);
-            swf.soundTransform = soundTransform;
+            Log.logging("setImageVolume obj is MovieClip");
+            
+            var maxFlame:int = movieClip.totalFrames;
+            Log.logging("maxFlame", maxFlame);
+            Log.logging("framesLoaded", movieClip.framesLoaded);
+            var defaultFlame:int = 20;
+            var targetFlame:int = Math.min(maxFlame, defaultFlame);
+            Log.logging("targetFlame", targetFlame);
+            
+            movieClip.gotoAndStop(targetFlame);
         }
         
+        static public function stopMoviewPlay(obj:Object):void {
+            try {
+                var image:Image = obj as Image;
+                if( image != null ) {
+                    Log.logging("stopMoviewPlay obj is Image so, flash.media.SoundMixer.stopAll()");
+                    image.unloadAndStop();
+                    return;
+                }
+                
+                var movieClip:MovieClip = obj as MovieClip;
+                if( movieClip == null ) {
+                    Log.logging("stopMoviewPlay obj is NOT MovieClip");
+                    return;
+                }
+                
+                Log.logging("stopMoviewPlay obj is MovieClip");
+                movieClip.stop();
+                
+            } catch( e:Error ) {
+                Log.loggingException("Utils.stopMoviewPlay()", e);
+            }
+       }
+       
+
         
         static public function getEnterText():String {
             if( isWindowsOs() ) {
