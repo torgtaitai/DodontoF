@@ -1212,16 +1212,22 @@ INFO_MESSAGE_TEXT
 
   #**アイテムカテゴリ決定表(1D6)
   def mk_item_decide_table(num)
-    table = [
-      [ 1, mk_weapon_item_table(d66(2)) ],
-      [ 2, mk_life_item_table(d66(2)) ],
-      [ 3, mk_rest_item_table(d66(2)) ],
-      [ 4, mk_search_item_table(d66(2)) ],
-      [ 5, mk_rare_weapon_item_table(d66(1)) ],
-      [ 6, mk_rare_item_table(d66(1)) ],
-    ]
 
-    return get_table_by_number(num, table);
+    if(num == 1)
+      return mk_weapon_item_table(d66(2))
+    elsif(num == 2)
+      return mk_life_item_table(d66(2))
+    elsif(num == 3)
+      return mk_rest_item_table(d66(2))
+    elsif(num == 4)
+      return mk_search_item_table(d66(2))
+    elsif(num == 5)
+      return mk_rare_weapon_item_table(d66(1))
+    elsif(num == 6)
+      return mk_rare_item_table(d66(1))
+    end
+
+  return nil
   end
 
   #**武具アイテム表(D66)
