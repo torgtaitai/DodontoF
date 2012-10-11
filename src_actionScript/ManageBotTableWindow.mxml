@@ -38,7 +38,7 @@
     <mx:Spacer width="20" />
     <mx:Button label="削除"  click="removeFromList()" />
     <mx:Spacer width="50%" />
-    <mx:Button label="キャンセル"  click="closeAction()" />
+    <mx:Button label="閉じる"  click="closeAction()" />
   </mx:HBox>
       
   

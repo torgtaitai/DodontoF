@@ -79,10 +79,7 @@
       <mx:Spacer id="yourNameSpace" width="50" />
       
       <mx:Label text="現在のログイン状況：" />
-<!--
-      <mx:Label id="currentAllLoginInfo" text="0/0(0%)" width="100" height="100%" />
--->
-      <mx:Button id="currentAllLoginInfo" label="0/0(0%)" fontWeight="normal" width="130"
+      <mx:Button id="currentAllLoginInfo" label="0/0(0%)" fontWeight="normal" width="150"
                  click="showLoginInfo()" />
       
       <mx:TextInput id="adminPassword" text="管理用パスワード" width="0" height="0" enabled="false"
@@ -111,7 +108,6 @@
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="createNewPlayRoomButton" label="新規プレイルーム作成"
                  click="createPlayRoom()"  enabled="false"
-                 fontWeight="normal"
       />
       
       <mx:Spacer width="10%" />
@@ -211,7 +207,8 @@
         setAdminMode();
     }
     
-    private var defaultUserNames:Array = ["ななしさん"];
+    private var defaultUserName:String = "ななしさん";
+    private var defaultUserNames:Array = [ defaultUserName ];
     
     private function getDefaultName():String {
         var index:int = Dice.getRandomNumber(defaultUserNames.length) - 1;
@@ -311,6 +308,7 @@
     }
     
     private function loadDefaultCharacterName():String {
+        Log.logging("loadDefaultCharacterName Begin");
         var info:Object = ChatWindow.getPlayerInfo();
         if( info == null ) {
             return getDefaultName();
@@ -321,11 +319,22 @@
             return getDefaultName();
         }
         
+        if( name == defaultUserName ) {
+            return getDefaultName();
+        }
+        
+        Log.logging("loadDefaultCharacterName name", name);
         return name;
     }
     
     
     private function setDefaultUserNames(names:Array):void {
+        if( names.length == 1 ) {
+            if( names[0] == defaultUserName ) {
+                return;
+            }
+        }
+        
         defaultUserNames = names;
         yourName.text = loadDefaultCharacterName();
     }
@@ -500,6 +509,11 @@
     private var isNeedCreatePassword:Boolean = false;
     
     private function setLoginInitialInfo(jsonData:Object):void {
+        var canLogin:Boolean = analyzeLoginInfo(jsonData);
+        if( ! canLogin ) {
+            return;
+        }
+        
         if( jsonData.fps != null ) {
             stage.frameRate = jsonData.fps;
         }
@@ -541,8 +555,6 @@
             DodontoF_Main.getInstance().getMap().addPaformanceMonitor();
         }
         
-        analyzeLoginInfo(jsonData);
-        
         if( autoLoginRoom >= 0 ) {
             Log.loggingTuning("autoLoginRoom", autoLoginRoom);
             
@@ -556,26 +568,39 @@
         getPlayRoomStates();
     }
     
-    private function analyzeLoginInfo(jsonData:Object):void {
+    private function analyzeLoginInfo(jsonData:Object):Boolean {
         loginUserCountList = jsonData.loginUserCountList as Array;
         Log.logging("loginUserCountList", loginUserCountList)
         
-        //currentAllLoginInfo.text = getLoginCountInfo(jsonData);
         currentAllLoginInfo.label = getLoginCountInfo(jsonData);
         
-        checkLoginCount(jsonData);
+        return checkLoginCount(jsonData);
     }
     
     
     private function getLoginCountInfo(jsonData:Object):String {
         var count:int = jsonData.allLoginCount;
         var max:int = jsonData.maxLoginCount;
-        var percentage:int = getLoginCountPercentage(jsonData);
         
-        var message:String = "" + percentage + "%(" + count  + "/" + max + ")";
+        //var percentage:int = getLoginCountPercentage(jsonData);
+        //var message:String = "" + percentage + "%(" + count  + "/" + max + ")";
+        
+        var message:String = "" + "現状：" + count  + "人";
+        if( isValidLimitLoginCount(jsonData) ) {
+            message += "／" + "上限：" + jsonData.limitLoginCount + "人";
+        }
+        
         return message;
     }
     
+    private function isValidLimitLoginCount(jsonData:Object):Boolean {
+        if( jsonData.limitLoginCount == null ) {
+            return false;
+        }
+        
+        return ( jsonData.limitLoginCount >= 0 );
+    }
+    /*
     private function getLoginCountPercentage(jsonData:Object):int { 
         var count:int = jsonData.allLoginCount;
         var max:int = jsonData.maxLoginCount;
@@ -584,16 +609,29 @@
         
         return percentage;
     }
+    */
     
-    private function checkLoginCount(jsonData:Object):void {
-        var percentage:int = getLoginCountPercentage(jsonData);
+    private function checkLoginCount(jsonData:Object):Boolean {
+        Log.logging("jsonData.allLoginCount", jsonData.allLoginCount);
+        Log.logging("jsonData.limitLoginCount", jsonData.limitLoginCount);
         
-        if( percentage <= 100 ) {
-            return;
+        var countInfo:String = getLoginCountInfo(jsonData);
+        
+        if( isValidLimitLoginCount(jsonData) ) {
+            if( jsonData.allLoginCount > jsonData.limitLoginCount ) {
+                var message:String = "ログイン人数が限界です。\n　　【" + countInfo + "】\n他のサーバをご利用ください。";
+                status = message.replace(/　/g, '').replace(/\n/g, '　');
+                Alert.show(message);
+                return false;
+            }
         }
         
-        var message:String = getLoginCountInfo(jsonData);
-        status = "ログイン人数が許容人数を超えています【" + message + "】　 他のサーバの利用を検討ください";
+        if( jsonData.allLoginCount < jsonData.maxLoginCount ) {
+            return true;
+        }
+        
+        status = "ログイン人数が多くなってきました。【" + countInfo + "】他のサーバの利用を検討ください";
+        return true;
     }
     
     private var showLoginLineMax:int = 10;
@@ -767,8 +805,6 @@
     
     private function getEnterPlayRoomFunction(roomNumber:int, roomName:String,
                                               chatChannelNames:Array):Function {
-        var thisObj:LoginWindow = this;
-        
         var enterPlayRoomFunction:Function = function(password:String = "", visiterMode:Boolean = false):void {
             
             Log.logging("enterPlayRoomFunction begin");

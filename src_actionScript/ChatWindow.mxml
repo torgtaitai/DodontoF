@@ -1159,7 +1159,7 @@
             chatMessageTrader.sendMessage(data);
         }
         
-        private function clearDice():void {
+        static public function clearDice():void {
             if( DodontoF_Main.getInstance().getDiceBox() == null ) {
                 return;
             }
@@ -1465,8 +1465,6 @@
             if( isWelcomeMessageOn ) {
                 sendSystemMessage("がログインしました。");
             }
-
-
             
             var message:String = DodontoF_Main.getInstance().getLoginTimeLimitSecondMessage();
             Log.logging("message", message);

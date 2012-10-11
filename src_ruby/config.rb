@@ -5,13 +5,20 @@
 $debug = false
 
 
-#サーバで許容できると思うログイン人数を記載。大体でいいです。
+#サーバで許容できると思うログイン人数を指定。大体でいいです。
+#この人数以上になると、人数が多いと警告が表示されるようになります。
 $aboutMaxLoginCount = 30
 
+#サーバにログインする事のできる限界人数。
+#この人数以上になると、ログインが全くできなくなります。
+#制限しないなら -1 と指定ください。
+# 例) $limitLoginCount = 100
+#     $limitLoginCount = -1
+$limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.39.06"
-$versionDate = "2012/10/05"
+$versionOnly = "Ver.1.39.07"
+$versionDate = "2012/10/10"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -260,6 +267,7 @@ $diceBotOrder = <<____END_MARKER____
 ダブルクロス2nd,3rd
 ダンジョンズ＆ドラゴンズ3.x版
 ダンジョンズ＆ドラゴンズ4版
+墜落世界
 デモンパラサイト
 トーグ
 特命転攻生

@@ -48,7 +48,7 @@ package {
         private var sender:SharedDataSender = null;
         private var history:Array = null;
         private var replaySpeed:Number = 1;
-        private var restChatMessageForReplay:Array = new Array();
+        private var restChatSendDataForReplay:Array = new Array();
         
         public function setReplaySpeed(speed:Number):void {
             replaySpeed = speed;
@@ -98,7 +98,7 @@ package {
         
         private function init():void {
             historyIndex = 0;
-            restChatMessageForReplay = new Array();
+            restChatSendDataForReplay = new Array();
             setSlider();
             
             DodontoF_Main.getInstance().setLocalReplayMode(true);
@@ -135,8 +135,8 @@ package {
             beginChangeReplayPoint();
         }
         
-        public function addRestChatMessageForReplay(messageData:Object):void {
-            restChatMessageForReplay.push(messageData);
+        public function addRestChatSendDataForReplay(chatSendData:ChatSendData):void {
+            restChatSendDataForReplay.push(chatSendData);
         }
         
         private function getPlayingState():Boolean {
@@ -151,13 +151,6 @@ package {
                 DodontoF_Main.getInstance().getDodontoF().setPlayIcon();
             }
         }
-        
-        private var characterSleepTime:int = 0.5 * 1000;
-        
-        private function getChatSleepTime(length:int):Number {
-            return (0.7 + (length * 0.07)) * 1000;
-        }
-        
         
         //リプレイで表示するチャンネルはここの辺りの処理で制御
         private var activeChannelNames:Array = [DodontoF_Main.publicChatChannelName];
@@ -186,22 +179,36 @@ package {
             return true;
         }
         
-        private function getChatSleepTimeFromMessageData(messageData:Object):Number {
-            var channel:int = messageData[0];
+        private function getChatSleepTimeFromMessageData(chatSendData:ChatSendData):int {
+            var channel:int = chatSendData.getChannel();
             if( isIgnoreChannel(channel) ) {
                 return 0;
             }
             
-            var chatMessage:String = messageData[1];
-            return getChatSleepTime(chatMessage.length);
+            //var chatMessage:String = chatSendData.getMessage();
+            var box:ChatMessageLogBox = ChatWindow.getInstance().getChatChannle(0);
+            var htmlText:String = box.getLastHtmlText();
+            var chatMessage:String = Utils.htmlToText(htmlText);
+            Log.logging("sleep chatMessage", chatMessage);
+            
+            var length:int = chatMessage.length;
+            Log.logging("sleep chatMessage.length", length);
+            
+            var sleepTimeMilliSeconds:int =  (0.3 + length * 0.05) * 1000;
+            Log.logging("sleepTime", sleepTimeMilliSeconds / 1000.0);
+            
+            return sleepTimeMilliSeconds;
         }
+        
+        private var characterSleepTime:int = 0.5 * 1000;
+        
         
         private function replayHistory(currentReplaySeekIndex:int):void {
             
             if( isPausing ) {
                 setPlayingState( false );
                 isPausing = false;
-                restChatMessageForReplay = new Array();
+                restChatSendDataForReplay = new Array();
                 return;
             }
             
@@ -210,14 +217,16 @@ package {
                 return;
             }
             
-            if( (history.length == historyIndex) && (restChatMessageForReplay.length == 0) ) {
+            if( (history.length == historyIndex) && (restChatSendDataForReplay.length == 0) ) {
                 endPhase();
                 return;
             }
             
+            ChatWindow.clearDice();
+            
             var sleepTime:int = 0;
             
-            if( restChatMessageForReplay.length > 0 ) {
+            if( restChatSendDataForReplay.length > 0 ) {
                 sleepTime = printRestChatMessage();
             } else {
                 var jsonData:Object = history[historyIndex];
@@ -353,31 +362,23 @@ package {
         
         private function printRestChatMessage():int {
             
-            var messageData:Object = restChatMessageForReplay.shift();
+            var chatSendData:ChatSendData= restChatSendDataForReplay.shift();
             
-            var channel:int = messageData[0];
+            var channel:int = chatSendData.getChannel();
             if( isIgnoreChannel(channel) ) {
                 return 0;
             }
             
-            var nameAndState:String = messageData[1];
-            var message:String = messageData[2];
-            var color:String = messageData[3];
-            var time:Number = messageData[4];
-            var uniqueId:String = messageData[5];
+            var time:Number = chatSendData.getParamsNumber("time");
+            var uniqueId:String = chatSendData.getParamsString("uniqueId");
+            Log.logging("time", time);
+            Log.logging("uniqueId", uniqueId);
             
-            var data:ChatSendData = new ChatSendData(channel, message);
-            data.setNameAndState(nameAndState);
-            data.setColorString(color);
+            var window:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+            window.clearPublicChatMessageLog();
+            window.addMessageToChatLog(chatSendData, time, uniqueId, true);
             
-            DodontoF_Main.getInstance().getChatWindow().clearPublicChatMessageLog();
-            DodontoF_Main.getInstance().getChatWindow()
-                .addMessageToChatLog(data,
-                                     time,
-                                     uniqueId,
-                                     true);
-            
-            return getChatSleepTimeFromMessageData(messageData);
+            return getChatSleepTimeFromMessageData(chatSendData);
         }
         
         private function analyzeForReplay(jsonData:Object):int {
@@ -385,14 +386,17 @@ package {
             
             var reciever:SharedDataReceiver = sender.getReciever();
             var isValidResponse:Boolean = reciever.analyzeRefreshResponseCatchedCallByJsonData(jsonData);
+            Log.logging("analyzeForReplay isValidResponse", isValidResponse);
             
             if( isValidResponse ) {
                 if( (jsonData.chatMessageDataLog != null) && 
-                    (restChatMessageForReplay.length != 0) ) {
-                    var messageData:Object = restChatMessageForReplay[ restChatMessageForReplay.length - 1 ];
-                    return getChatSleepTimeFromMessageData(messageData);
+                    (restChatSendDataForReplay.length != 0) ) {
+                    Log.logging("analyzeForReplay restChatSendDataForReplay");
+                    var chatSendData:ChatSendData = restChatSendDataForReplay[ restChatSendDataForReplay.length - 1 ];
+                    return getChatSleepTimeFromMessageData(chatSendData);
                 }
                 if( isCharacterData(jsonData) ) {
+                    Log.logging("analyzeForReplay isCharacterData");
                     return characterSleepTime;
                 }
             }

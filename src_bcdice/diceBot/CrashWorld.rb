@@ -23,12 +23,12 @@ INFO_MESSAGE_TEXT
   
   def dice_command(string, nick_e)
     secret_flg = false
-
-    return '1', secret_flg unless(/(^|\s)(S)?CW(\d+)(\s|$)/i =~ string)
+    
+    return '1', secret_flg unless( /(^|\s)(S)?(#{prefixs.join('|')})(\s|$)/i =~ string )
     
     secretMarker = $2
     targetNum = $3.to_i
-
+    
     output_msg = getCrashWorldResult(targetNum, nick_e);
     if( secretMarker )   # 隠しロール
       secret_flg = true if(output_msg != '1');

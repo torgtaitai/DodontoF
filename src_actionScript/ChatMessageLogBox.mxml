@@ -81,6 +81,10 @@
             lastText = createChatMessageLog(novelticMode)
         }
         
+        public function getLastHtmlText():String {
+            return lastText.htmlText;
+        }
+        
         public function getChatMessageLogList():Array {
             return textBlockList;
         }

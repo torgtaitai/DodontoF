@@ -90,7 +90,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ブラッド・クルセイド',
     'gameType' => 'BloodCrusade',
     'fileName' => 'BloodCrusade',
-    'prefixs' => ['RT','ST','IST','BRT','CHT','SHT','DHT','LHT','EHT'],
+    'prefixs' => ['RT','ST','IST','BRT','CHT','SHT','DHT','LHT','EHT','AST','MIT','SIT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・各種表
 　・関係属性表         RT
@@ -102,6 +102,9 @@ INFO_MESSAGE_TEXT
 　・日常幸福表　　　　 DHT
 　・人脈幸福表　　　　 LHT
 　・退路幸福表　　　　 EHT
+　・ランダム全特技表　 AST
+　・軽度狂気表　　　　 MIT
+　・重度狂気表　　　　 SIT
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -144,6 +147,17 @@ INFO_MESSAGE_TEXT
 　負傷とスタミナロスを計算します。
 　ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。
 　例）SR7　　　sr13　　　SR(7+4)　　　Ssr10
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => '墜落世界',
+    'gameType' => 'CrashWorld',
+    'fileName' => 'CrashWorld',
+    'prefixs' => ['CW\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定 CWn
+初期目標値n (必須)
+例・CW8
 INFO_MESSAGE_TEXT
   },
   {
@@ -709,7 +723,7 @@ INFO_MESSAGE_TEXT
 　・(リプレイ戦1〜2巻)学校シーン表　GAST／京都シーン表　KYST
 　　　／神社仏閣シーン表　JBST
 　・(怪)怪ファンブル表　KFT／怪変調表　KWT
-　・（その他）秋空に雪舞えばシーン表　KST／災厄シーン表　CLST
+　・（その他）秋空に雪舞えばシーン表　AKST／災厄シーン表　CLST
 　　／出島EXシーン表　DXST／斜歯ラボシーン表　HLST
 　　／夏の終わりシーン表　NTST／培養プラントシーン表　　PLST
 ・D66ダイスあり

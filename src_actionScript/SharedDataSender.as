@@ -333,12 +333,12 @@ package {
             Log.logging("checkLastUpdateTimes begin.");
             Log.logging("checkLastUpdateTimes type", type);
             
-            if( lastUpdateTimes == null ) {
-                return false;
-            }
-            
             if( isReplayMode() ) {
                 return true;
+            }
+            
+            if( lastUpdateTimes == null ) {
+                return false;
             }
             
             var timeValue:Number = lastUpdateTimes[type];
@@ -1021,9 +1021,17 @@ package {
         
         public function getPlayRoomStates(minRoom:int, maxRoom:int, resultFunction:Function):void {
             var data:Object = {"minRoom": minRoom,
-                                   "maxRoom" : maxRoom };
+                               "maxRoom" : maxRoom };
             
             var obj:Object = getParamObject("getPlayRoomStates", data);
+            sendCommandData(obj, resultFunction);
+        }
+        
+        public function getPlayRoomStatesByCount(minRoom:int, count:int, resultFunction:Function):void {
+            var data:Object = {"minRoom": minRoom,
+                               "count": count };
+            
+            var obj:Object = getParamObject("getPlayRoomStatesByCount", data);
             sendCommandData(obj, resultFunction);
         }
         

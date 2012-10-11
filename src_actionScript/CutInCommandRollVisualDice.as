@@ -93,8 +93,7 @@ package {
                 }
             }
             
-            var diceBox:DiceBox = getDiceBox();
-            diceBox.castDice();
+            getDiceBox().castDice();
         }
         
         private function getRandResults(params:Object):Array {

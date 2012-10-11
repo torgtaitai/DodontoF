@@ -580,6 +580,10 @@ package {
             sender.getPlayRoomStates(minRoom, maxRoom, resultFunction);
         }
         
+        public function getPlayRoomStatesByCount(minRoom:int, count:int, resultFunction:Function):void {
+            sender.getPlayRoomStatesByCount(minRoom, count, resultFunction);
+        }
+        
         public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
             sender.getLoginInfo(resultFunction, uniqueId);
         }

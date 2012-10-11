@@ -786,17 +786,32 @@ package {
         
         
         private function playRollSound():void {
-            if( ChatWindow.getInstance() == null ) {
-                return;
-            }
-
-            if( ! ChatWindow.getInstance().isSoundOnMode() ) {
+            
+            if( ! isSoundOn() ) {
                 return;
             }
             
             stopRollSound();
             var rollSound:Sound = new DiceRollSound() as Sound;
             rollSoundChannel = rollSound.play();
+        }
+        
+        private function isSoundOn():Boolean {
+            
+            if( DodontoF_Main.getInstance().isReplayMode() ) {
+                return true;
+            }
+            
+            
+            if( ChatWindow.getInstance() == null ) {
+                return false;
+            }
+            
+            if( ! ChatWindow.getInstance().isSoundOnMode() ) {
+                return false;
+            }
+            
+            return true;
         }
     }
 }

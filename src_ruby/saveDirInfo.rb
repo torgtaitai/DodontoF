@@ -59,6 +59,11 @@ class SaveDirInfo
     return saveDirs
   end
   
+  def getSaveDataLastAccessTime(fileName, roomNo)
+    roomNumberRange = (roomNo .. roomNo )
+    return getSaveDataLastAccessTimes([fileName], roomNumberRange)
+  end
+  
   def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
     logging(fileNames, "getSaveDataLastAccessTimes fileNames")
     

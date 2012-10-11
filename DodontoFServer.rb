@@ -693,6 +693,7 @@ class DodontoFServer
       ['clearGraveyard', hasReturn], 
       ['getLoginInfo', hasReturn], 
       ['getPlayRoomStates', hasReturn], 
+      ['getPlayRoomStatesByCount', hasReturn], 
       ['deleteImage', hasReturn], 
       ['uploadImageUrl', hasReturn], 
       ['save', hasReturn], 
@@ -851,6 +852,8 @@ class DodontoFServer
       return setWebIfRoomInfo
     when 'getChatColor'
       return getChatColor
+    when 'refresh'
+      return getWebIfRefresh
     end
     
     return {'result'=> "command [#{commandName}] is NOT found"}
@@ -920,6 +923,7 @@ class DodontoFServer
       end
     end
   end
+  
   
   def getWebIfChatText
     logging("getWebIfChatText begin")
@@ -1459,6 +1463,16 @@ class DodontoFServer
   end
   
   
+  def getWebIfRefresh
+    logging("getWebIfRefresh Begin")
+    
+    
+    refresh()
+    
+    logging("getWebIfRefresh End")
+  end
+  
+  
   def refresh()
     logging("==>Begin refresh");
     
@@ -1469,19 +1483,19 @@ class DodontoFServer
       return saveData
     end
     
-    refreshData = getParamsFromRequestData()
-    logging(refreshData, "refreshData")
+    params = getParamsFromRequestData()
+    logging(params, "params")
     
-    @lastUpdateTimes = refreshData['times']
+    @lastUpdateTimes = params['times']
     logging(@lastUpdateTimes, "@lastUpdateTimes");
     
     isFirstChatRefresh = (@lastUpdateTimes['chatMessageDataLog'] == 0)
     logging(isFirstChatRefresh, "isFirstChatRefresh");
     
-    refreshIndex = refreshData['rIndex'];
+    refreshIndex = params['rIndex'];
     logging(refreshIndex, "refreshIndex");
     
-    @isGetOwnRecord = refreshData['isGetOwnRecord'];
+    @isGetOwnRecord = params['isGetOwnRecord'];
     
     if( $isCommet )
       refreshLoop(saveData)
@@ -1490,8 +1504,8 @@ class DodontoFServer
     end
     
     uniqueId = getCommandSender
-    userName = refreshData['name'];
-    isVisiter = refreshData['isVisiter'];
+    userName = params['name'];
+    isVisiter = params['isVisiter'];
     
     unless( saveData.empty? )
       saveData['lastUpdateTimes'] = @lastUpdateTimes
@@ -1634,108 +1648,6 @@ class DodontoFServer
   end
   
   
-  def getPlayRoomPasswordLockStates( roomNumberRange )
-    passwordLockStates = {}
-    roomNumberRange.each{|i| passwordLockStates[i] = false}
-    logging(passwordLockStates, 'passwordLockStates')
-    
-    @saveDirInfo.each_with_index(roomNumberRange, $playRoomInfo) do |saveFiles, index|
-      next unless( roomNumberRange.include?(index) )
-      
-      if( saveFiles.size != 1 )
-        loggingForce("[#{index}](getPlayRoomPasswordLockStates) invalid playRoomInfo saveFiles:#{saveFiles.inspect}")
-        next
-      end
-      
-      trueSaveFileName = saveFiles.first
-      
-      getSaveData(trueSaveFileName) do |saveData|
-        password = saveData['playRoomChangedPassword']
-        unless( password.nil? )
-          passwordLockStates[index] = true
-        end
-      end
-    end
-    
-    logging(passwordLockStates, 'passwordLockStates')
-    
-    return passwordLockStates
-  end
-  
-  def getCanVisitList( roomNumberRange )
-    defaultValue = false
-    saveDataKey = 'canVisit'
-    return getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
-  end
-  
-  def getGameTypeList( roomNumberRange )
-    defaultValue = ''
-    saveDataKey = 'gameType'
-    return getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
-  end
-  
-  def getPlayRoomInfoList( roomNumberRange, defaultValue, saveDataKey )
-    infoList = {}
-    roomNumberRange.each{|i| infoList[i] = defaultValue}
-    
-    @saveDirInfo.each_with_index(roomNumberRange, $playRoomInfo) do |saveFiles, index|
-      next unless( roomNumberRange.include?(index) )
-      
-      if( saveFiles.size != 1 )
-        loggingForce("[#{index}](infoList) invalid playRoomInfo saveFiles:#{saveFiles.inspect}")
-        next
-      end
-      
-      trueSaveFileName = saveFiles.first
-      
-      getSaveData(trueSaveFileName) do |saveData|
-        unless( saveData[saveDataKey].nil? )
-          infoList[index] = saveData[saveDataKey]
-        end
-      end
-    end
-    
-    return infoList
-  end
-  
-  def getPlayRoomNames( saveDataLastAccesTimes, roomNumberRange )
-    logging(saveDataLastAccesTimes, "getPlayRoomNames saveDataLastAccesTimes")
-    
-    emptyRoomName = "（空き部屋）"
-    playRoomNames = {}
-    roomNumberRange.each{|i| playRoomNames[i] = emptyRoomName}
-    logging(playRoomNames, 'playRoomNames')
-    
-    @saveDirInfo.each_with_index(roomNumberRange, $playRoomInfo) do |saveFiles, index|
-      next unless( roomNumberRange.include?(index) )
-      
-      logging(index, "getPlayRoomNames each_with_index index")
-      logging(saveFiles, "getPlayRoomNames each_with_index saveFiles")
-      
-      if( saveDataLastAccesTimes[index].to_i == 0 )
-        logging("(saveDataLastAccesTimes[index].to_i == 0)")
-        next
-      end
-      
-      if( saveFiles.size != 1 )
-        loggingForce("[#{index}](getPlayRoomNames) invalid playRoomInfo saveFiles:#{saveFiles.inspect}")
-        next
-      end
-      
-      @saveDirInfo.setSaveDataDirIndex(index)
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      logging(trueSaveFileName, "getPlayRoomNames trueSaveFileName")
-      
-      getSaveData(trueSaveFileName) do |saveData|
-        playRoomName = getPlayRoomName(saveData, index)
-        playRoomNames[index] = playRoomName
-      end
-    end
-    logging(playRoomNames, 'playRoomNames result')
-    
-    return playRoomNames
-  end
-  
   def getPlayRoomName(saveData, index)
     playRoomName = saveData['playRoomName']
     playRoomName ||= "プレイルームNo.#{index}"
@@ -1793,6 +1705,11 @@ class DodontoFServer
   
   def getSaveDataLastAccessTimes( roomNumberRange )
     @saveDirInfo.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
+  end
+  
+  def getSaveDataLastAccessTime( fileName, roomNo )
+    data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
+    return data[roomNo]
   end
   
   
@@ -1889,42 +1806,87 @@ class DodontoFServer
     roomNumberRange = (minRoom .. maxRoom)
     playRoomStates = []
     
-    loginUsersList = getLoginUserList( roomNumberRange )
-    playRoomPasswordLockStates = getPlayRoomPasswordLockStates( roomNumberRange )
-    saveDataLastAccesTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    playRoomNames = getPlayRoomNames( saveDataLastAccesTimes, roomNumberRange )
-    canVisitList = getCanVisitList( roomNumberRange )
-    gameTypeList = getGameTypeList( roomNumberRange )
-    
-    roomNumberRange.each do |i|
-      createdState = false
-      loginUsers = loginUsersList[i];
-      logging("loginUsers", loginUsers);
-      playRoomName = playRoomNames[i]
-      passwordLockState = playRoomPasswordLockStates[i]
-      canVisit = canVisitList[i]
-      timeStamp = saveDataLastAccesTimes[i]
-      gameType = gameTypeList[i] # getGameName( gameTypeList[i] )
+    roomNumberRange.each do |roomNo|
       
-      timeString = ""
-      unless( timeStamp.nil? )
-        timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-      end
+      @saveDirInfo.setSaveDataDirIndex(roomNo)
       
-      playRoomState = {
-        'passwordLockState' => passwordLockState,
-        'index' => sprintf("%3d", i),
-        'playRoomName' => playRoomName,
-        'loginUsers' => loginUsers,
-        'lastUpdateTime' => timeString,
-        'canVisit' => canVisit,
-        'gameType' => gameType,
-      }
+      playRoomState = getPlayRoomState(roomNo)
+      next if( playRoomState.nil? )
       
       playRoomStates << playRoomState
     end
     
     return playRoomStates;
+  end
+  
+  def getPlayRoomState(roomNo)
+    
+    # playRoomState = nil
+    playRoomState = {}
+    playRoomState['passwordLockState'] = false
+    playRoomState['index'] = sprintf("%3d", roomNo)
+    playRoomState['playRoomName'] = "（空き部屋）"
+    playRoomState['lastUpdateTime'] = ""
+    playRoomState['canVisit'] = false
+    playRoomState['gameType'] = ''
+    playRoomState['loginUsers'] = []
+    
+    playRoomInfoFile = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+    
+    return playRoomState unless( isExist?(playRoomInfoFile) )
+    
+    playRoomData = nil
+    getSaveData(playRoomInfoFile) do |playRoomDataTmp|
+      playRoomData = playRoomDataTmp
+    end
+    logging(playRoomData, "playRoomData")
+    
+    return playRoomState if( playRoomData.empty? )
+    
+    playRoomName = getPlayRoomName(playRoomData, roomNo)
+    passwordLockState = playRoomData['playRoomChangedPassword'].nil?
+    canVisit = playRoomData['canVisit']
+    gameType = playRoomData['gameType']
+    
+    timeStamp = getSaveDataLastAccessTime( $playRoomInfo, roomNo )
+    
+    timeString = ""
+    unless( timeStamp.nil? )
+      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
+    end
+    
+    loginUsers = getLoginUserNames()
+    
+    playRoomState['passwordLockState'] = passwordLockState
+    playRoomState['playRoomName'] = playRoomName
+    playRoomState['lastUpdateTime'] = timeString
+    playRoomState['canVisit'] = canVisit
+    playRoomState['gameType'] = gameType
+    playRoomState['loginUsers'] = loginUsers
+    return playRoomState
+  end
+  
+  def getLoginUserNames()
+    userNames = []
+    
+    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($loginUserInfo)
+    logging(trueSaveFileName, "getLoginUserNames trueSaveFileName")
+    
+    unless( isExist?(trueSaveFileName) )
+      return userNames
+    end
+    
+    @now_getLoginUserNames ||= Time.now.to_i
+    
+    getSaveData(trueSaveFileName) do |userInfos|
+      userInfos.each do |uniqueId, userInfo|
+        next if( isDeleteUserInfo?(uniqueId, userInfo, @now_getLoginUserNames) )
+        userNames << userInfo['userName']
+      end
+    end
+    
+    logging(userNames, "getLoginUserNames userNames")
+    return userNames
   end
   
   def getGameName(gameType)
@@ -1936,6 +1898,45 @@ class DodontoFServer
     
     return gameInfo["name"]
   end
+  
+  
+  
+  def getPlayRoomStatesByCount()
+    params = getParamsFromRequestData()
+    logging(params, "params")
+    
+    minRoom = getMinRoom(params)
+    count = params["count"]
+    playRoomStates = getPlayRoomStatesByCountLocal(minRoom, count)
+    
+    result = {
+      "playRoomStates" => playRoomStates,
+    }
+    
+    logging(result, "getPlayRoomStatesByCount result");
+    
+    return result
+  end
+  
+  def getPlayRoomStatesByCountLocal(startRoomNo, count)
+    playRoomStates = []
+    
+    (startRoomNo .. ($saveDataMaxCount - 1)).each do |roomNo|
+      
+      break if( playRoomStates.length > count )
+      
+      @saveDirInfo.setSaveDataDirIndex(roomNo)
+      
+      playRoomState = getPlayRoomState(roomNo)
+      next if( playRoomState.nil? )
+      
+      playRoomStates << playRoomState
+    end
+    
+    return playRoomStates;
+  end
+  
+
   
   def getAllLoginCount()
     roomNumberRange = (0 .. $saveDataMaxCount)
@@ -2029,6 +2030,7 @@ class DodontoFServer
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
       "allLoginCount" => allLoginCount.to_i,
+      "limitLoginCount" => $limitLoginCount,
       "loginUserCountList" => loginUserCountList,
       "maxLoginCount" => $aboutMaxLoginCount.to_i,
       "skinImage" => $skinImage,
@@ -2171,6 +2173,13 @@ class DodontoFServer
   
   def getGameCommandInfos
     logging('getGameCommandInfos Begin')
+    
+    if( @saveDirInfo.getSaveDataDirIndex == -1 )
+      logging('getGameCommandInfos room is -1, so END')
+      
+      return []
+    end
+    
     require 'customDiceBot.rb'
     
     bot = CgiDiceBot.new
@@ -2211,8 +2220,10 @@ class DodontoFServer
       if( playRoomIndex == -1 )
         playRoomIndex = findEmptyRoomNumber()
         raise Exception.new("noEmptyPlayRoom") if(playRoomIndex == -1)
-        loggingForce(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
+        
+        logging(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
       end
+      
       logging(playRoomName, 'playRoomName')
       logging('playRoomPassword is get')
       logging(playRoomIndex, 'playRoomIndex')
@@ -2239,6 +2250,8 @@ class DodontoFServer
         
         addViewStatesToSaveData(saveData, viewStates)
       end
+      
+      sendRoomCreateMessage(playRoomIndex)
     rescue => e
       loggingException(e)
       resultText = e.inspect + "$@ : " + $@.join("\n")
@@ -2265,6 +2278,20 @@ class DodontoFServer
     
     raise Exception.new("errorPassword")
   end
+  
+  
+  def sendRoomCreateMessage(roomNo)
+    chatData = {
+      "senderName" => "どどんとふ",
+      "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
+      "color" => "cc0066",
+      "uniqueId" => '0',
+      "channel" => 0,
+    }
+    
+    sendChatMessageByChatData(chatData)
+  end
+  
   
   def addViewStatesToSaveData(saveData, viewStates)
     viewStates['key'] = Time.now.to_f.to_s
@@ -6079,7 +6106,10 @@ end
 def getCgiParams()
   logging("getCgiParams Begin")
   
-  input = STDIN.read(ENV['CONTENT_LENGTH'].to_i)
+  length = ENV['CONTENT_LENGTH'].to_i
+  logging(length, "getCgiParams length")
+  input = STDIN.read(length)
+  logging(input, "getCgiParams input")
   messagePackedData = DodontoFServer.getMessagePackFromData( input )
   
   # logging("================================-")

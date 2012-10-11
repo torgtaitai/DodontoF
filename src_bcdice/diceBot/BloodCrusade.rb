@@ -44,7 +44,7 @@ INFO_MESSAGE_TEXT
   def dice_command(string, nick_e)
     secret_flg = false
     
-    return '1', secret_flg unless( /(^|\s)(S)?(RT|ST|IST|BRT|CHT|SHT|DHT|LHT|EHT|AST|MIT|SIT)(\s|$)/i =~ string )
+    return '1', secret_flg unless( /(^|\s)(S)?(#{prefixs.join('|')})(\s|$)/i =~ string )
     
     secretMarker = $2
     command = $3
@@ -61,9 +61,9 @@ INFO_MESSAGE_TEXT
     return '' unless(signOfInequality == ">=")
     
     if(dice_n <= 2)
-      return " ＞ ファンブル(【モラル】-3。追跡フェイズなら吸血シーンを追加。戦闘フェイズなら吸血鬼は追加行動を一回得る)";
+      return " ＞ ファンブル(【モラル】-3。追跡フェイズなら吸血シーンを追加。戦闘フェイズなら吸血鬼は追加行動を一回得る)"
     elsif(dice_n >= 12)
-      return " ＞ スペシャル(【モラル】+3。追跡フェイズならあなたに関係を持つPCの【モラル】+2。攻撃判定ならダメージ+1D6）";
+      return " ＞ スペシャル(【モラル】+3。追跡フェイズならあなたに関係を持つPCの【モラル】+2。攻撃判定ならダメージ+1D6）"
     elsif(total_n >= diff)
       return " ＞ 成功";
     else

@@ -15,6 +15,7 @@ package {
         private var channel:int = 0;
         private var isSendToOwnself:Boolean = false;
         private var isReadLocal:Boolean = true;
+        private var params:Object = new Object();
         
         private var randomSeed:int = 0;
         private var gameType:String = null;
@@ -241,6 +242,18 @@ package {
         
         private function getParamText(name:String, param:String):String {
             return name + " :" + param + "\n";
+        }
+        
+        public function setParams(key:String, value:Object):void {
+            params[key] = value;
+        }
+        
+        public function getParamsNumber(key:String):Number {
+            return params[key];
+        }
+        
+        public function getParamsString(key:String):String {
+            return params[key];
         }
         
     }

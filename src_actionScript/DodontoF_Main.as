@@ -870,8 +870,8 @@ package {
             return replay;
         }
         
-        public function addRestChatMessageForReplay(messageData:Object):void {
-            getReplay().addRestChatMessageForReplay(messageData);
+        public function addRestChatSendDataForReplay(chatSendData:ChatSendData):void {
+            getReplay().addRestChatSendDataForReplay(chatSendData);
         }
         
         public function getGlobalZoomRate():Number {
@@ -1042,7 +1042,9 @@ package {
         }
         
         public function initForFirstRefresh():void {
+            getGuiInputSender().getSender().getDiceBotInfos();
             chatWindow.initForFirstRefresh(isWelcomeMessageOn);
+            
             dodontoF.findMainMenuItem("pass_display").enabled = true;
         }
         

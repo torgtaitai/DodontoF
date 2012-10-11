@@ -14,7 +14,7 @@
   <mx:CheckBox id="position" label="座標文字を表示する" selected="true"
                height="100%"
                />
-  <mx:CheckBox id="dice" label="座標文字を表示する" selected="true"
+  <mx:CheckBox id="dice" label="ビジュアルダイスを表示する" selected="true"
                height="100%"
                />
   <mx:HBox width="100%">

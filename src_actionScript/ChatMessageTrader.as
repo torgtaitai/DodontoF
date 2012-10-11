@@ -208,13 +208,11 @@ package {
             var sendto:String = chatSendData.getSendto();
             var chatMessage:String = chatSendData.getMessage();
             var channel:int = chatSendData.getChannel();
-
             
             if( DodontoF_Main.getInstance().isReplayMode() ) {
                 if( ! isReplayChatMessage ) {
-                    var messageData:Object = [channel, senderName, chatMessage, color, time, chatSenderUniqueId];
-                    DodontoF_Main.getInstance().addRestChatMessageForReplay(messageData);
                     Log.logging("it's replay log.");
+                    pushToReplayChatLog(time, chatSenderUniqueId, chatSendData);
                     return true;
                 }
             } else {
@@ -258,6 +256,12 @@ package {
             
             Log.logging("addMessageToChatLog end");
             return true;
+        }
+        
+        private function pushToReplayChatLog(time:Number, uniqueId:String, chatSendData:ChatSendData):void {
+            chatSendData.setParams('time', time);
+            chatSendData.setParams('uniqueId', uniqueId);
+            DodontoF_Main.getInstance().addRestChatSendDataForReplay(chatSendData);
         }
         
         static private var separator:String = "：";
