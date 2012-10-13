@@ -219,7 +219,7 @@ package {
                     continue;
                 }
                 
-                if( isHitTailAnyLine(chatMessage, state) ) {
+                if( isHitTailAnyLine(chatMessage, info.state) ) {
                     //チャット文字の末尾が 〜〜@(カットイン名)　のような名前なら、末尾を削除。
                     result.info = info;
                     result.chatMessage = Utils.cutChatTailWhenMarked(chatMessage, info.state);
@@ -390,10 +390,10 @@ package {
             Log.logging("findTargetInfo 2nd calling...");
             var speakImageResult:Object = findTargetInfo(name, state + speakMarker, chatMessage);
             if( speakImageResult.info != null ) {
-                var kuchipaku:Object = {
+                var speakInfo:Object = {
                     "image" : speakImageResult.info.source,
                     "message" : findResult.chatMessage};
-                filterImageInfos.splice(0, 0, kuchipaku);
+                filterImageInfos.splice(0, 0, speakInfo);
             }
             
             adjustmentPosition(chatWindowX, chatWindowY, chatWindowWidth);
@@ -409,7 +409,7 @@ package {
         private function adjustmentPosition(chatWindowX:int, chatWindowY:int, chatWindowWidth:int):void {
             //ウィンドサイズの分高さを調整。
             baseY = chatWindowY - 30;
-
+            
             //カットインが左端だと見栄えが悪いので調整。
             baseX = chatWindowX + 10;
             
@@ -465,7 +465,14 @@ package {
             saveEventHash(event, source);
             
             var image:Loader = event.target.loader;
+            adjustmentImagePosition(image, leftIndex, mirrored);
+            addImage(leftIndex, image, filterImageInfos, name, mirrored);
             
+            Log.logging("imageCompleteHandler end");
+        }
+        
+        
+        private function adjustmentImagePosition(image:Loader, leftIndex:int, mirrored:Boolean):void {
             var imageHeigthMinimum:int = 200;
             var imageSizeInfo:Object = Utils.getSizeInfo(image, 0, 0, imageHeigthMinimum);
             
@@ -477,7 +484,7 @@ package {
                     setImageSizeFromHeigth(imageHeigthMinimum, image);
                 }
                 
-                var imageHeigthMax:int = baseY - 50;//baseY * 0.9;
+                var imageHeigthMax:int = baseY - 50;
                 if( image.height > imageHeigthMax ) {
                     setImageSizeFromHeigth(imageHeigthMax, image);
                 }
@@ -498,10 +505,6 @@ package {
                 image.scaleX = -1;
                 image.x += image.width;
             }
-            
-            addImage(leftIndex, image, filterImageInfos, name);
-            
-            Log.logging("imageCompleteHandler end");
         }
         
         private function saveEventHash(event:Event, source:String):void {
@@ -513,13 +516,15 @@ package {
             Log.logging("saveEventHash end"); 
         }
         
-        private function addImage(leftIndex:int, imageLoader:Loader, filterImageInfos:Array, name:String):void {
+        private function addImage(leftIndex:int, imageLoader:Loader, filterImageInfos:Array, name:String, mirrored:Boolean):void {
             var component:UIComponent = new UIComponent();
             component.addChild(imageLoader);
             
             var dodontoFComp:UIComponent = DodontoF_Main.getInstance().getStandingGraphicLayer();
             dodontoFComp.addChild(component);
+            
             clearExistImages(name, leftIndex);
+            
             this.imageInfos[leftIndex] = {"component" : component,
                                           "name" : name};
             
@@ -527,26 +532,31 @@ package {
                     dodontoFComp.removeChild(component);
                 });
             
+            Log.logging("filterImageInfos", filterImageInfos);
+            
             for(var i:int = 0 ; i < filterImageInfos.length ; i++) {
                 var filterImageInfo:Object = filterImageInfos[i];
                 var imageName:String = filterImageInfo.image;
                 var message:String = filterImageInfo.message;
-                loadImage(imageName, getImageCompFundlerForFilter(imageLoader, component, message));
+                loadImage(imageName, getImageCompFundlerForFilter(imageLoader, component, message, mirrored));
             }
         }
         
-        private function getImageCompFundlerForFilter(baseLoader:Loader, component:UIComponent, message:String):Function {
+        private function getImageCompFundlerForFilter(baseLoader:Loader, component:UIComponent,
+                                                      message:String, mirrored:Boolean):Function {
             return function(event:Event):void {
                 var loader:Loader = event.target.loader;
                 loader.x = baseLoader.x;
                 loader.y = baseLoader.y;
-                
                 var imageSizeInfo:Object = Utils.getSizeInfo(loader, 0, 0, baseLoader.height);
                 
                 imageSizeInfo.width;
                 
                 loader.width = (imageSizeInfo.width / imageSizeInfo.height) * baseLoader.height;
                 loader.height = baseLoader.height;
+                if( mirrored ) {
+                    loader.scaleX = -1;
+                }
                 
                 component.addChild(loader);
                 

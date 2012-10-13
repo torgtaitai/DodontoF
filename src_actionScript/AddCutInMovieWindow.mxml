@@ -106,31 +106,16 @@
     
     private var cutIn:CutInMovie = new CutInMovie();
     private var previewImage:Image = new Image();
-    private var previewBox:Box = new Box();
-    private var previewImageInfo:TextInput = new TextInput();
     
     private function initPreview():void {
-        previewBox.setStyle("paddingBottom", 0);
-        previewBox.setStyle("paddingTop", 0);
-        previewBox.setStyle("horizontalGap", "0");
-        previewBox.setStyle("verticalGap", "0");
-        
-        previewImageInfo.editable = false;
-        previewImageInfo.width = 200;
-        previewImageInfo.height = 0;
-        previewImageInfo.visible = false;
-        previewImageInfo.text = "動画はここに表示できません。\n「プレビュー」ボタンから確認してください。";
-        previewBox.addChild(previewImageInfo);
-        
         previewImage.height = 200;
         previewImage.width = 200;
         previewImage.visible = true;
-        previewBox.addChild(previewImage);
     }
     
     override protected function setup():void {
         initPreview();
-        imageSelecter.addPreview(previewBox, 200);
+        imageSelecter.addPreview(previewImage, 200);
         imageSelecter.setMoviewFileSelectable(true);
         
         imageSource.enabled = false;
@@ -174,17 +159,8 @@
         
         if( CutInMovie.isMovie(imageSource.text) ) {
             imageUrl = Config.getInstance().getFileImageUrl();
-            /*
-            previewImageInfo.visible = true;
-            previewImageInfo.height = 200;
-            previewImage.visible = false;
-            previewImage.height = 0;
-            return;
-            */
         }
         
-        previewImageInfo.visible = false;
-        previewImageInfo.height = 0;
         previewImage.visible = true;
         previewImage.height = 200;
         

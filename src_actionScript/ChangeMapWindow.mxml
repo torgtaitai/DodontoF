@@ -90,7 +90,7 @@
         
         imageSelecter.setImageClickEventFunction(imageClickEvent);
         imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
-        imageSelecter.setDefaultTags( [ImageTag.getMapTag(), ImageTag.getAllTag()] );
+        imageSelecter.setDefaultTags( [ImageTag.getNoneTag(), ImageTag.getMapTag(), ImageTag.getAllTag()] );
         imageSelecter.initImage( false );
     }
        

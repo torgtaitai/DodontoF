@@ -83,7 +83,7 @@
               <mx:Image id="sendSoundButton" click="sendOrStopSound()"  />
               <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="カットイン設定" />
               <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
-              <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="ファイルアップローダー" />
+              <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="簡易ファイルアップローダー" />
               <mx:Image id="talkButton" source="{talkSilentIcon}" click="setTalkMode()"  visible="{canTalk}" />
               <!-- <mx:Image source="{goodIcon}" click="sendGood()" toolTip="いいねっ！" /> -->
               <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->

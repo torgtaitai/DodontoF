@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="220"
-   title="ファイルアップローダー" 
+   title="簡易ファイルアップローダー" 
    showCloseButton="true"
    >
   
@@ -14,7 +14,7 @@
   <mx:Text text="アップロードしたファイルは1時間経つと自動的に削除されます。" />
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="uploadButton" enabled="true" label="アップロード実行" click="uploadReplayData()" />
+    <mx:Button id="uploadButton" enabled="true" label="アップロード実行" click="uploadFile()" />
     <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
@@ -36,7 +36,7 @@
     
     private var fileReferenceForUpload:FileReference = null;
     
-    private function uploadReplayData():void {
+    private function uploadFile():void {
         
         if( fileReferenceForUpload == null ) {
             fileReferenceForUpload  = new FileReference();
@@ -71,19 +71,14 @@
         };
         
         var sender:SharedDataSender = DodontoF_Main.getInstance().getGuiInputSender().getSender();
-        //sender.sendFileUpload(fileReferenceForUpload, "uploadFile", params);
         sender.sendFileBytesUpload(fileReferenceForUpload, "uploadFile", params, uploadImageFileResult);
-        
-        //fileReferenceForUpload.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, uploadImageFileResult);
     }
     
-    //public function uploadImageFileResult(dataEvent:DataEvent):void {
     public function uploadImageFileResult(dataEvent:Object):void {
         Log.loggingTuning("=>uploadImageFileResult(event:Event) Begin");
         try {
             uploadButton.enabled = true;
             
-            //var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(dataEvent);
             Log.loggingTuning("jsonData", jsonData);
             result.text = (jsonData.resultText);

@@ -199,10 +199,8 @@ package {
                 }
                 
                 if( resultFunction != null ) {
-                    //fileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, resultFunction);//Event.COMPLETE, resultFunction);
                 }
                 
-                //thisObj.sendFileUpload(fileReference, commandName, thisObj.loadParams);
                 thisObj.sendFileBytesUpload(fileReference, commandName, thisObj.loadParams, resultFunction);
             }
         }
@@ -267,11 +265,11 @@ package {
                                             data:Object = null,
                                             resultFunction:Function = null):void {
             fileReference.addEventListener(Event.COMPLETE,
-                                           getSendFileBytesUpload2(fileReference, commandName, data, resultFunction));
+                                           getSendFileBytesUpload(fileReference, commandName, data, resultFunction));
             fileReference.load();
         }
         
-        public function getSendFileBytesUpload2(fileReference:FileReference,
+        public function getSendFileBytesUpload(fileReference:FileReference,
                                                 commandName:String,
                                                 data:Object = null,
                                                 resultFunction:Function = null):Function {
@@ -287,38 +285,6 @@ package {
                 sendCommandData(obj, resultFunction);
             }
         }
-        
-        /*
-        public function sendFileUpload(fileReferenceForLocal:FileReference,
-                                       commandName:String,
-                                       params:Object = null):void {
-            var request:URLRequest = new URLRequest( Config.getInstance().getImageUploaderUrl() );
-            
-            request.method = URLRequestMethod.POST;
-            var jsonData:Object = {
-                "cmd" : commandName,
-                "room" : this.saveDataDirIndex
-            };
-            
-            if( params != null ) {
-                for(var key:String in params) {
-                    jsonData[key] = params[key];
-                }
-            }
-            
-            var jsonParams:String = getEncodedJsonString(jsonData);
-            Log.loggingTuning("load jsonParams", jsonParams);
-            
-            var variables:URLVariables = new URLVariables();
-            variables.__jsonDataForFileUploader__ = jsonParams;
-            
-            request.data = variables;
-            Log.loggingTuning("fileReferenceForLocal.upload(request) calling...");
-            
-            fileReferenceForLocal.upload(request);
-            Log.loggingTuning("fileReferenceForLocal.upload(request) called.");
-        }
-        */
         
         public function uploadImageData(params:Object, resultFunction:Function, errorFunction:Function):void {
             Log.loggingTuning("SharedDataSenderBody.uploadImageData Begin");

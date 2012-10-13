@@ -107,14 +107,17 @@ class DodontoFServer
   def getRequestData(key)
     logging(key, "getRequestData key")
     
-    if( @isWebIf )
-      @cgi ||= CGI.new
-      return @cgi.params[key].first
-    end
-    
     value = @cgiParams[key]
     logging(@cgiParams, "@cgiParams")
     # logging(value, "getRequestData value")
+    
+    if( value.nil? )
+      if( @isWebIf )
+        @cgi ||= CGI.new
+        value = @cgi.params[key].first
+      end
+    end
+    
     
     logging(value, "getRequestData result")
     return value
@@ -634,15 +637,18 @@ class DodontoFServer
   def self.getMessagePackFromData(data)
     logging("getMessagePackFromData Begin")
     
-    messageMap = {}
+    messagePack = {}
     
-    return messageMap if( data.nil? )
+    if( data.nil? )
+      logging("data is nil")
+      return messagePack 
+    end
     
     begin
       if( $isMessagePackInstalled )
-        messageMap = MessagePack.unpack(data)
+        messagePack = MessagePack.unpack(data)
       else
-        messageMap = MessagePackPure::Unpacker.new(StringIO.new(data, "r")).read
+        messagePack = MessagePackPure::Unpacker.new(StringIO.new(data, "r")).read
       end
     rescue => e
       loggingForce("getMessagePackFromData rescue")
@@ -652,9 +658,39 @@ class DodontoFServer
       loggingException(e)
     end
     
-    logging(messageMap, "getMessagePackFromData End messageMap")
+    logging(messagePack, "messagePack")
     
-    return messageMap
+    if( isWebIfMessagePack(messagePack) )
+      logging(data, "data is webif.")
+      messagePack = parseWebIfMessageData(data)
+    end
+    
+    logging(messagePack, "getMessagePackFromData End messagePack")
+    
+    return messagePack
+  end
+  
+  def self.isWebIfMessagePack(messagePack)
+    logging(messagePack, "isWebif messagePack")
+    
+    unless( messagePack.kind_of?(Hash) )
+      logging("messagePack is NOT Hash")
+      return true
+    end
+    
+    return false
+  end
+  
+  def self.parseWebIfMessageData(data)
+    params = CGI.parse(data)
+    logging(params, "params")
+    
+    messagePack = {}
+    params.each do |key, value|
+      messagePack[key] = value.first
+    end
+    
+    return messagePack
   end
   
   #override
@@ -1507,10 +1543,12 @@ class DodontoFServer
     userName = params['name'];
     isVisiter = params['isVisiter'];
     
+    loginUserInfo = getLoginUserInfo(userName, uniqueId, isVisiter)
+    
     unless( saveData.empty? )
       saveData['lastUpdateTimes'] = @lastUpdateTimes
       saveData['refreshIndex'] = refreshIndex
-      saveData['loginUserInfo'] = getLoginUserInfo(userName, uniqueId, isVisiter)
+      saveData['loginUserInfo'] = loginUserInfo
     end
     
     if( isFirstChatRefresh )
@@ -1844,7 +1882,7 @@ class DodontoFServer
     return playRoomState if( playRoomData.empty? )
     
     playRoomName = getPlayRoomName(playRoomData, roomNo)
-    passwordLockState = playRoomData['playRoomChangedPassword'].nil?
+    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
     canVisit = playRoomData['canVisit']
     gameType = playRoomData['gameType']
     
@@ -3272,7 +3310,8 @@ class DodontoFServer
       
       deleteOldUploadFile()
       
-      baseUrl = getRequestData('baseUrl');
+      params = getParamsFromRequestData()
+      baseUrl = params['baseUrl']
       logging(baseUrl, "baseUrl")
       
       fileUploadUrl = baseUrl + fileNameFullPath
