@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
-                width="500" height="340"
+                width="500" height="350"
                 title="カード初期化画面" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"
                 >
   
   <mx:Box height="100%" width="100%">
+    
+    <mx:Box height="{this.height - 90}" 
+            width="100%"
+            verticalGap="0"
+            horizontalGap="0"
+            paddingTop="0"
+            paddingBottom="0"
+            >
       
-    <mx:HBox height="30" width="100%">
-      <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
-      <mx:Label text="デッキ個数:" />
-      <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
-      <mx:Label text="ジョーカー枚数:" />
-      <mx:NumericStepper id="jorkerCount" minimum="0" maximum="10" value="0" enabled="false" />
-    </mx:HBox>
-    
-    <mx:Box id="checkBoxPlace" height="100%" width="100%" />
-    
-    <mx:HBox height="30" width="100%">
-      <mx:CheckBox id="randomDungeonTrumpCheck" label="ランダムダンジョン用トランプ（アリアンロッド等）" selected="false" change="changeRandomDungeonTrumpCheck()" />
-    </mx:HBox>
-    <mx:HBox height="30" width="100%">
-      <mx:Spacer width="20" />
-      <mx:Label text="Aを含めた枚数:" />
-      <mx:NumericStepper id="randomDungeonCardCount" minimum="1" maximum="{49 + randomDungeonJorkerCount.value}" value="1" enabled="false" />
-      <mx:Label text="ジョーカー枚数:" />
-      <mx:NumericStepper id="randomDungeonJorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
-    </mx:HBox>
+      <mx:HBox id="trumpBox" height="30" width="100%">
+        <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
+        <mx:Label text="デッキ個数:" />
+        <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
+        <mx:Label text="ジョーカー枚数:" />
+        <mx:NumericStepper id="jorkerCount" minimum="0" maximum="10" value="0" enabled="false" />
+      </mx:HBox>
+      
+      <mx:Box id="checkBoxPlace" width="100%" />
+      
+      <mx:HBox height="30" width="100%">
+        <mx:CheckBox id="randomDungeonTrumpCheck" label="ランダムダンジョン用トランプ（アリアンロッド等）" selected="false" change="changeRandomDungeonTrumpCheck()" />
+      </mx:HBox>
+      
+      <mx:HBox id="randomDungeonTrumpBox" height="30" width="100%">
+        <mx:Spacer width="20" />
+        <mx:Label text="Aを含めた枚数:" />
+        <mx:NumericStepper id="randomDungeonCardCount" minimum="1" maximum="{49 + randomDungeonJorkerCount.value}" value="1" enabled="false" />
+        <mx:Label text="ジョーカー枚数:" />
+        <mx:NumericStepper id="randomDungeonJorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
+      </mx:HBox>
+      
+    </mx:Box>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="シャッフルして初期配置へ" click="execute()" enabled="true" />

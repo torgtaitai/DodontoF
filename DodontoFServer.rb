@@ -1747,7 +1747,8 @@ class DodontoFServer
   
   def getSaveDataLastAccessTime( fileName, roomNo )
     data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
-    return data[roomNo]
+    time = data[roomNo]
+    return time
   end
   
   
@@ -1869,6 +1870,20 @@ class DodontoFServer
     playRoomState['gameType'] = ''
     playRoomState['loginUsers'] = []
     
+    begin
+      playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
+    rescue => e
+      loggingForce("getPlayRoomStateLocal rescue")
+      loggingException(e)
+    rescue Exception => e
+      loggingForce("getPlayRoomStateLocal Exception rescue")
+      loggingException(e)
+    end
+    
+    return playRoomState
+  end
+  
+  def getPlayRoomStateLocal(roomNo, playRoomState)
     playRoomInfoFile = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
     
     return playRoomState unless( isExist?(playRoomInfoFile) )
@@ -1885,8 +1900,7 @@ class DodontoFServer
     passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
     canVisit = playRoomData['canVisit']
     gameType = playRoomData['gameType']
-    
-    timeStamp = getSaveDataLastAccessTime( $playRoomInfo, roomNo )
+    timeStamp = getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
     
     timeString = ""
     unless( timeStamp.nil? )
@@ -1901,6 +1915,7 @@ class DodontoFServer
     playRoomState['canVisit'] = canVisit
     playRoomState['gameType'] = gameType
     playRoomState['loginUsers'] = loginUsers
+    
     return playRoomState
   end
   
@@ -2267,6 +2282,10 @@ class DodontoFServer
       logging(playRoomIndex, 'playRoomIndex')
       
       checkSetPassword(playRoomPassword, playRoomIndex)
+      
+      logging("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
+      @saveDirInfo.removeSaveDir(playRoomIndex)
+      logging("@saveDirInfo.removeSaveDir(playRoomIndex) End")
       
       createDir(playRoomIndex)
       

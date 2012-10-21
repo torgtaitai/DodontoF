@@ -380,14 +380,14 @@ package {
             return true;
         }
         
-        private var isFirstReplayConfigChek:Boolean = true;
+        private var isFirstReplayConfigCheck:Boolean = true;
         
         private function analyzeReplayConfig(replayConfig:Object):void {
             Log.logging("analyzeReplayConfig replayConfig", replayConfig);
             
-            if( isFirstReplayConfigChek ) {
-                DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isDiceVisible", true);
-                isFirstReplayConfigChek = false;
+            if( isFirstReplayConfigCheck ) {
+                selectMenuByManuName("isDiceVisible", true, true);
+                isFirstReplayConfigCheck = false;
             }
             
             if( replayConfig == null ) {
@@ -396,16 +396,25 @@ package {
             
             Log.logging("analyzeReplayConfig replayConfig.channelNames", replayConfig.channelNames);
             DodontoF_Main.getInstance().getReplay().setActiveChannel(replayConfig.channelNames);
-            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isGridVisible", replayConfig.grid);
-            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isPositionVisible", replayConfig.position);
-            
-            if( replayConfig.dice == null ) {
-                replayConfig.dice = true;
-            }
-            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isDiceVisible", replayConfig.dice);
+            selectMenuByManuName("isGridVisible", replayConfig.grid, true);
+            selectMenuByManuName("isPositionVisible", replayConfig.position, true);
+            selectMenuByManuName("isDiceVisible", replayConfig.dice, true);
+            selectMenuByManuName("isAdjustImageSize", replayConfig.adjustStand, true);
             
             ChatWindow.getInstance().setChatBackgroundColor(replayConfig.chatBackgroundColor);
         }
+        
+        
+        public function selectMenuByManuName(menuName:String, toggledObject:Object, defaultValue:Boolean):void {
+            var toggled:Boolean = toggledObject as Boolean;
+            
+            if( toggledObject == null ) {
+                toggled = defaultValue;
+            }
+            
+            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName(menuName, toggled);
+        }
+        
         
         private var isFirstChatRefreshFlag:Boolean = true;
         

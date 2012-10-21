@@ -437,29 +437,13 @@
             result.dataType = "リプレイ再生時設定";
             result.detail = "グリッド表示" + (jsonData.replayConfig.grid ? "あり" : "なし")
             + "、座標文字" + (jsonData.replayConfig.position ? "あり" : "なし")
-            + "、ダイス表示" + ( jsonData.replayConfig.dice ? "あり" : "なし");
+            + "、ダイス表示" + ( jsonData.replayConfig.dice ? "あり" : "なし")
+            + "、立ち絵調整" + ( jsonData.replayConfig.adjustStand ? "あり" : "なし");
 //            + "、チャットタブ：" + jsonData.replayConfig.channelNames.join(",");
         }
         
         return result;
     }
-    
-    /*
-    private function getElement(jsonData:Object):Object {
-        var elements:Array = ["characters", "roundTimeData", "effects", "chatMessageDataLog", "mapData"];
-        
-        for(var i:int = 0 ; i < elements.length ; i++) {
-            var elementName:String = elements[i];
-            if( jsonData[elementName] == null ) {
-                continue;
-            }
-            
-            return jsonData[elementName];
-        }
-        
-        return null;
-    }
-    */
     
     override protected function setup():void {
     }
@@ -482,8 +466,6 @@
         targetIndex--;
         replayDataList.addItemAt(item, targetIndex);
         
-        //printHistory( targetIndex );
-        //printHistory( targetIndex + 1 );
         printHistory();
         selectHistory( targetIndex );
     }
@@ -501,18 +483,22 @@
         targetIndex++;
         replayDataList.addItemAt(item, targetIndex);
         
-        //printHistory( targetIndex - 1 );
-        //printHistory( targetIndex );
         printHistory();
         selectHistory( targetIndex );
     }
     
     private function createReplayConfigItem():void {
+        var index:int = 0;
+        var replayConfig:Object = getReplayConfig(index);
+        
         var window:EditReplayConfigWindow = DodontoF.popup(EditReplayConfigWindow, true) as EditReplayConfigWindow;
+        window.init( replayConfig );
         window.setResultCallBack( addReplayConfigItem );
     }
     
     private function addReplayConfigItem(replayConfig:Object):void {
+        clearExistReplayConfig();
+        
         var info:Object = {
             "jsonData" : {
                 "replayConfig" : replayConfig
@@ -520,13 +506,38 @@
         };
         
         var index:int = 0;
-        
         replayDataList.addItemAt(info, index);
         
         printHistory();
         selectHistory(index);
     }
     
+    private function getReplayConfig(index:int):Object {
+        var item:Object = replayDataList.getItemAt(index);
+        if( item == null ) {
+            return null;
+        }
+        
+        if( item.jsonData == null ) {
+            return null;
+        }
+        
+        var replayConfig:Object = item.jsonData.replayConfig;
+        return replayConfig;
+    }
+    
+    private function clearExistReplayConfig():void {
+        while( true ) {
+            var index:int = 0;
+            var replayConfig:Object = getReplayConfig(index);
+            if( replayConfig == null ) {
+                return;
+            }
+            
+            replayDataList.removeItemAt(index);
+        }
+        
+    }
     
     private function copyItem():void {
         if( targetIndex < 0 ) {

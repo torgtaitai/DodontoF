@@ -975,6 +975,8 @@
     
     
     private function replaySessionRecord(replayDataUrl:String = null):void {
+        stage.frameRate = 60;
+        
         getEnterPlayRoomFunction(-1, "リプレイルーム", null).call();
     
         if( replayDataUrl == null ) {

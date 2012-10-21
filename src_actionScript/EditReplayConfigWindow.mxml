@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="210"
+   height="225"
    title="リプレイ環境設定" 
    showCloseButton="true"
    >
@@ -15,6 +15,9 @@
                height="100%"
                />
   <mx:CheckBox id="dice" label="ビジュアルダイスを表示する" selected="true"
+               height="100%"
+               />
+  <mx:CheckBox id="adjustStand" label="立ち絵を自動調整する" selected="true"
                height="100%"
                />
   <mx:HBox width="100%">
@@ -45,6 +48,7 @@
         grid.selected = replayConfig.grid;
         position.selected = replayConfig.position;
         dice.selected = replayConfig.dice;
+        adjustStand.selected = replayConfig.adjustStand;
     }
     
     private var resultCallBack:Function;
@@ -60,6 +64,7 @@
                 "grid" : grid.selected,
                 "position" : position.selected,
                 "dice" : dice.selected,
+                "adjustStand" : adjustStand.selected,
                 "chatBackgroundColor" : ChatFontWindow.getColor(chatBackgroundColorPicker)
 //              "channelNames" : channelNames.text.split(/[\s　]+/)
             };

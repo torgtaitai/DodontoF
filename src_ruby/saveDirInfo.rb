@@ -191,20 +191,10 @@ class SaveDirInfo
   end
   
   def self.removeDir(dirName)
-    unless( FileTest.directory?(dirName) )
-      return
-    end
+    return unless( FileTest.directory?(dirName) )
     
-    #fileNames = getSaveFileAllNames
-    #files = getExistFileNames(dirName, fileNames)
-    files = Dir.glob( File.join(dirName, "*") )
-    
-    logging(files, "removeDir files")
-    files.each do |fileName|
-      File.delete(fileName.untaint)
-    end
-    
-    Dir.delete(dirName)
+    force = true
+    FileUtils.remove_entry_secure(dirName, force)
   end
   
   def getTrueSaveFileName(saveFileName)
