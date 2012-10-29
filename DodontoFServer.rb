@@ -2281,6 +2281,7 @@ class DodontoFServer
       logging('playRoomPassword is get')
       logging(playRoomIndex, 'playRoomIndex')
       
+      initSaveFiles(playRoomIndex)
       checkSetPassword(playRoomPassword, playRoomIndex)
       
       logging("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
@@ -6166,17 +6167,16 @@ def getCgiParams()
   
   length = ENV['CONTENT_LENGTH'].to_i
   logging(length, "getCgiParams length")
-  input = STDIN.read(length)
+  
+  input = nil
+  if( ENV['REQUEST_METHOD'] == "POST" )
+    input = $stdin.read(length)
+  else
+    input = ENV['QUERY_STRING']
+  end
+  
   logging(input, "getCgiParams input")
   messagePackedData = DodontoFServer.getMessagePackFromData( input )
-  
-  # logging("================================-")
-  # logging(input.class.name, "input.class.name")
-  # loggingForce(messagePackedData['cmd'])
-  # loggingForce(input.length,                                                 "msgPack")
-  # loggingForce(DodontoFServer.getTextFromJsonData(messagePackedData).length, "json   ")
-  # loggingForce(messagePackedData, "messagePackedData")
-  # loggingForce(input, "input")
   
   logging(messagePackedData, "messagePackedData")
   logging("getCgiParams End")

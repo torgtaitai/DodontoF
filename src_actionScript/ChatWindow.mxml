@@ -1188,10 +1188,17 @@
             
             data.setMessage(diceRollMessage);
             
-            var gameType:String = getGameType();
             var randomSeed:int = Dice.getRandomNumber(0xffff);
-            Log.logging("sendDiceBotChatMessage(data, gameType) gameType", gameType);
-            data.setDiceBotData(randomSeed, gameType, repeatCount, sendDiceBotChatMessageResult);
+            data.setDiceBotData(randomSeed, repeatCount, sendDiceBotChatMessageResult);
+            
+            var gameType:String = data.getGameType();
+            Log.logging("sendDiceBotChatMessage(data, gameType) before gameType", gameType);
+            if( gameType == null ) {
+                gameType = getGameType();
+                Log.logging("sendDiceBotChatMessage(data, gameType) after gameType", gameType);
+                data.setGameType(gameType);
+            }
+            
             sendDiceBotChatMessage(data);
             
             return true;

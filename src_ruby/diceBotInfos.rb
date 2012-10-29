@@ -853,6 +853,20 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'ウィッチクエスト',
+    'gameType' => 'WitchQuest',
+    'fileName' => 'WitchQuest',
+    'prefixs' => ['WQ\d+','SET\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
+・チャレンジ(成功判定)(WQn)
+　n回2d6ダイスを振って判定を行います。
+　例）WQ3
+・SET（ストラクチャーカードに夜街の中の遭遇表(SETn)
+　ストラクチャーカードの番号(n)の遭遇表結果を得ます。
+　例）SET1　SET48
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => '絶対隷奴',
     'gameType' => 'ZettaiReido',
     'fileName' => 'ZettaiReido',

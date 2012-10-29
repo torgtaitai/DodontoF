@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.39.09"
-$versionDate = "2012/10/21"
+$versionOnly = "Ver.1.39.11"
+$versionDate = "2012/10/29"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -244,6 +244,7 @@ $diceBotOrder = <<____END_MARKER____
 アースドーン
 アリアンロッド
 アルスマギカ
+ウィッチクエスト
 ウォーハンマー
 エルリック！
 エムブリオマシン

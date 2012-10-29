@@ -193,8 +193,19 @@ class SaveDirInfo
   def self.removeDir(dirName)
     return unless( FileTest.directory?(dirName) )
     
-    force = true
-    FileUtils.remove_entry_secure(dirName, force)
+    # force = true
+    # FileUtils.remove_entry_secure(dirName, force)
+    # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
+    # この下の方法で対応しています。
+
+    files = Dir.glob( File.join(dirName, "*") )
+    
+    logging(files, "removeDir files")
+    files.each do |fileName|
+      File.delete(fileName.untaint)
+    end
+    
+    Dir.delete(dirName)
   end
   
   def getTrueSaveFileName(saveFileName)

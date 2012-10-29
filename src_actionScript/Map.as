@@ -277,11 +277,11 @@ package {
         }
         
         
-        public function extendMovablePieceViewPosition(point:Point, isListed:Boolean = false):void {
+        public function extendMovablePieceViewPosition(point:Point, isListed:Boolean = false):Boolean {
             
             //コマの回転中なら展開は全て一時取りやめ。
             if( Rotater.isAnyRotating() ) {
-                return;
+                return false;
             }
             
             var xCharacters:Array = new Array();
@@ -312,9 +312,13 @@ package {
                 }
             }
             
-            extendSortedCharacterToViewPosition(cards,       isListed, true);
-            extendSortedCharacterToViewPosition(xCharacters, isListed, true);
-            extendSortedCharacterToViewPosition(yCharacters, isListed, false, xCharacters);
+            var cardExtended:Boolean = extendSortedCharacterToViewPosition(cards,       isListed, true);
+            var xExtended:Boolean = extendSortedCharacterToViewPosition(xCharacters, isListed, true);
+            var yExtended:Boolean = extendSortedCharacterToViewPosition(yCharacters, isListed, false, xCharacters);
+            
+            var extended:Boolean = (cardExtended || xExtended || yExtended);
+            
+            return extended;
         }
         
         private function getCharactersSizeInfos(characters:Array, isX:Boolean):Object {
@@ -353,14 +357,19 @@ package {
         private function extendSortedCharacterToViewPosition(characters:Array, 
                                                              isListed:Boolean,
                                                              isX:Boolean,
-                                                             samePositionCharactersOnBorderLine:Array = null):void {
+                                                             samePositionCharactersOnBorderLine:Array = null):Boolean {
             if( samePositionCharactersOnBorderLine == null ) {
                 samePositionCharactersOnBorderLine = new Array();
             }
             
-            if(( ! isX ) && ( characters.length <= 1 ) && (samePositionCharactersOnBorderLine.length == 0)) {
-                return;
+            //Log.loggingTest("characters.length", characters.length);
+            //Log.loggingTest("samePositionCharactersOnBorderLine.length", samePositionCharactersOnBorderLine.length);
+            
+            if(( characters.length <= 1 ) && (samePositionCharactersOnBorderLine.length == 0)) {
+                return false;
             }
+            
+            var extended:Boolean = false;
             
             var widthPadding:int = 0;
             for(var i:int = 0 ; i < characters.length ; i++) {
@@ -395,7 +404,10 @@ package {
                 }
                 
                 addViewPosition(character, newPosition, isX);
+                extended = true;
             }
+            
+            return extended;
         }
         
         private function getNewPositionForExtendOnY(newPosition:int,

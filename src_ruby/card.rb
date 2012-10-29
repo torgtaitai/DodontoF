@@ -18,6 +18,17 @@ class Card
        },
        
        
+       { 'type' => 'witchQuestWitchTaro',
+         'title' => 'ウィッチクエスト：ウィッチ・タロー',
+         'fileName' => 'cards/witchQuestWitchTaro.txt',
+       },
+       
+       
+       { 'type' => 'witchQuestStructureCard',
+         'title' => 'ウィッチクエスト：ストラクチャーカード(テキストのみ)',
+         'fileName' => 'cards/witchQuestStructureCard.txt',
+       },
+       
        { 'type' => 'torg',
          'title' => 'TORG：ドラマデッキ',
          'fileName' => 'cards/torg.txt',

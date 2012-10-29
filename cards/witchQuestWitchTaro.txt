@@ -1,0 +1,31 @@
+text,upDown
+<p align='center'><font size="42" color="#FF9999"><br><br><br><br><br><br>ウィッチタロー</font><p>
+<p align='center'><font size="42"><br><br><br><br><br><br>１．星(THE STAR)</font><p>			１．星(THE STAR)	１．星(THE STAR)\nキイワード：はじまり\n正位置：機嫌、新しい出発、希望	１．星(THE STAR)\nキイワード：はじまり\n逆位置：先が見えない、不安
+<p align='center'><font size="42"><br><br><br><br><br><br>２．姫(THE PRINCESS)</font><p>			２．姫(THE PRINCESS)	２．姫(THE PRINCESS)\nキイワード：少女、若さ、可憐、快活\n正位置：可憐な、若さあふれる、みずみずしい、守られる存在	２．姫(THE PRINCESS)\nキイワード：少女、若さ、可憐、快活\n逆位置：わがままな、（少女の持つ）残忍性を持った、塔に閉じ込められた
+<p align='center'><font size="42"><br><br><br><br><br><br>３．杖(THE STAFF)</font><p>			３．杖(THE STAFF)	３．杖(THE STAFF)\nキイワード：調和、バランス\n正位置：調和、バランスのとれた	３．杖(THE STAFF)\nキイワード：調和、バランス\n逆位置：変化に乏しい、同じことの繰り返し
+<p align='center'><font size="42"><br><br><br><br><br><br>４．王(H'YUKIRIA)</font><p>			４．王(H'YUKIRIA)	４．王(H'YUKIRIA)\nキイワード：統合、理想、平和\n正位置：理想、平和、統治、よいリーダーを持つグループ、父親	４．王(H'YUKIRIA)\nキイワード：統合、理想、平和\n逆位置：行き詰まり、束縛、独裁
+<p align='center'><font size="42"><br><br><br><br><br><br>５．恋人(THE LOVERS)</font><p>			５．恋人(THE LOVERS)	５．恋人(THE LOVERS)\nキイワード：恋、愛情\n正位置：ステキな恋、よい人間関係	５．恋人(THE LOVERS)\nキイワード：恋、愛情\n逆位置：恋に溺れる、見境なし、人間関係の摩擦、愛情にあまえる
+<p align='center'><font size="42"><br><br><br><br><br><br>６．血(THE BLOOD)</font><p>			６．血(THE BLOOD)	６．血(THE BLOOD)\nキイワード：宿命、血の絆\n正位置：まじめな、約束を守る、血縁、家族の絆	６．血(THE BLOOD)\nキイワード：宿命、血の絆\n逆位置：宿命、罰、先祖の報いを受ける、家族との関係に縛られる
+<p align='center'><font size="42"><br><br><br><br><br><br>７．太陽(THE SUN)</font><p>			７．太陽(THE SUN)	７．太陽(THE SUN)\nキイワード：エネルギッシュ、強いカリスマ\n正位置：若い、力強い、幸運な、人気のある、影響力の強い	７．太陽(THE SUN)\nキイワード：エネルギッシュ、強いカリスマ\n逆位置：全ての責任を負う、周りの人々を巻き込む、悪影響
+<p align='center'><font size="42"><br><br><br><br><br><br>８．猫(THE CAT)</font><p>			８．猫(THE CAT)	８．猫(THE CAT)\nキイワード：魔法的、安定、眠り\n正位置：安定した、安心感のある、不思議な、不安の無い眠り	８．猫(THE CAT)\nキイワード：魔法的、安定、眠り\n逆位置：怠惰、甘え、恩を知らない
+<p align='center'><font size="42"><br><br><br><br><br><br>９．妖精(THE FAIRY)</font><p>			９．妖精(THE FAIRY)	９．妖精(THE FAIRY)\nキイワード：幼い、神秘的\n正位置：純真な、可愛らしい、無垢な	９．妖精(THE FAIRY)\nキイワード：幼い、神秘的\n逆位置：無知、浅はかな行動、勇み足
+<p align='center'><font size="42"><br><br><br><br><br><br>１０．風(THE WIND)</font><p>			１０．風(THE WIND)	１０．風(THE WIND)\nキイワード：どこでも行ける、物を運ぶ、押す\n正位置：柔軟な、誰とでも友達になる、良きアドバイザー	１０．風(THE WIND)\nキイワード：どこでも行ける、物を運ぶ、押す\n逆位置：一人では何もできない、八方美人、気まま
+<p align='center'><font size="42"><br><br><br><br><br><br>１１．毒(THE POISON)</font><p>			１１．毒(THE POISON)	１１．毒(THE POISON)\nキイワード：罪\n正位置：毒、悪口、復讐、怨念、罪	１１．毒(THE POISON)\nキイワード：罪\n逆位置：解毒剤、償い、浄化、罪を許す
+<p align='center'><font size="42"><br><br><br><br><br><br>１２．夢(THE DREAM)</font><p>			１２．夢(THE DREAM)	１２．夢(THE DREAM)\nキイワード：無意識\n正位置：幸運、思いがけない幸運(棚からボタモチ)、霊感	１２．夢(THE DREAM)\nキイワード：無意識\n逆位置：無意識の罪、他力本願、悪気はないのに
+<p align='center'><font size="42"><br><br><br><br><br><br>１３．ナイトメア(THE NIGHTMARE)</font><p>			１３．ナイトメア(THE NIGHTMARE)	１３．ナイトメア(THE NIGHTMARE)\nキイワード：心の中の魔物\n正位置：悪夢、欲望、嫉妬、誘惑、心の弱さ	１３．ナイトメア(THE NIGHTMARE)\nキイワード：心の中の魔物\n逆位置：悪夢が覚める、目から鱗が落ちる、誤解がとける
+<p align='center'><font size="42"><br><br><br><br><br><br>１４．天秤(THE BALANCE)</font><p>			１４．天秤(THE BALANCE)	１４．天秤(THE BALANCE)\nキイワード：正義、審判\n正位置：正義、公平、正しい事をつらぬく、指針	１４．天秤(THE BALANCE)\nキイワード：正義、審判\n逆位置：偽善、融通のきかない、何事も決まらない、必要悪、過ちの繰り返し
+<p align='center'><font size="42"><br><br><br><br><br><br>１５．月(THE MOON)</font><p>			１５．月(THE MOON)	１５．月(THE MOON)\nキイワード：完成\n正位置：完成、絶頂、日のうちどころのない美しさ	１５．月(THE MOON)\nキイワード：完成\n逆位置：理性の崩壊(獣と化す)、絶頂の後の下り坂
+<p align='center'><font size="42"><br><br><br><br><br><br>１６．宝石(THE GEM)</font><p>			１６．宝石(THE GEM)	１６．宝石(THE GEM)\nキイワード：美貌、才能\n正位置：美しい、秀でた	１６．宝石(THE GEM)\nキイワード：美貌、才能\n逆位置：傲慢、見栄
+<p align='center'><font size="42"><br><br><br><br><br><br>１７．剣(THE SWORD)</font><p>			１７．剣(THE SWORD)	１７．剣(THE SWORD)\nキイワード：戦い、武器\n正位置：勇敢な、戦いに強い、才能、能力	１７．剣(THE SWORD)\nキイワード：戦い、武器\n逆位置：暴力、力による支配、むやみな突進
+<p align='center'><font size="42"><br><br><br><br><br><br>１８．嵐(STORM)</font><p>			１８．嵐(STORM)	１８．嵐(STORM)\nキイワード：突然の事故\n正位置：トラブル、混乱、無一文になる	１８．嵐(STORM)\nキイワード：突然の事故\n逆位置：ゼロからの出発、方向転換、雨ふって地固まる
+<p align='center'><font size="42"><br><br><br><br><br><br>１９．竜(DRAGON)</font><p>			１９．竜(DRAGON)	１９．竜(DRAGON)\nキイワード：破壊と前進、勇気、秩序\n正位置：勇猛、試行錯誤と発展、男性的な	１９．竜(DRAGON)\nキイワード：破壊と前進、勇気、秩序\n逆位置：混乱、暴力、不安定、後さき考えない
+<p align='center'><font size="42"><br><br><br><br><br><br>２０．宇宙(THE DEEP SPACE)</font><p>			２０．宇宙(THE DEEP SPACE)	２０．宇宙(THE DEEP SPACE)\nキイワード：未知\n正位置：広大な、無限の可能性、冒険心	２０．宇宙(THE DEEP SPACE)\nキイワード：未知\n逆位置：まとまりのない、とりとめのない、不安
+<p align='center'><font size="42"><br><br><br><br><br><br>２１．海(THE SEA)</font><p>			２１．海(THE SEA)	２１．海(THE SEA)\nキイワード：誕生、流動\n正位置：母親、母性的な、新たなる命の誕生、やすらぎ	２１．海(THE SEA)\nキイワード：誕生、流動\n逆位置：自立していない、過保護、変化に乏しい
+<p align='center'><font size="42"><br><br><br><br><br><br>２２．鳥(THE WITCH)</font><p>			２２．鳥(THE WITCH)	２２．鳥(THE WITCH)\nキイワード：自由、飛翔\n正位置：飛翔、自由、開放、周りにとらわれず行動する	２２．鳥(THE WITCH)\nキイワード：自由、飛翔\n逆位置：孤独、不安、足場のない、一人浮く、取り残される
+<p align='center'><font size="42"><br><br><br><br><br><br>２３．銀(THE SILVER)</font><p>			２３．銀(THE SILVER)	２３．銀(THE SILVER)\nキイワード：純粋、無垢、魔法\n正位置：誠実、純潔、混じりけのない、神秘	２３．銀(THE SILVER)\nキイワード：純粋、無垢、魔法\n逆位置：高慢ちきな、役に立たない
+<p align='center'><font size="42"><br><br><br><br><br><br>２４．時の川(THE RIVER)</font><p>			２４．時の川(THE RIVER)	２４．時の川(THE RIVER)\nキイワード：時間、移りゆくもの、流れゆくもの\n正位置：人生経験、再会、思い出、変化、発展	２４．時の川(THE RIVER)\nキイワード：時間、移りゆくもの、流れゆくもの\n逆位置：死、老衰、風化、うもれる、闇に葬られる
+<p align='center'><font size="42"><br><br><br><br><br><br>２５．金(GOLD)</font><p>			２５．金(GOLD)	２５．金(GOLD)\nキイワード：富\n正位置：お金持ち、裕福、商売のうまい	２５．金(GOLD)\nキイワード：富\n逆位置：欲張り、ケチ
+<p align='center'><font size="42"><br><br><br><br><br><br>２６．空(THE SKY)</font><p>			２６．空(THE SKY)	２６．空(THE SKY)\nキイワード：開放\n正位置：スリリングな、気晴らし、澄み切った	２６．空(THE SKY)\nキイワード：開放\n逆位置：悪ノリ、空騒ぎ、虚無
+<p align='center'><font size="42"><br><br><br><br><br><br>２７．戦士(THE WARRIOR)</font><p>			２７．戦士(THE WARRIOR)	２７．戦士(THE WARRIOR)\nキイワード：試練、挑戦\n正位置：頼りになる、勝利、リーダーシップ、誰かを守る	２７．戦士(THE WARRIOR)\nキイワード：試練、挑戦\n逆位置：敗北、頼りにならない、守るべきものを失った
+<p align='center'><font size="42"><br><br><br><br><br><br>２８．旅人(THE FOREIGNER)</font><p>			２８．旅人(THE FOREIGNER)	２８．旅人(THE FOREIGNER)\nキイワード：流浪\n正位置：たくさんの出会い、変換に富んだ、常に新しい	２８．旅人(THE FOREIGNER)\nキイワード：流浪\n逆位置：さ迷い、当てのない旅、無計画、不安定
+<p align='center'><font size="42"><br><br><br><br><br><br>０．トリックスター(THE TRICKSTER)</font><p>			０．トリックスター(THE TRICKSTER)	０．トリックスター(THE TRICKSTER)\nキイワード：愉快な、混沌の\n正位置：笑い、愉快ないたずら、お祭り、目立った、常識にとらわれない	０．トリックスター(THE TRICKSTER)\nキイワード：愉快な、混沌の\n逆位置：まとまりのない、無秩序、悪ふざけ、理解できない

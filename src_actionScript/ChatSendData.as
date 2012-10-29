@@ -165,15 +165,22 @@ package {
         }
         
         
-        public function setDiceBotData(seed:int, type:String, count:int, callBack_:Function):void {
+        public function setDiceBotData(seed:int, count:int, callBack_:Function):void {
             randomSeed = seed;
-            gameType = type;
             repeatCount = count;
             callBack = callBack_;
         }
         
         public function getRandSeed():int {
             return randomSeed;
+        }
+        
+        public function setGameType(game:String):void {
+            if( gameType != null ) {
+                return;
+            }
+            
+            gameType = game;
         }
         
         public function getGameType():String {

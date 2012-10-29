@@ -97,6 +97,8 @@ package {
         private var mountName:String = "";
         private var canDelete:Boolean = false;
         
+        private var cardName:String = null;
+        
         private var isInitMovedd:Boolean = false;
         
         private var nameTextField:TextField = new TextField();
@@ -267,6 +269,8 @@ package {
             }
             
             this.nameTextField.text = text;
+            
+            setCardCommand();
         }
         
         public function getTitleText():String {
@@ -284,6 +288,18 @@ package {
                 return "非公開：" + this.ownerName;
             }
         }
+        
+        
+        private function setCardCommand():void {
+            if( commandMenu == null ) {
+                return;
+            }
+            
+            var cardCommand:String = getCardCommand( this.imageName );
+            commandMenu.visible = ( cardCommand != "" );
+            commandMenu.caption = getCardCommandName( this.imageName );
+        }
+        
         
         override public function getSquareLength():int {
             return 1;
@@ -347,13 +363,14 @@ package {
             if( this.isText ) {
                 mainTextArea.visible = true;
                 printMainText( targetImageName );
-                targetImageName = "image/transparent.gif";
             } else {
                 mainTextArea.visible = false;
                 subTextArea.visible = false;
-                this.cardName = getCardNameWhenImageData(targetImageName);
-                targetImageName = getImageUrlWhenImageData(targetImageName);
             }
+            
+            this.cardName = getCardNameFromMessage(targetImageName);
+            this.view.toolTip = getCardToolTips(targetImageName);
+            targetImageName = getImageUrl(targetImageName);
             
             setViewStates();
             
@@ -563,6 +580,7 @@ package {
             return obj;
         }
         
+        private var commandMenu:ContextMenuItem;
         private var openPrivateMenu:ContextMenuItem;
         private var openPublicMenu:ContextMenuItem;
         private var closeSecretMenu:ContextMenuItem;
@@ -573,6 +591,8 @@ package {
         override protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
+            
+            commandMenu = addMenuItem(menu, "チャットメッセージ送信", sendChatMessage, false);
             
             openPrivateMenu = addMenuItem(menu, "カードを自分だけが見る（非公開）", openPrivate, false);
             openPublicMenu = addMenuItem(menu, "カードを全員に見せる（公開）", openCard, true);
@@ -588,6 +608,21 @@ package {
             removeCardMenu = addMenuItem(menu, "カード削除", getContextMenuItemRemoveCharacter, true);
             
             view.contextMenu = menu;
+        }
+        
+        public function sendChatMessage(event:ContextMenuEvent = null):void {
+            var cardCommand:String = getCardCommand( this.imageName );
+            if( cardCommand == "" ) {
+                return;
+            }
+            
+            var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+            
+            var data:ChatSendData = new ChatSendData(chatWindow.getSelectedChatChannleIndex(), cardCommand);
+            var gameType:String = getCardCommandGameType( this.imageName );
+            data.setGameType(gameType);
+            
+            chatWindow.sendChatMessageByChatSendData(data);
         }
         
         public function hideContextMenu():void {
@@ -617,7 +652,19 @@ package {
         }
         
         protected function getContextMenuItemFunctionPrintCardText(event:ContextMenuEvent):void {
+            var cardMessage:String = getCardMessageForPrintChatMessage();
+            cardMessage = cardMessage.replace(/\n/ig, "／");
+            DodontoF_Main.getInstance().getChatWindow().addTextToChatMessageInput(cardMessage);
+        }
+        
+        protected function getCardMessageForPrintChatMessage():String {
             var message:String = getLoadImageUrl();
+            
+            var text:String = getCardToolTips(message);
+            if( text != "" ) {
+                return getCardNameFromMessage(message) + "\n" + text;
+            }
+            
             var mainText:String = getCardMainText(message);
             var subText:String = getCardSubText(message);
             
@@ -629,7 +676,7 @@ package {
             cardMessage = cardMessage.replace(/&lt;/g, '<');
             cardMessage = cardMessage.replace(/&gt;/g, '>');
             
-            DodontoF_Main.getInstance().getChatWindow().addTextToChatMessageInput(cardMessage);
+            return cardMessage;
         }
         
         /*
@@ -846,18 +893,96 @@ package {
             }
             return text;
         }
+        
         private function getCardMainText(message:String):String {
             return getTextFromMessage(message, 0);
         }
+        
         private function getCardSubText(message:String):String {
             return getTextFromMessage(message, 1);
         }
+        
         protected function getCardBackColor(message:String):uint {
             var colorText:String = getTextFromMessage(message, 2);
             return getBackColor( colorText );
         }
-        protected function getCardNameWhenText(message:String):String {
-            return getTextFromMessage(message, 3);
+        
+        protected function getCardNameFromMessage(message:String):String {
+            if( this.isText ) {
+                return getTextFromMessage(message, 3);
+            }
+            return getCardNameWhenImageData(message);
+        }
+        
+        protected function getCardToolTips(message:String):String {
+            if( this.isText ) {
+                return getCardToolTipsByIndexs(message, 4, 5);
+            }
+            
+            return getCardToolTipsWhenImageData(message);
+        }
+        
+        
+        protected function getCardCommandName(message:String):String {
+            return getCardCommandParam(message, 0);
+        }
+        
+        protected function getCardCommand(message:String):String {
+            return getCardCommandParam(message, 1);
+        }
+        
+        protected function getCardCommandGameType(message:String):String {
+            return getCardCommandParam(message, 2);
+        }
+        
+        protected function getCardCommandParam(message:String, index:int):String {
+            var base:String = "";
+            
+            if( this.isText ) {
+                base = getTextFromMessage(message, 6);
+            } else {
+                base = getCardCommandWhenImageData(message);
+            }
+            
+            if( base == "" ) {
+                return "";
+            }
+            
+            var params:Array = base.split("|");
+            var result:String = params[index];
+            if( result == null ) {
+                result = "";
+            }
+            
+            return result;
+        }
+        
+        protected function getCardToolTipsByIndexs(message:String, upIndex:int, downIndex:int):String {
+            var text:String = getCardToolTipsByIndexsDirectory(message, upIndex, downIndex);
+            return text.replace(/\\n/g, "\n");
+        }
+        
+        protected function getCardToolTipsByIndexsDirectory(message:String, upIndex:int, downIndex:int):String {
+            var upText:String = getTextFromMessage(message, upIndex);
+            if( isUpSide() ){
+                return upText;
+            }
+            
+            var downText:String = getTextFromMessage(message, downIndex);
+            
+            if( downText == "" ) {
+                return upText;
+            }
+            
+            return downText;
+        }
+        
+        protected function getImageUrl(message:String):String {
+            if( this.isText ) {
+                return "image/transparent.gif";
+            }
+            
+            return getImageUrlWhenImageData(message);
         }
         
         protected function getImageUrlWhenImageData(message:String):String {
@@ -868,6 +993,13 @@ package {
             return getTextFromMessage(message, 1);
         }
         
+        protected function getCardToolTipsWhenImageData(message:String):String {
+            return getCardToolTipsByIndexs(message, 2, 3);
+        }
+        
+        protected function getCardCommandWhenImageData(message:String):String {
+            return getTextFromMessage(message, 4);
+        }
         
         override public function getOwnWidth():int {
             return getWidthSize() * Map.getSquareLength();
@@ -877,8 +1009,6 @@ package {
             return getHeightSize() * Map.getSquareLength();
         }
         
-        
-        private var cardName:String = null;
         
         public function getCardName():String {
             if( this.cardName == null ) {
@@ -895,7 +1025,8 @@ package {
             var mainText:String = getCardMainText(message);
             var subText:String = getCardSubText(message);
             var backColor:uint = getCardBackColor(message);
-            this.cardName = getCardNameWhenText(message);
+            this.cardName = getCardNameFromMessage(message);
+            this.view.toolTip = getCardToolTips(message);
             
             if( subText == null ) {
                 subText = "";

@@ -45,11 +45,38 @@
     }
     
     public function init(replayConfig:Object):void {
-        grid.selected = replayConfig.grid;
-        position.selected = replayConfig.position;
-        dice.selected = replayConfig.dice;
-        adjustStand.selected = replayConfig.adjustStand;
+        initCheckBox(grid, replayConfig, "grid");
+        initCheckBox(position, replayConfig, "position");
+        initCheckBox(dice, replayConfig, "dice");
+        initCheckBox(adjustStand, replayConfig, "adjustStand");
+        initColorPicker(chatBackgroundColorPicker, replayConfig, "chatBackgroundColor");
     }
+    
+    private function initCheckBox(checkBox:CheckBox, data:Object, paramName:String):void {
+        if( data == null ) {
+            return;
+        }
+        
+        if( data[paramName] == null ) {
+            return;
+        }
+        
+        checkBox.selected = data[paramName];
+    }
+    
+    private function initColorPicker(colorPicker:ColorPicker, data:Object, paramName:String):void {
+        if( data == null ) {
+            return;
+        }
+        
+        var colorString:String = data[paramName];
+        if( colorString == null ) {
+            return;
+        }
+        
+        colorPicker.selectedColor = parseInt("0x" + colorString);
+    }
+    
     
     private var resultCallBack:Function;
     
@@ -59,7 +86,6 @@
     
     public function execute():void {
         try {
-            
             var replayConfig:Object = {
                 "grid" : grid.selected,
                 "position" : position.selected,

@@ -335,6 +335,8 @@ package {
         
         
         private function setWheelEvent():void {
+            
+            //複数キャラクターが積み上がっている場合には、ホイールで順番入れ替え
             view.addEventListener(MouseEvent.MOUSE_WHEEL, function (event:MouseEvent):void {
                     
                     if( ! thisObj.canExtend() ) {
@@ -343,9 +345,12 @@ package {
                     
                     var isUp:Boolean = (event.delta > 0);
                     thisObj.rotateViewIndex(isUp);
-                    thisObj.extendMovablePieceViewPosition( true );
+                    var extended:Boolean = thisObj.extendMovablePieceViewPosition( true );
                     
-                    event.stopPropagation();
+                    //積み上げキャラを入れ替えしたなら、マップの拡大・縮小は行わない
+                    if( extended ) {
+                        event.stopPropagation();
+                    }
                 });
         }
         
@@ -410,10 +415,12 @@ package {
             return (samePosition.length == 1);
         }
         
-        private function extendMovablePieceViewPosition(isListed:Boolean):void {
-            if( canExtend() ) {
-                map.extendMovablePieceViewPosition( new Point(positionX, positionY), isListed );
+        private function extendMovablePieceViewPosition(isListed:Boolean):Boolean {
+            if( ! canExtend() ) {
+                return false;
             }
+            
+            return map.extendMovablePieceViewPosition( new Point(positionX, positionY), isListed );
         }
         
         public function setPickuped():void {
