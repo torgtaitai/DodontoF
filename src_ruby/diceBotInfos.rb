@@ -385,19 +385,26 @@ INFO_MESSAGE_TEXT
     'name' => 'マギカロギア',
     'gameType' => 'MagicaLogia',
     'fileName' => 'MagicaLogia',
-    'prefixs' => ['WT','CT','ST','FT','AT','BGT','DAT','FAT','WIT','RTT'],
+    'prefixs' => ['WT','FCT','ST','FT','AT','BGT','DAT','FAT','WIT','RTT','TPT','TCT','PCT','MCT','ICT','SCT','XCT','WCT','CCT','BST','PT','XEST','IWST','MCST','WDST','LWST'],
     'info' => <<INFO_MESSAGE_TEXT
 ・各種表
-　　変調表　　　　WT
-　　運命変転表　　CT
-　　シーン表　　　ST
-　　ファンブル表　FT
-　　事件表　　　　AT
-　　経歴表　　　　　BGT
-　　初期アンカー表　DAT
-　　運命属性表　　　FAT
-　　願い表　　　　　WIT
-　　ランダム特技表　RTT
+変調表　　　　WT
+運命変転表　　FCT
+　典型的災厄 TCT／物理的災厄 PCT／精神的災厄 MCT／狂気的災厄 ICT
+　社会的災厄 SCT／超常的災厄 XCT／不思議系災厄 WCT／コミカル系災厄 CCT
+シーン表　　　ST
+　極限環境 XEST／内面世界 IWST／魔法都市 MCST
+　死後世界 WDST／迷宮世界 LWST
+ファンブル表　FT
+事件表　　　　AT
+経歴表　　　　　BGT
+初期アンカー表　DAT
+運命属性表　　　FAT
+願い表　　　　　WIT
+ランダム特技表　RTT
+時の流れ表　　　TPT
+ブランク秘密表　BST
+プライズ表　　　PT
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },

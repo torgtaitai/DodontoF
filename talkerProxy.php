@@ -1,5 +1,6 @@
 <?php
-$url = (isset($_POST['url']) && $_POST['url']) ? $_POST['url'] : 'undefined';
+$queryText = (isset($_POST['queryText']) && $_POST['queryText']) ? $_POST['queryText'] : 'undefined';
+$url = "http://translate.google.com/translate_tts?tl=ja&q=" + $queryText;
 
 $option = array(
     'http'=>array(

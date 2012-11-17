@@ -1133,6 +1133,7 @@ class DodontoFServer
     logging(name, "name")
     
     message = getWebIfRequestText('message')
+    message.gsub!(/\r\n/, "\r")
     logging(message, "message")
     
     color = getWebIfRequestText('color', getTalkDefaultColor)

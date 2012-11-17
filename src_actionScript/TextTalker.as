@@ -104,14 +104,16 @@ package {
         private function send():void {
             Log.logging("onConnect begin");
             
-            var ttsUrl:String = getGoogleTextToSpeachUrl();
-            Log.logging("ttsUrl", ttsUrl);
+            //var ttsUrl:String = getGoogleTextToSpeachUrl();
+            //Log.logging("ttsUrl", ttsUrl);
+            var readText:String = getReadText();
+            var queryText:String = encodeURI(readText);
             
             var proxyUrl:String = "talkerProxy.php";
             var request:URLRequest = new URLRequest(proxyUrl);
             request.method = URLRequestMethod.POST;
             var variables:URLVariables = new URLVariables();
-            variables.url = ttsUrl;
+            variables.queryText = queryText;
             request.data = variables;
             
             var sound:Sound = new Sound();
@@ -122,6 +124,7 @@ package {
             Log.logging("onConnect end");
         }
         
+        /*
         private function getGoogleTextToSpeachUrl():String {
             var readText:String = getReadText();
             var ttsUrl:String = "http://translate.google.com/translate_tts"
@@ -130,6 +133,7 @@ package {
             
             return ttsUrl;
         }
+        */
         
         private function getQuery():String {
             var readText:String = getReadText();
