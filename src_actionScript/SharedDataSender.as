@@ -1188,10 +1188,11 @@ package {
             return map.getExistPiecesCount();
         }
         
-        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean, password:String):void {
             var data:Object = {
                 "roomNumbers": roomNumbers,
-                "ignoreLoginUser": ignoreLoginUser
+                "ignoreLoginUser": ignoreLoginUser,
+                "password" : password
             };
             
             

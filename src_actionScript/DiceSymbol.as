@@ -181,6 +181,8 @@ package {
             var targetOwner:String = null;
             if( ! isOpen ) {
                 targetOwner = DodontoF_Main.getInstance().getStrictlyUniqueId();
+            } else {
+                sendOpenMessage();
             }
             this.owner = targetOwner;
             
@@ -190,6 +192,11 @@ package {
             
             updateRefresh();
             sender.changeCharacter( getJsonData() );
+        }
+        
+        private function sendOpenMessage():void {
+            var message:String = "がダイスをオープンしました。出目は" + number + "(" + maxNumber + "面ダイス)です。";
+            ChatWindow.getInstance().sendSystemMessage(message);
         }
         
         override protected function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {

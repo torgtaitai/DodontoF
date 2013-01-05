@@ -4,12 +4,10 @@
   <script type="text/javascript"><!--
 
 function getDodontofBusyAll() {
-     getDodontofBusyImage("#dodontof_stable1");
-     getDodontofBusyImage("#dodontof_raa2");
-     getDodontofBusyImage("#dodontof_raa3");
-     getDodontofBusyImage("#dodontof_taguchan");
-     getDodontofBusyImage("#dodontof_kurumi");
-     getDodontofBusyImage("#dodontof_newest");
+    $("#dodontofList > div > div").each(function() {
+    var targetDivName = "#" + $(this).attr('id');
+    getDodontofBusyImage( targetDivName );
+    });
 }
      
 function getDodontofBusyImage(target) {
@@ -22,12 +20,12 @@ function getDodontofBusyImage(target) {
     
     $(target).html( "loading...<br>" + title );
     
-    var url = $(target).parent().attr('href');
+    var url = $(target).parent().find('a').attr('href');
     url = getBusyInfoUrl(url);
     
     jQuery.getJSON(url, function(data) {
-	    getBusyInfoResult(target, title, data)
-	});
+      getBusyInfoResult(target, title, data)
+  });
 }
 
 function getBusyInfoUrl(url) {
@@ -41,7 +39,7 @@ function getBusyInfoUrl(url) {
 
 function getBusyInfoResult(target, title, data) {
     if( data.result != "OK" ) {
-	return ;
+      return ;
     }
     
     var percentage = data.loginCount / data.maxLoginCount * 100;
@@ -53,26 +51,27 @@ function getBusyInfoResult(target, title, data) {
     $(target).html(htmlText);
     
     var imageUrl = getImageUrl(percentage);
-    var image = $(target).parent().children('img');
+    var image = $(target).parent().find('img');
     image.attr('src', imageUrl);
     
     $(target).parent().attr('title', data.version);
 }
 
 function getImageUrl(percentage) {
-    var prefix = "l_";
+    //var prefix = "l_";
+    var prefix = "";
     var imageUrl = "p00.gif";
     
     if( percentage > 100 ) {
-	imageUrl = "over100.gif";
+  imageUrl = "over100.gif";
     } else if ( percentage > 75) {
-	imageUrl = "over75.gif";
+  imageUrl = "over75.gif";
     } else if ( percentage > 50) {
-	imageUrl = "over50.gif";
+  imageUrl = "over50.gif";
     } else if ( percentage > 25) {
-	imageUrl = "over25.gif";
+  imageUrl = "over25.gif";
     } else {
-	imageUrl = "over0.gif";
+  imageUrl = "over0.gif";
     }
     
     imageUrl = "images/" + prefix + imageUrl;
@@ -87,55 +86,44 @@ function getUrlLinkText(text, url) {
 
 
 // -->
-  </script>
+</script>
+
+  <div id="dodontofList">
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://www.taruki.com/%7Etakeru/DodontoF/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_stable1">Œö®</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://raa0121.gehirn.ne.jp/DodontoF/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_raa1">‚ç‚Ÿ‚³‚ñ‚P</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://raa0121.shiracha.net/DodontoF/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_raa2">‚ç‚Ÿ‚³‚ñ‚Q</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://nakako.raa0121.info/DodontoF/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_raa3">‚ç‚Ÿ‚³‚ñ‚R</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://trpg.gigafreaks.com/dodontof/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_kisaragi">”@ŒãÄ–ç‚³‚ñ</div>
+</div>
+
+  <div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><img src="images/baloon3.gif" border="0" /></div>
+<br /> <br />
   
-  <div id="dodontofList" >
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://www.taruki.com/%7Etakeru/DodontoF/DodontoF.swf">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	    <div id="dodontof_stable1">Œö®</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://raa0121.shiracha.net/DodontoF/DodontoF.swf">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	    <div id="dodontof_raa2" isSleep="true">‚ç‚Ÿ‚³‚ñ‚Q</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://nakako.raa0121.info/DodontoF/DodontoF.swf">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	  <div id="dodontof_raa3">‚ç‚Ÿ‚³‚ñ‚R</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://smile-b.xsrv.jp/dodon2/DodontoF.swf">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	    <div id="dodontof_taguchan">‚½‚®‚Á‚¿‚á‚ñ</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://ec2-54-248-99-4.ap-northeast-1.compute.amazonaws.com/">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	    <div id="dodontof_kurumi">‚­‚é‚İ‚³‚ñ</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <a target="_blank" href="http://www.dodontof.com/DodontoF/DodontoF.swf">
-	    <img src="images/l_equal0.gif" width="65" height="62" />
-	    <div id="dodontof_newest">ÅV”Å</div>
-	  </a>
-    </div>
-    
-    <div style="display: inline-block; _display: inline; margin-left:30px; text-align: center ">
-	  <img src="images/baloon3.gif" />
-    </div>
-    
-  </div>
-</body>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://dodontof.trpg.net/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_trpg_net">TRPG.NET</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://dodontof.cre.jp/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_cre">CRE</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://dodontof.cokage.ne.jp/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_cokage">–Ø‰A</div>
+</div>
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="http://dodontof.kataribe.com/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_kataribe">Œê‚è•”</div>
+</div>
+<br /><hr />
+  
+<div style="display: inline-block; _display: inline; margin-left: 30px; text-align: center;"><a href="DodontoF/DodontoF.swf" target="_blank"> <img src="images/equal0.gif" border="0" /></a>
+<div id="dodontof_newest">“®ìƒeƒXƒg—pÅV</div>
+</div>
+
+</div>

@@ -538,11 +538,11 @@ package {
             view.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickEvent);
         }
         
-        protected function canDoubleClick():Boolean {
+        override protected function canDoubleClick():Boolean {
             return true;
         }
         
-        protected function doubleClickEvent(event:MouseEvent):void {
+        override protected function doubleClickEvent(event:MouseEvent):void {
             Log.logging("MouseEvent.DOUBLE_CLICK");
             
             //カード自分の物なら表裏を入れ替えるだけで終了。

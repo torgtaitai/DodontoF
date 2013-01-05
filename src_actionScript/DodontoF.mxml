@@ -404,6 +404,8 @@
             dodontoF_Main.setCardPickUpVisible( toggled );
         } else if( menuName == "openInitCardWindow" ) {
             popup(InitCardWindow, true);
+        } else if( menuName == "cleanCard" ) {
+            InitCardWindow.cleanCard();
         } else if( menuName == "changeMap" ) {
             popup(ChangeMapWindow, true);
         } else if( menuName == "createChit" ) {
@@ -807,6 +809,7 @@
         //event.currentTarget.setStyle('borderColor', tempBorderColor);
         //borderColorSet = true;
     }
+    
     
     ]]>
   </mx:Script>

@@ -203,14 +203,21 @@
     }
        
     public function execute():void {
-        var thisObj:InitCardWindow = this;
-           
-        var result:Alert = Alert.show("現在使用しているカードは全て破棄されます。\nよろしいですか？", "カード初期化確認", 
-                                      Alert.OK | Alert.CANCEL, null, 
-                                      function(e : CloseEvent) : void {
-                                          if (e.detail == Alert.OK) {
-                                              thisObj.initCards();
-                                          }});           
+        var title:String = "カード初期化確認";
+        var message:String = "現在使用しているカードは全て破棄されます。\nよろしいですか？";
+        var cardInitInfos:Array = getCardInitInfos();
+        executeInitCard(title, message, cardInitInfos, initCardsResult);
+    }
+    
+    static private function executeInitCard(title:String, message:String,
+                                            infos:Array, result:Function):void {
+
+        Alert.show(message, title,
+                   Alert.OK | Alert.CANCEL, null, 
+                   function(e : CloseEvent) : void {
+                       if(e.detail == Alert.OK) {
+                           DodontoF_Main.getInstance().getGuiInputSender().getSender().initCards(infos, result);
+                       }});
     }
     
     private function getCardInitInfos():Array {
@@ -246,10 +253,10 @@
         return cardInitInfos;
     }
     
-    public function initCards():void {
+    public function initCards(infos:Array, result:Function):void {
         try{
             var cardInitInfos:Array = getCardInitInfos();
-            DodontoF_Main.getInstance().getGuiInputSender().getSender().initCards( cardInitInfos, initCardsResult );
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().initCards(infos, result);
         } catch(error:Error) {
             this.status = error.message;
         }
@@ -270,6 +277,16 @@
     }
     
        
+    static public function cleanCard():void {
+        var title:String = "カード削除確認";
+        var message:String = "全てのカードを破棄します\nよろしいですか？";
+        var cardInitInfosDummy:Array = new Array();
+        var initCardsResultDummy:Function = function(event:Event):void {
+        };
+        
+        executeInitCard(title, message, cardInitInfosDummy, initCardsResultDummy);
+    }
+    
     ]]>
   </mx:Script>
   

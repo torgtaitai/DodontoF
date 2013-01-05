@@ -548,8 +548,8 @@
         ChatWindow.setTalk(jsonData.canTalk);
         ChatSendData.setRetryCountLimit(jsonData.retryCountLimit);
         
-        //Config.getInstance().setSkinImageUrl( jsonData.skinImage );
-        //Utils.setSkin(this);
+        Config.getInstance().setSkinImageUrl( jsonData.skinImage );
+        Utils.setSkin(this);
         
         if( jsonData.isPaformanceMonitor) {
             DodontoF_Main.getInstance().getMap().addPaformanceMonitor();
@@ -731,50 +731,102 @@
     
     public function removePlayRoomWithMessage(roomNumbers:Array,
                                               message:String,
-                                              ignoreLoginUser:Boolean = false):void {
+                                              ignoreLoginUser:Boolean = false,
+                                              password:String = ""):void {
         try{
             var result:Alert = Alert.show(message, "削除確認", 
                                           Alert.OK | Alert.CANCEL, null, 
                                           function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
-                                                  guiInputSender.removePlayRoom(roomNumbers, removePlayRoomResult, ignoreLoginUser);
+                                                  guiInputSender.removePlayRoom(roomNumbers, removePlayRoomResult,
+                                                                                ignoreLoginUser, password);
                                               }});
         } catch(error:Error) {
             status = error.message;
         }
     }
-
+    
     public function removePlayRoomResult(event:Event):void {
         try{
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             
-            var deletedRoomNumbers:Array = jsonData.deletedRoomNumbers;
-            var errorMessages:Array = jsonData.errorMessages;
-            var askDeleteRoomNumbers:Array = jsonData.askDeleteRoomNumbers;
-            Log.logging("askDeleteRoomNumbers", askDeleteRoomNumbers)
-            
-            if( deletedRoomNumbers.length > 0 ) {
-                //削除したプレイルームのタブを更新。複数タブのプレイルームは選択できない仕様なので先頭の1部屋だけで処理実施。
-                var firstDeleteNumber:int = deletedRoomNumbers[0];
-                getPlayRoomStatesByRoomNumber(firstDeleteNumber, true);
-            }
-            
-            for each(var i:int in askDeleteRoomNumbers) {
-                this.askDeleteWhenUserExist(i);
-                }
-            
-            var errorMessage:String = ""
-            for each(var s:String in errorMessages) {
-                    errorMessage += Messages.getMessage(s);
-                }
-            if( errorMessage.length > 0 ) {
-                Alert.show(errorMessage);
-            }
+            reloadDeletedPlayRoom(jsonData.deletedRoomNumbers);
+            askDeletePlayRoom(jsonData.askDeleteRoomNumbers);
+            inputPaswordToDeletePlayRoom(jsonData.passwordRoomNumbers);
+            printErrorMessageForDeletePlayRom(jsonData.errorMessages);
             
         } catch(error:Error) {
             status = error.message;
         }
     }
-
+    
+    private function reloadDeletedPlayRoom(deletedRoomNumbers:Array):void {
+        if( deletedRoomNumbers == null ) {
+            return;
+        }
+        
+        if( deletedRoomNumbers.length > 0 ) {
+            //削除したプレイルームのタブを更新。複数タブのプレイルームは選択できない仕様なので先頭の1部屋だけで処理実施。
+            var firstDeleteNumber:int = deletedRoomNumbers[0];
+            getPlayRoomStatesByRoomNumber(firstDeleteNumber, true);
+        }
+    }
+    
+    private function askDeletePlayRoom(askDeleteRoomNumbers:Array):void {
+        Log.logging("askDeleteRoomNumbers", askDeleteRoomNumbers);
+        
+        if( askDeleteRoomNumbers == null ) {
+            return;
+        }
+        
+        for each(var i:int in askDeleteRoomNumbers) {
+            this.askDeleteWhenUserExist(i);
+        }
+    }
+    
+    private function askDeleteWhenUserExist(roomNumber:int):void {
+        var message:String = "No."+ roomNumber + "にログインしているユーザーがまだいるようです。\n削除してよいですか？";
+        var ignoreLoginUser:Boolean = true;
+        removePlayRoomWithMessage([roomNumber], message, ignoreLoginUser);
+    }
+    
+    
+    private function inputPaswordToDeletePlayRoom(passwordRoomNumbers:Array):void {
+        if( passwordRoomNumbers == null ) {
+            return;
+        }
+        
+        for each(var roomNumber:int in passwordRoomNumbers) {
+            inputPaswordToDeleteTargetRoom(roomNumber);
+        }
+    }
+    
+    private function inputPaswordToDeleteTargetRoom(roomNumber:int):void {
+        var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
+        
+        var texts:Array = ["部屋 [ No." + roomNumber + " ] を削除します。パスワードを入力してください。"];
+        var ignoreLoginUser:Boolean = true;
+        
+        window.init(texts, "部屋削除", "パスワード入力", function(password:String):void {
+                guiInputSender.removePlayRoom([roomNumber], removePlayRoomResult, ignoreLoginUser, password);
+            });
+    }
+    
+    
+    private function printErrorMessageForDeletePlayRom(errorMessages:Array):void {
+        if( errorMessages == null ) {
+            return;
+        }
+        
+        var errorMessage:String = ""
+        for each(var s:String in errorMessages) {
+                errorMessage += Messages.getMessage(s);
+            }
+        if( errorMessage.length > 0 ) {
+            Alert.show(errorMessage);
+        }
+    }
+    
+    
     public function removeOldPlayRoom():void {
         Utils.askByAlert("一括削除確認",
                          ""+ removeOldPlayRoomLimitDays + "日以上前の、古いプレイルームの一括削除を行います。\nよろしいですか？",
@@ -786,11 +838,7 @@
                          });
     }
     
-    private function askDeleteWhenUserExist(roomNumber:int):void {
-        var message:String = "No."+ roomNumber + "にログインしているユーザーがまだいるようです。\n削除してよいですか？";
-        var ignoreLoginUser:Boolean = true;
-        removePlayRoomWithMessage([roomNumber], message, ignoreLoginUser);
-    }
+    
     
     private function login(roomNumber:int):void {
         try{

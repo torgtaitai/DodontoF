@@ -138,7 +138,9 @@ package {
         
         static public function setSkin(component:UIComponent):void {
             if( CustomSkin.isSkinDefined() ) {
-                component.setStyle("borderSkin", CustomSkin);
+                //component.setStyle("borderSkin", CustomSkin);
+                component.setStyle("backgroundImage", Config.getInstance().getSkinImageUrl());
+                component.setStyle("backgroundSize","100%");
             }
         }
         

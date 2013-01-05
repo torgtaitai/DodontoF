@@ -134,6 +134,16 @@ class Card
          'fileName' => 'cards/actCard.txt',
        },
        
+       { 'type' => 'ItrasBy_ChanceCard',
+         'title' => 'Itras By：チャンスカード',
+         'fileName' => 'cards/ItrasBy_ChanceCard.txt',
+       },
+       
+       { 'type' => 'ItrasBy_ResolutionCard',
+         'title' => 'Itras By：解決カード',
+         'fileName' => 'cards/ItrasBy_ResolutionCard.txt',
+       },
+       
        
       ]
   end

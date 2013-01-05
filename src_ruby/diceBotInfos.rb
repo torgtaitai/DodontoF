@@ -87,6 +87,29 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'バトルテック',
+    'gameType' => 'BattleTech',
+    'fileName' => 'BattleTech',
+    'prefixs' => ['\d*SRM\d+.+','\d*LRM\d+.+','\d*BT.+','CT','DW','CD\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定方法
+　(回数)BT(ダメージ)(部位)+(基本値)>=(目標値)
+　回数は省略時 1固定。
+　部位はC（正面）R（右）、L（左）。省略時はC（正面）固定
+　U（上半身）、L（下半身）を組み合わせ CU/RU/LU/CL/RL/LLも指定可能
+　例）BT3+2>=4
+　　正面からダメージ3の攻撃を技能ベース2目標値4で1回判定
+　例）2BT3RL+5>=8
+　　右下半身にダメージ3の攻撃を技能ベース5目標値8で2回判定
+　ミサイルによるダメージは BT(ダメージ)の変わりに SRM2/4/6, LRM5/10/15/20を指定
+　例）3SRM6LU+5>=8
+　　左上半身にSRM6連を技能ベース5目標値8で3回判定
+・CT：致命的命中表
+・DW：転倒後の向き表
+・CDx：メッwク戦士意識維持表。ダメージ値xで判定　例）CD3
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'ブラッド・クルセイド',
     'gameType' => 'BloodCrusade',
     'fileName' => 'BloodCrusade',
@@ -131,7 +154,7 @@ INFO_MESSAGE_TEXT
     'fileName' => 'ChaosFlare',
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
-失敗、成功(差分値の計算も)の自動判定を行います。
+失敗、成功の判定。差分値の計算も行います。
 ファンブル時は達成値を-20します。
 INFO_MESSAGE_TEXT
   },
@@ -222,11 +245,11 @@ INFO_MESSAGE_TEXT
 　衝動表に従って自動でダイスロールを行い、結果を表示します。
 　ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。
 　頭に識別文字を追加して、デフォルト以外の衝動表もロールできます。
-　・nURGEx　頭に「N」を付けると「新衝動表」。
-　・aURGEx　頭に「A」を付けると「誤作動表」。
-　・mURGEx　頭に「M」を付けると「ミュータント衝動表」になります。
-　・uURGEx　頭に「U」が付くと鬼御魂の戦闘外衝動表。
-　・cURGEx　頭に「C」で鬼御魂の戦闘中衝動表になります。
+　・NURGEx　頭に「N」を付けると「新衝動表」。
+　・AURGEx　頭に「A」を付けると「誤作動表」。
+　・MURGEx　頭に「M」を付けると「ミュータント衝動表」になります。
+　・UURGEx　頭に「U」が付くと鬼御魂の戦闘外衝動表。
+　・CURGEx　頭に「C」で鬼御魂の戦闘中衝動表になります。
 例）URGE1　　　urge5　　　Surge2
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
@@ -387,6 +410,8 @@ INFO_MESSAGE_TEXT
     'fileName' => 'MagicaLogia',
     'prefixs' => ['WT','FCT','ST','FT','AT','BGT','DAT','FAT','WIT','RTT','TPT','TCT','PCT','MCT','ICT','SCT','XCT','WCT','CCT','BST','PT','XEST','IWST','MCST','WDST','LWST'],
     'info' => <<INFO_MESSAGE_TEXT
+・判定
+スペシャル／ファンブル／成功／失敗を判定
 ・各種表
 変調表　　　　WT
 運命変転表　　FCT
@@ -415,7 +440,6 @@ INFO_MESSAGE_TEXT
     'prefixs' => ['\d+MD','DRT','DNT','DBT','DHT','KST','CAT','CFT','FWT','T1T','T2T','T3T','T4T','MPT','APT','DCT','MCT','PCT','LCT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定　(nMD+m)
-　迷宮デイズ判定用コマンドです。Rコマンドに読替されます。
 　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。
 　絶対成功と絶対失敗も自動判定します。
 ・各種表
@@ -439,7 +463,6 @@ INFO_MESSAGE_TEXT
     'prefixs' => ['\d+MK','LRT','ORT','CRT','ART','FRT','TBT','CBT','SBT','VBT','FBT','ABT','WBT','LBT','THT','CHT','SHT','VHT','KDT','KCT','KMT','CAT','FWT','CFT','TT','NT','ET','MPT','T1T','T2T','T3T','T4T','T5T','NAME.*','DFT','IDT\d*','WIT','LIT','RIT','SIT','RWIT','RUIT','IFT','\d+RET','PNT\d*','MLT\d*','KNT\d+','WORD\d+'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定　(nMK+m)
-　迷宮キングダム判定用コマンドです。Rコマンドに読替されます。
 　n個のD6を振って大きい物二つだけみて達成値を算出します。修正mも可能です。
 　絶対成功と絶対失敗も自動判定します。
 ・各種表
@@ -490,9 +513,10 @@ INFO_MESSAGE_TEXT
     'fileName' => 'NjslyrBattle',
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
-カラテロール：2d6<=(カラテ点)
+・カラテロール
+2d6<=(カラテ点)
 例）2d6<=5
-　(2D6<=5) ＞ 2[1,1] ＞ 2 ＞ 成功 重点 3 溜まる
+(2D6<=5) ＞ 2[1,1] ＞ 2 ＞ 成功 重点 3 溜まる
 INFO_MESSAGE_TEXT
   },
   {
@@ -529,7 +553,7 @@ INFO_MESSAGE_TEXT
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
 加算ロール時に６の個数をカウントして、その４倍を自動的に加算します。
-(出目はそのまま表示で合計値が6懼��10の読み替えになります)
+(出目はそのまま表示で合計値が6-10の読み替えになります)
 INFO_MESSAGE_TEXT
   },
   {
@@ -543,11 +567,11 @@ INFO_MESSAGE_TEXT
 　衝動表に従って自動でダイスロールを行い、結果を表示します。
 　ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。
 　頭に識別文字を追加して、デフォルト以外の衝動表もロールできます。
-　・nURGEx　頭に「N」を付けると「新衝動表」。
-　・aURGEx　頭に「A」を付けると「誤作動表」。
-　・mURGEx　頭に「M」を付けると「ミュータント衝動表」になります。
-　・uURGEx　頭に「U」が付くと鬼御魂の戦闘外衝動表。
-　・cURGEx　頭に「C」で鬼御魂の戦闘中衝動表になります。
+　・NURGEx　頭に「N」を付けると「新衝動表」。
+　・AURGEx　頭に「A」を付けると「誤作動表」。
+　・MURGEx　頭に「M」を付けると「ミュータント衝動表」になります。
+　・UURGEx　頭に「U」が付くと鬼御魂の戦闘外衝動表。
+　・CURGEx　頭に「C」で鬼御魂の戦闘中衝動表になります。
 例）URGE1　　　urge5　　　Surge2
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
@@ -561,13 +585,11 @@ INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
 ・各種表
-　・イベント表　(〜ET)
-　　・学校イベント表　　　　　　　　SET
-　　・個別学校イベント表　　　　　　PSET
-　　・オバケ屋敷イベント表　　　　　OET
-　・バタンキュー表　(〜BT)
-　　・イノセント用バタンキュー！表　IBT
-　　・スプーキー用バタンキュー！表　SBT
+　・学校イベント表　　　　　　　　SET
+　・個別学校イベント表　　　　　　PSET
+　・オバケ屋敷イベント表　　　　　OET
+　・イノセント用バタンキュー！表　IBT
+　・スプーキー用バタンキュー！表　SBT
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -595,7 +617,8 @@ INFO_MESSAGE_TEXT
     'fileName' => 'RokumonSekai2',
     'prefixs' => ['\d+RS'],
     'info' => <<INFO_MESSAGE_TEXT
-通常判定　　　　　　aRSm<=t
+・判定
+aRSm<=t
 能力値a,修正値m,目標値tで判定ロールを行います。
 Rコマンド(3R6m<=t[a])に読み替えます。
 成功度、評価、ボーナスダイスを自動表示します。
@@ -626,13 +649,11 @@ INFO_MESSAGE_TEXT
     'fileName' => 'Ryutama',
     'prefixs' => ['R\d+'],
     'info' => <<INFO_MESSAGE_TEXT
-ロール判定
+・判定
 　Rx,y>=t（x,y：使用する能力値、t：目標値）
 　1ゾロ、クリティカルも含めて判定結果を表示します
 　能力値１つでの判定は Rx>=t で行えます
-例）
-　R8,6>=13
-　Ryutama : (R8,6>=13) ＞ 6(8)+6(6) ＞ 12 ＞ クリティカル成功
+例）R8,6>=13
 INFO_MESSAGE_TEXT
   },
   {
@@ -641,7 +662,8 @@ INFO_MESSAGE_TEXT
     'fileName' => 'ShinMegamiTenseiKakuseihen',
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
-1D100<=(目標値) でスワップ・通常・逆スワップ判定を自動判定
+・判定
+1D100<=(目標値) でスワップ・通常・逆スワップ判定を判定。
 威力ダイスは nU6[6] (nはダイス個数)でロール可能です。
 INFO_MESSAGE_TEXT
   },
@@ -659,9 +681,9 @@ INFO_MESSAGE_TEXT
 　「TAGT3」のようにコマンド末尾に数字を入れると複数回一辺に引くことが出来ます。
 　・タグ決定表　(TAGT)
 　・情報イベント表　(〜IET)
-　　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)となっています。
+　　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)
 　・情報ハプニング表　(〜IHT)
-　　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)となっています。
+　　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)
 　・命中判定ファンブル表　(FumbleT)
 　・致命傷表　(FatalT)
 　・アクシデント表　(AccidentT)
@@ -689,7 +711,7 @@ INFO_MESSAGE_TEXT
     'fileName' => 'ShadowRun4',
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
-個数振り足しロール(xRn)の閾値を6にセット、バラバラロール(xBn)の目標値を5以上にセットします。
+個数振り足しロール(xRn)の境界値を6にセット、バラバラロール(xBn)の目標値を5以上にセットします。
 BコマンドとRコマンド時に、グリッチの表示を行います。
 INFO_MESSAGE_TEXT
   },
@@ -699,18 +721,22 @@ INFO_MESSAGE_TEXT
     'fileName' => 'ShinkuuGakuen',
     'prefixs' => ['CRL','CSW','CLS','CSS','CSP','CAX','CCL','CMA','CBX','CPR','CST','RL','SW','LS','SS','SP','AX','CL','BW','MA','BX','PR','ST'],
     'info' => <<INFO_MESSAGE_TEXT
+・判定
 RLx：技能ベースｘで技能チェックのダイスロール
 RLx>=y：この書式なら目標値 ｙ で判定結果出力
 　例）RL10　　RL22>=50
 
-SWx：武器（剣）を技能ベースｘでダイスロール。技発動までチェック。
-武器の対応は以下の通り
+・武器攻撃
+（武器記号）（技能ベース値）
+　例）SW10　BX30
+武器を技能ベースでダイスロール。技発動までチェック。
+武器記号は以下の通り
 　SW：剣、LS：大剣、SS：小剣、SP：槍、
 　AX：斧、CL：棍棒、BW：弓、MA：体術、
 　BX：ボクシング、PR：プロレス、ST：幽波紋
-　例）SW10　BX30
 
-カウンター技は全て頭に「C」をつけるとロール可能。
+・カウンター攻撃
+カウンター技は武器記号の頭に「C」をつけるとロール可能。
 　例）CSW10　CBX76
 INFO_MESSAGE_TEXT
   },
@@ -806,7 +832,7 @@ INFO_MESSAGE_TEXT
     'fileName' => 'TokumeiTenkousei',
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
-「1の出目でEPP獲得」、判定時の「成功」「失敗」「ゾロ目で自動振り足し」を自動判定。
+「1の出目でEPP獲得」、判定時の「成功」「失敗」「ゾロ目で自動振り足し」を判定。
 INFO_MESSAGE_TEXT
   },
   {
@@ -852,7 +878,7 @@ INFO_MESSAGE_TEXT
 　例）whH10 whA5 WHL4
 ・命中判定(WHx@t)
 　"WH(命中値)@(種別)"の形で指定します。
-　部位は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。
+　種別は脚の数を数字、翼が付いているものは「W」、手が付いているものは「H」で書きます。
 　「2H(二足)」「2W(有翼二足)」「4(四足)」「4H(半人四足)」「4W(有翼四足)」「W(鳥類)」となります。
 　命中判定を行って、当たれば部位も表示します。
 　なお、種別指定を省略すると「二足」、「@」だけにすると全種別の命中部位を表示します。(コマンドを忘れた時の対応です)
@@ -868,7 +894,7 @@ INFO_MESSAGE_TEXT
 ・チャレンジ(成功判定)(WQn)
 　n回2d6ダイスを振って判定を行います。
 　例）WQ3
-・SET（ストラクチャーカードに夜街の中の遭遇表(SETn)
+・SET（ストラクチャーカードの遭遇表(SETn)
 　ストラクチャーカードの番号(n)の遭遇表結果を得ます。
 　例）SET1　SET48
 INFO_MESSAGE_TEXT
@@ -879,7 +905,10 @@ INFO_MESSAGE_TEXT
     'fileName' => 'ZettaiReido',
     'prefixs' => ['\d+\-2DR'],
     'info' => <<INFO_MESSAGE_TEXT
-m-2DR+n>=x　：m(基本能力),n(修正値),x(目標値) DPの取得の有無も表示されます。
+・判定
+m-2DR+n>=x
+m(基本能力),n(修正値),x(目標値)
+DPの取得の有無も表示されます。
 INFO_MESSAGE_TEXT
   },
 ### DICE_BOT_INFO_END

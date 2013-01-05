@@ -14,6 +14,9 @@ package {
         }
 
         override protected function init():void {
+            title = "魔法範囲変更";
+            executeButton.label = "変更";
+            
             magicRangeName.text = magicRange.getName();
             magicRangeFeets.value = magicRange.getFeets();
             

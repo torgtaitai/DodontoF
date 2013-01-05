@@ -19,9 +19,10 @@ package {
     import mx.controls.Image;
     
     
-    public class Character extends InitiativedMovablePiece {
+    final public class Character extends InitiativedMovablePiece {
         
         protected var imageUrl:String = "";
+        protected var images:Array = new Array();
         protected var mirrored:Boolean = false;
         protected var size:int = 1;
         private var isHide:Boolean = false;
@@ -57,6 +58,7 @@ package {
         
         public static function getJsonData(name:String,
                                            imageUrl:String,
+                                           images:Array,
                                            mirrored:Boolean,
                                            size:int,
                                            isHide:Boolean,
@@ -78,6 +80,7 @@ package {
                                                     draggable, rotation);
             
             jsonData.imageName = imageUrl;
+            jsonData.images = images;
             jsonData.mirrored = mirrored;
             jsonData.size = size;
             jsonData.isHide = isHide;
@@ -91,6 +94,7 @@ package {
             var jsonData:Object = super.getJsonData();
             
             jsonData.imageName = getImageUrl();
+            jsonData.images = getImages();
             jsonData.mirrored = isMirrored();
             jsonData.size = getSize();
             jsonData.isHide = isHideMode();
@@ -102,6 +106,13 @@ package {
         
         public function setImageUrl(url_:String):void {
             this.imageUrl = url_;
+        }
+        
+        public function setImages(images_:Array):void {
+            if( images_ == null ) {
+                images_ = new Array();
+            }
+            this.images = images_;
         }
         
         public function setMirrored(b:Boolean):void {
@@ -130,6 +141,7 @@ package {
             initTextField(dogTagTextField);
             
             this.imageUrl = params.imageName;
+            setImages( params.images );
             this.mirrored = params.mirrored;
             this.size = params.size;
             this.isHide = params.isHide;
@@ -159,6 +171,17 @@ package {
         
         public function getImageUrl():String {
             return imageUrl;
+        }
+        
+        public function getImages():Array {
+            if( images == null ) {
+                images = new Array();
+            }
+            if( images.length == 0 ) {
+                images = [getImageUrl()];
+            }
+            
+            return images;
         }
         
         public function isMirrored():Boolean {
@@ -304,6 +327,26 @@ package {
             return getMap().getCharacterLayer();
         }
         
+        override protected function canDoubleClick():Boolean {
+            return true;
+        }
+        
+        override protected function doubleClickEvent(event:MouseEvent):void {
+            var list:Array = getImages();
+            var index:int = list.indexOf(this.imageUrl);
+            if(index == -1) {
+                return;
+            }
+            
+            var newIndex:int = index + 1;
+            if( newIndex > (list.length - 1) ) {
+                newIndex = 0;
+            }
+            
+            this.imageUrl = list[newIndex];
+            loadViewImage();
+        }
+        
         
         override protected function mouseDownEvent(event:MouseEvent):void {
             //キャラクター待合室を開いてるなら待合室へのドラッグ処理に差し替え
@@ -434,6 +477,7 @@ package {
             
             Log.logging("character local params changed.");
             this.imageUrl = params.imageName;
+            this.images = params.images
             this.mirrored = params.mirrored;
             this.size = params.size;
             setHide( params.isHide );

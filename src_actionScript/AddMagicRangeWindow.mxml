@@ -45,7 +45,7 @@
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button label="追加" click="execute()" />
+    <mx:Button id="executeButton" label="追加" click="execute()" />
     <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 

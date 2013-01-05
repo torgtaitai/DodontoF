@@ -13,15 +13,19 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.40.00.02(2012/11/17)"
+$version = "Ver.1.40.05(2013/01/05)"
 
 class SaveDataManagerOnMySql
   def initialize
     @tableLocked = false
+    @db = nil
   end
   
   def getDb
-    @db ||= openDb
+    if( @db.nil? )
+      @db = openDb
+    end
+    
     @db
   end
   
@@ -360,7 +364,13 @@ SQL
     
     tableName = getTableName(dirName)
     
-    count = executeCountSql("SELECT count(*) FROM #{tableName} WHERE fileName=?", fileName)
+    count = 0
+    
+    begin
+      count = executeCountSql("SELECT count(*) FROM #{tableName} WHERE fileName=?", fileName)
+    rescue
+    end
+    
     return (count >= 1)
   end
   
@@ -752,13 +762,17 @@ def mainMySql(cgiParams)
   
   saveDataManager = SaveDataManagerOnMySql.new
   
-  FileLockMySql.setSaveDataManager(saveDataManager)
-  MySqlAccesser.setSaveDataManager(saveDataManager)
-  SaveDirInfoMySql.setSaveDataManager(saveDataManager)
-  
-  server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgiParams)
-  
-  printResult(server)
+  begin
+    FileLockMySql.setSaveDataManager(saveDataManager)
+    MySqlAccesser.setSaveDataManager(saveDataManager)
+    SaveDirInfoMySql.setSaveDataManager(saveDataManager)
+    
+    server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgiParams)
+    
+    printResult(server)
+  ensure
+    saveDataManager.closeDb
+  end
 end
 
 

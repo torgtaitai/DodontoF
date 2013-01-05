@@ -50,6 +50,8 @@
     
     [Bindable]
     private var characterImageUrl:String = "";
+    
+    private var characterImages:Array = new Array();
     private var characterMirrored:Boolean = false;
     
     private function setup():void {
@@ -68,6 +70,7 @@
         setEvent();
         
         characterImageUrl = characterParams.imageUrl;
+        characterImages = characterParams.images;
         
         Log.loggingTuning("=>setup() End");
     }
@@ -131,6 +134,7 @@
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.addCharacter(characterName,
                                         characterImageUrl,
+                                        characterImages,
                                         characterMirrored,
                                         characterParams.size,
                                         characterParams.isHide,

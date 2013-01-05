@@ -10,6 +10,29 @@
   
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
   
+  <mx:HBox id="imageListBox" width="100%" height="15" 
+           paddingRight="0" paddingLeft="0" 
+           paddingTop="0" paddingBottom="0" 
+           verticalGap="0" horizontalGap="0" 
+           >
+    <mx:Button id="imageListExtendButon" label="画像切替設定" height="15" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
+    <mx:HBox id="imageListExtendSpace"
+             paddingTop="0" paddingBottom="0" 
+             width="0" height="0" enabled="false" visible="false">
+      <mx:Tile id="imageListSpace" 
+               height="65" width="0" minHeight="0" minWidth="0"
+               verticalAlign="middle"
+               horizontalAlign="center"
+               direction="horizontal" 
+               borderStyle="solid" 
+               paddingTop="1" paddingBottom="1" 
+               paddingRight="1" paddingLeft="1" 
+               verticalGap="2" horizontalGap="2" 
+               tileWidth="50" />
+      <mx:Button label="追加" height="100%" click="addImageListDefault()" />
+      <mx:Button label="削除" height="100%" click="removeImageList()" />
+    </mx:HBox>
+  </mx:HBox>
   
   <mx:DataGrid id="counterInfoListView"
                width="100%"
@@ -1142,7 +1165,7 @@
       <mx:Form width="100%"
                >
         <mx:FormItem label="参照URL:" width="100%"
-                     toolTip="設定すると、キャラクターの右クリックメニューから&#013;参照URLを開けるようになります。&#013;WEB上のキャラクターシートのULRを入力しておくと便利です"
+                     toolTip="設定すると、キャラクターの右クリックメニューから&#013;参照URLを開けるようになります。&#013;WEB上のキャラクターシートのURLを入力しておくと便利です"
                      >
 	      <mx:TextInput id="url" width="100%" />
         </mx:FormItem>
@@ -1226,49 +1249,138 @@
     import mx.controls.Image;
     import mx.controls.Alert;
     
-    private var loadingMessage:String = "ロード中・・・";
-    private var previewImage:Image = new Image();
     public var statusAlias:Object = new Object();
     protected var character:Character;
     
+    private var loadingMessage:String = "ロード中・・・";
+    private var previewImage:Image = new Image();
+    
     
     override protected function setup():void {
-        imageSelecter.addPreview(previewImage, 200);
-        
         characterImageUrl.text = loadingMessage;
-        imageSelecter.setMirrored(false);
         
-        imageSelecter.setImageClickEventFunction(imageClickEvent);
-        imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
-        imageSelecter.setDefaultTags( getDefaultTags() );
-        imageSelecter.initImage( isLoadInitImageList() );
-        
+        initImageSelecter();
         initCounterColumns();
+        initImageList();
+        
         init();
-        //initStanding();
     }
     
-    /*
-    private function initStanding():void {
-        var states:Array = DodontoF_Main.getInstance().getChatWindow().getStandingGraphics().findAllStates( characterName.text );
-        if( states.length == 0 ) {
+    private function initImageSelecter():void {
+        imageSelecter.addPreview(previewImage, 200);
+        imageSelecter.setMirrored(false);
+        imageSelecter.setImageClickEventFunction(clickImageEvent);
+        imageSelecter.setImageLoadCompleteFunction(loadImageComplete);
+        imageSelecter.setDefaultTags( getDefaultTags() );
+        imageSelecter.initImage( isLoadInitImageList() );
+    }
+    
+    protected var imageInfos:Array = new Array();
+    protected var currentImage:Image;
+    
+    protected function addImageListDefault():Image {
+        var defaultImageUrl:String = "./image/defaultImageSet/pawn/pawnBlack.png";
+        var image:Image = addImageList( defaultImageUrl );
+        return image;
+    }
+    
+    protected function addImageList(url:String):Image {
+        var image:Image = ImageSelecter.createImageAndCash(url);
+        var box:Box = ImageSelecter.createImageBox(image);
+        box.addEventListener(MouseEvent.CLICK, getClickImageListEvent(box));
+        
+        imageListSpace.addChild(box);
+        var info:Object= {
+            "imageBox": box,
+            "image":image
+        };
+        imageInfos.push(info);
+        return image;
+    }
+    
+    public function getClickImageListEvent(imageBox:Box):Function {
+        return function(event:MouseEvent):void {
+            changeBackgroundColor( imageBox );
+        }
+    }
+    
+    protected function selectImageList(index:int):void {
+        changeBackgroundColor( imageInfos[index].imageBox );
+        
+    }
+    private function changeBackgroundColor(imageBox:Box):void {
+        for(var i:int = 0 ; i < imageInfos.length ; i++) {
+            var imageInfo:Object = imageInfos[i];
+            var targetImageBox:Box = imageInfo.imageBox;
+            targetImageBox.setStyle("backgroundColor", ImageSelecter.getNonSelectedColor());
+        }
+        
+        imageBox.setStyle("backgroundColor", ImageSelecter.getSelectedColor());
+        
+        var index:int = findImageInfoIndex("imageBox", imageBox);
+        if( index == -1 ) {
+            index = imageInfos.length - 1;
+        }
+        var info:Object = imageInfos[index];
+        
+        currentImage = info.image;
+        clickImageEvent( info.image.source );
+    }
+    
+    protected function findImageInfoIndex(key:String, obj:Object):int {
+        return findImageInfoIndexByActoin( function(imageInfo:Object):Boolean {
+                return (imageInfo[key] == obj);
+            });
+    }
+    
+    protected function findImageInfoIndexByActoin(action:Function):int {
+        for(var i:int = 0 ; i < imageInfos.length ; i++) {
+            var imageInfo:Object = imageInfos[i];
+            if( action(imageInfo) ) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
+    private function removeImageList():void {
+        if( imageInfos.length <= 1 ) {
             return;
         }
         
-        standingGraphicsIsAlreadySetBox.visible = true;
-        standingGraphicsIsAlreadySetBox.height = leftIndexBox.height;
+        var index:int = findImageInfoIndex("image", currentImage);
+        if( index == -1 ) {
+            return;
+        }
         
-        leftIndexBox.visible = false;
-        leftIndexBox.height = 0;
+        var info:Object = imageInfos[index];
+        imageInfos.splice(index, 1);
+        
+        try {
+            imageListSpace.removeChild( info.imageBox );
+        } catch(e:Error) {
+        }
+        
+        var newIndex:int = index;
+        var maxIndex:int = (imageInfos.length - 1);
+        if( newIndex > maxIndex ) {
+            newIndex = maxIndex;
+        }
+        selectImageList( newIndex );
     }
-    */
+    
+    protected function initImageList():void {
+        currentImage = addImageListDefault();
+        selectImageList( 0 );
+    }
+    
     
     protected function isLoadInitImageList():Boolean {
         return true;
     }
     
     protected function getDefaultTags():Array {
-        //return [ImageTag.getCharacterTag(), ImageTag.getAllTag()];
         return [
                 ImageTag.getNoneTag(),
                 ImageTag.getCharacterTag(),
@@ -1424,13 +1536,13 @@
     protected function init():void {
     }
        
-    public function imageClickEvent(imageName:String):void {
-        characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( imageName );
+    public function clickImageEvent(imageName:String):void {
+        var url:String = imageSelecter.getImageUrlChanger().getShort( imageName );
+        characterImageUrl.text = url;
         printPreview();
     }
     
-    
-    public function imageLoadComplete():void {
+    public function loadImageComplete():void {
         if( characterImageUrl.text == loadingMessage ) {
             characterImageUrl.text =  "";
         }
@@ -1476,8 +1588,10 @@
     }
     
     public function setCharacterOnButton():void {
+        Log.logging("CharacterWindow.setCharacterOnButton Begin");
         try{
             var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+            var images:Array = getImages();
             var mirrored:Boolean = imageSelecter.isMirrored();
             var counters:Object = new Object();
             
@@ -1487,7 +1601,6 @@
             }
             Log.logging("counters", counters);
             
-            //var initiative:Number = Utils.getInitiative(characterInitiative.value, characterInitiativeModify.value);
             var initiativeInt:int = counterInfo["initiativeInt"]
             var initiativeModify:int = counterInfo["initiativeModify"]
             var initiative:Number = Utils.getInitiative(initiativeInt, initiativeModify);
@@ -1495,6 +1608,7 @@
             sendCharacterData(
                               characterName.text,
                               imageUrl,
+                              images,
                               mirrored,
                               characterSize.value,
                               isHide.selected,
@@ -1505,14 +1619,27 @@
                               url.text);
             
             PopUpManager.removePopUp(this);
-
+            
         } catch(error:Error) {
+            Log.loggingError("CharacterWindow.setCharacterOnButton Error");
             this.status = error.message;
         }
+        Log.logging("CharacterWindow.setCharacterOnButton End");
     }
 
+    private function getImages():Array {
+        var images:Array = new Array();
+        
+        for(var i:int = 0 ; i < imageInfos.length ; i++) {
+            images.push( imageInfos[i].image.source );
+        }
+        
+        return images;
+    }
+    
     public function sendCharacterData(name:String,
                                       imageUri:String,
+                                      images:Array,
                                       mirrored:Boolean,
                                       size:int,
                                       isHide:Boolean,
@@ -1528,13 +1655,29 @@
         var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
         Log.logging("imageUrl", imageUrl);
         previewImage.source = imageUrl;
+        currentImage.source = imageUrl;
     }
     
     public function openChangeStatusAliasWindow():void {
         var window:ChangeStatusAliasWindow = DodontoF.popup(ChangeStatusAliasWindow, true) as ChangeStatusAliasWindow;
         window.setCharacterWindow( this );
     }
-       
+    
+    private function extendImageList():void {
+        imageListExtendButon.visible = false;
+        imageListExtendButon.enabled = false;
+        imageListExtendButon.width = 0;
+        
+        imageListExtendSpace.visible = true;
+        imageListExtendSpace.enabled = true;
+        imageListExtendSpace.width = 650;
+        imageListSpace.width = imageListExtendSpace.width - 120;
+        imageListExtendSpace.height = 68;
+        
+        imageListBox.height = imageListExtendSpace.height;
+        this.height += imageListBox.height;
+    }
+    
     ]]>
   </mx:Script>
   

@@ -134,7 +134,9 @@ package {
             sender.deleteImage(imageUrlList, resultFunction);
         }
         
-        public function getAndCheckAddCharacterParams(characterName:String, imageUrl:String,
+        public function getAndCheckAddCharacterParams(characterName:String,
+                                                      imageUrl:String,
+                                                      images:Array,
                                                       mirrored:Boolean,
                                                       size:int, isHide:Boolean,
                                                       initiative:Number, info:String,
@@ -176,6 +178,7 @@ package {
             var characterParams:Object = new Object;
             characterParams.name = characterName;
             characterParams.imageUrl = imageUrl;
+            characterParams.images = images;
             characterParams.mirrored = mirrored;
             characterParams.size = size;
             characterParams.isHide = isHide;
@@ -188,7 +191,10 @@ package {
             return characterParams;
         }
         
-        public function addCharacter(name:String, imageUri:String, mirrored:Boolean,
+        public function addCharacter(name:String,
+                                     imageUri:String,
+                                     images:Array,
+                                     mirrored:Boolean,
                                      size:int, isHide:Boolean,
                                      initiative:Number, info:String,
                                      characterPositionX:int, characterPositionY:int,
@@ -196,7 +202,10 @@ package {
                                      url:String):void {
             
             var characterJsonData:Object =
-                Character.getJsonData(name, imageUri, mirrored,
+                Character.getJsonData(name,
+                                      imageUri, 
+                                      images,
+                                      mirrored,
                                       size, isHide,
                                       initiative, info, 0,
                                       characterPositionX, characterPositionY,
@@ -384,14 +393,17 @@ package {
         }
         
         public function changeCharacter(character:Character,
-                                        name:String, imageUri:String, mirrored:Boolean,
+                                        name:String,
+                                        imageUrl:String,
+                                        images:Array,
+                                        mirrored:Boolean,
                                         size:int, isHide:Boolean,
                                         initiative:Number, info:String,
                                         counters:Object, statusAlias:Object,
                                         url:String):void {
             Log.logging("changeCharacter start");
             Log.logging("name", name);
-            Log.logging("imageUri", imageUri);
+            Log.logging("imageUrl", imageUrl);
             Log.logging("size", size);
             Log.logging("initiative", initiative);
             Log.logging("info", info);
@@ -400,7 +412,7 @@ package {
                 throw new Error("名前を入力してください。");
             }
             
-            if( imageUri.length == 0 ) {
+            if( imageUrl.length == 0 ) {
                 throw new Error("イメージ画像のURLを入力してください。");
             }
             
@@ -409,7 +421,8 @@ package {
             }
             
             character.setName(name);
-            character.setImageUrl(imageUri);
+            character.setImageUrl(imageUrl);
+            character.setImages(images);
             character.setMirrored(mirrored);
             character.setSize(size);
             character.setHide(isHide);
@@ -670,8 +683,8 @@ package {
             sender.removeCharacters(pieces);
         }
         
-        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean):void {
-            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser);
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean, password:String):void {
+            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser, password);
         }
         
         public function removeOldPlayRoom(resultFunction:Function):void {

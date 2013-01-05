@@ -1503,10 +1503,36 @@ class DodontoFServer
   def getWebIfRefresh
     logging("getWebIfRefresh Begin")
     
+    @lastUpdateTimes = {
+      'chatMessageDataLog' => getWebIfRequestNumber('chat', -1),
+      'map' => getWebIfRequestNumber('map', -1),
+      'characters' => getWebIfRequestNumber('characters', -1),
+      'time' => getWebIfRequestNumber('time', -1),
+      'effects' => getWebIfRequestNumber('effects', -1),
+      $playRoomInfoTypeName => getWebIfRequestNumber('roomInfo', -1),
+    }
     
-    refresh()
+    @lastUpdateTimes.delete_if{|type, time| time == -1}
+    logging(@lastUpdateTimes, "getWebIfRefresh lastUpdateTimes")
     
-    logging("getWebIfRefresh End")
+    saveData = {}
+    refreshLoop(saveData)
+    
+    result = {}
+    ["chatMessageDataLog", "mapData", "characters", "graveyard", "effects"].each do |key|
+      value = saveData.delete(key)
+      next if( value.nil? )
+      
+      result[key] = value
+    end
+    
+    result['roomInfo'] = saveData
+    result['lastUpdateTimes'] = @lastUpdateTimes
+    result['result'] = 'OK'
+    
+    logging("getWebIfRefresh End result", result)
+    
+    return result
   end
   
   
@@ -1771,7 +1797,8 @@ class DodontoFServer
     roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
     
     ignoreLoginUser = true
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+    password = nil
+    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
     logging(result, "removePlayRoomByParams result")
     
     return result
@@ -2234,8 +2261,7 @@ class DodontoFServer
       return []
     end
     
-    require 'customDiceBot.rb'
-    
+    require 'cgiDiceBot.rb'
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
     logging(dir, 'dir')
@@ -2445,16 +2471,23 @@ class DodontoFServer
   end
   
   
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser)
+  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
     roomNumberRange = (roomNumber..roomNumber)
     logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
     
     unless( ignoreLoginUser )
-      loginUserCountList = getLoginUserCountList( roomNumberRange )
-      logging(loginUserCountList, "checkRemovePlayRoom loginUserCountList");
+      userNames = getLoginUserNames()
+      userCount = userNames.size
+      logging(userCount, "checkRemovePlayRoom userCount");
       
-      if( loginUserCountList[roomNumber] > 0 )
+      if( userCount > 0 )
         return "userExist"
+      end
+    end
+    
+    if( not password.nil? )
+      if( not checkPassword(roomNumber, password) )
+        return "password"
       end
     end
     
@@ -2463,43 +2496,67 @@ class DodontoFServer
     end
     
     lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    logging(lastAccessTimes, "lastAccessTimes")
     lastAccessTime = lastAccessTimes[roomNumber]
     logging(lastAccessTime, "lastAccessTime")
-    now = Time.now
-    logging(now, "now")
-    spendTimes = now - lastAccessTime
-    logging(spendTimes, "spendTimes")
-    logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-    if( spendTimes < $deletablePassedSeconds )
-      return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+    
+    unless( lastAccessTime.nil? )
+      now = Time.now
+      spendTimes = now - lastAccessTime
+      logging(spendTimes, "spendTimes")
+      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+      if( spendTimes < $deletablePassedSeconds )
+        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+      end
     end
     
     return "OK"
   end
+  
+  
+  def checkPassword(roomNumber, password)
+    
+    return true unless( $isPasswordNeedFroDeletePlayRoom )
+    
+    @saveDirInfo.setSaveDataDirIndex(roomNumber)
+    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+    isExistPlayRoomInfo = ( isExist?(trueSaveFileName) ) 
+    
+    return true unless( isExistPlayRoomInfo )
+    
+    matched = false
+    getSaveData(trueSaveFileName) do |saveData|
+      changedPassword = saveData['playRoomChangedPassword']
+      matched = isPasswordMatch?(password, changedPassword)
+    end
+    
+    return matched
+  end
+  
   
   def removePlayRoom()
     params = getParamsFromRequestData()
     
     roomNumbers = params['roomNumbers']
     ignoreLoginUser = params['ignoreLoginUser']
+    password = params['password']
+    password ||= ""
     
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
   end
   
-  def removePlayRoomByParams(roomNumbers, ignoreLoginUser)
+  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
     logging(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
     
     deletedRoomNumbers = []
-    #部屋に人がまだる場合はこの配列に入れて、後で確認を取ってから削除します。
-    askDeleteRoomNumbers = []
     errorMessages = []
+    passwordRoomNumbers = []
+    askDeleteRoomNumbers = []
     
     roomNumbers.each do |roomNumber|
       roomNumber = roomNumber.to_i
       logging(roomNumber, 'roomNumber')
       
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser)
+      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
       logging(resultText, "checkRemovePlayRoom resultText")
       
       case resultText
@@ -2507,6 +2564,8 @@ class DodontoFServer
         @saveDirInfo.removeSaveDir(roomNumber)
         removeLocalSpaceDir(roomNumber)
         deletedRoomNumbers << roomNumber
+      when "password"
+        passwordRoomNumbers << roomNumber
       when "userExist"
         askDeleteRoomNumbers << roomNumber
       else
@@ -2517,6 +2576,7 @@ class DodontoFServer
     result = {
       "deletedRoomNumbers" => deletedRoomNumbers,
       "askDeleteRoomNumbers" => askDeleteRoomNumbers,
+      "passwordRoomNumbers" => passwordRoomNumbers,
       "errorMessages" => errorMessages,
     }
     logging(result, 'result')
@@ -3012,7 +3072,7 @@ class DodontoFServer
         result['visiterMode'] = true
       else
         changedPassword = saveData['playRoomChangedPassword']
-        if( changedPassword.nil? or password.crypt(changedPassword) == changedPassword )
+        if( isPasswordMatch?(password, changedPassword) )
           result['resultText'] = "OK"
         else
           result['resultText'] = "パスワードが違います"
@@ -3022,6 +3082,12 @@ class DodontoFServer
     
     return result
   end
+  
+  def isPasswordMatch?(password, changedPassword)
+    return true if( changedPassword.nil? )
+    ( password.crypt(changedPassword) == changedPassword )
+  end
+  
   
   def logout()
     logoutData = getParamsFromRequestData()
@@ -4259,7 +4325,7 @@ class DodontoFServer
     logging(message, 'rollDice message')
     logging(gameType, 'rollDice gameType')
     
-    require 'customDiceBot.rb'
+    require 'cgiDiceBot.rb'
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
     result, randResults = bot.roll(message, gameType, dir, @diceBotTablePrefix, isNeedResult)

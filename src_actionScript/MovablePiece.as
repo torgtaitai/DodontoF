@@ -126,7 +126,29 @@ package {
             
             rotater = new Rotater();
             rotater.init(view, this);
+            
+            //initUragaeshi();
         }
+        
+        /*
+        private function initUragaeshi():void {
+            var marker:Image = new Image();
+            marker.source = uragaesi;
+            marker.width = 20 * getWidth();
+            marker.height = 20 * getWidth();
+            marker.x = 0 - marker.width;
+            marker.y = (getOwnHeight() / 2) - (marker.height / 2);
+            view.addChild(marker);
+            
+            marker.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
+                    event.stopPropagation();
+                });
+        }
+        
+        [Embed(source='image/cursor/uragaesi_b50.swf')]
+        [Bindable]
+        private var uragaesi:Class;
+        */
         
         public function getX():Number {
             return positionX;
@@ -279,6 +301,36 @@ package {
         }
         
         protected function initEventAll():void {
+            initMouseDoubleClickEvent();
+            initMouseDownEvent();
+            initMouseUpEvent();
+            initMouseOverEvent();
+            initMouseOutEvent();
+            
+            setWheelEvent();
+            
+            initEvent();
+            initRotater();
+            //            initTurnUper();
+        }
+        
+        private function initMouseDoubleClickEvent():void {
+            if( ! canDoubleClick() ) {
+                return;
+            }
+            
+            view.doubleClickEnabled = canDoubleClick();
+            view.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickEvent);
+        }
+        
+        protected function canDoubleClick():Boolean {
+            return false;
+        }
+        
+        protected function doubleClickEvent(event:MouseEvent):void {
+        }
+        
+        private function initMouseDownEvent():void {
             view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                     Rotater.stopRotation();
                     
@@ -294,7 +346,9 @@ package {
                     
                     mouseDownEvent(event);
                 });
-            
+        }
+        
+        private function initMouseUpEvent():void {
             view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                     if( draggingPiece == null ) {
                         return;
@@ -307,7 +361,9 @@ package {
                     
                     Config.getInstance().setMouseEvent(null);
                 });
-            
+        }
+        
+        private function initMouseOverEvent():void {
             view.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
                     if( isDragging() ) {
                         return;
@@ -316,7 +372,9 @@ package {
                     thisObj.zoomLittleForTeachDraggable();
                     thisObj.extendMovablePieceViewPosition( true );
                 });
-            
+        }
+        
+        private function initMouseOutEvent():void {
             view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
                     if( isDragging() ) {
                         return;
@@ -325,14 +383,7 @@ package {
                     thisObj.shrinkLittleForTeachDraggable();
                     thisObj.extendMovablePieceViewPosition( false );
                 });
-            
-            setWheelEvent();
-            
-            initEvent();
-            initRotater();
-            //            initTurnUper();
         }
-        
         
         private function setWheelEvent():void {
             

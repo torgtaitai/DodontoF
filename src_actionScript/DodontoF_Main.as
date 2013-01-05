@@ -1154,7 +1154,9 @@ package {
      children: [
         {label:"カードピックアップウィンドウ表示", data:"isCardPickUpVisible", type:"check", toggled:false},
         {type:"separator"},
-        {label:"カード配置の初期化", data:"openInitCardWindow"}
+        {label:"カード配置の初期化", data:"openInitCardWindow"},
+        {type:"separator"},
+        {label:"カードの全削除", data:"cleanCard"}
                 ]},
     
     {label:"マップ", data:"pass",

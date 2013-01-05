@@ -1,0 +1,10 @@
+image
+cards/ItrasBy/ChanceCard/ItrasBy_ChanceCard_Back.gif	チャンスカード
+cards/ItrasBy/ChanceCard/ItrasBy_CC_HN.gif	手助けが必要だ	この行動の目的を達成するためには、\nこのシーンに登場していない誰かの助けが必要だ。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_NA.gif	駄目だ、しかも…	行動は失敗、\n更に無関係な何かにも悪影響を及ぼした。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_NB.gif	駄目だ、だけど…	行動は失敗した、\nしかし当初の目的とは全く無関係な何らかの「良い事」が起きた。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_YA.gif	良し、更に…	行動は成功、\n更に目標以上の効果が得られた。\nただ、ちょっとやりすぎかも…
+cards/ItrasBy/ChanceCard/ItrasBy_CC_YB1.gif	良し、だが…	行動は成功、\nだがその成功に至る過程は、\n当初の意図とは全く別のものだった。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_YB2.gif	良し、ただし…	行動は成功、\nただし細かなディテールは当初の予定通りでは無かった。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_YB3.gif	良し、しかし…	行動は成功した。\nしかし、無関係な何かに悪影響を及ぼし、\n自分がその後始末をしなければならない。
+cards/ItrasBy/ChanceCard/ItrasBy_CC_YBOI.gif	良し、もしも…	目的は達成可能だ、\nただし何かを犠牲にするという決断をくだしたらではあるが。

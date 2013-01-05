@@ -26,6 +26,7 @@ package {
         
         public override function sendCharacterData(name:String,
                                                    imageUrl:String,
+                                                   images:Array,
                                                    mirrored:Boolean,
                                                    size:int,
                                                    isHide:Boolean,
@@ -39,6 +40,7 @@ package {
             var characterParams:Object =
                 guiInputSender.getAndCheckAddCharacterParams(name,
                                                              imageUrl, 
+                                                             images,
                                                              mirrored,
                                                              size,
                                                              isHide, 

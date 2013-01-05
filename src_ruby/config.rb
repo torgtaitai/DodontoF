@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.40.00.02"
-$versionDate = "2012/11/17"
+$versionOnly = "Ver.1.40.05"
+$versionDate = "2013/01/05"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -205,7 +205,7 @@ $uploadFileTimeLimitSeconds = (1 * 60 * 60)
 
 #古いプレイルームを一括削除する時の指定日数（日である点に注意）
 # 0 以下の値の場合、処理されません。
-$removeOldPlayRoomLimitDays = 0
+$removeOldPlayRoomLimitDays = 5
 
 #キャラクターの情報を前回との差分レベルで管理する方式（Record方式と勝手に命名）
 #コマの連続移動で移動したコマが手戻りする事がなくなり使いやすい反面、
@@ -231,6 +231,10 @@ $isMessagePackInstalled = false
 #配列なので、 ["abc", "def"] のように複数記述すると、どれかがランダムで表示されます。
 #基本変更する必要はありません。誰得機能。
 $defaultUserNames = ["ななしさん"]
+
+#部屋削除時にパスワード入力が必要かどうかを設定します
+# true ： パスワード必要、 false : パスワード不要。
+$isPasswordNeedFroDeletePlayRoom = true
 
 #ダイスボット一覧に表示するダイスボットの名前順序
 #標準添付ののダイスボットで表示したくない物ははここから削除して下さい。
@@ -266,8 +270,6 @@ $diceBotOrder = <<____END_MARKER____
 ソードワールド2.0
 ダークブレイズ
 ダブルクロス2nd,3rd
-ダンジョンズ＆ドラゴンズ3.x版
-ダンジョンズ＆ドラゴンズ4版
 墜落世界
 デモンパラサイト
 トーグ
@@ -276,11 +278,12 @@ $diceBotOrder = <<____END_MARKER____
 ナイトウィザード
 ナイトメアハンター=ディープ
 ネクロニカ
-ファンタズムアドベンチャー
+バトルテック
 パラサイトブラッド
 バルナ・クロニカ
 ハンターズムーン
 ピーカーブー
+ファンタズムアドベンチャー
 ブラッド・クルセイド
 ペンドラゴン
 マギカロギア

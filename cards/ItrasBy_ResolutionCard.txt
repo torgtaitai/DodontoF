@@ -1,0 +1,26 @@
+image
+cards/ItrasBy/ResolutionCard/ItrasBy_ResoCard_Back.gif	解決カード
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_AmorVictor.gif	愛の勝利
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Conscience.gif	悪魔と天使
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_CutScene.gif	カットシーン
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_DNGaze.gif	ドツボにはまる
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Extra.gif	エキストラ
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Flashback.gif	フラッシュバック
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_GoodAdvice.gif	良き助言
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_HbtP.gif	過去の亡霊だ! 
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_InAMirror.gif	鏡のなか、夢のなか
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_InReverse.gif	反転事象
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_InnerM.gif	自分語り
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Interview.gif	インタビュー
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Masquerade.gif	仮面舞踏会!
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Meanwhile.gif	さて一方、そちらでは…
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_MoodChange.gif	雰囲気が変わった
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Nemesis.gif	宿敵だ!
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Prosopopeia.gif	擬人化
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_RealitySplit.gif	フラグマップ
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_RumourMill.gif	人の噂は
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_Shadow.gif	自分の影
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_THFlaw.gif	欠点を見てしまった
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_TheWindTurns.gif	風が移ろう
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_TwoNews.gif	2つのニュース
+cards/ItrasBy/ResolutionCard/ItrasBy_RC_WitPockets.gif	ポケットの中には? 

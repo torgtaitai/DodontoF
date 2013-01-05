@@ -10,6 +10,24 @@ package {
             return false;
         }
     
+        override protected function initImageList():void {
+            var images:Array = character.getImages();
+            for(var i:int = 0 ; i < images.length ; i++) {
+                addImageList(images[i]);
+            }
+            
+            var index:int = findImageInfoIndexByActoin(function(imageInfo:Object):Boolean {
+                    return (imageInfo["image"].source == character.getImageUrl());
+                });
+            
+            if( index == -1 ) {
+                index = 0;
+            }
+            selectImageList( index );
+            
+            Log.logging("ChangeCharacterWindow.initImageList selectImageList index", index);
+        }
+        
         protected override function init():void {
             if( character.isOnlyOwnMap() ) {
                 PopUpManager.removePopUp(this);
@@ -25,8 +43,6 @@ package {
             
             characterSize.value = character.getSize();
             isHide.selected = character.isHideMode();
-            //characterInitiative.value = Utils.getInitiativeInt(character.getInitiative());
-            //characterInitiativeModify.value = Utils.getInitiativeModify(character.getInitiative());
             characterOtherInfo.text = character.getInfo();
             statusAlias = character.getStatusAlias();
             url.text = character.getUrl();
@@ -43,6 +59,7 @@ package {
         
         public override function sendCharacterData(name:String,
                                                    imageUrl:String,
+                                                   images:Array,
                                                    mirrored:Boolean,
                                                    size:int, isHide:Boolean,
                                                    initiative:Number,
@@ -50,13 +67,14 @@ package {
                                                    counters:Object, 
                                                    statusAlias:Object,
                                                    url:String):void {
-            Log.logging("statusAlias", statusAlias);
+            Log.logging("ChangeCharacterWindow.sendCharacterData Begin statusAlias", statusAlias);
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
             guiInputSender.changeCharacter(character,
                                            name,
                                            imageUrl,
+                                           images,
                                            mirrored,
                                            size,
                                            isHide,
@@ -65,6 +83,8 @@ package {
                                            counters,
                                            statusAlias,
                                            url);
+            
+            Log.logging("ChangeCharacterWindow.sendCharacterData End");
         }
     }
 }

@@ -153,11 +153,13 @@
     }
     
     protected function printPreview():void {
-        Log.logging("printPreview imageSource.text", imageSource.text);
+        var imageSourceText:String = imageSource.text;
+        Log.logging("printPreview imageSourceText", imageSourceText);
         
-        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
+        checkImageUrl(imageSourceText);
         
-        if( CutInMovie.isMovie(imageSource.text) ) {
+        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSourceText );
+        if( CutInMovie.isMovie(imageSourceText) ) {
             imageUrl = Config.getInstance().getFileImageUrl();
         }
         
@@ -166,6 +168,17 @@
         
         Log.logging("imageUrl", imageUrl);
         previewImage.source = imageUrl;
+    }
+    
+    protected function checkImageUrl(imageSourceText:String):void {
+        this.status = "";
+        if(  DodontoF_Main.getInstance().canUseExternalImage() ) {
+            return;
+        }
+        
+        if( Utils.isYoutubeUrl(imageSourceText) ) {
+            this.status = "YoutubeのURL指定時には「ルーム」ボタンから「プレイルーム情報変更」で外部URLを使用可にしてください";
+        }
     }
     
     protected function getCommandParams():Object {

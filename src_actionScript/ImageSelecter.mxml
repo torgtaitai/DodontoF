@@ -6,18 +6,22 @@
         verticalAlign="middle"
         height="100%" width="100%" minHeight="0" minWidth="0"
         creationComplete="constructor();"
+        paddingTop="0" paddingBottom="0" 
+        verticalGap="0" horizontalGap="0"
         >
   <mx:HBox id="imageSelectBox"
            verticalAlign="middle"
            horizontalAlign="center"
            height="100%" width="100%" minHeight="0" minWidth="0"
+           paddingTop="0" paddingBottom="0" 
+           verticalGap="0" horizontalGap="0" 
            >
     
     <mx:Box id="previewSpace"
             verticalAlign="middle"
             horizontalAlign="center"
             height="100%" width="0" minHeight="0" minWidth="0"
-      />
+            />
     
     <mx:Box id="imageSelectSpaceBoxOpener" 
             verticalAlign="middle"
@@ -60,7 +64,7 @@
       
       <mx:HBox id="tagDispalyBox" 
                visible="false"
-               width="100%" minHeight="0" minWidth="0"
+               height="0" width="100%" minHeight="0" minWidth="0"
                horizontalAlign="center" verticalAlign="middle">
         <mx:Label text="選択画像に含まれるタグ：" fontWeight="normal"/>
         <mx:TextInput id="tagList" editable="false" width="100%" text="" />
@@ -80,7 +84,6 @@
   <mx:ProgressBar id="imageProgressBar" indeterminate="true"
                   width="100%" height="0" minHeight="0" minWidth="0"
                   visible="false" mode="manual" />
-  
   
   <mx:Script>
     <![CDATA[
@@ -105,9 +108,18 @@
        private var currentPassword:String = "";
        private var canSelectMoviewFile:Boolean = false;
        
-       private var nonselectedColor:uint = 0xFFFFFF;
-       private var selectedColor:uint = 0xFFAAAA;
+       static private var nonselectedColor:uint = 0xFFFFFF;
+       static private var selectedColor:uint = 0xFFAAAA;
+       
        private var preview:UIComponent;
+       
+       static public function getNonSelectedColor():uint {
+           return nonselectedColor;
+       }
+       
+       static public function getSelectedColor():uint {
+           return selectedColor;
+       }
        
        public function constructor():void {
            addEventListener(Event.REMOVED_FROM_STAGE,
@@ -323,6 +335,13 @@
                return staticImageHash[imageUrl];
            }
            
+           var image:Image = createImageAndCash(imageUrl);
+           staticImageHash[imageUrl] = image;
+           
+           return image;
+       }
+       
+       static public function createImageAndCash(imageUrl:String):Image {
            var image:Image = new Image();
            
            image.setStyle("horizontalAlign", "center");
@@ -331,13 +350,12 @@
            image.setStyle("paddingRight", 0);
            image.height = 50;
            image.width = 50;
-           
-           staticImageHash[imageUrl] = image;
+           image.source = Config.getInstance().getUrlString(imageUrl);
            
            return image;
        }
        
-       private function createImageBox(image:Image):Box {
+       static public function createImageBox(image:Image):Box {
            var imageBox:Box = new Box();
            
            imageBox.setStyle("backgroundColor", nonselectedColor);
@@ -467,6 +485,7 @@
        
        public function setTagDisplayVisible(b:Boolean):void {
            tagDispalyBox.visible = b;
+           tagDispalyBox.height = 25;
        }
        
        public function imageClickEvent(event:MouseEvent):void {

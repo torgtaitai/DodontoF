@@ -43,6 +43,8 @@ package {
             }
             
             Utils.selectComboBox(positionCoboBox, cutInInfo.position, 'data', 3);
+            
+            checkImageUrl(imageSource.text);
         }
         
         override public function imageLoadComplete():void {
