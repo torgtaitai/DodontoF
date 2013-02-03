@@ -344,6 +344,8 @@ package {
             }
             
             this.imageUrl = list[newIndex];
+            
+            sender.changeCharacter( this.getJsonData() );
             loadViewImage();
         }
         

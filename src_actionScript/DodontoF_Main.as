@@ -1148,6 +1148,8 @@ package {
         {type:"separator"},
         {label:"墓場", data:"graveyard"},
         {label:"キャラクター待合室", data:"characterWaitingRoom"},
+        {type:"separator"},
+        {label:"回転マーカーを表示する", data:"isRotateMarkerVisible", type:"check", toggled:true},
                 ]},
     
     {label:"カード", data:"pass_card",

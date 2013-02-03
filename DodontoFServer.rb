@@ -232,7 +232,7 @@ class DodontoFServer
         saveData = loadSaveFileForCharacter(typeName, saveFileName)
       else
         saveData = loadSaveFileForDefault(typeName, saveFileName)
-      end 
+      end
     rescue => e
       loggingException(e)
       raise e
@@ -965,7 +965,7 @@ class DodontoFServer
     logging("getWebIfChatText begin")
     
     time= getWebIfRequestNumber('time', -1)
-    unless( time == -1 )
+    if( time != -1 )
       saveData = getWebIfChatTextFromTime(time)
     else
       seconds = getRequestData('sec')
@@ -985,7 +985,7 @@ class DodontoFServer
     @lastUpdateTimes = {'chatMessageDataLog' => time}
     refreshLoop(saveData)
     
-    deleteExtraChatText(time, saveData)
+    deleteOldChatTextForWebIf(time, saveData)
     
     logging(saveData, 'getWebIfChatTextFromTime saveData')
     
@@ -1006,23 +1006,26 @@ class DodontoFServer
       saveData.merge!(targetSaveData)
     end
     
-    deleteExtraChatText(time, saveData)
+    deleteOldChatTextForWebIf(time, saveData)
     
     logging("getCurrentSaveData end saveData", saveData)
     
     return saveData
   end
   
-  def deleteExtraChatText(time, saveData)
-    logging(time, 'deleteExtraChatText time')
+  def deleteOldChatTextForWebIf(time, saveData)
+    logging(time, 'deleteOldChatTextForWebIf time')
+    
+    return if( time.nil? )
     
     chats = saveData['chatMessageDataLog']
     return if( chats.nil? )
     
     chats.delete_if do |writtenTime, data|
-      logging(writtenTime, 'writtenTime')
-      (writtenTime < time)
+      ((writtenTime < time) or (not data['sendto'].nil?))
     end
+    
+    logging('deleteOldChatTextForWebIf End')
   end
   
   
@@ -1503,8 +1506,10 @@ class DodontoFServer
   def getWebIfRefresh
     logging("getWebIfRefresh Begin")
     
+    chatTime = getWebIfRequestNumber('chat', -1)
+    
     @lastUpdateTimes = {
-      'chatMessageDataLog' => getWebIfRequestNumber('chat', -1),
+      'chatMessageDataLog' => chatTime,
       'map' => getWebIfRequestNumber('map', -1),
       'characters' => getWebIfRequestNumber('characters', -1),
       'time' => getWebIfRequestNumber('time', -1),
@@ -1517,6 +1522,7 @@ class DodontoFServer
     
     saveData = {}
     refreshLoop(saveData)
+    deleteOldChatTextForWebIf(chatTime, saveData)
     
     result = {}
     ["chatMessageDataLog", "mapData", "characters", "graveyard", "effects"].each do |key|
@@ -4396,7 +4402,6 @@ class DodontoFServer
     chatData = getParamsFromRequestData()
     
     password = chatData["password"]
-    logging(password, "password check...")
     return result unless( password == $mentenanceModePassword )
     
     logging("adminPoassword check OK.")

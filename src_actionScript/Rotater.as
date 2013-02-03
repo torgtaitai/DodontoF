@@ -52,12 +52,22 @@ package {
             is2ndMarker = b;
         }
         
-        private function setMarkerVisible(marker:UIComponent, visible:Boolean):void {
-            if( marker == null ) {
+        static private var isRotateMarkerGlobalVisible:Boolean = true;
+        
+        static public function setGlobalVisible( b:Boolean ) :void {
+            isRotateMarkerGlobalVisible = b;
+        }
+        
+        private function setRotateMarkerVisible(visible:Boolean):void {
+            if( rotateMarker == null ) {
                 return;
             }
             
-            marker.visible = visible;
+            if( ! isRotateMarkerGlobalVisible ) {
+                visible = false;
+            }
+            
+            rotateMarker.visible = visible;
         }
         
         private function initEvent():void {
@@ -67,7 +77,7 @@ package {
                 }
                 
                 if( ! isRotating() ) {
-                    setMarkerVisible(thisObj.rotateMarker, true);
+                    thisObj.setRotateMarkerVisible(true);
                 }
             };
             view.addEventListener(MouseEvent.MOUSE_OVER, markerVisibler);
@@ -75,7 +85,7 @@ package {
             
             view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
                 if( ! isRotating() ) {
-                    setMarkerVisible(thisObj.rotateMarker, false);
+                    thisObj.setRotateMarkerVisible(false);
                 }
             });
         }
@@ -152,18 +162,16 @@ package {
             }
             
             initMarkerBasePosition();
+            initRotateMarkerPosition();
             
-            var marker:UIComponent = rotateMarker;
-            initMarkerPosition(marker);
-            
-            marker.width = getMarkerWidth();
-            marker.height = getMarkerWidth();
+            rotateMarker.width = getMarkerWidth();
+            rotateMarker.height = getMarkerWidth();
         }
         
-        private function initMarkerPosition(marker:UIComponent):void {
+        private function initRotateMarkerPosition():void {
             var point:Point = getMarkerInitPoint();
-            marker.x = point.x;
-            marker.y = point.y;
+            rotateMarker.x = point.x;
+            rotateMarker.y = point.y;
         }
         
         private function getMarkerInitPoint():Point {
@@ -180,10 +188,10 @@ package {
         private function addRotateRotateMarker():void {
             rotateMarker.width = getMarkerWidth();
             rotateMarker.height = getMarkerWidth();
-            rotateMarker.visible = false;
             
-            initMarkerPosition(rotateMarker);
-            rotateMarker.visible = false;
+            setRotateMarkerVisible( false );
+            initRotateMarkerPosition();
+            
             addMouseDownEventToRotateMarker();
             addMouseMoveEventToRotateMarker();
             addMouseUpEventToRotateMarker();
@@ -251,10 +259,10 @@ package {
         private function stopRotationFunction(event:MouseEvent = null):void {
             rotateMarker.stopDrag();
             
-            var rotation:Number = thisObj.getRotationOnMarker(rotateMarker.x, rotateMarker.y, event);
+            var rotation:Number = getRotationOnMarker(rotateMarker.x, rotateMarker.y, event);
             
-            thisObj.initMarkerPosition(rotateMarker);
-            rotateMarker.visible = false;
+            initRotateMarkerPosition();
+            setRotateMarkerVisible( false );
             
             clearRotateImage();
             

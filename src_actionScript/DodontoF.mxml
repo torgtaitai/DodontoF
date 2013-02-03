@@ -398,6 +398,9 @@
             if( ! CharacterWaitingRoomWindow.isOpened() ) {
                 popup(CharacterWaitingRoomWindow, true);
             }
+        } else if( menuName == "isRotateMarkerVisible" ) {
+            var isRotateMarkerVisible:Boolean = toggled;
+            Rotater.setGlobalVisible( isRotateMarkerVisible );
         } else if( menuName == "clearCards" ) {
             dodontoF_Main.clearCards();
         } else if( menuName == "isCardPickUpVisible" ) {
