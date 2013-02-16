@@ -73,7 +73,7 @@
         previewLoader.setLoadImageCompleate( function():void {
                 thisObj.previewLoader.setMirrored(mirrored);
                 thisObj.previewLoader.clearSquares();
-                thisObj.previewLoader.drawGrid();
+                thisObj.previewLoader.drawGrid(map.getGridColor(), map.getGridInterval(), map.isAlternatelyMode());
                 thisObj.previewLoader.drawSquare( mapMarks, thisObj.getColor, thisObj.setColor );
             });
         

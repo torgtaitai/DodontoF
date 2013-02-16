@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.40.08"
-$versionDate = "2013/01/23"
+$versionOnly = "Ver.1.40.09.02"
+$versionDate = "2013/02/16"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -236,6 +236,13 @@ $defaultUserNames = ["ななしさん"]
 # true ： パスワード必要、 false : パスワード不要。
 $isPasswordNeedFroDeletePlayRoom = true
 
+
+#マップにペンで書き込める最大書き込み可能量。
+#単位は線の本数。細かい直線をは本数が増え、消しゴムでも書き込み量は増え続けます。
+$drawLineCountLimit = 3000
+
+
+
 #ダイスボット一覧に表示するダイスボットの名前順序
 #標準添付ののダイスボットで表示したくない物ははここから削除して下さい。
 #
@@ -250,6 +257,7 @@ $diceBotOrder = <<____END_MARKER____
 アルスマギカ
 ウィッチクエスト
 ウォーハンマー
+エリュシオン
 エルリック！
 エムブリオマシン
 カードランカー

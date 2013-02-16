@@ -204,7 +204,13 @@ package {
             var square:PaintablePreviewLoaderSquare = new PaintablePreviewLoaderSquare();
             
             var length:Number = getLength();
-            square.x = x * length;
+            
+            var xPadding:int = 0;
+            if( DodontoF_Main.getInstance().getMap().isAlternatelyPosition(y) ) {
+                xPadding = -1 * length / 2;
+            }
+            
+            square.x = x * length + xPadding;
             square.y = y * length;
             square.width = length;
             square.height = length;
@@ -294,5 +300,16 @@ package {
             view.setColor(color);
             view.drawSquare();
         }
+        
+        override protected function getWidthSize():int {
+            var width:int =  super.getWidthSize();
+            
+            if( DodontoF_Main.getInstance().getMap().isAlternatelyMode() ){
+                width++;
+            }
+            
+            return  width;
+        }
+        
     }
 }

@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.40.08(2013/01/23)";
+        private var version:String = "Ver.1.40.09.02(2013/02/16)";
         
         public function getVersion():String {
             return version;
@@ -481,5 +481,18 @@ package {
         }
         
         
+        public function isGameType(target:String):Boolean {
+            var gameType:String = ChatWindow.getInstance().diceBotGameType.selectedItem.gameType;
+            return (target == gameType);
+        }
+        
+        public function isHaveZeroDice(maxNumber:int):Boolean {
+            if( isGameType("Elysion") ) {
+                if( maxNumber == 6 ) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

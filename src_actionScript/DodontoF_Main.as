@@ -487,6 +487,11 @@ package {
                              function():void { thisObj.logoutExecute() });
         }
         
+        public function logoutFromReplay():void {
+            Utils.askByAlert("ログイン画面に戻る", "リプレイ再生を止め、ログイン画面に戻りますか？", 
+                             function():void { thisObj.logoutExecute() });
+        }
+        
         public function logoutExecute():void {
             stopSessionRecording();
             

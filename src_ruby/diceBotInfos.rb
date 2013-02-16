@@ -106,7 +106,7 @@ INFO_MESSAGE_TEXT
 　　左上半身にSRM6連を技能ベース5目標値8で3回判定
 ・CT：致命的命中表
 ・DW：転倒後の向き表
-・CDx：メッwク戦士意識維持表。ダメージ値xで判定　例）CD3
+・CDx：メック戦士意識維持表。ダメージ値xで判定　例）CD3
 INFO_MESSAGE_TEXT
   },
   {
@@ -301,6 +301,23 @@ INFO_MESSAGE_TEXT
     'prefixs' => [],
     'info' => <<INFO_MESSAGE_TEXT
 貫通、クリティカル、ファンブルの自動判定を行います。
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'エリュシオン',
+    'gameType' => 'Elysion',
+    'fileName' => 'Elysion',
+    'prefixs' => ['date.*','EL.*'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定（ELn+m）
+　能力値 n 、既存の達成値 m（アシストの場合）
+例）
+　EL3　：能力値３で判定。 
+　EL5+10：能力値５、達成値が１０の状態にアシストで判定。
+・デート表（DATE）
+　2人が「DATE」とコマンドをそれぞれ1回ずつ打つと、両者を組み合わせてデート表の結果が表示されます。
+・デート表（DATE[PC名1,PC名2]）
+　1コマンドでデート判定を行い、デート表の結果を表示します。
 INFO_MESSAGE_TEXT
   },
   {

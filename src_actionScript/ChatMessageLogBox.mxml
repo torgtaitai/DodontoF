@@ -30,6 +30,11 @@
         private var buffer:Array = new Array();
         private var allChatLogList:Array = new Array();
         private var chatFontSize:int = 11;
+        private var channel:int = 0;
+        
+        public function setChannel(channel_:int):void {
+            this.channel = channel_;
+        }
         
         public function init(novelticMode:NovelticMode):void {
             defaultLabel = this.label;
@@ -155,7 +160,9 @@
             
             if( isFirstLoadFinished ) {
                 Log.logging("talk Text");
-                new TextTalker().sendTexts(tmpBuffer);
+                var talker:TextTalker = new TextTalker()
+                talker.setChannel(channel);
+                talker.sendTexts(tmpBuffer);
                 //new BouyomiChan().sendTexts(tmpBuffer);
             }
             

@@ -15,52 +15,13 @@ package {
         override protected function executeCommand(params:Object):void {
             Log.logging("CutInCommandRollVisualDice.executeCommand params", params);
             
-            //addCard(params);
             rollDice(params);
+            
+            executeGameCommand(params);
         }
         
         
-        private var cardRankerRandomChoice:RegExp = /CardRanker : .*ランダムモンスター選択.+：(.+)/m;
-        
-        private function addCard(params:Object):void {
-            
-            if( ChatWindow.getInstance().diceBotGameType.selectedItem.gameType != "CardRanker" ) {
-                Log.logging("カードランカーではないので、この処理は無し");
-                return;
-            }
-            
-            if( params.uniqueId != DodontoF_Main.getInstance().getStrictlyUniqueId() ) {
-                Log.logging("自分自身の発言でないなら、カード追加処理は無し");
-                return;
-            }
-            
-            Log.logging("CutInCommandRollVisualDice.addCard params.chatMessage", params.chatMessage);
-            var result:Object = cardRankerRandomChoice.exec(params.chatMessage);
-            Log.logging("addCard match result", result);
-            if( result == null ) {
-                return;
-            }
-            
-            Log.logging("カードランカーカードを自動作製！");
-            
-            var monsterName:String = result[1];
-            Log.logging("monsterName", monsterName);
-            
-            //var color:uint = 0xFFFFFF;//Utils.getComplementaryColor( ChatWindow.getInstance().getChatFontColorValue() );
-            //DodontoF_Main.getInstance().getGuiInputSender().addMapMarker(monsterName, color, true, 1, 1, 6, 0);
-            //return;
-            
-            var imageName:String = 'cards/cardRanker/Ningyo.png';
-            if( (count++ % 2) != 0 ) {
-                imageName = 'cards/cardRanker/Red_4.png';
-            }
-            DodontoF_Main.getInstance().getGuiInputSender().getSender()
-                .addCardRankerCard(imageName,
-                                   imageName,
-                                   100, 100);
-        }
-        private var count:int = 0;
-        
+        //汎用のダイスロール処理
         private function rollDice(params:Object):void {
             var randResults:Array = getRandResults(params);
             Log.logging("randResults", randResults);
@@ -175,6 +136,20 @@ package {
             
             return diceBox.visible;
         }
+        
+        
+        
+        private function executeGameCommand(params:Object):void {
+            for each(var gameCommand:GameCommand in gameCommands) {
+                if( Config.getInstance().isGameType( gameCommand.getGameType() )) {
+                    gameCommand.executeCommand(params);
+                    return;
+                }
+            }
+        }
+        
+        private var gameCommands:Array = [new ElysionCommand()];
+        //                                          new CardRankerCommand()];
         
     }
 }

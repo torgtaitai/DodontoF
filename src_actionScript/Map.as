@@ -459,25 +459,25 @@ package {
         public function getSnapViewPoint(viewX:Number, viewY:Number, squareLength:int):Point {
             var y:Number = getSnapPositionFromViewPosition(viewY, squareLength, false);
             
-            var isAlternatelyPosition:Boolean = isAlternatelyPosition(y);
-            var x:Number = getSnapPositionFromViewPosition(viewX, squareLength, isAlternatelyPosition);
+            var isAlternatelyLocal:Boolean = isAlternatelyPosition(y);
+            var x:Number = getSnapPositionFromViewPosition(viewX, squareLength, isAlternatelyLocal);
             
             return new Point(x, y);
         }
         
         private function getSnapPositionFromViewPosition(position:Number, squareLength:int,
-                                                                isAlternatelyPosition:Boolean):Number {
+                                                                isAlternatelyLocal:Boolean):Number {
             Log.logging("position : ", position);
             
             var newPosition:Number = (position / squareLength);
             
-            if( isAlternatelyPosition ) {
+            if( isAlternatelyLocal ) {
                 newPosition += 0.5;
             }
             if( Config.getInstance().isSnapMovablePieceMode() ) {
                 newPosition = Math.round( newPosition );
             }
-            if( isAlternatelyPosition ) {
+            if( isAlternatelyLocal ) {
                 newPosition -= 0.5;
             }
             
@@ -486,7 +486,7 @@ package {
             return newPosition;
         }
         
-        private function isAlternatelyPosition(y:Number):Boolean {
+        public function isAlternatelyPosition(y:Number):Boolean {
             Log.logging("isAlternatelyPosition Begin");
             
             
@@ -933,13 +933,18 @@ package {
                         var color:int = squareColors[y][x];
                         Log.logging("color", color);
                         
+                        var xPadding:Number = 0;
+                        if( isAlternatelyPosition(y) ) {
+                            xPadding = -1 * getSquareLength() / 2;
+                        }
+                        
                         if( color >= 0 ) {
                             Log.logging("drawing...");
                             Log.logging("x", x * getSquareLength());
                             Log.logging("y", y * getSquareLength());
                             Log.logging("getSquareLength", getSquareLength());
                             marksLayer.graphics.beginFill(color);
-                            marksLayer.graphics.drawRect(x * getSquareLength(),
+                            marksLayer.graphics.drawRect(x * getSquareLength() + xPadding,
                                                          y * getSquareLength(),
                                                          getSquareLength(),
                                                          getSquareLength());

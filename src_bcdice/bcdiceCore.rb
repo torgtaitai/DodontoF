@@ -140,6 +140,10 @@ class BCDice
     debug("@message", @message)
   end
   
+  def getOriginalMessage
+    @messageOriginal
+  end
+  
   #直接TALKでは大文字小文字を考慮したいのでここでオリジナルの文字列に変更
   def changeMessageOriginal
     @message = @messageOriginal
@@ -1819,6 +1823,9 @@ class BCDice
     when /(^|\s)BattleTech$/i
       require 'diceBot/BattleTech'
       diceBot = BattleTech.new
+    when /(^|\s)Elysion$/i
+      require 'diceBot/Elysion'
+      diceBot = Elysion.new
     when /(^|\s)None$/i, ""
       diceBot = DiceBot.new
     else

@@ -2133,6 +2133,7 @@ class DodontoFServer
       'diceBotInfos' => diceBotInfos,
       'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
       'defaultUserNames' => $defaultUserNames,
+      'drawLineCountLimit' => $drawLineCountLimit,
     }
     
     logging(result, "result")

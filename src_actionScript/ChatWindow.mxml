@@ -206,7 +206,7 @@
         
         [Embed(source='image/icons/emoticon_grin.png')]
         [Bindable]
-        private static var talkIcon:Class;
+        public static var talkIcon:Class;
         
         [Embed(source='image/icons/emoticon_smile.png')]
         [Bindable]
@@ -514,13 +514,14 @@
         
         public function addChannel(labelName:String):void {
             var box:ChatMessageLogBox = new ChatMessageLogBox();
-            box.label = labelName
+            box.label = labelName;
             box.init(novelticMode);
             
             chatMessageLogBoxTab.addChild(box);
             chatMessageLogBoxTab.validateNow();
             
             channels.push(box);
+            box.setChannel(channels.length - 1);
         }
         
         public function get publicChatChannel():int {
@@ -584,6 +585,8 @@
             
             var channel:int = getSelectedChatChannleIndex();
             chatMessageLogBoxTab.getTabAt(channel).styleName = undefined;
+            
+            setTalkButton();
         }
         
         public function setChatChannelVisible(channel:int, b:Boolean):void {
@@ -1835,19 +1838,27 @@
             }
         }
         
-        private var isTalking:Boolean = false;
-        
-        public function isTalkMode():Boolean {
-            return isTalking;
+        public function isTalkMode(targetChannel:int):Boolean {
+            var box:ChatMessageLogBox = getChatChannle(targetChannel);
+            return (box.icon != null);
         }
         
         private function setTalkMode():void {
-            isTalking = ( ! isTalking );
+            var channel:int = getSelectedChatChannleIndex();
+            var box:ChatMessageLogBox = getChatChannle(channel);
+            
+            if( box.icon == null ) {
+                box.icon = talkIcon;
+            } else {
+                box.icon = null;
+            }
             setTalkButton();
         }
         
         private function setTalkButton():void {
-            if( isTalking ) {
+            var channel:int = getSelectedChatChannleIndex();
+            
+            if( isTalkMode(channel) ) {
                 talkButton.source = talkIcon;
                 talkButton.toolTip = "テキスト読み上げあり";
             } else {

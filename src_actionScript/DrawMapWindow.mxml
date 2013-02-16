@@ -8,7 +8,7 @@
    creationComplete="setup()"
    >
   
-  <mx:HBox width="100%">
+  <mx:HBox id="penBox" width="100%">
     <mx:Button id="pencil"
                icon="{pencilIcon}"
                click="setMapDrawMode(pencilMode)"
@@ -19,19 +19,6 @@
                horizontalGap="0"
                width="25"
                />
-    
-<!--
-    <mx:Button id="line"
-               icon="{lineIcon}"
-               click="setMapDrawMode(lineMode)"
-               toolTip="Shiftで45度刻み&#13;Ctrlでマス目に吸着"
-               toggle="true"
-               selected="true"
-               verticalGap="0"
-               horizontalGap="0"
-               width="25"
-               />
--->
     
     <mx:Button id="eraser"
                icon="{eraserIcon}"
@@ -65,7 +52,7 @@
   
   <mx:Spacer height="10" />
   
-  <mx:HBox width="100%" >
+  <mx:HBox id="lineWeightBox" width="100%" >
     <mx:Label text="太さ:" />
     <mx:HSlider id="lineWeight" 
                 width="200"
@@ -131,6 +118,10 @@
     static private var lineCountLimit:int = 3000;
     static private var totalLineCount:int = 0;
     
+    static public function setLineCountLimit(count:int):void {
+        lineCountLimit = count;
+    }
+    
     static public function setLineCount(count:int):void {
         totalLineCount = count;
         
@@ -146,6 +137,8 @@
     public function setLineCountLocal():void {
         lineCounter.setProgress(totalLineCount, lineCountLimit);
         printLineCounterLabel();
+        
+        checkLimit();
     }
     
     private function printLineCounterLabel():void {
@@ -175,8 +168,23 @@
         }
         
         var isDrawMode:Boolean = button.selected;
+        thisObj.openLocal(isDrawMode);
+    }
+    
+    private function openLocal(isDrawMode:Boolean):void {
+        if( ! checkLimit() ) {
+            return;
+        }
         
+        setDrawMode(isDrawMode);
+    }
+    
+    static public function setDrawMode(isDrawMode:Boolean):void {
         thisObj.visible = isDrawMode;
+        setDrawModeLocal(isDrawMode);
+    }
+    
+    static private function setDrawModeLocal(isDrawMode:Boolean):void {
         getMap().setDrawMode( isDrawMode );
         
         if( isDrawMode ) {
@@ -245,7 +253,6 @@
     private function setMapDrawMode(mode:int):void {
         eraser.selected = (mode == eraserMode);
         pencil.selected = (mode == pencilMode);
-        //line.selected = (mode == lineMode);
         
         lineWeight.value = ( mode == eraserMode ? eraserLineWeight  : pencilLineWeight );
         lineWeightStep.value = lineWeight.value;
@@ -253,8 +260,29 @@
         setDrawState();
     }
     
+    private function checkLimit():Boolean {
+        if (totalLineCount <= lineCountLimit) {
+            blockBoxes(true);
+            return true;
+        }
+        
+        blockBoxes(false);
+        blockDraw();
+        return false;
+    }
+    
+    private function blockBoxes(b:Boolean):void {
+        penBox.enabled = b;
+        lineWeightBox.enabled = b;
+        lineWeightStep.enabled = b;
+    }
+    
+    private function blockDraw():void {
+        lineCounter.label = "書き込み量が上限です。「全削除」して下さい";
+        setDrawModeLocal(false);
+    }
+    
     private function isPencilMode():Boolean {
-        //return (pencil.selected || line.selected);
         return pencil.selected;
     }
     
@@ -291,7 +319,7 @@
     }
     
     private function setDrawState():void {
-        getMap().setDrawState(lineWeight.value, colorPicker.selectedColor, eraser.selected, false);//line.selected);
+        getMap().setDrawState(lineWeight.value, colorPicker.selectedColor, eraser.selected, false);
     }
     
     

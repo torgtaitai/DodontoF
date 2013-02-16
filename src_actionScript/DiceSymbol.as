@@ -120,13 +120,16 @@ package {
                 loopCount = limitMaxNumber;
             }
             
+            var separatorBefore:Boolean = true;
+            if( Config.getInstance().isHaveZeroDice(maxNumber) ) {
+                pushSetDiceNumberMenuItem(menu, 0, separatorBefore);
+                separatorBefore = false;
+            }
+            
             for(var i:int = 0 ; i < loopCount ; i++) {
-                var separatorBefore:Boolean = ( i == 0 );
                 var n:int = i + 1;
-                allMenus.push( addMenuItem(menu,
-                                           "ダイス目を" + n + "に",
-                                           getMenuItemFunctionChangeNumber(n),
-                                           separatorBefore) );
+                pushSetDiceNumberMenuItem(menu, n, separatorBefore);
+                separatorBefore = false;
             }
             
             if( this.maxNumber > limitMaxNumber ) {
@@ -141,6 +144,13 @@ package {
             allMenus.push( addMenuItem(menu, "ダイスの削除", this.getContextMenuItemRemoveCharacter, true) );
             
             view.contextMenu = menu;
+        }
+        
+        private function pushSetDiceNumberMenuItem(menu:ContextMenu, n:int, separatorBefore:Boolean):void {
+            allMenus.push( addMenuItem(menu,
+                                       "ダイス目を" + n + "に",
+                                       getMenuItemFunctionChangeNumber(n),
+                                       separatorBefore) );
         }
         
         private function getContextMenuItemOpenDice(event:ContextMenuEvent):void {

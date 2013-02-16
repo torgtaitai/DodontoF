@@ -71,7 +71,15 @@
     }
     
     private function changeView():void {
+        
         number.maximum = maxNumber.selectedItem.data;
+        
+        number.minimum = 1;
+        
+        if( Config.getInstance().isHaveZeroDice(number.maximum) ) {
+            number.minimum = 0; 
+        }
+        
         number.callLater(function():void {
                 var source:String = DiceInfo.getDiceImageUrlGlobal(maxNumber.selectedItem.data, number.value);
                 source = Config.getInstance().getUrlString(source);

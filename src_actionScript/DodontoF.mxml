@@ -84,6 +84,7 @@
       <mx:CheckBox id="isRepeat" label="繰り返し" selected="false"
                    visible="false" width="0"
                    />
+      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logoutFromReplay()" label="戻る" />
     </mx:HBox>
     
   </mx:ApplicationControlBar>

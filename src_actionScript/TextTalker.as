@@ -11,7 +11,12 @@ package {
     
     public class TextTalker {
         
+        private var channel:int = 0;
         private var buffer:String = "";
+        
+        public function setChannel(channel_:int):void {
+            this.channel = channel_;
+        }
         
         public function sendTexts(texts:Array):void {
             if( ! isTalkMode() ) {
@@ -94,7 +99,11 @@ package {
                 return false;
             }
             
-            return window.isTalkMode();
+            var isTalk:Boolean = window.isTalkMode(channel);
+            Log.logging("isTalkMode channel", channel);
+            Log.logging("isTalk", isTalk);
+            
+            return isTalk;
         }
         
         //private var sound:Sound;

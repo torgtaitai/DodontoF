@@ -535,6 +535,8 @@
         saveUniqeId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
         
+        DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
+        
         DodontoF_Main.getInstance().setLoginTimeLimitSecond( jsonData.loginTimeLimitSecond );
         DodontoF_Main.getInstance().setRefreshTimeout( jsonData.refreshTimeout );
         DodontoF_Main.getInstance().setRefreshInterval( jsonData.refreshInterval );
