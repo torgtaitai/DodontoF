@@ -32,29 +32,33 @@ package {
             }
             
             var resultText:String = getRollResultText(params);
-            Log.logging("resultText", resultText);
             
             for(var i:int = 0 ; i < randResults.length ; i++) {
-                
                 var result:Array = randResults[i];
-                if( (result == null) || (result.length != 2) ) {
-                    continue;
-                }
-                
-                var value:int = result[0];
-                var diceType:int = result[1];
-                
-                if( DiceInfo.isValidDiceMax(diceType) ) {
-                    if( diceType == 100 ) {
-                        addDice(100, getD10Value(value / 10), resultText);
-                        addDice( 10, getD10Value(value % 10), resultText);
-                    } else {
-                        addDice(diceType, value, resultText);
-                    }
-                }
+                rollDiceByRandResult(result, resultText);
             }
             
             getDiceBox().castDice();
+        }
+        
+        private function rollDiceByRandResult(result:Array, resultText:String):void {
+            if( (result == null) || (result.length != 2) ) {
+                return;
+            }
+            
+            var value:int = result[0];
+            var diceType:int = result[1];
+            
+            if( ! DiceInfo.isValidDiceMax(diceType) ) {
+                return;
+            }
+            
+            if( diceType == 100 ) {
+                addDice(100, getD10Value(value / 10), resultText);
+                addDice( 10, getD10Value(value % 10), resultText);
+            } else {
+                addDice(diceType, value, resultText);
+            }
         }
         
         private function getRandResults(params:Object):Array {
@@ -81,14 +85,15 @@ package {
             return value;
         }
         
+        private var diceBotResultReg:RegExp = /→\s*([^→]+)\Z/;
+        
         private function getRollResultText(params:Object):String {
             var message:String = params.chatMessage;
             if( message == null ) {
                 return "";
             }
             
-            var tailReg:RegExp = /→\s*([^→]+)\Z/;
-            var result:Object = tailReg.exec(message);
+            var result:Object = diceBotResultReg.exec(message);
             
             if( result == null ) {
                 return getSimpleMessage(message);
@@ -148,8 +153,8 @@ package {
             }
         }
         
-        private var gameCommands:Array = [new ElysionCommand()];
-        //                                          new CardRankerCommand()];
+        private var gameCommands:Array = [new ElysionCommand(),
+                                          new CardRankerCommand()];
         
     }
 }

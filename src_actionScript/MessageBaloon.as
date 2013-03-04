@@ -70,6 +70,13 @@ package {
         private var lineLimitLength:int = 30;
         
         private function getSplitText(text:String):Array {
+            
+            var enterIndex:int = text.indexOf("\n");
+            if( enterIndex != -1) {
+                var firstLine:String = text.slice(0, enterIndex);
+                return [firstLine];
+            }
+            
             var parts:Array = text.split(/。/);
             var result:Array = [];
             

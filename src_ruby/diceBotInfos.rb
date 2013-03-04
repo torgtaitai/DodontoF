@@ -307,17 +307,22 @@ INFO_MESSAGE_TEXT
     'name' => 'エリュシオン',
     'gameType' => 'Elysion',
     'fileName' => 'Elysion',
-    'prefixs' => ['date.*','EL.*'],
+    'prefixs' => ['date.*','EL.*','RBT','SBT','BBT','CBT','DBT','IBT','FBT','LBT','PBT','NBT','ABT','VBT','GBT','BFT','FWT','FT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定（ELn+m）
 　能力値 n 、既存の達成値 m（アシストの場合）
-例）
-　EL3　：能力値３で判定。 
-　EL5+10：能力値５、達成値が１０の状態にアシストで判定。
+例）EL3　：能力値３で判定。 
+　　EL5+10：能力値５、達成値が１０の状態にアシストで判定。
+・ファンブル表 FT
+・戦場表 BFT
+・致命傷表 FWT
+・休憩表（〜BT）
+  教室 RBT／購買 SBT／部室 BBT／生徒会室 CBT／学生寮 DBT／図書館 IBT／屋上 FBT／研究室 LBT／プール PBT／中庭 NBT／商店街 ABT／廃墟 VBT／ゲート GBT
 ・デート表（DATE）
 　2人が「DATE」とコマンドをそれぞれ1回ずつ打つと、両者を組み合わせてデート表の結果が表示されます。
 ・デート表（DATE[PC名1,PC名2]）
 　1コマンドでデート判定を行い、デート表の結果を表示します。
+・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
   {
