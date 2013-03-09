@@ -1465,6 +1465,16 @@ package {
             sendCommandData(obj, resultFunction);
         }
         
+        public function getCardList(mountName:String, resultFunction:Function):void {
+            var data:Object = {
+                "mountName": mountName
+            };
+            
+            var obj:Object = getParamObject("getCardList", data);
+            sendCommandData(obj, resultFunction);
+        }
+        
+        
         public function deleteChatLog(resultFunction:Function):void {
             var data:Object = {
             };

@@ -715,5 +715,9 @@ package {
             sender.getTrushMountCardInfos(mountName, mountId, resultFunction);
         }
         
+        public function getCardList(mountName:String, resultFunction:Function):void {
+            sender.getCardList(mountName, resultFunction);
+        }
+        
     }
 }

@@ -144,6 +144,11 @@ class Card
          'fileName' => 'cards/ItrasBy_ResolutionCard.txt',
        },
        
+       { 'type' => 'CardRanker',
+         'title' => 'カードランカー',
+         'fileName' => 'cards/cardRanker.txt',
+       },
+       
        
       ]
   end

@@ -307,7 +307,7 @@ INFO_MESSAGE_TEXT
     'name' => 'エリュシオン',
     'gameType' => 'Elysion',
     'fileName' => 'Elysion',
-    'prefixs' => ['date.*','EL.*','RBT','SBT','BBT','CBT','DBT','IBT','FBT','LBT','PBT','NBT','ABT','VBT','GBT','BFT','FWT','FT'],
+    'prefixs' => ['date.*','EL.*','RBT','SBT','BBT','CBT','DBT','IBT','FBT','LBT','PBT','NBT','ABT','VBT','GBT','BFT','FWT','FT','SRT','ORT','DRT','URT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定（ELn+m）
 　能力値 n 、既存の達成値 m（アシストの場合）
@@ -318,6 +318,8 @@ INFO_MESSAGE_TEXT
 ・致命傷表 FWT
 ・休憩表（〜BT）
   教室 RBT／購買 SBT／部室 BBT／生徒会室 CBT／学生寮 DBT／図書館 IBT／屋上 FBT／研究室 LBT／プール PBT／中庭 NBT／商店街 ABT／廃墟 VBT／ゲート GBT
+ ・ランダムNPC表（〜RT）
+　学生生活関連NPC表 SRT／その他NPC表 ORT／学生図鑑 下級生表 DRT／学生図鑑 上級生表 URT
 ・デート表（DATE）
 　2人が「DATE」とコマンドをそれぞれ1回ずつ打つと、両者を組み合わせてデート表の結果が表示されます。
 ・デート表（DATE[PC名1,PC名2]）

@@ -885,7 +885,7 @@ package {
             return color;
         }
         
-        private function getTextFromMessage(message:String, index:int):String {
+        static private function getTextFromMessage(message:String, index:int):String {
             var texts:Array = message.split(/\t/);
             var text:String = texts[index];
             if( text == null ) {
@@ -989,7 +989,7 @@ package {
             return getTextFromMessage(message, 0);
         }
         
-        protected function getCardNameWhenImageData(message:String):String {
+        static public function getCardNameWhenImageData(message:String):String {
             return getTextFromMessage(message, 1);
         }
         

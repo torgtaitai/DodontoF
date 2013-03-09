@@ -770,6 +770,7 @@ class DodontoFServer
       # Card Command Get
       ['getMountCardInfos', hasReturn],
       ['getTrushMountCardInfos', hasReturn],
+      ['getCardList', hasReturn],
       
       # Card Command Set
       ['drawTargetCard', hasReturn],
@@ -5030,29 +5031,10 @@ class DodontoFServer
         mountName = cardTypeInfo['mountName']
         logging(mountName, "initCards mountName")
         
-        cardsListFileName = getCardsInfo.getCardFileName(mountName);
-        logging(cardsListFileName, "initCards cardsListFileName");
+        cardMount, cardMountData, cardTrushMountData = getInitCardMountInfos(cardTypeInfo, mountName, index)
         
-        cardsList = []
-        readLines(cardsListFileName).each_with_index  do |i, lineIndex|
-          cardsList << i.chomp.toutf8
-        end
-        
-        logging(cardsList, "initCards cardsList")
-        
-        cardData = cardsList.shift.split(/,/)
-        isText = (cardData.shift == "text")
-        isUpDown = (cardData.shift == "upDown")
-        logging("isUpDown", isUpDown)
-        imageNameBack = cardsList.shift
-        
-        cardsList, isSorted = getInitCardSet(cardsList, cardTypeInfo)
-        cardMounts[mountName] = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
-        
-        cardMountData = createCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList)
+        cardMounts[mountName] = cardMount
         characters << cardMountData
-        
-        cardTrushMountData = getCardTrushMountData(isText, mountName, index, cardTypeInfo)
         characters << cardTrushMountData
       end
       
@@ -5066,6 +5048,38 @@ class DodontoFServer
     return {"result" => "OK", "cardExist" => cardExist }
   end
   
+  
+  def getInitCardMountInfos(cardTypeInfo, mountName, index)
+    cardData, imageNameBack, cardsList = getCardsDataFromMountName(mountName)
+    
+    isText = cardData.include?("text")
+    isUpDown = cardData.include?("upDown")
+    
+    cardsList, isSorted = getInitCardSet(cardsList, cardTypeInfo)
+    cardMount = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
+    
+    cardMountData = createCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList)
+    cardTrushMountData = getCardTrushMountData(isText, mountName, index, cardTypeInfo)
+    
+    return cardMount, cardMountData, cardTrushMountData
+  end
+  
+  def getCardsDataFromMountName(mountName)
+    cardsListFileName = getCardsInfo.getCardFileName(mountName);
+    logging(cardsListFileName, "initCards cardsListFileName");
+    
+    cardsList = []
+    readLines(cardsListFileName).each_with_index  do |i, lineIndex|
+      cardsList << i.chomp.toutf8
+    end
+    
+    logging(cardsList, "initCards cardsList")
+    
+    cardData = cardsList.shift.split(/,/)
+    imageNameBack = cardsList.shift
+    
+    return cardData, imageNameBack, cardsList
+  end
   
   def getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
     cardMount = []
@@ -5232,7 +5246,7 @@ class DodontoFServer
     cardMountData = getCardData(isText, imageNameBack, imageNameBack, mountName)
     
     cardMountData['type'] = getCardMountType
-    setCardCountAndBackImage(cardMountData, cardMount[mountName]);
+    setCardCountAndBackImage(cardMountData, cardMount);
     cardMountData['mountName'] = mountName
     cardMountData['isUpDown'] = isUpDown
     cardMountData['x'] = getInitCardMountX(index)
@@ -5815,6 +5829,22 @@ class DodontoFServer
     end
     
     return cards
+  end
+  
+  
+  def getCardList
+    params = getParamsFromRequestData()
+    logging(params, 'getCardList params')
+    
+    mountName = params['mountName']
+    cardTypeInfo = {'mountName' => mountName}
+    index = 0
+    
+    cardMount, cardMountData, cardTrushMountData = getInitCardMountInfos(cardTypeInfo, mountName, index)
+    
+    logging(cardMount, 'cardMount')
+    
+    return cardMount
   end
   
   
