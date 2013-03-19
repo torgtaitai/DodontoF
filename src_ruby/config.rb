@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.41.02"
-$versionDate = "2013/03/17"
+$versionOnly = "Ver.1.41.02.01"
+$versionDate = "2013/03/19"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -177,7 +177,7 @@ $mapMaxHeigth = 150
 $scenarioDataMaxSize = 100.0 
 
 #ログイン状況を記録するファイル
-$loginCountFile = File.join($SAVE_DATA_DIR, 'saveData', 'loginCount.txt')
+$loginCountFile = 'loginCount.txt'
 
 #読み上げ機能の有効／無効(true/false)。サーバに負荷が掛かるので有効化は慎重に
 #あ、あとPHP環境必須なんでその辺は頑張って下さい。

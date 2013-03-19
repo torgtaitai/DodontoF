@@ -36,6 +36,8 @@ begin
 rescue LoadError
 end
 
+$loginCountFile = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
+
 
 if( $isMessagePackInstalled )
   # gem install msgpack バージョン
