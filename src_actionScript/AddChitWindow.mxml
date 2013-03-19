@@ -32,11 +32,18 @@
     import mx.managers.PopUpManager;
     import mx.controls.Image;
     
+    /**
+     * チット（マップに置くカウンター的な物）作成画面
+     */
+    
     private var previewLoader:PreviewLoader = new PreviewLoader();
     private var tileImageUrl_text:String;
     static private var previewImageSize:int = 50;
     private var thisObj:AddChitWindow;
     
+    /**
+     * Window の初期化処理
+     */
     override protected function setup():void {
         thisObj = this;
         
@@ -55,23 +62,26 @@
         
         setDragEvent();
         
-        /*
-        setResizeEventFunction(function():void {
-                thisObj.title = "width:" + thisObj.width + " height:" + thisObj.height;
-            });
-        */
         imageSelecter.imageSelectBox.setStyle("horizontalAlign", "left");
     }
     
+    /**
+     * 画像一覧選択時のプレビュー画像更新処理
+     */
     public function imageClickEvent(imageName:String):void {
-        //tileImageUrl_text = imageSelecter.getImageUrlChanger().getShort( imageName );
         tileImageUrl_text = imageName;
         printPreview();
     }
     
+    /**
+     * プレビュー画像読み込み完了時の処理
+     */
     public function imageLoadComplete():void {
     }
     
+    /**
+     * プレビュー画像更新処理
+     */
     private function printPreview():void {
         Log.logging("printPreview tileImageUrl_text", tileImageUrl_text);
         var xCount:int = tileWidth.value;
@@ -90,6 +100,9 @@
     }
     
     
+    /**
+     * チットをマップに配置するためのドラッグ＆ドロップイベント割り当て
+     */
     private function setDragEvent():void {
         var view:PreviewLoader = previewLoader;
         
@@ -106,6 +119,9 @@
             });
     }
     
+    /**
+     * チットをマップに配置するためのドラッグ＆ドロップのドロップ処理
+     */
     private function viewDroped(view:PreviewLoader):void {
         view.stopDrag();
         
@@ -128,13 +144,13 @@
         guiInputSender.getSender().addCharacter(obj);
     }
     
+    /**
+     * マップオブジェクトの取得を簡略化するためだけの関数
+     */
     protected function getMap():Map {
         return DodontoF_Main.getInstance().getMap();
     }
     
-    
-    override protected function teardown():void {
-    }
     
     ]]>
   </mx:Script>

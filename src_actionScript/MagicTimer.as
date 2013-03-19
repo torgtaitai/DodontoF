@@ -130,8 +130,8 @@ package {
         public function popUpChangeWindow():void {
             var dodontoF:DodontoF = DodontoF_Main.getInstance().getDodontoF();
             
-            ChangeMagicTimerWindow.setMagicTimer(this);
-            DodontoF.popup(ChangeMagicTimerWindow, true);
+            var window:ChangeMagicTimerWindow = DodontoF.popup(ChangeMagicTimerWindow, true) as ChangeMagicTimerWindow;
+            window.setMagicTimer(this);
         }
         
         public function sendDelete():void {

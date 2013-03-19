@@ -28,18 +28,22 @@
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
     
+    /** 
+     * メモ追加画面
+     */
+    
+    
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
-        init();
     }
     
-    protected function init():void {
-    }
     
+    /** 
+     * メモ追加実行
+     */
     public function execute():void {
-        addMemo();
-    }
-    
-    private function addMemo():void {
         try{
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             

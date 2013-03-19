@@ -13,9 +13,17 @@ package {
             card = card_;
             
             roundColor = card.getRoundColor();
-            setTitleVisible(card.getTitleVisible());
+            setTitleVisible(card.isTitleVisible());
             
             update( card.getJsonDataForPreview() );
+        }
+        
+        /** 
+         * カードの拡大率指定
+         */
+        public function setRate(rate:Number):void {
+            view.scaleX = rate;
+            view.scaleY = rate;
         }
         
         private var roundColor:int;

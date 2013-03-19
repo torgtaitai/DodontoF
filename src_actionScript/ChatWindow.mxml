@@ -106,7 +106,7 @@
             </mx:Box>
             
             
-            <mx:Box id="sendButtonBox" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:Box id="sendCounterRemocon" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
               <mx:Button id="sendMessageButton" label="送信" height="18" width="60" click="sendChatMessageLocal()" />
               <mx:Button label="ログ保存" height="18" width="60" click="saveChatLog()" paddingLeft="2" paddingRight="2" />
             </mx:Box>
@@ -1736,10 +1736,9 @@
                 return;
             }
             
-            AlarmWindow.setChatWindow(this);
             DodontoF.popup(AlarmWindow, true);
         }
-    
+        
         public function sendSound(userName:String, soundFileName:String, seconds:int):void {
             var alarmString:String = getAlarmString(userName, soundFileName, seconds);
             chatMessageTrader_sendMessage(publicChatChannel, alarmString);

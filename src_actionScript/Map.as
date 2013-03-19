@@ -1245,27 +1245,27 @@ package {
         }
         
         private function addCharacter(event:ContextMenuEvent):void {
-            var point:Point = getCreatePoint();
-            AddCharacterWindow.setCharacterPosition(point.x, point.y);
-            
-            Log.logging("DodontoF.popup(AddCharacterWindow, true);");
             DodontoF.popup(AddCharacterWindow, true);
         }
         
         private function addMagicRange(event:ContextMenuEvent):void {
             var point:Point = getCreatePoint();
-            AddMagicRangeWindow.setCharacterPosition(point.x, point.y);
+            var addMagicRangeWindow:AddMagicRangeWindow = 
+                DodontoF.popup(AddMagicRangeWindow, true) as AddMagicRangeWindow;
             
-            Log.logging("DodontoF.popup(AddMagicRangeWindow, true);");
-            DodontoF.popup(AddMagicRangeWindow, true);
+            addMagicRangeWindow.setCharacterPosition(point.x, point.y);
+            
+            Log.logging("addMagicRange end");
         }
         
         private function addMagicRangeDD4th(event:ContextMenuEvent):void {
             var point:Point = getCreatePoint();
-            AddMagicRangeDD4thWindow.setCharacterPosition(point.x, point.y);
+            var addMagicRangeDD4thWindow:AddMagicRangeDD4thWindow
+                = DodontoF.popup(AddMagicRangeDD4thWindow, true) as AddMagicRangeDD4thWindow;
             
-            Log.logging("DodontoF.popup(AddMagicRangeDD4thWindow, true);");
-            DodontoF.popup(AddMagicRangeDD4thWindow, true);
+            addMagicRangeDD4thWindow.setCharacterPosition(point.x, point.y);
+            
+            Log.logging("addMagicRangeDD4th end");
         }
         
         private function addMagicTimer(event:ContextMenuEvent):void {

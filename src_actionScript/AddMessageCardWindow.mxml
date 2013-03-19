@@ -24,13 +24,13 @@
         <mx:Box height="100%" width="70">
           <mx:Label text="背面:" />
           <mx:NumericStepper id="imageNameBackSize" minimum="5" maximum="64"  value="18"
-                             change="printPreview(imageNameBackSize, imageNameBack.text, previewCardBack)"
+                             change="printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack)"
                              />
         </mx:Box>
 	    <mx:TextArea id="imageNameBack"
                      text="ななしさん へ"
                      height="100%" width="100%"
-                     change="printPreview(imageNameBackSize, imageNameBack.text, previewCardBack)"
+                     change="printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack)"
                      />
       </mx:HBox>
       
@@ -38,13 +38,13 @@
         <mx:Box height="100%" width="70">
           <mx:Label text="メッセージ:" />
           <mx:NumericStepper id="imageNameSize" minimum="5" maximum="64" value="18"
-                             change="printPreview(imageNameSize, imageName.text, previewCard)"
+                             change="printPreview(imageNameSize.value, imageName.text, previewCard)"
                              />
         </mx:Box>
         <mx:TextArea id="imageName"
                      text="サンプルメッセージ"
                      height="100%" width="100%"
-                     change="printPreview(imageNameSize, imageName.text, previewCard)"
+                     change="printPreview(imageNameSize.value, imageName.text, previewCard)"
                      />
       </mx:HBox>
     </mx:Box>
@@ -63,9 +63,26 @@
     import mx.controls.Alert;
     import mx.events.CloseEvent;
     
+    /** 
+     * メッセージカード追加画面
+     */
+    
     private var previewCard:Card = null;
     private var previewCardBack:Card = null;
     
+    private var createPoint:Point = new Point();
+    
+    /** 
+     * 追加座標設定
+     */
+    public function setCreatePoint(point:Point):void {
+        createPoint = point;
+    }
+    
+    
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
         previewCard = addPreviewCard( cardPreviewPlace );
         previewCardBack = addPreviewCard( cardBackPreviewPlace );
@@ -74,16 +91,17 @@
         previewCard.setOwnerName("表面");
         previewCardBack.setOwnerName("裏面");
         
-        printPreview(imageNameSize, imageName.text, previewCard);
-        printPreview(imageNameBackSize, imageNameBack.text, previewCardBack);
+        printPreview(imageNameSize.value, imageName.text, previewCard);
+        printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack);
     }
     
-    private var createPoint:Point = new Point();
-    
-    public function setCreatePoint(point:Point):void {
-        createPoint = point;
-    }
-    
+    /** 
+     * メッセージカードのプレビューを指定した場所に作製して、
+     * 作製したプレビューを返します。
+     * 
+     * @place プレビュー用のメッセージカードを追加する場所
+     * @return 追加したプレビューカード情報
+     */
     private function addPreviewCard( place:Box ):Card {
         var cardInfo:Object = Card.getJsonData("", "", 0, 30);
         var card:Card = new Card( cardInfo );
@@ -94,8 +112,14 @@
         return card
     }
     
-    private function printPreview(stepper:NumericStepper, text:String, card:Card):void {
-        var html:String = getHtml( stepper.value, text);
+    /** 
+     * 以下のデータを下に、プレビューの内容を更新します。
+     * @fontSize カードのフォントサイズ
+     * @text カードに表示する文字
+     * @card 更新対象のプレビューカード
+     */
+    private function printPreview(fontSize:int, text:String, card:Card):void {
+        var html:String = getHtml(fontSize, text);
         
         if( card.getBack() ) {
             card.setImageNameBack(html);
@@ -106,10 +130,18 @@
         card.loadViewImage();
     }
     
+    /** 
+     * カードに表示するHTML文字列を生成
+     * @fontSize カードのフォントサイズ
+     * @text カードに表示する文字
+     */
     private function getHtml(fontSize:int, text:String):String {
         return "<font size='" + (fontSize * 4) + "'>" + text + "</font>";
     }
     
+    /** 
+     * カード追加処理
+     */
     public function execute():void {
         var imageNameText:String = getHtml( imageNameSize.value, imageName.text );
         var imageNameBackText:String = getHtml( imageNameBackSize.value, imageNameBack.text );

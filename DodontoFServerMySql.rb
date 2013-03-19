@@ -1,11 +1,8 @@
 #!/usr/local/bin/ruby -Ku
 #--*-coding:utf-8-*--
 
-#mod_ruby でも再読み込みするようにloadに
-load 'DodontoFServer.rb'
-
+require 'DodontoFServer.rb'
 #require 'rubygems'
-
 require 'mysql'
 
 
@@ -13,7 +10,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.41.01(2013/03/09)"
+$version = "Ver.1.41.02(2013/03/17)"
 
 class SaveDataManagerOnMySql
   def initialize

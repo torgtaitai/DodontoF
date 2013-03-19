@@ -56,29 +56,38 @@
     import mx.events.FlexEvent;
     
     
-    private static var characterPositionX:int;
-    private static var characterPositionY:int;
+    /**
+     * D&D3.x版の魔法範囲の追加画面
+     */
     
-    public static function setCharacterPosition(x:int = 1, y:int = 1):void {
+    private var characterPositionX:int;
+    private var characterPositionY:int;
+    
+    /**
+     * 魔法範囲の初期配置座標を指定
+     */
+    public function setCharacterPosition(x:int = 1, y:int = 1):void {
         characterPositionX = x;
         characterPositionY = y;
     }
     
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
-        init();
     }
     
-    protected function init():void {
-    }
     
+    /**
+     * 魔法範囲の残り時間表示用処理。追加画面では不要のため処理無し。
+     */
     public function setMagicRangeRestTime():void {
     }
     
+    /**
+     * 魔法範囲の追加処理
+     */
     public function execute():void {
-        addMagicRange();
-    }
-    
-    public function addMagicRange():void {
         try{
             var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
             
@@ -101,6 +110,11 @@
         }
     }
     
+    /**
+     * 画面のチェックは「イニシアティブ表に表示させる」もので、
+     * 魔法範囲が持つ属性は「非表示にさせるか」というもの。
+     * 真偽が逆になるのがややこしいのでここで変換して処理します。
+     */
     protected function isHide():Boolean {
         return ( ! isShowOnInitiativeWindow.selected )
     }

@@ -52,7 +52,7 @@
       <mx:TextArea id="message" text="" width="100%" height="100%" change="clearStatus()"/>
       
         <mx:HBox id="changeExecuteSpace" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{! isCreate}" >
-        <mx:Button id="executeButton" label="追加" click="execute()" />
+        <mx:Button id="executeButton" label="変更" click="changeMapMarker()" />
         <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
       
@@ -68,50 +68,72 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
-
+    
+    /**
+     * マップマーカー追加画面
+     */
+    
     [Bindable]
     protected var isCreate:Boolean = true;
     
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
         init();
         changeView();
         setDragEvent();
     }
     
-    private function changeView():void {
-        var maxRate:Number = 2.5;
-        changeViewLocal(isPaint.selected, mapMarkerHeigth.value, mapMarkerWidth.value,
-                        colorPicker.selectedColor, maxRate);
+    /**
+     * 初期化処理。マップマーカー変更画面でオーバーライドさせるために存在
+     */
+    protected function init():void {
     }
     
-    private function changeViewLocal(isFill:Boolean , height:int, width:int,
-                                     color:uint, maxRate:Number):void {
-        var viewSquareLength:int = Map.getSquareLength();
+    
+    /**
+     * マップマーカーのプレビューでは一定以上大きいサイズは縮小して表示する。
+     * その表示処理。
+     */
+    private function changeView():void {
         
-        var maxSize:int = height;
-        if( maxSize < width ) {
-            maxSize = width;
-        }
+        var color:uint = colorPicker.selectedColor;
+        var fillColor:uint = (isPaint.selected ? color : 0xFFFFFF);
+        var widthHeight:Object = getViewWidthHeight();
+        var lineWidth:int = 5;
         
         view.graphics.clear();
-        view.graphics.lineStyle(5, color);
-        
-        var fillColor:uint = (isFill ? color : 0xFFFFFF);
+        view.graphics.lineStyle(lineWidth, color);
         view.graphics.beginFill(fillColor, 1.0);
-        
-        var rate:Number = maxSize;
-        if( rate > maxRate ) {
-            rate = maxRate;
-        }
-        
-        view.graphics.drawRect(0,
-                               5,
-                               viewSquareLength * width / maxSize * rate,
-                               viewSquareLength * height / maxSize * rate);
-        
+        view.graphics.drawRect(0, lineWidth, widthHeight['width'], widthHeight['height']);
         view.graphics.endFill();
     }
     
+    /**
+     * マップマーカーのプレビューを縮小する場合のサイズの計算
+     */
+    private function getViewWidthHeight():Object {
+        var height:int = mapMarkerHeigth.value;
+        var width:int = mapMarkerWidth.value;
+        var maxLength:int = Math.max(height, width);
+        
+        var maxRate:Number = 2.5;
+        var rate:Number = Math.min(maxLength, maxRate);
+        
+        var squareLength:int = Map.getSquareLength();
+        
+        var result:Object = { "height": (squareLength * height / maxLength * rate),
+                              "width" : (squareLength * width / maxLength * rate) };
+        
+        return result;
+    }
+    
+    /**
+     * マップマーカーのプレビュー表示部分は
+     * ドラッグ＆ドロップでマップに落とす事で追加処理となる。
+     * その処理をここで実装。
+     */
     protected function setDragEvent():void {
         view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                 view.startDrag();
@@ -137,18 +159,23 @@
             });
     }
     
-    
-    protected function init():void {
-    }
-    
-    protected function clearStatus():void {
+    /**
+     * エラーメッセージのクリア処理
+     */
+    private function clearStatus():void {
         this.status = "";
     }
     
-    public function execute():void {
-        addMapMarker(10, 10);
+    /**
+     * マップマーカーの変更処理。
+     * 変更処理画面でオーバーライドするために定義だけしておく。
+     */
+    protected function changeMapMarker():void {
     }
     
+    /**
+     * マップマーカー追加処理。
+     */
     private function addMapMarker(x:int, y:int):void {
         try{
             clearStatus();

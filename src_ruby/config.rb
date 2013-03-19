@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.41.01"
-$versionDate = "2013/03/09"
+$versionOnly = "Ver.1.41.02"
+$versionDate = "2013/03/17"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -44,6 +44,7 @@ $playRoomGetRangeMax = 10
 $graveyardLimit = 30
 
 #チャットの過去ログ大量保管を許可するかの設定
+#設定をはずすと処理が軽くなります。が、過去ログが殆ど残らなくなります。
 $IS_SAVE_LONG_CHAT_LOG = true
 
 #チャットログ大量保管時の保管ライン数

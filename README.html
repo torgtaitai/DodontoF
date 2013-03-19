@@ -373,21 +373,42 @@ $dbType = "mysql"
 <br>
 <h3 id="howToVersionUp">バージョンアップ方法</h3>
 上記の手順をすべて実施した上で、最新版の「どどんとふ」へバージョンをあげる場合。<br>
+<br>
 構築済みの既存「どどんとふ」環境から<br>
 　/pubilc_html/DodontoF/src_ruby/config.rb<br>
 だけを取り出しておきましょう。<br>
 <br>
-そして、<br>
+そしてここからがポイントなのですが、config.rbの中で書き換えている箇所を<br>
+config_local.rb というファイルに別出ししましょう。<br>
+（すでに config_local.rb ファイルを作ったことがある人はこの手順はパスして下さい。）<br>
+<br>
+注意点は config_local.rb の文字コードはUTF-8、改行コードはUNIX系のLF（つまり\nのみ）にするという事。<br>
+多分何を言っているか分からない人が大半だと思いますので、<br>
+既存の config.rb をコピーして、config_local.rb という名前にして、変更していない行を削る形でファイルを作成してやってください<br>
+<br>
+こんな感じです。<br>
+<pre>
+<code>
+<i>###config_local.rb の記述例##</i>
+#サーバにログインする事のできる限界人数。
+$limitLoginCount = 10
+
+#プレイルームの最大数
+$saveDataMaxCount = 5
+
+#チャットの過去ログ大量保管を許可するかの設定
+$IS_SAVE_LONG_CHAT_LOG = false
+</code>
+</pre>
+もう一度繰り返しますが、 config.rb をコピーして config_local.rb を作製してください。<br>
+新規ファイルで作製して「上手く動かないよー」なんて言わないように。この点だけは要注意。<br>
+<br>
+作製できたら、config_local.rb を config.rb と同じく src_ruby ディレクトリに置きます。<br>
+<br>
+config_local.rb の設置ができたら、後は<br>
 <a href="http://www.dodontof.com/ja/home/dodontofdownload.html">http://www.dodontof.com/ja/home/dodontofdownload.html</a><br>
-からDodontoF.zip を入手し、中身を展開。<br>
-先ほど取り出した<br>
-　/pubilc_html/DodontoF/src_ruby/config.rb<br>
-の設定内容を展開した同一ファイルに適用していきます。<br>
-<br>
-そのまま上書きで差し替えると新しく追加された設定が無効になる可能性がありますので、<br>
-<a href="http://www.geocities.co.jp/SiliconValley-SanJose/8165/winmerge.html">WinMerge</a>辺りのソフトで差分を確認しつつ適用してやってください。<br>
-<br>
-それができたら、媒体の中身の<br>
+からDodontoF.zip を入手し、圧縮ファイルを展開。<br>
+展開した中身の<br>
 <br>
 　DodontoF_WebSet/pubilc_html/DodontoF<br>
 <br>
@@ -399,7 +420,11 @@ $dbType = "mysql"
 <br>
 後は<a href="#howToCheckSetting">動作確認方法</a>を参考に動作チェックを行ってください。<br>
 <br>
+以後、設定値を変更したい場合は config.rb ではなく config_local.rb を書き換えるようしてください。<br>
+こうする事で展開した圧縮媒体を直接上書きするだけで設定を保持したままバージョンアップができるようになります。<br>
 <br>
+<br>
+追記：<br>
 MySQLデータベース機能はお試し版のため従来の機能と両立する方法もあります。<br>
 その場合は、<br>
 １．<br>
@@ -951,6 +976,12 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2013/03/17 Ver.1.41.02<br>
+・バージョンアップ手順を更新。 config.rb の書き換え手順が楽に。詳しくは「バージョンアップ方法」参照。Anonymousさん提案ありがとうございます！<br>
+・ダイスボットをボーンズ＆カーズVer2.01.40対応へ変更。<br>
+　・Rコマンドの不具合修正。くまかばさん指摘ありがとうっ！<br>
+・ソースコードの整理（機能的には変更無し）<br>
+<br>
 2013/03/09 Ver.1.41.01<br>
 ・カードランカーで「RM」コマンド実行時にカードが出現するように機能追加。<br>
 　カード画像は cards/cardRanker にあるものを差し替えることで任意に変更可能です。<br>
@@ -963,6 +994,7 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 2013/03/04 Ver.1.41.00<br>
 ・Ver.1.40.12をベースに安定版を開発コード「ENERGY」としてリリース。<br>
 <br>
+<!-- RELEASE_LINE -->
 2013/02/28 Ver.1.40.12<br>
 ・エリュシオンダイスボットを修正。D66に対応。くまかばさん超ありがとうございます！！<br>
 <br>
@@ -1053,7 +1085,6 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 ・Ver.1.39.12.01をベースに安定版を開発コード「manamoon」としてリリース。<br>
 ・README.htmlのレンタルサーバのロリポップについての記述を修正。（如月 翔也さんありがとうっ！）<br>
 <br>
-<!-- RELEASE_LINE -->
 2012/11/04 Ver.1.39.12.01<br>
 ・README.htmlのレンタルサーバのCGIについての記述を修正。<br>
 ・ダイスボットをボーンズ＆カーズVer2.01.32.01対応へ変更。<br>

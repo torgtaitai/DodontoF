@@ -31,6 +31,11 @@ end
 
 require "config.rb"
 
+begin
+  require "config_local.rb"
+rescue LoadError
+end
+
 
 if( $isMessagePackInstalled )
   # gem install msgpack バージョン

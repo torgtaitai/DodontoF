@@ -420,7 +420,7 @@ package {
             
             hideForTiny(chatWindow.diceBotGameType);
             hideForTiny(chatWindow.secretTalkButton);
-            hideForTiny(chatWindow.sendButtonBox);
+            hideForTiny(chatWindow.sendCounterRemocon);
             hideForTiny(chatWindow.voteImage);
             hideForTiny(chatWindow.sendSoundButton);
             hideForTiny(chatWindow.novelticModeButton);
@@ -758,17 +758,17 @@ package {
             chatPalette.setVisibleState(v);
         }
         
-        private var buttonBox:ButtonBox;
+        private var counterRemocon:CounterRemocon;
         
         public function setButtonWindow(window:IFlexDisplayObject, eventName:String):void {
-            buttonBox = window as ButtonBox;
-            buttonBox.setChangeVisibleEvent( function(visible:Boolean):void {
+            counterRemocon = window as CounterRemocon;
+            counterRemocon.setChangeVisibleEvent( function(visible:Boolean):void {
                     dodontoF.changeMainMenuToggle(eventName, visible);
                 });
         }
         
-        public function setButtonBoxVisible(v:Boolean):void {
-            buttonBox.setVisibleState(v);
+        public function setCounterRemoconVisible(v:Boolean):void {
+            counterRemocon.setVisibleState(v);
         }
         
         private var diceBox:DiceBox;
@@ -1117,7 +1117,7 @@ package {
     {label:"表示", data:"pass_display", enabled:"true",
      children: [
         {label:"チャットパレット表示", data:"isChatPaletteVisible", type:"check", toggled:false},
-        {label:"カウンターリモコン表示", data:"isButtonBoxVisible", type:"check", toggled:false},
+        {label:"カウンターリモコン表示", data:"isCounterRemoconVisible", type:"check", toggled:false},
         {type:"separator"},
         
         {label:"チャット表示", data:"isChatVisible", type:"check", toggled:true},

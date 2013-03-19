@@ -30,7 +30,7 @@
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="this.setMagicTimerOnButton()" />
+    <mx:Button id="executeButton" label="追加" click="executeOnButton()" />
     <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
@@ -40,36 +40,29 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     
-    override protected function setup():void {
-        init();
-    }
-
-    protected function init():void {
-        var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+    /**
+     * 魔法タイマー追加画面
+     */
     
+    
+    /**
+     * 画面初期化処理
+     */
+    override protected function setup():void {
+        var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
+        
         magicTimerCreateRound.value = roundTimer.getCurrentRound(),
         magicTimerInitiative.value = roundTimer.getCurrentInitiative();
     }
-
-
-    public function setMagicTimer(magicTimerNameText:String,
-                                  magicTimerTimeRangeValue:int,
-                                  magicTimerCreateRoundValue:int,
-                                  magicTimerInitiativeValue:Number,
-                                  magicTimerInfoText:String):void {
-        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        guiInputSender.addMagicTimer(magicTimerNameText,
-                                     magicTimerTimeRangeValue,
-                                     magicTimerCreateRoundValue,
-                                     magicTimerInitiativeValue,
-                                     magicTimerInfoText);
-    }
-
-    public function setMagicTimerOnButton():void {
+    
+    /**
+     * 魔法タイマーの「追加」ボタン処理
+     */
+    public function executeOnButton():void {
         try{
             var roundTimer:RoundTimer = DodontoF_Main.getInstance().getRoundTimer();
-        
-            setMagicTimer(magicTimerName.text,
+            
+            execute(magicTimerName.text,
                           magicTimerTimeRange.value,
                           magicTimerCreateRound.value,
                           magicTimerInitiative.value,
@@ -81,8 +74,28 @@
             Log.loggingError("stackTrace : " + error.getStackTrace());
         }
     }
-
-
+    
+    
+    /**
+     * 魔法タイマー追加処理
+     */
+    protected function execute(magicTimerNameText:String,
+                                  magicTimerTimeRangeValue:int,
+                                  magicTimerCreateRoundValue:int,
+                                  magicTimerInitiativeValue:Number,
+                                  magicTimerInfoText:String):void {
+        
+        var guiInputSender:GuiInputSender =
+            DodontoF_Main.getInstance().getGuiInputSender();
+        
+        guiInputSender.addMagicTimer(magicTimerNameText,
+                                     magicTimerTimeRangeValue,
+                                     magicTimerCreateRoundValue,
+                                     magicTimerInitiativeValue,
+                                     magicTimerInfoText);
+    }
+    
+    
     ]]>
 
   </mx:Script>

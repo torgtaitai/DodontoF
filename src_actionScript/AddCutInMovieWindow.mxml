@@ -104,15 +104,19 @@
     import mx.controls.Image;
     import mx.core.UIComponent;
     
+    
+    /**
+     * カットイン追加画面
+     */
+    
+    
     private var cutIn:CutInMovie = new CutInMovie();
     private var previewImage:Image = new Image();
     
-    private function initPreview():void {
-        previewImage.height = 200;
-        previewImage.width = 200;
-        previewImage.visible = true;
-    }
     
+    /**
+     * Window の初期化処理
+     */
     override protected function setup():void {
         initPreview();
         imageSelecter.addPreview(previewImage, 200);
@@ -127,15 +131,33 @@
         imageSelecter.initImage( isLoadInitImageList() );
     }
     
+    /**
+     * カットインのプレビューを初期化
+     */
+    private function initPreview():void {
+        previewImage.height = 200;
+        previewImage.width = 200;
+        previewImage.visible = true;
+    }
     
+    /**
+     * カットインの画像・動画を選択するときに優先して表示するタグ名の一覧
+     */
     protected function getDefaultTags():Array {
         return [ImageTag.getNoneTag(), ImageTag.getAllTag()];
     }
     
+    /**
+     * カットインの画像・動画の選択一覧が画面を開いた時点で表示されているかを指定。
+     */
     protected function isLoadInitImageList():Boolean {
         return false;
     }
     
+    
+    /**
+     * 画像一覧選択時のプレビュー画像更新処理
+     */
     public function imageClickEvent(imageName:String):void {
         imageSource.text = imageSelecter.getImageUrlChanger().getShort( imageName );
         printPreview();
@@ -143,6 +165,9 @@
     
     private var loadingMessage:String = "ロード中・・・";
     
+    /**
+     * プレビュー画像読み込み完了時の処理
+     */
     public function imageLoadComplete():void {
         if( imageSource.text == loadingMessage ) {
             imageSource.text =  "";
@@ -152,6 +177,9 @@
         imageSource.enabled = true;
     }
     
+    /**
+     * プレビュー画像更新処理
+     */
     protected function printPreview():void {
         var imageSourceText:String = imageSource.text;
         Log.logging("printPreview imageSourceText", imageSourceText);
@@ -170,6 +198,11 @@
         previewImage.source = imageUrl;
     }
     
+    
+    /**
+     * カットインに指定したソースがYoutube等の外部URLの場合、
+     * 外部URL有効でないと表示できないので警告を表示
+     */
     protected function checkImageUrl(imageSourceText:String):void {
         this.status = "";
         if(  DodontoF_Main.getInstance().canUseExternalImage() ) {
@@ -181,6 +214,9 @@
         }
     }
     
+    /**
+     * カットインを作るために必要なパラメータをここで作製。
+     */
     protected function getCommandParams():Object {
         if( message.text == "" ) {
             Alert.show("タイトルを入力してください");
@@ -208,16 +244,14 @@
             "position" : position,
             "displaySeconds": displaySeconds.value,
             "cutInTag": cutInTag.text };
-    
-        getCommandParamsExt(params);
-    
+        
         return params;
     }
-
-    protected function getCommandParamsExt(params:Object):void {
-    }
     
     
+    /**
+     * カットイン追加処理の実行。
+     */
     protected function execute():void {
         var params:Object = getCommandParams();
         if( params == null ) {
@@ -231,7 +265,11 @@
         
         PopUpManager.removePopUp(this)
     }
-
+    
+    
+    /**
+     * カットインのプレビュー表示を実行。
+     */
     private function previewCutIn():void {
 
         var params:Object = getCommandParams();

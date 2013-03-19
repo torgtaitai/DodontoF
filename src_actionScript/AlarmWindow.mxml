@@ -33,30 +33,37 @@
     <![CDATA[
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
-
-
+    
+    /** 
+     * 目覚ましアラーム設定画面
+     */
+    
     [Bindable]
     private var userNameComboBoxArray:Array = new Array();
-
-    private static var chatWindow:ChatWindow;
-
-    public static function setChatWindow(chatWindow_:ChatWindow):void {
-        chatWindow = chatWindow_;
-    }
-
+    
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
         try {
+            var chatWindow:ChatWindow = ChatWindow.getInstance();
             userNameComboBoxArray = chatWindow.getUserNames();
         } catch(error:Error) {
             this.status = error.message;
         }
     }
-
+    
+    /** 
+     * アラーム音の送信
+     */
     public function sendWakeUpSound():void {
         Log.loggingTuning("=>alarm Begin");
         
         var userName:String = userNameComboBox.selectedItem as String;
+        
+        var chatWindow:ChatWindow = ChatWindow.getInstance();
         chatWindow.sendSound(userName, soundFileNameInput.text, seconds.value);
+        
         PopUpManager.removePopUp(this);
     
         Log.loggingTuning("=>alarm End");

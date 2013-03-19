@@ -49,9 +49,17 @@
     import mx.controls.Image;
     import mx.controls.Alert;
     
+    /** 
+     * 立ち絵追加画面
+     */
+    
     private var loadingMessage:String = "ロード中・・・";
     private var previewImage:Image = new Image();
     
+    
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
         try {
             imageSelecter.addPreview(previewImage, 200);
@@ -71,15 +79,25 @@
         }
     }
     
+    /** 
+     * 画面起動時に画像一覧を表示するかどうかの指定
+     */
     protected function isLoadInitImageList():Boolean {
         return true;
     }
     
+    /** 
+     * 画像一覧をクリックしたときにプレビューを更新する処理
+     */
     public function imageClickEvent(imageName:String):void {
         source.text = imageSelecter.getImageUrlChanger().getShort( imageName );
         printPreview();
     }
     
+    
+    /** 
+     * 画像一覧で選択したプレビュー画像の読み込みが完了したら呼ばれる処理
+     */
     public function imageLoadComplete():void {
         if( source.text == loadingMessage ) {
             source.text =  "";
@@ -89,6 +107,9 @@
         source.enabled = true;
     }
     
+    /** 
+     * プレビュー画像の更新処理
+     */
     protected function printPreview():void {
         Log.logging("printPreview source.text", source.text);
         var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( source.text );
@@ -97,6 +118,29 @@
     }
     
     
+    /** 
+     * 立ち絵の追加処理実行
+     */
+    protected function execute():void {
+        var params:Object = getEffectParams();
+        if( params == null ) {
+            return;
+        }
+    
+        DodontoF_Main.getInstance().standingGraphicInfos.addItem(params);
+    
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.addEffect(params);
+    
+        state.text = "";
+        source.text = "";
+    }
+    
+    
+    /** 
+     * 立ち絵用のデータ作製。
+     * 立ち絵はセーブデータでは「effect」という区分に当ります。
+     */
     protected function getEffectParams():Object {
         if( characterName.text == "" ) {
             return null;
@@ -119,30 +163,19 @@
             "leftIndex": leftIndex.value
         };
     
-        getEffectParamsExt(params);
+        addIdToPrams(params);
     
         return params;
     }
-
-    protected function getEffectParamsExt(params:Object):void {
+    
+    /** 
+     * 変更画面のではパラメータにIDを付与する。
+     * 追加画面なのでここでは処理無し。
+     */
+    protected function addIdToPrams(params:Object):void {
     }
-
-
-    protected function execute():void {
-        var params:Object = getEffectParams();
-        if( params == null ) {
-            return;
-        }
     
-        DodontoF_Main.getInstance().standingGraphicInfos.addItem(params);
     
-        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        guiInputSender.addEffect(params);
-    
-        state.text = "";
-        source.text = "";
-    }
-
     ]]>
   </mx:Script>
 </torgtaitai:CommonPopupWindow>

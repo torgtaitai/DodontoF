@@ -20,11 +20,10 @@ package {
             originalCommand = commandText.text;
         }
         
+        /**
+         * 表変更処理
+         */
         override public function execute():void {
-            changeBotTable();
-        }
-        
-        private function changeBotTable():void {
             window.changeBotTable(commandText.text, diceText.text, titleText.text,
                                   getTableTextFromTextArea(),
                                   originalCommand,

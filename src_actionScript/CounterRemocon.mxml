@@ -28,6 +28,9 @@
         import mx.events.MenuEvent;
         import mx.utils.StringUtil;
         
+        /** 
+         * カウンターリモコンウィンドウ用のクラス
+         */
         
         //{0} 対象キャラクター名
         //{1} 対象カウンター名
@@ -65,9 +68,9 @@
     */
         
         
-        static private var thisObj:ButtonBox;
+        static private var thisObj:CounterRemocon;
         
-        static public function getInstance():ButtonBox {
+        static public function getInstance():CounterRemocon {
             return thisObj;
         }
         
@@ -109,7 +112,7 @@
         }
     
         override public function getSaveInfoKeyName():String {
-            return "ButtonBox";
+            return "CounterRemocon";
         }
         
         private var dice:Dice = null;
@@ -132,7 +135,7 @@
             menu.hideBuiltInItems();
             
             MovablePiece.addMenuItem(menu, "カウンター追加", function():void{
-                    var window:ChangeButtonBoxWindow = DodontoF.popup(ChangeButtonBoxWindow, true) as ChangeButtonBoxWindow;
+                    var window:ChangeCounterRemoconWindow = DodontoF.popup(ChangeCounterRemoconWindow, true) as ChangeCounterRemoconWindow;
                 });
             
             this.contextMenu = menu;
@@ -201,7 +204,7 @@
             menu.hideBuiltInItems();
             
             MovablePiece.addMenuItem(menu, "カウンター設定", function():void{
-                    var window:ChangeButtonBoxWindow = DodontoF.popup(ChangeButtonBoxWindow, true) as ChangeButtonBoxWindow;
+                    var window:ChangeCounterRemoconWindow = DodontoF.popup(ChangeCounterRemoconWindow, true) as ChangeCounterRemoconWindow;
                     window.setParams( buttonInfos[index], index );
                 });
             

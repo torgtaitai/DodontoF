@@ -13,7 +13,7 @@ package {
             magicRange = magicRange_;
         }
 
-        override protected function init():void {
+        override protected function setup():void {
             title = "魔法範囲変更";
             executeButton.label = "変更";
             
@@ -42,6 +42,9 @@ package {
             }
         }
 
+        /**
+         * 魔法範囲の残り時間表示用処理。
+         */
         override public function setMagicRangeRestTime():void {
             var timeRange:int = magicRangeTimeRange.value;
             var restRound:int = MagicRange.getRestRound( timeRange,
@@ -52,10 +55,6 @@ package {
         }
         
         override public function execute():void {
-            changeMagicRange();
-        }
-        
-        public function changeMagicRange():void {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
 

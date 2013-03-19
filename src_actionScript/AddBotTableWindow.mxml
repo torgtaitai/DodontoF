@@ -29,7 +29,6 @@
     <mx:Button id="sampleButton" label="サンプル表示"  click="printSample()" />
   </mx:HBox>
   
-  
   <mx:Script>
     <![CDATA[
     import mx.managers.PopUpManager;
@@ -38,16 +37,28 @@
     import mx.collections.ArrayCollection;
     import mx.events.CloseEvent;
     
-    private var guiInputSender:GuiInputSender;
-    private var sender:SharedDataSender;
+    /**
+     * ダイスボット用の表を追加する画面クラス
+     */
     
+    
+    /**
+     * Window の初期化処理
+     */
     override protected function setup():void {
     }
     
+    /**
+     * 「サンプル表示」ボタンの表示制御。
+     * このボタンはダイスボット表の変更画面では非表示にするために使います。
+     */
     public function setVisiblePrintSampleButton(b:Boolean):void {
-        sampleButton.visible = false;
+        sampleButton.visible = b;
     }
     
+    /**
+     * 入力サンプルを表示します。
+     */
     private function printSample():void {
         commandText.text = "SAMPLE";
         diceText.text = "2d6";
@@ -70,40 +81,59 @@
     
     protected var window:ManageBotTableWindow;
     
+    /**
+     * 初期化処理。
+     * @window_ ダイスボット表の管理画面
+     * @command 表コマンドの初期値
+     * @dice ダイスロールのコマンド文字(xDy)
+     * @titleText_ 表のタイトル
+     * @tableText_ 表の一覧情報
+     */
     public function init(window_:ManageBotTableWindow,
                          command:String = "",
                          dice:String = "",
-                         titleTextText:String = "",
-                         tableTextText:String = ""):void {
+                         titleText_:String = "",
+                         tableText_:String = ""):void {
         window = window_;
         
         commandText.text = command;
         diceText.text = dice;
-        titleText.text = titleTextText;
-        tableText.text = tableTextText;
+        titleText.text = titleText_;
+        tableText.text = tableText_;
         
         initAfter();
     }
     
+    
+    /**
+     * 初期化後の追加処理。
+     * ダイスボット表変更画面で追加処理を入れるために使います。
+     */
     public function initAfter():void {
     }
     
+    /**
+     * 実行ボタン処理。
+     */
     public function executeLocal():void {
         executeButton.enabled = false;
         status = "";
         
         execute();
     }
-    public function execute():void {
-        addBotTable();
-    }
     
-    private function addBotTable():void {
+    /**
+     * 表追加処理
+     */
+    public function execute():void {
         window.addBotTable(commandText.text, diceText.text, titleText.text,
                            getTableTextFromTextArea(),
                            checkResult);
     }
     
+    /**
+     * テキストエリアの文字列は改行コードが特殊なのでここで加工
+     */
     protected function getTableTextFromTextArea():String {
         var text:String = tableText.text;
         
@@ -113,6 +143,9 @@
         return text;
     }
     
+    /**
+     * 表追加・変更処理が成功したかのチェック処理。
+     */
     public function checkResult(jsonData:Object):Boolean {
         if( jsonData.resultText == 'OK' ) {
             closeAction();

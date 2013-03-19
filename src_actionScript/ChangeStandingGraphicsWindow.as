@@ -27,7 +27,7 @@ package {
             return false;
         }
         
-        protected override function getEffectParamsExt(params:Object):void {
+        protected override function addIdToPrams(params:Object):void {
             params.effectId = effectId;
         }
         

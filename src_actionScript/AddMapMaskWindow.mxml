@@ -60,7 +60,11 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
-
+    
+    /**
+     * マップマスク追加画面
+     */
+    
     [Bindable]
     private var mapMaskCount:int = 1;
     
@@ -70,8 +74,10 @@
     [Bindable]
     protected var draggable:Boolean = true;
     
-    private static var squareLength:int = Map.getSquareLength();
     
+    /**
+     * Windowの初期化処理
+     */
     override protected function setup():void {
         Log.loggingTuning("=>setup() Begin");
         
@@ -82,70 +88,32 @@
         Log.loggingTuning("=>setup() End");
     }
     
-    protected function setMaxMaskName():void {
-        mapMaskCount = getMaxExistMapMaskCount() + 1;
-        maskName.text = "" + mapMaskCount;
-    }
-    
-    private function getMaxExistMapMaskCount():int {
-        var maxNumber:int = 0;
-        
-        var mapMaskList:Array  = DodontoF_Main.getInstance().getMap().getExistPieces();
-        for(var i:int = 0 ; i < mapMaskList.length ; i++) {
-            var mapMask:MapMask = mapMaskList[i] as MapMask;
-            if( mapMask == null ) {
-                continue;
-            }
-            
-            var number:int = getNumberFromName(mapMask.getName());
-            if( maxNumber < number ) {
-                maxNumber = number
-            }
-        }
-        
-        return maxNumber;
-    }
-    
-    private function getNumberFromName(text:String):int {
-        Log.loggingTuning("getNumberFromName text", text);
-        var result:Object = /(\d+)$/.exec(text);
-        if( result == null ) {
-            Log.loggingTuning("getNumberFromName null");
-            return 0;
-        }
-        
-        var numberString:String = result[1];
-        Log.loggingTuning("numberString", numberString);
-        var number:int = parseInt(numberString);
-        Log.loggingTuning("number", number);
-        
-        return number;
-    }
-    
+    /**
+     * マップマスクのプレビューでは一定以上大きいサイズは縮小して表示する。
+     */
     private function changeView():void {
-        var maxSize:int = mapMaskHeigth.value;
-        if( maxSize < mapMaskWidth.value ) {
-            maxSize = mapMaskWidth.value;
-        }
+        var maxLength:int = Math.max(mapMaskHeigth.value, mapMaskWidth.value);
+        
+        var maxRate:Number = 2.5;
+        var rate:Number = Math.min(maxLength * 0.5, maxRate);
+        
+        var squareLength:int = Map.getSquareLength();
+        var width:int = squareLength * mapMaskWidth.value / maxLength * rate;
+        var height:int = squareLength * mapMaskHeigth.value / maxLength * rate;
         
         view.graphics.clear();
         view.graphics.lineStyle(1, getColor());
         view.graphics.beginFill(getColor(), 1.0);
-        var rate:Number = maxSize * 0.5;
-        if( rate > 2.5 ) {
-            rate = 2.5;
-        }
-        view.graphics.drawRect(0,
-                               5,
-                               squareLength * mapMaskWidth.value / maxSize * rate,
-                               squareLength * mapMaskHeigth.value / maxSize * rate);
+        view.graphics.drawRect(0, 1, width, height);
         view.graphics.endFill();
     }
     
-    private function getColor():int {
-        return parseInt("0x" + mapMaskColorPicker.selectedColor.toString(16));
-    }
     
+    /**
+     * マップマスクのプレビュー表示部分は
+     * ドラッグ＆ドロップでマップに落とす事で追加処理となる。
+     * その処理をここで実装。
+     */
     protected function setDragEvent():void {
         view.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                 view.startDrag();
@@ -174,9 +142,77 @@
             });
     }
     
+    /**
+     * マップマスクには「１」のように名前が数字の連番で付けられます。
+     */
+    protected function setMaxMaskName():void {
+        mapMaskCount = getMaxExistMapMaskCount() + 1;
+        maskName.text = "" + mapMaskCount;
+    }
+    
+    /** 
+     * マップマスクの名前を連番で付けるため、
+     * マップに存在する最大の部屋番号の数字をここで取得
+     */
+    private function getMaxExistMapMaskCount():int {
+        var maxNumber:int = 0;
+        
+        var mapMaskList:Array  = DodontoF_Main.getInstance().getMap().getExistPieces();
+        for(var i:int = 0 ; i < mapMaskList.length ; i++) {
+            var mapMask:MapMask = mapMaskList[i] as MapMask;
+            if( mapMask == null ) {
+                continue;
+            }
+            
+            var number:int = getNumberFromName(mapMask.getName());
+            if( maxNumber < number ) {
+                maxNumber = number
+            }
+        }
+        
+        return maxNumber;
+    }
+    
+    
+    /**
+     * 部屋の名前から部屋番号を取得する。
+     */
+    
+    private function getNumberFromName(text:String):int {
+        Log.loggingTuning("getNumberFromName text", text);
+        var result:Object = /(\d+)$/.exec(text);
+        if( result == null ) {
+            Log.loggingTuning("getNumberFromName null");
+            return 0;
+        }
+        
+        var numberString:String = result[1];
+        Log.loggingTuning("numberString", numberString);
+        var number:int = parseInt(numberString);
+        Log.loggingTuning("number", number);
+        
+        return number;
+    }
+    
+    
+    /** 
+     * 部屋の色を16進数文字列を値に変換
+     */
+    private function getColor():int {
+        return parseInt("0x" + mapMaskColorPicker.selectedColor.toString(16));
+    }
+    
+    
+    /**
+     * マップマスクの変更処理。
+     * 変更処理画面でオーバーライドするために定義だけしておく。
+     */
     public function changeMapMask():void {
     }
     
+    /** 
+     * マップマスク追加処理
+     */
     public function addMapMask(x:int, y:int):void {
         try{
             Log.logging("addMapMask called");

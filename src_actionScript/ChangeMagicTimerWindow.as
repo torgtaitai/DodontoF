@@ -4,12 +4,13 @@ package {
     
     public class ChangeMagicTimerWindow extends AddMagicTimerWindow {
         
-        private static var magicTimer:MagicTimer;
-        public static function setMagicTimer(magicTimer_:MagicTimer):void {
+        private var magicTimer:MagicTimer;
+        
+        public function setMagicTimer(magicTimer_:MagicTimer):void {
             magicTimer = magicTimer_;
         }
         
-        protected override function init():void {
+        override protected function setup():void {
             title = "魔法タイマー変更";
             executeButton.label = "変更";
             
@@ -20,11 +21,11 @@ package {
             magicTimerInfo.text = magicTimer.getInfo();
         }
         
-        public override function setMagicTimer(magicTimerNameText:String,
-                                               magicTimerTimeRangeValue:int,
-                                               magicTimerCreateRoundValue:int,
-                                               magicTimerInitiativeValue:Number,
-                                               magicTimerInfoText:String):void {
+        protected override function execute(magicTimerNameText:String,
+                                            magicTimerTimeRangeValue:int,
+                                            magicTimerCreateRoundValue:int,
+                                            magicTimerInitiativeValue:Number,
+                                            magicTimerInfoText:String):void {
             
             var guiInputSender:GuiInputSender =
                 DodontoF_Main.getInstance().getGuiInputSender();

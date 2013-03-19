@@ -10,7 +10,10 @@ package {
             memo = m;
         }
         
-        protected override function init():void {
+        /**
+         * Windowの初期化処理
+         */
+        override protected function setup():void {
             title = "共有メモ変更";
             executeButton.label = "変更";
             
@@ -18,10 +21,6 @@ package {
         }
         
         override public function execute():void {
-            changeMemo();
-        }
-        
-        private function changeMemo():void {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
                 memo.setMessage( message.text );

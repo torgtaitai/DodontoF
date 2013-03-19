@@ -8,9 +8,18 @@
   
   <mx:Script>
 	<![CDATA[
-			private function creationCompleteHandler():void {
-				as3unit.run(DodontoFTest);
-			}
+             
+             /** 
+              * ユニットテスト用クラス
+              */
+             
+             
+             /** 
+              * 自動的にテスト開始する処理
+              */
+             private function creationCompleteHandler():void {
+                 as3unit.run(DodontoFTest);
+             }
 		]]>
   </mx:Script>
   

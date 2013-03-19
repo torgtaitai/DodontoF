@@ -13,7 +13,7 @@ package {
             magicRange = magicRange_;
         }
         
-        override protected function init():void {
+        override protected function setup():void {
             title = "魔法範囲変更(D&D4版)";
             executeButton.label = "変更";
             
@@ -28,11 +28,10 @@ package {
             isShowOnInitiativeWindow.selected = ( ! magicRange.isHideMode());
         }
         
+        /**
+         * 魔法範囲の変更処理
+         */
         override public function execute():void {
-            changeMagicRange();
-        }
-        
-        private function changeMagicRange():void {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
                 

@@ -12,7 +12,6 @@ package {
         
         protected override function init():void {
             title = "マップマーカー変更";
-            executeButton.label = "変更";
             
             this.isCreate = false;
             this.isMany.height = 0;
@@ -29,11 +28,8 @@ package {
         override protected function setDragEvent():void {
         }
         
-        override public function execute():void {
-            changeMapMarker();
-        }
         
-        private function changeMapMarker():void {
+        override protected function changeMapMarker():void {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
                 

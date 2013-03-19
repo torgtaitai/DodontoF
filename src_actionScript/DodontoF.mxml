@@ -293,7 +293,7 @@
         dodontoF_Main.setChatPaletteWindow( popup(ChatPalette2, false), "isChatPaletteVisible" );
         dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
         dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
-        dodontoF_Main.setButtonWindow( popup(ButtonBox, false), "isButtonBoxVisible" );
+        dodontoF_Main.setButtonWindow( popup(CounterRemocon, false), "isCounterRemoconVisible" );
         
         dodontoF_Main.initWindowForTiny();
     }
@@ -353,8 +353,8 @@
             dodontoF_Main.setDiceBoxVisible( toggled );
         } else if( menuName == "isChatPaletteVisible" ) {
             dodontoF_Main.setChatPaletteVisible( toggled );
-        } else if( menuName == "isButtonBoxVisible" ) {
-            dodontoF_Main.setButtonBoxVisible( toggled );
+        } else if( menuName == "isCounterRemoconVisible" ) {
+            dodontoF_Main.setCounterRemoconVisible( toggled );
         } else if( menuName == "isInitiativeListVisible" ) {
             InitiativeWindow.getInstance().setVisibleState( toggled );
         } else if( menuName == "isStandingGraphicVisible" ) {
@@ -382,15 +382,15 @@
             var isAdjustStandingGraphics:Boolean = toggled;
             Config.getInstance().setAdjustImageSizeMode(isAdjustStandingGraphics);
         } else if( menuName == "addCharacter" ) {
-            AddCharacterWindow.setCharacterPosition();
-            var characterWindow:CharacterWindow = popup(AddCharacterWindow, true) as CharacterWindow;
-            dodontoF_Main.setCharacterWindow(characterWindow);
+            var addCharacterWindow:AddCharacterWindow = popup(AddCharacterWindow, true) as AddCharacterWindow;
+            dodontoF_Main.setCharacterWindow(addCharacterWindow);
         } else if( menuName == "addMagicRange" ) {
-            AddMagicRangeWindow.setCharacterPosition();
-            popup(AddMagicRangeWindow, true);
+            var addMagicRangeWindow:AddMagicRangeWindow = popup(AddMagicRangeWindow, true) as AddMagicRangeWindow;
+            addMagicRangeWindow.setCharacterPosition();
         } else if( menuName == "addMagicRangeDD4th" ) {
-            AddMagicRangeDD4thWindow.setCharacterPosition();
-            popup(AddMagicRangeDD4thWindow, true);
+            var addMagicRangeDD4thWindow:AddMagicRangeDD4thWindow
+              = popup(AddMagicRangeDD4thWindow, true) as AddMagicRangeDD4thWindow;
+            addMagicRangeDD4thWindow.setCharacterPosition();
         } else if( menuName == "addMagicTimer" ) {
             popup(AddMagicTimerWindow, true);
         } else if( menuName == "graveyard" ) {

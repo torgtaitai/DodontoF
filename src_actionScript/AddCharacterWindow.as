@@ -2,18 +2,16 @@
 
 package {
     
+    /**
+     * キャラクター追加画面
+     */
     public class AddCharacterWindow extends CharacterWindow {
         
         import mx.managers.PopUpManager;
         
-        private static var characterPositionX:int;
-        private static var characterPositionY:int;
-        
-        public static function setCharacterPosition(x:int = 1, y:int = 1):void {
-            characterPositionX = x;
-            characterPositionY = y;
-        }
-        
+        /**
+         * 初期化処理
+         */
         protected override function init():void {
             title = "キャラクター追加";
             executeButton.label = "追加";
@@ -24,6 +22,9 @@ package {
             printPreview();
         }
         
+        /**
+         * キャラクターデータの追加処理
+         */
         public override function sendCharacterData(name:String,
                                                    imageUrl:String,
                                                    images:Array,

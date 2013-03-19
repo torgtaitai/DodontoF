@@ -85,7 +85,7 @@
         params.counterName = counterName.text;
         params.messageFormat = getMessageFormat();
         
-        ButtonBox.getInstance().changeButtonInfo(params, index);
+        CounterRemocon.getInstance().changeButtonInfo(params, index);
         
         PopUpManager.removePopUp(this);
     }

@@ -381,6 +381,9 @@ MapMask.as
 Memo.as
 メモ用クラス
 
+AddChitWindow.mxml
+チット（マップに置くカウンター的な物）作成画面
+
 MersenneTwister.as
 乱数（メルセンヌ・ツイスター）生成用クラス
 
@@ -455,15 +458,25 @@ AllTests.mxml
 動作検証用のテストソース。
 実動作には使用していないので無視してOK.
 
+AddBotTableWindow.mxml
+ダイスボット用の表を追加する画面用
+
+BouyomiChan.as
+棒読みちゃんでのテキスト読み上げ用クラス…なんですが、2013年3月現状、接続成功できていません。
+当面無視してOK。
+
+CounterRemocon.mxml
+
+
 ###############################
 
-AddBotTableWindow.mxml
-AddChitWindow.mxml
-BouyomiChan.as
-ButtonBox.mxml
+x AddBotTableWindow.mxml
+x AddChitWindow.mxml
+x BouyomiChan.as
+x CounterRemocon.mxml
 CardRankerCommand.as
 ChangeBotTableWindow.as
-ChangeButtonBoxWindow.mxml
+ChangeCounterRemoconWindow.mxml
 ChangeStatusAliasWindow.mxml
 CharacterWaitingRoomWindow.mxml
 ChatMessageLogBoxDummy.as

@@ -55,8 +55,11 @@ package {
             printPreview();
         }
         
-        protected override function getCommandParamsExt(params:Object):void {
+        override protected function getCommandParams():Object {
+            var params:Object = super.getCommandParams();
             params.effectId = effectId;
+            
+            return params;
         }
         
         protected override function execute():void {

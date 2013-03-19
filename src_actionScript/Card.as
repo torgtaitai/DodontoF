@@ -24,15 +24,25 @@ package {
     import mx.effects.Glow;
     import mx.managers.PopUpManager;
     
-    
+    /** 
+     * カードクラス
+     */
     public class Card extends MovablePiece {
         
         private var thisObj:Card;
         
+        /** 
+         * カードは誰かに所持されている場合は所持者のIDを持っていますが、
+         * 誰も所持していないカードの場合はIDはこの文字になります。
+         */
         static public function getNobodyOwner():String {
             return "nobody";
         }
         
+        /** 
+         * コマの定義名
+         * Pieceの子クラスは常に定義
+         */
         public static function getTypeStatic():String {
             return "Card";
         }
@@ -41,50 +51,66 @@ package {
             return getTypeStatic();
         }
         
+        /** 
+         * クラス定義名の日本語版。
+         * ゴミ箱から拾い上げるときに使用する。
+         */
         override public function getTypeName():String {
             return "カード";
         }
         
+        
+        /** 
+         * コマの作製用の初期データを生成
+         * @imageName_ カード表の画像URL(もしくはHTML文字列）
+         * @imageNameBack_ カード裏の画像URL(もしくはHTML文字列）
+         * @x カードのX座標
+         * @y カードのY座標
+         */
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x:int,
                                            y:int):Object {
             
-            var jsonData:Object = MovablePiece.getJsonData(getTypeStatic(), x, y);
+            var params:Object = MovablePiece.getJsonData(getTypeStatic(), x, y);
             
-            jsonData["imageName"] = imageName_;
-            jsonData["imageNameBack"] = imageNameBack_;
-            jsonData["isBack"] = true;
-            jsonData["isUpDown"] = false;
-            jsonData["isText"] = true;
-            jsonData["isOpen"] = false;
-            jsonData["owner"] = "";
-            jsonData["ownerName"] = "";
-            jsonData["mountName"] = "";
-            jsonData["name"] = "";
-            jsonData["canDelete"] = false;
+            params["imageName"] = imageName_;
+            params["imageNameBack"] = imageNameBack_;
+            params["isBack"] = true;
+            params["isUpDown"] = false;
+            params["isText"] = true;
+            params["isOpen"] = false;
+            params["owner"] = "";
+            params["ownerName"] = "";
+            params["mountName"] = "";
+            params["name"] = "";
+            params["canDelete"] = false;
             
-            return jsonData;
+            return params;
         }
         
+        /** 
+         * コマの作製用の初期データをここで生成
+         */
         override public function getJsonData():Object {
-            var jsonData:Object = super.getJsonData();
+            var params:Object = super.getJsonData();
             
-            jsonData["type"] = getType();
-            jsonData["imageName"] = this.imageName;
-            jsonData["imageNameBack"] = this.imageNameBack;
-            jsonData["isBack"] = this.isBack;
-            jsonData["isUpDown"] = this.isUpDown;
-            jsonData["isText"] = this.isText;
-            jsonData["isOpen"] = this.isOpen;
-            jsonData["owner"] = this.owner;
-            jsonData["ownerName"] = this.ownerName;
-            jsonData["mountName"] = this.mountName;
-            jsonData["name"] = "";
-            jsonData["canDelete"] = this.canDelete;
+            params["type"] = getType();
+            params["imageName"] = this.imageName;
+            params["imageNameBack"] = this.imageNameBack;
+            params["isBack"] = this.isBack;
+            params["isUpDown"] = this.isUpDown;
+            params["isText"] = this.isText;
+            params["isOpen"] = this.isOpen;
+            params["owner"] = this.owner;
+            params["ownerName"] = this.ownerName;
+            params["mountName"] = this.mountName;
+            params["name"] = "";
+            params["canDelete"] = this.canDelete;
             
-            return jsonData;
+            return params;
         }
+        
         
         private var isOpen:Boolean = false;
         private var owner:String = "";
@@ -99,7 +125,7 @@ package {
         
         private var cardName:String = null;
         
-        private var isInitMovedd:Boolean = false;
+        private var isInitMoved:Boolean = false;
         
         private var nameTextField:TextField = new TextField();
         private var cashMainText:Bitmap = null;
@@ -107,6 +133,10 @@ package {
         private var cashSubText:Bitmap = null;
         private var subTextArea:MovieClip = new MovieClip();
         
+        
+        /** 
+         * コマのデータを下にカードを作製します。
+         */
         public function Card(params:Object) {
             thisObj = this;
             
@@ -117,25 +147,32 @@ package {
             view.setBackGroundColor(0xFFFFFF);
             view.setLineDiameter(4 * 2);
         }
-
+        
+        /** 
+         * 回転可能なコマかを判別。
+         */
         override protected function canRotate():Boolean {
             return true;
         }
         
-        
+        /** 
+         * カードにはカードの属する「山」があり、
+         * ここではその山の名前を返す。
+         */
         public function getMountName():String {
             return this.mountName;
         }
         
-        public function setRate(rate:Number):void {
-            view.scaleX = rate;
-            view.scaleY = rate;
-        }
-        
+        /** 
+         * カードを表示するためのビューを返す。
+         */
         public function getView():UIComponent {
             return view;
         }
         
+        /** 
+         * 初期化・更新するための各種パラメータをここで更新
+         */
         protected function setParams(params:Object):void {
             this.isOpen = params.isOpen;
             this.owner = params.owner;
@@ -151,116 +188,23 @@ package {
             printTitle();
         }
         
+        /** 
+         * カード表の画像URL(もしくはHTML文字列）を設定
+         */
         public function setImageName(s:String):void {
             this.imageName = s;
         }
         
+        /** 
+         * カード裏の画像URL(もしくはHTML文字列）を設定
+         */
         public function setImageNameBack(s:String):void {
             this.imageNameBack = s;
         }
         
-        public function setCanDelete(b:Boolean):void {
-            canDelete = b;
-        }
-        
-        private function getStringFromParams(params:Object, key:String):String {
-            var name:String = params[key];
-            
-            if( name == null ) {
-                return name;
-            }
-            
-            return name;
-        }
-        
-        public function getOwner():String {
-            return this.owner;
-        }
-        
-        public function getOwnerName():String {
-            return this.ownerName;
-        }
-        
-        public function setOwnerName(name:String):void {
-            this.ownerName = name;
-            this.owner = getSelfOwnerId();
-        }
-        
-        public function isPickupable():Boolean {
-            return true;
-        }
-        
-        public function getRoundColor():int {
-            var roundColor:int = 0xBBBB00;
-            if( this.isOpen ) {
-                roundColor = 0xAFEEEE;
-            }
-            return roundColor;
-        }
-        
-        private function setViewStates():void {
-            if( this.view == null ) {
-                return;
-            }
-            
-            var roundColor:int = getRoundColor();
-            this.view.setRoundColor(roundColor);
-            this.view.setLineColor(roundColor);
-            
-            setContextMenu();
-        }
-        
-        override protected function dragged():void {
-            isInitMovedd = true;
-        }
-        
-        private function setContextMenu():void {
-            if( openPrivateMenu == null ) {
-                return;
-            }
-            
-            openPrivateMenu.visible = false; //"カードを見る：非公開で自分だけ
-            openPublicMenu.visible = false; //"カードを全員に公開する
-            closeSecretMenu.visible = false;  //カードを伏せる：非公開に戻す
-            changeOwnerMenu.visible = false; //"カードの管理者を自分に変える
-            printCardTextMenu.visible = false; //カードテキストをチャットに引用
-            removeCardMenu.visible = false; //"カード削除
-            
-            if( this.isPrintCardText() ) {
-                if( ! isPrintBackSide() ) {
-                    printCardTextMenu.visible = true;
-                }
-            }
-            
-            if( this.canDelete ) {
-                removeCardMenu.visible = true;
-            }
-            
-            if( ! isOwner() ) {
-                changeOwnerMenu.visible = true; //"カードの管理者を自分に変える")
-                return;
-            }
-            
-            if( this.isOpen ) {
-                closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す")
-                return;
-            }
-            
-            if( this.isBack ) {
-                openPrivateMenu.visible = true; //"カードを見る：非公開で自分だけ")
-            }
-            
-            openPublicMenu.visible = true; //"カードを全員に公開する")
-        }
-        
-        public function getTitleVisible():Boolean {
-            return this.nameTextField.visible;
-        }
-        
-        public function setTitleVisible(b:Boolean):void {
-            this.nameTextField.visible = b;
-        }
-        
+        /** 
+         * カードの所持者表示の更新
+         */
         protected function printTitle():void {
             var text:String = getTitleText();
             
@@ -273,6 +217,9 @@ package {
             setCardCommand();
         }
         
+        /** 
+         * カードの所持者表示文字列の取得
+         */
         public function getTitleText():String {
             if( this.ownerName == null ) {
                 return null;
@@ -290,6 +237,10 @@ package {
         }
         
         
+        /** 
+         * ウィッチクエストではカードにコマンドを定義する事ができる。
+         * その設定コマンドの表示をここで行う。
+         */
         private function setCardCommand():void {
             if( commandMenu == null ) {
                 return;
@@ -298,6 +249,74 @@ package {
             var cardCommand:String = getCardCommand( this.imageName );
             commandMenu.visible = ( cardCommand != "" );
             commandMenu.caption = getCardCommandName( this.imageName );
+        }
+        
+        
+        /** 
+         * カードは誰かに所持されている場合は所持者のIDを持っている。
+         * そのIDを返す。
+         */
+        public function getOwner():String {
+            return this.owner;
+        }
+        
+        /** 
+         * カード所持者の名前を返す。
+         */
+        public function getOwnerName():String {
+            return this.ownerName;
+        }
+        
+        /** 
+         * カード所持者の名前を設定。
+         */
+        public function setOwnerName(name:String):void {
+            this.ownerName = name;
+            this.owner = getSelfOwnerId();
+        }
+        
+        /** 
+         * カードピックアップ画面に拡大表示させるかどうかの指定。
+         * 子クラスによっては対象外を指定します
+         * （カードの山もカードクラスだけど拡大表示対象外）
+         */
+        public function isPickupable():Boolean {
+            return true;
+        }
+        
+        /** 
+         * カードの縁取りの色を取得。
+         * カードを全員に公開しているかどうかで色が変わります。
+         */
+        public function getRoundColor():int {
+            var roundColor:int = 0xBBBB00;
+            if( this.isOpen ) {
+                roundColor = 0xAFEEEE;
+            }
+            return roundColor;
+        }
+        
+        
+        /** 
+         * 最初にマップに配置された瞬間は、マス目に沿う位置への自動配置（Snapと呼んでいます）は行われない。
+         * 一度でも動かされたら、以降はSnapが許可されます。
+         */
+        override protected function dragged():void {
+            isInitMoved = true;
+        }
+        
+        /** 
+         * カードのタイトル（所有者）の表示状態
+         */
+        public function isTitleVisible():Boolean {
+            return this.nameTextField.visible;
+        }
+        
+        /** 
+         * カードのタイトル（所有者）の表示状態を設定
+         */
+        public function setTitleVisible(b:Boolean):void {
+            this.nameTextField.visible = b;
         }
         
         
@@ -386,6 +405,58 @@ package {
             printTitle();
         }
         
+        private function setViewStates():void {
+            if( this.view == null ) {
+                return;
+            }
+            
+            var roundColor:int = getRoundColor();
+            this.view.setRoundColor(roundColor);
+            this.view.setLineColor(roundColor);
+            
+            setContextMenu();
+        }
+        
+        
+        private function setContextMenu():void {
+            if( openPrivateMenu == null ) {
+                return;
+            }
+            
+            openPrivateMenu.visible = false; //"カードを見る：非公開で自分だけ
+            openPublicMenu.visible = false; //"カードを全員に公開する
+            closeSecretMenu.visible = false;  //カードを伏せる：非公開に戻す
+            changeOwnerMenu.visible = false; //"カードの管理者を自分に変える
+            printCardTextMenu.visible = false; //カードテキストをチャットに引用
+            removeCardMenu.visible = false; //"カード削除
+            
+            if( this.isPrintCardText() ) {
+                if( ! isPrintBackSide() ) {
+                    printCardTextMenu.visible = true;
+                }
+            }
+            
+            if( this.canDelete ) {
+                removeCardMenu.visible = true;
+            }
+            
+            if( ! isOwner() ) {
+                changeOwnerMenu.visible = true; //"カードの管理者を自分に変える")
+                return;
+            }
+            
+            if( this.isOpen ) {
+                closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す")
+                return;
+            }
+            
+            if( this.isBack ) {
+                openPrivateMenu.visible = true; //"カードを見る：非公開で自分だけ")
+            }
+            
+            openPublicMenu.visible = true; //"カードを全員に公開する")
+        }
+        
         override public function getViewRotationDiff():Number {
             var rotationDiff:Number = 0;
             if( ! isPrintBackSide() ) {
@@ -454,7 +525,7 @@ package {
         
         
         override public function snapViewPosition():Boolean {
-            if( ! thisObj.isInitMovedd ) {
+            if( ! thisObj.isInitMoved ) {
                 return false;
             }
             
@@ -598,11 +669,6 @@ package {
             openPublicMenu = addMenuItem(menu, "カードを全員に見せる（公開）", openCard, true);
             closeSecretMenu = addMenuItem(menu, "カードを伏せる（非公開）", closeSecret, false);
             changeOwnerMenu = addMenuItem(menu, "カードを自分の管理へ", changeOwner, true);
-            /*
-            addMenuItem(menu, "右回転",    thisObj.getContextMenuItemFunctionRotateCharacter( 90), true);
-            addMenuItem(menu, "180度回転", thisObj.getContextMenuItemFunctionRotateCharacter(180));
-            addMenuItem(menu, "左回転",    thisObj.getContextMenuItemFunctionRotateCharacter(270));
-            */
             printCardTextMenu = addMenuItem(menu, "カードテキストをチャットに引用", getContextMenuItemFunctionPrintCardText, true);
             
             removeCardMenu = addMenuItem(menu, "カード削除", getContextMenuItemRemoveCharacter, true);
@@ -678,17 +744,6 @@ package {
             
             return cardMessage;
         }
-        
-        /*
-        protected function getContextMenuItemFunctionRotateCharacter(rotationDiff:Number):Function {
-            return function(event:ContextMenuEvent):void {
-                setDiffRotation(rotationDiff);
-                
-                thisObj.loadViewImage();
-                sender.changeCharacter( thisObj.getJsonData() );
-            };
-        }
-        */
         
         override public function isGotoGraveyard():Boolean {
             return true;
