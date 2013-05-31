@@ -692,6 +692,7 @@ package {
                                                    RandomDungeonCardMount,
                                                    CardTrushMount,
                                                    RandomDungeonCardTrushMount,
+                                                   MetallicGuardianDamageRange,
                                                    Character ];
         
         static public function createPieceFromCharacterData(characterData:Object):Piece {

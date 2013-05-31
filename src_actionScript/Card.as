@@ -133,6 +133,8 @@ package {
         private var cashSubText:Bitmap = null;
         private var subTextArea:MovieClip = new MovieClip();
         
+        private var zoomRate:Number = 4;
+        
         
         /** 
          * コマのデータを下にカードを作製します。
@@ -319,29 +321,57 @@ package {
             this.nameTextField.visible = b;
         }
         
-        
+          /** 
+           * コマの座標を画面上の何ドットとして表現するかの指定。
+           * 普通は Map.getSquareLength() と同一の 50 。
+           * 例えばキャラクターが x=1, y=2 の座標に居るとすると、
+           * 画面の表示上はマップ上で 50, 100 の座標に表示されます。
+           * 
+           * しかしカードは歴史的な経緯で扱いが特殊で、座標＝画面上の表示座標となっています。
+           * このためここの値は 1 です。
+           * 
+           * 歴史的経緯って何かといえば、
+           * 昔はキャラクターのマップとカードの置き場所は別々に管理されたんです。
+           * 今はマップ上にカード置くようになったので、この仕様は混乱の元なんですが
+           * 下手に変更すると昔のデータと互換性が無くなるのでこのままとします。
+           */
         override public function getSquareLength():int {
             return 1;
         }
         
+        
+        /** 
+         * マップ上の何処のレイヤーに表示されるかを指定します。
+         */
         override public function getMapLayer():UIComponent {
             return getMap().getCardLayer();
         }
         
-        private var zoomRate:Number = 4;
         
+        /** 
+         * コマの幅がマス目の何マス分かを示します。
+         */
         protected function getWidthSize():Number {
             return 2; 
-       }
+        }
         
+        /** 
+         * コマの高がマス目の何マス分かを示します。
+         */
         protected function getHeightSize():Number {
             return 3;
         }
         
+        /** 
+         * コマの幅がマス目の何マス分かを示します。
+         */
         override public function getWidth():int {
             return getWidthSize();
         }
         
+        /** 
+         * コマの高がマス目の何マス分かを示します。
+         */
         override public function getHeight():int {
             return getHeightSize();
         }

@@ -49,6 +49,8 @@ package {
         static private var defaultChatChannelNames:Array = [publicChatChannelName, "雑談"];
         private var chatChannelNames:Array = Utils.clone(defaultChatChannelNames);
         private var canVisitValue:Boolean = false;
+        private var logoutUrl:String = "";
+
         
         public function setCommet(b:Boolean):void {
             sender.setCommet(b);
@@ -457,8 +459,8 @@ package {
         }
         
 
-        public function uploadScenarioData():void {
-            getGuiInputSender().getSender().uploadScenarioData();
+        public function loadAllSaveData():void {
+            getGuiInputSender().getSender().loadAllSaveData();
         }
         
         
@@ -499,13 +501,21 @@ package {
                 chatWindow.sendSystemMessage("がログアウトしました。");
             }
             
-            //今のＵＲＬに再ログイン
-            var url:String = Utils.getOwnRawUrl();;
-            url = url.replace(/loginRoom=\d+\&?/, '');
-            url = url.replace(/\?$/, '');
-            url = url.replace(/\&$/, '');
-            var currentUrl:URLRequest = new URLRequest( url );
-            navigateToURL( currentUrl, "_self" );
+            var url:String = logoutUrl;
+            if((url == null) || (url == "")) {
+                //ログアウト先の指定が無いなら、今のＵＲＬに再ログイン
+                url = Utils.getOwnRawUrl();;
+                url = url.replace(/loginRoom=\d+\&?/, '');
+                url = url.replace(/\?$/, '');
+                url = url.replace(/\&$/, '');
+            }
+            
+            var request:URLRequest = new URLRequest( url );
+            navigateToURL( request, "_self" );
+        }
+            
+        public function setLogoutUrl(url:String):void {
+            logoutUrl = url;
         }
         
         public function isSessionRecording():Boolean {
@@ -1104,8 +1114,8 @@ package {
         {label:"セーブ", data:"save"},
         {label:"ロード", data:"load"},
         {type:"separator"},
-        {label:"全データセーブ", data:"saveScenarioData"},
-        {label:"全データロード(旧：シナリオデータ読み込み)", data:"uploadScenarioData"},
+        {label:"全データセーブ", data:"saveAllData"},
+        {label:"全データロード(旧：シナリオデータ読み込み)", data:"loadAllSaveData"},
         {type:"separator"},
         {label:"チャットログ保存", data:"saveLog"},
         {label:"録画開始", data:"startSessionRecording", enabled:"true"},
@@ -1145,8 +1155,12 @@ package {
     {label:"コマ", data:"pass",
      children: [
         {label:"キャラクター追加", data:"addCharacter"},
-        {label:"魔法範囲追加(D&D3版)", data:"addMagicRange"},
-        {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
+        {label:"範囲追加", data:"pass",
+                children: [
+                           {label:"魔法範囲追加(D&D3版)", data:"addMagicRange"},
+                           {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
+                           {label:"攻撃範囲(メタリックガーディアン)", data:"addMetallicGuardianDamageRange"},
+                           ]},
         {label:"魔法タイマー追加", data:"addMagicTimer"},
         {type:"separator"},
         {label:"チット作成", data:"createChit"},

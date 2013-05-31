@@ -149,12 +149,12 @@ package {
             fileReferenceForSaveDownload.download(request);
         }
         
-        public function saveScenario(chatPalleteData:String, resultFunction:Function):void {
+        public function saveAllData(chatPaletteData:String, resultFunction:Function):void {
             var data:Object = {
-                "chatPalleteData": chatPalleteData,
+                "chatPaletteData": chatPaletteData,
                 "baseUrl": Utils.getOwnBaseUrl() };
             
-            var obj:Object = getParamObject("saveScenario",  data);
+            var obj:Object = getParamObject("saveAllData",  data);
             sendCommandData(obj, resultFunction);
         }
         
@@ -198,50 +198,45 @@ package {
                     return;
                 }
                 
-                if( resultFunction != null ) {
-                }
-                
                 thisObj.sendFileBytesUpload(fileReference, commandName, thisObj.loadParams, resultFunction);
             }
         }
         
-        private var scenarioFileExtensions:String = "*.tgz;*.tar.gz";
+        private var allSaveDataFileExtensions:String = "*.tgz;*.tar.gz";
         
-        public function uploadScenarioData():void {
-            Log.loggingTuning("uploadScenarioData begin");
+        public function loadAllSaveData():void {
+            Log.loggingTuning("loadAllSaveData begin");
             loadParams = new Object();
             
-            var commandName:String = "loadScenario";
+            var commandName:String = "loadAllSaveData";
             
-            var loadScenarioFileReference:FileReference = new FileReference();
+            var fileReference:FileReference = new FileReference();
             
-            loadScenarioFileReference.addEventListener(Event.SELECT,
-                                                       getFileSelectHandlerForLoad(commandName));
-            loadScenarioFileReference.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA,
-                                                       analyzeLoadScenarioResult);
+            fileReference.addEventListener(Event.SELECT,
+                                           getFileSelectHandlerForLoad(commandName, analyzeLoadAllSaveDataResult));
             
             var filters:Array = new Array();
-            filters.push( new FileFilter("シナリオデータ(" + scenarioFileExtensions + ")",
-                                         scenarioFileExtensions) );
+            filters.push( new FileFilter("全セーブデータ(" + allSaveDataFileExtensions + ")",
+                                         allSaveDataFileExtensions) );
             
-            loadScenarioFileReference.browse(filters);
-            Log.loggingTuning("uploadScenarioData end");
+            fileReference.browse(filters);
+            Log.loggingTuning("loadAllSaveData end");
         }
-
-
-        public function analyzeLoadScenarioResult(dataEvent:DataEvent):void {
-            Log.logging('analyzeLoadScenarioResult called, dataEvent', dataEvent);
+        
+        
+        public function analyzeLoadAllSaveDataResult(obj:Object):void {
+            Log.loggingTuning('analyzeLoadAllSaveDataResult Begin');
             
-            var jsonData:Object = SharedDataReceiver.getJsonDataFromDataEvent(dataEvent);
-            Log.logging('analyzeLoadScenarioResult jsonData', jsonData);
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            Log.loggingTuning('allSaveData jsonData', jsonData);
             
             if( jsonData.resultText != 'OK' ) {
-                Log.loggingError( "シナリオデータ読み込み時にエラーが発生しました：" + jsonData.resultText );
+                Log.loggingError( "全セーブデータ読み込み時にエラーが発生しました：" + jsonData.resultText );
                 return;
             }
             
             DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPaletteSaveData );
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("シナリオデータ読み込みに成功しました。", false);
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("全セーブデータ読み込みに成功しました。", false);
         }
         
         
@@ -270,9 +265,9 @@ package {
         }
         
         public function getSendFileBytesUpload(fileReference:FileReference,
-                                                commandName:String,
-                                                data:Object = null,
-                                                resultFunction:Function = null):Function {
+                                               commandName:String,
+                                               data:Object = null,
+                                               resultFunction:Function = null):Function {
             return function(e:Event):void {
                 if( data == null ) {
                     data = new Object();

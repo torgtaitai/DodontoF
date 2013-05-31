@@ -37,6 +37,7 @@
     
     override protected function setup():void {
         imageSelecter.addPreview(previewImage, 200);
+        imageSelecter.setMoviewFileSelectable(true);
         
         Log.loggingTuning("=>setup() Begin");
         

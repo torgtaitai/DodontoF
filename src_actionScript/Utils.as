@@ -328,6 +328,7 @@ package {
             str = changeZenkakuToHankakuOnAll(str, "］", null, "]");
             str = changeZenkakuToHankakuOnAll(str, "、", null, ",");
             str = changeZenkakuToHankakuOnAll(str, "，", null, ",");
+            str = changeZenkakuToHankakuOnAll(str, "＃", null, "#");
             return str;
         }
         

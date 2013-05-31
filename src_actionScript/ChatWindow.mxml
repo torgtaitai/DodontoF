@@ -362,13 +362,40 @@
         }
         
         public function setDiceBotGameType(gameType:String):void {
+            Log.logging("setDiceBotGameType Begin");
+            
             var index:int = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
             if( index == -1 ) {
-                Utils.selectComboBox(diceBotGameType, gameType, "name");
+                index = Utils.selectComboBox(diceBotGameType, gameType, "name");
+            }
+            
+            if( index == -1 ) {
+                Log.logging("gameType not found", gameType);
+                addNewGameType(gameType);
+                index = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+                Log.logging("gameType add result", index);
             }
             
             diceBotGameType.validateNow();
             setDiceBotHelpText();
+            
+            Log.logging("setDiceBotGameType End");
+        }
+        
+        private function addNewGameType(gameType:String):void {
+            var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
+            
+            var info:Object = Utils.clone(diceBotInfos[0]);
+            info.name = gameType;
+            info.gameType = gameType;
+            info.prefixs = [];
+            info.info = "独自ダイス未実装";
+            
+            diceBotInfos.push( info );
+            Log.logging("gameType", gameType);
+            Log.logging("info", info);
+            
+            diceBotGameType.dataProvider = diceBotInfos;
         }
         
         private function getDiceBotGameTypeKeyName():String { 
@@ -806,14 +833,17 @@
         }
         
         public function initDiceBotInfos():void {
+            Log.logging("initDiceBotInfos called");
             var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
             diceBotGameType.dataProvider = diceBotInfos;
         }
         
         public function setDiceBotInfos(diceBotInfos:Array):void {
+            Log.logging("setDiceBotInfos called");
             var gameType:String = diceBotGameType.selectedItem.gameType;
             diceBotGameType.dataProvider = diceBotInfos;
-            Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            //Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            setDiceBotGameType(gameType);
             
             initDicePatterns();
         }
@@ -930,15 +960,24 @@
             var helpText:String = getBaseHelpText();
             var item:Object = diceBotGameType.selectedItem;
             
-            if( item.gameType == '' || item.gameType == 'DiceBot' ) {
-                helpText += "==【その他】===============================\n";
-                helpText += "ゲーム固有の判定がある場合はこの場所に記載されます。";
-            } else {
-                helpText += ("==【" + item.name + "専用】=======================\n")
-                helpText += item.info;
-            }
+            helpText += getDiceBotHelpText(item);
             
             diceBotHelpText = helpText;
+        }
+        
+        private function getDiceBotHelpText(item:Object):String {
+            var text:String = "";
+            
+            if( item.gameType == '' || item.gameType == 'DiceBot' ) {
+                text += "==【その他】===============================\n";
+                text += "ゲーム固有の判定がある場合はこの場所に記載されます。";
+                return text;
+            }
+            
+            text += ("==【" + item.name + "専用】=======================\n");
+            text += item.info;
+            
+            return text;
         }
         
         private function getBaseHelpText():String {

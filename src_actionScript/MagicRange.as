@@ -13,7 +13,7 @@ package {
     import flash.ui.ContextMenuItem;
     import flash.geom.Point;
     
-    public class MagicRange  extends InitiativedMovablePiece {
+    public class MagicRange extends InitiativedMovablePiece {
         
         private var radius:int = 1;
         private var rangeType:String = "circle";

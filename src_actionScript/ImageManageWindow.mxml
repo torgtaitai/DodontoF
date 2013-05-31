@@ -33,6 +33,7 @@
     private var loadedImageCount:int = 0;
     
     override protected function setup():void {
+        imageSelecter.setMoviewFileSelectable(true);
         imageSelecter.setMultiSelectable(true);
         imageSelecter.setImageClickEventFunction(imageClickEvent);
         imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);

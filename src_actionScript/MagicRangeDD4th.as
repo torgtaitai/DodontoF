@@ -2,7 +2,7 @@
 
 package {
     
-    public class MagicRangeDD4th  extends MagicRange {
+    public class MagicRangeDD4th extends MagicRange {
         public function MagicRangeDD4th(params:Object) {
             super(params);
         }

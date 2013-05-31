@@ -3,7 +3,7 @@
 package {
     import mx.controls.Alert;
     
-    public class SaveScenarioDataWindow extends SaveWindow {
+    public class SaveAllDataWindow extends SaveWindow {
         
         override protected function setup():void {
             this.title = "全データセーブ";
@@ -21,13 +21,15 @@ package {
         }
         
         override protected function executeServerSave():void {
-            var chatPaletteSaveData:String = DodontoF_Main.getInstance().getChatPaletteWindow().getSaveData();
+            var chatPaletteData:String = DodontoF_Main.getInstance().getChatPaletteWindow().getSaveData();
+            Log.logging("chatPaletteData", chatPaletteData);
+            
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-            guiInputSender.saveScenario(chatPaletteSaveData, this.resultFuction);
+            guiInputSender.saveAllData(chatPaletteData, this.resultFuction);
         }
         
         override protected function getReadyMessage():String {
-            return "シナリオファイル準備完了";
+            return "ファイル準備完了";
         }
         
     }

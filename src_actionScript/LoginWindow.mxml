@@ -518,6 +518,7 @@
             stage.frameRate = jsonData.fps;
         }
         
+        DodontoF_Main.getInstance().setLogoutUrl( jsonData.logoutUrl );
         isNeedCreatePassword = jsonData.isNeedCreatePassword 
         Config.getInstance().setImageUploadDirInfo(jsonData.imageUploadDirInfo);
         

@@ -337,10 +337,10 @@
             refreshMainMenu();
             
             dodontoF_Main.stopSessionRecording();
-        } else if( menuName == "saveScenarioData" ) {
-            popup(SaveScenarioDataWindow, true);
-        } else if( menuName == "uploadScenarioData" ) {
-            dodontoF_Main.uploadScenarioData();
+        } else if( menuName == "saveAllData" ) {
+            popup(SaveAllDataWindow, true);
+        } else if( menuName == "loadAllSaveData" ) {
+            dodontoF_Main.loadAllSaveData();
         } else if( menuName == "logout" ) {
             dodontoF_Main.logout();
         } else if( menuName == "initWindowPosition" ) {
@@ -391,6 +391,8 @@
             var addMagicRangeDD4thWindow:AddMagicRangeDD4thWindow
               = popup(AddMagicRangeDD4thWindow, true) as AddMagicRangeDD4thWindow;
             addMagicRangeDD4thWindow.setCharacterPosition();
+        } else if( menuName == "addMetallicGuardianDamageRange" ) {
+            popup(AddMetallicGuardianDamageRangeWindow, true);
         } else if( menuName == "addMagicTimer" ) {
             popup(AddMagicTimerWindow, true);
         } else if( menuName == "graveyard" ) {

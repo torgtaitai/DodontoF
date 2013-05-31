@@ -31,8 +31,8 @@ package {
             sender.saveFileDownload(saveFileName, resultFunction);
         }
         
-        public function saveScenario(chatPalleteData:String, resultFunction:Function):void {
-            sender.saveScenario(chatPalleteData, resultFunction);
+        public function saveAllData(chatPalleteData:String, resultFunction:Function):void {
+            sender.saveAllData(chatPalleteData, resultFunction);
         }
         
         public function save(resultFunction:Function):void {

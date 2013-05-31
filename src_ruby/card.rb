@@ -150,6 +150,12 @@ class Card
        },
        
        
+       { 'type' => 'harrowdeck',
+         'title' => 'Pathfinder：Harrow Deck',
+         'fileName' => 'cards/PathfinderHarrowDeck.txt',
+       },
+       
+       
       ]
   end
   

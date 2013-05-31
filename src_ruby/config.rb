@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.41.02.01"
-$versionDate = "2013/03/19"
+$versionOnly = "Ver.1.41.08"
+$versionDate = "2013/05/31"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -173,8 +173,8 @@ $fps = 60
 $mapMaxWidth = 150
 $mapMaxHeigth = 150
 
-#アップロード可能なシナリオデータの上限(MB)
-$scenarioDataMaxSize = 100.0 
+#「全データロード」でアップロード可能なの上限(MB)
+$allSaveDataMaxSize = 100.0 
 
 #ログイン状況を記録するファイル
 $loginCountFile = 'loginCount.txt'
@@ -242,6 +242,9 @@ $isPasswordNeedFroDeletePlayRoom = true
 #単位は線の本数。細かい直線をは本数が増え、消しゴムでも書き込み量は増え続けます。
 $drawLineCountLimit = 3000
 
+#ログアウト時に飛ばされるURL
+#空の場合はログインしていた DodontoF.swf をリロードしてログイン画面に戻ります。
+$logoutUrl = ""
 
 
 #ダイスボット一覧に表示するダイスボットの名前順序
@@ -262,11 +265,13 @@ $diceBotOrder = <<____END_MARKER____
 エルリック！
 エムブリオマシン
 カードランカー
+ガープス
 カオスフレア
 ガンドッグ
 ガンドッグ・ゼロ
 クトゥルフ
 クトゥルフテック
+ゲイシャ・ガール・ウィズ・カタナ
 ゲヘナ・アナスタシス
 サタスペ
 シノビガミ

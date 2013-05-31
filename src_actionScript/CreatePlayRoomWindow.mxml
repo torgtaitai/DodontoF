@@ -242,7 +242,7 @@
         }
         
         if( item == null ) {
-            return null;
+            return gameType.text;
         }
         
         result = item.gameType;

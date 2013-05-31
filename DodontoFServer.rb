@@ -36,7 +36,10 @@ begin
 rescue LoadError
 end
 
-$loginCountFile = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
+
+if( $loginCountFileFullPath.nil? )
+  $loginCountFileFullPath = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
+end
 
 
 if( $isMessagePackInstalled )
@@ -94,7 +97,11 @@ class DodontoFServer
     
     @diceBotTablePrefix = 'diceBotTable_'
     @fullBackupFileBaseName = "DodontoFFullBackup"
-    @scenarioFIleExtName = '.tar.gz'
+    
+    @allSaveDataFileExt = '.tar.gz'
+    @defaultAllSaveData = 'default.sav'
+    @defaultChatPallete = 'default.cpd'
+    
     @card = nil
   end
   
@@ -115,7 +122,7 @@ class DodontoFServer
     logging(key, "getRequestData key")
     
     value = @cgiParams[key]
-    logging(@cgiParams, "@cgiParams")
+    # logging(@cgiParams, "@cgiParams")
     # logging(value, "getRequestData value")
     
     if( value.nil? )
@@ -126,7 +133,8 @@ class DodontoFServer
     end
     
     
-    logging(value, "getRequestData result")
+    # logging(value, "getRequestData result")
+    
     return value
   end
 
@@ -741,9 +749,9 @@ class DodontoFServer
       ['uploadImageUrl', hasReturn], 
       ['save', hasReturn], 
       ['saveMap', hasReturn], 
-      ['saveScenario', hasReturn], 
+      ['saveAllData', hasReturn], 
       ['load', hasReturn], 
-      ['loadScenario', hasReturn], 
+      ['loadAllSaveData', hasReturn], 
       ['getDiceBotInfos', hasReturn], 
       ['getBotTableInfos', hasReturn], 
       ['addBotTable', hasReturn], 
@@ -946,7 +954,19 @@ class DodontoFServer
   
   
   def getTestResponseText
-    "「どどんとふ」の動作環境は正常に起動しています。";
+    unless ( FileTest::directory?( $SAVE_DATA_DIR + '/saveData') )
+      return "Error : saveData ディレクトリ が存在しません。"
+    end
+    if ( Dir::mkdir( $SAVE_DATA_DIR + '/saveData/data_checkTestResponse') )
+      Dir::rmdir($SAVE_DATA_DIR + '/saveData/data_checkTestResponse' )
+    end
+    unless ( FileTest::directory?( $imageUploadDir ) )
+      return "Error : 画像保存用ディレクトリ #{$imageUploadDir} が存在しません。"
+    end
+    if ( Dir::mkdir( $imageUploadDir + '/data_checkTestResponse' ) )
+      Dir::rmdir($imageUploadDir + '/data_checkTestResponse' )
+    end
+    return "「どどんとふ」の動作環境は正常に起動しています。"
   end
   
   
@@ -1090,7 +1110,7 @@ class DodontoFServer
   
   def getBusyInfo()
     jsonData = {
-      "loginCount" => File.readlines($loginCountFile).join.to_i,
+      "loginCount" => File.readlines($loginCountFileFullPath).join.to_i,
       "maxLoginCount" => $aboutMaxLoginCount,
       "version" => $version,
       "result" => 'OK',
@@ -2142,6 +2162,7 @@ class DodontoFServer
       'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
       'defaultUserNames' => $defaultUserNames,
       'drawLineCountLimit' => $drawLineCountLimit,
+      'logoutUrl' => $logoutUrl,
     }
     
     logging(result, "result")
@@ -2158,7 +2179,7 @@ class DodontoFServer
   def writeAllLoginInfo( allLoginCount )
     text = "#{allLoginCount}"
     
-    saveFileName = $loginCountFile
+    saveFileName = $loginCountFileFullPath
     saveFileLock = getSaveFileLockReadOnlyRealFile(saveFileName)
     
     saveFileLock.lock do
@@ -2608,33 +2629,35 @@ class DodontoFServer
     saveFileName = @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
   
-  def saveScenario()
-    logging("saveScenario begin")
+  def saveAllData()
+    logging("saveAllData begin")
     dir = getRoomLocalSpaceDirName
     makeDir(dir)
     
     params = getParamsFromRequestData()
-    @saveScenarioBaseUrl = params['baseUrl']
-    chatPaletteSaveDataString = params['chatPaletteSaveData']
+    @saveAllDataBaseUrl = params['baseUrl']
+    chatPaletteData = params['chatPaletteData']
+    logging(@saveAllDataBaseUrl, "saveAllDataBaseUrl")
+    logging(chatPaletteData, "chatPaletteData")
     
-    saveDataAll = getSaveDataAllForScenario
+    saveDataAll = getAllSaveData
     saveDataAll = moveAllImagesToDir(dir, saveDataAll)
-    makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
-    makeScenariDefaultSaveFile(dir, saveDataAll)
+    makeChatPalletSaveFile(dir, chatPaletteData)
+    makeDefaultSaveFileForAllSave(dir, saveDataAll)
     
-    removeOldScenarioFile(dir)
+    removeOldAllSaveFile(dir)
     baseName = getNewSaveFileBaseName(@fullBackupFileBaseName);
-    scenarioFile = makeScenarioFile(dir, baseName)
+    allSaveDataFile = makeAllSaveDataFile(dir, baseName)
     
     result = {}
     result['result'] = "OK"
-    result["saveFileName"] = scenarioFile
+    result["saveFileName"] = allSaveDataFile
     
-    logging(result, "saveScenario result")
+    logging(result, "saveAllData result")
     return result
   end
   
-  def getSaveDataAllForScenario
+  def getAllSaveData
     selectTypes = $saveFiles.keys
     selectTypes.delete_if{|i| i == 'chatMessageDataLog'}
     
@@ -2741,8 +2764,8 @@ class DodontoFServer
     logging(from, "from")
     logging(to, "to")
     
-    logging(@saveScenarioBaseUrl, "@saveScenarioBaseUrl")
-    from.gsub!(@saveScenarioBaseUrl, './')
+    logging(@saveAllDataBaseUrl, "@saveAllDataBaseUrl")
+    from.gsub!(@saveAllDataBaseUrl, './')
     logging(from, "from2")
     
     return false if( from.nil? )
@@ -2767,49 +2790,49 @@ class DodontoFServer
     return result
   end
   
-  def makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
+  def makeChatPalletSaveFile(dir, chatPaletteData)
     logging("makeChatPalletSaveFile Begin")
     logging(dir, "makeChatPalletSaveFile dir")
     
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
     
-    File.open($scenarioDefaultChatPallete, "a+") do |file|
-      file.write(chatPaletteSaveDataString)
+    File.open(@defaultChatPallete, "w+") do |file|
+      file.write(chatPaletteData)
     end
     
     FileUtils.cd(currentDir)
     logging("makeChatPalletSaveFile End")
   end
   
-  def makeScenariDefaultSaveFile(dir, saveDataAll)
-    logging("makeScenariDefaultSaveFile Begin")
-    logging(dir, "makeScenariDefaultSaveFile dir")
+  def makeDefaultSaveFileForAllSave(dir, saveDataAll)
+    logging("makeDefaultSaveFileForAllSave Begin")
+    logging(dir, "makeDefaultSaveFileForAllSave dir")
     
     extension = "sav"
     result = saveSelectFilesFromSaveDataAll(saveDataAll, extension)
     
     from = result["saveFileName"]
-    to = File.join(dir, $scenarioDefaultSaveData)
+    to = File.join(dir, @defaultAllSaveData)
     
     FileUtils.mv(from, to)
     
-    logging("makeScenariDefaultSaveFile End")
+    logging("makeDefaultSaveFileForAllSave End")
   end
   
   
-  def removeOldScenarioFile(dir)
-    fileNames = Dir.glob("#{dir}/#{@fullBackupFileBaseName}*#{@scenarioFIleExtName}")
+  def removeOldAllSaveFile(dir)
+    fileNames = Dir.glob("#{dir}/#{@fullBackupFileBaseName}*#{@allSaveDataFileExt}")
     fileNames = fileNames.collect{|i| i.untaint}
-    logging(fileNames, "removeOldScenarioFile fileNames")
+    logging(fileNames, "removeOldAllSaveFile fileNames")
     
     fileNames.each do |fileName|
       File.delete(fileName)
     end
   end
   
-  def makeScenarioFile(dir, fileBaseName = "scenario")
-    logging("makeScenarioFile begin")
+  def makeAllSaveDataFile(dir, fileBaseName)
+    logging("makeAllSaveDataFile begin")
     
     require 'zlib'
     require 'archive/tar/minitar'
@@ -2817,19 +2840,19 @@ class DodontoFServer
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
     
-    scenarioFile = fileBaseName + @scenarioFIleExtName
-    tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
+    saveFile = fileBaseName + @allSaveDataFileExt
+    tgz = Zlib::GzipWriter.new(File.open(saveFile, 'wb'))
     
     fileNames = Dir.glob('*')
     fileNames = fileNames.collect{|i| i.untaint}
     
-    fileNames.delete_if{|i| i == scenarioFile}
+    fileNames.delete_if{|i| i == saveFile}
     
     Archive::Tar::Minitar.pack(fileNames, tgz)
     
     FileUtils.cd(currentDir)
     
-    return File.join(dir, scenarioFile)
+    return File.join(dir, saveFile)
   end
   
   
@@ -3504,8 +3527,8 @@ class DodontoFServer
   end
   
   
-  def loadScenario()
-    logging("loadScenario() Begin")
+  def loadAllSaveData()
+    logging("loadAllSaveData() Begin")
     checkLoad()
     
     setRecordWriteEmpty
@@ -3515,12 +3538,12 @@ class DodontoFServer
     clearDir(fileUploadDir)
     makeDir(fileUploadDir)
     
-    fileMaxSize = $scenarioDataMaxSize # Mbyte
-    scenarioFile = nil
+    fileMaxSize = $allSaveDataMaxSize # Mbyte
+    saveFile = nil
     isChangeFileName = false
     
     result = uploadFileBase(fileUploadDir, fileMaxSize, isChangeFileName) do |fileNameFullPath, fileNameOriginal, result|
-      scenarioFile = fileNameFullPath
+      saveFile = fileNameFullPath
     end
     
     logging(result, "uploadFileBase result")
@@ -3529,12 +3552,12 @@ class DodontoFServer
       return result
     end
     
-    extendSaveData(scenarioFile, fileUploadDir)
+    extendSaveData(saveFile, fileUploadDir)
     
-    chatPaletteSaveData = loadScenarioDefaultInfo(fileUploadDir)
+    chatPaletteSaveData = loadAllSaveDataDefaultInfo(fileUploadDir)
     result['chatPaletteSaveData'] = chatPaletteSaveData
     
-    logging(result, 'loadScenario result')
+    logging(result, 'loadAllSaveData result')
     
     return result
   end
@@ -3557,14 +3580,14 @@ class DodontoFServer
     end
   end
   
-  def extendSaveData(scenarioFile, fileUploadDir)
-    logging(scenarioFile, 'scenarioFile')
+  def extendSaveData(allSaveDataFile, fileUploadDir)
+    logging(allSaveDataFile, 'allSaveDataFile')
     logging(fileUploadDir, 'fileUploadDir')
     
     require 'zlib'
     require 'archive/tar/minitar'
     
-    readScenarioTar(scenarioFile) do |tar|
+    readTar(allSaveDataFile) do |tar|
       logging("begin read scenario tar file")
       
       Archive::Tar::Minitar.unpackWithCheck(tar, fileUploadDir) do |fileName, isDirectory|
@@ -3572,27 +3595,27 @@ class DodontoFServer
       end
     end
     
-    File.delete(scenarioFile)
+    File.delete(allSaveDataFile)
     
     logging("archive extend !")
   end
   
-  def readScenarioTar(scenarioFile)
+  def readTar(allSaveDataFile)
     
     begin
-      File.open(scenarioFile, 'rb') do |file|
+      File.open(allSaveDataFile, 'rb') do |file|
         tar = file
         tar = Zlib::GzipReader.new(file)
         
-        logging("scenarioFile is gzip")
+        logging("allSaveDataFile is gzip")
         yield(tar)
         
       end
     rescue
-      File.open(scenarioFile, 'rb') do |file|
+      File.open(allSaveDataFile, 'rb') do |file|
         tar = file
         
-        logging("scenarioFile is tar")
+        logging("allSaveDataFile is tar")
         yield(tar)
         
       end
@@ -3675,19 +3698,16 @@ class DodontoFServer
     SaveDirInfo.removeDir(dir)
   end
   
-  $scenarioDefaultSaveData = 'default.sav'
-  $scenarioDefaultChatPallete = 'default.cpd'
-  
-  def loadScenarioDefaultInfo(dir)
-    loadScenarioDefaultSaveData(dir)
-    chatPaletteSaveData = loadScenarioDefaultChatPallete(dir)
+  def loadAllSaveDataDefaultInfo(dir)
+    loadAllSaveDataDefaultSaveData(dir)
+    chatPaletteSaveData = loadAllSaveDataDefaultChatPallete(dir)
     
     return chatPaletteSaveData
   end
   
-  def loadScenarioDefaultSaveData(dir)
-    logging('loadScenarioDefaultSaveData begin')
-    saveFile = File.join(dir, $scenarioDefaultSaveData)
+  def loadAllSaveDataDefaultSaveData(dir)
+    logging('loadAllSaveDataDefaultSaveData begin')
+    saveFile = File.join(dir, @defaultAllSaveData)
     
     unless( File.exist?(saveFile) )
       logging(saveFile, 'saveFile is NOT exist')
@@ -3697,25 +3717,25 @@ class DodontoFServer
     jsonDataString = File.readlines(saveFile).join
     loadFromJsonDataString(jsonDataString)
     
-    logging('loadScenarioDefaultSaveData end')
+    logging('loadAllSaveDataDefaultSaveData end')
   end
   
   
-  def loadScenarioDefaultChatPallete(dir)
-    file = File.join(dir, $scenarioDefaultChatPallete)
-    logging(file, 'loadScenarioDefaultChatPallete file')
+  def loadAllSaveDataDefaultChatPallete(dir)
+    file = File.join(dir, @defaultChatPallete)
+    logging(file, 'loadAllSaveDataDefaultChatPallete file')
     
     return nil unless( File.exist?(file) )
     
     buffer = File.readlines(file).join
-    logging(buffer, 'loadScenarioDefaultChatPallete buffer')
+    logging(buffer, 'loadAllSaveDataDefaultChatPallete buffer')
     
     return buffer
   end
   
   
   def load()
-    logging("saveData load() Begin")
+    logging("load() Begin")
     
     result = {}
     
@@ -4783,6 +4803,7 @@ class DodontoFServer
   end
   
   def deleteFile(file)
+    return unless File.exist?(file)
     File.delete(file)
   end
   
