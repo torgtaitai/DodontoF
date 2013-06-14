@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.41.08"
-$versionDate = "2013/05/31"
+$versionOnly = "Ver.1.41.14"
+$versionDate = "2013/06/14"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -292,6 +292,7 @@ $diceBotOrder = <<____END_MARKER____
 ナイトウィザード
 ナイトメアハンター=ディープ
 ネクロニカ
+ハーンマスター
 バトルテック
 パラサイトブラッド
 バルナ・クロニカ

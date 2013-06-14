@@ -162,7 +162,7 @@ INFO_MESSAGE_TEXT
     'name' => 'Chill',
     'gameType' => 'Chill',
     'fileName' => 'Chill',
-    'prefixs' => ['SR\d+'],
+    'prefixs' => ['SR\d+.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・ストライク・ランク　(SRx)
 　"SRストライク・ランク"の形で記入します。
@@ -187,7 +187,7 @@ INFO_MESSAGE_TEXT
     'name' => 'クトゥルフ',
     'gameType' => 'Cthulhu',
     'fileName' => 'Cthulhu',
-    'prefixs' => ['RES\(\d+','CBR\(\d+,\d+\)'],
+    'prefixs' => ['RES.*','CBR\(\d+,\d+\)'],
     'info' => <<INFO_MESSAGE_TEXT
 ・1D100の目標値判定で、クリティカル(決定的成功)／スペシャル／ファンブル(致命的失敗)の自動判定。
 　例）1D100<=50
@@ -220,7 +220,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ダークブレイズ',
     'gameType' => 'DarkBlaze',
     'fileName' => 'DarkBlaze',
-    'prefixs' => ['DB','BT'],
+    'prefixs' => ['DB.*','BT.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・行為判定　(DBxy#n)
 　行為判定専用のコマンドです。
@@ -278,7 +278,7 @@ INFO_MESSAGE_TEXT
     'name' => 'アースドーン',
     'gameType' => 'EarthDawn',
     'fileName' => 'EarthDawn',
-    'prefixs' => ['\d+e\d+'],
+    'prefixs' => ['\d+e\d+.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ステップダイス　(xEn+k)
 ステップx、目標値n、カルマダイスkでステップダイスをロールします。
@@ -411,7 +411,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ガンドッグ・ゼロ',
     'gameType' => 'GundogZero',
     'fileName' => 'GundogZero',
-    'prefixs' => ['(.DPT|.FT)'],
+    'prefixs' => ['(.DPT|.FT)\d*'],
     'info' => <<INFO_MESSAGE_TEXT
 失敗、成功、クリティカル、ファンブルとロールの達成値の自動判定を行います。
 nD9ロールも対応。
@@ -421,6 +421,17 @@ nD9ロールも対応。
 ・ファンブル表　　　　　　(〜FTx)  (x:修正)
 　射撃(SFT)、格闘(MFT)、投擲(TFT)の各表を引くことが出来ます。
 　修正を後ろに書くことも出来ます。
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'ハーンマスター',
+    'gameType' => 'HarnMaster',
+    'fileName' => 'HarnMaster',
+    'prefixs' => ['SHK\d+.*','AP','APU','APD'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定
+　1D100<=XX の判定時に致命的失敗・決定的成功を判定
+・命中部位表 (AP)／上段命中部位 (APU)／上段命中部位 (APD)
 INFO_MESSAGE_TEXT
   },
   {
@@ -436,7 +447,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ハンターズムーン',
     'gameType' => 'HuntersMoon',
     'fileName' => 'HuntersMoon',
-    'prefixs' => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)'],
+    'prefixs' => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)\d*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
@@ -710,7 +721,7 @@ INFO_MESSAGE_TEXT
     'name' => 'りゅうたま',
     'gameType' => 'Ryutama',
     'fileName' => 'Ryutama',
-    'prefixs' => ['R\d+'],
+    'prefixs' => ['R\d+.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　Rx,y>=t（x,y：使用する能力値、t：目標値）
@@ -734,7 +745,7 @@ INFO_MESSAGE_TEXT
     'name' => 'サタスペ',
     'gameType' => 'Satasupe',
     'fileName' => 'Satasupe',
-    'prefixs' => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT)'],
+    'prefixs' => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT).*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定コマンド　(nR>=x[y,z])
 　nが最大ロール回数、xが難易度、yが目標成功度、zがファンブル値です。
@@ -782,7 +793,7 @@ INFO_MESSAGE_TEXT
     'name' => '真空学園',
     'gameType' => 'ShinkuuGakuen',
     'fileName' => 'ShinkuuGakuen',
-    'prefixs' => ['CRL','CSW','CLS','CSS','CSP','CAX','CCL','CMA','CBX','CPR','CST','RL','SW','LS','SS','SP','AX','CL','BW','MA','BX','PR','ST'],
+    'prefixs' => ['CRL.*','CSW.*','CLS.*','CSS.*','CSP.*','CAX.*','CCL.*','CMA.*','CBX.*','CPR.*','CST.*','RL.*','SW.*','LS.*','SS.*','SP.*','AX.*','CL.*','BW.*','MA.*','BX.*','PR.*','ST.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 RLx：技能ベースｘで技能チェックのダイスロール
@@ -829,7 +840,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ソードワールド',
     'gameType' => 'SwordWorld',
     'fileName' => 'SwordWorld',
-    'prefixs' => ['K\d+'],
+    'prefixs' => ['K\d+.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・SW　レーティング表　　　　　(Kx[c]+m$f) (x:キー, c:クリティカル値, m:ボーナス, f:出目修正)
 INFO_MESSAGE_TEXT
@@ -838,7 +849,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ソードワールド2.0',
     'gameType' => 'SwordWorld2.0',
     'fileName' => 'SwordWorld2_0',
-    'prefixs' => ['K\d+'],
+    'prefixs' => ['K\d+.*'],
     'info' => <<INFO_MESSAGE_TEXT
 自動的成功、成功、失敗、自動的失敗の自動判定を行います。
 
@@ -873,7 +884,7 @@ INFO_MESSAGE_TEXT
     'name' => 'トーグ',
     'gameType' => 'TORG',
     'fileName' => 'Torg',
-    'prefixs' => ['(TG|RT|Result|IT|Initimidate|TT|Taunt|Trick|CT|MT|Maneuver|ODT|ords|odamage|DT|damage|BT|bonus|total)'],
+    'prefixs' => ['(TG.*|RT.*|Result.*|IT.*|Initimidate.*|TT.*|Taunt.*|Trick.*|CT.*|MT.*|Maneuver.*|ODT.*|ords.*|odamage.*|DT.*|damage.*|BT.*|bonus.*|total.*)'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定　(TGm)
 　TORG専用の判定コマンドです。
@@ -934,7 +945,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ウォーハンマー',
     'gameType' => 'Warhammer',
     'fileName' => 'Warhammer',
-    'prefixs' => ['WH'],
+    'prefixs' => ['WH.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・クリティカル表(whHxx/whAxx/whBxx/whLxx)
 　"WH部位 クリティカル値"の形で指定します。部位は「H(頭部)」「A(腕)」「B(胴体)」「L(足)」の４カ所です。
@@ -966,7 +977,7 @@ INFO_MESSAGE_TEXT
     'name' => '絶対隷奴',
     'gameType' => 'ZettaiReido',
     'fileName' => 'ZettaiReido',
-    'prefixs' => ['\d+\-2DR'],
+    'prefixs' => ['\d+\-2DR.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 m-2DR+n>=x

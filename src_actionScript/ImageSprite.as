@@ -265,7 +265,10 @@ package {
             image.width = squareLength * widthSize;
             image.height = squareLength * heightSize;
             
-            snapImagePosition();
+            try {
+                snapImagePosition();
+            } catch (e:Error) {
+            }
             
             if( resultFunction != null ) {
                 resultFunction.call();

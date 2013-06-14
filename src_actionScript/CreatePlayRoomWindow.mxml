@@ -166,12 +166,11 @@
         Log.logging("initGameType begin");
         
         var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
-        diceBotInfos[0].name = "（指定なし）";
         gameType.dataProvider = diceBotInfos;
         
         if( ChatWindow.getInstance() != null ) {
             var gameTypeText:String = ChatWindow.getInstance().getGameType();
-            Utils.selectComboBox(gameType, gameTypeText, "gameType");
+            Utils.setGameTypeToComboBox(gameTypeText, gameType);
         }
         
         Log.logging("initGameType end");

@@ -17,6 +17,7 @@ package {
         
         private var number:int = 1;
         private var maxNumber:int = 6;
+        private var colorName:String = "";
         private var limitMaxNumber:int = 10;
         private var ownerName:String;
         private var owner:String = null;
@@ -40,6 +41,7 @@ package {
         
         public static function getJsonData(maxNumber:int,
                                            number:int,
+                                           colorName:String,
                                            owner:String,
                                            ownerName:String,
                                            createPositionX:int,
@@ -49,6 +51,7 @@ package {
             
             jsonData.number = number;
             jsonData.maxNumber = maxNumber;
+            jsonData.colorName = colorName;
             jsonData.owner = owner;
             jsonData.ownerName = ownerName;
             
@@ -60,6 +63,7 @@ package {
             
             jsonData.number = getNumber();
             jsonData.maxNumber = getMaxNumber();
+            jsonData.colorName = getColorName();
             jsonData.owner = owner;
             jsonData.ownerName = ownerName;
             
@@ -71,6 +75,7 @@ package {
             
             this.number = parseInt(params.number);
             this.maxNumber = parseInt(params.maxNumber);
+            this.colorName = params.colorName;
             this.owner = params.owner;
             this.ownerName = params.ownerName;
             
@@ -89,6 +94,13 @@ package {
             return this.maxNumber;
         }
         
+        public function getColorName():String {
+            if( this.colorName == null ) {
+                return "";
+            }
+            return this.colorName;
+        }
+        
         public function setNumber(number_:int):void {
             this.number = number_;
         }
@@ -97,12 +109,20 @@ package {
             this.maxNumber = maxNumber_;
         }
         
+        public function setColorName(colorName:String):void {
+            this.colorName = colorName;
+        }
+        
         override public function isGotoGraveyard():Boolean {
             return true;
         }
         
         override public function getName():String {
             return getToolTipMessage();
+        }
+        
+        public function updateContextMenu():void {
+            initContextMenu();
         }
         
         override protected function initContextMenu():void {
@@ -115,21 +135,12 @@ package {
             
             allMenus.push( addMenuItem(menu, "ダイスを振る", this.rollDice) );
             
-            var loopCount:int = this.maxNumber;
-            if( loopCount > limitMaxNumber ) {
-                loopCount = limitMaxNumber;
-            }
+            var minNumber:int = (Config.getInstance().isHaveZeroDice(maxNumber) ? 0 : 1);
+            var loopCount:int = Math.min(this.maxNumber, limitMaxNumber);
             
-            var separatorBefore:Boolean = true;
-            if( Config.getInstance().isHaveZeroDice(maxNumber) ) {
-                pushSetDiceNumberMenuItem(menu, 0, separatorBefore);
-                separatorBefore = false;
-            }
-            
-            for(var i:int = 0 ; i < loopCount ; i++) {
-                var n:int = i + 1;
-                pushSetDiceNumberMenuItem(menu, n, separatorBefore);
-                separatorBefore = false;
+            for(var i:int = minNumber ; i <= loopCount ; i++) {
+                var separatorBefore:Boolean = (i == minNumber);
+                pushSetDiceNumberMenuItem(menu, i, separatorBefore);
             }
             
             if( this.maxNumber > limitMaxNumber ) {
@@ -219,8 +230,9 @@ package {
                 return;
             }
             
+            var diceType:String = "d" + maxNumber + DiceInfo.getColoredNameTail( getColorName() );
             var params:Object = null;
-            DodontoF_Main.getInstance().getDiceBox().createDice("d" + maxNumber, params, getId(), changeNumber);
+            DodontoF_Main.getInstance().getDiceBox().createDice(diceType, params, getId(), changeNumber);
         }
 
         
@@ -353,7 +365,7 @@ package {
                 return Config.getInstance().getTransparentImage();
             }
             
-            return DiceInfo.getDiceImageUrlGlobal(this.maxNumber, this.number);
+            return DiceInfo.getDiceImageUrlGlobal(this.maxNumber, this.number, getColorName());
         }
         
         private function drawDice():void {

@@ -25,13 +25,23 @@ package {
             return ( diceType == "d0" );
         }
         
-        static public function getDiceImageUrlGlobal(max:int, number:int):String {
+        static public function getDiceImageUrlGlobal(max:int, number:int, colorName:String):String {
             if( max == 0 ) {
                 return "./image/diceImage/secretDice.png";
             }
             
-            return "./image/diceImage/" + max + "_dice/" + max + "_dice[" + number + "].png";
+            var colorNameTail:String  = getColoredNameTail(colorName);
+            return "./image/diceImage/" + max + "_dice" + colorNameTail + "/" + max + "_dice[" + number + "].png";
         }
+        
+        static public function getColoredNameTail(colorName:String):String { 
+            var colorNameTail:String  = colorName;
+            if( colorName != "" ) {
+                colorNameTail = '_' + colorName;
+            }
+            return colorNameTail;
+        }
+        
         
 		[Embed(source='../image/diceImage/unknown.png')]
         private static var secretDice:Class;
@@ -62,6 +72,21 @@ package {
 		[Embed(source='../image/diceImage/6_dice/6_dice[6].png')]
         private static var d6_6:Class;
         private static var d6List:Array = [d6_1, d6_2, d6_3, d6_4, d6_5, d6_6];
+        
+        //d6_black
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[1].png')]
+        private static var d6_black_1:Class;
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[2].png')]
+        private static var d6_black_2:Class;
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[3].png')]
+        private static var d6_black_3:Class;
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[4].png')]
+        private static var d6_black_4:Class;
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[5].png')]
+        private static var d6_black_5:Class;
+		[Embed(source='../image/diceImage/6_dice_black/6_dice[6].png')]
+        private static var d6_black_6:Class;
+        private static var d6_blackList:Array = [d6_black_1, d6_black_2, d6_black_3, d6_black_4, d6_black_5, d6_black_6];
         
         //d8
         [Embed(source='../image/diceImage/8_dice/8_dice[1].png')]
@@ -203,6 +228,7 @@ package {
             "d0"  : {"max": 0, "maxString":   "0", "imageList" :  d0List, "getResultValue" : noChange},
             "d4"  : {"max": 4, "maxString":   "4", "imageList" :  d4List, "getResultValue" : noChange},
             "d6"  : {"max": 6, "maxString":   "6", "imageList" :  d6List, "getResultValue" : noChange},
+      "d6_black"  : {"max": 6, "maxString":   "6", "imageList" :  d6_blackList, "getResultValue" : noChange},
             "d8"  : {"max": 8, "maxString":   "8", "imageList" :  d8List, "getResultValue" : noChange},
             "d10" : {"max":10, "maxString":  "10", "imageList" : d10List, "getResultValue" : noChange},
             "d12" : {"max":12, "maxString":  "12", "imageList" : d12List, "getResultValue" : noChange},

@@ -159,11 +159,14 @@ class TableFileData
   def self.getLineKeyValue(line)
     line = line.toutf8.chomp
     
-    if(/^[\s　]*([^:：]+)[\s　]*[:：][\s　]*(.+)/ === line)
-      return $1, $2
+    unless(/^[\s　]*([^:：]+)[\s　]*[:：][\s　]*(.+)/ === line)
+      return '', ''
     end
     
-    return '', ''
+    key = $1
+    value = $2
+    
+    return key, value
   end
       
   
@@ -197,8 +200,25 @@ class TableFileData
     title = oneTableData["title"]
     table = oneTableData["table"]
     
+    table = changeEnterCode(table)
+    
     return dice, title, table, isSecret
   end
+  
+  def changeEnterCode(table)
+    newTable = {}
+    if( table.nil? )
+        return newTable
+    end
+    table.each do |key, value|
+      value = value.gsub(/\\n/, "\n")
+      value = value.gsub(/\\\n/, "\\n")
+      newTable[key] = value
+    end
+    
+    return newTable
+  end
+  
   
   def isTargetGameType(gameType, targetGameType)
     return true if( gameType.empty? )
@@ -306,8 +326,9 @@ class TableFileCreator
     
     text = ""
     text << "#{dice}:#{title}\n"
-    
-    table = getFormatedTableText(table)
+    if( ! table.kind_of?(String) )
+      table = getFormatedTableText(table)
+    end
     
     text << table
   end
@@ -335,7 +356,7 @@ class TableFileCreator
     keyValue = key.to_i
     
     if( keyValue == 0 )
-      raise "#{index + 1}行目の表記(#{key}〜)は「数字:文字列」になっていません。"
+      raise "#{index + 1}行目の表記(#{key}?)は「数字:文字列」になっていません。"
     end
     
     return keyValue
@@ -384,3 +405,4 @@ class TableFileEditer < TableFileCreator
   
   
 end
+

@@ -70,26 +70,16 @@ package {
         private var lineLimitLength:int = 30;
         
         private function getSplitText(text:String):Array {
+            var parts:Array = splitArrayText([text], "。", true);
+            parts = splitArrayText(parts, "\n", false);
             
-            var enterIndex:int = text.indexOf("\n");
-            if( enterIndex != -1) {
-                var firstLine:String = text.slice(0, enterIndex);
-                return [firstLine];
-            }
-            
-            var parts:Array = text.split(/。/);
             var result:Array = [];
             
-            for(var i:int ; i< parts.length ; i++) {
-                var text:String = parts[i];
-                
+            for each(var text:String in  parts) {
                 if( text.length == 0 ) {
                     continue;
                 }
                 
-                if( i != (parts.length - 1) ) {
-                    text += "。";
-                }
                 
                 if( text.length > lineLimitLength ) {
                     //1行が長すぎるならさらに区切る事
@@ -100,6 +90,34 @@ package {
                 
                 result.push(text);
             }
+            
+            return result;
+        }
+        
+        private function splitArrayText(parts:Array, separator:String, isInclude:Boolean):Array {
+            var result:Array = [];
+            
+            for each(var text:String in  parts) {
+                    
+                    while(true) {
+                        if( text.length == 0 ) {
+                            break;
+                        }
+                        
+                        var index:int = text.indexOf(separator);
+                        if( index == -1 ) {
+                            result.push(text);
+                            break;
+                        }
+                        
+                        var beforeTextEndIndex:int = (isInclude ? (index + 1) : index);
+                        var beforeText:String = text.substring(0, beforeTextEndIndex);
+                        result.push(beforeText);
+                        
+                        text = text.substring(index + 1);
+                    }
+                }
+            
             
             return result;
         }
@@ -261,12 +279,7 @@ package {
             var format:TextFormat = new TextFormat();
             format.size = fontSize;
             format.bold = true;
-            /*
-              format.color = Utils.getComplementarColor( getColor() );
-              format.font = "Arial"; // 文字フォント...Arial
-              format.italic = true; // イタリック（デフォルトfalse）
-              format.underline = true; // 下線（デフォルトfalse）
-            */
+            
             textField.defaultTextFormat = format;
             
             textField.wordWrap = false;

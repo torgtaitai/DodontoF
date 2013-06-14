@@ -173,7 +173,7 @@ package {
         static private function printSystemLog(message:String, channel:int):void {
             channel = ChatWindow.getInstance().changeChatChannelNumberForSystemLog(channel);
             
-            var name:String = "";
+            var name:String = "どどんとふ";
             var color:String = "00AA00";
             var time:Number = (new Date().getTime() / 1000);
             

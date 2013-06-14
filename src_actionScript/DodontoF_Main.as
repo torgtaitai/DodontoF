@@ -1118,6 +1118,7 @@ package {
         {label:"全データロード(旧：シナリオデータ読み込み)", data:"loadAllSaveData"},
         {type:"separator"},
         {label:"チャットログ保存", data:"saveLog"},
+        {type:"separator"},
         {label:"録画開始", data:"startSessionRecording", enabled:"true"},
         {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
         {type:"separator"},

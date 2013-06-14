@@ -5,7 +5,7 @@
    xmlns:torgtaitai="*" 
    x="250"
    y="50"
-   width="260"
+   width="270"
    height="160"
    title="ダイスシンボル生成" 
    showCloseButton="true"
@@ -34,14 +34,20 @@
           </mx:ComboBox>
         </mx:FormItem>
         
-        <!-- <mx:FormItem label="ダイス目を隠して置く:"> -->
         <mx:CheckBox id="isHide" label="ダイス目を隠して置く" selected="false" />
+
         
       </mx:Form>
     </mx:Box>
     
-    <mx:Box  width="50" height="50" >
+    <mx:Box  width="60" height="80" >
       <mx:Image id="view" width="50" height="50" source=""/>
+      <mx:ComboBox id="colorNameList" width="55" fontWeight="normal" editable="false" change="changeView()" >
+        <mx:ArrayCollection>
+          <mx:Object label="白" data=""/>
+          <mx:Object label="黒" data="black"/>
+        </mx:ArrayCollection>
+      </mx:ComboBox>
     </mx:Box>
 
   </mx:HBox>
@@ -72,16 +78,26 @@
     
     private function changeView():void {
         
-        number.maximum = maxNumber.selectedItem.data;
+        var max:int = maxNumber.selectedItem.data;
         
+        number.maximum = max;
         number.minimum = 1;
         
-        if( Config.getInstance().isHaveZeroDice(number.maximum) ) {
+        if( Config.getInstance().isHaveZeroDice(max) ) {
             number.minimum = 0; 
         }
         
+        if( max == 6 ) {
+            colorNameList.visible = true;
+        } else {
+            colorNameList.visible = false;
+            colorNameList.selectedIndex = 0;
+        }
+        
         number.callLater(function():void {
-                var source:String = DiceInfo.getDiceImageUrlGlobal(maxNumber.selectedItem.data, number.value);
+                var number:int = number.value;
+                var colorName:String = colorNameList.selectedItem.data;
+                var source:String = DiceInfo.getDiceImageUrlGlobal(max, number, colorName);
                 source = Config.getInstance().getUrlString(source);
                 view.source = source;
             });
@@ -116,9 +132,11 @@
             }
             
             var ownerName:String = DodontoF_Main.getInstance().getChatWindow().getChatCharacterName();
+            var colorName:String = colorNameList.selectedItem.data;
             
             var jsonData:Object = DiceSymbol.getJsonData(maxNumber.selectedItem.data,
                                                          number.value,
+                                                         colorName,
                                                          owner,
                                                          ownerName,
                                                          point.x,

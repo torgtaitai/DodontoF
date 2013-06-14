@@ -2,14 +2,22 @@
 
 package {
     
-    import flash.display.MovieClip;
+    import mx.graphics.ImageSnapshot;
+    import flash.display.IBitmapDrawable;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
     import com.adobe.serialization.json.JSON;
     import flash.display.Loader;
+    import flash.display.MovieClip;
+    import flash.display.Sprite;
+    import flash.events.Event;
+    import flash.events.IOErrorEvent;
     import flash.events.KeyboardEvent;
     import flash.events.TimerEvent;
+    import flash.geom.Matrix;
     import flash.media.SoundTransform;
+    import flash.net.FileReference;
+    import flash.system.Capabilities;
     import flash.ui.Keyboard;
     import flash.utils.ByteArray;
     import flash.utils.Timer;
@@ -19,20 +27,24 @@ package {
     import mx.controls.ComboBox;
     import mx.controls.Image;
     import mx.controls.Label;
+    import mx.controls.SWFLoader;
     import mx.controls.ToolTip;
     import mx.core.UIComponent;
-    import mx.styles.CSSStyleDeclaration;
-    import mx.styles.StyleManager;
-    import mx.utils.URLUtil;
-    import mx.controls.SWFLoader;
-    import flash.system.Capabilities;
-    import mx.utils.StringUtil;
     import mx.effects.Glow;
     import mx.events.CloseEvent;
+    import mx.graphics.codec.JPEGEncoder;
+    import mx.styles.CSSStyleDeclaration;
+    import mx.styles.StyleManager;
+    import mx.utils.StringUtil;
+    import mx.utils.URLUtil;
     import org.msgpack.MessagePack;
-    import flash.display.Sprite;
+    
     
     public class Utils {
+        
+        [Embed(source="./image/unknownTarget.png")]
+        [Bindable]
+        public static var invalidImage:Class;
         
         public static function timer(seconds:Number, action:Function):void {
             var timer:Timer = new Timer(seconds * 1000, 1);
@@ -311,7 +323,7 @@ package {
             return ownUrl;
         }
         
-        public static function changeZenkakuToHankakuOnDiceBot(str:String):String{
+        public static function changeZenkakuToHankaku(str:String):String{
             str = changeZenkakuToHankakuOnAlphabet(str);
             str = changeZenkakuToHankakuOnNumber(str);
             str = changeZenkakuToHankakuOnOperator(str);
@@ -524,13 +536,25 @@ package {
         }
         
         static public function getBitMap(component:UIComponent, width:Number, height:Number):Bitmap {
-            var bitmapData:BitmapData = new BitmapData(width, height);
-            bitmapData.draw(component);
-            
             var bitmap:Bitmap = new Bitmap();
-            bitmap.bitmapData = bitmapData;
-            
+            bitmap.bitmapData = getBitMapData(component, width, height);
             return bitmap;
+        }
+        
+        static private function getBitMapData(component:UIComponent, width:Number, height:Number):BitmapData {
+            var bitmapData:BitmapData = new BitmapData(width, height);
+            
+            if( component == null ) {
+                return bitmapData;
+            }
+            
+            try { 
+                bitmapData.draw(component);
+            } catch (e:Error) {
+                bitmapData.draw( new invalidImage().bitmapData );
+            }
+            
+            return bitmapData;
         }
 
         static public function isSameArray(array1:Array, array2:Array):Boolean {
@@ -756,6 +780,98 @@ package {
         static public function getComplementaryColor(color:uint):uint {
             return 0xFFFFFF - color;
         }
+        
+
+        static public function setGameTypeToComboBox(gameType:String, diceBotGameType:ComboBox):void {
+            Log.logging("setGameTypeToComboBox Begin");
+            
+            var index:int = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            if( index == -1 ) {
+                index = Utils.selectComboBox(diceBotGameType, gameType, "name");
+            }
+            
+            if( index == -1 ) {
+                Log.logging("gameType not found", gameType);
+                
+                addNewGameType(gameType, diceBotGameType);
+                index = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+                Log.logging("gameType add result", index);
+            }
+            
+            diceBotGameType.validateNow();
+            Log.logging("setGameTypeToComboBox End");
+        }
+        
+        static private function addNewGameType(gameType:String, diceBotGameType:ComboBox):void {
+            var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
+            
+            var info:Object = Utils.clone(diceBotInfos[0]);
+            info.name = gameType;
+            info.gameType = gameType;
+            info.prefixs = [];
+            info.info = "独自ダイス未実装";
+            
+            diceBotInfos.push( info );
+            Log.logging("gameType", gameType);
+            Log.logging("info", info);
+            
+            diceBotGameType.dataProvider = diceBotInfos;
+        }
+        
+        
+        static public function saveCaptureImage(component:UIComponent):void {
+            Log.logging("saveCaptureImage Begin");
+            
+            var bmp:BitmapData = capture(component);
+            
+            if(bmp == null) {
+                return;
+            }
+            
+            var fileData:ByteArray = new JPEGEncoder().encode(bmp);
+            
+            saveImage(fileData, new Date().getTime() + ".jpg");
+            Log.logging("saveCaptureImage End");
+        }
+        
+        static private function capture(component:UIComponent):BitmapData {
+            var result:BitmapData = new BitmapData(component.width, component.height);
+        
+            try {
+                result.draw(component, new Matrix());
+            } catch(e:Error) {
+                Log.printSystemLogPublic("画面キャプチャーに失敗しました。コマなどに外部画像を使用している場合はキャプチャを行うことは出来ません。画像を差し替えあるいはコマを削除してから、もう一度お試しください。");
+                return null;
+            }
+        
+            return result;
+        }
+    
+        static private function saveImage(date:ByteArray, fileName:String):void {
+            var onComplete:Function = function(event:Event):void
+            {
+                Log.printSystemLogPublic(fileName + "を保存しました");
+                onDestruct();
+            }
+            var onIOError:Function = function(event:IOErrorEvent):void
+            {
+                Alert.show(event.toString(), "保存失敗");
+                onDestruct();
+            }
+            var onDestruct:Function = function():void
+            {
+                file.removeEventListener(Event.COMPLETE, onComplete);
+                file.removeEventListener(IOErrorEvent.IO_ERROR, onIOError);
+                file = null;
+            }
+            
+            var file:FileReference = new FileReference();
+            file.addEventListener(Event.COMPLETE, onComplete);
+            file.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+            file.save(date, fileName);
+        }
+    
+
     }
 }
 

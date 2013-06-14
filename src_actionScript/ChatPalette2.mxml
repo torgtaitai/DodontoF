@@ -82,6 +82,8 @@
         if( ChatWindow.getInstance() ) {
             setChatBackgroundColor(ChatWindow.getInstance().getChatBackgroundColor());
         }
+        
+        initSaveLoad();
     }
     
     private function initChatPalet():void {
@@ -352,7 +354,7 @@
     
     override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
         var info:Object = super.getWindowInfoSaveData(this);
-        info.saveData = getChatPalletSaveData();
+        info.saveData = getSaveData();
         
         return info;
     }
@@ -364,27 +366,21 @@
     }
     
     
-    private var typeName:String = "ChatPalette2";
+    private var saveLoadLocalFile:SaveLoadLocalFile = new SaveLoadLocalFile();
     
-    private var saveDataExt:String = "cpd";
-    private var fileReferenceForSave:FileReference = new FileReference();
-    private var fileReferenceForLoad:FileReference = new FileReference();
+    private function initSaveLoad():void {
+        saveLoadLocalFile.init("チャットパレットセーブデータ", "cpd", "ChatPalette2",
+                               function(saveData:Object):void { loadSaveData(saveData) } );
+    }
     
     public function save():void {
-        var jsonString:String = getSaveData();
-        fileReferenceForSave.save(jsonString, "DodontoF_ChatPaletteSaveData." + saveDataExt);
+        var saveData:Object = getSaveData();
+        saveLoadLocalFile.save(saveData, "ChatPalette");
     }
     
-    public function getSaveData():String {
-        var saveData:Object = getChatPalletSaveData();
-        var jsonString:String = Utils.getJsonString(saveData);
-        return jsonString
-    }
-    
-    public function getChatPalletSaveData():Object {
+    public function getSaveData():Object {
         var saveData:Object = new Object();
         
-        saveData.typeName = typeName;
         saveData.tabInfos = [];
         
         for(var i:int = 0 ; i < tabSpace.numChildren ; i++) {
@@ -409,45 +405,13 @@
     }
     
     public function load():void {
-        fileReferenceForLoad= new FileReference();
-        fileReferenceForLoad.addEventListener(Event.SELECT, loadSelect);
-        
-        var filters:Array = new Array();
-        filters.push(new FileFilter("チャットパレットセーブデータ(*." + saveDataExt + ")", "*." + saveDataExt));
-        
-        fileReferenceForLoad.browse(filters);
+        saveLoadLocalFile.load();
     }
     
-    public function loadSelect(e:Event):void {
-        fileReferenceForLoad.addEventListener(Event.COMPLETE, loadComplete);
-        fileReferenceForLoad.load();
-    }
-    
-    public function loadComplete(e:Event):void {
-        var data:ByteArray = fileReferenceForLoad.data as ByteArray;
-        var dataString:String = data.toString();
-        
-        loadFromText(dataString);
-    }
-    
-    public function loadFromText(dataString:String):void {
-        if( dataString == null ) {
-            return;
-        }
-        
-        var saveData:Object = Utils.getJsonDataFromString(dataString) as Object;
-        loadSaveData(saveData);
-    }
-        
     public function loadSaveData(saveData:Object):void {
         while( tabSpace.numChildren > 0 ) {
             var isForce:Boolean = true;
             deletePaletTab(isForce);
-        }
-        
-        if( saveData.typeName != typeName ) {
-            loadOnChatPalette1(saveData);
-            return;
         }
         
         var tabInfos:Object = saveData.tabInfos;
@@ -489,6 +453,11 @@
             setLines(lines, tabEditorInfo);
         }
     }
+    
+    public function loadFromText(dataString:String):void {
+        saveLoadLocalFile.loadFromText(dataString);
+    }
+
     
     private function changeLogVisible(event:MouseEvent, visible:Boolean):void {
         DodontoF_Main.getInstance().getChatWindow().changeLogVisible(event, visible);

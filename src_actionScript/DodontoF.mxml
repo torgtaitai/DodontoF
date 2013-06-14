@@ -51,6 +51,7 @@
       
       <mx:Spacer width="50%" />
       
+      <mx:Button icon="{cameraIcon}" click="captureScreen()"  paddingLeft="2" paddingRight="2" />
       <mx:Button id="mentenanceModeButton" label="メンテナンスモード" click="changeMentenanceMode();" toggle="true" visible="false" width="0" />
       <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" label="ログアウト" />
       
@@ -84,6 +85,8 @@
       <mx:CheckBox id="isRepeat" label="繰り返し" selected="false"
                    visible="false" width="0"
                    />
+
+      <mx:Button icon="{cameraIcon}" click="captureScreen()"  paddingLeft="2" paddingRight="2" />
       <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logoutFromReplay()" label="戻る" />
     </mx:HBox>
     
@@ -120,6 +123,7 @@
     import mx.events.MenuEvent;
     import mx.managers.DragManager;
     import mx.managers.PopUpManager;
+
     
     
     protected static var thisObj:DodontoF;
@@ -135,6 +139,10 @@
     [Embed(source='image/icons/door_out.png')]
     [Bindable]
     private static var logoutIcon:Class;
+    
+    [Embed(source='image/icons/camera.png')]
+    [Bindable]
+    private static var cameraIcon:Class;
     
     [Embed(source='image/icons/control_pause_blue.png')]
     [Bindable]
@@ -633,11 +641,19 @@
         return "???";
     }
     
-    public function getLoingUserUsingCharacterList():Array {
+    public function getLoingUserCharacterList():Array {
+        
+        //チャットで選択しているキャラクター名は最優先でリストに載せるための処理。
+        var ownInfo:Object = {
+            userName: dodontoF_Main.getChatWindow().getChatCharacterName(),
+            userId: getSender().getStrictlyUniqueId() };
+        var userInfos:Object = Utils.clone(loginUserInfo);
+        userInfos.push( ownInfo );
+        
         var characters:Array = [];
         
-        for(var i:int = 0 ; i < loginUserInfo.length ; i++) {
-            var userInfo:Object = loginUserInfo[i];
+        for(var i:int = 0 ; i < userInfos.length ; i++) {
+            var userInfo:Object = userInfos[i];
             
             var character:Character = dodontoF_Main.getMap().findCharacterByName(userInfo.userName);
             
@@ -767,53 +783,27 @@
     
     
     private function graveyardDragEnterHandler(event:DragEvent):void {
-        //if(myTree.indexToItemRenderer(myTree.calculateDropIndex(event)) != null) {
         var Initiator : * = event.currentTarget;
         DragManager.acceptDragDrop(Initiator);
     }
     
-    /*
-    private function graveyardDragEnterHandler(event:DragEvent):void {
-        var piece:InitiativedMovablePiece = dodontoF_Main.getInitiativeWindow().getDoropedInitiativedMovablePiece(event);
-        
-        if( piece == null ) {
-            return;
-        }
-        
-        Alert.show(piece.getName());
-    }
-    */
-    
     private function graveyardDragOver(event:DragEvent):void {
         DragManager.showFeedback(DragManager.MOVE);
-        /*
-        if (borderColorSet == false) {                 
-            tempBorderColor = 
-                event.currentTarget.getStyle('borderColor');
-            borderColorSet = true;
-        }
-        event.currentTarget.setStyle('borderColor', 'green');
-        */
-        
-        //if(myTree.indexToItemRenderer(myTree.calculateDropIndex(event)).data.@type == "target") {
     }
     
     public function graveyardDragDropHandler(event:DragEvent):void {    
-        // dataForFormat() always returns an Array 
-        // for the list-based controls 
-        // in case multiple items were selected.
         var dragObj:Array = event.dragSource.dataForFormat("items") as Array; 
         var piece:InitiativedPiece = dragObj[0]["character"]
         piece.sendDelete();
     }
     
-    //private var borderColorSet:Boolean = false;
-    //private var tempBorderColor:uint;
-    
-    // http://livedocs.adobe.com/flex/3_jp/html/help.html?content=dragdrop_7.html
     private function graveyardDragExitHandler(event:DragEvent):void {
-        //event.currentTarget.setStyle('borderColor', tempBorderColor);
-        //borderColorSet = true;
+    }
+    
+    
+    private function captureScreen():void {
+        //Utils.saveCaptureImage( UIComponent(Application.application) );
+        Utils.saveCaptureImage( this );
     }
     
     

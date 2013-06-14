@@ -21,7 +21,8 @@ package {
         }
         
         override protected function executeServerSave():void {
-            var chatPaletteData:String = DodontoF_Main.getInstance().getChatPaletteWindow().getSaveData();
+            var data:Object = DodontoF_Main.getInstance().getChatPaletteWindow().getSaveData();
+            var chatPaletteData:String = Utils.getJsonString(data);
             Log.logging("chatPaletteData", chatPaletteData);
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();

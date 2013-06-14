@@ -85,7 +85,7 @@ package {
             return value;
         }
         
-        private var diceBotResultReg:RegExp = /→\s*([^→]+)\Z/;
+        private var diceBotResultReg:RegExp = /→\s*([^→]+)\Z/m;
         
         private function getRollResultText(params:Object):String {
             var message:String = params.chatMessage;

@@ -955,7 +955,7 @@ class DodontoFServer
   
   def getTestResponseText
     unless ( FileTest::directory?( $SAVE_DATA_DIR + '/saveData') )
-      return "Error : saveData ディレクトリ が存在しません。"
+      return "Error : saveData ディレクトリ(#{$SAVE_DATA_DIR + '/saveData'}) が存在しません。"
     end
     if ( Dir::mkdir( $SAVE_DATA_DIR + '/saveData/data_checkTestResponse') )
       Dir::rmdir($SAVE_DATA_DIR + '/saveData/data_checkTestResponse' )
@@ -2255,7 +2255,7 @@ class DodontoFServer
       setDiceBotPrefix(diceBotInfos, commandInfo)
     end
     
-    logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
+    # logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
     
     return diceBotInfos
   end
@@ -4361,12 +4361,13 @@ class DodontoFServer
     logging(gameType, 'rollDice gameType')
     
     require 'cgiDiceBot.rb'
+    
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
     result, randResults = bot.roll(message, gameType, dir, @diceBotTablePrefix, isNeedResult)
     
     result.gsub!(/＞/, '→')
-    result.sub!(/\r?\n?\Z/, '')
+    result.sub!(/\r?\n?\Z/m, '')
     
     logging(result, 'rollDice result')
     

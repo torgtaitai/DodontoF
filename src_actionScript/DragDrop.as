@@ -110,19 +110,27 @@ package {
                                          component:UIComponent, 
                                          width:Number, height:Number,
                                          value:Object, action:Function):void{
+            Log.logging("dragStartHandler Begin");
+            
             setDropAction(action);
             
-            //ドラッグされるデータを作成
+            Log.logging("create Draged Data");
             var dragSource:DragSource = new DragSource();
             dragSource.addData(value, dropValueKey);
             
-            //ドラッグ中のイメージを作成
-            var bitmap:Bitmap = Utils.getBitMap(component, width, height);
+            Log.logging("create dragging image");
+            try {
+                var bitmap:Bitmap = Utils.getBitMap(component, width, height);
+            } catch (e:Error) {
+                Log.loggingException("DragDrop.dragStartHandler", e);
+            }
+            
             var imageProxy:UIComponent = new UIComponent();
             imageProxy.addChild(bitmap);
             
-            //ドラッグを開始
             DragManager.doDrag(component, dragSource, event, imageProxy);
+            
+            Log.logging("dragStartHandler End");
         }
     }
 }

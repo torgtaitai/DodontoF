@@ -158,7 +158,7 @@
         
         for each(var tag:String in tags) {
                 //ここで縦NN横MMの数値部分が全角でもOKに変換する
-                tag = Utils.changeZenkakuToHankakuOnDiceBot(tag);
+                tag = Utils.changeZenkakuToHankaku(tag);
                 
                 var result:Object = /^縦(\d+)横(\d+)$/.exec(tag);
                 if( result == null ) {

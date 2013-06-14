@@ -269,6 +269,17 @@ package {
             sendResult();
         }
         
+        private function getResultText():String {
+            for(var i:int = 0;  i < this.dice.length ; i++){
+                var diceInfo:Object = this.dice[i];
+                var resultText:String =  diceInfo.params.resultText;
+                if( resultText != null ) {
+                    return diceInfo.params.resultText;
+                }
+            }
+            return null;
+        }
+        
         private function printResult(resultText:String):void {
             Log.logging("Dice.printResult Begin");
             
@@ -312,17 +323,6 @@ package {
         private function sendResult():void {
             var message:String = getDiceResultsText();
             ChatWindow.getInstance().sendDiceRollResultMessageForChatWindowUser(message);
-        }
-        
-        private function getResultText():String {
-            for(var i:int = 0;  i < this.dice.length ; i++){
-                var diceInfo:Object = this.dice[i];
-                var resultText:String =  diceInfo.params.resultText;
-                if( resultText != null ) {
-                    return diceInfo.params.resultText;
-                }
-            }
-            return null;
         }
         
         private function getDiceTypesInfo():Object {

@@ -63,7 +63,7 @@
               <mx:ComboBox id="diceBotGameType"
                            labelField="name"
                            toolTip="{diceBotHelpText}"
-                           change="setDiceBotHelpText();"
+                           change="changeDiceBotGameType();"
                            rowCount="10"
                            >
               </mx:ComboBox>
@@ -362,40 +362,8 @@
         }
         
         public function setDiceBotGameType(gameType:String):void {
-            Log.logging("setDiceBotGameType Begin");
-            
-            var index:int = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
-            if( index == -1 ) {
-                index = Utils.selectComboBox(diceBotGameType, gameType, "name");
-            }
-            
-            if( index == -1 ) {
-                Log.logging("gameType not found", gameType);
-                addNewGameType(gameType);
-                index = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
-                Log.logging("gameType add result", index);
-            }
-            
-            diceBotGameType.validateNow();
-            setDiceBotHelpText();
-            
-            Log.logging("setDiceBotGameType End");
-        }
-        
-        private function addNewGameType(gameType:String):void {
-            var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
-            
-            var info:Object = Utils.clone(diceBotInfos[0]);
-            info.name = gameType;
-            info.gameType = gameType;
-            info.prefixs = [];
-            info.info = "独自ダイス未実装";
-            
-            diceBotInfos.push( info );
-            Log.logging("gameType", gameType);
-            Log.logging("info", info);
-            
-            diceBotGameType.dataProvider = diceBotInfos;
+            Utils.setGameTypeToComboBox(gameType, diceBotGameType);
+            changeDiceBotGameType();
         }
         
         private function getDiceBotGameTypeKeyName():String { 
@@ -810,7 +778,7 @@
             ToolTipManager.showDelay = 0;
             ToolTipManager.hideDelay = Infinity;
             
-            setDiceBotHelpText();
+            changeDiceBotGameType();
             
             this.addEventListener(Event.ACTIVATE, function():void {instance.isActive = true;});
             this.addEventListener(Event.DEACTIVATE, function():void {instance.isActive = false;});
@@ -955,6 +923,11 @@
             Log.logging("changedChatCharacterName() end, chatCharacterName.text", chatCharacterName.text);
         }
         
+        private function changeDiceBotGameType():void {
+            setDiceBotHelpText();
+            initDiceSymbolsMenu();
+        }
+        
         private function setDiceBotHelpText():void {
             saveChatInfos();
             var helpText:String = getBaseHelpText();
@@ -991,6 +964,20 @@
                 }
             
             return helpText;
+        }
+        
+        private function initDiceSymbolsMenu():void {
+            var map:Map = DodontoF_Main.getInstance().getMap();
+            var diceSymbols:Array = map.findExistPiecesByTypeName( DiceSymbol.getTypeStatic() );
+            
+            for each(var piece:Piece in  diceSymbols) {
+                var diceSymbol:DiceSymbol = piece as DiceSymbol;
+                if( diceSymbol == null ) {
+                    continue;
+                }
+                
+                diceSymbol.updateContextMenu();
+            }
         }
         
         private static var isDiceBotOn:Boolean = true;
@@ -1122,12 +1109,10 @@
             
             textArea.text = text.substring(0, start) + word + text.substring(start, last);
             
-            // カーソルを正しく移動する
-            //textArea.focus();
             var newIndex:int = start + word.length;
             textArea.setSelection(newIndex, newIndex);
         }
-    
+        
         public function getGameType():String { 
             return diceBotGameType.selectedItem.gameType;
         }
@@ -1275,7 +1260,7 @@
                 return result;
             }
             
-            var text:String = Utils.changeZenkakuToHankakuOnDiceBot(text);
+            var text:String = Utils.changeZenkakuToHankaku(text);
             var patterns:Array = getDicePatterns();
             
             for(var i:int = 0; i < patterns.length ; i++) {
@@ -1323,9 +1308,9 @@
         }
         
         private function getDicePatterns():Array {
-            var diceIndex:int = diceBotGameType.selectedIndex;
+            var gameTypeIndex:int = diceBotGameType.selectedIndex;
             
-            var patterns:Array = dicePatternsList[diceIndex];
+            var patterns:Array = dicePatternsList[gameTypeIndex];
             if( patterns != null ) {
                 Log.logging("patterns is already exist");
                 return patterns;
@@ -1335,12 +1320,12 @@
             
             addPrefixToPatterns( 0, patterns);
             
-            if( diceIndex != 0 ) {
-                addPrefixToPatterns( diceIndex, patterns );
+            if( gameTypeIndex != 0 ) {
+                addPrefixToPatterns( gameTypeIndex, patterns );
             }
             
             Log.logging("create new patterns");
-            dicePatternsList[diceIndex] = patterns
+            dicePatternsList[gameTypeIndex] = patterns
             
             return patterns;
         }
@@ -1349,8 +1334,8 @@
             var prefixs:Array = diceBotGameType.dataProvider[index].prefixs;
             
             for each(var prefix:String in prefixs) {
-                    patterns.push( new RegExp("^((\\d+)\\s+)?(S" + prefix + ".*)", "i") );
-                    patterns.push( new RegExp("^((\\d+)\\s+)?(" + prefix + ".*)", "i") );
+                    patterns.push( new RegExp("^((\\d+)\\s+)?(S" + prefix + ".*)", "is") );
+                    patterns.push( new RegExp("^((\\d+)\\s+)?(" + prefix + ".*)", "is") );
                 }
         }
         
@@ -1433,7 +1418,10 @@
         
         public function sendDiceRollResultMessageForChatWindowUser(diceRolledText:String):void {
             var channel:int = getSelectedChatChannleIndex();
+            channel = getChatChannleWhenVisiterMode(channel);
+            
             var data:ChatSendData = new ChatSendData(channel, diceRolledText);
+            selectChatChannelWhenVisiterMode();
             data.setDiceRollResult();
             sendDiceRollResultMessage(data);
         }
