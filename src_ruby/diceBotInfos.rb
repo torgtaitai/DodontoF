@@ -268,7 +268,7 @@ INFO_MESSAGE_TEXT
 
 ・各種表
 　・感情表(ET)
-　　ポジティブとネガティブの両方を振って、表になっている側に○を付けて表示します。
+　　ポジティブとネガティブの両方を振って、表になっている側に懿｢ｫを付けて表示します。
 　　もちろん任意で選ぶ部分は変更して構いません。
 
 ・D66ダイスあり
@@ -427,11 +427,13 @@ INFO_MESSAGE_TEXT
     'name' => 'ハーンマスター',
     'gameType' => 'HarnMaster',
     'fileName' => 'HarnMaster',
-    'prefixs' => ['SHK\d+.*','AP','APU','APD'],
+    'prefixs' => ['SHK\d+.*','SLH','SLHU','SLHD'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　1D100<=XX の判定時に致命的失敗・決定的成功を判定
-・命中部位表 (AP)／上段命中部位 (APU)／上段命中部位 (APD)
+・ショック判定（SHKx）
+　例）SHK13,3
+・人型用　中段命中部位表 (SLH)／上段命中部位 (SLHU)／上段命中部位 (SLHD)
 INFO_MESSAGE_TEXT
   },
   {
