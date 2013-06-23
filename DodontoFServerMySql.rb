@@ -10,7 +10,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.41.15(2013/06/15)"
+$version = "Ver.1.42.00(2013/06/22)"
 
 class SaveDataManagerOnMySql
   def initialize

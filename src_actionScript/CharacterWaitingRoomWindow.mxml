@@ -57,8 +57,8 @@
         map = DodontoF_Main.getInstance().getMap();
         squareLength = Map.getSquareLength();
         
-        dragDropForExit.addDropEvent( map.getOverMapLayer() );
-        dragDropForEnter.addDropEvent( this );
+        dragDropForExit.addDropEvent( map.getOverMapLayer(), exitAction );
+        dragDropForEnter.addDropEvent( this, enterAction );
         
         getWaitingRoomInfo();
     }
@@ -78,12 +78,12 @@
     
     public function dragEvent(event:MouseEvent, character:Character):void {
         var value:Object = {
+            "command" : "enterWaintgRoom",
             "character" : character };
         
-        dragDropForEnter.dragStartHandler(event,
-                                          character.getView(),
-                                          squareLength, squareLength,
-                                          value, enterAction);
+        dragDropForEnter.startDrag(event,
+                                   character.getView(), value, 
+                                   character.getOwnWidth(), character.getOwnHeight());
     }
     
     static public function getWaitingRoomInfo():void {
@@ -94,10 +94,6 @@
     }
     
     public function getWaitingRoomInfo():void {
-        while( preview.numChildren > 0 ) {
-            preview.removeChildAt(0);
-        }
-        
         DodontoF_Main.getInstance().getGuiInputSender().getWaitingRoomInfo(getWaitingRoomInfoResult);
     }
     
@@ -106,6 +102,8 @@
         try {
             imageProgressBar.height = 0;
             imageProgressBar.visible = false;
+            
+            clearWaithingRoom();
             
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             var characters:Array = jsonData as Array;
@@ -121,14 +119,10 @@
         Log.loggingTuning("=>getWaitingRoomInfoResult(event:Event) End");
     }
     
-    private function getNameTextField(name:String):TextField {
-        var nameTextField:TextField = new TextField();
-        
-        nameTextField.text = name;
-        Character.initTextField(nameTextField);
-        Character.initNameTextField(nameTextField, squareLength);
-        
-        return nameTextField;
+    private function clearWaithingRoom():void {
+        while( preview.numChildren > 0 ) {
+            preview.removeChildAt(0);
+        }
     }
     
     private function addCharacterImageOnWaithingRoom(data:Object):void {
@@ -141,35 +135,76 @@
         image.addChild(nameTextField);
         
         var value:Object = {
+            "command" : "exitWaintgRoom",
             "characterId" : data.imgId,
-            "component" : image };
-        dragDropForExit.setDropEventWidthHeigth(image, squareLength, squareLength, value, exitAction);
+            "component" : image};
+        dragDropForExit.setDropEventWidthHeigth(image, value, squareLength, squareLength);
         
         preview.addChild(image);
     }
     
+    private function getNameTextField(name:String):TextField {
+        var nameTextField:TextField = new TextField();
+        
+        nameTextField.text = name;
+        Character.initTextField(nameTextField);
+        Character.initNameTextField(nameTextField, squareLength);
+        
+        return nameTextField;
+    }
+    
+    
     private function enterAction(obj:Object):void {
+        if( obj.command == "exitWaintgRoom" ) {
+            //待合室にドロップされているのにEXIT（待合室からの取り出し）処理の場合、
+            //待合室内のソート処理を行います。
+            sortWaitingRoom(obj);
+            return;
+        }
+        
         var character:Character = obj.character;
         var characterId:String = character.getId();
         
-        DodontoF_Main.getInstance().getGuiInputSender().getSender()
-        .enterWaitingRoomCharacter(characterId, function(event:Event):void {
-                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-                if( jsonData.result == "OK" ) {
-                    //getWaitingRoomInfo();
-                    character.remove();
-                    addCharacterImageOnWaithingRoom(character.getJsonData());
-                }
-            });
+        var index:int = getWaitingIndexByMousePoint();
+        
+        DodontoF_Main.getInstance().getGuiInputSender()
+        .getSender().enterWaitingRoomCharacter(characterId, index, getWaitingRoomInfoResult);
+    }
+    
+    private function getWaitingIndexByMousePoint():int {
+        var point:Point = Utils.getMouseLocalPoint( preview );
+        
+        var horizontalGap:int = 10;
+        var verticalGap:int = 30;
+        var x:int = point.x / (preview.tileWidth + horizontalGap);
+        var y:int = point.y / (preview.tileHeight + verticalGap);
+        var perCount:int = preview.width / (preview.tileWidth + horizontalGap);
+        
+        var index:int = y * perCount + x;
+        Log.logging("enterWaitingRoomCharacter index", index);
+        
+        return index;
+    }
+    
+    private function sortWaitingRoom(obj:Object):void {
+        var characterId:String = obj.characterId;
+        var index:int = getWaitingIndexByMousePoint();
+        
+        //ソート処理と言いつつ、結局は待合室への入室処理を行うだけ。
+        //これで指定位置に強制的に移動させられるのでソートに使えます
+        DodontoF_Main.getInstance().getGuiInputSender()
+        .getSender().enterWaitingRoomCharacter(characterId, index, getWaitingRoomInfoResult);
     }
     
     private function exitAction(obj:Object):void {
+        if( obj.command != "exitWaintgRoom" ) {
+            return;
+        }
+        
         var characterId:String = obj.characterId;
         var component:UIComponent = obj.component;
         
-        var base:UIComponent = DodontoF_Main.getInstance().getDodontoF();
-        var mousePoint:Point = new Point(base.mouseX, base.mouseY);
-        var point:Point = dragDropForExit.getLayer().globalToLocal(mousePoint);
+        var point:Point = Utils.getMouseLocalPoint( dragDropForExit.getLayer() );
         
         var length:int = Map.getSquareLength();
         var x:int = point.x / length;

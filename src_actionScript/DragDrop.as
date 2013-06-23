@@ -25,15 +25,16 @@ package {
         }
         
         
-        public function addDropEvent(component:UIComponent):void {
+        public function addDropEvent(component:UIComponent, action:Function):void {
             removeDropEvent();
             
             Log.logging("DragDrop.addDropEvent at ", name);
             
             layer = component;
-            layer.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-            layer.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+            layer.addEventListener(DragEvent.DRAG_DROP, dropHandler);
             layer.addEventListener(DragEvent.DRAG_ENTER, dragEnter);
+            
+            dropAction = action;
         }
         
         public function getLayer():UIComponent {
@@ -47,13 +48,12 @@ package {
             
             Log.logging("DragDrop.removeDropEvent at ", name);
             
-            layer.removeEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-            layer.removeEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+            layer.removeEventListener(DragEvent.DRAG_DROP, dropHandler);
             layer.removeEventListener(DragEvent.DRAG_ENTER, dragEnter);
             layer = null;
         }
         
-        private function dragDropHandler(event:DragEvent):void {
+        private function dropHandler(event:DragEvent):void {
             if( event.action != DragManager.MOVE ) {
                 //MOVE以外のアクション（つまりドロップが行われていない場合）は無視
                 return;
@@ -64,73 +64,47 @@ package {
             dropAction(value);
         }
         
-        private function dragOverHandler(event:DragEvent):void {
-            if( thisObj.moveAction == null ) {
-                return;
-            }
-            
-            thisObj.moveAction(event);
-            event.stopPropagation();
-        }
-        
-        public function dragEnter(e:DragEvent):void {
+        private function dragEnter(e:DragEvent):void {
             DragManager.acceptDragDrop(layer);
         }
         
         
         
-        private function setDropAction(action:Function):void {
-            dropAction = action;
-        }
-        
-        
-        private var moveAction:Function;
-        public function setMoveEvent(action:Function):void {
-            moveAction = action;
-        } 
-        
-        public function setDropEvent(component:UIComponent, value:Object, action:Function):void {
+        public function setDropEvent(component:UIComponent, value:Object):void {
             var width:Number = component.width;
             var height:Number = component.height;
-            setDropEventWidthHeigth(component, width, height, value, action);
+            setDropEventWidthHeigth(component, value, width, height);
         }
         
         
-        public function setDropEventWidthHeigth(component:UIComponent,
-                                                width:Number, height:Number,
-                                                value:Object, action:Function):void {
+        public function setDropEventWidthHeigth(component:UIComponent, value:Object,
+                                                width:Number, height:Number):void {
             component.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                     event.stopPropagation();
                     
-                    thisObj.dragStartHandler(event, component, width, height, value, action);
+                    thisObj.startDrag(event, component, value, width, height);
                 });
         }
         
-        public function dragStartHandler(event:MouseEvent,
-                                         component:UIComponent, 
-                                         width:Number, height:Number,
-                                         value:Object, action:Function):void{
-            Log.logging("dragStartHandler Begin");
+        public function startDrag(event:MouseEvent,
+                                  component:UIComponent, 
+                                  value:Object,
+                                  width:Number, height:Number):void{
+                                  
+            Log.logging("startDrag Begin");
             
-            setDropAction(action);
-            
-            Log.logging("create Draged Data");
             var dragSource:DragSource = new DragSource();
             dragSource.addData(value, dropValueKey);
             
-            Log.logging("create dragging image");
-            try {
-                var bitmap:Bitmap = Utils.getBitMap(component, width, height);
-            } catch (e:Error) {
-                Log.loggingException("DragDrop.dragStartHandler", e);
-            }
-            
+            var bitmap:Bitmap = Utils.getBitMap(component, width, height);
             var imageProxy:UIComponent = new UIComponent();
             imageProxy.addChild(bitmap);
             
             DragManager.doDrag(component, dragSource, event, imageProxy);
             
-            Log.logging("dragStartHandler End");
+            Log.logging("startDrag End");
         }
-    }
+        
+        
+   }
 }

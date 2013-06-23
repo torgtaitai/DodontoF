@@ -2,11 +2,10 @@
 
 package {
     
-    import mx.graphics.ImageSnapshot;
-    import flash.display.IBitmapDrawable;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
     import com.adobe.serialization.json.JSON;
+    import flash.display.IBitmapDrawable;
     import flash.display.Loader;
     import flash.display.MovieClip;
     import flash.display.Sprite;
@@ -15,6 +14,7 @@ package {
     import flash.events.KeyboardEvent;
     import flash.events.TimerEvent;
     import flash.geom.Matrix;
+    import flash.geom.Point;
     import flash.media.SoundTransform;
     import flash.net.FileReference;
     import flash.system.Capabilities;
@@ -32,6 +32,7 @@ package {
     import mx.core.UIComponent;
     import mx.effects.Glow;
     import mx.events.CloseEvent;
+    import mx.graphics.ImageSnapshot;
     import mx.graphics.codec.JPEGEncoder;
     import mx.styles.CSSStyleDeclaration;
     import mx.styles.StyleManager;
@@ -872,6 +873,12 @@ package {
         }
     
 
+        static public function getMouseLocalPoint(component:UIComponent):Point {
+            var base:UIComponent = DodontoF_Main.getInstance().getDodontoF();
+            var mousePoint:Point = new Point(base.mouseX, base.mouseY);
+            var point:Point = component.globalToLocal(mousePoint);
+            return point;
+        }
     }
 }
 

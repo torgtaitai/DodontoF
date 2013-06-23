@@ -1338,9 +1338,10 @@ package {
             sendCommandData(obj, resultFunction);
         }
 
-        public function enterWaitingRoomCharacter(characterId:String, resultFunction:Function):void {
+        public function enterWaitingRoomCharacter(characterId:String, index:int, resultFunction:Function):void {
             var data:Object = {
-                "characterId" : characterId};
+                "characterId" : characterId,
+                "index" : index};
             
             var obj:Object = getParamObject("enterWaitingRoomCharacter", data);
             sendCommandData(obj, resultFunction);

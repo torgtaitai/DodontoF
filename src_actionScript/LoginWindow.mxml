@@ -409,9 +409,11 @@
         }
         
         var message:String = "";
-        message += "サーバCGIとクライアントFlashのバージョンが異なります。\n";
-        message += "Flashの読み込みに失敗していると思われます。\n";
-        message += "ブラウザをリロードしてFlashの再読み込みを行ってください。\n";
+        message += "どどんとふの更新データが正しく読み込めませんでした。\n";
+        message += "今開いているページを一度閉じて、再度開き直してください。\n";
+        message += "２〜３回繰り返すと読み込みに成功すると思います。\n";
+        message += "\n";
+        message += "以下、技術的な情報：\n";
         message += "サーババージョン　　　：" + serverVersion + "\n";
         message += "クライアントバージョン：" + clientVersion + "\n";
         

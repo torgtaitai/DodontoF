@@ -379,7 +379,7 @@ package {
                 dragDropForClone.removeDropEvent();
             } else {
                 selectCharacterForBatchDelete();
-                dragDropForClone.addDropEvent( getMap().getOverMapLayer() );
+                dragDropForClone.addDropEvent( getMap().getOverMapLayer(), this.cloneCharacterByDrag );
                 dragForCloneEvent(event);
             }
         }
@@ -388,10 +388,9 @@ package {
             var value:Object = {
                 "character" : this };
             
-            dragDropForClone.dragStartHandler(event,
-                                              this.getView(),
-                                              getSquareLength(), getSquareLength(),
-                                              value, this.cloneCharacterByDrag);
+            dragDropForClone.startDrag(event,
+                                       this.getView(), value, 
+                                       this.getOwnWidth(), this.getOwnHeight());
         }
         
         private function cloneCharacterByDrag(obj:Object = null):void {

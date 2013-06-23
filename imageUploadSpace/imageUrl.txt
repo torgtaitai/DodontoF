@@ -25,4 +25,3 @@ image/defaultImageSet/pawn/pawnPurple.png
 image/defaultImageSet/pawn/pawnRed.png
 image/defaultImageSet/pawn/pawnWhite.png
 image/defaultImageSet/pawn/pawnYellow.png
-image/defaultImageSet/sampleRandomDungeon.jpg

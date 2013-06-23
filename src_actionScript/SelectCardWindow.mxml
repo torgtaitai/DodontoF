@@ -50,7 +50,7 @@
         
         map = DodontoF_Main.getInstance().getMap();
         
-        dragDropForDrow.addDropEvent( map.getView() );
+        dragDropForDrow.addDropEvent( map.getView(), drowAction );
         
         init();
     }
@@ -147,7 +147,7 @@
             "card" : card,
             "component" : component };
 
-        dragDropForDrow.setDropEventWidthHeigth(card.getView(), 104, 154, value, drowAction);
+        dragDropForDrow.setDropEventWidthHeigth(card.getView(), value, 104, 154);
         
         return component;
     }

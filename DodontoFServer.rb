@@ -5963,23 +5963,42 @@ class DodontoFServer
     
     params = getParamsFromRequestData()
     characterId = params['characterId']
+    index = params['index']
     
     logging(characterId, "enterWaitingRoomCharacter characterId")
     
     result = {"result" => "NG"}
+    
     changeSaveData(@saveFiles['characters']) do |saveData|
+      
       characters = getCharactersFromSaveData(saveData)
-      
-      enterCharacterData = removeFromArray(characters) {|i| (i['imgId'] == characterId) }
-      return result if( enterCharacterData.nil? )
-      
       waitingRoom = getWaitinigRoomFromSaveData(saveData)
-      waitingRoom << enterCharacterData
+      
+      target = removeFromArray(characters) {|i| (i['imgId'] == characterId) }
+      
+      #待合室内をソートしている場合はこちらが適用されます
+      target ||= removeFromArray(waitingRoom) {|i| (i['imgId'] == characterId) }
+      
+      return result if( target.nil? )
+      
+      addWaitingRoom(waitingRoom, target, index)
     end
     
-    result["result"] = "OK"
-    return result
+    return getWaitingRoomInfo()
   end
+  
+  def addWaitingRoom(waitingRoom, target, index)
+    logging(index, "index")
+    
+    if (index >= 0) and (waitingRoom.length > index)
+      logging("waitingRoom insert!")
+      waitingRoom.insert(index, target)
+    else
+      logging("waitingRoom << only")
+      waitingRoom << target
+    end
+  end
+  
   
   
   def resurrectCharacter
@@ -6083,6 +6102,7 @@ class DodontoFServer
   
   def removeFromArray(array)
     index = nil
+    
     array.each_with_index do |i, targetIndex|
       logging(i, "i")
       logging(targetIndex, "targetIndex")
@@ -6090,6 +6110,7 @@ class DodontoFServer
       logging(b, "yield(i)")
       if( b )
         index = targetIndex
+        break
       end
     end
     
