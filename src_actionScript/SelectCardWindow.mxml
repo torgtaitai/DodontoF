@@ -136,17 +136,19 @@
     }
     
     private function getCardComponent(card:Card):UIComponent {
+        var aspectRation:Number = (1.0 * card.getHeight() / card.getWidth());
+        
         var component:UIComponent = new UIComponent();
-        component.width = preview.tileWidth;// * 0.8;
-        component.height = component.width * 1.5;//preview.tileWidth * 1.5;
+        component.width = preview.tileWidth;
+        component.height = component.width * aspectRation;
         component.addChild(card.getView());
-        component.scaleX = 0.5;
-        component.scaleY = 0.5;
+        component.scaleX = component.width / (card.getWidth() * Map.getSquareLength());
+        component.scaleY = component.height / (card.getHeight() * Map.getSquareLength());
         
         var value:Object = {
             "card" : card,
             "component" : component };
-
+        
         dragDropForDrow.setDropEventWidthHeigth(card.getView(), value, 104, 154);
         
         return component;

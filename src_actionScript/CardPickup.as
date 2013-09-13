@@ -39,6 +39,14 @@ package {
             return card.getHeight();
         }
         
+        override public function getMountName():String {
+            if( card == null ) {
+                return "CardPickUp";
+            }
+            
+            return card.getMountName();
+        }
+       
         override public function getTitleText():String {
             if( card == null ) {
                 return "";

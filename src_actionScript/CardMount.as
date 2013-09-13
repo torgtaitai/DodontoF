@@ -150,13 +150,6 @@ package {
         }
         
         public function drawCard(isOpen_:Boolean, count:int = 1):void {
-            if( isOpen_ ) {
-                DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを引いて公開しました。");
-            } else {
-                DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを引きました。");
-            }
-            
-            
             sender.drawCard( isOpen_,
                              getSelfOwnerId(),
                              getSelfOwnerName(),
@@ -165,7 +158,40 @@ package {
                              this.getX() + (getWidth() * Map.getSquareLength() / 3),
                              this.getY() + 10,
                              getId(),
-                             count);
+                             count,
+                             printCardDrawMessage);
+        }
+        
+        private function printCardDrawMessage(jsonData:Object):void {
+            if( jsonData["result"] != "OK" ) {
+                return;
+            }
+            
+            var cardDataList:Array = jsonData["cardDataList"];
+            var openCardNames:Array = [];
+            var closeCardNames:Array = [];
+            
+            for each(var cardData:Object in cardDataList) {
+                    if( cardData == null ) {
+                        return;
+                    }
+                    
+                    var card:Card = new Card(cardData);
+                    if( card.isOpenMode() ) {
+                        openCardNames.push( card.getCardName() );
+                    } else {
+                        closeCardNames.push( card.getCardName() );
+                    }
+                }
+            
+            if( openCardNames.length > 0 ) {
+                printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを引いて公開しました。"
+                                  + "「" + openCardNames.join("」「") + "」");
+            }
+            
+            if( closeCardNames.length > 0 ) {
+                printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを引きました。");
+            }
         }
         
         private function getNewCardImgId():String {
@@ -174,7 +200,7 @@ package {
         }
         
         public function drawCardSecret(count:int = 1):void {
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + this.getMountNameForDisplay() + "」の山札からカードを伏せたまま引きました。");
+            printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを伏せたまま引きました。");
             
             var isOpen:Boolean = false;
             var ownerId:String = Card.getNobodyOwner();
@@ -190,7 +216,8 @@ package {
                              this.getX() + 10,
                              this.getY() + 10,
                              getId(),
-                             count);
+                             count,
+                             printCardDrawMessage);
         }
         
         protected function openDrawCardWindow():void {

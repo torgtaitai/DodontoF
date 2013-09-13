@@ -427,6 +427,10 @@ package {
         
         private var isInitialRefreshFlag:Boolean = true;
         
+        public function isInitialRefresh():Boolean {
+            return isInitialRefreshFlag;
+        }
+        
         public function initForFirstRefresh():void {
             DodontoF_Main.getInstance().initForFirstRefresh();
         }

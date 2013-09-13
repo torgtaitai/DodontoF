@@ -13,7 +13,7 @@ package {
         private var sendto:String;
         private var message:String = "";
         private var channel:int = 0;
-        private var isSendToOwnself:Boolean = false;
+        private var strictlyUniqueId:String = null;
         private var isReadLocal:Boolean = true;
         private var params:Object = new Object();
         
@@ -216,12 +216,16 @@ package {
         }
         
         public function setSendToOwnself():void {
-            isSendToOwnself = true;
+            setStrictlyUniqueId("dummy");
+        }
+        
+        public function setStrictlyUniqueId(targetId:String):void {
+            strictlyUniqueId = targetId;
         }
         
         public function getStrictlyUniqueId(sender:SharedDataSender):String {
-            if( isSendToOwnself ) {
-                return "dummy";
+            if( strictlyUniqueId != null ) {
+                return strictlyUniqueId;
             }
             
             return sender.getStrictlyUniqueId();
@@ -235,7 +239,7 @@ package {
             result += getParamText("sendto", sendto);
             result += getParamText("message", message);
             result += getParamText("channel", "" + channel);
-            result += getParamText("isSendToOwnself", "" + isSendToOwnself);
+            result += getParamText("strictlyUniqueId", strictlyUniqueId);
             result += getParamText("randomSeed", "" + randomSeed);
             result += getParamText("gameType", gameType);
             result += getParamText("repeatCount", "" + repeatCount);

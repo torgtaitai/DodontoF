@@ -23,6 +23,7 @@
         <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
         <mx:Label text="ジョーカー枚数:" />
         <mx:NumericStepper id="jorkerCount" minimum="0" maximum="10" value="0" enabled="false" />
+        <mx:CheckBox id="trumpMini" label="1×1サイズ" selected="false" />
       </mx:HBox>
       
       <mx:Box id="checkBoxPlace" width="100%" />
@@ -65,12 +66,13 @@
     }
     
     static private var cardTypeTrump:String = "trump_swf";
+    static private var cardTypeTrumpMini:String = "trump_swf\t1x1";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
     
     private var gropuBoxes:Object = new Object();
     
     static private function isTrump(cardType:String):Boolean {
-        return ( cardType == cardTypeTrump );
+        return (cardType.indexOf(cardTypeTrump) == 0);
     }
     
     static public function setCardInfos(infos:Array):void {
@@ -224,7 +226,8 @@
         var cardInitInfos:Array = [];
         
         if( trump.selected ) {
-            cardInitInfos.push( {'mountName':cardTypeTrump,
+            var trumpType:String = (trumpMini.selected ? cardTypeTrumpMini : cardTypeTrump);
+            cardInitInfos.push( {'mountName':trumpType,
                                  'useLineCount':(52 + jorkerCount.value),
                                  "deckCount": deckCount.value} );
         }

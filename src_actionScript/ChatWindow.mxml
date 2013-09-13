@@ -1431,8 +1431,8 @@
         }
         
         
-        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true):void {
-            chatMessageTrader.sendSystemMessage(messageBase, isPrintName);
+        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true, strictlyUniqueId:String = null):void {
+            chatMessageTrader.sendSystemMessage(messageBase, isPrintName, strictlyUniqueId);
         }
         
         public function addLocalMessage(message:String):void {

@@ -881,8 +881,9 @@ class DodontoFServer
     when 'getServerInfo'
       return getWebIfServerInfo
     when 'getRoomList'
-      logging("getRoomList passed")
       return getWebIfRoomList
+    when 'getLoginInfo'
+      return getWebIfLoginInfo
     end
     
     loginOnWebInterface
@@ -906,9 +907,25 @@ class DodontoFServer
       return getChatColor
     when 'refresh'
       return getWebIfRefresh
+    when 'getLoginUserInfo'
+      return getWebIfLoginUserInfo
     end
     
     return {'result'=> "command [#{commandName}] is NOT found"}
+  end
+  
+  def getWebIfLoginInfo
+    uniqueId = getRequestData('uniqueId')
+    uniqueId ||= createUniqueId()
+    return {'uniqueId' => uniqueId}
+  end
+  
+  def getWebIfLoginUserInfo
+    uniqueId = getWebIfRequestText('uniqueId')
+    userName = getWebIfRequestText('name', '')
+    isVisiter = getWebIfRequestBoolean('isVisiter', false)
+    
+    getLoginUserInfo(userName, uniqueId, isVisiter)
   end
   
   
@@ -1310,6 +1327,7 @@ class DodontoFServer
       "isHide" => getWebIfRequestBoolean("isHide", false),
       "type" => "characterData",
       "imgId" =>  createCharacterImgId(),
+      "url" => getWebIfRequestText('url'),
     }
     
     logging(jsonData, 'sendWebIfAddCharacter jsonData')
@@ -2121,8 +2139,6 @@ class DodontoFServer
     logging("getLoginInfo begin")
     
     params = getParamsFromRequestData()
-    
-    uniqueId = params['uniqueId']
     uniqueId ||= createUniqueId()
     
     allLoginCount, loginUserCountList = getAllLoginCount()
@@ -5425,11 +5441,14 @@ class DodontoFServer
     
     changeSaveData(@saveFiles['characters']) do |saveData|
       count = params['count']
+      cardDataList = []
       
       count.times do
-        drawCardDataOne(params, saveData)
+        cardData = drawCardDataOne(params, saveData)
+        cardDataList << cardData unless( cardData.nil? )
       end
       
+      result["cardDataList"] = cardDataList
       result["result"] = "OK"
     end
     
@@ -5445,15 +5464,15 @@ class DodontoFServer
     cards = getCardsFromCardMount(cardMount, mountName)
     
     cardMountData = findCardMountData(saveData, params['imgId'])
-    return if( cardMountData.nil? )
+    return nil if( cardMountData.nil? )
     
     cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
     unless( cardCountDisplayDiff.nil? )
-      return if( cardCountDisplayDiff >= cards.length )
+      return nil if( cardCountDisplayDiff >= cards.length )
     end
     
     cardData = cards.pop
-    return if( cardData.nil? )
+    return nil if( cardData.nil? )
     
     cardData['x'] = params['x']
     cardData['y'] = params['y']
@@ -5469,6 +5488,8 @@ class DodontoFServer
     
     logging(cards.size, 'cardMount[mountName].size')
     setCardCountAndBackImage(cardMountData, cards)
+    
+    return cardData
   end
   
 

@@ -481,6 +481,33 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'インセイン',
+    'gameType' => 'Insane',
+    'fileName' => 'Insane',
+    'prefixs' => ['ST','HJST','MTST','DVST','DT','BT','PT','FT','JT','BET','RTT','TVT','TET','TPT','TST','TKT','TMT'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定
+スペシャル／ファンブル／成功／失敗を判定
+・各種表
+シーン表　　　ST
+　本当は怖い現代日本シーン表 HJST／狂騒の二〇年代シーン表 MTST
+　暗黒のヴィクトリアシーン表 DVST
+形容表　　　　DT
+　本体表 BT／部位表 PT
+感情表　　　　　　FT
+職業表　　　　　　JT
+バッドエンド表　　BET
+ランダム特技決定表　RTT
+指定特技(暴力)表　　(TVT)
+指定特技(情動)表　　(TET)
+指定特技(知覚)表　　(TPT)
+指定特技(技術)表　　(TST)
+指定特技(知識)表　　(TKT)
+指定特技(怪異)表　　(TMT)
+・D66ダイスあり
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'マギカロギア',
     'gameType' => 'MagicaLogia',
     'fileName' => 'MagicaLogia',

@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.42.00(2013/06/22)";
+        private var version:String = "Ver.1.42.04(2013/09/13)";
         
         public function getVersion():String {
             return version;
@@ -301,6 +301,7 @@ package {
             loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
             loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
+            loadToggleStateForRisizableWindow(serverInfo, "isCardHandleLogVisible");
 
             Log.logging("loadViewStateInfo info", info);
             
@@ -493,6 +494,11 @@ package {
                 }
             }
             return false;
+        }
+        
+        public function isInitialRefresh():Boolean {
+            return DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever()
+                .isInitialRefresh();
         }
     }
 }

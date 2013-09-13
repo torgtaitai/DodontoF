@@ -70,7 +70,8 @@ package {
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x:int,
-                                           y:int):Object {
+                                           y:int,
+                                           mountName:String = ""):Object {
             
             var params:Object = MovablePiece.getJsonData(getTypeStatic(), x, y);
             
@@ -82,7 +83,7 @@ package {
             params["isOpen"] = false;
             params["owner"] = "";
             params["ownerName"] = "";
-            params["mountName"] = "";
+            params["mountName"] = mountName;
             params["name"] = "";
             params["canDelete"] = false;
             
@@ -135,6 +136,10 @@ package {
         
         private var zoomRate:Number = 4;
         
+        static public function get cardLogStrictlyUniqueId():String {
+            return "ChatLog";
+        }
+        
         
         /** 
          * コマのデータを下にカードを作製します。
@@ -148,6 +153,8 @@ package {
             initName();
             view.setBackGroundColor(0xFFFFFF);
             view.setLineDiameter(4 * 2);
+            
+            setCardName();
         }
         
         /** 
@@ -188,6 +195,7 @@ package {
             this.canDelete = params.canDelete;
             
             printTitle();
+            setWidthHeight();
         }
         
         /** 
@@ -236,6 +244,13 @@ package {
             } else {
                 return "非公開：" + this.ownerName;
             }
+        }
+        
+        /** 
+         * カードの公開状態の取得。
+         */
+        public function isOpenMode():Boolean {
+            return this.isOpen;
         }
         
         
@@ -352,15 +367,37 @@ package {
          * コマの幅がマス目の何マス分かを示します。
          */
         protected function getWidthSize():Number {
-            return 2; 
+            return cardWidth;
         }
         
         /** 
          * コマの高がマス目の何マス分かを示します。
          */
         protected function getHeightSize():Number {
-            return 3;
+            return cardHeight;
         }
+        
+        /** 
+         * コマの縦横マス数を算出します。
+         * 山札の名前が「trump_swf\tAxB」と末尾に「(タブ)AxB」が付く場合、横A，縦Bになります。
+         * それ以外の場合は横２，縦３に固定です。
+         * また ruby/card.rb に(\t)NxM まで加えた一致する表記がある場合、表示データはそちらに差し替わります。
+         * 
+         */
+        private function setWidthHeight():void {
+            var result:Object = /\t(\d+)x(\d+)/.exec( getMountName() );
+            if( result == null ) {
+                cardWidth = 2;
+                cardHeight = 3;
+            } else {
+                cardWidth = parseInt(result[1]);
+                cardHeight = parseInt(result[2]);
+            }
+        }
+        
+        private var cardWidth:Number = 0;
+        private var cardHeight:Number = 0;
+        
         
         /** 
          * コマの幅がマス目の何マス分かを示します。
@@ -376,7 +413,6 @@ package {
             return getHeightSize();
         }
         
-        
         override protected function update(params:Object):void {
             Log.loggingTuning("=>Card.update() Begin");
             
@@ -388,6 +424,14 @@ package {
             Log.loggingTuning("=>Card.update() End");
         }
         
+        private function isCardChangeToOpened(isOpenBefore:Boolean):Boolean {
+            if( isOpenBefore ) {
+                return false;
+            }
+            
+            return this.isOpen;
+        }
+        
         override protected function initDraw(x:Number, y:Number):void {
             loadViewImage();
             move(x, y, true);
@@ -397,16 +441,9 @@ package {
             return ( this.isBack || ( ! isOwner()) );
         }
         
-        public function getLoadImageUrl():String {
-            var targetImageName:String = this.imageName;
-            if( isPrintBackSide() ) {
-                targetImageName = this.imageNameBack;
-            }
-            
-            return targetImageName;
-        }
-        
         override public function loadViewImage():void {
+            setCardName();
+            
             var targetImageName:String = getLoadImageUrl();
             
             if( this.isText ) {
@@ -417,8 +454,6 @@ package {
                 subTextArea.visible = false;
             }
             
-            this.cardName = getCardNameFromMessage(targetImageName);
-            this.view.toolTip = getCardToolTips(targetImageName);
             targetImageName = getImageUrl(targetImageName);
             
             setViewStates();
@@ -433,6 +468,21 @@ package {
             super.loadViewImage();
             
             printTitle();
+        }
+        
+        private function setCardName():void {
+            var message:String = getLoadImageUrl();
+            this.cardName = getCardNameFromMessage(message);
+            this.view.toolTip = getCardToolTips(message);
+        }
+        
+        public function getLoadImageUrl():String {
+            var targetImageName:String = this.imageName;
+            if( isPrintBackSide() ) {
+                targetImageName = this.imageNameBack;
+            }
+            
+            return targetImageName;
         }
         
         private function setViewStates():void {
@@ -538,16 +588,20 @@ package {
             
             var message:String = "";
             if( this.getCardName() == "" ) {
-                //message = "が「" + this.getMountNameForDisplay() + "」のカードを捨てました。";
                 message = "がカードを捨てました。";
             } else {
                 message = "が「" + this.getCardName() + "」を捨てました。";
             }
             
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message );
+            printCardLog( message );
             sender.dumpTrushCard( getId(), trushMount.getMountName(), trushMount.getId() );
-            
         }
+        
+        public function printCardLog(message:String):void {
+            var isPrintName:Boolean = true;
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message, isPrintName, cardLogStrictlyUniqueId );
+        }
+        
         
         public function getMountNameForDisplay():String {
             return InitCardWindow.getCardName( getMountName() );
@@ -619,6 +673,7 @@ package {
         override public function canExtendOnPositionX():Boolean {
             return true;
         }
+        
         
         override protected function initEvent():void {
             Log.logging("Card.initEvent begin");
@@ -806,6 +861,8 @@ package {
             
             loadViewImage();
             sender.changeCharacter( getJsonData() );
+            
+            printCardLog( "がカードを公開しました。「" + this.getCardName() + "」" );
         }
         
         public function getSelfOwnerId():String {
@@ -831,7 +888,7 @@ package {
         
         private function changeOwnerLocal(isPrintMessage:Boolean):void {
             if( isPrintMessage ) {
-                ChatWindow.getInstance().sendSystemMessage("が「" + this.ownerName + "」のカードを受け取りました。");
+                printCardLog("が「" + this.ownerName + "」のカードを受け取りました。");
             }
             
             var thisUserId:String = getSelfOwnerId();
@@ -843,7 +900,7 @@ package {
         public function changeOwnerToAnyoneOnLocal(ownerAnyone:String, ownerNameAneone:String):void {
             
             if( ownerAnyone != this.owner ) {
-                ChatWindow.getInstance().sendSystemMessage("が「" + ownerNameAneone + "」へカードを渡しました。");
+                printCardLog("が「" + ownerNameAneone + "」へカードを渡しました。");
             }
             
             this.owner = ownerAnyone;
@@ -886,7 +943,7 @@ package {
             if( ! isBackPrint ) {
                 //if( this.canDelete ) {
                 if( this.mountName == "messageCard" ){
-                    ChatWindow.getInstance().sendSystemMessage("がメッセージカードを開きました。");
+                    printCardLog("がメッセージカードを開きました。");
                 }
             }
         }
@@ -1110,8 +1167,6 @@ package {
             var mainText:String = getCardMainText(message);
             var subText:String = getCardSubText(message);
             var backColor:uint = getCardBackColor(message);
-            this.cardName = getCardNameFromMessage(message);
-            this.view.toolTip = getCardToolTips(message);
             
             if( subText == null ) {
                 subText = "";

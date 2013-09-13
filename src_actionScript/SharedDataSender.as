@@ -1269,7 +1269,6 @@ package {
                                          imgId:String,
                                          x:int,
                                          y:int):void {
-            
             var text:String = "<p align='center'><font size=\"72\">LOADING...</font><p>";
             var cardJsonData:Object = getJsonDataFunction(text, text, x, y);
             
@@ -1288,7 +1287,8 @@ package {
                                   x:int,
                                   y:int,
                                   imgId:String,
-                                  count:int):void {
+                                  count:int,
+                                  action:Function):void {
             
             drawCardOnLocal(Card.getJsonData, owner, newCardImgId, x, y);
             
@@ -1311,6 +1311,7 @@ package {
                 if( result != "OK" ) {
                     receiver.removeCharacterOnlyOwnMap(event);
                 }
+                action(data);
             };
             
             sendCommandData(obj, resultFunction);

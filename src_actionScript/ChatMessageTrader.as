@@ -110,7 +110,7 @@ package {
             addMessageToChatLog(data, 0, "dummy");
         }
         
-        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true):void {
+        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true, strictlyUniqueId:String = null):void {
             var isRoomResult:Boolean = true;
             var message:String = "";
             
@@ -131,6 +131,9 @@ package {
             
             data.setMessage(message);
             data.setSendToOwnself();
+            if( strictlyUniqueId != null ) {
+                data.setStrictlyUniqueId(strictlyUniqueId);
+            }
             
             guiInputSender.sendChatMessage(data);
         }
@@ -224,6 +227,11 @@ package {
                 }
             }
             
+            //カード操作時のログを残さない指定の場合、表示なしだが発言は正しいので true
+            if( isInvisibleChatHandleLog(chatSenderUniqueId) ) {
+                return true;
+            }
+            
             if( ! isPrintableMessageOnSecretMessage(chatSenderUniqueId, sendto) ) {
                 //指定外のユーザーのためログ表示無し
                 Log.logging("it's NOT printable message");
@@ -256,6 +264,14 @@ package {
             
             Log.logging("addMessageToChatLog end");
             return true;
+        }
+        
+        private function isInvisibleChatHandleLog(chatSenderUniqueId:String):Boolean {
+            if( chatSenderUniqueId != Card.cardLogStrictlyUniqueId ) {
+                return false;
+            }
+            
+            return ( ! DodontoF_Main.getInstance().getCardHandleLogVisible() );
         }
         
         private function pushToReplayChatLog(time:Number, uniqueId:String, chatSendData:ChatSendData):void {

@@ -181,8 +181,8 @@ package {
                 return message;
             }
             
-            if( ! Config.getInstance().getCutInDisplayState() ) {
-                Log.logging("Config.getInstance().getCutInDisplayState() false");
+            if( isCutInDisable() ) {
+                Log.logging("CutIn Display is DisableMode");
                 return message;
             }
             
@@ -190,6 +190,10 @@ package {
             
             Log.logging("effectString End message", message);
             return message;
+        }
+        
+        protected function isCutInDisable():Boolean {
+            return ( ! Config.getInstance().getCutInDisplayState());
         }
         
         protected function executeEffect(params:Object):void {

@@ -616,6 +616,17 @@ package {
             cardPickUpWindow..setVisibleState(b);
         }
         
+        private var isCardHandleLogVisible:Boolean = true;
+        
+        public function setCardHandleLogVisible(b:Boolean):void {
+            isCardHandleLogVisible = b;
+        }
+        
+        public function getCardHandleLogVisible():Boolean {
+            return isCardHandleLogVisible;
+        }
+        
+        
         public function setRulerMode():void {
             map.setRulerMode();
         }
@@ -1175,6 +1186,7 @@ package {
     {label:"カード", data:"pass_card",
      children: [
         {label:"カードピックアップウィンドウ表示", data:"isCardPickUpVisible", type:"check", toggled:false},
+        {label:"カード操作ログ表示", data:"isCardHandleLogVisible", type:"check", toggled:true},
         {type:"separator"},
         {label:"カード配置の初期化", data:"openInitCardWindow"},
         {type:"separator"},

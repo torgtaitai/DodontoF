@@ -157,8 +157,6 @@
         return false;
     }
     
-    
-    
     ]]>
   </mx:Script>
 </torgtaitai:CommonPopupWindow>

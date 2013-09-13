@@ -11,12 +11,22 @@ class Card
          'fileName' => 'cards/trump_swf.txt',
        },
        
+       { 'type' => "trump_swf\t1x1",
+         'title' => 'トランプ',
+         'fileName' => 'cards/trump_mini_swf.txt',
+       },
+       
        
        { 'type' => 'randomDungeonTrump',
          'title' => 'ランダムダンジョン・トランプ',
          'fileName' => 'cards/trump_swf.txt',
        },
        
+       
+       { 'type' => 'insane',
+         'title' => 'インセイン：恐怖カード',
+         'fileName' => 'cards/insane.txt',
+       },
        
        { 'type' => 'witchQuestWitchTaro',
          'title' => 'ウィッチクエスト：ウィッチ・タロー',
@@ -29,29 +39,9 @@ class Card
          'fileName' => 'cards/witchQuestStructureCard.txt',
        },
        
-       { 'type' => 'torg',
-         'title' => 'TORG：ドラマデッキ',
-         'fileName' => 'cards/torg.txt',
-       },
-       
-       { 'type' => 'nova',
-         'title' => 'トーキョーN◎VA：ニューロデッキ',
-         'fileName' => 'cards/nova.txt',
-       },
-       
-       { 'type' => 'shinnen',
-         'title' => '深淵：運命カード',
-         'fileName' => 'cards/shinnen.txt',
-       },
-       
-       { 'type' => 'shinnen_red',
-         'title' => '深淵：運命カード(夢魔の占い札対応版)',
-         'fileName' => 'cards/shinnen_red.txt',
-       },
-       
-       { 'type' => 'bladeOfArcana',
-         'title' => 'ブレイド・オブ・アルカナ：タロット',
-         'fileName' => 'cards/bladeOfArcana.txt',
+       { 'type' => 'CardRanker',
+         'title' => 'カードランカー',
+         'fileName' => 'cards/cardRanker.txt',
        },
        
        { 'type' => 'gunMetalBlaze',
@@ -64,9 +54,34 @@ class Card
          'fileName' => 'cards/gunMetalBlazeLoversStreet.txt',
        },
        
-       { 'type' => 'tatoono',
-         'title' => 'ローズ・トゥ・ロード：タトゥーノ',
-         'fileName' => 'cards/tatoono.txt',
+       { 'type' => 'shanhaitaimakou',
+         'title' => '上海退魔行：陰陽カード',
+         'fileName' => 'cards/shanhaitaimakou.txt',
+       },
+       
+       { 'type' => 'shinnen',
+         'title' => '深淵：運命カード',
+         'fileName' => 'cards/shinnen.txt',
+       },
+       
+       { 'type' => 'shinnen_red',
+         'title' => '深淵：運命カード(夢魔の占い札対応版)',
+         'fileName' => 'cards/shinnen_red.txt',
+       },
+       
+       { 'type' => 'nova',
+         'title' => 'トーキョーN懿｢ｮVA：ニューロデッキ',
+         'fileName' => 'cards/nova.txt',
+       },
+       
+       { 'type' => 'torg',
+         'title' => 'TORG：ドラマデッキ',
+         'fileName' => 'cards/torg.txt',
+       },
+       
+       { 'type' => 'bladeOfArcana',
+         'title' => 'ブレイド・オブ・アルカナ：タロット',
+         'fileName' => 'cards/bladeOfArcana.txt',
        },
        
        { 'type' => 'farRoadsToLoad_chien:hikari',
@@ -124,14 +139,14 @@ class Card
          'fileName' => 'cards/farRoadsToLoad/reien_uta.txt',
        },
        
-       { 'type' => 'shanhaitaimakou',
-         'title' => '上海退魔行：陰陽カード',
-         'fileName' => 'cards/shanhaitaimakou.txt',
-       },
-       
        { 'type' => 'actCard',
          'title' => 'マスカレイド・スタイル：アクト・カード',
          'fileName' => 'cards/actCard.txt',
+       },
+       
+       { 'type' => 'tatoono',
+         'title' => 'ローズ・トゥ・ロード：タトゥーノ',
+         'fileName' => 'cards/tatoono.txt',
        },
        
        { 'type' => 'ItrasBy_ChanceCard',
@@ -143,12 +158,6 @@ class Card
          'title' => 'Itras By：解決カード',
          'fileName' => 'cards/ItrasBy_ResolutionCard.txt',
        },
-       
-       { 'type' => 'CardRanker',
-         'title' => 'カードランカー',
-         'fileName' => 'cards/cardRanker.txt',
-       },
-       
        
        { 'type' => 'harrowdeck',
          'title' => 'Pathfinder：Harrow Deck',
@@ -169,13 +178,32 @@ class Card
     return result
   end
   
-  def getCardInfo(type)
-    result = @cardsListInfos.find do |cardsInfo|
-      cardsInfo['type'] == type
+  
+  # "trump_swf\t4x6" のようにカード種別を指定すると、横4，縦6のカードが出来る。
+  # この場合に種別を 'trump_swf' と判断するための処理。
+  # また 実際に "trump_swf\t4x6" が定義されている場合には
+  # 'trump_swf' ではなくそちらが使用されるようにしている。
+  #
+  def getCardInfo(typeFull)
+    
+    type = typeFull
+    if( /^([^\t]*)/ == typeFull)
+      type = $1
+    end
+    
+    result = nil
+    @cardsListInfos.each do |cardsInfo|
+      case cardsInfo['type']
+      when typeFull
+        return cardsInfo
+      when type
+        result = cardsInfo
+      end
     end
     
     return result
   end
+  
   
   def getCardFileName(type)
     cardsInfo = getCardInfo(type)

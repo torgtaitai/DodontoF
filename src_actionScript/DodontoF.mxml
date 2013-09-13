@@ -416,6 +416,8 @@
             dodontoF_Main.clearCards();
         } else if( menuName == "isCardPickUpVisible" ) {
             dodontoF_Main.setCardPickUpVisible( toggled );
+        } else if( menuName == "isCardHandleLogVisible" ) {
+            dodontoF_Main.setCardHandleLogVisible( toggled );
         } else if( menuName == "openInitCardWindow" ) {
             popup(InitCardWindow, true);
         } else if( menuName == "cleanCard" ) {

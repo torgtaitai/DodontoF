@@ -2,6 +2,8 @@
 
 package {
 
+    //カットイン機能を流用してコマンドを流し込むための機能。
+    //内容については各種継承先の実例 CutInCommandRollVisualDice.as 等を参照してください。
     public class CutInCommandBase extends CutInBase {
         
         public function sendCommand(params:Object = null):void {
@@ -13,6 +15,11 @@ package {
             return "###CutInCommand:" + getCommand() + "###";
         }
         
+        //カットインが非表示の場合でも「カットインを流用したコマンド機能」（このクラスのこと）
+        //は有効にするためにオーバーライド。継承先でも変更しないで下さい。
+        override protected function isCutInDisable():Boolean {
+            return false;
+        }
         
         //継承先で実装して下さい。
         protected function getCommand():String {
