@@ -508,6 +508,55 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => '神我狩',
+    'gameType' => 'Kamigakari',
+    'fileName' => 'Kamigakari',
+    'prefixs' => ['RT','MT(\d*)'],
+    'info' => <<INFO_MESSAGE_TEXT
+・各種表
+ ・霊紋消費の代償表(RT)
+ ・獲得素材チャート(MTx xは［法則障害］の［強度］。省略時は１)
+　　例） MT　MT3　MT9
+・D66ダイスあり
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'キルデスビジネス',
+    'gameType' => 'KillDeathBusiness',
+    'fileName' => 'KillDeathBusiness',
+    'prefixs' => ['HST','ST[1-2]?','DWT','DeathWT','RWT','RevengeWT','VWT','VictoryWT','PWT','PossesionWT','CWT','ControlWT','FWT','FlourishWT','IWT','IntensifyWT','HWT','HealthWT','SaWT','SafetyWT','LWT','LongevityWT','EWT','ExistWT','NAME[1-3]?','NAME[1-3]?','OSPT','OccultSPT','FSPT','FamilySPT','LoSPT','LoveSPT','JSPT','JusticeSPT','TSPT','TrainingSPT','BSPT','BeamSPT','CMT','EST','sErviceST','SOUL','STGT','HSAT[1-2]?','SKLT','SKLJ','JD.*'],
+    'info' => <<INFO_MESSAGE_TEXT
+・各種表
+ ・履歴表 (HST)
+   末尾に数字(1,2)を入れることでシーン表1,2を個別に振れます。
+ ・願い事表 (-WT)
+   「死」(DWT/DeathWT)、「復讐」(RWT/RevengeWT)、
+   「勝利」(VWT/VictoryWT)、「獲得」(PWT/PossesionWT)、
+   「支配」(CWT/ControlWT)、「繁栄」(FWT/FlourishWT)、
+   「強化」(IWT/IntensifyWT)、「健康」(HWT/HealthWT)、
+   「安全」(SaWT/SafetyWT)、「長寿」(LWT/LongevityWT)、
+   「生」(EWT/ExistWT)
+ ・万能命名表 (NAME)
+   末尾に数字(1,2,3)を入れることで万能命名表1,2,3を個別に振れます。
+ ・サブプロット表 (-SPT)
+   「オカルト」(OSPT/OccultSPT)、「家族」(FSPT/FamilySPT)、
+   「恋愛」(LoSPT/LoveSPT)、「正義」(JSPT/JusticeSPT)、
+   「修行」(TSPT/TrainingSPT)、「笑い」(BSPT/BeamSPT)
+ ・シーン表 (ST)
+ ・サービスシーン表 (EST/sErviceST)
+ ・CM表 (CMT)
+ ・ソウル放出表 (SOUL)
+ ・汎用演出表 (STGT)
+ ・ヘルスタイリスト罵倒表 (HSAT)
+   末尾に数字(1,2)を入れることでヘルスタイリスト罵倒表1,2を個別に振れます。
+ ・指定特技ランダム決定表 (SKLT)
+ ・指定特技分野ランダム決定表 (SKLJ)
+・D66ダイスあり
+・判定　JDx or JDx+y or JDx-y or JDx,z or JDx+y,z JDx-y,z
+　（x＝難易度、y＝補正、z＝ファンブル率（リスク））
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'マギカロギア',
     'gameType' => 'MagicaLogia',
     'fileName' => 'MagicaLogia',
@@ -715,6 +764,19 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'Record of Steam',
+    'gameType' => 'RecordOfSteam',
+    'fileName' => 'RecordOfSteam',
+    'prefixs' => ['\d+S\d+.*'],
+    'info' => <<INFO_MESSAGE_TEXT
+2S2@1
+RecordOfSteam : (2S2@1) ＞ 1,2,3,4 ＞ 1回転 ＞ 成功数2
+
+4S3@2
+RecordOfSteam : (4S3@2) ＞ 2,1,2,4,4,4,2,3,4,5,6,6 ＞ 4回転 ＞ 成功数5
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => '六門世界2nd',
     'gameType' => 'RokumonSekai2',
     'fileName' => 'RokumonSekai2',
@@ -774,28 +836,29 @@ INFO_MESSAGE_TEXT
     'name' => 'サタスペ',
     'gameType' => 'Satasupe',
     'fileName' => 'Satasupe',
-    'prefixs' => ['(\d+R|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT).*'],
+    'prefixs' => ['(\d+R|SR\d+|TAGT|\w+IET|\w+IHT|F\w*T|F\w*T|A\w*T|G\w*A\w*T|A\w*T|R\w*FT|NPCT|KusaiMT|EnterT|BudTT|GetgT|GetzT|GetnT|GetkT|GETSST).*'],
     'info' => <<INFO_MESSAGE_TEXT
-・判定コマンド　(nR>=x[y,z])
-　nが最大ロール回数、xが難易度、yが目標成功度、zがファンブル値です。
-　yとzは省略可能です。
-　例）　10r>=7　　　8R>=7[3,3]　　　10r>=5[5]　　　8R>=7[,3]
-・各種表
-　「TAGT3」のようにコマンド末尾に数字を入れると複数回一辺に引くことが出来ます。
-　・タグ決定表　(TAGT)
-　・情報イベント表　(〜IET)
-　　　犯罪表(CrimeIET)、生活表(LifeIET)、恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)
-　・情報ハプニング表　(〜IHT)
-　　　犯罪表(CrimeIHT)、生活表(LifeIHT)、恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)
-　・命中判定ファンブル表　(FumbleT)
-　・致命傷表　(FatalT)
-　・アクシデント表　(AccidentT)
-　・汎用アクシデント表　(GeneralAT)
-　・その後表　(AfterT)
-　・ロマンスファンブル表　(RomanceFT)
-　・NPCの年齢と好みを一括出力　(NPCT)
-　　　NPCの年齢区分(実年齢)、好み/雰囲気、好み/年齢を一括で引きます。
-　　　使用しない部分は無視してください。
+・判定コマンド　(nR>=x[y,z,c] or nR>=x or nR>=[,,c] etc)
+　nが最大ロール回数、xが難易度、yが目標成功度、zがファンブル値、cが必殺値。
+　yとzとcは省略可能です。(省略時、y＝無制限、z＝1、c=13(なし))
+・性業値コマンド(SRx or SRx+y or SRx-y x=性業値 y=修正値)
+・各種表 ： コマンド末尾に数字を入れると複数回の一括実行が可能　例）TAGT3
+　・タグ決定表(TAGT)
+　・命中判定ファンブル表(FumbleT)、致命傷表(FatalT)
+　・ロマンスファンブル表(RomanceFT)
+　・アクシデント表(AccidentT)、汎用アクシデント表(GeneralAT)
+　・その後表　(AfterT)、臭い飯表(KusaiMT)、登場表(EnterT)、
+　　　バッドトリップ表(BudTT)
+　・報酬表(Get〜) ： ガラクタ(GetgT)、実用品(GetzT)、値打ち物(GetnT)、
+　　　奇天烈(GetkT)
+　・NPCの年齢と好みを一括出力(NPCT)
+　・「サタスペ」のベースとアクセサリを出力(GETSSTx　xはアクセサリ数、省略時１)
+・以下のコマンドは +,- でダイス目修正、=でダイス目指定が可能
+　例）CrimeIET+1　CrimeIET-1　CrimeIET=7
+　・情報イベント表(〜IET) ： 犯罪表(CrimeIET)、生活表(LifeIET)、
+　　　恋愛表(LoveIET)、教養表(CultureIET)、戦闘表(CombatIET)
+　・情報ハプニング表(〜IHT) ： 犯罪表(CrimeIHT)、生活表(LifeIHT)、
+　　　恋愛表(LoveIHT)、教養表(CultureIHT)、戦闘表(CombatIHT)
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },

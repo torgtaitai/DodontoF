@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.42.04"
-$versionDate = "2013/09/13"
+$versionOnly = "Ver.1.42.06"
+$versionDate = "2013/09/29"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -268,8 +268,10 @@ $diceBotOrder = <<____END_MARKER____
 カードランカー
 ガープス
 カオスフレア
+神我狩
 ガンドッグ
 ガンドッグ・ゼロ
+キルデスビジネス
 クトゥルフ
 クトゥルフテック
 ゲイシャ・ガール・ウィズ・カタナ
@@ -313,6 +315,7 @@ $diceBotOrder = <<____END_MARKER____
 ワープス
 比叡山炎上
 無限のファンタジア
+Record of Steam
 Chill
 Eclipse Phase
 NJSLYRBATTLE

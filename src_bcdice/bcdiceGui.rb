@@ -315,6 +315,8 @@ GunDogZero
 Hieizan
 HuntersMoon
 InfiniteFantasia
+KillDeathBusiness
+Kamigakari
 MagicaLogia
 MeikyuDays
 MeikyuKingdom
@@ -327,6 +329,7 @@ ParasiteBlood
 Peekaboo
 Pendragon
 PhantasmAdventure
+RecordOfSteam
 RokumonSekai2
 RoleMaster
 RuneQuest

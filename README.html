@@ -100,7 +100,6 @@ Flashって何？という方はすでに入っている可能性もあります
 <ul>
 <li><a href="http://www.sakura.ad.jp/">さくらインターネット</a>（<a href="http://sakura.cb-faq.com/faq/public/app/servlet/qadoc?QID=000487">参照</a>）7人程度までは負荷に問題なし。</li>
 <li><a href="http://atpages.jp/">@PAGES</a>（<a href="http://www10.atwiki.jp/atpagesguide/pages/27.html#id_94cfcba5">参照</a>）7人程度までは負荷に問題なし。</li>
-<li><a href="http://lolipop.jp/">ロリポップ！</a>（<a href="http://trpg.gigafreaks.com/other/roripo_install.html">参照</a>：ゲーム系CGIは設置可能。チャット系ツールにも該当せず。負荷が高すぎる場合は運営から通達があります）</li>
 <li><a href="http://www.xserver.ne.jp/">エックスサーバー</a>（<a href="http://dfes.blog129.fc2.com/blog-entry-80.html">参照</a>：10人未満での運用は問題なし。負荷が高すぎる場合は運営から通達があります）</li>
 <li><a href="http://www.extrem.jp/">エクストリムレンタルサーバー</a>（<a href="http://www.vampire-blood.net/1165.html">参照</a>：年齢制限を要するR指定ゲームの禁止。負荷が極端に高い場合はアカウントが停止される場合もあります。）</li>
 <!--
@@ -163,7 +162,6 @@ DodontoF_WebSet<br>
 <ul>
 <li>「さくらインターネット」なら「<a href="http://support.sakura.ad.jp/manual/rs/tech_cgi.html">2.2. プログラムのコマンドパス</a>」</li>
 <li>「@PAGES」なら「<a href="http://www10.atwiki.jp/atpagesguide/pages/27.html#id_6c25e82a">CGIのパスを教えてください</a>」</li>
-<li>「ロリポップ！」なら「<a href="http://lolipop.jp/manual/hp/cgi/">CGI・SSI・PHPの設定等について</a>」</li>
 <li>「エックスサーバー」なら「<a href="http://www.xserver.ne.jp/man_program_cgi.php">CGI関連の仕様一覧</a>」</li>
 <li>「エクストリムレンタルサーバー」なら「<a href="http://www.extrem.jp/guide_cgi.php">CGIのパス・パーミッションについて</a>」（perlのパスをrubyに読み替えて下さい）</li>
 <!--<li>「お名前.com」なら「<a href="">CGIのパスを教えてください</a>」</li>-->
@@ -271,7 +269,6 @@ DodontoF_WebSet<br>
 <ul>
 <li>「さくらインターネット」なら「<a href="http://support.sakura.ad.jp/manual/rs/tech_cgi.html">2.1. ファイル、ディレクトリの設定</a>」</li>
 <li>「@PAGE」なら「<a href="http://www10.atwiki.jp/atpagesguide/pages/27.html#id_7a08792f">@PAGESのCGIガイドのRuby箇所</a>」</li>
-<li>「ロリポップ！」なら「<a href="http://lolipop.jp/manual/hp/cgi/">設定するパーミッションの値」の「Perl・Ruby・Pythonスクリプトの場合</a>」</li>
 <li>「エックスサーバー」なら「<a href="http://www.xserver.ne.jp/man_program_cgi.php">CGI関連の仕様一覧</a>」</li>
 <li>「エクストリムレンタルサーバー」なら「<a href="http://www.extrem.jp/guide_cgi.php">CGIのパス・パーミッションについて</a>」
 <!--<li>「お名前.com」なら「<a href=""></a>」</li>-->
@@ -1002,6 +999,30 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2013/09/29 Ver.1.42.06<br>
+・ダイスボットをボーンズ＆カーズVer2.01.53対応へ変更。<br>
+　・キルデスビジネスのダイスボットにファンブル判定も含めた判定用コマンド（JD）を追加。<br>
+　　ヘルスタイリスト罵倒表に前後の修飾語句を追加。神武来さんありがとうっ！<br>
+　　一部文字化けを修正。くまかばさんありがとうっ！<br>
+　・サタスペのダイスボットを大量更新。<br>
+　　性業値コマンド追加。<br>
+　　判定コマンドに必殺値追加。<br>
+　　情報イベント／ハプニング表に値補正追加。<br>
+　　臭い飯表、バッドトリップ表、報酬表追加。<br>
+　　神武来さんありがとうっ！<br>
+　・ダイスボットにRecord of Steamを追加。らぁさんありがとうっ！<br>
+<br>
+2013/09/22 Ver.1.42.05<br>
+・ダイスボットをボーンズ＆カーズVer2.01.52対応へ変更。<br>
+　・キルデスビジネスに指定特技ランダム決定表 (SKLT)を追加。ハスキーさんありがとうっ！<br>
+　・キルデスビジネスのコマンド名を一部変更。能代銀華さんありがとうっ！<br>
+　・ダイスボットに神我狩追加。能代銀華さんありがとうっ！<br>
+・CGI対象サーバからロリポップを削除。今後は非推奨とします。<br>
+<br>
+2013/09/14 Ver.1.42.04.01<br>
+・キルデスビジネスの解説テキストを修正。<br>
+・ダイスボット一覧表にキルデスビジネスが抜けていたため修正。<br>
+<br>
 2013/09/13 Ver.1.42.04<br>
 ・ダイスボットをボーンズ＆カーズVer2.01.51対応へ変更。<br>
 　・キルデスビジネスのダイスボット追加。ハスキーさん、犬のようなものさん、ありがとうっ！<br>
