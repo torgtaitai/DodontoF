@@ -70,7 +70,7 @@ class Card
        },
        
        { 'type' => 'nova',
-         'title' => 'トーキョーN懿｢ｮVA：ニューロデッキ',
+         'title' => 'トーキョーN◎VA：ニューロデッキ',
          'fileName' => 'cards/nova.txt',
        },
        
@@ -179,10 +179,10 @@ class Card
   end
   
   
-  # "trump_swf\t4x6" のようにカード種別を指定すると、横4，縦6のカードが出来る。
-  # この場合に種別を 'trump_swf' と判断するための処理。
-  # また 実際に "trump_swf\t4x6" が定義されている場合には
-  # 'trump_swf' ではなくそちらが使用されるようにしている。
+  # 
+  # (カード種別名)(タブ)(横幅)x(盾幅)とカード種別を設定するとカードの縦横幅が指定できる
+  # 例）"trump_swf\t4x6" であれば、
+  #   　カード種別 'trump_swf' を 横4，縦6 の幅でカードが生成される。
   #
   def getCardInfo(typeFull)
     

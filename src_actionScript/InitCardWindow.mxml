@@ -23,7 +23,7 @@
         <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
         <mx:Label text="ジョーカー枚数:" />
         <mx:NumericStepper id="jorkerCount" minimum="0" maximum="10" value="0" enabled="false" />
-        <mx:CheckBox id="trumpMini" label="1×1サイズ" selected="false" />
+        <mx:CheckBox id="trumpSizeChangedCheck" label="{trumpSizeChanged + 'サイズ'}" selected="false" visible="{trumpSizeChanged != null}"/>
       </mx:HBox>
       
       <mx:Box id="checkBoxPlace" width="100%" />
@@ -52,6 +52,10 @@
   
   <mx:Script>
     <![CDATA[
+    
+    [Bindable]
+    private var trumpSizeChanged:String = ""; //"1x1";
+    
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
@@ -66,7 +70,6 @@
     }
     
     static private var cardTypeTrump:String = "trump_swf";
-    static private var cardTypeTrumpMini:String = "trump_swf\t1x1";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
     
     private var gropuBoxes:Object = new Object();
@@ -109,6 +112,7 @@
             var cardName:String = cardInfo.title;
 
             if( isTrump(cardType) ) {
+                initCardSizeInfo(cardType);
                 continue;
             }
             
@@ -128,6 +132,15 @@
                 checkBoxPlace.addChild( checkBox );
             }
         }
+    }
+    
+    private function initCardSizeInfo(cardType:String):void {
+        var result:Object = Card.getCardSizeInfoCardType(cardType);
+        if( result == null ) {
+            return;
+        }
+        
+        trumpSizeChanged = result.text;
     }
     
     private function isGroupCardType(cardType:String):Boolean {
@@ -226,7 +239,11 @@
         var cardInitInfos:Array = [];
         
         if( trump.selected ) {
-            var trumpType:String = (trumpMini.selected ? cardTypeTrumpMini : cardTypeTrump);
+            var trumpType:String = cardTypeTrump;
+            if( trumpSizeChangedCheck.selected ) {
+                trumpType += "\t" + trumpSizeChanged;
+            }
+            
             cardInitInfos.push( {'mountName':trumpType,
                                  'useLineCount':(52 + jorkerCount.value),
                                  "deckCount": deckCount.value} );

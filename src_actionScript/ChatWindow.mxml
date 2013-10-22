@@ -225,7 +225,6 @@
         
         import flash.events.Event;
         import flash.net.URLRequest;
-        import mx.collections.ArrayCollection;
         import mx.containers.dividedBoxClasses.BoxDivider;
         import mx.controls.Alert;
         import mx.controls.Menu;
@@ -834,7 +833,7 @@
             clearPublicChatMessageLog();
         }
         
-        public function setStandingGraphics(infos:ArrayCollection):void {
+        public function setStandingGraphics(infos:Array):void {
             standingGraphics.clear();
             for(var i:int = 0 ; i < infos.length ; i++) {
                 var info:Object = infos[i];

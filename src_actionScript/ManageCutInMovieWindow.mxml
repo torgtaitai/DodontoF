@@ -25,6 +25,10 @@
       </mx:HBox>
       
 	  <mx:DataGrid id="cutInInfosList"
+                   dragEnabled="true"
+                   dropEnabled="true"
+                   dragMoveEnabled="true"
+                   dragComplete="dragComplete(event)"
                    width="100%"
                    height="100%"
                    dataProvider="{ CutInBase.cutInInfos }"
@@ -84,6 +88,7 @@
     import mx.managers.PopUpManager;
     import mx.controls.Alert;
     import mx.events.CloseEvent;
+    import mx.events.DragEvent;
     
     private var cutIn:CutInMovie = new CutInMovie();
 
@@ -98,7 +103,7 @@
         Log.loggingTuning("=>setup() End");
     }
 
-    private function getCutInInfoAndIndex():Array {
+    private function getCutInInfoAndIndex():Object {
         status = "";
     
         var index:int = cutInInfosList.selectedIndex;
@@ -106,14 +111,16 @@
         
         if( index == -1 ) {
             status = "カットインを選択してください。";
-            return [null, index];
+            return {index:index, info:null};
+                    
         }
     
-        return [CutInBase.cutInInfos[index], index];
+        return {index:index, info:CutInBase.cutInInfos[index]};
     }
 
     private function getCutInInfo():Object {
-        return getCutInInfoAndIndex()[0];
+        var obj:Object = getCutInInfoAndIndex();
+        return obj.info;
     }
 
     private function previewCutIn():void {
@@ -146,9 +153,9 @@
     private function removeCutInEffect():void {
         status = "";
         
-        var info:Array = getCutInInfoAndIndex();
-        var cutInInfo:Object = info[0];
-        var index:int = info[1];
+        var obj:Object = getCutInInfoAndIndex();
+        var index:int = obj.index;
+        var cutInInfo:Object = obj.info;
         
         if( cutInInfo == null ) {
             return;
@@ -176,7 +183,7 @@
     }
     
     private function removeCutInEffectAfterCheck(cutInInfo:Object, index:int):void {
-        //DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
+        //CutInBase.cutInInfos.removeItemAt(index);
         
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.removeEffect(cutInInfo.effectId);
@@ -185,25 +192,25 @@
 
     private function changeCutInEffect():void {
         status = "";
-    
-        var info:Array = getCutInInfoAndIndex();
-        var cutInInfo:Object = info[0];
-        var index:int = info[1];
-    
+        
+        var obj:Object = getCutInInfoAndIndex();
+        var index:int = obj.index;
+        var cutInInfo:Object = obj.info;
+        
         if( cutInInfo == null ) {
             return;
         }
-    
+        
         if( cutInInfo.effectId == null ) {
             return;
         }
-    
+        
         var window:ChangeCutInMovieWindow =
         DodontoF.popup(ChangeCutInMovieWindow, true) as ChangeCutInMovieWindow;
         window.init(cutInInfo, index);
     }
 
-<!--
+    /*
     private function openEditBox():void {
         var editBoxHeigth:int = 30;
     
@@ -217,8 +224,8 @@
             openEditBoxButton.label = "編集＞＞"
         }
     }
--->
-
+    */
+    
     static public function changeEnableState(params:Object):void {
         if( params.isTail == null ) {
             params.isTail = true;
@@ -229,7 +236,19 @@
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.changeEffect(params);
     }
-
+    
+    private function dragComplete(event:DragEvent):void { 
+        var paramsList:Array = Utils.clone(CutInBase.cutInInfos);
+        for each(var params:Object in paramsList) {
+                delete params.mx_internal_uid;
+            }
+        
+        Log.logging("dragComplete paramsList", paramsList);
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.changeEffectsAll(paramsList);
+    }
+    
     ]]>
   </mx:Script>
 

@@ -23,7 +23,6 @@ package {
     import flash.ui.Keyboard;
     import flash.utils.ByteArray;
     import flash.utils.setTimeout;
-    import mx.collections.ArrayCollection;
     import mx.containers.Box;
     import mx.controls.Alert;
     import mx.core.IFlexDisplayObject;
@@ -32,8 +31,6 @@ package {
     
     
 	public class DodontoF_Main extends UIComponent {
-        
-        [Bindable] public var standingGraphicInfos:ArrayCollection = new ArrayCollection();
         
         /*
         [Bindable] public var visibleDirectionLayer:Boolean = false;
@@ -224,23 +221,23 @@ package {
             }
         }
         
-        public function setEffects(effects:ArrayCollection):void {
-            var tmpCutInInfos:ArrayCollection = new ArrayCollection();
-            var tmpStandingGraphicInfos:ArrayCollection =  new ArrayCollection();
+        public function setEffects(effects:Array):void {
+            var tmpCutInInfos:Array = new Array();
+            var tmpStandingGraphicInfos:Array =  new Array();
             
             for(var i:int = 0 ; i < effects.length ; i++) {
                 var effect:Object = effects[i];
                 if( effect.type == StandingGraphics.getTypeStatic() ) {
-                    tmpStandingGraphicInfos.addItem(effect);
+                    tmpStandingGraphicInfos.push(effect);
                 } else {
-                    tmpCutInInfos.addItem(effect);
+                    tmpCutInInfos.push(effect);
                 }
             }
             
             CutInBase.setCutInInfos(tmpCutInInfos);
-            standingGraphicInfos = tmpStandingGraphicInfos;
+            StandingGraphicsManageWindow.standingGraphicInfos = tmpStandingGraphicInfos;
             
-            chatWindow.setStandingGraphics(standingGraphicInfos);
+            chatWindow.setStandingGraphics(StandingGraphicsManageWindow.standingGraphicInfos);
         }
         
         

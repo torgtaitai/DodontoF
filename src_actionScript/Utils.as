@@ -442,6 +442,12 @@ package {
             return result;
         }
         
+        static public function newSameClassInstance(obj:Object):Object {
+            var className:String = flash.utils.getQualifiedClassName(obj);
+            var klass:Class = Class( flash.utils.getDefinitionByName(className) );
+            return new klass();
+        }
+        
         static public function clone(source:Object):*{
             var myBA:ByteArray = new ByteArray();
             myBA.writeObject(source);

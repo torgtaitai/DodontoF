@@ -34,7 +34,7 @@ package {
         protected override function execute():void {
             var params:Object = getEffectParams();
             
-            DodontoF_Main.getInstance().standingGraphicInfos[index] = params;
+            StandingGraphicsManageWindow.standingGraphicInfos[index] = params;
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.changeEffect(params);

@@ -9,7 +9,6 @@ package {
     import flash.net.FileReference;
     import flash.net.URLRequest;
     import flash.utils.ByteArray;
-    import mx.collections.ArrayCollection;
     import mx.controls.Alert;
     import mx.rpc.events.ResultEvent;
     
@@ -452,7 +451,7 @@ package {
         }
         
         private function analyzeEffects(effects:Object):void {
-            var tmp:ArrayCollection = new ArrayCollection(effects as Array);
+            var tmp:Array = effects as Array;
             DodontoF_Main.getInstance().setEffects( tmp );
         }
         

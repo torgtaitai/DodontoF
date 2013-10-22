@@ -385,14 +385,31 @@ package {
          * 
          */
         private function setWidthHeight():void {
-            var result:Object = /\t(\d+)x(\d+)/.exec( getMountName() );
+            var result:Object = getCardSizeInfoCardType( getMountName() );
+            
             if( result == null ) {
                 cardWidth = 2;
                 cardHeight = 3;
             } else {
-                cardWidth = parseInt(result[1]);
-                cardHeight = parseInt(result[2]);
+                cardWidth = result.width;
+                cardHeight = result.height
             }
+        }
+        
+        static public function getCardSizeInfoCardType(cardType:String):Object {
+            var result:Object = /\t((\d+)x(\d+))/.exec(cardType);
+            
+            if( result == null ) {
+                return null;
+            }
+            
+            var obj:Object = {
+                text: result[1],
+                width: parseInt(result[2]),
+                height: parseInt(result[3])
+            }
+            
+            return obj;
         }
         
         private var cardWidth:Number = 0;

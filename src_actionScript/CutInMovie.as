@@ -1,6 +1,5 @@
 //--*-coding:utf-8-*--
 
-
 package {
     
     import com.adobe.serialization.json.JSON;
@@ -209,8 +208,7 @@ package {
         
         private function metadataEventHandlerForCutInFlv(event:MetadataEvent):void {
             var metadata:Object = event.info;
-            //cutInWindow.setSize(metadata.width, metadata.height);
-            cutInWindow.setSize( (metadata.width + 5), (metadata.height + 5));
+            cutInWindow.setSize((metadata.width + 5), (metadata.height + 5));
         }
         
         private function completeHandlerForCutInWindowClose(event:Event):void {
@@ -230,7 +228,6 @@ package {
             if( youtubeMovie.height == 0 ) {
                 youtubeMovie.height = 300;
             }
-            //youtubeMovie.height = 200 + MovieSprite.CHROME_HEIGHT;
             
             youtubeMovie.setVolume( this.volume * 100 );
             
@@ -249,7 +246,6 @@ package {
                 });
             
             if( playerReadyEvent != null ) {
-                //youtubeMovie.playVideo();
                 var youtubeId:String = getYoutubeId(params.source);
                 loadYoutube(youtubeId);
             }
@@ -258,7 +254,6 @@ package {
         
         private function initYoutubeMovie():void {
             youtubeMovie.addEventListener(PlayerReadyEvent.PLAYER_READY, onPlayerReadyYoutube);
-            //youtubeMovie.addEventListener(flash.events.Event.COMPLETE, completeHandlerForCutInWindowClose);
         }
         
         private function loadYoutube(youtubeId:String):void {
@@ -281,7 +276,7 @@ package {
             try {
                 loadYoutube(youtubeId);
             } catch (e:Error) {
-                //Alert.show("youtubeMovie.loadVideoById error");
+                Log.loggingTuning("youtubeMovie.loadVideoById error");
             }
         }
         

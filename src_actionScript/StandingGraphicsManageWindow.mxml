@@ -11,9 +11,13 @@
     
     <mx:Box width="100%" height="100%">
 	  <mx:DataGrid id="effectInfosList"
+                   dragEnabled="true"
+                   dropEnabled="true"
+                   dragMoveEnabled="true"
+                   dragComplete="dragComplete(event)"
                    width="100%"
                    height="100%"
-                   dataProvider="{ DodontoF_Main.getInstance().standingGraphicInfos }"
+                   dataProvider="{ standingGraphicInfos }"
                    editable="false"
 		           draggableColumns="false"
                    >
@@ -50,11 +54,14 @@
   </mx:HBox>
   <mx:Script>
     <![CDATA[
-    import mx.collections.ArrayCollection;
+             
+    [Bindable] public static var standingGraphicInfos:Array = new Array();
+        
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.controls.Alert;
     import mx.events.CloseEvent;
+    import mx.events.DragEvent;
     
     
     override protected function setup():void {
@@ -74,7 +81,7 @@
             return [null, index];
         }
     
-        return [DodontoF_Main.getInstance().standingGraphicInfos[index], index];
+        return [standingGraphicInfos[index], index];
     }
 
     private function getEffectInfo():Object {
@@ -121,8 +128,8 @@
     }
 
     private function removeEffectAfterCheck(effectInfo:Object, index:int):void {
-        DodontoF_Main.getInstance().standingGraphicInfos.removeItemAt(index);
-    
+        //standingGraphicInfos.removeItemAt(index);
+        
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.removeEffect(effectInfo.effectId);
     }
@@ -147,8 +154,20 @@
         DodontoF.popup(ChangeStandingGraphicsWindow, true) as ChangeStandingGraphicsWindow;
         window.init(effectInfo, index);
     }
-
-
+    
+    
+    private function dragComplete(event:DragEvent):void { 
+        var paramsList:Array = Utils.clone(standingGraphicInfos);
+        for each(var params:Object in paramsList) {
+                delete params.mx_internal_uid;
+            }
+        
+        Log.logging("dragComplete paramsList", paramsList);
+        
+        var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        guiInputSender.changeEffectsAll(paramsList);
+    }
+    
     ]]>
   </mx:Script>
 

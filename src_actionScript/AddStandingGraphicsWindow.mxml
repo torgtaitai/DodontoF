@@ -127,7 +127,7 @@
             return;
         }
     
-        DodontoF_Main.getInstance().standingGraphicInfos.addItem(params);
+        StandingGraphicsManageWindow.standingGraphicInfos.push(params);
     
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.addEffect(params);

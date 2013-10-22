@@ -37,7 +37,6 @@ package {
             chatWindow = chatWindow_;
             cutInList = [new CutInCommandRollVisualDice(),
                          new CutInMovie(), 
-                         //new CutInCommandAddCharacter(),
                          new CutInCommandGetDiceBotInfos()];
             
             voter  = new Voter(chatWindow);
@@ -402,6 +401,8 @@ package {
                 }
                 
                 Log.logging("matched matchResult", matchResult);
+                
+                cutIn = Utils.newSameClassInstance(cutIn) as CutInBase;
                 
                 cutIn.setEffectable(effectable);
                 chatMessage = cutIn.effect( matchResult.resultData.chatMessage );

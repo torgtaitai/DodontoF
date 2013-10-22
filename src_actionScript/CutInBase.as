@@ -7,7 +7,6 @@ package {
     import flash.events.Event;
     import flash.media.Sound;
     import flash.net.URLRequest;
-    import mx.collections.ArrayCollection;
     import mx.controls.Image;
     import mx.controls.VideoDisplay;
     import mx.core.UIComponent;
@@ -17,9 +16,9 @@ package {
     public class CutInBase {
         
         [Bindable]
-            static public var cutInInfos:ArrayCollection = new ArrayCollection();
+        static public var cutInInfos:Array = new Array();
         
-        static public function setCutInInfos(cutInInfos_:ArrayCollection):void {
+        static public function setCutInInfos(cutInInfos_:Array):void {
             cutInInfos = cutInInfos_;
         }
         

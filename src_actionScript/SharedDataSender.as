@@ -1221,6 +1221,11 @@ package {
             sendCommandData(obj);
         }
         
+        public function changeEffectsAll(data:Object):void {
+            var obj:Object = getParamObject("changeEffectsAll", data);
+            sendCommandData(obj);
+        }
+        
         public function removeEffect(effectId:String):void {
             var data:Object = {
                 "effectId": effectId

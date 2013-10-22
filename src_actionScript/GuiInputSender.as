@@ -703,6 +703,10 @@ package {
             sender.changeEffect(params);
         }
         
+        public function changeEffectsAll(params:Object):void {
+            sender.changeEffectsAll(params);
+        }
+        
         public function removeEffect(effectId:String):void {
             sender.removeEffect(effectId);
         }

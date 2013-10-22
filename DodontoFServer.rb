@@ -808,6 +808,7 @@ class DodontoFServer
       ['changeRoundTime', hasNoReturn],
       ['addEffect', hasNoReturn], 
       ['changeEffect', hasNoReturn], 
+      ['changeEffectsAll', hasNoReturn], 
       ['removeEffect', hasNoReturn], 
       ['changeImageTags', hasNoReturn], 
     ]
@@ -1594,8 +1595,7 @@ class DodontoFServer
     saveData = {}
     
     if( $isMentenanceNow )
-      saveData["warning"] = {"key" => "canNotRefreshBecauseMentenanceNow"}
-      return saveData
+      saveData["warning"] = {"key" => "canNotRefreshBecauseMentenanceNow", "params" => []}
     end
     
     params = getParamsFromRequestData()
@@ -4696,8 +4696,7 @@ class DodontoFServer
   
   def addEffectData(effectDataList)
     changeSaveData(@saveFiles['effects']) do |saveData|
-      saveData['effects'] ||= []
-      effects = saveData['effects']
+      effects = getArrayInfoFromHash(saveData, 'effects')
       
       effectDataList.each do |effectData|
         logging(effectData, "addEffectData target effectData")
@@ -4723,8 +4722,7 @@ class DodontoFServer
       effectData = getParamsFromRequestData()
       targetCutInId = effectData['effectId']
       
-      saveData['effects'] ||= []
-      effects = saveData['effects']
+      effects = getArrayInfoFromHash(saveData, 'effects')
       
       findIndex = -1
       effects.each_with_index do |i, index|
@@ -4741,6 +4739,27 @@ class DodontoFServer
     end
   end
   
+  def changeEffectsAll
+    paramEffects = getParamsFromRequestData()
+    return if( paramEffects.nil? )
+    return if( paramEffects.empty? )
+    
+    logging(paramEffects, "changeEffectsAll paramEffects")
+    
+    type = paramEffects.first['type']
+    
+    changeSaveData(@saveFiles['effects']) do |saveData|
+      effects = getArrayInfoFromHash(saveData, 'effects')
+      
+      effects.delete_if{|i| (type == i['type'])}
+      
+      paramEffects.each do |param|
+        effects << param
+      end
+    end
+  end
+  
+  
   def removeEffect()
     logging('removeEffect Begin')
     
@@ -4749,8 +4768,7 @@ class DodontoFServer
       effectId = params['effectId']
       logging(effectId, 'effectId')
       
-      saveData['effects'] ||= []
-      effects = saveData['effects']
+      effects = getArrayInfoFromHash(saveData, 'effects')
       effects.delete_if{|i| (effectId == i['effectId'])}
     end
     
