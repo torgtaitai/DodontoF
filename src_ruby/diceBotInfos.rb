@@ -645,7 +645,7 @@ INFO_MESSAGE_TEXT
     'name' => 'モノトーン・ミュージアム',
     'gameType' => 'MonotoneMusium',
     'fileName' => 'MonotoneMusium',
-    'prefixs' => ['OT','DT','WDT'],
+    'prefixs' => ['2D6.*','OT','DT','WDT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　・通常判定　　　　　　2D6+m>=t[c,f]
@@ -840,7 +840,9 @@ INFO_MESSAGE_TEXT
     'info' => <<INFO_MESSAGE_TEXT
 ・判定コマンド　(nR>=x[y,z,c] or nR>=x or nR>=[,,c] etc)
 　nが最大ロール回数、xが難易度、yが目標成功度、zがファンブル値、cが必殺値。
-　yとzとcは省略可能です。(省略時、y＝無制限、z＝1、c=13(なし))
+　y と z と c は省略可能です。(省略時、y＝無制限、z＝1、c=13(なし))
+　c の後ろにSを記述すると必殺が出た時点で判定を終了します。
+　例）5R>=5[10,2,7S]
 ・性業値コマンド(SRx or SRx+y or SRx-y x=性業値 y=修正値)
 ・各種表 ： コマンド末尾に数字を入れると複数回の一括実行が可能　例）TAGT3
 　・タグ決定表(TAGT)
@@ -1022,6 +1024,15 @@ SAVEの難易度を「レベル」で表記することが出来ます。
 　"(ダイス数)BS(修正値)"でバーサーク、"(ダイス数)HBS(修正値)"でハイパーバーサークでロールできます。
 　最初のダイスの読替は、個別の出目はそのままで表示。
 　下から２番目の出目をずらした分だけ合計にマイナス修正を追加して表示します。
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'ウタカゼ',
+    'gameType' => 'Utakaze',
+    'fileName' => 'Utakaze',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
+
 INFO_MESSAGE_TEXT
   },
   {
