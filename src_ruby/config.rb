@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.42.09"
-$versionDate = "2013/10/26"
+$versionOnly = "Ver.1.42.11"
+$versionDate = "2013/11/11"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -268,6 +268,7 @@ $diceBotOrder = <<____END_MARKER____
 カードランカー
 ガープス
 カオスフレア
+央華封神RPG第三版
 神我狩
 ガンドッグ
 ガンドッグ・ゼロ

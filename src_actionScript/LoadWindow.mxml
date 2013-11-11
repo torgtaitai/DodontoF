@@ -129,14 +129,16 @@
                 var resultText:String = jsonData.resultText;
                 Log.logging("load resultText", resultText);
                 
+                //エラー受信処理
                 if( resultText != "OK" ) {
                     Alert.show( Messages.getMessage(resultText) );
                     return;
                 }
                 
-                
+                //全データロード時には最終更新時間を初期化して、
+                //全サーバデータ（チャットログとかも）をロードしなおすようにする。
                 if( params == null ) {
-                DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
+                    DodontoF_Main.getInstance().getGuiInputSender().clearLastUpdateTimes();
                 }
             } catch(error:Error) {
                 this.status = error.message;

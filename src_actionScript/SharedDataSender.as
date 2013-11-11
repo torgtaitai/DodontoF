@@ -237,6 +237,10 @@ package {
             
             DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPaletteSaveData );
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("全セーブデータ読み込みに成功しました。", false);
+            
+            //ダイスボットの情報を取得します。
+            //これでダイスボットの表情報をリロードして使用できるようにします。
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().getDiceBotInfos();
         }
         
         
@@ -819,7 +823,9 @@ package {
         }
         
         
-        //現状未使用。
+        //ダイスボットの情報を取得します。
+        //主な使用目的はダイスボットの表自作機能で新しい表を追加・変更した場合に
+        //その表データをリロードするため。
         public function getDiceBotInfos():void {
             Log.logging("SharedDataSender.getDiceBotInfos Begin");
             

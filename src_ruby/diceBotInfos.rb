@@ -524,7 +524,7 @@ INFO_MESSAGE_TEXT
     'name' => 'キルデスビジネス',
     'gameType' => 'KillDeathBusiness',
     'fileName' => 'KillDeathBusiness',
-    'prefixs' => ['HST','ST[1-2]?','DWT','DeathWT','RWT','RevengeWT','VWT','VictoryWT','PWT','PossesionWT','CWT','ControlWT','FWT','FlourishWT','IWT','IntensifyWT','HWT','HealthWT','SaWT','SafetyWT','LWT','LongevityWT','EWT','ExistWT','NAME[1-3]?','NAME[1-3]?','OSPT','OccultSPT','FSPT','FamilySPT','LoSPT','LoveSPT','JSPT','JusticeSPT','TSPT','TrainingSPT','BSPT','BeamSPT','CMT','EST','sErviceST','SOUL','STGT','HSAT[1-2]?','SKLT','SKLJ','JD.*'],
+    'prefixs' => ['HST','ST[1-2]?','DWT','DeathWT','RWT','RevengeWT','VWT','VictoryWT','PWT','PossesionWT','CWT','ControlWT','FWT','FlourishWT','IWT','IntensifyWT','HWT','HealthWT','SaWT','SafetyWT','LWT','LongevityWT','EWT','ExistWT','NAME[1-3]?','NAME[1-3]?','OSPT','OccultSPT','FSPT','FamilySPT','LoSPT','LoveSPT','JSPT','JusticeSPT','TSPT','TrainingSPT','BSPT','BeamSPT','CMT','EST','sErviceST','SOUL','STGT','HSAT[1-2]?','EXT[1-4]?','SKLT','SKLJ','JD.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・各種表
  ・履歴表 (HST)
@@ -551,6 +551,9 @@ INFO_MESSAGE_TEXT
    末尾に数字(1,2)を入れることでヘルスタイリスト罵倒表1,2を個別に振れます。
  ・指定特技ランダム決定表 (SKLT)
  ・指定特技分野ランダム決定表 (SKLJ)
+ ・エキストラ表 (EXT)
+   末尾に数字(1,2,3,4)を入れることでエキストラ表A(1),B(2)、
+   エキストラ登場表A(3),B(4)を個別に振れます。
 ・D66ダイスあり
 ・判定　JDx or JDx+y or JDx-y or JDx,z or JDx+y,z JDx-y,z
 　（x＝難易度、y＝補正、z＝ファンブル率（リスク））
@@ -706,6 +709,22 @@ INFO_MESSAGE_TEXT
     'info' => <<INFO_MESSAGE_TEXT
 加算ロール時に６の個数をカウントして、その４倍を自動的に加算します。
 (出目はそのまま表示で合計値が6-10の読み替えになります)
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => '央華封神RPG第三版',
+    'gameType' => 'Oukahoushin3rd',
+    'fileName' => 'Oukahoushin3rd',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
+・各種表
+　・能力値判定裏成功表（NHT）
+　・武器攻撃裏成功表（BKT）
+　・受け・回避裏成功表（UKT）
+　・仙術行使裏成功表（SKT）
+　・仙術抵抗裏成功表（STT）
+　・精神値ダメージ悪影響表（SDT）
+　・狂気表（KKT）
 INFO_MESSAGE_TEXT
   },
   {
@@ -1024,15 +1043,6 @@ SAVEの難易度を「レベル」で表記することが出来ます。
 　"(ダイス数)BS(修正値)"でバーサーク、"(ダイス数)HBS(修正値)"でハイパーバーサークでロールできます。
 　最初のダイスの読替は、個別の出目はそのままで表示。
 　下から２番目の出目をずらした分だけ合計にマイナス修正を追加して表示します。
-INFO_MESSAGE_TEXT
-  },
-  {
-    'name' => 'ウタカゼ',
-    'gameType' => 'Utakaze',
-    'fileName' => 'Utakaze',
-    'prefixs' => [],
-    'info' => <<INFO_MESSAGE_TEXT
-
 INFO_MESSAGE_TEXT
   },
   {
