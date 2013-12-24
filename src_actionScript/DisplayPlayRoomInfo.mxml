@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="300"
-   title="プレイルーム情報表示" 
+   title="{Language.s.displayPlayRoomInfo}" 
    showCloseButton="true"
    >
   
@@ -12,10 +12,10 @@
     <mx:Text id="playRoomInfo" height="100%" text="" />
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Spacer width="100%" />
-      <mx:Button id="changePlarRoomInfoButton" label="プレイルーム情報変更" click="changePlarRoomInfo()" />
+      <mx:Button id="changePlarRoomInfoButton" label="{Language.s.changePlayRoomInfo}" click="changePlarRoomInfo()" />
     </mx:HBox>
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+      <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   <mx:Script>

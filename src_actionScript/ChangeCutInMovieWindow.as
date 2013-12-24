@@ -5,17 +5,15 @@ package {
     
     public class ChangeCutInMovieWindow extends AddCutInMovieWindow {
         
-        private var index:int = 0;
         private var effectId:String = "";
         private var cutInInfo:Object = new Object();
         
-        public function init(cutInInfo_:Object, index_:int):void {
+        public function init(cutInInfo_:Object):void {
             cutInInfo = cutInInfo_;
             
-            title = "カットイン変更";
-            executeButton.label = "変更";
+            title = Language.s.changeCutInWindowTitle;
+            executeButton.label = Language.s.changeButton;
             
-            index = index_;
             effectId = cutInInfo.effectId;
             
             message.text = cutInInfo.message;
@@ -64,6 +62,10 @@ package {
         
         protected override function execute():void {
             var params:Object = getCommandParams();
+            var index:int = getCutInIndex();
+            if( index == -1 ) {
+                PopUpManager.removePopUp(this);
+            }
             
             CutInBase.cutInInfos[index] = params;
             
@@ -71,6 +73,17 @@ package {
             guiInputSender.changeEffect(params);
             
             PopUpManager.removePopUp(this);
+        }
+        
+        private function getCutInIndex():int {
+            var array:Array = CutInBase.cutInInfos;
+            
+            for(var i:int ; i < array.length ; i++) {
+                var info:Object = array[i];
+                info.effectId = effectId;
+                return i;
+            }
+            return -1;
         }
         
     }

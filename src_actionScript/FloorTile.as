@@ -33,7 +33,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "フロアタイル";
+            return Language.s.floorTile;
         }
         
         
@@ -74,8 +74,10 @@ package {
             
             super(params);
             
-            //自分の環境に仮作成する場合のために、作成直後はドラッグ不可に。
-            //応答が正常ならどちらにしろupdateで更新されるはずなのでこの実装で問題は無い。
+            //設置した瞬間はタイル情報はFlash側に借り作成されるだけ。
+            //このため、作成直後はドラッグ不可に。
+            //正常にデータがサー側に生成されれば
+            // update() でDraggableに更新されるはずなのでこの実装で問題ないです。
             setDraggable(false);
             
             view.setMaintainAspectRatio(false);
@@ -92,11 +94,11 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            menuList.push( addMenuItem(menu, "タイルの固定／固定解除", this.getContextMenuItemMoveLock) );
-            menuList.push( addMenuItem(menu, "右回転",    this.getContextMenuItemFunctionObRotateCharacter( 90), true) );
-            menuList.push( addMenuItem(menu, "180度回転", this.getContextMenuItemFunctionObRotateCharacter(180)) );
-            menuList.push( addMenuItem(menu, "左回転",    this.getContextMenuItemFunctionObRotateCharacter(270)) );
-            menuList.push( addMenuItem(menu, "フロアタイルの削除", this.getContextMenuItemRemoveCharacter, true) );
+            menuList.push( addMenuItem(menu, Language.s.fixFlexFloorTile, this.getContextMenuItemMoveLock) );
+            menuList.push( addMenuItem(menu, Language.s.rotationRight,    this.getContextMenuItemFunctionObRotateCharacter( 90), true) );
+            menuList.push( addMenuItem(menu, Language.s.rotation180, this.getContextMenuItemFunctionObRotateCharacter(180)) );
+            menuList.push( addMenuItem(menu, Language.s.rotationLeft,    this.getContextMenuItemFunctionObRotateCharacter(270)) );
+            menuList.push( addMenuItem(menu, Language.s.deleteFloorTile, this.getContextMenuItemRemoveCharacter, true) );
             
             view.contextMenu = menu;
         }
@@ -183,7 +185,7 @@ package {
             var textHeight:int = 50;
             
             var nameTextField:TextField = new TextField();
-            nameTextField.text = "作成中…";
+            nameTextField.text = Language.s.creating;
             
             nameTextField.background = true;
             nameTextField.multiline = false;
@@ -220,14 +222,8 @@ package {
             return getHeight() * getSquareLength();
         }
         
-        override public function canMoveMode():Boolean {
-            if( ! super.canMoveMode() ) {
-                return false;
-            }
-            return this.editable;
-        }
-        
         override public function getDraggable():Boolean {
+            
             if( ! super.getDraggable() ) {
                 return false;
             }

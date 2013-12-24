@@ -14,8 +14,8 @@ package {
         }
 
         override protected function setup():void {
-            title = "魔法範囲変更";
-            executeButton.label = "変更";
+            title = Language.s.changeMagicRangeDD3rdWindowTitle;
+            executeButton.label = Language.s.changeButton;
             
             magicRangeName.text = magicRange.getName();
             magicRangeFeets.value = magicRange.getFeets();

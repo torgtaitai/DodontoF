@@ -492,7 +492,6 @@ DrawMapWindow.mxml
 ElysionCommand.as
 GameCommand.as
 InputServerUrl.mxml
-LoginWindowStyle2.mxml
 ManageBotTableWindow.mxml
 MapPainter.as
 MessageBaloon.as

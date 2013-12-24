@@ -4,49 +4,49 @@
    xmlns:torgtaitai="*" 
    width="500"
    height="315"
-   title="魔法範囲追加" 
+   title="{Language.s.addMagicRangeDD3rdWindowTitle}" 
    showCloseButton="true"
    >
   
   <mx:Form>
-	<mx:FormItem label="名前:">
+	<mx:FormItem label="{Language.s.magicRangeName}:">
 	  <mx:TextInput id="magicRangeName" text="" />
 	</mx:FormItem>
-	<mx:FormItem label="半径(5ft.単位):">
+	<mx:FormItem label="{Language.s.magicRangeFeets}:">
 	  <mx:NumericStepper id="magicRangeFeets" minimum="5" maximum="100" value="5" stepSize="5" />
 	</mx:FormItem>
-	<mx:FormItem label="範囲種別:">
+	<mx:FormItem label="{Language.s.magicRangeType}:">
       <mx:ComboBox id="magicRangeType" width="100%" editable="false">
-        <mx:Object data="circle" label="円" />
-        <mx:Object data="corn1" label="円錐型(右上)" />
-        <mx:Object data="corn2" label="円錐型(右)" />
-        <mx:Object data="corn3" label="円錐型(右下)" />
-        <mx:Object data="corn4" label="円錐型(下)" />
-        <mx:Object data="corn5" label="円錐型(左下)" />
-        <mx:Object data="corn6" label="円錐型(左)" />
-        <mx:Object data="corn7" label="円錐型(左上)" />
-        <mx:Object data="corn8" label="円錐型(上)" />
-        <mx:Object data="square" label="四角" />
+        <mx:Object data="circle" label="{Language.s.magicRangeTypeCircle}" />
+        <mx:Object data="corn1" label="{Language.s.magicRangeTypeCorn1}" />
+        <mx:Object data="corn2" label="{Language.s.magicRangeTypeCorn2}" />
+        <mx:Object data="corn3" label="{Language.s.magicRangeTypeCorn3}" />
+        <mx:Object data="corn4" label="{Language.s.magicRangeTypeCorn4}" />
+        <mx:Object data="corn5" label="{Language.s.magicRangeTypeCorn5}" />
+        <mx:Object data="corn6" label="{Language.s.magicRangeTypeCorn6}" />
+        <mx:Object data="corn7" label="{Language.s.magicRangeTypeCorn7}" />
+        <mx:Object data="corn8" label="{Language.s.magicRangeTypeCorn8}" />
+        <mx:Object data="square" label="{Language.s.magicRangeTypeSquare}" />
       </mx:ComboBox>
 	</mx:FormItem>
-	<mx:FormItem label="色:">
+	<mx:FormItem label="{Language.s.magicRangeColor}:">
     <mx:ColorPicker id="magicRangeColorPicker" showTextField="true" selectedColor="0x000000" />
 	</mx:FormItem>
-	<mx:FormItem label="持続時間:">
+	<mx:FormItem label="{Language.s.magicRangeTimeRange}:">
       <mx:HBox width="100%" horizontalGap="0">
         <mx:Label id="magicRangeRestTime" text="" width="0"/>
 	    <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" change="setMagicRangeRestTime()" />
       </mx:HBox>
 	</mx:FormItem>
-	<mx:FormItem label="その他:">
+	<mx:FormItem label="{Language.s.initiativeWindowColumnTitleInfo}:">
 	  <mx:TextInput id="magicRangeInfo" text="" />
 	</mx:FormItem>
-    <mx:CheckBox id="isShowOnInitiativeWindow" label="イニシアティブ表に表示する" selected="true" />
+    <mx:CheckBox id="isShowOnInitiativeWindow" label="{Language.s.isShowOnInitiativeWindow}" selected="true" />
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addButton}" click="execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 
   <mx:Script>

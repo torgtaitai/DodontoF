@@ -4,25 +4,28 @@
    xmlns:torgtaitai="*" 
    width="850"
    height="470"
-   title="ログイン" 
+   title="{Language.s.loginWindowTitle}" 
    >
   
   <mx:Box id="infoBox" width="100%" height="140" >
-    <mx:TextArea id="loginMessage" htmlText="ロード中・・・" width="100%" height="100%" editable="false" />
+    <mx:TextArea id="loginMessage" htmlText="Loading..." width="100%" height="100%" editable="false" />
   </mx:Box>
   
   <mx:Box id="mainBox" width="100%" height="100%" 
           paddingTop="0" paddingBottom="0" 
           paddingRight="0" paddingLeft="0" 
           >
-    <mx:TabNavigator id="playRoomStateTabs" width="100%" height="20"
-                     change="getPlayRoomStates()"
-                     paddingTop="0" paddingBottom="0" 
-                     paddingRight="0" paddingLeft="0" 
-                     enabled="false"
-                     >
-    </mx:TabNavigator>
-    
+    <mx:HBox width="100%" height="22" >
+      <mx:TabNavigator id="playRoomStateTabs" width="100%" height="20"
+                       change="getPlayRoomStates()"
+                       paddingTop="0" paddingBottom="0" 
+                       paddingRight="0" paddingLeft="0" 
+                       enabled="false"
+                       >
+      </mx:TabNavigator>
+      <mx:Label id="languageComboBoxLabel" text="Language:" visible="false"/>
+      <mx:ComboBox id="languageComboBox" dataProvider="{languageList}" change="changeLanguage()" visible="false" />
+    </mx:HBox>
     <mx:Box width="100%" height="100%" >
 	  <mx:DataGrid id="playRoomStateInfo"
                    width="100%"
@@ -42,27 +45,27 @@
                              dataField="index"
                              textAlign="center"
                              width="35"/>
-		  <mx:DataGridColumn headerText="プレイルーム名"
+		  <mx:DataGridColumn headerText="{Language.s.playRoomName}"
                              dataField="playRoomName"
                              textAlign="center"
                              width="250"/>
-		  <mx:DataGridColumn headerText="ゲームシステム"
+		  <mx:DataGridColumn headerText="{Language.s.gameSystem}"
                              dataField="gameName"
                              textAlign="center"
                              width="100"/>
-		  <mx:DataGridColumn headerText="入室人数"
+		  <mx:DataGridColumn headerText="{Language.s.loginUserCount}"
                              dataField="loginUserCount"
                              textAlign="center"
                              width="60"/>
-		  <mx:DataGridColumn headerText="パスワード"
-                             dataField="passwordLockState"
+		  <mx:DataGridColumn headerText="{Language.s.loginPassword}"
+                             dataField="passwordLockStateText"
                              textAlign="center"
                              width="60"/>
-		  <mx:DataGridColumn headerText="見学"
-                             dataField="canVisit"
+		  <mx:DataGridColumn headerText="{Language.s.canVisitTitle}"
+                             dataField="canVisitText"
                              textAlign="center"
                              width="40"/>
-		  <mx:DataGridColumn headerText="最終更新時刻"
+		  <mx:DataGridColumn headerText="{Language.s.updateTime}"
                              dataField="lastUpdateTime"
                              textAlign="center"
                              width="140"/>
@@ -71,18 +74,18 @@
     </mx:Box>
     
     <mx:HBox width="100%" height="22" >
-      <mx:Label text="あなたのお名前（初回ログイン用）：" />
+      <mx:Label text="{Language.s.yourName}：" />
       <mx:TextInput id="yourName" text="" width="200" height="100%" editable="true"
                     change="savePlayerInfo()"
                     />
       
       <mx:Spacer id="yourNameSpace" width="50" />
       
-      <mx:Label text="現在のログイン状況：" />
+      <mx:Label text="{Language.s.currentLoginStatus}" />
       <mx:Button id="currentAllLoginInfo" label="0/0(0%)" fontWeight="normal" width="150"
                  click="showLoginInfo()" />
       
-      <mx:TextInput id="adminPassword" text="管理用パスワード" width="0" height="0" enabled="false"
+      <mx:TextInput id="adminPassword" text="{Language.s.adminPassword}" width="0" height="0" enabled="false"
                     />
       
       <mx:Spacer width="100%" />
@@ -96,48 +99,48 @@
     
     <mx:HBox id="extendBox" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="false" >
       <mx:Spacer width="150" />
-      <mx:Button id="removeOldPlayRoomButton" label="古いプレイルームを削除" click="this.removeOldPlayRoom()"
+      <mx:Button id="removeOldPlayRoomButton" label="{Language.s.deleteOldPlayRoom}" click="this.removeOldPlayRoom()"
                  visible="{removeOldPlayRoomLimitDays > 0}"
                  fontWeight="normal"/>
       <mx:Spacer width="100%" />
-      <mx:Button label="リプレイ編集" click="editReplayData();" fontWeight="normal" />
-      <mx:Button label="リプレイ投稿" click="uploadReplayData();" fontWeight="normal" />
-      <mx:Button label="リプレイ再生" click="replaySessionRecord();" fontWeight="normal" />
+      <mx:Button label="{Language.s.editReplayData}" click="editReplayData();" fontWeight="normal" />
+      <mx:Button label="{Language.s.uploadReplayData}" click="uploadReplayData();" fontWeight="normal" />
+      <mx:Button label="{Language.s.playReplayData}" click="playReplaySessionRecord();" fontWeight="normal" />
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="createNewPlayRoomButton" label="新規プレイルーム作成"
+      <mx:Button id="createNewPlayRoomButton" label="{Language.s.createNewPlayRoom}"
                  click="createPlayRoom()"  enabled="false"
       />
       
       <mx:Spacer width="10%" />
       
-      <mx:Button id="removePlayRoomButton" label="指定プレイルームを削除" click="this.removePlayRoom()"
+      <mx:Button id="removePlayRoomButton" label="{Language.s.deleteSelectedPlayRoom}" click="this.removePlayRoom()"
                  fontWeight="normal"
                  />
       
       <mx:Spacer width="20%" />
-	  <mx:Label text="プレイルームNo." />
+	  <mx:Label text="{Language.s.playRoomNo}" />
       <mx:TextInput id="roomNumberInput" text="0" width="50" />
-      <mx:Button id="loginButton" label="ログイン" click="login( parseInt(roomNumberInput.text) )" enabled="false" />
+      <mx:Button id="loginButton" label="{Language.s.loginButton}" click="login( parseInt(roomNumberInput.text) )" enabled="false" />
       
       <mx:Spacer width="70%" />
-      <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()"  enabled="false" fontWeight="normal" />
+      <mx:Button id="extendButton" label="{Language.s.extendButton}" click="extend()"  enabled="false" fontWeight="normal" />
     </mx:HBox>
     
   </mx:Box>
   
   <mx:HBox id="broadCastMessageBox" height="0" width="100%" enabled="false" visible="false" >
     <mx:Box width="150" height="100%">
-      <mx:Label text="全部屋への一斉送信メッセージ" />
+      <mx:Label text="{Language.s.sendMessageToAllRooms}" />
       <mx:HBox width="100%" height="100%">
-        <mx:Label text="発言者："/>
+        <mx:Label text="{Language.s.messageSender}"/>
         <mx:TextInput id="broadCastMessageName" width="100%" enabled="false" visible="false"
-                      text="システム管理者" />
+                      text="{Language.s.administrator}" />
       </mx:HBox>
     </mx:Box>
     <mx:TextArea id="broadCastMessageText" height="100%" width="100%" enabled="false" visible="false" />
-    <mx:Button id="broadCastMessageButton" label="全部屋へ一斉発言" click="sendMessageAll()" enabled="false" visible="false" />
+    <mx:Button id="broadCastMessageButton" label="{Language.s.sendMessageToAllRoomsButton}" click="sendMessageAll()" enabled="false" visible="false" />
   </mx:HBox>
   
   <mx:Script>
@@ -173,29 +176,16 @@
     
     override protected function setup():void {
         thisObj = this;
-        autoLoginRoom = DodontoF_Main.getInstance().getLoginRoom();
+        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         
+        autoLoginRoom = DodontoF_Main.getInstance().getLoginRoom();
         if( autoLoginRoom >= 0 ) {
             this.visible = false;
             minRoom = autoLoginRoom;
             maxRoom = autoLoginRoom;
         }
         
-        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        
-        var replayDataUrl:String = DodontoF_Main.getInstance().getReplayDataUrl();
-        var isReplayer:Boolean = DodontoF_Main.getInstance().isReplayer();
-        isReplay = ( (replayDataUrl != null) || isReplayer ) ;
-        
-        if( isReplay ) {
-            this.mainBox.visible = false;
-            this.mainBox.height = 0;
-            this.infoBox.percentHeight = 100;
-            
-            if( isReplay ) {
-                replaySessionRecord(replayDataUrl);
-            }
-            
+        if( checkReplay() ){
             return;
         }
         
@@ -203,18 +193,21 @@
         loadPlayerInfo();
         
         menuArray = getMenu();
-        
         setAdminMode();
     }
     
-    private var defaultUserName:String = "ななしさん";
-    private var defaultUserNames:Array = [ defaultUserName ];
+    private var initializedUserName:String = Language.s.anonymous;
+    private var defaultUserNames:Array = [];
     
     private function getDefaultName():String {
-        var index:int = Dice.getRandomNumber(defaultUserNames.length) - 1;
-        Log.logging("getDefaultName index", index);
-        var name:String = defaultUserNames[index];
-        Log.logging("getDefaultName name", name);
+        var names:Array = defaultUserNames;
+        
+        if( names == null || names.length == 0 ) {
+            return Language.s.anonymous;
+        }
+        
+        var index:int = Dice.getRandomNumber(names.length) - 1;
+        var name:String = names[index];
         
         return name;
     }
@@ -225,12 +218,12 @@
     
     private function getMenu():Array {
         return [
-                {label:"ヘルプ", data:"pass",
+                {label:Language.s.helpMenu, data:"pass",
                         children: [
-                                   {label:"バージョン", data:"version"},
-                                   {label:"マニュアル", data:"manual"},
-                                   {label:"チュートリアル動画", data:"tutorialReplay"},
-                                   {label:"オフィシャルサイトへ", data:"officialSite"}
+                                   {label:Language.s.versionMenu, data:"version"},
+                                   {label:Language.s.manualMenu, data:"manual"},
+                                   {label:Language.s.tutorialReplayMenu, data:"tutorialReplay"},
+                                   {label:Language.s.officialSiteMenu, data:"officialSite"}
                                    ]
                         }
                 ];
@@ -238,6 +231,71 @@
     
     private function selectMenu(event:MenuEvent):void {
         DodontoF_Main.getInstance().getDodontoF().selectMenu(event);
+    }
+    
+    
+    private function checkReplay():Boolean {
+        var replayDataUrl:String = DodontoF_Main.getInstance().getReplayDataUrl();
+        var isReplayer:Boolean = DodontoF_Main.getInstance().isReplayer();
+        isReplay = ( (replayDataUrl != null) || isReplayer ) ;
+        
+        if( ! isReplay ) {
+            return false;
+        }
+        
+        this.mainBox.visible = false;
+        this.mainBox.height = 0;
+        this.infoBox.percentHeight = 100;
+        
+        if( isReplay ) {
+            playReplaySessionRecord(replayDataUrl);
+        }
+        
+        return true;
+    }
+    
+    
+    [Bindable]
+    private var languageList:Array = [
+    {label:"日本語", data:""}];
+    
+    private var languageSaveKey:String = 'language';
+    
+    private function initLanguage(jsonData:Object):void {
+        Language.initLanguage( jsonData.languages );
+        languageList = Language.getDataProvider();
+        
+        if( languageList.length <= 1 ) {
+            return;
+        }
+        
+        languageComboBoxLabel.visible = true;
+        languageComboBox.visible = true;
+        
+        var language:String = "";
+        var info:Object = Config.getInstance().loadInfo(languageSaveKey);
+        if( info != null ) {
+            language = info['name'];
+        }
+        
+        Utils.selectComboBox(languageComboBox, language);
+        
+        changeLanguage();
+    }
+    
+    private function changeLanguage():void {
+        Language.setLanguage( languageComboBox.selectedItem.data as String );
+        menuArray = getMenu();
+        
+        var info:Object = Config.getInstance().loadInfo(languageSaveKey);
+        if( info == null ) {
+            info = new Object();
+        }
+        info['name'] = Language.getLanguage();
+        Config.getInstance().saveInfo(languageSaveKey, info);
+        
+        printPlayRoomInfos();
+        yourName.text = loadDefaultCharacterName();
     }
     
     private function setAdminMode():void {
@@ -293,7 +351,7 @@
         
         var loginUsers:Array = playRoomStates[index].loginUsers as Array;
         playRoomStateInfo.toolTip = null;
-        playRoomStateInfo.toolTip = "ログインユーザー：" + loginUsers.join("  ");
+        playRoomStateInfo.toolTip = Language.s.loginUser + loginUsers.join("  ");
     }
 
     private function savePlayerInfo():void {
@@ -315,11 +373,11 @@
         }
         
         var name:String = info["characterName"];
-        if( name == null ) {
+        if( name == null || name == "" ) {
             return getDefaultName();
         }
         
-        if( name == defaultUserName ) {
+        if( name == initializedUserName ) {
             return getDefaultName();
         }
         
@@ -329,14 +387,8 @@
     
     
     private function setDefaultUserNames(names:Array):void {
-        if( names.length == 1 ) {
-            if( names[0] == defaultUserName ) {
-                return;
-            }
-        }
-        
         defaultUserNames = names;
-        yourName.text = loadDefaultCharacterName();
+        yourName.text = getDefaultName();
     }
     
     private function saveUniqeId(uniqueId:String):void {
@@ -392,11 +444,11 @@
         extendMode = ( ! extendMode);
         
         if( extendMode ) {
-            extendButton.label = "＜＜拡張機能を隠す";
+            extendButton.label = Language.s.hideExtendButton;
             extendBox.height = 30;
             extendBox.visible = true;
         } else {
-            extendButton.label = "＞＞拡張機能";
+            extendButton.label = Language.s.extendButton;
             extendBox.height = 0;
             extendBox.visible = false;
         }
@@ -408,14 +460,7 @@
             return false;
         }
         
-        var message:String = "";
-        message += "どどんとふの更新データが正しく読み込めませんでした。\n";
-        message += "今開いているページを一度閉じて、再度開き直してください。\n";
-        message += "２〜３回繰り返すと読み込みに成功すると思います。\n";
-        message += "\n";
-        message += "以下、技術的な情報：\n";
-        message += "サーババージョン　　　：" + serverVersion + "\n";
-        message += "クライアントバージョン：" + clientVersion + "\n";
+        var message:String = Language.text("versionMismuch", serverVersion, clientVersion);
         
         Alert.show(message);
         
@@ -459,21 +504,31 @@
             var index:int = minRoomNumber / playRoomGetRangeMax;
             
             var jsonData:Array = result.playRoomStates as Array;
-            for each(var data:Object in jsonData ) {
-                    data.loginUserCount = data.loginUsers.length;
-                    data.passwordLockState = (data.passwordLockState ? "有り" : "--");
-                    data.canVisit = (data.canVisit ? "可" : "--");
-                    data.gameName = DodontoF_Main.getInstance().getDiceBotName(data.gameType);
-                }
             playRoomStates = new ArrayCollection(jsonData);
-            
             playRoomStatesList[index] = playRoomStates;
+            printPlayRoomInfos();
         } catch(e:Error) {
             Log.loggingException("getPlayRoomStatesResult", e);
         }
         Log.loggingTuning("=>getPlayRoomStatesResult(event:Event) End");
         enableLoginButton();
     }
+    
+    private function printPlayRoomInfos():void {
+        for each(var data:Object in playRoomStates) {
+            printPlayRoomInfo(data);
+        }
+    }
+    
+    private function printPlayRoomInfo(data:Object):void {
+        var none:String = "--";
+    
+        data.loginUserCount = data.loginUsers.length;
+        data.passwordLockStateText = (data.passwordLockState ? Language.s.passwordLocked : none);
+        data.canVisitText = (data.canVisit ? Language.s.canVisit : none);
+        data.gameName = DodontoF_Main.getInstance().getDiceBotName(data.gameType);
+    }
+    
     
     public function getLoginInfoResult(obj:Object):void {
         Log.loggingTuning("=>getLoginInfoResult(event:Event) Begin");
@@ -511,6 +566,8 @@
     private var isNeedCreatePassword:Boolean = false;
     
     private function setLoginInitialInfo(jsonData:Object):void {
+        initLanguage(jsonData);
+        
         var canLogin:Boolean = analyzeLoginInfo(jsonData);
         if( ! canLogin ) {
             return;
@@ -590,9 +647,9 @@
         //var percentage:int = getLoginCountPercentage(jsonData);
         //var message:String = "" + percentage + "%(" + count  + "/" + max + ")";
         
-        var message:String = "" + "現状：" + count  + "人";
+        var message:String = Language.text("currentLoginCount", count);
         if( isValidLimitLoginCount(jsonData) ) {
-            message += "／" + "上限：" + jsonData.limitLoginCount + "人";
+            message += "／" + Language.text("maxLoginCount", jsonData.limitLoginCount);
         }
         
         return message;
@@ -624,7 +681,7 @@
         
         if( isValidLimitLoginCount(jsonData) ) {
             if( jsonData.allLoginCount > jsonData.limitLoginCount ) {
-                var message:String = "ログイン人数が限界です。\n　　【" + countInfo + "】\n他のサーバをご利用ください。";
+                var message:String = Language.text("overCapacityError", countInfo);
                 status = message.replace(/　/g, '').replace(/\n/g, '　');
                 Alert.show(message);
                 return false;
@@ -635,7 +692,7 @@
             return true;
         }
         
-        status = "ログイン人数が多くなってきました。【" + countInfo + "】他のサーバの利用を検討ください";
+        status = Language.text("overCapacityWarning", countInfo);
         return true;
     }
     
@@ -665,13 +722,13 @@
             var roomNumber:int = data[0];
             var loginCount:int = data[1];
             
-            text += "No. " + roomNumber + " ： " + loginCount + " 人";
+            text += Language.text("loginRoomStates", roomNumber, loginCount);
         }
         
         if( text.length == 0 ) {
-            text = "誰もログインしていません";
+            text = Language.s.nobadyLogined;
         } else {
-            text = "ログイン状況\n" + text;
+            text = Language.s.loginStatus + text;
         }
         
         Alert.show(text);
@@ -713,21 +770,21 @@
                 return;
             }
             
-            var message:String = "";
+            var roomText:String = "";
             var roomNumbers:Array = new Array();
             for each(var index:int in indexs) {
                     var roomNumber:int = getRoomNumberByIndex(index);
                     guiInputSender.checkRoomNumber( roomNumber );
                     
                     var roomName:String = getRoomNameByIndex(index);
-                    message += "No." + roomNumber + "：" + roomName + "\n";
+                    roomText += "No." + roomNumber + "：" + roomName + "\n";
                     
                     roomNumbers.push(roomNumber);
                 }
             
             guiInputSender.checkRoomNumber( roomNumber );
             
-            message += "を削除しますか？";
+            var message:String = Language.text("removePlayRoomQuestion", roomText);
             removePlayRoomWithMessage(roomNumbers, message);
         } catch(error:Error) {
             status = error.message;
@@ -739,7 +796,7 @@
                                               ignoreLoginUser:Boolean = false,
                                               password:String = ""):void {
         try{
-            var result:Alert = Alert.show(message, "削除確認", 
+            var result:Alert = Alert.show(message, Language.s.removePlayRoomQuestionTitle, 
                                           Alert.OK | Alert.CANCEL, null, 
                                           function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
                                                   guiInputSender.removePlayRoom(roomNumbers, removePlayRoomResult,
@@ -789,7 +846,7 @@
     }
     
     private function askDeleteWhenUserExist(roomNumber:int):void {
-        var message:String = "No."+ roomNumber + "にログインしているユーザーがまだいるようです。\n削除してよいですか？";
+        var message:String = Language.text("TEXT_NO_00534", roomNumber);
         var ignoreLoginUser:Boolean = true;
         removePlayRoomWithMessage([roomNumber], message, ignoreLoginUser);
     }
@@ -808,10 +865,10 @@
     private function inputPaswordToDeleteTargetRoom(roomNumber:int):void {
         var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
         
-        var texts:Array = ["部屋 [ No." + roomNumber + " ] を削除します。パスワードを入力してください。"];
+        var texts:Array = [Language.text("deletePlayRoomPasswordMessage", roomNumber)];
         var ignoreLoginUser:Boolean = true;
         
-        window.init(texts, "部屋削除", "パスワード入力", function(password:String):void {
+        window.init(texts, Language.s.deletePlayRoom, Language.s.inputPassword, function(password:String):void {
                 guiInputSender.removePlayRoom([roomNumber], removePlayRoomResult, ignoreLoginUser, password);
             });
     }
@@ -833,8 +890,8 @@
     
     
     public function removeOldPlayRoom():void {
-        Utils.askByAlert("一括削除確認",
-                         ""+ removeOldPlayRoomLimitDays + "日以上前の、古いプレイルームの一括削除を行います。\nよろしいですか？",
+        Utils.askByAlert(Language.s.deleteOldPlayRoomBulkQuestion,
+                         ""+ removeOldPlayRoomLimitDays + Language.s.deleteOldPlayRoomBulkQuestionTitle,
                          function():void {
                              guiInputSender.removeOldPlayRoom(function(event:Event=null):void {
                                      thisObj.playRoomStatesList = new Object();
@@ -1027,10 +1084,10 @@
     }
     
     
-    private function replaySessionRecord(replayDataUrl:String = null):void {
+    private function playReplaySessionRecord(replayDataUrl:String = null):void {
         stage.frameRate = 60;
         
-        getEnterPlayRoomFunction(-1, "リプレイルーム", null).call();
+        getEnterPlayRoomFunction(-1, Language.s.replayRoom, null).call();
     
         if( replayDataUrl == null ) {
             DodontoF_Main.getInstance().replayFromSessionRecord();

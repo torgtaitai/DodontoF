@@ -17,8 +17,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.42.11"
-$versionDate = "2013/11/11"
+$versionOnly = "Ver.1.43.00"
+$versionDate = "2013/12/24"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -230,8 +230,8 @@ $isMessagePackInstalled = false
 
 #デフォルトで表示されるユーザー名
 #配列なので、 ["abc", "def"] のように複数記述すると、どれかがランダムで表示されます。
-#基本変更する必要はありません。誰得機能。
-$defaultUserNames = ["ななしさん"]
+# [] と空の配列なら各言語のデフォルトに。基本変更する必要はありません。誰得機能。
+$defaultUserNames = []
 
 #部屋削除時にパスワード入力が必要かどうかを設定します
 # true ： パスワード必要、 false : パスワード不要。
@@ -245,6 +245,11 @@ $drawLineCountLimit = 3000
 #ログアウト時に飛ばされるURL
 #空の場合はログインしていた DodontoF.swf をリロードしてログイン画面に戻ります。
 $logoutUrl = ""
+
+#多言語化対応 trueなら多言語有効化
+#有効にするとログイン画面表示の際に多言語設定を languages ディレクトリから読み取るため、
+#この処理の重さを嫌うのであれば false に設定し無効化してください。
+$isMultilingualization = true
 
 
 #ダイスボット一覧に表示するダイスボットの名前順序
@@ -267,6 +272,7 @@ $diceBotOrder = <<____END_MARKER____
 エムブリオマシン
 カードランカー
 ガープス
+ガープスフィルトウィズ
 カオスフレア
 央華封神RPG第三版
 神我狩

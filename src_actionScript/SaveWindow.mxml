@@ -4,18 +4,18 @@
    xmlns:torgtaitai="*" 
    width="300"
    height="120"
-   title="セーブ" 
+   title="{Language.s.save}" 
    showCloseButton="true"
    >
   
   <mx:Box id="loadingMessageBox" height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Label id="loadingMessage" text="サーバのデータをファイルとして保存します。"/>
+    <mx:Label id="loadingMessage" text="{Language.s.saveInfomation}"/>
     <mx:Label id="loadingMessage2" text="" height="0" visible="false" />
   </mx:Box>
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="readyButton" label="データ取得" click="executeServerSaveLocal()" />
-    <mx:Button id="saveButton" label="ファイル保存" click="this.save()" enabled="false" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="readyButton" label="{Language.s.initSaveData}" click="executeServerSaveLocal()" />
+    <mx:Button id="saveButton" label="{Language.s.saveSaveData}" click="this.save()" enabled="false" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>
@@ -40,7 +40,7 @@
     
     protected function executeServerSaveLocal():void {
         readyButton.enabled=false;
-        loadingMessage.text = "サーバデータ取得中...しばらくお待ち下さい...";
+        loadingMessage.text = Language.s.saveDataSetting;
         
         executeServerSave();
     }
@@ -50,7 +50,7 @@
     }
     
     protected function getReadyMessage():String {
-        return "セーブ(ファイル保存)準備完了";
+        return Language.s.saveDataReady;
     }
     
     protected function resultFuction(event:Object):void {
@@ -82,7 +82,7 @@
                                             });
             saveButton.enabled = false;
             
-            loadingMessage.text = "保存中…";
+            loadingMessage.text = Language.s.nowSaving;
         } catch(error:Error) {
             this.status = error.message;
         }

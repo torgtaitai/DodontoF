@@ -75,8 +75,8 @@ package {
             
             if( sender.clearRetry() ) {
                 retryConnectedCount++;
-                Log.loggingErrorOnStatus("サーバとの再接続に成功しました。",
-                                         "" + retryConnectedCount + "回目");
+                Log.loggingErrorOnStatus(Language.s.connectToServerSuccessfully,
+                                         Language.text("xTimes", retryConnectedCount));
             }
             
             sender.refreshNext();
@@ -158,38 +158,6 @@ package {
         }
 
 
-        /*
-        public static function getJsonDataFromResultEvent(obj:Object):Object {
-            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent begin");
-            Log.logging("obj", obj);
-            
-            var resultEvent:ResultEvent = obj as ResultEvent;
-            if( resultEvent != null ) {
-                Log.loggingTuning("result is resultEvent");
-                return resultEvent.result;
-            }
-            
-            var event:Event = obj as Event;
-            if( event == null ) {
-                Log.loggingTuning("result is NOT Event");
-                return obj;
-            }
-            
-            Log.loggingTuning("result is Event");
-            
-            // var loader:URLLoader = URLLoader(event.target);
-            var bytes:ByteArray = obj as ByteArray;
-            Log.loggingTuning("pass1");
-            Log.logging("bytes", bytes);
-            
-            var data:Object = Utils.getMessagePackDataFromBytes(bytes);
-            
-            Log.logging("SharedDataReceiver.getJsonDataFromResultEvent end, data", data);
-            
-            return data;
-        }
-        */
-        
         public static function getJsonDataFromDataEvent(dataEvent:DataEvent):Object {
             var jsonString:String = dataEvent.data;
             jsonString = getJsonStringFromEventResultJsonString(jsonString);
@@ -578,7 +546,7 @@ package {
                 Log.loggingError("invalid Character", JSON.encode(characterData));
                 if( characterData.imgId != null ) {
                     sender.removeInvalidCharacter(characterData.imgId);
-                    Log.loggingError("不正なデータが含まれていたため自動削除しました。");
+                    Log.loggingError(Language.s.deleteInvalidDataAutomatically);
                 }
                 
                 return;

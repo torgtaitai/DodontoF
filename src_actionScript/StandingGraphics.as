@@ -53,9 +53,7 @@ package {
             }
             
             if( findTargetSource(name, state) != null ) {
-                Log.loggingError("キャラクター名：" + name
-                                 + "、状態：" + state 
-                                 + "、はすでに登録済みの立ち絵が存在します。");
+                Log.loggingError( Language.text("standingGraphicDuplicateError", name, state) );
                 return;
             }
             

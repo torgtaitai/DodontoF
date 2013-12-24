@@ -133,17 +133,6 @@ package {
             Log.logging("onConnect end");
         }
         
-        /*
-        private function getGoogleTextToSpeachUrl():String {
-            var readText:String = getReadText();
-            var ttsUrl:String = "http://translate.google.com/translate_tts"
-                + "?tl=ja"
-                + "&q=" + encodeURI(readText);
-            
-            return ttsUrl;
-        }
-        */
-        
         private function getQuery():String {
             var readText:String = getReadText();
             return encodeURI(readText)

@@ -2,7 +2,7 @@
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   title="ダイス"
+   title="{Language.s.diceWindow}"
    width="270" height="140"
    showCloseButton="true"
    >
@@ -11,7 +11,7 @@
            paddingLeft="0"
            paddingRight="0"
            >
-    <mx:Button label="削除"
+    <mx:Button label="{Language.s.deleteButton}"
                click="dice.clearDice()"
                width="50" height="50"
                paddingLeft="0"

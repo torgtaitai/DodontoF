@@ -730,8 +730,6 @@ package {
             
             setMouseDownEvent();
             setMouseUpEvent();
-            
-            setRulerEvent();
         }
         
         private function setWheelEvent():void {
@@ -824,73 +822,6 @@ package {
             return new Point(centerX, centerY);
         }
         
-        
-        private var rulerStartPosition:Point = null;
-        private function setRulerEvent():void {
-            
-            /*
-            rulerLayer.addEventListener(MouseEvent.DOUBLE_CLICK, function(event:MouseEvent):void {
-                    event.stopImmediatePropagation();
-                    setRulerMode();
-                });
-            */
-            
-            rulerLayer.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
-                });
-            
-            rulerLayer.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
-                    var mouseX:Number = event.localX;
-                    var mouseY:Number = event.localY;
-                    var layer:UIComponent = lineLayer;
-                    
-                    layer.graphics.drawCircle(mouseX, mouseY, 3);
-                    
-                    if( rulerStartPosition == null ) {
-                        rulerStartPosition = new Point(mouseX, mouseY);
-                        return;
-                    }
-                    
-                    layer.graphics.moveTo(rulerStartPosition.x, rulerStartPosition.y);
-                    layer.graphics.lineTo(mouseX, mouseY);
-                    var diff:Number =
-                        Math.sqrt(Math.pow(rulerStartPosition.x - mouseX, 2) + 
-                                  Math.pow(rulerStartPosition.y - mouseY, 2));
-                    var diffSquare:Number = diff / getSquareLength();
-                    diffSquare = Math.round( diffSquare * 10 ) / 10;
-                    
-                    ChatWindow.getInstance().addLocalMessage("長さ：" + diffSquare + "マス");
-                    
-                    rulerStartPosition = null;
-                });
-        }
-        
-        public function setRulerMode():void {
-            rulerLayer.visible = ( ! rulerLayer.visible);
-            setRulerModeByVisible();
-        }
-        
-        private var lineLayer:UIComponent = new UIComponent();
-        
-        public function setRulerModeByVisible():void {
-            if( ! rulerLayer.visible ) {
-                rulerLayer.graphics.clear();
-                rulerLayer.removeChild( lineLayer );
-                return;
-            }
-            
-            lineLayer = new UIComponent();
-            rulerLayer.addChild( lineLayer );
-            var color:int = 0xFFFF00;
-            lineLayer.graphics.lineStyle(1, color);
-            lineLayer.graphics.beginFill(color);
-            
-            rulerLayer.alpha = 0.5;
-            rulerLayer.graphics.beginFill(0x000000);
-            rulerLayer.graphics.drawRect(0,
-                                         0,
-                                         getWidth() * getSquareLength(),
-                                         getHeight() * getSquareLength());
-        }
         
         public function centeringFromPiece(piece:InitiativedMovablePiece):void {
             var center:Point = getCenter();
@@ -1294,16 +1225,16 @@ package {
                     thisObj.menuClickPoint = getCreatePoint();
                 });
             
-            MovablePiece.addMenuItem(menu, "キャラクター追加", addCharacter);
-            MovablePiece.addMenuItem(menu, "魔法範囲追加(D＆D3版)", addMagicRange);
-            MovablePiece.addMenuItem(menu, "魔法範囲追加(D＆D4版)", addMagicRangeDD4th);
-            MovablePiece.addMenuItem(menu, "魔法タイマー追加", addMagicTimer);
-            MovablePiece.addMenuItem(menu, "マップマスク追加", addMapMask);
-            MovablePiece.addMenuItem(menu, "マップマーカー追加", addMapMarker);
-            MovablePiece.addMenuItem(menu, "ダイスシンボル追加", addDiceSymbol, true);
+            MovablePiece.addMenuItem(menu, Language.s.addCharacterMenu, addCharacter);
+            MovablePiece.addMenuItem(menu, Language.s.addMagicRangeMenu, addMagicRange);
+            MovablePiece.addMenuItem(menu, Language.s.addMagicRangeDD4thMenu, addMagicRangeDD4th);
+            MovablePiece.addMenuItem(menu, Language.s.addMagicTimerMenu, addMagicTimer);
+            MovablePiece.addMenuItem(menu, Language.s.addMapMaskMenu, addMapMask);
+            MovablePiece.addMenuItem(menu, Language.s.addMapMarkerMenue, addMapMarker);
+            MovablePiece.addMenuItem(menu, Language.s.addDiceSymbolMenu, addDiceSymbol, true);
             
-            MovablePiece.addMenuItem(menu, "手札置き場の作成", addCardZone, true);
-            MovablePiece.addMenuItem(menu, "メッセージカードの追加", addMessageCard);
+            MovablePiece.addMenuItem(menu, Language.s.addCardZoneMenu, addCardZone, true);
+            MovablePiece.addMenuItem(menu, Language.s.addMessageCardMenu, addMessageCard);
             
             overMapLayer.contextMenu = menu;
         }

@@ -6,13 +6,13 @@
    height="470"
    verticalAlign="middle"
    horizontalAlign="center"
-   title="WEBカメラ撮影" 
+   title="{Language.s.webCameraCaptureWindowTitle}" 
    showCloseButton="true"
    close="closeWindow()"
 >
   
-  <mx:Label text="WEBカメラで撮影した画像をキャラクター画像として直接アップロードできます。" />
-  <mx:Label text="お手持ちのフィギュアやイラストの取り込みにご利用ください。" />
+  <mx:Label text="{Language.s.webCameraCaptureInfos_1}" />
+  <mx:Label text="{Language.s.webCameraCaptureInfos_2}" />
   <mx:Panel id="previewPanle" x="33" y="40" width="340" height="280" layout="absolute">
     <mx:VideoDisplay y="0" x="0" width="320" height="240" id="display"/>
     <mx:Image x="0" y="0" id="imgPreview" />
@@ -22,9 +22,9 @@
                                  width="100%" horizontalAlign="center" verticalAlign="middle" />
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button label="撮影" id="btnShoot" click="clickShoot()"/>
-    <mx:Button label="アップロード" id="btnSave" enabled="false" click="clickSave()"/>
-    <mx:Button label="閉じる" click="closeWindow()" />
+    <mx:Button label="{Language.s.capture}" id="btnShoot" click="clickShoot()"/>
+    <mx:Button label="{Language.s.uploadCaptureImage}" id="btnSave" enabled="false" click="clickSave()"/>
+    <mx:Button label="{Language.s.closeButton}" click="closeWindow()" />
     <mx:Spacer width="50"/>
   </mx:HBox>
   
@@ -75,22 +75,22 @@
         if (camera) {
             camera.setMode(640, 480, 10, true);
             display.attachCamera(camera);
-            previewPanle.status = "撮影中...";
+            previewPanle.status = Language.s.capturing;
         } else {
-            Alert.show("カメラが検出できません");
+            Alert.show(Language.s.cameraNotFound);
         }
     }
         
     // 撮影ボタン
     public function clickShoot():void {
         if (imgPreview.source) {
-            previewPanle.status = "撮影中...";
-            btnShoot.label = "撮影";
+            previewPanle.status = Language.s.capturing;
+            btnShoot.label = Language.s.capture;
             btnSave.enabled = false;
             imgPreview.source = null;
         } else {
-            previewPanle.status = "この画像をアップロードしますか？";
-            btnShoot.label = "取消";
+            previewPanle.status = Language.s.uploadCapturedImageQuestion;
+            btnShoot.label = Language.s.cancel;
             btnSave.enabled = true;
                 
             // 表示されている画像を取得して動画の上に貼り付ける。。
@@ -136,22 +136,22 @@
         ImageUploadWindow.uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo,
                                            uploadSuccessResult, uploadErrorResult);
         btnSave.enabled = false;
-        previewPanle.status = "転送中・・・";;
+        previewPanle.status = Language.s.captureImageUploading;
     }
     
     public function uploadSuccessResult(event:Event):void {
-        btnShoot.label = "撮影";
+        btnShoot.label = Language.s.capture;
         imgPreview.source = null;
         captureBitMap = null;
         
         var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
         Log.loggingTuning("loader end");
         Log.loggingTuning("jsonData.resultText", jsonData.resultText);
-        previewPanle.status = "転送結果：" + jsonData.resultText;
+        previewPanle.status = Language.s.captureImageUploadResult + jsonData.resultText;
     }
         
     public function uploadErrorResult(event:Event):void {
-        previewPanle.status = "転送結果：" + "失敗";
+        previewPanle.status = Language.s.captureImageUploadResult + Language.s.captureImageUploadResultFailed;
     }
     
         ]]>

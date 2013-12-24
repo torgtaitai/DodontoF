@@ -14,6 +14,7 @@ package {
     import mx.controls.Button;
     import mx.controls.Alert;
     import mx.events.CloseEvent;
+    import mx.utils.StringUtil;
     
     public class ChatMessageTrader {
         
@@ -22,7 +23,7 @@ package {
         //private var addMessageLines:String = "";
         
         private var localMessageUniqueId:String = "localMessageUniqueId";
-        private var systemMessageSenderName:String = "どどんとふ";
+        private var systemMessageSenderName:String = Language.s.title;
         private var systemMessageColor:String = "00AA00";
         private var thisObj:ChatMessageTrader;
         private var guiInputSender:GuiInputSender;
@@ -58,8 +59,7 @@ package {
                 return false;
             }
             
-            chatWindow.sendSystemMessage("のチャットメッセージに不正なダイスロール結果が検出されました。\n"
-                                         + chatMessage + "");
+            chatWindow.sendSystemMessage(Language.s.invalidDiceBotText, [chatMessage]);
             return true;
         }
         
@@ -109,7 +109,12 @@ package {
             addMessageToChatLog(data, 0, "dummy");
         }
         
-        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true, strictlyUniqueId:String = null):void {
+        public function sendSystemMessage(messageBase:String,
+                                          args:Array = null, strictlyUniqueId:String = null):void {
+            if( args == null ) {
+                args = [];
+            }
+            
             var isRoomResult:Boolean = true;
             var message:String = "";
             
@@ -120,13 +125,13 @@ package {
             data.setColorString(systemMessageColor);
             data.setStateEmpty();
             
-            if( isPrintName ) {
-                var name:String = chatWindow.getChatCharacterName();
-                message += "「" + name + "」";
-                data.setMessage(message);
-                message = data.getMessage();
-            }
-            message += messageBase;
+            var name:String = chatWindow.getChatCharacterName();
+            data.setMessage(name);
+            name = data.getMessage();
+            
+            message = StringUtil.substitute(messageBase, name,
+                                            args[0], args[1], args[2], args[3], args[4], 
+                                            args[5], args[6], args[7], args[8], args[9]);
             
             data.setMessage(message);
             data.setSendToOwnself();
@@ -257,7 +262,6 @@ package {
                                                                 time, chatWindow.getDisplayTime(), sendto);
             chatWindow.getChatChannle(channel).addBuffer(messageLine, time);
             
-            //printUpdateDateString(time);
             chatWindow.playAddMessageSound(senderName);
             chatWindow.setUserNames(senderName);
             
@@ -321,7 +325,6 @@ package {
         }
         
         public static function escapeHtml(htmlString:String):String {
-            //htmlString = htmlString.replace(/\"/g, "&quot;"); //"
             htmlString = htmlString.replace(/&/g, "&amp;");
             htmlString = htmlString.replace(/</g, "&lt;");
             htmlString = htmlString.replace(/>/g, "&gt;");
@@ -406,7 +409,6 @@ package {
                 
                 cutIn.setEffectable(effectable);
                 chatMessage = cutIn.effect( matchResult.resultData.chatMessage );
-                //break;
             }
             
             Log.logging("checkCutInEffect result", chatMessage);

@@ -38,8 +38,8 @@ package {
         override protected function init():void {
             super.init();
             
-            title="プレイルーム変更";
-            executeButton.label = "変更";
+            title=Language.s.changePlayRoom;
+            executeButton.label = Language.s.changeButton;
         }
         
         override protected function initViewStateInfos():void {

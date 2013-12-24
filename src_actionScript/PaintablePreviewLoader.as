@@ -226,7 +226,7 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            MovablePiece.addMenuItem(menu, "色取得（スポイト）", thisObj.getFunctionForSyringeFromMenu(square));
+            MovablePiece.addMenuItem(menu, Language.s.getSpointColor, thisObj.getFunctionForSyringeFromMenu(square));
             
             square.contextMenu = menu;
         }

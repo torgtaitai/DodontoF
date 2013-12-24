@@ -5,25 +5,25 @@
    alpha="1"
    width="700"
    height="470"
-   title="立ち絵追加" 
+   title="{Language.s.addStandingGraphics}" 
    showCloseButton="true"
    >
 
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
   
   <mx:Box height="170" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Label text="下記で設定した「キャラクター名」「状態」でチャットで発言すると立ち絵が表示されます。" />
+    <mx:Label text="{Language.s.standingGraphicsTips}" />
     <mx:Form>
-      <mx:FormItem label="キャラクター名：">
+      <mx:FormItem label="{Language.s.standingGraphicsCharacterName}：">
         <mx:TextInput id="characterName" width="100%" text="" />
       </mx:FormItem>
-      <mx:FormItem label="状態：" >
+      <mx:FormItem label="{Language.s.standingGraphicStateColumn}：" >
         <mx:TextInput id="state" width="100%" text="" />
       </mx:FormItem>
-      <mx:FormItem label="画像ファイル名(jpg,gif,png,swf)：" >
+      <mx:FormItem label="{Language.s.standingGraphicsImageFileName}：" >
         <mx:TextInput id="source" width="100%" text="" change="printPreview()" />
       </mx:FormItem>
-      <mx:FormItem label="表示位置（1：左端、12：右端）：">
+      <mx:FormItem label="{Language.s.standingGraphicPosition}：">
           <mx:HSlider id="leftIndex"
                       width="150"
                       liveDragging="true"
@@ -38,8 +38,8 @@
   </mx:Box>
   
   <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="execute()" enabled="{source.text != ''}" />
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addButton}" click="execute()" enabled="{source.text != ''}" />
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>
@@ -53,7 +53,7 @@
      * 立ち絵追加画面
      */
     
-    private var loadingMessage:String = "ロード中・・・";
+    private var loadingMessage:String = Language.s.loading;
     private var previewImage:Image = new Image();
     
     

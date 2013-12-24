@@ -32,7 +32,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "メタリックガーディアン攻撃範囲";
+            return Language.s.metallicGuardianAtackRange;
         }
         
         public static function getJsonData(name:String,
@@ -120,10 +120,10 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "攻撃範囲の変更", this.getItemPopUpChangeWindow);
-            addMenuItem(menu, "攻撃範囲の削除", this.getContextMenuItemRemoveCharacter);
-            addMenuItem(menu, "右回転", this.getContextMenuItemRightRotateCharacter, true);
-            addMenuItem(menu, "左回転", this.getContextMenuItemLeftRotateCharacter);
+            addMenuItem(menu, Language.s.changeAtackRange, this.getItemPopUpChangeWindow);
+            addMenuItem(menu, Language.s.deleteAtackRange, this.getContextMenuItemRemoveCharacter);
+            addMenuItem(menu, Language.s.rotationRight, this.getContextMenuItemRightRotateCharacter, true);
+            addMenuItem(menu, Language.s.rotationLeft, this.getContextMenuItemLeftRotateCharacter);
             
             view.contextMenu = menu;
         }

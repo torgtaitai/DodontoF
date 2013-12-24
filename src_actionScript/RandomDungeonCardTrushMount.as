@@ -30,7 +30,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "ランダムダンジョン用カード捨て札";
+            return Language.s.randomDungeonCardTrushMount;
         }
         
         public static function getJsonData(imageName_:String,
@@ -57,15 +57,15 @@ package {
         }
         
         override public function getTitleText():String {
-            return "捨て札：" + getCardCount() + "枚";
+            return Language.text("trushCardMountCountDisplay", getCardCount());
         }
         
         override protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "一番上のカードを場に戻す", getContextMenuItemCardReturn);
-            addMenuItem(menu, "Aのみ山に戻して次のダンジョンタイルを準備する", getContextShuffleForNextRandomDungeon, true);
+            addMenuItem(menu, Language.s.returnMountTopCardToField, getContextMenuItemCardReturn);
+            addMenuItem(menu, Language.s.moveOnlyAceCardToMountForSetupDungeonTile, getContextShuffleForNextRandomDungeon, true);
             
             view.contextMenu = menu;
         }

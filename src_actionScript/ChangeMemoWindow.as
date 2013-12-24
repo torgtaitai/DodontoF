@@ -14,8 +14,8 @@ package {
          * Windowの初期化処理
          */
         override protected function setup():void {
-            title = "共有メモ変更";
-            executeButton.label = "変更";
+            title = Language.s.changeSharedMemoWindowTitle;
+            executeButton.label = Language.s.changeButton;
             
             message.text = memo.getMessage();
         }

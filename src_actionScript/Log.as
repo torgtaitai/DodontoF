@@ -4,7 +4,6 @@ package {
     import flash.text.TextField;
     import mx.utils.StringUtil;
     import mx.managers.PopUpManager;
-    import mx.controls.Alert;
     import flash.utils.ByteArray;
     
     
@@ -173,7 +172,7 @@ package {
         static private function printSystemLog(message:String, channel:int):void {
             channel = ChatWindow.getInstance().changeChatChannelNumberForSystemLog(channel);
             
-            var name:String = "どどんとふ";
+            var name:String = Language.s.title;
             var color:String = "00AA00";
             var time:Number = (new Date().getTime() / 1000);
             

@@ -14,9 +14,10 @@ package {
         }
         
         override protected function setup():void {
-            title = "魔法範囲変更(D&D4版)";
-            executeButton.label = "変更";
+            title = Language.s.changeMagicRangeDD4thWindowTitle;
+            executeButton.label = Language.s.changeButton;
             
+            initRangeType();
             magicRangeName.text = magicRange.getName();
             
             ChangeMagicRangeWindow.selectMagicRangeType(magicRangeType, magicRange.getRangeType());

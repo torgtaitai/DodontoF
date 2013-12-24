@@ -6,7 +6,7 @@
    y="30"
    width="770"
    height="500"
-   title="マップ変更" 
+   title="{Language.s.changeMap}" 
    showCloseButton="true"
    >
   
@@ -16,27 +16,27 @@
     
     <mx:Box height="100%" width="100%" verticalAlign="middle">
       <mx:HBox height="25" width="100%">
-        <mx:Label text="画像のURL" />
+        <mx:Label text="{Language.s.mapImageUrl}" />
         <mx:TextInput id="mapImageUrl" width="100%" editable="true" change="printPreview()" />
 	  </mx:HBox>
       
       <mx:HBox height="25" width="100%" horizontalAlign="left" verticalAlign="middle">
-        <mx:CheckBox id="checkBoxWhiteMap" label="白地図にする" selected="false" change="checkWhiteMap()"/>
-	    <mx:Label text="縦:" />
+        <mx:CheckBox id="checkBoxWhiteMap" label="{Language.s.changeToBrankMap}" selected="false" change="checkWhiteMap()"/>
+	    <mx:Label text="{Language.s.mapHeight}" />
         <mx:NumericStepper id="mapHeight" minimum="1" maximum="100" value="25" change="printPreview()" />
-	    <mx:Label text="横:" />
+	    <mx:Label text="{Language.s.mapWidth}" />
         <mx:NumericStepper id="mapWidth" minimum="1" maximum="100" value="25" change="printPreview()" />
-	    <mx:Label text="マス目・座標文字の色:" />
+	    <mx:Label text="{Language.s.mapLinePositionColor}" />
         <mx:ColorPicker id="gridColorPicker" showTextField="true" selectedColor="0x000000" change="printPreview()" />
-	    <mx:Label text="マス目間隔:" />
+	    <mx:Label text="{Language.s.mapGridGap}" />
         <mx:NumericStepper id="gridInterval" minimum="1" maximum="100" value="1" change="printPreview()" />
         <mx:Spacer width="20" />
-        <mx:CheckBox id="isAlternately" label="マスを交互に" selected="false" change="printPreview()"/>
+        <mx:CheckBox id="isAlternately" label="{Language.s.mapGridOdded}" selected="false" change="printPreview()"/>
       </mx:HBox>
       
       <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:Button id="executeButton" label="設定" click="this.changeMap()" enabled="false" />
-        <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+        <mx:Button id="executeButton" label="{Language.s.mapSet}" click="this.changeMap()" enabled="false" />
+        <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
     </mx:Box>
     

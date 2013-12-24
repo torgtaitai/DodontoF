@@ -17,7 +17,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "魔法範囲D&D4版";
+            return Language.s.magicRangeDD4th;
         }
         
         public static function getJsonData(name:String,
@@ -54,14 +54,15 @@ package {
             return jsonData;
         }
         
-        static private var closeBurst:Object = {data:"closeBurstDD4th",
-                                               label: "爆発"};
+        static public function get closeBurst():Object {
+            return {data:"closeBurstDD4th",
+                    label: Language.s.closeBurstDD4th};
+        }
         
-        static private var blast:Object = {data:"blastDD4th",
-                                           label: "噴射"};
-        
-        [Bindable]
-            static public var rangeTypes:Array = [closeBurst, blast];
+        static public function get blast():Object {
+            return {data:"blastDD4th",
+                    label: Language.s.blastDD4th};
+        }
         
         override public function popUpChangeWindow():void {
             try {

@@ -4,28 +4,28 @@
    xmlns:torgtaitai="*" 
    width="300"
    height="200"
-   title="目覚ましアラーム送信" 
+   title="{Language.s.sendWakeUpSound}" 
    showCloseButton="true"
    >
   
   <mx:Box width="100%" height="100%">
     <mx:Form>
-	  <mx:FormItem label="送信先:">
+	  <mx:FormItem label="{Language.s.alarmSendTo}:">
         <mx:ComboBox id="userNameComboBox" width="100%" dataProvider="{userNameComboBoxArray}" />
       </mx:FormItem>
-	  <mx:FormItem label="効果音:">
+	  <mx:FormItem label="{Language.s.alarmSource}:">
         <mx:TextInput id="soundFileNameInput" width="100%" text="./sound/alarm.mp3"/>
 	  </mx:FormItem>
-	  <mx:FormItem label="発動は" >
+	  <mx:FormItem label="{Language.s.alarmStartTime}:" >
         <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
           <mx:NumericStepper id="seconds" value="0" maximum="86400" />
-          <mx:Label text="秒後"/>
+          <mx:Label text="{Language.s.alarmStartSeconds}"/>
         </mx:HBox>
 	  </mx:FormItem>
     </mx:Form>
     <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="saveButton" label="実行" click="sendWakeUpSound()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="saveButton" label="{Language.s.executeButton}" click="sendWakeUpSound()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

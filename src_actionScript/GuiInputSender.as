@@ -57,7 +57,8 @@ package {
         
         public function checkRoomNumber(roomNumber:int):void {
             if( (roomNumber < 0) || (roomNumber > playRoomMaxNumber) ) {
-                throw new Error("ルームNo.は0〜" + playRoomMaxNumber + "の値を設定してください。");
+                throw new Error( Language.text("checkRoomNumberWarning",
+                                               playRoomMaxNumber) );
             }
         }
         
@@ -75,15 +76,6 @@ package {
             return sender.getRoomNumber();
         }
         
-        public function getRoomNumberName():String {
-            var number:int = sender.getRoomNumber();
-            if( number > playRoomMaxNumber ) {
-                return "お試しルーム";
-            }
-            
-            return "ルーム" + number;
-        }
-        
         public function uploadImageData(params:Object, resultFunction:Function, errorFunction:Function):void {
             sender.uploadImageData(params, resultFunction, errorFunction);
         }
@@ -98,12 +90,14 @@ package {
                                   mapMarks:Array):void {
             if( ( mapHeight < 1 ) ||
                 ( mapHeight > ChangeMapWindow.getMapMaxHeigth() )) {
-                throw new Error("縦マス数の入力値が不正です。1〜" + ChangeMapWindow.getMapMaxHeigth() + "の整数を入力してください。");
+                throw new Error(Language.text("checkMapHeightWarning",
+                                              ChangeMapWindow.getMapMaxHeigth()));
             }
                 
             if( ( mapWidth < 1 ) ||
                 ( mapWidth > ChangeMapWindow.getMapMaxWidth() )) {
-                throw new Error("横マス数の入力値が不正です。1〜" + ChangeMapWindow.getMapMaxWidth() + "の整数を入力してください。");
+                throw new Error(Language.text("checkMapWidthWarning",
+                                              ChangeMapWindow.getMapMaxWidth()));
             }
             
             sender.changeMap(mapImageUrl, mirrored, mapWidth, mapHeight,
@@ -152,23 +146,23 @@ package {
             Log.logging("statusAlias", statusAlias);
             
             if( characterName.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( imageUrl.length == 0 ) {
-                throw new Error("イメージ画像のURLを入力してください。");
+                throw new Error(Language.s.inputImageFileUrlError);
             }
             
             if( ( size < 1 ) || ( size > 10 ) ) {
-                throw new Error("サイズの入力値が不正です。1〜10の整数を入力してください。");
+                throw new Error(Language.s.sizeError);
             }
             
             if( counters == null ) {
-                throw new Error("カウンター値が不正です。");
+                throw new Error(Language.s.counterValueError);
             }
             
             if( statusAlias == null ) {
-                throw new Error("ステータスエイリアスが不正です。");
+                throw new Error(Language.s.statusAliasNameError);
             }
             
             Log.logging("createLoop");
@@ -230,15 +224,15 @@ package {
             Log.logging("GuiInputSender createPositionY", createPositionY);
             
             if( width < 0 ) {
-                throw new Error("幅が不正な値です。");
+                throw new Error(Language.s.widthInvalidError);
             }
             
             if( height < 0 ) {
-                throw new Error("高さが不正な値です。");
+                throw new Error(Language.s.heightInvalidError);
             }
             
             if( (createPositionX < 0) || (createPositionY < 0) ) {
-                throw new Error("設置X,Y座標が0未満の値になっています。");
+                throw new Error(Language.s.positionXYsmallerError);
             }
             
             var characterJsonData:Object =
@@ -253,7 +247,7 @@ package {
                                      width:int, height:int,
                                      characterPositionX:int, characterPositionY:int):void {
             if( message.length == 0 ) {
-                throw new Error("メッセージを入力してください。");
+                throw new Error(Language.s.inputMessageError);
             }
             
             var characterJsonData:Object =
@@ -282,23 +276,23 @@ package {
             Log.logging("info", info);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( ( feets < 1 ) || ( feets > feetsLimit ) || ((feets % 5) != 0) ) {
-                throw new Error("半径の入力値が不正です。1〜" + feetsLimit + "の整数で5の倍数を入力してください。");
+                throw new Error(Language.text("checkDD3rdRadiusWarning", feetsLimit));
             }
             
             if( type.length == 0 ) {
-                throw new Error("魔法範囲種別を選択してください。");
+                throw new Error(Language.s.noMagirRangeErroro);
             }
             
             if( color.length == 0 ) {
-                throw new Error("色を選択してください");
+                throw new Error(Language.s.noColorErro);
             }
             
             if( (characterPositionX < 0) || (characterPositionY < 0) ) {
-                throw new Error("設置X,Y座標が0未満の値になっています。");
+                throw new Error(Language.s.positionXYsmallerError);
             }
             
             var characterJsonData:Object =
@@ -333,23 +327,23 @@ package {
             Log.logging("info", info);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( ( feets < 1 ) || ( feets > feetsLimit ) ) {
-                throw new Error("半径の入力値が不正です。1〜" + feetsLimit + "の整数を入力してください。");
+                throw new Error(Language.text("checkDD4thRadiusWarning", feetsLimit));
             }
             
             if( type.length == 0 ) {
-                throw new Error("魔法範囲種別を選択してください。");
+                throw new Error(Language.s.noMagirRangeError);
             }
             
             if( color.length == 0 ) {
-                throw new Error("色を選択してください");
+                throw new Error(Language.s.noColorErro);
             }
             
             if( (characterPositionX < 0) || (characterPositionY < 0) ) {
-                throw new Error("設置X,Y座標が0未満の値になっています。");
+                throw new Error(Language.s.positionXYsmallerError);
             }
             
             var characterJsonData:Object =
@@ -378,7 +372,7 @@ package {
             Log.logging("info", info);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             var characterJsonData:Object =
@@ -409,15 +403,15 @@ package {
             Log.logging("info", info);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( imageUrl.length == 0 ) {
-                throw new Error("イメージ画像のURLを入力してください。");
+                throw new Error(Language.s.noImageUrlError);
             }
             
             if( ( size < 1 ) || ( size > 10 ) ) {
-                throw new Error("サイズの入力値が不正です。1〜10の整数を入力してください。");
+                throw new Error(Language.s.sizeError);
             }
             
             character.setName(name);
@@ -455,23 +449,23 @@ package {
             Log.logging("timeRange", timeRange);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( ( feets < 1 ) || ( feets > feetsLimit ) || ((feets % 5) != 0) ) {
-                throw new Error("半径の入力値が不正です。1〜" + feetsLimit + "の整数で5の倍数を入力してください。");
+                throw new Error(Language.text("checkDD3rdRadiusWarning", feetsLimit));
             }
             
             if( rangeType.length == 0 ) {
-                throw new Error("範囲タイプを選択してください。");
+                throw new Error(Language.s.noMagirRangeError);
             }
             
             if( color.length == 0 ) {
-                throw new Error("色を選択してください。");
+                throw new Error(Language.s.noColorErro);
             }
             
             if( timeRange < 1 ) {
-                throw new Error("持続時間の値範囲が不正です。1以上の値を入力してください。");
+                throw new Error(Language.s.invalidTimeRangeError);
             }
             
             magicRange.setName(name);
@@ -505,23 +499,23 @@ package {
             Log.logging("timeRange", timeRange);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             if( ( feets < 1 ) || ( feets > feetsLimit ) ) {
-                throw new Error("半径の入力値が不正です。1〜" + feetsLimit + "の整数で5の倍数を入力してください。");
+                throw new Error(Language.text("checkDD4thRadiusWarning", feetsLimit));
             }
             
             if( rangeType.length == 0 ) {
-                throw new Error("範囲タイプを選択してください。");
+                throw new Error(Language.s.noMagirRangeError);
             }
             
             if( color.length == 0 ) {
-                throw new Error("色を選択してください。");
+                throw new Error(Language.s.noColorErro);
             }
             
             if( timeRange < 1 ) {
-                throw new Error("持続時間の値範囲が不正です。1以上の値を入力してください。");
+                throw new Error(Language.s.invalidTimeRangeError);
             }
             
             magicRange.setName(name);
@@ -552,7 +546,7 @@ package {
             Log.logging("info", info);
             
             if( name.length == 0 ) {
-                throw new Error("名前を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             
             magicTimer.setName(name);
@@ -570,7 +564,7 @@ package {
             Log.logging("resurrectCharacterId", resurrectCharacterId);
             
             if( resurrectCharacterId.length == 0 ) {
-                throw new Error("復活させたいキャラクターのＩＤを入力してください。");
+                throw new Error(Language.s.noCharacterIdWantToRessurectError);
             }
             
             sender.resurrectCharacter(resurrectCharacterId, resultFunction);
@@ -610,10 +604,9 @@ package {
             var callBack:Function = chatSendData.getCallBack();
             
             if( name.length == 0 ) {
-                throw new Error("発言者を入力してください。");
+                throw new Error(Language.s.inputNameError);
             }
             if( message.length == 0 ) {
-                //throw new Error("空メッセージは送信できません。");
                 return;
             }
             
@@ -624,7 +617,7 @@ package {
                                        playRoomPassword:String,
                                        chatChannelNames:Array):void {
             if( playRoomName == "" ) {
-                throw new Error("プレイルーム名は必ず入力してください");
+                throw new Error(Language.s.noPlayRoomError);
             }
         }
         

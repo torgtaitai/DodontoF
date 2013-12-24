@@ -144,7 +144,7 @@ INFO_MESSAGE_TEXT
 学園場所表 (SST)
 運命表 (DT)
 大会運命表 (TDT)
-学園運命表 (SDT)
+学園運命表 (GDT)
 崩壊運命表 (CDT)
 INFO_MESSAGE_TEXT
   },
@@ -268,7 +268,7 @@ INFO_MESSAGE_TEXT
 
 ・各種表
 　・感情表(ET)
-　　ポジティブとネガティブの両方を振って、表になっている側に懿｢ｫを付けて表示します。
+　　ポジティブとネガティブの両方を振って、表になっている側に○を付けて表示します。
 　　もちろん任意で選ぶ部分は変更して構いません。
 
 ・D66ダイスあり
@@ -424,6 +424,47 @@ nD9ロールも対応。
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'ガープスフィルトウィズ',
+    'gameType' => 'GurpsFW',
+    'fileName' => 'GurpsFW',
+    'prefixs' => ['CRT','HCRT','FMB','MFMB','HIT','FEAR(()?\d*)','REACT((|\-)?\d*)','TRAP(E|N|H|L)','TRS((E|N|H|L)\d+)((|\-)?\d*)','RAND(E|N|H|L)[1-6]?','RENC(E|N|H|L)[1-6]?','AREA','DROP(N)?(()?\d)?','HST','KHST','RANDOP','LOT(N|P)'],
+    'info' => <<INFO_MESSAGE_TEXT
+--GURPS汎用コマンド----------
+・判定においてクリティカル・ファンブルの自動判別、成功度の自動計算。(3d6<=目標値)
+ ・祝福等のダイス目にかかる修正は「3d6-1<=目標値」といった記述で計算されます。
+ (ダイス目の修正値はクリティカル・ファンブルに影響を与えません。)
+ ・クリティカル値・ファンブル値への修正については現在対応していません。
+・クリティカル表 (CRT)
+・頭部打撃クリティカル表 (HCRT)
+・ファンブル表 (FMB)
+・呪文ファンブル表 (MFMB)
+・命中部位表 (HIT)
+・恐怖表 (FEAR+n)
+　nには恐怖判定の失敗度を入れてください。
+・反応判定表 (REACT, REACT±n)
+　nには反応修正を入れてください。
+・D66ダイスあり
+--GURPS-FW専用コマンド----------
+・ドロップ判定(DROP)/ネームドドロップ判定(DROPN)
+ ・ドロップ判定に修正が付く場合は末尾に+xを記述(xは修正値)。(DROP+x、DROPN+x)
+・必殺技表(HST)/驚異的必殺技表(KHST)
+ ・ホムンクルスの【必殺技！】/【驚異的必殺技！】用コマンド。
+・ナンバーワンくじ/ノーマル(LOTN)/プレミアム(LOTP)
+--夢幻の迷宮(ver.2013/11/07)----------
+・コマンド中のdには難易度を入れてください。(初級：E 中級：N 上級：H 悪夢：L)
+・コマンド中のaには地形を入れてください。
+ (1：洞窟 2：遺跡 3：断崖 4：水辺 5：森林 6：墓地)
+・ランダムイベント(RANDd)/地形固定(RANDda)
+・ランダムエンカウント(RENCd)/地形固定(RENCda)
+・トラップリスト(TRAPd)
+・報酬財宝テーブル(xに到達深度を記述)。 (TRSdx)
+ ・財宝テーブルの段階が変動する場合、末尾に±yを記述(yは変動段階)。(TRSdx±y)
+  [例：TRSE5-1、TRSH36+2]
+・地形決定表(AREA)
+・迷宮追加オプション表(RANDOP)
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'ハーンマスター',
     'gameType' => 'HarnMaster',
     'fileName' => 'HarnMaster',
@@ -449,7 +490,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ハンターズムーン',
     'gameType' => 'HuntersMoon',
     'fileName' => 'HuntersMoon',
-    'prefixs' => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|TST|THT|TAT|TBT|TLT|TET)\d*'],
+    'prefixs' => ['(ET|CLT|SLT|HLT|FLT|DLT|MAT|SAT|SA2T|TST|THT|TAT|TBT|TLT|TET)\d*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
@@ -462,12 +503,20 @@ INFO_MESSAGE_TEXT
 　・部位ダメージ決定表　(DLT)
 　・モノビースト行動表　(MAT)
 　・異形アビリティー表　(SATx) (xは個数)
+　・異形アビリティー表2　(SA2Tx) (xは個数)
+　　→表１と表２の振り分けも判定
 　・指定特技(社会)表　　(TST)
 　・指定特技(頭部)表　　(THT)
 　・指定特技(腕部)表　　(TAT)
 　・指定特技(胴部)表　　(TBT)
 　・指定特技(脚部)表　　(TLT)
 　・指定特技(環境)表　　(TET)
+　・異形化表　　　　　　(MST)
+　・代償表　　　　　　　(ERT)
+　・ディフェンス遭遇表1/2/3 (DS1ET/DS2ET/DS3ET)
+　・エスケープ遭遇表1/2/3 (EE1ET/EE2ET/EE3ET)
+　・ディフェンス遭遇表1/2/3 (ET1ET/ET2ET/ET3ET)
+　・ディフェンス遭遇表1/2/3 (TK1ET/TK2ET/TK3ET)
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -524,7 +573,7 @@ INFO_MESSAGE_TEXT
     'name' => 'キルデスビジネス',
     'gameType' => 'KillDeathBusiness',
     'fileName' => 'KillDeathBusiness',
-    'prefixs' => ['HST','ST[1-2]?','DWT','DeathWT','RWT','RevengeWT','VWT','VictoryWT','PWT','PossesionWT','CWT','ControlWT','FWT','FlourishWT','IWT','IntensifyWT','HWT','HealthWT','SaWT','SafetyWT','LWT','LongevityWT','EWT','ExistWT','NAME[1-3]?','NAME[1-3]?','OSPT','OccultSPT','FSPT','FamilySPT','LoSPT','LoveSPT','JSPT','JusticeSPT','TSPT','TrainingSPT','BSPT','BeamSPT','CMT','EST','sErviceST','SOUL','STGT','HSAT[1-2]?','EXT[1-4]?','SKLT','SKLJ','JD.*'],
+    'prefixs' => ['HST','ST[1-2]?','DWT','DeathWT','RWT','RevengeWT','VWT','VictoryWT','PWT','PossesionWT','CWT','ControlWT','FWT','FlourishWT','IWT','IntensifyWT','HWT','HealthWT','SaWT','SafetyWT','LWT','LongevityWT','EWT','ExistWT','NAME[1-3]?','NAME[1-3]?','OSPT','OccultSPT','FSPT','FamilySPT','LoSPT','LoveSPT','JSPT','JusticeSPT','TSPT','TrainingSPT','BSPT','BeamSPT','CMT','EST','sErviceST','SOUL','STGT','HSAT[1-2]?','EXT[1-4]?','SKLT','SKLJ','ERT','WKT','JD.*'],
     'info' => <<INFO_MESSAGE_TEXT
 ・各種表
  ・履歴表 (HST)
@@ -545,6 +594,8 @@ INFO_MESSAGE_TEXT
  ・シーン表 (ST)
  ・サービスシーン表 (EST/sErviceST)
  ・CM表 (CMT)
+ ・蘇生副作用表 (ERT)
+ ・一週間表（WKT)
  ・ソウル放出表 (SOUL)
  ・汎用演出表 (STGT)
  ・ヘルスタイリスト罵倒表 (HSAT)
@@ -738,12 +789,8 @@ INFO_MESSAGE_TEXT
 　衝動表に従って自動でダイスロールを行い、結果を表示します。
 　ダイスロールと同様に、他のプレイヤーに隠れてロールすることも可能です。
 　頭に識別文字を追加して、デフォルト以外の衝動表もロールできます。
-　・NURGEx　頭に「N」を付けると「新衝動表」。
 　・AURGEx　頭に「A」を付けると「誤作動表」。
-　・MURGEx　頭に「M」を付けると「ミュータント衝動表」になります。
-　・UURGEx　頭に「U」が付くと鬼御魂の戦闘外衝動表。
-　・CURGEx　頭に「C」で鬼御魂の戦闘中衝動表になります。
-例）URGE1　　　urge5　　　Surge2
+例）URGE1　　　urge5　　　Aurge2
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -751,7 +798,7 @@ INFO_MESSAGE_TEXT
     'name' => 'ピーカーブー',
     'gameType' => 'Peekaboo',
     'fileName' => 'Peekaboo',
-    'prefixs' => ['SET','PSET','OET','IBT','SBT'],
+    'prefixs' => ['SET','PSET','OET','IBT','SBT','NET'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 　判定時にクリティカルとファンブルを自動判定します。
@@ -761,6 +808,7 @@ INFO_MESSAGE_TEXT
 　・オバケ屋敷イベント表　　　　　OET
 　・イノセント用バタンキュー！表　IBT
 　・スプーキー用バタンキュー！表　SBT
+　・日中ブラブラ表                NET
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },

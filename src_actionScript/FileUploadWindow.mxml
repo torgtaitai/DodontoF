@@ -4,22 +4,22 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="220"
-   title="簡易ファイルアップローダー" 
+   title="{Language.s.easyFileUploader}" 
    showCloseButton="true"
    >
   
-  <mx:Text text="ファイルをアップロードできます。" />
-  <mx:Text text="アップロードすると、ファイルのURLがチャットに発言されるので、" />
-  <mx:Text text="そのリンクからみんなでファイルをダウンロードすることができます。" />
-  <mx:Text text="アップロードしたファイルは1時間経つと自動的に削除されます。" />
+  <mx:Text text="{Language.s.easyFileUploaderInfo_1}" />
+  <mx:Text text="{Language.s.easyFileUploaderInfo_2}" />
+  <mx:Text text="{Language.s.easyFileUploaderInfo_3}" />
+  <mx:Text text="{Language.s.easyFileUploaderInfo_4}" />
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="uploadButton" enabled="true" label="アップロード実行" click="uploadFile()" />
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="uploadButton" enabled="true" label="{Language.s.executeFileUpload}" click="uploadFile()" />
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:HBox  height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-    <mx:Label text="実行結果：" />
+    <mx:Label text="{Language.s.executeFileUploadResult}" />
     <mx:Label id="result" width="100%" text="" fontWeight="bold" />
   </mx:HBox>
   
@@ -43,12 +43,12 @@
             fileReferenceForUpload.addEventListener(Event.SELECT, fileSelectHandler);
         }
         
-        var data:Array = [["全サポートファイル種別", "*.jpg;*.jpeg;*.gif;*.png;*.bmp;*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf;*.zip;*.lzh;*.rar;*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav;*.cpd;*.sav;*.rec"],
-                          ["画像", "*.jpg;*.jpeg;*.gif;*.png;*.bmp"],
-                          ["文書", "*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf"],
-                          ["圧縮ファイル", "*.zip;*.lzh;*.rar"],
-                          ["動画・音声", "*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav"],
-                          ["その他", "*.cpd;*.sav;*.rec"]];
+        var data:Array = [[Language.s.allUploadableFileTypes, "*.jpg;*.jpeg;*.gif;*.png;*.bmp;*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf;*.zip;*.lzh;*.rar;*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav;*.cpd;*.sav;*.rec"],
+                          [Language.s.imageFileType, "*.jpg;*.jpeg;*.gif;*.png;*.bmp"],
+                          [Language.s.textFileType, "*.pdf;*.doc;*.txt;*.html;*.htm;*.xls;*.rtf"],
+                          [Language.s.compressedFileType, "*.zip;*.lzh;*.rar"],
+                          [Language.s.movieSoundFileType, "*.swf;*.flv;*.avi;*.mp4;*.mp3;*.wmv;*.wav"],
+                          [Language.s.oterFileType, "*.cpd;*.sav;*.rec"]];
                           
         
         var filters:Array = new Array();
@@ -64,7 +64,7 @@
     private function fileSelectHandler(event:Event):void {
         uploadButton.enabled = false;
         
-        result.text = "アップロード中";
+        result.text = Language.s.uploading;
         
         var params:Object = {
             'baseUrl' : Utils.getOwnBaseUrl()
@@ -86,10 +86,10 @@
             if( result.text == "OK") {
                 var fileName:String = jsonData.uploadFileInfo.fileName;
                 var url:String = jsonData.uploadFileInfo.fileUploadUrl;
-                DodontoF_Main.getInstance().getChatWindow().
-                    sendSystemMessage("がファイルをアップロードしました"
-                                      + "\r  ファイル名：" + fileName
-                                      + "\r  URL:" + url);
+                Utils.sendSystemMessage(
+                    Language.s.executeFileUploadInishedMessage,
+                    [fileName, url]);
+                
                 PopUpManager.removePopUp(this);
             }
         } catch(e:Error) {

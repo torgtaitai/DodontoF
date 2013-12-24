@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="690"
    height="500"
-   title="カットイン作成" 
+   title="{Language.s.addCutInWindowTitle}"
    showCloseButton="true"
    >
   
@@ -15,22 +15,22 @@
     <!--<mx:HBox height="170" width="100%"> -->
     <mx:HBox height="200" width="100%">
       <mx:Form height="100%" width="50%">
-	    <mx:FormItem label="カットインタイトル:">
+	    <mx:FormItem label="{Language.s.cutInTitle}:">
           <mx:TextInput id="message" width="200" text="" />
         </mx:FormItem>
         
-	    <mx:FormItem label="画像／動画ファイル:" >
+	    <mx:FormItem label="{Language.s.cutInImageSourceLabel}:" >
           <mx:TextInput id="imageSource" width="200" text=""  change="printPreview()"
-                        toolTip="指定可能なファイル形式は jpg,gif,png,swf,flv&#13;そしてYoutubeへのURLです。"/>
+                        toolTip="{Language.s.cutInImageSourceTips}"/>
         </mx:FormItem>
         
-	    <mx:FormItem label="表示時間[秒]" >
+	    <mx:FormItem label="{Language.s.cutInDisplaySecondsLabel}" >
           <mx:NumericStepper id="displaySeconds" minimum="0" maximum="300" value="0" stepSize="0.1"
-                             toolTip="0で無限時間（ウィンドウの自動閉じ無し）&#13;flvなら再生が完了した時点でも閉じます" />
+      />
         </mx:FormItem>
-	    <mx:Label text="0で無限。flvなら再生が完了した時点でも閉じます" />
+	    <mx:Label text="{Language.s.cutInDisplaySecondsTips}" />
         
-	    <mx:FormItem label="音声ボリューム" >
+	    <mx:FormItem label="{Language.s.cutInVolumeLabel}" >
           <mx:HSlider id="volume"
                       width="150"
                       liveDragging="true"
@@ -41,57 +41,57 @@
                       snapInterval="0.01"
                       />
         </mx:FormItem>
-	    <mx:FormItem label="チャット末尾で起動" toolTip="チャットの行末尾がカットインタイトルと一致した場合にカットインを発動するかの指定&#13;例えばカットインタイトルを「 → 失敗」とするとダイス結果に対してカットインを発動させることができるようになります。">
+	    <mx:FormItem label="{Language.s.cutInMatchWithChatTail}" toolTip="Language.s.cutInMatchWithChatTailTips">
           <mx:CheckBox id="isTail" selected="true"/>
         </mx:FormItem>
       </mx:Form>
       
       <mx:Box height="100%" width="50%">
         
-	    <mx:FormItem label="BGM(空欄ならBGM無し):" >
+	    <mx:FormItem label="{Language.s.cutInBgm}:" >
           <mx:HBox height="100%" width="100%">
             <mx:TextInput id="soundSourceEdit" width="90" text="" />
-            <mx:CheckBox id="isSoundLoopCheck" label="無限ループ" selected="false" />
+            <mx:CheckBox id="isSoundLoopCheck" label="{Language.s.cutInBgmLoop}" selected="false" />
           </mx:HBox>
         </mx:FormItem>
         
-	    <mx:FormItem label="表示位置:" >
+	    <mx:FormItem label="{Language.s.cutInPosition}:" >
           <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false"
                        selectedIndex="3"
-                       toolTip="カットインの表示位置を指定します。">
-            <mx:Object label="左上"   data="up,left"  />
-            <mx:Object label="右上"   data="up,right" />
-            <mx:Object label="上"     data="up"       />
-            <mx:Object label="中央"   data="center"   />
-            <mx:Object label="右"     data="right"    />
-            <mx:Object label="左"     data="left"     />
+                       toolTip="{Language.s.cutInPositionTips}">
+            <mx:Object label="{Language.s.cutInPositionLeftUp}"   data="up,left"  />
+            <mx:Object label="{Language.s.cutInPositionRightUp}"   data="up,right" />
+            <mx:Object label="{Language.s.cutInPositionUp}"     data="up"       />
+            <mx:Object label="{Language.s.cutInPositionCenter}"   data="center"   />
+            <mx:Object label="{Language.s.cutInPositionRight}"     data="right"    />
+            <mx:Object label="{Language.s.cutInPositionLeft}"     data="left"     />
           </mx:ComboBox>
         </mx:FormItem>
         
         <mx:HBox width="100%">
-	      <mx:Label text="横:" />
+	      <mx:Label text="{Language.s.cutInSizeWidth}:" />
           <mx:NumericStepper id="imageWidth" minimum="0" maximum="1000" value="0" stepSize="1" width="60" />
-	      <mx:Label text="縦:" />
+	      <mx:Label text="{Language.s.cutInSizeHeight}:" />
           <mx:NumericStepper id="imageHeight" minimum="0" maximum="1000" value="0" stepSize="1" width="60" />
-	      <mx:Label text="ドット(0なら自動設定)" />
+	      <mx:Label text="{Language.s.cutInSizeDot}" />
         </mx:HBox>
         
         <mx:Spacer height="10" width="100%" />
         
-	    <mx:FormItem label="カットインタグ名(空欄なら指定無し):"  toolTip="カットインタグ名が同一のカットインが表示されている場合は、既存のカットインを先に閉じて新しいカットインが表示されます。&#13;カットインタグ名が空欄（指定無し）の場合には常に新しいカットインが生成されます。" >
+	    <mx:FormItem label="{Language.s.cutInTagLabel}:"  toolTip="{Language.s.cutInTagTips}" >
         <mx:TextInput id="cutInTag" width="100" text="" />
         </mx:FormItem>
         
         <mx:Spacer height="10" width="100%" />
         
-        <mx:Button label="プレビュー(自分のみ)" click="previewCutIn()" />
+        <mx:Button label="{Language.s.cutInPreview}" click="previewCutIn()" />
         
       </mx:Box>
     </mx:HBox>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="追加" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.addButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
     
     
@@ -163,7 +163,7 @@
         printPreview();
     }
     
-    private var loadingMessage:String = "ロード中・・・";
+    private var loadingMessage:String = "Loading...";
     
     /**
      * プレビュー画像読み込み完了時の処理
@@ -210,7 +210,7 @@
         }
         
         if( Utils.isYoutubeUrl(imageSourceText) ) {
-            this.status = "YoutubeのURL指定時には「ルーム」ボタンから「プレイルーム情報変更」で外部URLを使用可にしてください";
+            this.status = Language.s.cutInYoutubeUrlTips;
         }
     }
     
@@ -219,11 +219,11 @@
      */
     protected function getCommandParams():Object {
         if( message.text == "" ) {
-            Alert.show("タイトルを入力してください");
+            Alert.show(Language.s.cutInInputTitleWarning);
             return null;
         }
         if( imageSource.text == "" ) {
-            Alert.show("画像／動画ファイル名を入力してください\n");
+            Alert.show(Language.s.cutInInputImageSourceWarning);
             return null;
         }
         

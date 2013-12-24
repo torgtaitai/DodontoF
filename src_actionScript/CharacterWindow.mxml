@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="690"
    height="540"
-   title="キャラクター..." 
+   title="title..." 
    showCloseButton="true"
    >
   
@@ -15,7 +15,7 @@
            paddingTop="0" paddingBottom="0" 
            verticalGap="0" horizontalGap="0" 
            >
-    <mx:Button id="imageListExtendButon" label="画像切替設定" height="15" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
+    <mx:Button id="imageListExtendButon" label="{Language.s.characterWindowImageSetting}" height="15" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
     <mx:HBox id="imageListExtendSpace"
              paddingTop="0" paddingBottom="0" 
              width="0" height="0" enabled="false" visible="false">
@@ -29,8 +29,8 @@
                paddingRight="1" paddingLeft="1" 
                verticalGap="2" horizontalGap="2" 
                tileWidth="50" />
-      <mx:Button label="追加" height="100%" click="addImageListDefault()" />
-      <mx:Button label="削除" height="100%" click="removeImageList()" />
+      <mx:Button id="addImageButton" label="{Language.s.addButton}" height="100%" click="addImageListDefault()" />
+      <mx:Button id="changeImageButton" label="{Language.s.deleteButton}" height="100%" click="removeImageList()" />
     </mx:HBox>
   </mx:HBox>
   
@@ -49,7 +49,7 @@
       
 	  <mx:DataGridColumn id="initiativeInt"
                          visible="false"
-                         headerText="イニシアティブ"
+                         headerText="{Language.s.initiativeWindowColumnTitleInitiative}"
                          editorDataField="value"
                          dataField="initiativeInt"
                          textAlign="left"
@@ -65,7 +65,7 @@
       
 	  <mx:DataGridColumn id="initiativeModify"
                          visible="false"
-                         headerText="修正値(イニシアティブ同値時比較用)"
+                         headerText="{Language.s.initiativeWindowColumnTitleInitiativeModify}"
                          editorDataField="value"
                          dataField="initiativeModify"
                          textAlign="left"
@@ -1120,38 +1120,19 @@
                paddingTop="0"
                paddingBottom="0"
                >
-        <mx:FormItem label="名前:"
+        <mx:FormItem label="{Language.s.initiativeWindowColumnTitleCharacterName}:"
                      paddingTop="0"
                      >
-	      <mx:TextInput id="characterName" width="190" />
+	      <mx:TextInput id="characterName" width="170" />
         </mx:FormItem>
         
-	    <mx:FormItem id="characterImageUrlItem" label="画像のURL:">
-          <mx:TextInput id="characterImageUrl" width="190" change="printPreview();" editable="true" enabled="false" />
+	    <mx:FormItem id="characterImageUrlItem" label="{Language.s.characterImageUrlItem}:">
+          <mx:TextInput id="characterImageUrl" width="150" change="printPreview();" editable="true" enabled="false" />
         </mx:FormItem>
       </mx:Form>
       
-<!--
-      <mx:HBox id="underNameBox"
-               height="25" width="100%"
-               verticalGap="0"
-               horizontalGap="0"
-               horizontalAlign="left"
-               >
-	    <mx:Label text="イニシアティブ:" />
-        <mx:NumericStepper id="characterInitiative" maximum="999" minimum="-999" value="0" stepSize="1" />
-        
-        <mx:Spacer height="100%" width="10" />
-        
-	    <mx:Label text="修正値:"
-                  toolTip="イニシアティブ同値時比較用"/>
-        <mx:NumericStepper id="characterInitiativeModify" maximum="90" minimum="-9" value="0" stepSize="1"
-                           toolTip="イニシアティブ同値時比較用"/>
-      </mx:HBox>
--->
-      
       <mx:HBox id="characterSizeBox" height="30" width="100%" horizontalAlign="left">
-	    <mx:Label text="サイズ:" />
+	    <mx:Label text="{Language.s.size}:" />
         <mx:NumericStepper id="characterSize" minimum="1" maximum="10" value="1" />
         
         <mx:Spacer width="10" />
@@ -1159,68 +1140,25 @@
         <mx:CheckBox id="isHide" label="" selected="false"
                      height="100%"
                      />
-        <mx:Text text="マップマスクの下へ隠す&#013;(イニシアティブ表で非表示)" />
+        <mx:Text text="{Language.s.hideCharacterUnderMapMask}" />
       </mx:HBox>
       
       <mx:Form width="100%"
                >
-        <mx:FormItem label="参照URL:" width="100%"
-                     toolTip="設定すると、キャラクターの右クリックメニューから&#013;参照URLを開けるようになります。&#013;WEB上のキャラクターシートのURLを入力しておくと便利です"
+        <mx:FormItem label="{Language.s.characterDataUrl}:" width="100%"
+                     toolTip="{Language.s.characterDataUrlTips}"
                      >
 	      <mx:TextInput id="url" width="100%" />
         </mx:FormItem>
       </mx:Form>
       
-      
-      <!--
-          <mx:Spacer width="100%" height="100%" />
-          
-          <mx:HBox height="0" width="100%"
-                   id="standingGraphicsIsAlreadySetBox"
-                   verticalGap="0"
-                   horizontalGap="0"
-                   horizontalAlign="center"
-                   visible="false"
-                   >
-            <mx:Text id="standingGraphicsIsAlreadySet" text="立ち絵は設定されているため&#013;簡易立ち絵表示は無効です。" />
-          </mx:HBox>
-          <mx:HBox height="40" width="100%"
-                   id="leftIndexBox"
-                   verticalGap="0"
-                   horizontalGap="0"
-                   horizontalAlign="center"
-                   toolTip="立ち絵が未設定のため、このコマの画像が立ち絵に使用されます。"
-                   >
-            <mx:Text id="leftIndexLabel" text="簡易立ち絵表示位置：&#013;(1:左端, 12:右端)" />
-            <mx:HSlider id="leftIndex"
-                        width="150"
-                        liveDragging="true"
-                        showTrackHighlight="false"
-                        maximum="12"
-                        minimum="1"
-                        value="1"
-                        snapInterval="1"
-                        />
-          </mx:HBox>
-          
-          <mx:Button label="立ち絵設定" height="20"
-                     fontWeight="nomal"
-                     click="DodontoF.popup(StandingGraphicsManageWindow, true)"
-                     />
-          -->
     </mx:Box>
     
     <mx:Box id="otherInfos" height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
       
-      <!--
-          <mx:Button label="カウンター設定" click="DodontoF_Main.getInstance().getInitiativeWindow().setConfig();PopUpManager.removePopUp(this)" />
-          -->
-      
-
-      
       <mx:Box height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
         <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-          <mx:Label text="その他:" width="100%" />
+          <mx:Label text="{Language.s.initiativeWindowColumnTitleInfo}:" width="100%" />
           <mx:Button id="changeStatusAliasButton"
                      label="■"
                      height="20" fontWeight="normal" enabled="false"
@@ -1233,9 +1171,9 @@
   </mx:HBox>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="this.setCharacterOnButton()"
+    <mx:Button id="executeButton" label="button..." click="this.setCharacterOnButton()"
                enabled="{ (characterImageUrl.text != '') }" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>
@@ -1252,7 +1190,7 @@
     public var statusAlias:Object = new Object();
     protected var character:Character;
     
-    private var loadingMessage:String = "ロード中・・・";
+    private var loadingMessage:String = "Loading...";
     private var previewImage:Image = new Image();
     
     
@@ -1494,9 +1432,9 @@
         changeStatusAliasButton.enabled = b;
         
         if( b ) {
-            changeStatusAliasButton.toolTip="カウンターのチェック欄に名前を付ける";
+            changeStatusAliasButton.toolTip= Language.s.changeStatusAliasEnable;
         } else {
-            changeStatusAliasButton.toolTip="カウンターのチェック欄に名前を付ける\n(カウンターにチェック欄が無いため現在設定できません)";
+            changeStatusAliasButton.toolTip= Language.s.changeStatusAliasDisable;
         }
     }
     
@@ -1671,7 +1609,8 @@
         imageListExtendSpace.visible = true;
         imageListExtendSpace.enabled = true;
         imageListExtendSpace.width = 650;
-        imageListSpace.width = imageListExtendSpace.width - 120;
+        imageListSpace.width = imageListExtendSpace.width
+           - addImageButton.width - changeImageButton.width - 20;
         imageListExtendSpace.height = 68;
         
         imageListBox.height = imageListExtendSpace.height;

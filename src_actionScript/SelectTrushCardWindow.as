@@ -6,8 +6,8 @@ package {
 	public class SelectTrushCardWindow extends SelectCardWindow {
         
         override protected function init():void {
-            title = "捨て札カード選択";
-            howToLabel.text = "捨て札のカードは以下の通り。抜き取りたいカードをドラッグしてカード置き場（緑のマットの上）にドロップしてください。";
+            title = Language.s.selectTrushCard;
+            howToLabel.text = Language.s.selectTrushCardInfo;
         }
         
         override protected function getMountCardInfos():void {

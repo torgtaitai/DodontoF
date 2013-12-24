@@ -2,7 +2,7 @@
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   title="チャットパレット"
+   title="{Language.s.chatPallet}"
    width="220" height="220"
    visible="false"
    showCloseButton="true"
@@ -16,13 +16,13 @@
     </mx:TabNavigator>
     
     <mx:HBox width="100%" height="20">
-      <mx:Button label="編集" click="edit()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="{Language.s.chatPalletEdit}" click="edit()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
       <mx:Spacer width="20"/>
-      <mx:Button label="セーブ" click="save()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
-      <mx:Button label="ロード" click="load()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="{Language.s.chatPalletSave}" click="save()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="{Language.s.chatPalletLoad}" click="load()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
       <mx:Spacer width="20"/>
-      <mx:Button id="addPaletTabButton" label="タブ追加" click="addPaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
-      <mx:Button id="deletePaletTabButton" label="タブ削除" click="deletePaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button id="addPaletTabButton" label="{Language.s.chatPalletAddTab}" click="addPaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button id="deletePaletTabButton" label="{Language.s.chatPalletDeleteTab}" click="deletePaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
     </mx:HBox>
     
   </mx:Box>
@@ -94,11 +94,11 @@
             addPaletTab();
         }
         
-        var lines:Array = ["チャットパレット入力例：",
-                           "2d6+1 ダイスロール",
-                           "１ｄ２０＋{敏捷}＋｛格闘｝　格闘！",
-                           "//敏捷=10",
-                           "//格闘＝１"];
+        var lines:Array = [Language.s.chatPalletInputSample1,
+                           Language.s.chatPalletInputSample2,
+                           Language.s.chatPalletInputSample3,
+                           Language.s.chatPalletInputSample4,
+                           Language.s.chatPalletInputSample5];
         
         var tabEditorInfo:Object = tabEditors[0];
         setLines(lines, tabEditorInfo);
@@ -179,15 +179,15 @@
         box.percentWidth = 100;
         
         var nameLabel:Label = new Label();
-        nameLabel.text = "名前：";
+        nameLabel.text = Language.s.chatPalletName;
         
         box.addChild(nameLabel);
         box.addChild(name);
         box.addChild(state);
         box.addChild(colorPicker);
         
-        colorPicker.toolTip = "指定文字色が白（FFFFFF）の場合はチャットウィンドウの文字色で発言します。";
-        box.toolTip = "名前が空欄の場合、チャットウィンドウの名前で発言します";
+        colorPicker.toolTip = Language.s.chatPalletColorTips;
+        box.toolTip = Language.s.chatPalletNameTips;
         
         return box;
     }
@@ -197,7 +197,7 @@
         input.addEventListener(FlexEvent.ENTER, getSendChatMessageFunction(input, name, state, colorPicker));
         
         var button:Button = new Button();
-        button.label = "送信";
+        button.label = Language.s.chatPalletSendButton;
         button.setStyle("paddingLeft", 0);
         button.setStyle("paddingRight", 0);
         button.addEventListener(MouseEvent.CLICK, getSendChatMessageFunction(input, name, state, colorPicker));
@@ -369,7 +369,7 @@
     private var saveLoadLocalFile:SaveLoadLocalFile = new SaveLoadLocalFile();
     
     private function initSaveLoad():void {
-        saveLoadLocalFile.init("チャットパレットセーブデータ", "cpd", "ChatPalette2",
+        saveLoadLocalFile.init(Language.s.chatPalletSaveData, "cpd", "ChatPalette2",
                                function(saveData:Object):void { loadSaveData(saveData) } );
     }
     

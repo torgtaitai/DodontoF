@@ -16,10 +16,10 @@
            horizontalAlign="center"
            verticalGap="1"
            > 
-    <mx:Button label="セーブ" click="saveButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
-    <mx:Button label="ロード" click="loadButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.saveCounterRemoconButton}" click="saveButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.loadCounterRemoconButton}" click="loadButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
     <mx:Spacer width="100%" />
-    <mx:Button label="ボタン追加" click="addButton()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.addCounterRemoconButton}" click="addButton()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
   </mx:HBox>
     
   <mx:Script>
@@ -48,26 +48,26 @@
         private var buttonInfos:Array = null;
         
         private var buttonDefaultInfos:Array = [
-    {label:"1D6ダメージ",
+    {label:Language.s.counterRemoconSampleTitle_1,
      counterName: "HP",
      operator: "minus",
      modifyValue: "1D6+1",
-     messageFormat:"{0}に{3}のダメージ！{4}"},
-    {label:"HP回復",
+     messageFormat:Language.s.counterRemoconSampleInfo_1},
+    {label:Language.s.counterRemoconSampleTitle_2,
      counterName: "HP",
      operator: "plus",
      modifyValue: "",
-     messageFormat:"{0}の{1}を{3}回復{4}"},
-    {label:"イニシロール",
+     messageFormat:Language.s.counterRemoconSampleInfo_2},
+    {label:Language.s.counterRemoconSampleTitle_3,
      counterName: "#INI",
      operator: "equal",
      modifyValue: "1D20+1",
-     messageFormat:"{0}のイニシアティブを{2}へ"},
-    {label:"夢を渡す",
-     counterName: "夢",
+     messageFormat:Language.s.counterRemoconSampleInfo_3},
+    {label:Language.s.counterRemoconSampleTitle_4,
+     counterName: Language.s.counterRemoconSampleCounterName_4,
      operator: "plus",
      modifyValue: 1,
-     messageFormat:"{0}に夢を渡しました{4}"},
+     messageFormat:Language.s.counterRemoconSampleInfo_5},
     {}];
         
         
@@ -130,19 +130,19 @@
             initButtons();
             setContextMenu();
             
-            saveLoadLocalFile.init("カウンターリモコンセーブデータ", "json", "CounterRemocon",
+            saveLoadLocalFile.init(Language.s.counterRemoconSaveData, "json", "CounterRemocon",
                                    function(saveData:Object):void { loadSaveData(saveData) } );
         }
         
         public function setTitle():void {
-            this.title="カウンター リモコン"
+            this.title=Language.s.counterRemocon
         }
         
         private function setContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            MovablePiece.addMenuItem(menu, "ボタン追加", function():void {addButton()} );
+            MovablePiece.addMenuItem(menu, Language.s.addCounterRemoconButton, function():void {addButton()} );
             this.contextMenu = menu;
         }
         
@@ -213,23 +213,23 @@
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            MovablePiece.addMenuItem(menu, "ボタンの変更", function():void{
+            MovablePiece.addMenuItem(menu, Language.s.changeCounterRemoconButton, function():void{
                     var window:ChangeCounterRemoconWindow = DodontoF.popup(ChangeCounterRemoconWindow, true) as ChangeCounterRemoconWindow;
                     window.setParams( buttonInfos[index], index );
                 });
             
-            MovablePiece.addMenuItem(menu, "ボタンの削除", function():void{
+            MovablePiece.addMenuItem(menu, Language.s.deleteCounterRemoconButton, function():void{
                     buttonInfos.splice(index, 1);
                     initButtons();
                 }, true);
             
-            MovablePiece.addMenuItem(menu, "ボタンの複製", function():void{
+            MovablePiece.addMenuItem(menu, Language.s.cloneCounterRemoconButton, function():void{
                     var button:Object = Utils.clone(buttonInfos[index]);
                     buttonInfos.splice(index + 1, 0, button);
                     initButtons();
                 }, true);
             
-            MovablePiece.addMenuItem(menu, "ボタンを【←左　　】へ", function():void{
+            MovablePiece.addMenuItem(menu, Language.s.moveLeftCounterRemoconButton, function():void{
                     if( index == 0 ) {
                         return;
                     }
@@ -240,7 +240,7 @@
                     initButtons();
                 }, true);
             
-            MovablePiece.addMenuItem(menu, "ボタンを【　　右→】へ", function():void{
+            MovablePiece.addMenuItem(menu, Language.s.moveRightCounterRemoconButton, function():void{
                     if( (index + 1) == buttonInfos.length ) {
                         return;
                     }
@@ -280,6 +280,7 @@
                 if( info == null ) {
                     continue;
                 }
+                
                 menuData.push(info);
             }
             
@@ -287,7 +288,7 @@
             
             if( others.length > 0 ) {
                 var childrenInfo:Object = {
-                    label: "その他のキャラ",
+                    label: Language.s.toOthersCounterRemoconButton,
                     children: others };
                 
                 menuData.push(childrenInfo);
@@ -366,7 +367,6 @@
             
             return valueInfo;
         }
-        
         
         private function getOtherCharactersMenu(exists:Array, params:Object):Array {
             var menuData:Array = [];
@@ -470,7 +470,7 @@
             
             character.setInitiative(initiative);
             
-            var counterName:String = "イニシアティブ値";
+            var counterName:String = Language.s.initiativeValue;
             var message:String = getExecuteResultMessage(messageFormat, character.getName(), counterName, 
                                                          before, modifyResult)
             sendCharacterChange(character, message);
@@ -489,7 +489,7 @@
             }
             
             if( ! isExistCounterName ) {
-                var errorMessage:String = "カウンター値に「" + counterName + "」は存在しません";
+                var errorMessage:String = Language.text("counterRemoconCounterNameWarning", counterName);
                 this.title = errorMessage;
                 Log.printSystemLogPublic(errorMessage);
                 return;
@@ -519,7 +519,7 @@
                 after = "?";
             }
             
-            var result:String = StringUtil.substitute("（{0}：{1}→{2}）", counterName, before, after);
+            var result:String = StringUtil.substitute(Language.s.counterRemoconExecuteResultFormat, counterName, before, after);
             
             return StringUtil.substitute(messageFormat, 
                                          characterName,   //{0} 相手

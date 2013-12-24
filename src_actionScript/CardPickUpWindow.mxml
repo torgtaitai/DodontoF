@@ -2,7 +2,7 @@
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   title="カードピックアップ"
+   title="{Language.s.cardPickup}"
    showCloseButton="false"
    backgroundColor="#FFFFFF"
    borderStyle="solid"

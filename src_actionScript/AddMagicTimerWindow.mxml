@@ -4,34 +4,34 @@
    xmlns:torgtaitai="*" 
    width="500"
    height="300"
-   title="魔法タイマー追加" 
+   title="{Language.s.addMagicTimer}" 
    showCloseButton="true"
    >
 
   <mx:Form>
-	<mx:FormItem label="名前:">
+	<mx:FormItem label="{Language.s.magicTimerName}">
 	  <mx:TextInput id="magicTimerName" text="" />
 	</mx:FormItem>
-	<mx:FormItem label="持続時間:">
+	<mx:FormItem label="{Language.s.magicTimerTime}">
       <mx:HBox width="100%" height="100%">
 	    <mx:NumericStepper id="magicTimerTimeRange" minimum="1" maximum="99" value="1" />
-        <mx:Label text = "ラウンド" />
+        <mx:Label text = "{Language.s.magicTimerRound}" />
       </mx:HBox>
 	</mx:FormItem>
-	<mx:FormItem label="効果開始ラウンド:">
+	<mx:FormItem label="{Language.s.magicTimerStartRound}">
 	  <mx:NumericStepper id="magicTimerCreateRound" minimum="1" maximum="99" />
 	</mx:FormItem>
-	<mx:FormItem label="効果開始イニシアティブ:">
+	<mx:FormItem label="{Language.s.magicTimerStartInitiative}">
 	  <mx:NumericStepper id="magicTimerInitiative" minimum="0" maximum="99"  value="0" stepSize="0.01" />
 	</mx:FormItem>
-	<mx:FormItem label="その他:">
+	<mx:FormItem label="{Language.s.magicTimerInfo}">
 	  <mx:TextInput id="magicTimerInfo" text="" />
 	</mx:FormItem>
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="executeOnButton()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addButton}" click="executeOnButton()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>

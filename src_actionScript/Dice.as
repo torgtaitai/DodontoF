@@ -377,7 +377,7 @@ package {
             }
             
             var total:int = getDiceTotal();
-            var result:String = "ダイス合計：" + total + " (" + diceTypesString + ")";
+            var result:String = Language.s.diceTotal + total + " (" + diceTypesString + ")";
             return result;
         }
         
@@ -635,7 +635,7 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            MovablePiece.addMenuItem(menu, "ダイスの削除", clearDiceFromMenu);
+            MovablePiece.addMenuItem(menu, Language.s.deleteDice, clearDiceFromMenu);
             
             view.contextMenu = menu;
         }

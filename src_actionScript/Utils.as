@@ -563,7 +563,25 @@ package {
             
             return bitmapData;
         }
-
+        
+        static public function getHashDiff(array1:Array, array2:Array):String {
+            var result:String = "";
+            if( array1.length != array2.length ) {
+                result += StringUtil.substitute("diff length before:{0}, after:{1}",
+                                             array1.length, array2.length) + "\n";
+            }
+            
+            for(var i:int = 0 ; i < array1.length ; i++) {
+                if( array1[i] != array2[i] ) {
+                    result += StringUtil.substitute("diff item\rbefore: \"{1}\"\r   after: \"{2}\"",
+                                                    i, array1[i], array2[i]);
+                    return result;
+                }
+            }
+            
+            return "";
+        }
+        
         static public function isSameArray(array1:Array, array2:Array):Boolean {
             if( array1.length != array2.length ) {
                 return false;
@@ -884,6 +902,47 @@ package {
             var mousePoint:Point = new Point(base.mouseX, base.mouseY);
             var point:Point = component.globalToLocal(mousePoint);
             return point;
+        }
+        
+        
+        static public function getKeys(obj:Object, ignorePrefix:String = null):Array {
+            var keys:Array = [];
+            
+            for(var key:String in obj){
+                if(ignorePrefix != null) {
+                    if(key.indexOf(ignorePrefix) == 0) {
+                        continue;
+                    }
+                }
+                keys.push(key);
+            }
+            keys.sort();
+            
+            return keys;
+        }
+        
+        
+        static public function getDiceBotLanguageName(gameType:String):String {
+            var diceBotLanguageName:String = Language.diceBotLangPrefix + gameType;
+            var langName:String = Language.s[diceBotLanguageName];
+            return langName;
+        }
+        
+        static public function setDiceBotDataProvider(comboBox:ComboBox,
+                                                      diceBotInfos:Array):void {
+            for(var i:int = 0 ; i < diceBotInfos.length; i++) {
+                var info:Object = diceBotInfos[i];
+                var langName:String = getDiceBotLanguageName( info['gameType'] );
+                if( langName != null ) {
+                    info['name'] = langName;
+                }
+            }
+            comboBox.dataProvider = diceBotInfos;
+        }
+        
+        static public function sendSystemMessage(message:String,
+                                                  args:Array = null, strictlyUniqueId:String = null):void {
+            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message, args, strictlyUniqueId );
         }
     }
 }

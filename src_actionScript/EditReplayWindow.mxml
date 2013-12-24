@@ -4,20 +4,20 @@
    xmlns:torgtaitai="*" 
    width="600"
    height="450"
-   title="リプレイデータ編集画面" 
+   title="{Language.s.editReplayDataWindow}" 
    showCloseButton="true"
    >
   
   
   <mx:HBox width="100%" >
-    <mx:Button id="loadButton" label="ロード" click="loadReplayData();" />
+    <mx:Button id="loadButton" label="{Language.s.loadReplayData}" click="loadReplayData();" />
       <mx:Spacer width="10" height="10" />
-    <mx:Button id="saveButton" label="セーブ" click="saveEditReplayData();" enabled="false" />
-    <mx:Button id="saveHtmlButton" label="セーブ(HTML形式)" click="saveEditReplayDataByHtml();" enabled="false" />
+    <mx:Button id="saveButton" label="{Language.s.saveReplayData}" click="saveEditReplayData();" enabled="false" />
+    <mx:Button id="saveHtmlButton" label="{Language.s.saveReplayDataByHtmlStyle}" click="saveEditReplayDataByHtml();" enabled="false" />
   </mx:HBox>
   
   <mx:TabNavigator id="tabSpace" width="100%" height="100%" >
-    <mx:Box label="ログ編集" width="100%" height="100%" >
+    <mx:Box label="{Language.s.editReplayDataLog}" width="100%" height="100%" >
       
       <mx:HBox width="100%" height="100%" >
 	    <mx:DataGrid id="replayDataListDisplay"
@@ -36,11 +36,11 @@
                                dataField="index"
                                textAlign="center"
                                width="35"/>
-		    <mx:DataGridColumn headerText="データ種別"
+		    <mx:DataGridColumn headerText="{Language.s.replayDataType}"
                                dataField="dataType"
                                textAlign="left"
                                width="100"/>
-		    <mx:DataGridColumn headerText="詳細"
+		    <mx:DataGridColumn headerText="{Language.s.replayDataDetail}"
                                dataField="detail"
                                textAlign="left"
                                width="300"/>
@@ -49,14 +49,14 @@
         
         <mx:Box width="100" height="100%" horizontalAlign="center" verticalAlign="middle">
           <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:Button label="環境設定" click="createReplayConfigItem()" width="100%" />
+            <mx:Button label="{Language.s.setReplayConfig}" click="createReplayConfigItem()" width="100%" />
 <!--            <mx:Spacer width="100%" height="20" /> -->
-            <mx:Button label="コピー" click="copyItem()" width="100%"/>
-            <mx:Button label="↑" click="up()" width="100%"/>
-            <mx:Button label="↓" click="down()" width="100%"/>
-            <mx:Button label="挿入ロード" click="addLoadItems()" width="100%"/>
-            <mx:Button label="削除" click="deleteItem()" width="100%"/>
-            <mx:Button label="削除取消" click="undoDeletedItem()" width="100%"/>
+            <mx:Button label="{Language.s.copyReplayData}" click="copyItem()" width="100%"/>
+            <mx:Button label="{Language.s.moveReplayDataUp}" click="up()" width="100%"/>
+            <mx:Button label="{Language.s.moveReplayDataDown}" click="down()" width="100%"/>
+            <mx:Button label="{Language.s.insertReplayDataByLoad}" click="addLoadItems()" width="100%"/>
+            <mx:Button label="{Language.s.deleteButton}" click="deleteItem()" width="100%"/>
+            <mx:Button label="{Language.s.undoReplayDataDelete}" click="undoDeletedItem()" width="100%"/>
           </mx:Box>
         </mx:Box>
         
@@ -91,7 +91,7 @@
       
     </mx:Box>
     
-    <mx:Box label="画像一括編集" width="100%" height="100%" >
+    <mx:Box label="{Language.s.bulkChangeReplayDataImage}" width="100%" height="100%" >
       
 	  <mx:DataGrid id="imageListDisplay"
                    width="100%"
@@ -103,11 +103,11 @@
                    click="clickImageList()"
                    >
 	    <mx:columns>
-		  <mx:DataGridColumn headerText="概要"
+		  <mx:DataGridColumn headerText="{Language.s.replayDataInfo}"
                              dataField="info"
                              textAlign="center"
                              width="20"/>
-		  <mx:DataGridColumn headerText="画像ファイル名"
+		  <mx:DataGridColumn headerText="{Language.s.replayDataImageFileName}"
                              dataField="source"
                              textAlign="left"
                              width="100"/>
@@ -237,7 +237,7 @@
             var characterData:Object = characters[i];
             
             if( characterData.type == Character.getTypeStatic() ) {
-                addImageList(characterData, "imageName", "キャラ:" + characterData.name);
+                addImageList(characterData, "imageName", Language.s.replayEditCharacterName + characterData.name);
             }
         }
     }
@@ -246,15 +246,15 @@
         for(var i:int = 0 ; i < effects.length ; i++) {
             var effectData:Object = effects[i];
             if( effectData.type == StandingGraphics.getTypeStatic() ) {
-                addImageList(effectData, "source", "立ち絵:" + effectData.name + ":" + effectData.state);
+                addImageList(effectData, "source", Language.s.replayEditStandingGraphic + effectData.name + ":" + effectData.state);
             } else {
-                addImageList(effectData, "source", "カットイン:" + effectData.message );
+                addImageList(effectData, "source", Language.s.replayEditCutIn + effectData.message );
             }
         }
     }
     
     private function showAllSourceFromMap(mapData:Object):void {
-        addImageList(mapData, "imageSource", "マップ画像:" + mapData.imageSource);
+        addImageList(mapData, "imageSource", Language.s.replayEditMapImage + mapData.imageSource);
     }
     
     private function addImageList(data:Object, key:String, info:String):void {
@@ -405,20 +405,20 @@
         };
         
         if( jsonData.characters ) {
-            result.dataType = "キャラクター・カード";
+            result.dataType = Language.s.replayEditCharacterOrCardData;
         }
         if( jsonData.record ) {
-            result.dataType = "キャラクター・カード";
+            result.dataType = Language.s.replayEditCharacterOrCardData;
         }
         if( jsonData.roundTimeData ) {
-            result.dataType = "ラウンド進行";
+            result.dataType = Language.s.replayEditRandData;
         }
         if( jsonData.effects ) {
-            result.dataType = "立ち絵・カットイン";
+            result.dataType = Language.s.replayEditEffectData;
         }
         
         if( jsonData.chatMessageDataLog ) {
-            result.dataType = "チャット";
+            result.dataType = Language.s.replayEditChatData;
             var chatInfo:Object = getChatInfo(jsonData);
             var detail:String = "";
             detail = chatInfo.name;
@@ -430,16 +430,16 @@
         }
         
         if( jsonData.mapData ) {
-            result.dataType = "マップ情報";
+            result.dataType = Language.s.replayEditMapData;
         }
         
         if( jsonData.replayConfig ) {
-            result.dataType = "リプレイ再生時設定";
-            result.detail = "グリッド表示" + (jsonData.replayConfig.grid ? "あり" : "なし")
-            + "、座標文字" + (jsonData.replayConfig.position ? "あり" : "なし")
-            + "、ダイス表示" + ( jsonData.replayConfig.dice ? "あり" : "なし")
-            + "、立ち絵調整" + ( jsonData.replayConfig.adjustStand ? "あり" : "なし");
-//            + "、チャットタブ：" + jsonData.replayConfig.channelNames.join(",");
+            result.dataType = Language.s.replayEditConfigData;
+            result.detail = Language.text("replaySetting",
+                                          (jsonData.replayConfig.grid ? Language.s.ON : Language.s.OFF),
+                                          (jsonData.replayConfig.position ? Language.s.ON : Language.s.OFF),
+                                          (jsonData.replayConfig.dice ? Language.s.ON : Language.s.OFF),
+                                          (jsonData.replayConfig.adjustStand ? Language.s.ON : Language.s.OFF));
         }
         
         return result;

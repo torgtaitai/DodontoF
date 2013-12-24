@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="430" height="200"
-   title="送信失敗チャットの再送" 
+   title="{Language.s.retrySendFailedMessage}" 
    showCloseButton="true"
    >
   
@@ -26,7 +26,7 @@
     </mx:DataGrid>
     <mx:HBox width="100%">
       <mx:Spacer width="50%" />
-      <mx:Button label="再送" click="sendMessage()" />
+      <mx:Button label="{Language.s.resend}" click="sendMessage()" />
       <mx:Spacer width="50%" />
     </mx:HBox>
   </mx:Box>
@@ -58,7 +58,7 @@
         
         if ( b ) {
             Log.logging("setNotify message");
-            Log.loggingErrorOnStatus("送信エラー[" + self.listData.length + "]");
+            Log.loggingErrorOnStatus( Language.text("sendChatErrorCountMessage", self.listData.length) );
         }
         Log.logging("setNotify End");
     }

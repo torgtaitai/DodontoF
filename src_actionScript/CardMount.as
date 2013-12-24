@@ -34,7 +34,7 @@ package {
         }
 
         override public function getTypeName():String {
-            return "カード山";
+            return Language.s.cardMount;
         }
         
         public function getCardCount():int {
@@ -79,7 +79,7 @@ package {
         }
 
         override public function getTitleText():String {
-            return "山札:" + getCardCount() + "枚";
+            return Language.text("cardMountCountDisplay", getCardCount());
         }
         
         override protected function isOwner():Boolean {
@@ -94,13 +94,13 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "カードを引く：非公開で自分だけ", getContextMenuItemCardDraw, false);
-            addMenuItem(menu, "カードを引く：全員に公開する", getContextMenuItemCardDrawPublic, false);
-            addMenuItem(menu, "カードを引く：全員に非公開で", getContextMenuItemCardDrawSecret, false);
+            addMenuItem(menu, Language.s.drawCardForMe, getContextMenuItemCardDraw, false);
+            addMenuItem(menu, Language.s.drawCardForEveryone, getContextMenuItemCardDrawPublic, false);
+            addMenuItem(menu, Language.s.drawCardClosed, getContextMenuItemCardDrawSecret, false);
             
-            addMenuItem(menu, "カードをN枚引く", getContextMenuItemCardDrawMany, true);
+            addMenuItem(menu, Language.s.drawCardMany, getContextMenuItemCardDrawMany, true);
             
-            addMenuItem(menu, "山からカードを選び出す", getContextMenuItemCardSelect, true);
+            addMenuItem(menu, Language.s.selectCardFromMount, getContextMenuItemCardSelect, true);
             
             view.contextMenu = menu;
         }
@@ -185,12 +185,14 @@ package {
                 }
             
             if( openCardNames.length > 0 ) {
-                printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを引いて公開しました。"
-                                  + "「" + openCardNames.join("」「") + "」");
+                var cardsText:String = openCardNames.join(Language.s.drawCardAndOpenMessageSeparactor);
+                printCardLog(Language.s.drawCardAndOpenMessage,
+                             [this.getMountNameForDisplay(), cardsText]);
             }
             
             if( closeCardNames.length > 0 ) {
-                printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを引きました。");
+                printCardLog(Language.s.drawCardMessage,
+                             [this.getMountNameForDisplay()]);
             }
         }
         
@@ -200,7 +202,8 @@ package {
         }
         
         public function drawCardSecret(count:int = 1):void {
-            printCardLog("が「" + this.getMountNameForDisplay() + "」の山札からカードを伏せたまま引きました。");
+            printCardLog(Language.s.drawCardSecretMessage,
+                         [this.getMountNameForDisplay()]);
             
             var isOpen:Boolean = false;
             var ownerId:String = Card.getNobodyOwner();

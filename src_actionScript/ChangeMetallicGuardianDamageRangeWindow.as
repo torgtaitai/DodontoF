@@ -14,8 +14,8 @@ package {
         }
 
         override protected function setup():void {
-            title = "攻撃範囲変更";
-            executeButton.label = "変更";
+            title = Language.s.changeMetallicGuardianDamageRangeWindowTitle;
+            executeButton.label = Language.s.changeButton;
             
             rangeName.text = damageRange.getName();
             maxRange.value = damageRange.getMaxRange();

@@ -4,18 +4,18 @@
    xmlns:torgtaitai="*" 
    width="300"
    height="120"
-   title="マップ切り替え" 
+   title="{Language.s.changeMapState}" 
    showCloseButton="true"
    >
   
   <mx:Box width="100%" height="100%">
     <mx:HBox id="loadSelectBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Label text="マップとマップマスクを差し替えて、マップを切り替えます" />
+      <mx:Label text="{Language.s.changeMapStateInfo}" />
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="切り替え実行" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.executeChangeMapState}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

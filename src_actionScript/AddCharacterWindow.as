@@ -13,9 +13,8 @@ package {
          * 初期化処理
          */
         protected override function init():void {
-            title = "キャラクター追加";
-            executeButton.label = "追加";
-            
+            title = Language.s.addCharacterWindowTitle;
+            executeButton.label = Language.s.addButton;
             initCounterValues();
             
             characterImageUrl.text = "./image/defaultImageSet/pawn/pawnBlack.png";

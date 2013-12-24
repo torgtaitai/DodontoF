@@ -10,8 +10,8 @@ package {
         
         
         override protected function setup():void {
-            title = "ダイスボット表変更";
-            executeButton.label = "変更";
+            title = Language.s.changeBotTableWindowTitle;
+            executeButton.label = Language.s.botTableChangeButton;
             
             setVisiblePrintSampleButton( false );
         }

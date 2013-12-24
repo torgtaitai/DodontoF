@@ -4,17 +4,17 @@
    xmlns:torgtaitai="*" 
    width="600"
    height="450"
-   title="ログイン" 
+   title="{Language.s.login}" 
    >
   
   <mx:Box width="100%" height="100%" >
-      <mx:TextArea id="message" htmlText="ロード中・・・" width="100%" height="100%" />
+      <mx:TextArea id="message" htmlText="{Language.s.loading}" width="100%" height="100%" />
   </mx:Box>
 
 
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="getImageButton" label="データ取得" click="collectSmallImage()" enabled="false" />
-    <mx:Button id="uploadButton" label="アップロード" click="upload()" enabled="false" />
+    <mx:Button id="getImageButton" label="{Language.s.getData}" click="collectSmallImage()" enabled="false" />
+    <mx:Button id="uploadButton" label="{Language.s.uploadImage}" click="upload()" enabled="false" />
   </mx:HBox>
   
   <mx:Script>
@@ -30,7 +30,7 @@
     private function collectSmallImage():void {
         getImageButton.enabled = false;
         
-        message.text += "進行度を示す . が止まったら「アップロード」ボタンを押してください。 . 一つが１ファイルです。\n";
+        message.text += Language.s.progressiveInfo;
         
         for(var i:int = 0 ; i < noSmallImageUrlList.length ; i++) {
             var imageUrl:String = noSmallImageUrlList[i];
@@ -96,14 +96,14 @@
             }
         }
         
-        message.text += "サムネイル作成対象件数（予定） : " + noSmallImageUrlList.length + "\n\n";
+        message.text += Language.s.createSmallImagesCountPlan + noSmallImageUrlList.length + "\n\n";
         if( noSmallImageUrlList.length == 0 ) {
             getImageButton.enabled = false;
-            message.text += "全画像のサムネイル作成が完了しました。お疲れ様でした。\n";
+            message.text += Language.s.createSmallImagesFinished;
             return;
         }
-        message.text += "この件数が0件なら全て完了です。\n0でなくても何らかの理由で実施できない場合もあります。\n大体0件になればOKと考えておいてください。\n\n";
-        message.text += "まずは「データ取得」ボタンを押してください。処理が重い場合がありますのでご注意ください。\n";
+        message.text += Language.s.createSmallImages_1;
+        message.text += Language.s.createSmallImages_2;
     }
     
     private var uploadInfos:Array = new Array();
@@ -111,7 +111,7 @@
     private function upload():void {
         uploadButton.enabled = false;
         
-        message.text += "\nアップロード中。　上記と同様に進行度を . で示しています。\n通常は上記と同じ数の.が表示されます。\n進行が停止したら処理完了です。お疲れ様でした。\n";
+        message.text += Language.s.createSmallImages_3;
         
         while( uploadInfos.length > 0 ) {
             var info:Array = uploadInfos.shift() as Array;

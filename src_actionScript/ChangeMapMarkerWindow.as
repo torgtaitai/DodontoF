@@ -11,7 +11,7 @@ package {
         }
         
         protected override function init():void {
-            title = "マップマーカー変更";
+            title = Language.s.changeMapMarkerWindowTitle;
             
             this.isCreate = false;
             this.isMany.height = 0;

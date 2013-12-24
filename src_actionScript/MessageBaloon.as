@@ -70,7 +70,7 @@ package {
         private var lineLimitLength:int = 30;
         
         private function getSplitText(text:String):Array {
-            var parts:Array = splitArrayText([text], "。", true);
+            var parts:Array = splitArrayText([text], Language.s.period, true);
             parts = splitArrayText(parts, "\n", false);
             
             var result:Array = [];
@@ -83,7 +83,7 @@ package {
                 
                 if( text.length > lineLimitLength ) {
                     //1行が長すぎるならさらに区切る事
-                    var delimiters:Array = ["、", "」", "]", "／",  "/"];
+                    var delimiters:Array = [Language.s.comma, "」", "]", "／",  "/"];
                     addSplitedText(text, delimiters, result);
                     continue;
                 }
@@ -245,8 +245,8 @@ package {
             }
         }
         
-        static private var successList:Array = ["成功"];
-        static private var failedList:Array = ["失敗"];
+        static private var successList:Array = [Language.s.success];
+        static private var failedList:Array = [Language.s.failed];
         
         static private var successColor:uint = 0x66FF66;
         static private var failedColor:uint = 0xFF0033;

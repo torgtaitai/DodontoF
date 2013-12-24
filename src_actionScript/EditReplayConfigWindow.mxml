@@ -4,35 +4,31 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="225"
-   title="リプレイ環境設定" 
+   title="{Language.s.editReplayConfig}" 
    showCloseButton="true"
    >
   
-  <mx:CheckBox id="grid" label="マス目を表示する" selected="true"
+  <mx:CheckBox id="grid" label="{Language.s.isDisplayGridOnReplay}" selected="true"
                height="100%"
                />
-  <mx:CheckBox id="position" label="座標文字を表示する" selected="true"
+  <mx:CheckBox id="position" label="{Language.s.isDisplayPositionOnReplay}" selected="true"
                height="100%"
                />
-  <mx:CheckBox id="dice" label="ビジュアルダイスを表示する" selected="true"
+  <mx:CheckBox id="dice" label="{Language.s.isVisualDiceOnReplay}" selected="true"
                height="100%"
                />
-  <mx:CheckBox id="adjustStand" label="立ち絵を自動調整する" selected="true"
+  <mx:CheckBox id="adjustStand" label="{Language.s.isStandingGraphicsOnReplay}" selected="true"
                height="100%"
                />
   <mx:HBox width="100%">
-    <mx:Label text="チャットウィンドウ背景色:" />
+    <mx:Label text="{Language.s.chatWindowBackgroundColorOnReplay}" />
     <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0xFFFFFF"
-                    toolTip="チャット背景色設定" />
+                    toolTip="{Language.s.chatBackgroundColorOnReplay}" />
   </mx:HBox>
-<!--  
-  <mx:Label text="表示するチャットタブ名（スペース区切りで）：" width="100%" />
-  <mx:TextInput id="channelNames" text="メイン　雑談" width="100%" />
--->
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="設定" click="execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.setConfigOnReplay}" click="execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>

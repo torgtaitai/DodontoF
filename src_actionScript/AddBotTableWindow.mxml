@@ -4,29 +4,29 @@
    xmlns:torgtaitai="*" 
    width="700"
    height="400"
-   title="ダイスボット表追加"
+   title="{Language.s.addBotTableWindowTitle}"
    showCloseButton="true"
    >
   
   <mx:HBox width="100%" height="25">
-    <mx:Label text="コマンド名：" />
+    <mx:Label text="{Language.s.botTableCommandName}：" />
     <mx:TextInput id="commandText" width="100" />
-    <mx:Label text="ダイス：" />
+    <mx:Label text="{Language.s.botTableDiceText}：" />
     <mx:TextInput id="diceText" width="50" />
-    <mx:Label text="表タイトル：" />
+    <mx:Label text="{Language.s.botTableTitle}：" />
     <mx:TextInput id="titleText" width="100%"/>
   </mx:HBox>
   
-  <mx:Label text="表内容：" />
+  <mx:Label text="{Language.s.botTableText}：" />
   <mx:TextArea id="tableText" text="" height="100%" width="100%" />
   
   <mx:HBox height="25" width="100%" verticalAlign="middle" horizontalAlign="center" >
     <mx:Spacer width="50%" />
-    <mx:Button id="executeButton" label="追加作成" click="executeLocal()"  />
+    <mx:Button id="executeButton" label="{Language.s.botTableAddButton}" click="executeLocal()"  />
     <mx:Spacer width="20" />
-    <mx:Button label="キャンセル"  click="closeAction()" />
+    <mx:Button label="{Language.s.cancelButton}"  click="closeAction()" />
     <mx:Spacer width="50%" />
-    <mx:Button id="sampleButton" label="サンプル表示"  click="printSample()" />
+    <mx:Button id="sampleButton" label="{Language.s.botTablePrintSampleButton}"  click="printSample()" />
   </mx:HBox>
   
   <mx:Script>
@@ -62,20 +62,20 @@
     private function printSample():void {
         commandText.text = "SAMPLE";
         diceText.text = "2d6";
-        titleText.text = "表サンプル";
+        titleText.text = Language.s.botTableSample;
         
         var text:String = "";
-        text += "2:「コマンド名」をチャットに入力することで、\\n表のロールができるようになります。\n";
-        text += "3:この例では「SAMPLE」と入力すれば\\n実行できるようになります。\n";
-        text += "4:表のフォーマットは\\nまさにここに書いてある通り、\n";
-        text += "5:　（数値）:（メッセージ）\n";
-        text += "6:になります。\n";
-        text += "7:「コマンド」をチャットで発言すると\\n「ダイス」に記載したダイスを元にランダム選択されます。\n";
-        text += "8:ダイス目に合致する値が表に無い場合は空文字になります。\n";
-        text += "9:悩むより一度追加してみるのが早いでしょう。\n";
-        text += "10:他の人も使える便利な表が出来たら\\n皆で共有してあげてくださいね！\n";
-        text += "11:そろそろ\\n書く事無くなってきましたね…\n";
-        text += "12:以上です。";
+        text += Language.s.botTableSampleText_2 + "\n";
+        text += Language.s.botTableSampleText_3 + "\n";
+        text += Language.s.botTableSampleText_4 + "\n";
+        text += Language.s.botTableSampleText_5 + "\n";
+        text += Language.s.botTableSampleText_6 + "\n";
+        text += Language.s.botTableSampleText_7 + "\n";
+        text += Language.s.botTableSampleText_8 + "\n";
+        text += Language.s.botTableSampleText_9 + "\n";
+        text += Language.s.botTableSampleText_10 + "\n";
+        text += Language.s.botTableSampleText_11 + "\n";
+        text += Language.s.botTableSampleText_12 + "\n";
         tableText.text = text;
     }
     

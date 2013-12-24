@@ -52,7 +52,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "キャラクター";
+            return Language.s.character;
         }
         
         
@@ -220,10 +220,10 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "キャラクターの変更", thisObj.getItemPopUpChangeWindow);
-            addMenuItem(menu, "キャラクターの削除", thisObj.getContextMenuItemRemoveCharacter, true);
-            addMenuItem(menu, "キャラクターの複製", thisObj.cloneCharacter, true);
-            openUrlMenu = addMenuItem(menu, "データ参照先URLを開く", thisObj.getContextMenuItemOpenUrl, true);
+            addMenuItem(menu, Language.s.changeCharacter, thisObj.getItemPopUpChangeWindow);
+            addMenuItem(menu, Language.s.deleteCharacter, thisObj.getContextMenuItemRemoveCharacter, true);
+            addMenuItem(menu, Language.s.cloneCharacter, thisObj.cloneCharacter, true);
+            openUrlMenu = addMenuItem(menu, Language.s.openCharacterDataUrl, thisObj.getContextMenuItemOpenUrl, true);
             setUrlMenuVisible();
             
             view.setContextMenu(menu);
@@ -308,8 +308,6 @@ package {
             try {
                 var characterWindow:CharacterWindow = DodontoF.popup(ChangeCharacterWindow, true) as CharacterWindow;
                 characterWindow.setCharacter(this);
-                
-                DodontoF_Main.getInstance().setCharacterWindow(characterWindow);
             } catch(e:Error) {
                 Log.loggingExceptionDebug("Character.popUpChangeWindow()", e);
             }

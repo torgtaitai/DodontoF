@@ -4,30 +4,30 @@
    xmlns:torgtaitai="*" 
    width="350"
    height="230"
-   title="攻撃範囲追加" 
+   title="{Language.s.addAatackRange}" 
    showCloseButton="true"
    >
   
   <mx:Form>
-    <mx:FormItem label="名前:">
+    <mx:FormItem label="{Language.s.atackRangeName}">
 	  <mx:TextInput id="rangeName" text="" />
     </mx:FormItem>
     
-    <mx:FormItem label="最大射程:">
+    <mx:FormItem label="{Language.s.maxRange}">
 	  <mx:NumericStepper id="maxRange" minimum="0" maximum="999" value="1"  />
     </mx:FormItem>
-    <mx:FormItem label="最小射程:">
+    <mx:FormItem label="{Language.s.minRange}">
 	  <mx:NumericStepper id="minRange" minimum="0" maximum="999" value="0" />
     </mx:FormItem>
     
-	<mx:FormItem label="色:">
+	<mx:FormItem label="{Language.s.color}">
       <mx:ColorPicker id="rangeColorPicker" showTextField="true" selectedColor="0x000000" />
 	</mx:FormItem>
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addButton}" click="execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 
   <mx:Script>

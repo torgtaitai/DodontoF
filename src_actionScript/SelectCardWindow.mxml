@@ -56,8 +56,8 @@
     }
     
     protected function init():void {
-        title = "カード選択";
-        howToLabel.text = "山札のカードは以下の通り。抜き取りたいカードをドラッグしてマップにドロップしてください。";
+        title = Language.s.selectCard;
+        howToLabel.text = Language.s.selectCardMessage;
     }
     
     public function closeWindow():void {

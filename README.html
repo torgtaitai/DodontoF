@@ -463,7 +463,7 @@ https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_Developer-Site/en_US/-
 から「Java SE Development Kit 6u11」をダウンロードし、インストールしておきます。
 その後、DodontoF/src_actionScript ディレクトリで以下を実行します。<br>
 <br>
-mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isGaeRuby,false -define=COMPILE::isGaeJava,false -define=COMPILE::isReplayer,false -define=COMPILE::isAir,false -define=COMPILE::isMySql,false -include-libraries+=./corelib/bin/corelib.swc  -o ../DodontoF.swf DodontoF.mxml
+mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isReplayer,false -define=COMPILE::isMySql,false -include-libraries+=./corelib/bin/corelib.swc  -o ../DodontoF.swf DodontoF.mxml
 <br>
 これで DodontoF.swf が作成されるはずです。<br>
 作成された DodontoF.swf を DodontoF 直下に移動してください。<br>
@@ -1006,6 +1006,56 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2013/12/24 Ver.1.43.00<br>
+・Ver.1.42.18をベースに安定版を開発コード「Timeless time」としてリリース。<br>
+<br>
+2013/12/24 Ver.1.42.18<br>
+・ハンターズムーンに代償表、異形化表追加。<br>
+<br>
+2013/12/22 Ver.1.42.17<br>
+・アラーム音が鳴らない不具合を修正。今野博臣さんありがとう！<br>
+・カットイン編集画面で一覧をヘッダーからソートすると選択したカットインた正しく選ばれない不具合を修正。リネノンさん指摘ありがとう！<br>
+・ユーザー名のデフォルトがマルチ言語対応していない不具合を修正。日隠さん指摘ありがとう！<br>
+<br>
+2013/12/16 Ver.1.42.16<br>
+・ダイスボットをボーンズ＆カーズVer2.01.61対応へ変更。<br>
+　・ハンターズムーンの表を12個追加。今野博臣さんありがとう！<br>
+・ログイン画面で言語を変更すると、部屋状態も正しく更新されるように機能改良。<br>
+<br>
+2013/12/14 Ver.1.42.15<br>
+・ダイスボットをボーンズ＆カーズVer2.01.60対応へ変更。<br>
+　・キルデスビジネスに蘇生副作用表と一週間表を追加。能代銀華さんありがとう！<br>
+　・ピーカブーに日中ブラブラ表を追加。こちらも能代銀華さんありがとう！<br>
+・マルチ言語化の不具合修正。<br>
+　・ログイン画面にゲーム名が正しく表示されない問題を修正。能代銀華さん指摘ありがとう！<br>
+　・日本語以外で見学者ログインしたときに、チャットで名前の後ろに改行がついてしまう問題を修正。日隠さん指摘ありがとう！<br>
+<br>
+2013/12/12 Ver.1.42.14<br>
+・マルチ言語化対応を完全化。これで全画面が完全に多言語対応に。<br>
+・対応言語に中国語を追加。日隠さんありがとうっっっ！！！<br>
+・ダイスボットをボーンズ＆カーズVer2.01.59対応へ変更。<br>
+　・央華封神ダイスボットコマンド出力を一部改良。あずさんありがとう！<br>
+　・パラサイトブラッドのコマンドを整理。あるたさんありがとう！<br>
+　・ダブルクロスの説明分文字化けを修正。今野さんありがとう！<br>
+<br>
+2013/11/30 Ver.1.42.13<br>
+・ログイン画面から言語を選択できるように機能追加。<br>
+　　src_ruby/config.rb の $isMultilingualizationから抑止可能。<br>
+　languages ディレクトリにファイルを置くと任意に追加もできます。<br>
+・フロアタイル変更モードでタイルが動かせない不具合を修正。ハルキさん指摘ありがとうっ！<br>
+<br>
+2013/11/28 Ver.1.42.12<br>
+・ダイスボットをボーンズ＆カーズVer2.01.58対応へ変更。<br>
+　・ダイスボットにガープスフィルトウィズを追加。ハスキーさんありがとうっ！<br>
+　・ハンターズムーンに異形アビリティ表２コマンド(SA2T)を追加。今野博臣さんありがとうっ！<br>
+　・サタスペのNPCTコマンドの出力を改善。<br>
+　・カードランカーのSDTコマンドをGDTに変更。<br>
+・点呼／投票機能で表示するウィンドウを目立つように変更。<br>
+・カウンターリモコンで自PCの名前が2回表示されてしまう問題を修正。<br>
+・TORGのドラマデッキに英語版追加。日本語版の誤字修正。<br>
+・ダイスボットの自作表でのダイスロール結果表示を「1D6（=>3）」の様に矢印記号を変更。<br>
+・ダイスボット表追加機能でのコマンド追加時に、他の表と名前が重複していると正しくコマンドが実行できない不具合を修正。<br>
+<br>
 2013/11/11 Ver.1.42.11<br>
 ・ダイスボットをボーンズ＆カーズVer2.01.57対応へ変更。<br>
 　・ダイスボットに央華封神RPG 第三版追加。あずさんありがとうっ！<br>

@@ -4,14 +4,14 @@
    xmlns:torgtaitai="*" 
    width="700"
    height="400"
-   title="リプレイ録画データ投稿所" 
+   title="{Language.s.replayUploadWindowTitle}" 
    showCloseButton="true"
    >
   
-  <mx:Text text="リプレイ録画データ投稿所へようこそ！ここではあなたのリプレイデータの投稿が可能です。" />
+  <mx:Text text="{Language.s.replayUploadWindowWelcomeMessage1}" />
 <!--
-  <mx:Text text="カッコいい・恥ずかしい・うれしかったそんなプレイが録画できましたら" />
-  <mx:Text text="サクっと投稿してみましょう！" />
+  <mx:Text text="{Language.s.replayUploadWindowWelcomeMessage2}" />
+  <mx:Text text="{Language.s.replayUploadWindowWelcomeMessage3}" />
 -->
   
   <mx:DataGrid id="replayDataListGrid"
@@ -22,12 +22,8 @@
 		       draggableColumns="true"
                click="selectReplayDataList()"
                >
-<!--
-               doubleClickEnabled="true"
-               doubleClick="playReplayData()"
--->
 	<mx:columns>
-	  <mx:DataGridColumn headerText="タイトル"
+	  <mx:DataGridColumn headerText="{Language.s.replayUploadTitle}"
                          dataField="title"
                          textAlign="center"
                          width="50"/>
@@ -39,30 +35,30 @@
   </mx:DataGrid>
       
   <mx:HBox height="25" width="100%" verticalAlign="middle">
-    <mx:Button label="再生" click="playReplayData()"  fontWeight="normal" />
-    <mx:Button label="削除"  click="removeReplayData()" fontWeight="normal" />
-    <mx:Label id="selectedTitle" text="タイトル" width="150" selectable="true" />
+    <mx:Button label="{Language.s.replayUploadPlayButton}" click="playReplayData()"  fontWeight="normal" />
+    <mx:Button label="{Language.s.deleteButton}"  click="removeReplayData()" fontWeight="normal" />
+    <mx:Label id="selectedTitle" text="{Language.s.replayUploadTitle}" width="150" selectable="true" />
   </mx:HBox>
   <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Label id="selectedUrl" text="再生URL" width="100%" selectable="true"
-              toolTip="このURLでリプレイを直接再生することが出来ます。&#13;他の人にリプレイを見せる場合に手軽でオススメです。"
+    <mx:Label id="selectedUrl" text="{Language.s.replayUploadPlayUrl}" width="100%" selectable="true"
+              toolTip="{Language.s.replayUploadPlayUrlInfo}"
  />
   </mx:HBox>
   
   <mx:Spacer width="100%" height="10" />
   
-  <mx:Label text="リプレイデータの投稿は以下から" />
+  <mx:Label text="{Language.s.replayUploadMessage}" />
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="selectButton" label="投稿リプレイデータ選択" click="selectReplayData()" />
-    <mx:Label text="タイトル:" />
+    <mx:Button id="selectButton" label="{Language.s.selectUploadReplayData}" click="selectReplayData()" />
+    <mx:Label text="{Language.s.replayUploadTitle}:" />
 	<mx:TextInput id="replayDataTitle" width="100%" />
-    <mx:Button id="uploadButton" enabled="false" label="投稿（リプレイデータアップロード）" click="uploadReplayData()" />
+    <mx:Button id="uploadButton" enabled="false" label="{Language.s.uploadReplayData}" click="uploadReplayData()" />
   </mx:HBox>
   
   <mx:HBox  height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-    <mx:Label text="実行結果：" />
+    <mx:Label text="{Language.s.uploadReplayDataResult}" />
     <mx:Label id="result" width="100%" text="" fontWeight="bold" />
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   
@@ -113,8 +109,8 @@
         };
         Log.loggingTuning("ReplayUploadWindow.removeReplayData replayData", replayData);
         
-        var message:String = "タイトル：" + replayData.title  + "\nのリプレイデータを削除します。よろしいですか？";
-        var result:Alert = Alert.show(message, "リプレイデータ削除確認", 
+        var message:String = Language.text("deleteReplayDataQuestion", replayData.title);
+        var result:Alert = Alert.show(message, Language.s.deleteUploadedReplayDataQuestion, 
                                       Alert.OK | Alert.CANCEL, null, 
                                       function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
                                               guiInputSender.removeReplayData(targetReplayData,
@@ -144,7 +140,7 @@
         }
         
         var filters:Array = new Array();
-        filters.push(new FileFilter("リプレイデータ(*.rec)","*.rec"));
+        filters.push(new FileFilter(Language.s.replayDataFileFormat,"*.rec"));
         
         fileReferenceForUpload.browse(filters);
     }
@@ -155,13 +151,13 @@
     
     private function uploadReplayData():void {
         if( replayDataTitle.text == "" ) {
-            Alert.show("タイトルを入力してください。")
+            Alert.show(Language.s.pleaseInputReplayDataTitle)
             return;
         }
         
         selectButton.enabled = false;
         uploadButton.enabled = false;
-        result.text = "アップロード中……";
+        result.text = Language.s.uploading;
         
         var params:Object = {
             'replayDataName' : replayDataTitle.text,

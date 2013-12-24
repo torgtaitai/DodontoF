@@ -19,7 +19,8 @@
     import flash.events.TimerEvent;
     import flash.events.MouseEvent;
     import mx.controls.Alert;
-
+    
+    
     private var stopFunction:Function = null;
     private var closeTimer:Timer = null;
     private var position:String = "center";
@@ -119,7 +120,7 @@
                              position:String):void {
         this.addChild(component);
         
-        this.title = "カットイン：" + titleText;
+        this.title = Language.text("cutInWindowTitle", titleText);
         if( position != null ) {
             this.position = position;
         }

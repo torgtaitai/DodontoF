@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
                 width="600" height="300"
-                title="メッセージカード追加画面" 
+                title="{Language.s.addMessageCardWindow}" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"
                 >
@@ -22,13 +22,13 @@
     <mx:Box height="100%" width="100%">
       <mx:HBox height="30%" width="100%">
         <mx:Box height="100%" width="70">
-          <mx:Label text="背面:" />
+          <mx:Label text="{Language.s.cardBack}" />
           <mx:NumericStepper id="imageNameBackSize" minimum="5" maximum="64"  value="18"
                              change="printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack)"
                              />
         </mx:Box>
 	    <mx:TextArea id="imageNameBack"
-                     text="ななしさん へ"
+                     text="{Language.s.toAnonymous}"
                      height="100%" width="100%"
                      change="printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack)"
                      />
@@ -36,13 +36,13 @@
       
       <mx:HBox height="70%" width="100%">
         <mx:Box height="100%" width="70">
-          <mx:Label text="メッセージ:" />
+          <mx:Label text="{Language.s.message}" />
           <mx:NumericStepper id="imageNameSize" minimum="5" maximum="64" value="18"
                              change="printPreview(imageNameSize.value, imageName.text, previewCard)"
                              />
         </mx:Box>
         <mx:TextArea id="imageName"
-                     text="サンプルメッセージ"
+                     text="{Language.s.sampleMessage}"
                      height="100%" width="100%"
                      change="printPreview(imageNameSize.value, imageName.text, previewCard)"
                      />
@@ -51,8 +51,8 @@
   </mx:HBox>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="メッセージカードの追加" click="execute()" enabled="true" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addMessageCard}" click="execute()" enabled="true" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>
@@ -88,8 +88,8 @@
         previewCardBack = addPreviewCard( cardBackPreviewPlace );
         
         previewCard.reverseCardLocal(false);
-        previewCard.setOwnerName("表面");
-        previewCardBack.setOwnerName("裏面");
+        previewCard.setOwnerName(Language.s.faceSide);
+        previewCardBack.setOwnerName(Language.s.backSide);
         
         printPreview(imageNameSize.value, imageName.text, previewCard);
         printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack);

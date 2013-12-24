@@ -59,7 +59,7 @@
             Resizer.addResize(this, new Point( resizerMinWidth(), resizerMinHeigth() ));
             
             if( getSaveInfoKeyName() == "" ) {
-                Alert.show("セーブキー名称が未定義です");
+                Alert.show("save key name is empty");
             }
             
             setup();

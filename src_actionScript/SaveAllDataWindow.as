@@ -6,16 +6,16 @@ package {
     public class SaveAllDataWindow extends SaveWindow {
         
         override protected function setup():void {
-            this.title = "全データセーブ";
+            this.title = Language.s.allSaveData;
             
-            loadingMessage.text = "画像等の全データをファイルとして保存します。";
+            loadingMessage.text = Language.s.saveDataTips;
             
             var height:int = 25;
             this.height += height;
             loadingMessageBox.height += height;
             loadingMessage2.height = height;
             loadingMessage2.visible = true;
-            loadingMessage2.text = "このファイルを使って別サーバへ移行することも可能です！";
+            loadingMessage2.text = Language.s.saveDataTips2;
             
             super.setup();
         }
@@ -30,7 +30,7 @@ package {
         }
         
         override protected function getReadyMessage():String {
-            return "ファイル準備完了";
+            return Language.s.saveFileReady;
         }
         
     }

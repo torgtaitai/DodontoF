@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="300"
    height="170"
-   title="カードをN枚引く" 
+   title="{Language.s.drawCardMany}" 
    showCloseButton="true"
    >
   
@@ -13,17 +13,17 @@
     
     <mx:Form width="100%" >
       
-      <mx:FormItem label="引く枚数:">
+      <mx:FormItem label="{Language.s.drawCardCount}">
         <mx:NumericStepper id="drawCount" minimum="0" maximum="{cardMaxCount}" value="1" stepSize="1" />
       </mx:FormItem>
       
-	  <mx:FormItem label="引き方:">
+	  <mx:FormItem label="{Language.s.howToDraw}">
         <mx:ComboBox id="howToDraw" >
           <mx:dataProvider>
 		    <mx:Array>
-			  <mx:Object label="非公開で自分だけ" data="own" />
-			  <mx:Object label="全員に公開する" data="public" />
-			  <mx:Object label="全員に非公開で" data="secret" />
+			  <mx:Object label="{Language.s.howToDrawDrawCardForMe}" data="own" />
+			  <mx:Object label="{Language.s.howToDrawDrawCardForEveryone}" data="public" />
+			  <mx:Object label="{Language.s.howToDrawDrawCardClosed}" data="secret" />
 			</mx:Array>
 		  </mx:dataProvider>
         </mx:ComboBox>
@@ -31,8 +31,8 @@
     </mx:Form>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="カードを引く" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.drawCard}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
     
   </mx:Box>

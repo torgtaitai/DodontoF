@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="380"
    height="235"
-   title="カウンターリモコンエディター" 
+   title="{Language.s.changeCounterRemoconWindow}" 
    showCloseButton="true"
    >
   
@@ -14,44 +14,44 @@
        paddingTop="1" paddingBottom="1" 
        paddingRight="1" paddingLeft="1" >
       
-	  <mx:FormItem label="ボタン名:" width="100%" >
-      <mx:TextInput id="labelName" height="25" width="100%" text="HP増加" />
+	  <mx:FormItem label="{Language.s.buttonName}" width="100%" >
+      <mx:TextInput id="labelName" height="25" width="100%" text="{Language.s.addHp}" />
       </mx:FormItem>
       
-	  <mx:FormItem label="カウンター名\{1\}:" width="100%" >
-        <mx:TextInput id="counterName" height="25" width="100%" text="HP" toolTip="イニシアティブは「#INI」で指定できます。"  change="printSampleMessage()" />
+	  <mx:FormItem label="{Language.s.counterRemoconCounterName}" width="100%" >
+        <mx:TextInput id="counterName" height="25" width="100%" text="HP" toolTip="{Language.s.counterRemoconCounterNameTips}"  change="printSampleMessage()" />
       </mx:FormItem>
       
-	  <mx:FormItem label="修正値\{2\}:" width="100%" >
+	  <mx:FormItem label="{Language.s.counterRemoconModifyValue}" width="100%" >
         <mx:HBox width="100%" height="25">
-          <mx:ComboBox id="operator" toolTip="現状値に加減算するか、値を差し替えるかを選択できます。" change="printSampleMessage()" >
+          <mx:ComboBox id="operator" toolTip="{Language.s.counterRemoconModifyOperatorTips}" change="printSampleMessage()" >
             <mx:Array>
               <mx:Object label="＋" data="plus" />
-              <mx:Object label="−" data="minus" />
+              <mx:Object label="－" data="minus" />
               <mx:Object label="＝" data="equal" />
             </mx:Array>
           </mx:ComboBox>
           
-          <mx:TextInput id="modifyValue" height="25" width="100%" text="1" toolTip="設定可能な書式&#13; （空）　：任意の値を後から指定&#13; 数値　：指定した値&#13; 「xDy+n」形式：ダイスロール結果（例：２ｄ６＋１）" change="printSampleMessage()" />
+          <mx:TextInput id="modifyValue" height="25" width="100%" text="1" toolTip="{Language.s.counterRemoconModifyValueTips}" change="printSampleMessage()" />
         </mx:HBox>
       </mx:FormItem>
       
-	  <mx:FormItem label="表示メッセージ:" width="100%" >
-        <mx:TextInput id="messageFormat" height="25" width="100%" text="\{0\}の\{1\}を\{2\}した"
+	  <mx:FormItem label="{Language.s.counterRemoconDisplayMessage}" width="100%" >
+        <mx:TextInput id="messageFormat" height="25" width="100%" text="{Language.s.counterRemoconDisplayMessageDefault}"
                       change="printSampleMessage()"
-                      toolTip="使用可能な置換文字：&#13;\{0\}：キャラクター名&#13;\{1\}：カウンター名&#13;\{2\}：修正値&#13;\{3\}：修正値絶対値（＋−無し）&#13;\{4\}：変更結果"
+                      toolTip="{Language.s.counterRemoconDisplayMessageTips}"
                       />
       </mx:FormItem>
       
-	  <mx:FormItem label="例:" width="100%" >
+	  <mx:FormItem label="{Language.s.sample}" width="100%" >
         <mx:Label id="sampleMessage" height="25" width="100%" />
       </mx:FormItem>
       
     </mx:Form>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="設定" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.setting}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

@@ -49,7 +49,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "カード置き場";
+            return Language.s.cardZone;
         }
         
         public static function getJsonData(imageName_:String,
@@ -99,7 +99,7 @@ package {
         }
         
         override public function getTitleText():String {
-            return this.getOwnerName() + "の手札置き場";
+            return Language.text("cardZoneTitle", this.getOwnerName());
         }
         
         override protected function isOwner():Boolean {
@@ -134,14 +134,14 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "手札置き場を自分の管理へ", changeOwner);
-            addMenuItem(menu, "手札置き場の削除", getContextMenuItemRemoveCharacter, true);
+            addMenuItem(menu, Language.s.changeCardZoneOwnerToMe, changeOwner);
+            addMenuItem(menu, Language.s.deleteCardZone, getContextMenuItemRemoveCharacter, true);
             
             view.contextMenu = menu;
         }
         
         override public function changeOwner(event:ContextMenuEvent = null):void {
-            ChatWindow.getInstance().sendSystemMessage("が「" + getOwnerName() + "」のカード一式を受け取りました。");
+            Utils.sendSystemMessage(Language.s.changeCardOwnerMessage, [getOwnerName()]);
             
             setOwnerName( getSelfOwnerName() );
             

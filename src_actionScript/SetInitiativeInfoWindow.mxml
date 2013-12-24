@@ -4,53 +4,39 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="250"
-   title="イニシアティブ表設定"
+   title="{Language.s.setInitiativeInfoWindow}"
    showCloseButton="true"
    >
   
   <mx:Box width="100%" height="100%">
     <mx:Box id="infoBox" width="100%"
             verticalGap="2" horizontalGap="2" >
-      <mx:Label text="カウンターに使用するパラメータ名をスペース区切りで入力してください" />
-      <mx:Label text="先頭に ＊（全角・半角どちらでも可）を付けて記述するとチェック欄になります。" />
-      <mx:Label text="　　　例）　HP　MP　AC　侵食率　ポシビリティ　*毒　＊転倒" />
-      <mx:Label text="(注)この設定は同一プレイルームの全員に影響します。" />
+      <mx:Label text="{Language.s.inputerCounterNames}" />
+      <mx:Label text="{Language.s.inputerCounterNamesInfo_1}" />
+      <mx:Label text="{Language.s.inputerCounterNamesInfo_2}" />
+      <mx:Label text="{Language.s.inputerCounterNamesInfo_3}" />
     </mx:Box>
     <mx:HBox width="100%" height="100%">
-      <mx:Label  text="カウンター名一覧:" />
+      <mx:Label  text="{Language.s.counterNamelist}" />
       <mx:TextInput id="counterNames" width="100%" text="" />
     </mx:HBox>
     
     
-<!--
     <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
     
     
     <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
       <mx:HBox width="100%" height="100%">
-        <mx:Label text="カウント値変更ボタン設定:" />
-        <mx:TextInput id="input" width="100%" text="" />
-      </mx:HBox>
-      <mx:Label text="「」" />
-    </mx:Box>
--->
-    
-    
-    <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
-    
-    
-    <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
-      <mx:HBox width="100%" height="100%">
-        <mx:Label text="イニシアティブ表フォントサイズ:" />
+        <mx:Label text="{Language.s.initiativeWindowFontSize}" />
         <mx:NumericStepper id="fontSize" maximum="999" minimum="1" value="11" />
       </mx:HBox>
-      <mx:Label text="(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。" />
+      <mx:Label text="{Language.s.initiativeWindowFontSizeTips}" />
     </mx:Box>
     
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="実行" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.executeButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

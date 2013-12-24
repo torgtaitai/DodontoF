@@ -12,7 +12,7 @@
     <mx:Button id="pencil"
                icon="{pencilIcon}"
                click="setMapDrawMode(pencilMode)"
-               toolTip="Altで直線&#13;Shiftで一定角&#13;Ctrlでマス目端点"
+               toolTip="{Language.s.handPaintTips}"
                toggle="true"
                selected="true"
                verticalGap="0"
@@ -28,20 +28,20 @@
                />
       
     <mx:Spacer width="10" />
-	<mx:Label text="色:" />
+	<mx:Label text="{Language.s.handPaintColor}" />
     <mx:ColorPicker id="colorPicker" showTextField="true" selectedColor="0x000000" change="setDrawState()"/>
     
     <mx:Spacer width="100%" />
 
     <mx:Button id="undo"
-               toolTip="取り消し（アンドゥ）"
+               toolTip="{Language.s.handPaintUndo}"
                icon="{undoIcon}"
                click="undoDrawOnMap()"
                width="25"
                />
       
     <mx:Button id="redo"
-               toolTip="取り消しの取り消し（リドゥ）"
+               toolTip="{Language.s.handPaintRedo}"
                icon="{redoIcon}"
                click="redoDrawOnMap()"
                width="25"
@@ -53,7 +53,7 @@
   <mx:Spacer height="10" />
   
   <mx:HBox id="lineWeightBox" width="100%" >
-    <mx:Label text="太さ:" />
+    <mx:Label text="{Language.s.handLineWeight}" />
     <mx:HSlider id="lineWeight" 
                 width="200"
                 showTrackHighlight="true"
@@ -77,7 +77,7 @@
                     />
     
     <mx:Button id="clearDraw"
-               label="全削除"
+               label="{Language.s.handPaintDeleteAll}"
                click="clearDrawOnMap()"
                />
   </mx:HBox>
@@ -146,16 +146,16 @@
 
         var percent:int = (100 * totalLineCount / lineCountLimit);
         if( percent > 100 ) {
-            message +="描き込み量：大量！";
+            message +=Language.s.handPaintDrawTooMuch;
         } else if( percent > 60 ) {
-            message +="描き込み量：多い";
+            message +=Language.s.handPaintDrawMuch;
         } else if( percent > 30 ) {
-            message +="描き込み量：普通";
+            message +=Language.s.handPaintDrawMuchNomal;
         } else {
-            message +="描き込み量：軽い";
+            message +=Language.s.handPaintDrawMuchLittle;
         }
         
-        message += "(%1ポイント)";
+        message += Language.s.handPaintDrawPointPercent;
         lineCounter.label = message;
     }
     
@@ -278,7 +278,7 @@
     }
     
     private function blockDraw():void {
-        lineCounter.label = "書き込み量が上限です。「全削除」して下さい";
+        lineCounter.label = Language.s.handPaintDrawTooMuchWarning;
         setDrawModeLocal(false);
     }
     
@@ -359,8 +359,8 @@
     }
     
     private function clearDrawOnMap():void {
-        Utils.askByAlert("マップ描消去",
-                         "マップの全描き込みを削除してよいですか？",
+        Utils.askByAlert(Language.s.deleteHandPaint,
+                         Language.s.deleteHandPaintQuestion,
                          function():void {
                              DodontoF_Main.getInstance().getGuiInputSender().clearDrawOnMap();
                              parentButton.selected = false;

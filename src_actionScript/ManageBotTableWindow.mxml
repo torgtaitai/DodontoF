@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="700"
    height="300"
-   title="ダイスボット用表管理"
+   title="{Language.s.ManageBotTableWindowTitle}"
    showCloseButton="true"
    >
   
@@ -17,11 +17,11 @@
                doubleClick="openEditWindow()"
                >
 	<mx:columns>
-	  <mx:DataGridColumn headerText="コマンド名"
+	  <mx:DataGridColumn headerText="{Language.s.botTableCommandName}"
                          dataField="command"
                          textAlign="center"
                          width="100"/>
-	  <mx:DataGridColumn headerText="表タイトル"
+	  <mx:DataGridColumn headerText="{Language.s.botTableTitle}"
                          dataField="title"
                          textAlign="center"
                          width="400"/>
@@ -30,15 +30,15 @@
   
   <mx:HBox height="25" width="100%" verticalAlign="middle" horizontalAlign="center" >
     <mx:Spacer width="50%" />
-    <mx:Button label="新規作成" click="openAddWindow()"  />
+    <mx:Button label="{Language.s.addNewBotTable}" click="openAddWindow()"  />
     <mx:Spacer width="20" />
-    <mx:Button label="コピー作成" click="openAddCloneWindow()"  />
+    <mx:Button label="{Language.s.copyBotTable}" click="openAddCloneWindow()"  />
     <mx:Spacer width="20" />
-    <mx:Button label="変更" click="openEditWindow()"  />
+    <mx:Button label="{Language.s.changeBotTable}" click="openEditWindow()"  />
     <mx:Spacer width="20" />
-    <mx:Button label="削除"  click="removeFromList()" />
+    <mx:Button label="{Language.s.deleteButton}"  click="removeFromList()" />
     <mx:Spacer width="50%" />
-    <mx:Button label="閉じる"  click="closeAction()" />
+    <mx:Button label="{Language.s.closeBotTable}"  click="closeAction()" />
   </mx:HBox>
       
   
@@ -49,6 +49,7 @@
     import mx.controls.Alert;
     import mx.collections.ArrayCollection;
     import mx.events.CloseEvent;
+    
     
     [Bindable]
     private var tableInfos:ArrayCollection = new ArrayCollection();
@@ -145,13 +146,6 @@
         Log.logging("tableData", tableData);
         
         var result:String = "";
-        /*
-        for(var number:String in tableData) {
-            Log.logging("number", number);
-            var text:String = tableData[number];
-            result += "" + number + ":" + text + "\n";
-        }
-        */
         var array:Array = tableData as Array;
         if( array == null ) {
             return result;
@@ -195,8 +189,9 @@
             return;
         }
         
-        var message:String = "" + data.command + "(" + data.title  + ")\n" + "を削除します。よろしいですか？";
-        var result:Alert = Alert.show(message, "削除確認", 
+        var message:String = Language.text("deleteBotTableQuestion", data.command, data.title);
+        var result:Alert = Alert.show(message,
+                                      Language.s.deleteBotTableQuestionWindoTitle, 
                                       Alert.OK | Alert.CANCEL, null, 
                                       function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
                                               sender.removeBotTable(data.command, getBotTableInfosResult);
@@ -206,33 +201,6 @@
     
     private function dummy():void {
     }
-    
-    
-    /*
-    public function removeReplayData():void {
-        var index:int = dataGrid.selectedIndex;
-        
-        var replayData:Object = tableInfos[index];
-        if( replayData == null ) {
-            return;
-        }
-        
-        var targetReplayData:Object = {
-            "title": replayData.title,
-            "url": replayData.url
-        };
-        Log.loggingTuning("ReplayUploadWindow.removeReplayData replayData", replayData);
-        
-        var message:String = "タイトル：" + replayData.title  + "\nのリプレイデータを削除します。よろしいですか？";
-        var result:Alert = Alert.show(message, "リプレイデータ削除確認", 
-                                      Alert.OK | Alert.CANCEL, null, 
-                                      function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
-                                              guiInputSender.removeReplayData(targetReplayData,
-                                                                              requestTableListResult);
-                                          }});
-    }
-    */
-    
     
     ]]>
   </mx:Script>

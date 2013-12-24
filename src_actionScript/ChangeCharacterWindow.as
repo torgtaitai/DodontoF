@@ -33,8 +33,8 @@ package {
                 PopUpManager.removePopUp(this);
             }
             
-            title = "キャラクター変更";
-            executeButton.label = "変更";
+            title = Language.s.changeCharacterWindowTitle;
+            executeButton.label = Language.s.changeCharacterWindowButton;
             
             characterName.text = character.getName();
             

@@ -11,8 +11,8 @@ package {
         }
         
         override protected function setup():void {
-            title = "魔法タイマー変更";
-            executeButton.label = "変更";
+            title = Language.s.changeMagicTimer;
+            executeButton.label = Language.s.changeButton;
             
             magicTimerName.text = magicTimer.getName();
             magicTimerTimeRange.value = magicTimer.getTimeRange();

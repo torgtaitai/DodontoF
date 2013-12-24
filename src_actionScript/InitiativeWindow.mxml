@@ -2,7 +2,7 @@
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   title="イニシアティブ表"
+   title="{Language.s.initiativeWindowTitle}"
    width="10" height="300"
    showCloseButton="true"
    verticalScrollPolicy="off"
@@ -13,15 +13,15 @@
           horizontalAlign="center"
           verticalGap="1"
           >
-    <mx:Button id="prevButton" height="15" paddingLeft="2" paddingRight="2" label="戻る" click="previous()" />
-    <mx:Button id="nextButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="次へ" click="next()" />
+    <mx:Button id="prevButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowBackButton}" click="previous()" />
+    <mx:Button id="nextButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowNextButton}" click="next()" />
     
     <mx:Spacer width="100%" />
     
-    <mx:Button id="resetButton" height="15" width="60" paddingLeft="2" paddingRight="2" label="戦闘開始" click="reset()" />
+    <mx:Button id="resetButton" height="15" width="60" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowInitButton}" click="reset()" />
       
     <mx:Spacer width="5" />
-    <mx:Button id="setConfigButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="設定" click="setConfig()" />
+    <mx:Button id="setConfigButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowConfigButton}" click="setConfig()" />
     
   </mx:HBox>
   
@@ -42,14 +42,14 @@
                dragEnabled="true"
                >
 	<mx:columns>
-	  <mx:DataGridColumn headerText="順番"
+	  <mx:DataGridColumn headerText="{Language.s.initiativeWindowColumnTitleOrder}"
                          dataField="currentTarget"
                          textAlign="left"
                          editable="false"
       	                 minWidth="0"
                          width="10"
                          />
-	  <mx:DataGridColumn headerText="イニシアティブ"
+	  <mx:DataGridColumn headerText="{Language.s.initiativeWindowColumnTitleInitiative}"
                          editorDataField="value"
                          dataField="initiativeInt"
                          textAlign="left"
@@ -63,7 +63,7 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
-	  <mx:DataGridColumn headerText="修正値(イニシアティブ同値時比較用)"
+	  <mx:DataGridColumn headerText="{Language.s.initiativeWindowColumnTitleInitiativeModify}"
                          editorDataField="value"
                          dataField="initiativeModify"
                          textAlign="left"
@@ -77,7 +77,7 @@
         </mx:itemEditor>
       </mx:DataGridColumn>
       
-	  <mx:DataGridColumn headerText="名前"
+	  <mx:DataGridColumn headerText="{Language.s.initiativeWindowColumnTitleCharacterName}"
                          dataField="characterName"
                          textAlign="left"
                          editable="false"
@@ -1112,7 +1112,7 @@
       <mx:DataGridColumn headerText="counterEnd"
                          id="counterEnd" width="0" visible="false" />
       
-	  <mx:DataGridColumn headerText="その他"
+	  <mx:DataGridColumn headerText="{Language.s.initiativeWindowColumnTitleInfo}"
                          dataField="info"
                          textAlign="left"
                          editable="true"
@@ -1127,9 +1127,9 @@
           horizontalAlign="center"
           verticalGap="1"
           >
-    <mx:Button id="editButton" height="15" paddingLeft="2" paddingRight="2" label="変更" click="editListCharacter()" />
+    <mx:Button id="editButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.editButton}" click="editListCharacter()" />
     <mx:Spacer width="5" />
-    <mx:Button id="deleteButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="削除" click="removeListCharacter()" />
+    <mx:Button id="deleteButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.deleteButton}" click="removeListCharacter()" />
   </mx:HBox>
     
   <mx:Script>
@@ -1197,7 +1197,7 @@
       protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
-            characterMenu = MovablePiece.addMenuItem(menu, "対象の削除", getContextMenuItemRemoveCharacter, true);
+            characterMenu = MovablePiece.addMenuItem(menu, Language.s.deleteSelectedCharacter, getContextMenuItemRemoveCharacter, true);
             this.contextMenu = menu;
             
             /*
@@ -1586,19 +1586,6 @@
               return "";
           }
           
-          /*
-          var toolTip:mx.core.IToolTip = mx.managers.ToolTipManager.currentToolTip;
-          if( toolTip == null ) {
-              return "";
-          }
-          
-          var toolTipX:Number = this.x - toolTip.measuredWidth;
-          if( toolTip < 0 ) {
-              toolTipX = this.x + this.width;
-          }
-          toolTip.x = toolTipX;
-          */
-          
           return piece.getToolTipMessage();
       }
       
@@ -1648,9 +1635,7 @@
       }
       
       public function clear(currentRound:int, currentInitiative:Number):void {
-          //roundTimerRound.htmlText = "ラウンド：" + currentRound + "<br />";
-          //roundTimerInitiative.htmlText = "イニシアティブ：" + currentInitiative;
-          this.title = "ラウンド：" + currentRound + "／イニシアティブ：" + currentInitiative;
+          this.title = Language.text("initiativeWindowRoundFormat", currentRound, currentInitiative);
           setAllButtonsStatus(true);
           
           initiativeInfoList = new Array();

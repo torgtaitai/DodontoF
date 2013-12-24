@@ -65,7 +65,7 @@ package {
             
             if( saveData.saveDataTypeName != null ) {
                 if( saveData.saveDataTypeName != saveDataTypeName ) {
-                    Alert.show(saveDataName + "ではないため開けません。");
+                    Alert.show( Language.text("saveDataNameNotMatched", saveDataName) );
                     return;
                 }
                 
@@ -74,7 +74,7 @@ package {
             
             
             if( saveData == null ) {
-                Alert.show("セーブデータが不正なため開けませんでした");
+                Alert.show(Language.s.canNotOpenSaveDataBecauseInvalid);
                 return;
             }
             

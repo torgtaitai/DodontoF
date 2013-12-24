@@ -122,7 +122,7 @@ package {
         private function ioErrorHandler(event:Event):void {
             Log.loggingError("ioErrorHandler");
             var imageLoader:Loader = event.target.loader;
-            Log.loggingError("指定画像が読み出せませんでした。", imageLoader.loaderInfo.url);
+            Log.loggingError(Language.s.loadImageErrorMessage, imageLoader.loaderInfo.url);
             cutInWindow.closeWindow();
         }
         

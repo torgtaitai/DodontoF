@@ -4,15 +4,15 @@
    xmlns:torgtaitai="*" 
    width="450"
    height="130"
-   title="自前サーバはいかがでしょうか？" 
+   title="{Language.s.howDoYouMakeYoruServer}" 
    >
   
   <mx:Label id="message" width="100%" height="100%" />
   <mx:HBox width="100%">
-    <mx:Button label="YES(設定方法について是非教えて下さい)" 
+    <mx:Button label="{Language.s.yesIMakeMyServer}" 
       click='DodontoF.openUrl("README.html#howToSetting");' />
     <mx:Spacer width="100%"/>
-    <mx:Button label="NO(またの機会に願いします)" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.noIhaveNotInterestInMyServer}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
       
       
@@ -26,9 +26,7 @@
     }
     
     public function setMessage(count:int):void {
-        message.text = 
-        "このサーバへのログイン回数が " + count + "回 になりました！\r" + 
-        "そろそろ自前サーバの構築はいかがでしょうか！？";
+        message.text = Language.text("checkLoginCount", count);
     }
     
     

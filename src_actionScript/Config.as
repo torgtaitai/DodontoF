@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.42.11(2013/11/11)";
+        private var version:String = "Ver.1.43.00(2013/12/24)";
         
         public function getVersion():String {
             return version;
@@ -23,37 +23,6 @@ package {
         private var localUrlPrefix:String = null;
         
         public function Config() {
-            /*
-            if( DodontoF_Main.getInstance().isGoogleWave() ){
-                localUrlPrefix = "http://www.dodontof.com/DodontoF_New/";
-            }
-            */
-            
-            if( isGaeJava() ){
-                return;
-            }
-            
-        }
-        
-        static public function isGaeJava():Boolean {
-            return COMPILE::isGaeJava;
-        }
-        
-        static public function isGaeRuby():Boolean {
-            return COMPILE::isGaeRuby;
-        }
-        
-        static public function isRails():Boolean {
-            return DodontoF_Main.getInstance().isRails();
-        }
-        
-        public function setServerUrl(url:String):void {
-            //localUrlPrefix = "http://www.dodontof.com/DodontoF/";
-            localUrlPrefix = url;
-        }
-        
-        public function isAdobeAir():Boolean {
-            return COMPILE::isAir;
         }
         
         
@@ -105,14 +74,6 @@ package {
         
         
         public function getDodontoFServerCgiUrl():String {
-            if( isGaeRuby() ) {
-                return "/dodontof";
-            }
-            
-            if( isRails() ) {
-                return "/command/any.json";
-            }
-            
             var cgiUrl:String = "DodontoFServer.rb";
             
             if( DodontoF_Main.getInstance().isMySqlMode() ) {
@@ -125,9 +86,6 @@ package {
         }
         
         public function getImageUploaderUrl():String {
-            if( isGaeRuby() ) {
-                return "/imageUploader";
-            }
             return getDodontoFServerCgiUrl();
         }
         
@@ -188,10 +146,6 @@ package {
         }
         
         public function saveInfo(key:String, info:Object):void {
-            if( DodontoF_Main.getInstance().isTinyMode() ) {
-                key = tinyModePrefix + key;
-            }
-            
             var saveData:SharedObject = getSaveData();
             saveData.data[key] = info
             saveData.flush();
@@ -200,10 +154,6 @@ package {
         private var tinyModePrefix:String = "tinyMode:";
         
         public function loadInfo(key:String):Object {
-            
-            if( DodontoF_Main.getInstance().isTinyMode() ) {
-                key = tinyModePrefix + key;
-            }
             
             //リプレイモードでは常にデフォルト構成に
             if( DodontoF_Main.getInstance().isReplayMode() ) {

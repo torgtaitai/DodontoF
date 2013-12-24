@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="600"
    height="420"
-   title="画像／動画アップローダ" 
+   title="{Language.s.imageUploader}" 
    showCloseButton="true"
    close="closeWindow()"
    >
@@ -25,15 +25,15 @@
                                  width="100%" horizontalAlign="center" verticalAlign="middle" />
   
   <mx:HBox height="50" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button label="アップロード対象画像選択" click="selectUploadImage()" />
+    <mx:Button label="{Language.s.selectUploadTargetImage}" click="selectUploadImage()" />
     <mx:Spacer width="20" />
-    <mx:Button id="uploadButton" label="アップロード" click="uploadImageFile()" enabled="false"/>
-    <mx:Button label="閉じる" click="closeWindow()" />
+    <mx:Button id="uploadButton" label="{Language.s.uploadImage}" click="uploadImageFile()" enabled="false"/>
+    <mx:Button label="{Language.s.closeButton}" click="closeWindow()" />
   </mx:HBox>
   
   <mx:HBox  height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-    <mx:Label text="実行結果：" />
-    <mx:Label id="result" width="100%" text="アップロード画像未選択" fontWeight="bold" />
+    <mx:Label text="{Language.s.executeResult}" />
+    <mx:Label id="result" width="100%" text="{Language.s.uploadImageIsNotSelected}" fontWeight="bold" />
   </mx:HBox>
   
   <mx:Script>
@@ -76,8 +76,7 @@
     private function printWarningAboutSamnailNotSupport():void {
         warningInfo.height = preview.height - 5;
         warningInfo.width = preview.width - 5;
-        warningInfo.htmlText = "選択画像の表示にはFlash Player10以上が必要です。<br>"
-        + "<i><a href='http://www.adobe.com/shockwave/download/index.cgi?Lang=Japanese&P1_Prod_Version=ShockwaveFlash'>Flash Player最新版のダウンロードはこちらから。</a></i>";
+        warningInfo.htmlText = Language.s.uploadImageFlashPlayerVersionWarningMessage;
         
         var component:UIComponent = new UIComponent();
         preview.addChild(component);
@@ -91,7 +90,7 @@
         fileReferenceForUpload.addEventListener(Event.SELECT, this.complateUploadFileSelect)
         
         var filters:Array = new Array();
-        filters.push(new FileFilter("画像／動画データ(*.jpg;*.jpeg;*.gif;*.png;*.swf;*.flv)","*.jpg;*.jpeg;*.gif;*.png;*.swf;*.flv"));
+        filters.push(new FileFilter(Language.s.imageFIleFormat,"*.jpg;*.jpeg;*.gif;*.png;*.swf;*.flv"));
         fileReferenceForUpload.browse(filters);
     }
     
@@ -123,10 +122,10 @@
             Log.logging(previewFileReference.name, "selected file.name");
             
             uploadButton.enabled = true;
-            result.text = "選択画像のアップロード可能";
+            result.text = Language.s.canUploadSeletedImage;
             
             if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
-                warningInfo.htmlText = "選択ファイル名：" + previewFileReference.name;
+                warningInfo.htmlText = Language.s.selectedFileName + previewFileReference.name;
                 return;
             }
             previewFileReference.addEventListener(Event.COMPLETE, setImage);
@@ -228,7 +227,7 @@
         try {
             resultList = new Array();
             uploadButton.enabled = false;
-            result.text = "アップロード実行中...";
+            result.text = Language.s.nowUploading;
             
             for(var i:int = 0 ; i < fileReferenceForUpload.fileList.length ; i++) {
                 var fileReference:FileReference = fileReferenceForUpload.fileList[i];
@@ -281,7 +280,7 @@
     }
     
     private function ioErrorHandler(event:Event):void {
-        resultList.push("画像の読み込みでエラーが発生しました。");
+        resultList.push(Language.s.loadImageFileErrorMessage);
         printResultList();
     }
     
@@ -306,7 +305,7 @@
         if( resultList.length == fileReferenceForUpload.fileList.length ) {
             result.text = getAllFinishResult(resultList);
         } else {
-            result.text = "アップロード実行中...(" + resultList.length + "/" + fileReferenceForUpload.fileList.length + ")";
+            result.text = Language.text("imageFileUploadingProgress", "" + resultList.length, "" + fileReferenceForUpload.fileList.length);
         }
         
         Log.logging("printResultList End");

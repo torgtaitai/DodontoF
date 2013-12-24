@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="150"
-   title="入力" 
+   title="{Language.s.input}" 
    showCloseButton="true"
    >
   
@@ -13,13 +13,13 @@
             verticalGap="2" horizontalGap="2" 
             />
     <mx:HBox width="100%" height="100%">
-      <mx:Label id="inputLabel" text="入力:" />
+      <mx:Label id="inputLabel" text="{Language.s.input}:" />
       <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="実行" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.executeButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

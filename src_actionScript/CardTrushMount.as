@@ -30,7 +30,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "カード捨て札";
+            return Language.s.cardTrushMount;
         }
         
         public static function getJsonData(imageName_:String,
@@ -65,7 +65,7 @@ package {
         }
         
         override public function getTitleText():String {
-            return "捨て札：" + getCardCount() + "枚";
+            return Language.text("trushCardMountCountDisplay", getCardCount());
         }
         
         override protected function isOwner():Boolean {
@@ -88,11 +88,11 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "一番上のカードを場に戻す", getContextMenuItemCardReturn);
-            addMenuItem(menu, "捨て札を山札に積んでシャッフルする", getContextMenuItemCardShuffle, true);
-            addMenuItem(menu, "捨て札をそのまま山札に積んで、シャッフルしない", getContextMenuItemCardNoShuffle, true);
+            addMenuItem(menu, Language.s.returnMountTopCardToField, getContextMenuItemCardReturn);
+            addMenuItem(menu, Language.s.shuffleTrushCardsAndToMount, getContextMenuItemCardShuffle, true);
+            addMenuItem(menu, Language.s.moveTrushCardsToMountWithoutShuffle, getContextMenuItemCardNoShuffle, true);
             
-            addMenuItem(menu, "山からカードを選び出す", getContextMenuItemCardSelect, true);
+            addMenuItem(menu, Language.s.selectCardFromTrushMount, getContextMenuItemCardSelect, true);
             
             view.contextMenu = menu;
         }
@@ -108,12 +108,11 @@ package {
         private function returnCard():void {
             var message:String = "";
             if( this.getCardName() == "" ) {
-                message = "が「" + this.getMountNameForDisplay() + "」の捨て札からカードを引き戻しました。";
+                Utils.sendSystemMessage(Language.s.returnCardNoNameMessage, [this.getMountNameForDisplay()]);
             } else {
-                message = "が捨て札から「" + this.getCardName() + "」を引き戻しました。";
+                Utils.sendSystemMessage(Language.s.returnCardWithNameMessage, [this.getCardName()]);
             }
             
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message );
             sender.returnCard( getMountName(),
                                this.getX(),
                                this.getY(),

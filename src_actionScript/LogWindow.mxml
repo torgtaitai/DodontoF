@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
                 width="500" height="300"
-                title="デバッグログ" 
+                title="Debug Log" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"
                 >

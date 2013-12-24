@@ -35,7 +35,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "ダイスシンボル";
+            return Language.s.diceSymbol;
         }
         
         
@@ -131,9 +131,9 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            openMenu = addMenuItem(menu, "ダイス目を公開する", this.getContextMenuItemOpenDice, true);
+            openMenu = addMenuItem(menu, Language.s.openDiceSymbol, this.getContextMenuItemOpenDice, true);
             
-            allMenus.push( addMenuItem(menu, "ダイスを振る", this.rollDice) );
+            allMenus.push( addMenuItem(menu, Language.s.rollDiceSymbol, this.rollDice) );
             
             var minNumber:int = (Config.getInstance().isHaveZeroDice(maxNumber) ? 0 : 1);
             var loopCount:int = Math.min(this.maxNumber, limitMaxNumber);
@@ -144,22 +144,22 @@ package {
             }
             
             if( this.maxNumber > limitMaxNumber ) {
-                hideMenu = addMenuItem(menu, "ダイス目を10以上に", 
+                hideMenu = addMenuItem(menu, Language.s.changeDiceNumberOver10, 
                                        this.getContextMenuItemSetDiceOver10Function(),
                                        true);
             }
             
-            hideMenu = addMenuItem(menu, "ダイスを隠す", this.getContextMenuItemHideDice, true);
+            hideMenu = addMenuItem(menu, Language.s.hideDiceSymbol, this.getContextMenuItemHideDice, true);
             allMenus.push( hideMenu );
             
-            allMenus.push( addMenuItem(menu, "ダイスの削除", this.getContextMenuItemRemoveCharacter, true) );
+            allMenus.push( addMenuItem(menu, Language.s.deleteDiceSymbol, this.getContextMenuItemRemoveCharacter, true) );
             
             view.contextMenu = menu;
         }
         
         private function pushSetDiceNumberMenuItem(menu:ContextMenu, n:int, separatorBefore:Boolean):void {
             allMenus.push( addMenuItem(menu,
-                                       "ダイス目を" + n + "に",
+                                       Language.text("changeDiceSymbolNumber", n),
                                        getMenuItemFunctionChangeNumber(n),
                                        separatorBefore) );
         }
@@ -216,8 +216,7 @@ package {
         }
         
         private function sendOpenMessage():void {
-            var message:String = "がダイスをオープンしました。出目は" + number + "(" + maxNumber + "面ダイス)です。";
-            ChatWindow.getInstance().sendSystemMessage(message);
+            Utils.sendSystemMessage(Language.s.diceOpenMessage, [number, maxNumber]);
         }
         
         override protected function getContextMenuItemRemoveCharacter(event:ContextMenuEvent):void {
@@ -383,9 +382,10 @@ package {
         private function getToolTipMessage():String {
             var toolTipMessage:String = "";
             
-            toolTipMessage += "[" + this.ownerName + "]のダイス\n";
+            toolTipMessage += Language.text("diceSymbolToolTips", this.ownerName);
+            
             if( ! isOpenMode() ) {
-                toolTipMessage += "非公開：";
+                toolTipMessage += Language.s.diceSymbolPrivateMode;
             }
             if( isDiceVisible() ) {
                 toolTipMessage += "" + this.number + " / D" + maxNumber;

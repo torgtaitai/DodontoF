@@ -34,7 +34,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "マップマーカー";
+            return Language.s.mapMarker;
         }
         
         
@@ -129,8 +129,8 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "マップマーカーの変更", this.getItemPopUpChangeWindow);
-            addMenuItem(menu, "マップマーカーの削除", this.getContextMenuItemRemoveCharacter);
+            addMenuItem(menu, Language.s.changeMapMarker, this.getItemPopUpChangeWindow);
+            addMenuItem(menu, Language.s.deleteMapMarker, this.getContextMenuItemRemoveCharacter);
             
             view.contextMenu = menu;
         }

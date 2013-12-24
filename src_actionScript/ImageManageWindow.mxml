@@ -4,20 +4,20 @@
    xmlns:torgtaitai="*" 
    width="700"
    height="500"
-   title="画像管理" 
+   title="{Language.s.imageManageWindow}" 
    showCloseButton="true"
    >
-  <mx:Label text="削除する画像を選択してください。" />
+  <mx:Label text="{Language.s.selectDeleteImage}" />
   
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
   
   <mx:Box height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Label text="上の一覧から削除したい画像を選択してください。選択すると背景色が変わります" />
+    <mx:Label text="{Language.s.selectDeleteImageTips}" />
   </mx:Box>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="選択した画像を削除" click="this.deleteSelectedImage()" enabled="false" />
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.deleteImage}" click="this.deleteSelectedImage()" enabled="false" />
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   <mx:Label id="result" text=""/>
   
@@ -61,7 +61,7 @@
     private function deleteSelectedImage():void {
         var imageUrlList:Array = imageSelecter.getSelectedImageUrls();
         
-        result.text = "削除中・・・";
+        result.text = Language.s.deleting;
         
         try {
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
@@ -75,7 +75,7 @@
     public function deleteSelectedImageResult(event:Event):void {
         Log.loggingTuning("=>deleteSelectedImageResult(event:Event) Begin");
         try {
-            result.text = "結果受信中・・・";
+            result.text = Language.s.deleteResultLoading;
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             result.text = jsonData.resultText;
             imageSelecter.initImage();

@@ -32,18 +32,9 @@ package {
     
 	public class DodontoF_Main extends UIComponent {
         
-        /*
-        [Bindable] public var visibleDirectionLayer:Boolean = false;
-        
-        public function setVisibleDirectionLayer(b:Boolean):void {
-            visibleDirectionLayer = b;
-        }
-        */
-        
-        
         private var playRoomName:String = "";
         private var playRoomPassword:String = "";
-        static private var defaultChatChannelNames:Array = [publicChatChannelName, "雑談"];
+        static private var defaultChatChannelNames:Array = [publicChatChannelName, Language.s.smallTalkTabName];
         private var chatChannelNames:Array = Utils.clone(defaultChatChannelNames);
         private var canVisitValue:Boolean = false;
         private var logoutUrl:String = "";
@@ -204,7 +195,7 @@ package {
             return DodontoF_Main.publicChatChannelName;
         }
         static public function get publicChatChannelName():String {
-            return "メイン";
+            return Language.s.mainTabName;
         }
         
         private var visiterMode:Boolean = false;
@@ -369,7 +360,7 @@ package {
                 
                 thisObj = this;
                 
-                initForTiny();
+                map = new Map();
                 
                 Log.logging("map init.");
                 map.init(this);
@@ -392,70 +383,6 @@ package {
             }
         }
         
-        public function setStockCharacterWindow(window:StockCharacterWindow):void {
-            if( ! isTinyMode() ) {
-                return;
-            }
-            
-            hideForTiny(window.isMany);
-        }
-        
-        public function setCharacterWindow(characterWindow:CharacterWindow):void {
-            if( ! isTinyMode() ) {
-                return;
-            }
-            
-            hideForTiny(characterWindow.otherInfos);
-            hideForTiny(characterWindow.characterSizeBox);
-            characterWindow.height = 400;
-        }
-        
-        public function initWindowForTiny():void {
-            if( ! isTinyMode() ) {
-                return;
-            }
-            
-            initiativeWindow.visible = false;
-            
-            hideForTiny(chatWindow.diceBotGameType);
-            hideForTiny(chatWindow.secretTalkButton);
-            hideForTiny(chatWindow.sendCounterRemocon);
-            hideForTiny(chatWindow.voteImage);
-            hideForTiny(chatWindow.sendSoundButton);
-            hideForTiny(chatWindow.novelticModeButton);
-            
-            chatPalette.visible = false;
-            
-            diceBox.visible = false;
-            diceBox.width = 0;
-        }
-        
-        private function initForTiny():void {
-            if( ! isTinyMode() ) {
-                menuXml = getMenuXmlDefault();
-                map = new Map();
-                return;
-            }
-            
-            menuXml = getMenuXmlTiny();
-            map = new MapForTiny();
-            
-            hideForTiny(dodontoF.zoomInButton);
-            hideForTiny(dodontoF.zoomOutButton);
-            hideForTiny(dodontoF.sharedMemo);
-            ChatWindow.setDiceBotOn( false );
-            
-            hideForTiny(dodontoF.graveyard);
-        }
-        
-        private function hideForTiny(comp:UIComponent):void {
-            comp.visible = false;
-            comp.width = 0;
-            comp.height = 0;
-            comp.enabled = false;
-        }
-        
-
         public function loadAllSaveData():void {
             getGuiInputSender().getSender().loadAllSaveData();
         }
@@ -478,16 +405,16 @@ package {
         
         public function logout():void {
             if( isSessionRecording() ) {
-                Alert.show("録画中です。ログアウトするには録画を終了してください。");
+                Alert.show(Language.s.nowYouAreRecordingErrorMessage);
                 return;
             }
             
-            Utils.askByAlert("ログアウト確認", "ログアウトしてよろしいですか？", 
+            Utils.askByAlert(Language.s.logoutQuestionTitle, Language.s.logoutQuestion, 
                              function():void { thisObj.logoutExecute() });
         }
         
         public function logoutFromReplay():void {
-            Utils.askByAlert("ログイン画面に戻る", "リプレイ再生を止め、ログイン画面に戻りますか？", 
+            Utils.askByAlert(Language.s.returnToLoginWindow, Language.s.returnToLoginWindowQuestion, 
                              function():void { thisObj.logoutExecute() });
         }
         
@@ -495,7 +422,7 @@ package {
             stopSessionRecording();
             
             if( isWelcomeMessageOn ) {
-                chatWindow.sendSystemMessage("がログアウトしました。");
+                chatWindow.sendSystemMessage(Language.s.logoutMessage);
             }
             
             var url:String = logoutUrl;
@@ -520,7 +447,7 @@ package {
         }
         
         public function startSessionRecording():void {
-            chatWindow.sendSystemMessage("が録画を開始しました。");
+            chatWindow.sendSystemMessage(Language.s.startRecordMessage);
             var sender:SharedDataSender = getGuiInputSender().getSender();
             sender.startSessionRecording();
         }
@@ -536,7 +463,7 @@ package {
             var saveFileBaseName:String = "DodontoF_PlayRecord_";
             saveHistory(history, saveFileBaseName);
             
-            chatWindow.sendSystemMessage("の録画が終了しました。");
+            chatWindow.sendSystemMessage(Language.s.stopRecordMessage);
         }
         
         private var fileReferenceForSessionRecording:FileReference = new FileReference();
@@ -623,10 +550,6 @@ package {
             return isCardHandleLogVisible;
         }
         
-        
-        public function setRulerMode():void {
-            map.setRulerMode();
-        }
         
         public function getUniqueId():String {
             return sender.getUniqueId();
@@ -803,10 +726,6 @@ package {
         }
         
         public function getDiceBoxWidth():Number {
-            if( isTinyMode() ) {
-                return 0;
-            }
-            
             return diceBox.width;
         }
         
@@ -923,7 +842,9 @@ package {
             return parseInt( getParams('replayStartPosition') );
         }
         
-        //無効な場合は-1を返す
+        // URLで
+        // DodontoF.swf?loginRoom=1
+        //のようにログインする部屋番号を指定。値が指定されていない場合は-1を返す
         public function getLoginRoom():int {
             var value:String = getParams('loginRoom') as String;
             if( value == null ) {
@@ -932,6 +853,7 @@ package {
             
             return parseInt( value );
         }
+        
         
         public function isMode(targetMode:String):Boolean {
             var modeString:String = getParams("mode");
@@ -993,11 +915,19 @@ package {
                 gameType = "DiceBot";
             }
             
+            var localGameName:String = Utils.getDiceBotLanguageName(gameType);
+            if( localGameName != null ) {
+                return localGameName;
+            }
+                
+            
             for each(var info:Object in diceBotInfos) {
-                    if( info['gameType'] == gameType ) {
-                        return info["name"];
-                    }
+                if( info['gameType'] != gameType ) {
+                    continue;
                 }
+                
+                return info['name'];
+            }
             
             return gameType;
         }
@@ -1079,149 +1009,118 @@ package {
             localReplayMode = b;
         }
         
-        public function isTinyMode():Boolean {
-            return isMode("tiny");
-        }
-        
-        private var menuXml:Array;
-        
         public function getMenuXml():Array {
+            var menuXml:Array = getMenuXmlDefault();
             return Utils.clone(menuXml);
         }
         
-        private function getMenuXmlTiny():Array {
-            return [
-                    {label:"ファイル", data:"pass",
-                            children: [
-                                       {label:"チャットログ保存", data:"saveLog"},
-                                       {label:"録画開始", data:"startSessionRecording", enabled:"true"},
-                                       {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
-                                       {label:"ログアウト", data:"logout", enabled:"true"},
-                                       ]},
-                    
-                    {label:"表示", data:"pass_display", enabled:"true",
-                            children: [
-                                       {label:"立ち絵のサイズを自動調整する", data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
-                                       {type:"separator"},
-                                       {label:"背景変更", data:"changeMap"},
-                                       ]},
-                    
-                    {label:"画像", data:"pass",
-                            children: [
-                                       {label:"ファイルアップローダー", data:"imageFileUploader"},
-                                       {label:"タグ編集", data:"openImageTagManager"},
-                                       {label:"画像削除", data:"deleteImage"}
-                                       ]},
-                    ];            
-        }
         
         private function getMenuXmlDefault():Array {
             return [
-    {label:"ファイル", data:"pass",
+    {label:Language.s.fileMenu, data:"pass_file",
      children: [
-        {label:"セーブ", data:"save"},
-        {label:"ロード", data:"load"},
+        {label:Language.s.saveMenu, data:"save"},
+        {label:Language.s.loadMenu, data:"load"},
         {type:"separator"},
-        {label:"全データセーブ", data:"saveAllData"},
-        {label:"全データロード(旧：シナリオデータ読み込み)", data:"loadAllSaveData"},
+        {label:Language.s.saveAllDataMenu, data:"saveAllData"},
+        {label:Language.s.loadAllSaveDataMenu, data:"loadAllSaveData"},
         {type:"separator"},
-        {label:"チャットログ保存", data:"saveLog"},
+        {label:Language.s.saveLogMenu, data:"saveLog"},
         {type:"separator"},
-        {label:"録画開始", data:"startSessionRecording", enabled:"true"},
-        {label:"録画終了", data:"stopSessionRecording", enabled:"false"},
+        {label:Language.s.startSessionRecordingMenu, data:"startSessionRecording", enabled:"true"},
+        {label:Language.s.stopSessionRecordingMenu, data:"stopSessionRecording", enabled:"false"},
         {type:"separator"},
-        {label:"ログアウト", data:"logout", enabled:"true"},
+        {label:Language.s.logoutMenu, data:"logout", enabled:"true"},
                 ]},
 
-    {label:"表示", data:"pass_display", enabled:"true",
+    {label:Language.s.displayMenu, data:"pass_display", enabled:"true",
      children: [
-        {label:"チャットパレット表示", data:"isChatPaletteVisible", type:"check", toggled:false},
-        {label:"カウンターリモコン表示", data:"isCounterRemoconVisible", type:"check", toggled:false},
+        {label:Language.s.isChatPaletteVisibleMenu, data:"isChatPaletteVisible", type:"check", toggled:false},
+        {label:Language.s.isCounterRemoconVisibleMenu, data:"isCounterRemoconVisible", type:"check", toggled:false},
         {type:"separator"},
         
-        {label:"チャット表示", data:"isChatVisible", type:"check", toggled:true},
-        {label:"ダイス表示", data:"isDiceVisible", type:"check", toggled:true},
-        {label:"イニシアティブ表示", data:"isInitiativeListVisible", type:"check", toggled:true},
+        {label:Language.s.isChatVisibleMenu, data:"isChatVisible", type:"check", toggled:true},
+        {label:Language.s.isDiceVisibleMenu, data:"isDiceVisible", type:"check", toggled:true},
+        {label:Language.s.isInitiativeListVisibleMenu, data:"isInitiativeListVisible", type:"check", toggled:true},
         {type:"separator"},
         
-        {label:"立ち絵表示", data:"isStandingGraphicVisible", type:"check", toggled:true},
-        {label:"カットイン表示", data:"isCutInVisible", type:"check", toggled:true},
+        {label:Language.s.isStandingGraphicVisibleMenu, data:"isStandingGraphicVisible", type:"check", toggled:true},
+        {label:Language.s.isCutInVisibleMenu, data:"isCutInVisible", type:"check", toggled:true},
         {type:"separator"},
         
-        {label:"座標表示", data:"isPositionVisible", type:"check", toggled:true},
-        {label:"マス目表示", data:"isGridVisible", type:"check", toggled:true},
+        {label:Language.s.isPositionVisibleMenu, data:"isPositionVisible", type:"check", toggled:true},
+        {label:Language.s.isGridVisibleMenu, data:"isGridVisible", type:"check", toggled:true},
         {type:"separator"},
         
-        {label:"マス目にキャラクターを合わせる", data:"isSnapMovablePiece", type:"check", toggled:true},
-        {label:"立ち絵のサイズを自動調整する", data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
+        {label:Language.s.isSnapMovablePieceMenu, data:"isSnapMovablePiece", type:"check", toggled:true},
+        {label:Language.s.isAdjustImageSizeMenu, data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
         {type:"separator"},
         
-        {label:"ウィンドウ配置初期化", data:"initWindowPosition"},
-        {label:"表示状態初期化", data:"initLocalSaveData"}
+        {label:Language.s.initWindowPositionMenu, data:"initWindowPosition"},
+        {label:Language.s.initLocalSaveDataMenu, data:"initLocalSaveData"}
         
                 ]},
     
-    {label:"コマ", data:"pass",
+    {label:Language.s.pieceMenu, data:"pass_piece",
      children: [
-        {label:"キャラクター追加", data:"addCharacter"},
-        {label:"範囲追加", data:"pass",
+        {label:Language.s.addCharacterMenu, data:"addCharacter"},
+        {label:Language.s.addRangeMenu, data:"pass_range",
                 children: [
-                           {label:"魔法範囲追加(D&D3版)", data:"addMagicRange"},
-                           {label:"魔法範囲追加(D&D4版)", data:"addMagicRangeDD4th"},
-                           {label:"攻撃範囲(メタリックガーディアン)", data:"addMetallicGuardianDamageRange"},
+                           {label:Language.s.addMagicRangeMenu, data:"addMagicRange"},
+                           {label:Language.s.addMagicRangeDD4thMenu, data:"addMagicRangeDD4th"},
+                           {label:Language.s.addMetallicGuardianDamageRangeMenu, data:"addMetallicGuardianDamageRange"},
                            ]},
-        {label:"魔法タイマー追加", data:"addMagicTimer"},
+        {label:Language.s.addMagicTimerMenu, data:"addMagicTimer"},
         {type:"separator"},
-        {label:"チット作成", data:"createChit"},
+        {label:Language.s.createChitMenu, data:"createChit"},
         {type:"separator"},
-        {label:"墓場", data:"graveyard"},
-        {label:"キャラクター待合室", data:"characterWaitingRoom"},
+        {label:Language.s.graveyardMenu, data:"graveyard"},
+        {label:Language.s.characterWaitingRoomMenu, data:"characterWaitingRoom"},
         {type:"separator"},
-        {label:"回転マーカーを表示する", data:"isRotateMarkerVisible", type:"check", toggled:true},
+        {label:Language.s.isRotateMarkerVisibleMenu, data:"isRotateMarkerVisible", type:"check", toggled:true},
                 ]},
     
-    {label:"カード", data:"pass_card",
+    {label:Language.s.cardMenu, data:"pass_card",
      children: [
-        {label:"カードピックアップウィンドウ表示", data:"isCardPickUpVisible", type:"check", toggled:false},
-        {label:"カード操作ログ表示", data:"isCardHandleLogVisible", type:"check", toggled:true},
+        {label:Language.s.isCardPickUpVisibleMenu, data:"isCardPickUpVisible", type:"check", toggled:false},
+        {label:Language.s.isCardHandleLogVisibleMenu, data:"isCardHandleLogVisible", type:"check", toggled:true},
         {type:"separator"},
-        {label:"カード配置の初期化", data:"openInitCardWindow"},
+        {label:Language.s.openInitCardWindowMenu, data:"openInitCardWindow"},
         {type:"separator"},
-        {label:"カードの全削除", data:"cleanCard"}
+        {label:Language.s.cleanCardMenu, data:"cleanCard"}
                 ]},
     
-    {label:"マップ", data:"pass",
+    {label:Language.s.mapMenu, data:"pass_map",
      children: [
-        {label:"マップ変更", data:"changeMap"},
-        {label:"フロアタイル変更モード", data:"changeFloorTile"},
-        {label:"マップマスク追加", data:"addMapMask"},
-        {label:"簡易マップ作成", data:"createMapEasy"},
+        {label:Language.s.changeMapMenu, data:"changeMap"},
+        {label:Language.s.changeFloorTileMenu, data:"changeFloorTile"},
+        {label:Language.s.addMapMaskMenu, data:"addMapMask"},
+        {label:Language.s.createMapEasyMenu, data:"createMapEasy"},
         {type:"separator"},
-        {label:"マップ状態保存", data:"saveMap"},
-        {label:"マップ切り替え", data:"loadMap"},
+        {label:Language.s.saveMapMenu, data:"saveMap"},
+        {label:Language.s.loadMapMenu, data:"loadMap"},
                 ]},
-    {label:"画像", data:"pass",
+    {label:Language.s.imageMenu, data:"pass_image",
      children: [
-        {label:"ファイルアップローダー", data:"imageFileUploader"},
-        //{label:"URLアップローダー", data:"imageUrlUploader"},
-        {label:"WEBカメラ撮影", data:"webcameraCaptureUploader"},
+        {label:Language.s.imageFileUploaderMenu, data:"imageFileUploader"},
+        {label:Language.s.webcameraCaptureUploaderMenu, data:"webcameraCaptureUploader"},
         {type:"separator"},
-        {label:"タグ編集", data:"openImageTagManager"},
-        {label:"画像削除", data:"deleteImage"}
+        {label:Language.s.openImageTagManagerMenu, data:"openImageTagManager"},
+        {label:Language.s.deleteImageMenu, data:"deleteImage"}
                 ]},
     
-    {label:"ヘルプ", data:"pass",
+    {label:Language.s.helpMenu, data:"pass_help",
             children: [
-                       {label:"バージョン", data:"version"},
-                       {label:"マニュアル", data:"manual"},
-                       {label:"チュートリアル動画", data:"tutorialReplay"},
-                       {label:"オフィシャルサイトへ", data:"officialSite"}
+                       {label:Language.s.versionMenu, data:"version"},
+                       {label:Language.s.manualMenu, data:"manual"},
+                       {label:Language.s.tutorialReplayMenu, data:"tutorialReplay"},
+                       {label:Language.s.officialSiteMenu, data:"officialSite"}
                        ]
             }
     
     /*
     ,
-    {label:"ログ", data:"pass", 
+    {label:"LOG", data:"pass_log", 
      children: [
         {label:"initLogWindow", data:"initLogWindow"}, 
         {type:"separator"}, 

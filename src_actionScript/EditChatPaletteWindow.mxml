@@ -4,20 +4,20 @@
    xmlns:torgtaitai="*" 
    width="500"
    height="350"
-   title="チャットパレット編集画面" 
+   title="{Language.s.eitChatPaletteWindow}" 
    showCloseButton="true"
    >
   
   <mx:HBox height="30" width="100%" >
-    <mx:Label text="チャットパレット文字列:" />
+    <mx:Label text="{Language.s.chatPaletteText}" />
     <mx:Spacer width="100%" />
     <mx:Button id="helpSpace" label="？" click="Alert.show(getHelpMessage())"/>
   </mx:HBox>
   <mx:TextArea id="lines" text="" width="100%" height="100%"/>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="編集" click="execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.chatPaletteEditButton}" click="execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 
   <mx:Script>
@@ -41,15 +41,15 @@
     }
     
     private function getHelpMessage():String {
-        var message:String = "チャットパレットの使い方：\n"
-        + "登録したいメッセージをここに入力しましょう。\n"
-        + "1行1メッセージに対応します。\n"
-        + "文中に\n"
-        + "//予約語＝値\n"
-        + "と書いておくと、｛予約語｝という記述で文字と値の差し替えが出来ます。\n"
-        + "キャラクターの能力値やスキルの管理に便利かと思います。\n"
-        + "予約語の宣言は文中どこでも構いません（他のタブには影響しません）。\n"
-        + " // や = や {} といった記号や数値は全角・半角どちらでもOKです。";
+        var message:String = Language.s.howToUseChatPallet_1
+        + Language.s.howToUseChatPallet_2
+        + Language.s.howToUseChatPallet_3
+        + Language.s.howToUseChatPallet_4
+        + Language.s.howToUseChatPallet_5
+        + Language.s.howToUseChatPallet_6
+        + Language.s.howToUseChatPallet_7
+        + Language.s.howToUseChatPallet_8
+        + Language.s.howToUseChatPallet_9;
         
         return message;
     }

@@ -2,7 +2,7 @@
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   title="チャット"
+   title="{Language.s.chatWindowTitle}"
    width="220"
    height="220"
    showCloseButton="true"
@@ -31,7 +31,7 @@
       
       <mx:Box id="chatControlBox" width="100%" height="75" verticalGap="1" >
         <mx:HBox id="nameBox" width="100%" height="25">
-	      <mx:Label text="名前"/>
+	      <mx:Label text="{Language.s.chatWindowSenderName}"/>
           <torgtaitai:SuggestComboBox id="chatCharacterName" 
                        change="changedChatCharacterName()"
                        tabIndex="1"
@@ -47,10 +47,10 @@
           
           <mx:Image id="secretTalkButton" source="{keyIcon}"
                     click="visibleSecretTalk()"
-                    toolTip="秘話機能有効化"
+                    toolTip="{Language.s.secretTalkButtonToolTip}"
                     />
           <mx:ComboBox id="sendtoBox"
-                       toolTip="送信先：（全員）以外ならその相手にだけ送信されます"
+                       toolTip="{Language.s.sendChatToButtonToolTip}"
                        change="changeSendtoBox()"
                        rowCount="10"
                        visible="false"
@@ -69,24 +69,22 @@
               </mx:ComboBox>
               
               <mx:Image id="botTableButton" source="{botTableIcon}" click="manageDiceBotTable()"
-                        toolTip="ダイスボット表追加・変更・削除"
+                        toolTip="{Language.s.botTableTips}"
                         />
 
               <mx:Image id="novelticModeButton" source="{novelticModeIcon}" click="changeNovelticMode()" />
-              <mx:CheckBox id="isHideNovelticWindow" label="自動ログ隠し" fontSize="10"
-                           toolTip="シフトキー・Ctrlキーを押しながらのマウス操作でもログは隠れなくなります。"
+              <mx:CheckBox id="isHideNovelticWindow" label="{Language.s.hiddenLogAuto}" fontSize="10"
+                           toolTip="{Language.s.novelticModeTips}"
                            width="0" selected="true" visible="false" />
-              <mx:Image id="deleteChatLogButton" source="{deleteChatLogIcon}" click="deleteChatLog()" toolTip="チャットログ全削除" />
-              <mx:Image id="chatFontSetButton" source="{chatFontIcon}" click="setChatFontWindow()" toolTip="チャット文字設定" />
+              <mx:Image id="deleteChatLogButton" source="{deleteChatLogIcon}" click="deleteChatLog()" toolTip="{Language.s.deleteAllChatLog}" />
+              <mx:Image id="chatFontSetButton" source="{chatFontIcon}" click="setChatFontWindow()" toolTip="{Language.s.chatFontConfig}" />
               <mx:Image id="soundStatusImage" click="changeSoundState()" />
-              <mx:Image id="voteImage" source="{voteIcon}" click="chatMessageTrader.vote()" toolTip="点呼／投票" />
+              <mx:Image id="voteImage" source="{voteIcon}" click="chatMessageTrader.vote()" toolTip="{Language.s.rollCallAndVote}" />
               <mx:Image id="sendSoundButton" click="sendOrStopSound()"  />
-              <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="カットイン設定" />
-              <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="立ち絵設定" />
-              <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="簡易ファイルアップローダー" />
+              <mx:Image source="{cutInIcon}" click="openCreateCutInWindow()" toolTip="{Language.s.cutInSetting}" />
+              <mx:Image source="{standingGraphicsEditIcon}" click="openCreateStandingGraphicsWindow()"  toolTip="{Language.s.standingImageConfig}" />
+              <mx:Image source="{fileUploadIcon}" click="uploadFile()" toolTip="{Language.s.easyFileUploader}" />
               <mx:Image id="talkButton" source="{talkSilentIcon}" click="setTalkMode()"  visible="{canTalk}" />
-              <!-- <mx:Image source="{goodIcon}" click="sendGood()" toolTip="いいねっ！" /> -->
-              <!-- <mx:Image source="{twitterIcon}" click="sendToTwitter()" toolTip="Twitter" /> -->
       
             </mx:HBox>
           </mx:HBox>
@@ -96,7 +94,7 @@
         <mx:Box width="100%" height="100%">
           
           <mx:HBox width="100%" height="100%">
-	        <mx:Label text="発言"/>
+	        <mx:Label text="{Language.s.chatMessageLabel}"/>
             <mx:Box id="chatMessageBase" width="100%" height="100%">
               <mx:TextArea id="chatMessageInput" width="100%" height="100%" text=""
                            keyDown="keyDownInChatMessage(event)"
@@ -107,8 +105,8 @@
             
             
             <mx:Box id="sendCounterRemocon" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
-              <mx:Button id="sendMessageButton" label="送信" height="18" width="60" click="sendChatMessageLocal()" />
-              <mx:Button label="ログ保存" height="18" width="60" click="saveChatLog()" paddingLeft="2" paddingRight="2" />
+              <mx:Button id="sendMessageButton" label="{Language.s.sendChatMessage}" height="18" width="60" click="sendChatMessageLocal()" />
+              <mx:Button label="{Language.s.saveChatLog}" height="18" width="60" click="saveChatLog()" paddingLeft="2" paddingRight="2" />
             </mx:Box>
             
           </mx:HBox>
@@ -151,10 +149,6 @@
         [Embed(source='image/icons/page_white_get.png')]
         [Bindable]
         private static var fileUploadIcon:Class;
-    
-        [Embed(source='image/icons/twitter.png')]
-        [Bindable]
-        private static var twitterIcon:Class;
     
         [Embed(source='image/icons/good.jpg')]
         [Bindable]
@@ -353,7 +347,7 @@
             setChatFontColor( info["chatFontColor"] );
             setChatBackgroundColor( info["chatBackgroundColor"], true );
             
-            var numberString:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
+            var numberString:String = "" + DodontoF_Main.getInstance().getGuiInputSender().getRoomNumber();
             setDiceBotGameType( info[getDiceBotGameTypeKeyName()] );
             
             Log.logging("loadChatInfo info", info);
@@ -366,7 +360,7 @@
         }
         
         private function getDiceBotGameTypeKeyName():String { 
-            var numberString:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
+            var numberString:String = "" + DodontoF_Main.getInstance().getGuiInputSender().getRoomNumber();
             var keyName:String = numberString + "_diceBotGameType";
             return keyName;
         }
@@ -434,7 +428,7 @@
         public function setChannelNames(changedChannelNames:Array):void {
             
             if( changedChannelNames.length == 0 ) {
-                Log.loggingError("チャンネル数が0で設定されています。正しいチャンネル設定を行ってください");
+                Log.loggingError(Language.s.channerCoundIsEmptyErrorMessage);
                 return;
             }
             
@@ -667,7 +661,7 @@
             image.source = sendChatMessageErrorIcon;
             image.width = 16;
             image.height = 16;
-            image.toolTip = "チャット送信エラー";
+            image.toolTip = Language.s.sendChatErrorMessage;
             image.addEventListener(MouseEvent.CLICK, function(event:MouseEvent = null):void {
                     SendChatMessageFailedWindow.setWindowVisible(true);
                 });
@@ -801,14 +795,15 @@
         
         public function initDiceBotInfos():void {
             Log.logging("initDiceBotInfos called");
+            
             var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
-            diceBotGameType.dataProvider = diceBotInfos;
+            Utils.setDiceBotDataProvider( diceBotGameType, diceBotInfos );
         }
         
         public function setDiceBotInfos(diceBotInfos:Array):void {
             Log.logging("setDiceBotInfos called");
             var gameType:String = diceBotGameType.selectedItem.gameType;
-            diceBotGameType.dataProvider = diceBotInfos;
+            Utils.setDiceBotDataProvider( diceBotGameType, diceBotInfos );
             //Utils.selectComboBox(diceBotGameType, gameType, "gameType");
             setDiceBotGameType(gameType);
             
@@ -845,7 +840,7 @@
         public function getChatCharacterName():String {
             var name:String = chatCharacterName.text;
             if( isVisiterMode() ) {
-                name += "＠見学";
+                name += Language.s.visitorNameSaffix;
             }
             return name;
         }
@@ -941,12 +936,12 @@
             var text:String = "";
             
             if( item.gameType == '' || item.gameType == 'DiceBot' ) {
-                text += "==【その他】===============================\n";
-                text += "ゲーム固有の判定がある場合はこの場所に記載されます。";
+                text += Language.s.diceBotOtherInfomation1;
+                text += Language.s.diceBotOtherInfomation2;
                 return text;
             }
             
-            text += ("==【" + item.name + "専用】=======================\n");
+            text += ("==【" + item.name + Language.s.diceBotCustomInfomation);
             text += item.info;
             
             return text;
@@ -1430,8 +1425,8 @@
         }
         
         
-        public function sendSystemMessage(messageBase:String, isPrintName:Boolean = true, strictlyUniqueId:String = null):void {
-            chatMessageTrader.sendSystemMessage(messageBase, isPrintName, strictlyUniqueId);
+        public function sendSystemMessage(messageBase:String, args:Array = null, strictlyUniqueId:String = null):void {
+            chatMessageTrader.sendSystemMessage(messageBase, args);
         }
         
         public function addLocalMessage(message:String):void {
@@ -1499,7 +1494,7 @@
         
         public function initForFirstRefresh(isWelcomeMessageOn:Boolean):void {
             if( isWelcomeMessageOn ) {
-                sendSystemMessage("がログインしました。");
+                sendSystemMessage(Language.s.loginMessage);
             }
             
             var message:String = DodontoF_Main.getInstance().getLoginTimeLimitSecondMessage();
@@ -1552,24 +1547,22 @@
             getChatChannle(channel).startNoCheckCount();
         }
         
-        private var allUserName:String = '＜全員＞';
+        private var allUserName:String = Language.s.allMember;
     
         private function getAlarmStringPrefix(userName:String):String {
-            return "[アラーム発生：" + userName + "]:";
+            return Language.text("alarmMessage", userName);
         }
-    
-
+        
         private function getAlarmString(userName:String, soundFileName:String, seconds:int):String {
             var text:String = getAlarmStringPrefix(userName) + soundFileName;
             if( seconds > 0 ) {
-                text += ":" + seconds + "秒後";
+                text += Language.text("alarmMessageSecond", seconds);
             }
             return text;
         }
-    
+        
         public function isToMyAlarm(chatMessage:String):Boolean {
             Log.logging("ChatWindow.isToMyAlarm chatMessage", chatMessage);
-            Log.logging("getAlarmStringPrefix(allUserName)", getAlarmStringPrefix(allUserName));
             
             if( (chatMessage.indexOf( getAlarmStringPrefix(allUserName)) == 0) ||
                 (chatMessage.indexOf( getAlarmStringPrefix(chatCharacterName.text))) == 0) {
@@ -1623,10 +1616,10 @@
                                                 channelName:String):void {
             
             if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
-                Alert.show("この機能を使用するにはFlashPlayerのバージョン10以上が必要です。");
+                Alert.show(Language.s.needFlashPlayerOverVer10ErrorMessage);
             }
             
-            var title:String = "チャットログ";
+            var title:String = Language.s.chatLog;
             if( channelName != "" ) {
                 title += "：" + channelName;
             }
@@ -1783,12 +1776,12 @@
         
         private function setSendSoundButtonOn():void {
             sendSoundButton.source = sendSoundIcon;
-            sendSoundButton.toolTip = "目覚ましアラーム送信";
+            sendSoundButton.toolTip = Language.s.sendWakeUpSound;
         }
         
         private function setSendSoundButtonOff():void {
             sendSoundButton.source = stopSoundIcon;
-            sendSoundButton.toolTip = "目覚ましアラーム停止";
+            sendSoundButton.toolTip = Language.s.stopWakeUpSound;
         }
         
         private function getSecondsFromAlarmText(text:String):int {
@@ -1856,10 +1849,10 @@
         private function setSoundStateImage():void {
             if( isSoundOn ) {
                 soundStatusImage.source = soundOnIcon;
-                soundStatusImage.toolTip = "音再生あり";
+                soundStatusImage.toolTip = Language.s.soundOn;
             } else {
                 soundStatusImage.source = soundOffIcon;
-                soundStatusImage.toolTip = "音再生なし";
+                soundStatusImage.toolTip = Language.s.soundOff;
             }
         }
         
@@ -1885,10 +1878,10 @@
             
             if( isTalkMode(channel) ) {
                 talkButton.source = talkIcon;
-                talkButton.toolTip = "テキスト読み上げあり";
+                talkButton.toolTip = Language.s.talkTextOn;
             } else {
                 talkButton.source = talkSilentIcon;
-                talkButton.toolTip = "テキスト読み上げなし";
+                talkButton.toolTip = Language.s.talkTextOff;
             }
         }
         
@@ -1959,9 +1952,9 @@
         
         public function changeNovelticMode():void {
             var toChangeModeName:String = (novelticMode.isNovelticModeOn() ? 
-                                           "通常のチャットログ表示モード" :
-                                           "ノベルゲーム風表示モード");
-            var message:String = toChangeModeName + "に切り替えますか？\n(切り替えには時間がかかります。";
+                                           Language.s.nomalChatLogDisplayMode :
+                                           Language.s.novelticChatDisplayMode);
+            var message:String = Language.text("changeChatLogDisplayModeQuestion", toChangeModeName);
             
             var changeFunction:Function = function(e : CloseEvent) : void {
                 if (e.detail != Alert.OK) {
@@ -1971,7 +1964,7 @@
             }
             
             Alert.show(message,
-                       "チャット表示切替確認", 
+                       Language.s.changeChatLogDisplayModeQuestionTitle, 
                        (Alert.OK | Alert.CANCEL),
                        null, 
                        changeFunction);
@@ -1984,7 +1977,7 @@
         }
         
         private function changeWindowColorAndTitle(titleTail:String, color:String):void {
-            var titleString:String = "チャット";
+            var titleString:String = Language.s.chatWindowTitle;
             if( titleTail != "" ) {
                 titleString += (" -> " + titleTail);
             }
@@ -2013,7 +2006,7 @@
         
         public function changeVisiterMode():void {
             if( isVisiterMode() ) {
-                changeWindowColorAndTitle("見学モード","#FFFFCC");
+                changeWindowColorAndTitle(Language.s.visitorMode,"#FFFFCC");
             } else {
                 changeDefaultWindowColorAndTitle();
             }
@@ -2069,7 +2062,7 @@
             dataProvider.sort();
             
             var option_all:Object = {
-                label : "（全員）",
+                label : Language.s.allMember,
                 data : null};
             
             dataProvider.splice(0, 0, option_all);
@@ -2077,34 +2070,16 @@
             return dataProvider;
         }
         
-        public function sendToTwitter():void {
-            var urlVariables:URLVariables = new URLVariables();
-            var locationHref:String = String(ExternalInterface.call("function(){return location.href}"));
-            var reg:RegExp = /https?:\/\/[-_.!~*\'()\w;\/?:@&=+$,%#]+/;
-            urlVariables.url = ((locationHref.search(reg)==0) ? locationHref : "");
-            urlVariables.text = chatMessageInput.text;
-            urlVariables.related = "torgtaitai:どどんとふ作者です";
-            var urlRequest:URLRequest = new URLRequest("https://twitter.com/share");
-            urlRequest.data = urlVariables;
-            navigateToURL(urlRequest, "_blank");
-            
-            sendChatMessageLocal();
-        }
-        
-        public function sendGood():void {
-            chatMessageTrader_sendMessage_publicChatChannel("【いいねっ！】");
-        }
-        
         
         public function deleteChatLog():void {
             var announce:Function = 
-                function():void { sendSystemMessage("の全チャットログ削除が正常に終了しました。") };
+                function():void { sendSystemMessage(Language.s.deleteAllChatLogMessage) };
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
-            Utils.askByAlert("チャットログ削除確認", "チャットログを全て削除します。よろしいですか？", 
+            Utils.askByAlert(Language.s.deleteAllChatLogDeleteQuestionTitle, Language.s.deleteAllChatLogDeleteQuestion, 
                              function():void {
-                                 Utils.askByAlert("再確認", "削除したログは復旧できませんが、本当によろしいですか？", 
+                                 Utils.askByAlert(Language.s.deleteAllChatLogDeleteQuestionTitle2, Language.s.deleteAllChatLogDeleteQuestion2, 
                                                   function():void { guiInputSender.getSender().deleteChatLog(announce) });
                              });
         }

@@ -66,7 +66,7 @@ package {
         }
         
         public function getTypeName():String {
-            return "コマ基本クラス";
+            return Language.s.movablePiece;
         }
         
         public static function getJsonData(type:String,

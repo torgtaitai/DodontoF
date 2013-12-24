@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="300"
    height="300"
-   title="チャット文字設定" 
+   title="{Language.s.chatFontWindow}" 
    showCloseButton="true"
    >
   
@@ -13,46 +13,46 @@
        paddingTop="1" paddingBottom="1" 
        paddingRight="1" paddingLeft="1" >
       
-	  <mx:FormItem label="文字色:">
+	  <mx:FormItem label="{Language.s.chatFontColor}">
       <mx:ColorPicker id="chatMessageColorPicker" showTextField="true" selectedColor="0x000000"
                       change="printSample()"
-                      toolTip="チャット文字色設定" />
+                      toolTip="{Language.s.chatFontColorSetting}" />
       </mx:FormItem>
       
-	  <mx:FormItem label="背景色:">
+	  <mx:FormItem label="{Language.s.chatFontBackgroundColor}">
       <mx:ColorPicker id="chatBackgroundColorPicker" showTextField="true" selectedColor="0x000000"
                       change="printSample()"
-                      toolTip="チャット背景色設定" />
+                      toolTip="{Language.s.chatFontBackgroundColorSetting}" />
       </mx:FormItem>
-	  <mx:FormItem label="文字サイズ:">
+	  <mx:FormItem label="{Language.s.chatFontSize}">
         <mx:ComboBox id="chatFontSizeComboBox" editable="true" prompt="8"
                      change="printSample()"
-                     toolTip="チャット文字サイズ" />
+                     toolTip="{Language.s.chatFontSizeTips}" />
       </mx:FormItem>
       
-	  <mx:FormItem label="フォーマット:">
+	  <mx:FormItem label="{Language.s.chatFontTimeFormat}">
         <mx:CheckBox id="isDisplayTimeCheckBox" 
-                     label="「時：分」表示"
+                     label="{Language.s.chatFontTimeFormatInfo}"
                      change="printSample()"
                      />
       </mx:FormItem>
       
-	  <mx:FormItem label="入力例:">
-        <mx:TextInput id="input" height="25" width="100%" text="どどんとふ"
+	  <mx:FormItem label="{Language.s.chatFontInputSample}">
+        <mx:TextInput id="input" height="25" width="100%" text="{Language.s.title}"
                      change="printSample()"
                      />
       </mx:FormItem>
       
     </mx:Form>
     
-    <mx:Label text="出力例：" />
+    <mx:Label text="{Language.s.chatFontOutputSample}" />
     <mx:Box id="sampleBase" height="100%" width="100%" >
-      <mx:TextArea id="sample" height="100%" width="100%" text="どどんとふ" editable="false" />
+      <mx:TextArea id="sample" height="100%" width="100%" text="{Language.s.title}" editable="false" />
     </mx:Box>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="設定" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.chatFontSetting}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   
@@ -133,7 +133,7 @@
     private function getChatMessageForPrintHtml(color:String):String {
         
         var time:Number = new Date().getTime() / 1000;
-        var name:String = "なまえ";
+        var name:String = Language.s.chatFontSampleName;
         
         var htmlText:String = chatWindow.getChatMessageTrader().
         getChatMessageForPrintHtml(input.text,

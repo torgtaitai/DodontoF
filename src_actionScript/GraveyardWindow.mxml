@@ -4,24 +4,24 @@
    xmlns:torgtaitai="*" 
    width="420"
    height="150"
-   title="墓場" 
+   title="`{Language.s.graveyard}" 
    close="closeEvent()"
    showCloseButton="true"
    > 
 
   <mx:Form width="100%">
-	<mx:FormItem label="名前:">
+	<mx:FormItem label="{Language.s.graveyardCharacterName}">
 	  <mx:ComboBox id="characterInfo" width="100%" editable="false" />
 	</mx:FormItem>
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Spacer width="45%" />
-    <mx:Button id="executeButton" label="復活" click="this.resurrectCharacter()" />
+    <mx:Button id="executeButton" label="{Language.s.ressurect}" click="this.resurrectCharacter()" />
     <mx:Spacer width="10%" />
-    <mx:Button label="キャンセル" click="closeEvent()" />
+    <mx:Button label="{Language.s.cancelButton}" click="closeEvent()" />
     <mx:Spacer width="45%" />
-    <mx:Button id="clearButton" label="墓地を空にする" click="this.clearGraveyard()" />
+    <mx:Button id="clearButton" label="{Language.s.clearGraveyard}" click="this.clearGraveyard()" />
   </mx:HBox>
   
   <mx:Script>
@@ -37,7 +37,7 @@
     private function loadGraveyardInfo(event:Object = null):void {
         executeButton.enabled = false;
         characterInfo.enabled = false;
-        characterInfo.text = "ロード中・・・";
+        characterInfo.text = Language.s.loading;
         
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.requestGraveyard(this.requestGraveyardResult);

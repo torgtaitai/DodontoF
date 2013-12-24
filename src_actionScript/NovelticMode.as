@@ -96,8 +96,9 @@ package {
             chatWindow.isHideNovelticWindow.visible = isNovelticMode;
             chatWindow.isHideNovelticWindow.width = ( isNovelticMode ? 80 : 0);
             chatWindow.novelticModeButton.toolTip = ( isNovelticMode ?
-                                                      "ログ表示をノベルゲーム風表示から通常ログに切り替える" :
-                                                      "ログ表示をノベルゲーム風表示へ切り替える");
+                                                      Language.s.changeLogDisplayToNomalMode :
+                                                      Language.s.changeLogDisplayToNovelticMode );
+                                                      
         }
         
         private var textLogBox:Box = new Box();

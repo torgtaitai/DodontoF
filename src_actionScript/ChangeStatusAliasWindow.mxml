@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="650"
    height="400"
-   title="イニシアティブ表のチェックボックスへの名前付与画面" 
+   title="{Language.s.changeStatusAliasWindow}" 
    showCloseButton="true"
    >
 
@@ -21,7 +21,7 @@
                >
     <mx:columns>
       <mx:DataGridColumn id="key"
-                         headerText="ヘッダー名"
+                         headerText="{Language.s.headerName}"
                          dataField="key"
                          textAlign="left"
                          editable="false"
@@ -29,7 +29,7 @@
                          width="30"
                          />
       <mx:DataGridColumn id="value"
-                         headerText="チェックボックスへの名前"
+                         headerText="{Language.s.checkBoxName}"
                          dataField="value"
                          textAlign="left"
                          editable="true"
@@ -41,8 +41,8 @@
   
   
   <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="変更" click="execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.changeButton}" click="execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   <mx:Script>

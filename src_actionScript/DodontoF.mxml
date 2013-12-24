@@ -2,7 +2,7 @@
 <mx:Application
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*"
-   pageTitle="どどんとふ"
+   pageTitle="{Language.s.title}"
    applicationComplete="setup()"
    layout="absolute"
    >
@@ -25,23 +25,23 @@
       <mx:Image id="zoomOutButton" source="{zoomOutIcon}" click="dodontoF_Main.zoom(false)" />
       <mx:Spacer width="20" />
       
-      <mx:Button id="displayPlayRoomInfoButton" label="ルームx：0名" click="displayPlayRoomInfo()" enabled="false"/>
+      <mx:Button id="displayPlayRoomInfoButton" label="RoomX:0" click="displayPlayRoomInfo()" enabled="false"/>
       
       <mx:Button id="sharedMemo"
-                label="共有メモ"
+                label="{Language.s.sharedMemo}"
                 click="popup(AddMemoWindow, true)"
                  />
       
       <mx:Button id="openDrawWindow"
                  icon="{DrawMapWindow.pencilIcon}"
-                 label="手書き"
+                 label="{Language.s.handwrite}"
                  click="DrawMapWindow.open(openDrawWindow)"
                  toggle="true"
                  />
       <mx:Spacer width="50%" />
       
       <mx:Button id="graveyard"
-                 label="墓場"
+                 label="{Language.s.graveyardMenu}"
                  click="popup(GraveyardWindow, true)"
                  dragEnter="graveyardDragEnterHandler(event);" 
                  dragOver="graveyardDragOver(event)"
@@ -52,13 +52,13 @@
       <mx:Spacer width="50%" />
       
       <mx:Button icon="{cameraIcon}" click="captureScreen()"  paddingLeft="2" paddingRight="2" />
-      <mx:Button id="mentenanceModeButton" label="メンテナンスモード" click="changeMentenanceMode();" toggle="true" visible="false" width="0" />
-      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" label="ログアウト" />
+      <mx:Button id="mentenanceModeButton" label="MentenanceMode" click="changeMentenanceMode();" toggle="true" visible="false" width="0" />
+      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logout()" label="{Language.s.logoutMenu}" />
       
     </mx:HBox>
     
     <mx:HBox id="speedBox" width="0" height="100%" visible="false">
-      <mx:Label text="再生位置" />
+      <mx:Label text="{Language.s.replayPosition}" />
       <mx:HSlider id="replaySeekSlider" 
                   showTrackHighlight="true"
                   width="100%"
@@ -71,7 +71,7 @@
       <mx:Image id="pauseAndPlay" width="25" height="25" source="{pauseIcon}" click="DodontoF_Main.getInstance().pauseAndPlay()" />
       <mx:Spacer width="10" />
       
-      <mx:Label text="早送り倍率" />
+      <mx:Label text="{Language.s.replaySpeed}" />
       <mx:HSlider id="replaySpeedSlider" 
                   showTrackHighlight="true"
                   width="150"
@@ -82,12 +82,12 @@
                   labelOffset="0"
                   />
       
-      <mx:CheckBox id="isRepeat" label="繰り返し" selected="false"
+      <mx:CheckBox id="isRepeat" label="{Language.s.repeat}" selected="false"
                    visible="false" width="0"
                    />
 
       <mx:Button icon="{cameraIcon}" click="captureScreen()"  paddingLeft="2" paddingRight="2" />
-      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logoutFromReplay()" label="戻る" />
+      <mx:Button icon="{logoutIcon}" click="dodontoF_Main.logoutFromReplay()" label="{Language.s.logoutFromReplay}" />
     </mx:HBox>
     
   </mx:ApplicationControlBar>
@@ -168,17 +168,6 @@
         return standingGraphicLayer;
     }
     
-    private function initStandigGraphicsLayer():void {
-        /*
-        standingGraphicLayer.addEventListener(MouseEvent.ROLL_OVER, function(event:MouseEvent):void {
-                setStandingGraphicVisible(false);
-            });
-        standingGraphicLayer.addEventListener(MouseEvent.ROLL_OUT, function(event:MouseEvent):void {
-                setStandingGraphicVisible(true);
-            });
-        */
-    }
-    
     public function setStandingGraphicVisible(visible:Boolean):void {
         standingGraphicLayer.visible = visible;
     }
@@ -198,21 +187,11 @@
         thisObj = this;
         
         dodontoF_Main.setDodontoF(this);
+        Language.setup();
         
         Log.loggingTuning("isMySqlMode()", dodontoF_Main.isMySqlMode());
         
-        if( ! Config.getInstance().isAdobeAir() ) {
-            initForSetup();
-            return;
-        }
-        
-        var window:InputServerUrl = popup(InputServerUrl, true) as InputServerUrl;
-        
-        window.setResultFunction( function(url:String):void {
-                Config.getInstance().setServerUrl(url);
-                initForSetup();
-            });
-        
+        initForSetup();
     }
     
     private function initForSetup():void {
@@ -229,8 +208,7 @@
         initToolTip();
         initLayer();
         setPauseIcon();
-        initMenuXml();
-        initStandigGraphicsLayer();
+        initMenu();
         
         replaySeekSlider.snapInterval = 1;
         
@@ -303,16 +281,11 @@
         dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
         dodontoF_Main.setButtonWindow( popup(CounterRemocon, false), "isCounterRemoconVisible" );
         
-        dodontoF_Main.initWindowForTiny();
     }
     
     public static function openUrl(urlString:String):void {
         var url:URLRequest = new URLRequest(urlString);
         navigateToURL(url);
-    }
-    
-    private function emptyImplement():void {
-        Alert.show( "次回実装予定。" );
     }
     
     public function selectMenu(event:MenuEvent):void {
@@ -391,7 +364,6 @@
             Config.getInstance().setAdjustImageSizeMode(isAdjustStandingGraphics);
         } else if( menuName == "addCharacter" ) {
             var addCharacterWindow:AddCharacterWindow = popup(AddCharacterWindow, true) as AddCharacterWindow;
-            dodontoF_Main.setCharacterWindow(addCharacterWindow);
         } else if( menuName == "addMagicRange" ) {
             var addMagicRangeWindow:AddMagicRangeWindow = popup(AddMagicRangeWindow, true) as AddMagicRangeWindow;
             addMagicRangeWindow.setCharacterPosition();
@@ -436,12 +408,8 @@
             popup(AddMapMaskWindow, false);
         } else if( menuName == "createMapEasy" ) {
             popup(CreateMapEasyWindow, true);
-        } else if( menuName == "setRulerMode" ) {
-            dodontoF_Main.setRulerMode();
         } else if( menuName == "imageFileUploader" ) {
             openImageFileUploader();
-        } else if( menuName == "imageUrlUploader" ) {
-            openUrlUploader();
         } else if( menuName == "webcameraCaptureUploader" ) {
             openWebcameraCaptureUploader();
         } else if( menuName == "deleteImage" ) {
@@ -495,19 +463,19 @@
     public function setPlayIcon():void {
         pauseAndPlay.enabled = true;
         pauseAndPlay.source = playIcon;
-        pauseAndPlay.toolTip = "再生";
+        pauseAndPlay.toolTip = Language.s.replayButton;
     }
     
     public function setPauseIcon():void {
         pauseAndPlay.enabled = true;
         pauseAndPlay.source = pauseIcon;
-        pauseAndPlay.toolTip = "一時停止";
+        pauseAndPlay.toolTip = Language.s.pauseTips;
     }
     
     
     public function initLocalSaveData():void {
-        var result:Alert = Alert.show("ウィンドウ位置等の表示情報を初期化しますか？\n(初期化した場合再ログインが必要です)",
-                                      "表示初期化確認", 
+        var result:Alert = Alert.show(Language.s.isInitWindowPosition,
+                                      Language.s.isInitWindowPositionWindow,
                                       (Alert.OK | Alert.CANCEL),
                                       null, 
                                       function(e : CloseEvent) : void {
@@ -516,8 +484,7 @@
                                           }
                                           
                                           Config.getInstance().setToDefaultInfo();
-                                          Alert.show("保存していた表示情報を初期化しました。\n" + 
-                                                     "お手数ですが再度ログインし直してしてください。");
+                                          Alert.show(Language.s.initWindowPositionFinished);
                                           thisObj.dodontoF_Main.logoutExecute();
                                       });
     }
@@ -527,11 +494,6 @@
         window.setCloseEvent(function_);
     }
 
-    public function openUrlUploader(function_:Function = null):void {
-        var window:ImageUrlUploadWindow = popup(ImageUrlUploadWindow, true) as ImageUrlUploadWindow;
-        window.setCloseEvent(function_);
-    }
-    
     public function openWebcameraCaptureUploader(function_:Function = null):void {
         var window:WebCameraCaptureWindow = popup(WebCameraCaptureWindow, true) as WebCameraCaptureWindow;
         window.setCloseEvent(function_);
@@ -560,10 +522,12 @@
     }
     
     private function updateDisplayLoginUserInfoButtonLabel():void {
-        var roomName:String = DodontoF_Main.getInstance().getGuiInputSender().getRoomNumberName();
-        var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
+        var number:int =  DodontoF_Main.getInstance().getGuiInputSender().getRoomNumber();
+        var roomNo:String = Language.text("roomNo", number);
+        var roomDisplay:String = Language.text("roomDisplay", roomNo, loginUserInfo.length);
+        displayPlayRoomInfoButton.label = roomDisplay;
         
-        displayPlayRoomInfoButton.label = roomName + "：" + loginUserInfo.length + "名";
+        var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
         displayPlayRoomInfoButton.toolTip = playRoomName;
         displayPlayRoomInfoButton.enabled = true;
     }
@@ -603,16 +567,17 @@
     private function displayPlayRoomInfo():void {
         var window:DisplayPlayRoomInfo = popup(DisplayPlayRoomInfo, true) as DisplayPlayRoomInfo;
         
-        var message:String = "";
         var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
+        var message:String = "";
         message += "【" + playRoomName + "】\n";
         message += "\n";
-        message += "ログイン中メンバー一覧：\n";
+        message += Language.s.loginUserList + "\n";
         
         for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
             var userInfo:Object = loginUserInfo[i];
             var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
-            message += userInfo.userName + "（ユーザーＩＤ：" + uniqueId + "）\n";
+            message += Language.text("loginUserNameAndId", userInfo.userName, uniqueId);
+            message += "\n";
         }
         
         window.init(message);
@@ -629,7 +594,6 @@
         for(var i:int = 0 ; i < loginUserInfo.length ; i++ ) {
             var userInfo:Object = loginUserInfo[i];
             
-            //var uniqueId:String = getUniqueIdFromUserInfo(userInfo);
             var uniqueId:String = userInfo.userId;
             Log.logging("check uniqueId", uniqueId);
             
@@ -652,6 +616,7 @@
         var userInfos:Object = Utils.clone(loginUserInfo);
         userInfos.push( ownInfo );
         
+        
         var characters:Array = [];
         
         for(var i:int = 0 ; i < userInfos.length ; i++) {
@@ -660,6 +625,10 @@
             var character:Character = dodontoF_Main.getMap().findCharacterByName(userInfo.userName);
             
             if( character == null ) {
+                continue;
+            }
+            
+            if( isAlreadyExist(characters, character) ) {
                 continue;
             }
             
@@ -673,6 +642,20 @@
         
         return characters;
     }
+
+    private function isAlreadyExist(array:Array, target:Object):Boolean {
+        
+        for(var i:int = 0 ; i < array.length ; i++) {
+            var data:Object = array[i];
+            if( data == target ) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+
     
     
     public function getOwnCharacter():Character {
@@ -775,7 +758,7 @@
         menuArray = menuArrayLocal;
     }
     
-    private function initMenuXml():void {
+    public function initMenu():void {
         menuArray = dodontoF_Main.getMenuXml();
     }
     

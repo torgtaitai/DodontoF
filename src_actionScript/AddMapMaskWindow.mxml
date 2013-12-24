@@ -6,7 +6,7 @@
    y="50"
    width="330"
    height="250"
-   title="マスク作成" 
+   title="{Language.s.addMapMask}" 
    
    showCloseButton="true"
    >
@@ -17,34 +17,34 @@
       <mx:Box height="100%" width="50%" horizontalAlign="center" verticalAlign="middle">
         <mx:Form>
           
-	      <mx:FormItem label="名前:">
+	      <mx:FormItem label="{Language.s.mapMaskName}">
             <mx:TextInput id="maskName" width="50" text=""/>
 	      </mx:FormItem>
           
-	      <mx:FormItem label="色:">
+	      <mx:FormItem label="{Language.s.color}">
             <mx:ColorPicker id="mapMaskColorPicker" showTextField="true" selectedColor="0x000000"
                             change="changeView()" />
 	      </mx:FormItem>
           
-	      <mx:FormItem label="高さ:">
+	      <mx:FormItem label="{Language.s.mapMaskHeight}">
             <mx:NumericStepper id="mapMaskHeigth" minimum="1" maximum="100" value="3" change="changeView()" enabled="{draggable}" />
 	      </mx:FormItem>
           
-	      <mx:FormItem label="幅:">
+	      <mx:FormItem label="{Language.s.mapMaskWidth}">
             <mx:NumericStepper id="mapMaskWidth" minimum="1" maximum="100" value="3" change="changeView()" enabled="{draggable}" />
 	      </mx:FormItem>
 
-	      <mx:FormItem label="透過度:">
+	      <mx:FormItem label="{Language.s.mapMaskAlpha}">
             <mx:HSlider id="alphaSlider" width="70" minimum="0.2" maximum="1" value="1" enabled="{draggable}"
                         change="view.alpha = alphaSlider.value"
                         />
 	      </mx:FormItem>
         </mx:Form>
         
-        <mx:CheckBox id="isMany" label="複数作成" selected="true" height="15" visible="{isCreate}" />
+        <mx:CheckBox id="isMany" label="{Language.s.manyCreateCheck}" selected="true" height="15" visible="{isCreate}" />
         <mx:HBox id="changeExecuteSpace" height="0" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{! isCreate}" >
-          <mx:Button id="changeButton" label="変更" click="changeMapMask()" />
-          <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+          <mx:Button id="changeButton" label="{Language.s.changeButton}" click="changeMapMask()" />
+          <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
         </mx:HBox>
         
       </mx:Box>

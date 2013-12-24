@@ -29,8 +29,7 @@
             height="0" width="0" minHeight="0" minWidth="0"
             visible="false"
             >
-            <mx:Button id="imageSelectSpaceBoxOpenerButton" label="画像変更"
-                       height="25" width="100"
+            <mx:Button label="{Language.s.imageSelecterOpenButton}"
                        fontWeight="bold" click="changeSelectMode()" />
     </mx:Box>
     
@@ -50,14 +49,14 @@
                tileWidth="50" />
       <mx:HBox width="100%" minHeight="0" minWidth="0"
                horizontalAlign="center" verticalAlign="middle">
-        <mx:Label text="タグ名：" fontWeight="bold"/>
+        <mx:Label text="{Language.s.tagName}：" fontWeight="bold"/>
         <torgtaitai:SuggestComboBox id="tagName" fontWeight="normal"
                      width="100%" change="tagNameChanged()" enabled="false" />
         <mx:Label id="indexPrintLabel" text="0/0" />
-        <mx:Button label="隠し画像" height="20" fontWeight="normal" click="createPasswordWindow()" />
-        <mx:Button id="mirrored" label="反" width="20" height="20" fontWeight="normal" toolTip="左右反転" selected="false" toggle="true"  click="changeMirror()"
+        <mx:Button label="{Language.s.secretImage}" height="20" fontWeight="normal" click="createPasswordWindow()" />
+        <mx:Button id="mirrored" label="{Language.s.reverseImage}" height="20" fontWeight="normal" toolTip="" selected="false" toggle="true"  click="changeMirror()"
       paddingRight="1" paddingLeft="1" 
-      verticalGap="2" horizontalGap="2" 
+      measuredMinWidth="0" minWidth="0" explicitMinWidth="0"
       visible="false"
       />
       </mx:HBox>
@@ -66,18 +65,10 @@
                visible="false"
                height="0" width="100%" minHeight="0" minWidth="0"
                horizontalAlign="center" verticalAlign="middle">
-        <mx:Label text="選択画像に含まれるタグ：" fontWeight="normal"/>
+        <mx:Label text="{Language.s.tagInSelectedImage}：" fontWeight="normal"/>
         <mx:TextInput id="tagList" editable="false" width="100%" text="" />
       </mx:HBox>
       
-      <!--
-          <mx:HBox id="controlButtons" height="20" width="100%" >
-          <mx:Label text="画像アップローダー：" />
-          <mx:Button height="20" fontWeight="normal" label="ファイル"  click="openImageFileUploader()" />
-          <mx:Button height="20" fontWeight="normal" label="URL"       click="openUrlUploader()" />
-          <mx:Button height="20" fontWeight="normal" label="WEBカメラ" click="openWebcameraCaptureUploader()" />
-        </mx:HBox>
-        -->
     </mx:Box>
   </mx:HBox>
   
@@ -223,8 +214,9 @@
        
        public function createPasswordWindow():void {
            var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
-           var infoTexts:Array = ["パスワードを入力することで、隠し画像を表示することができます"];
-           window.init(infoTexts, "隠し画像用パスワード入力", "パスワード入力", setPassword, currentPassword);
+           var infoTexts:Array = [Language.s.secretImagePasswordInputMessage];
+           window.init(infoTexts, Language.s.secretImagePasswordInputWindowTitle,
+                       Language.s.secretImagePasswordInput, setPassword, currentPassword);
        }
        
        private function setPassword(password:String):void {
@@ -689,18 +681,6 @@
            }
            
            return false;
-       }
-       
-       private function openImageFileUploader():void {
-           DodontoF_Main.getInstance().getDodontoF().openImageFileUploader( this.initImage );
-       }
-
-       private function openUrlUploader():void {
-           DodontoF_Main.getInstance().getDodontoF().openUrlUploader( this.initImage );
-       }
-       
-       private function openWebcameraCaptureUploader():void {
-           DodontoF_Main.getInstance().getDodontoF().openWebcameraCaptureUploader( this.initImage );
        }
        
     ]]>

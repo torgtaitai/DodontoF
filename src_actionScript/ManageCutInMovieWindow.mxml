@@ -4,24 +4,16 @@
    xmlns:torgtaitai="*" 
    width="350"
    height="280"
-   title="カットイン" 
+   title="{Language.s.cutIn}" 
    showCloseButton="true"
    >
-<!--
-<?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
-                xmlns:torgtaitai="*" 
-                alpha="1"
-                creationComplete="setup()"
-                >
--->
   <mx:HBox width="100%" height="100%">
     
     <mx:Box width="100%" height="100%">
       <mx:HBox width="100%">
-        <mx:Button label="送信" click="sendCutIn()" />
+        <mx:Button label="{Language.s.sendButton}" click="sendCutIn()" />
         <mx:Spacer width="100%" />
-        <mx:Button label="プレビュー(自分のみ)" click="previewCutIn()" />
+        <mx:Button label="{Language.s.previewButton}" click="previewCutIn()" />
       </mx:HBox>
       
 	  <mx:DataGrid id="cutInInfosList"
@@ -38,7 +30,7 @@
                    doubleClick="sendCutIn()"
                    >
 	    <mx:columns>
-          <mx:DataGridColumn headerText="末尾発動：チャット末尾がタイトル一致なら発動"
+          <mx:DataGridColumn headerText="{Language.s.executeCutInWhenChatTailMatched}"
                              dataField="isTail"
                              textAlign="center"
                              width="40">
@@ -48,35 +40,27 @@
               </mx:Component>
             </mx:itemRenderer>
           </mx:DataGridColumn>
-		  <mx:DataGridColumn headerText="タイトル"
+		  <mx:DataGridColumn headerText="{Language.s.cutInTitle}"
                              dataField="message"
                              textAlign="center"
                              width="100"/>
-		  <mx:DataGridColumn headerText="画像／動画ファイル名"
+		  <mx:DataGridColumn headerText="{Language.s.cutInImageFileName}"
                              dataField="source"
                              textAlign="center"
                              width="100"/>
-		  <mx:DataGridColumn headerText="秒"
+		  <mx:DataGridColumn headerText="{Language.s.cutInSecond}"
                              dataField="displaySeconds"
                              textAlign="center"
                              width="20"/>
 	    </mx:columns>
 	  </mx:DataGrid>
       
-<!--
-      <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:Button id="openEditBoxButton" label="編集＞＞"  click="openEditBox()" />
-        <mx:Spacer width="100%" />
-        <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
-      </mx:HBox>
--->
-      
       <mx:HBox id="editBox" height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:Button label="追加" click="addCutInEffect()" />
-        <mx:Button label="変更" click="changeCutInEffect()" />
-        <mx:Button label="削除"  click="removeCutInEffect()" />
+        <mx:Button label="{Language.s.addButton}" click="addCutInEffect()" />
+        <mx:Button label="{Language.s.changeButton}" click="changeCutInEffect()" />
+        <mx:Button label="{Language.s.deleteButton}"  click="removeCutInEffect()" />
         <mx:Spacer width="100%" />
-        <mx:Button label="閉じる"  click="PopUpManager.removePopUp(this)" />
+        <mx:Button label="{Language.s.closeButton}"  click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
     </mx:Box>
     
@@ -103,24 +87,18 @@
         Log.loggingTuning("=>setup() End");
     }
 
-    private function getCutInInfoAndIndex():Object {
+    private function getCutInInfo():Object {
         status = "";
     
-        var index:int = cutInInfosList.selectedIndex;
-        Log.logging("getCutInInfoAndIndex selectedIndex", index);
+        var obj:Object = cutInInfosList.selectedItem;
+        Log.logging("getCutInInfo selectedItem", obj);
         
-        if( index == -1 ) {
-            status = "カットインを選択してください。";
-            return {index:index, info:null};
+        if( obj == null ) {
+            status = Language.s.pleaseSelectCutIn;
                     
         }
-    
-        return {index:index, info:CutInBase.cutInInfos[index]};
-    }
-
-    private function getCutInInfo():Object {
-        var obj:Object = getCutInInfoAndIndex();
-        return obj.info;
+        
+        return obj;
     }
 
     private function previewCutIn():void {
@@ -153,9 +131,7 @@
     private function removeCutInEffect():void {
         status = "";
         
-        var obj:Object = getCutInInfoAndIndex();
-        var index:int = obj.index;
-        var cutInInfo:Object = obj.info;
+        var cutInInfo:Object = getCutInInfo();
         
         if( cutInInfo == null ) {
             return;
@@ -165,26 +141,24 @@
             return;
         }
         
-        checkQuestionForRemoveCutInfEffect(cutInInfo, index);
+        checkQuestionForRemoveCutInfEffect(cutInInfo);
     }
     
-    private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object, index:int):void {
+    private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object):void {
         var message:String = "";
-        message += "タイトル：" + cutInInfo.message + "\n";
-        message += "画像／動画ファイル名：" + cutInInfo.source + "\n";
+        message += Language.s.cutInTitle + "：" + cutInInfo.message + "\n";
+        message += Language.s.cutInImageFileName + "：" + cutInInfo.source + "\n";
         message += "\n";
-        message += "上記のカットイン動画を削除してよろしいですか？";
-        Alert.show(message, "カットイン削除確認", 
+        message += Language.s.deleteCutInMovieQuestion;
+        Alert.show(message, Language.s.deleteCutInMovieQuestionTitle, 
                    Alert.OK | Alert.CANCEL, null, 
                    function(e : CloseEvent) : void {
                        if (e.detail == Alert.OK) {
-                           removeCutInEffectAfterCheck(cutInInfo, index);
+                           removeCutInEffectAfterCheck(cutInInfo);
                        }});
     }
     
-    private function removeCutInEffectAfterCheck(cutInInfo:Object, index:int):void {
-        //CutInBase.cutInInfos.removeItemAt(index);
-        
+    private function removeCutInEffectAfterCheck(cutInInfo:Object):void {
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.removeEffect(cutInInfo.effectId);
     }
@@ -193,9 +167,7 @@
     private function changeCutInEffect():void {
         status = "";
         
-        var obj:Object = getCutInInfoAndIndex();
-        var index:int = obj.index;
-        var cutInInfo:Object = obj.info;
+        var cutInInfo:Object = getCutInInfo();
         
         if( cutInInfo == null ) {
             return;
@@ -207,24 +179,8 @@
         
         var window:ChangeCutInMovieWindow =
         DodontoF.popup(ChangeCutInMovieWindow, true) as ChangeCutInMovieWindow;
-        window.init(cutInInfo, index);
+        window.init(cutInInfo);
     }
-
-    /*
-    private function openEditBox():void {
-        var editBoxHeigth:int = 30;
-    
-        if( editBox.height == 0 ) {
-            this.height += editBoxHeigth;
-            editBox.height = editBoxHeigth;
-            openEditBoxButton.label = "＜＜編集"
-                } else {
-            this.height -= editBoxHeigth;
-            editBox.height = 0;
-            openEditBoxButton.label = "編集＞＞"
-        }
-    }
-    */
     
     static public function changeEnableState(params:Object):void {
         if( params.isTail == null ) {
@@ -252,5 +208,4 @@
     ]]>
   </mx:Script>
 
-<!-- </mx:Box> -->
 </torgtaitai:CommonPopupWindow>

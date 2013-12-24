@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
                 width="500" height="350"
-                title="カード初期化画面" 
+                title="{Language.s.initCardWindow}" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"
                 >
@@ -18,10 +18,10 @@
             >
       
       <mx:HBox id="trumpBox" height="30" width="100%">
-        <mx:CheckBox id="trump" label="トランプ" selected="false" change="changeTrumpCheck()" />
-        <mx:Label text="デッキ個数:" />
+        <mx:CheckBox id="trump" label="{Language.s.trump}" selected="false" change="changeTrumpCheck()" />
+        <mx:Label text="{Language.s.deckCouunt}" />
         <mx:NumericStepper id="deckCount" minimum="1" maximum="10" value="1" enabled="false" />
-        <mx:Label text="ジョーカー枚数:" />
+        <mx:Label text="{Language.s.jorkerCount}" />
         <mx:NumericStepper id="jorkerCount" minimum="0" maximum="10" value="0" enabled="false" />
         <mx:CheckBox id="trumpSizeChangedCheck" label="{trumpSizeChanged + 'サイズ'}" selected="false" visible="{trumpSizeChanged != null}"/>
       </mx:HBox>
@@ -29,22 +29,22 @@
       <mx:Box id="checkBoxPlace" width="100%" />
       
       <mx:HBox height="30" width="100%">
-        <mx:CheckBox id="randomDungeonTrumpCheck" label="ランダムダンジョン用トランプ（アリアンロッド等）" selected="false" change="changeRandomDungeonTrumpCheck()" />
+        <mx:CheckBox id="randomDungeonTrumpCheck" label="{Language.s.randomDungeonTrump}" selected="false" change="changeRandomDungeonTrumpCheck()" />
       </mx:HBox>
       
       <mx:HBox id="randomDungeonTrumpBox" height="30" width="100%">
         <mx:Spacer width="20" />
-        <mx:Label text="Aを含めた枚数:" />
+        <mx:Label text="{Language.s.cardCountIncludeAce}" />
         <mx:NumericStepper id="randomDungeonCardCount" minimum="1" maximum="{49 + randomDungeonJorkerCount.value}" value="1" enabled="false" />
-        <mx:Label text="ジョーカー枚数:" />
+        <mx:Label text="{Language.s.jorkerCount}" />
         <mx:NumericStepper id="randomDungeonJorkerCount" minimum="0" maximum="3" value="0" enabled="false" />
       </mx:HBox>
       
     </mx:Box>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="シャッフルして初期配置へ" click="execute()" enabled="true" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.initWithShuffle}" click="execute()" enabled="true" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
     
     <mx:Spacer height="100%" width="100%" />
@@ -218,15 +218,14 @@
     }
        
     public function execute():void {
-        var title:String = "カード初期化確認";
-        var message:String = "現在使用しているカードは全て破棄されます。\nよろしいですか？";
+        var title:String = Language.s.cardInitQuestion;
+        var message:String = Language.s.cardInitQuestionMessage;
         var cardInitInfos:Array = getCardInitInfos();
         executeInitCard(title, message, cardInitInfos, initCardsResult);
     }
     
     static private function executeInitCard(title:String, message:String,
                                             infos:Array, result:Function):void {
-
         Alert.show(message, title,
                    Alert.OK | Alert.CANCEL, null, 
                    function(e : CloseEvent) : void {
@@ -298,8 +297,8 @@
     
        
     static public function cleanCard():void {
-        var title:String = "カード削除確認";
-        var message:String = "全てのカードを破棄します\nよろしいですか？";
+        var title:String = Language.s.checkCardAllDelete;
+        var message:String = Language.s.checkCardAllDeleteMessage;
         var cardInitInfosDummy:Array = new Array();
         var initCardsResultDummy:Function = function(event:Event):void {
         };

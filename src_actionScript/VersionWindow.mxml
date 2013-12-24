@@ -4,25 +4,24 @@
    xmlns:torgtaitai="*" 
    width="560"
    height="340"
-   title="バージョン" 
+   title="{Language.s.version}" 
    >
-<!--                 layout="vertical" -->
   
+  <mx:TextArea id="titleImage" width="100%" height="100%" />
+  <mx:HBox width="100%">
+    <mx:Label id="versionText" selectable="true" />
+    <mx:Spacer width="100%"/>
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
+  </mx:HBox>
   <mx:Script>
     <![CDATA[
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     
     override protected function setup():void {
+        versionText.text = Language.s.title + " "  + Config.getInstance().getVersion();
         titleImage.htmlText = "<img src='image/titleLogo.jpg' />"
     }
     ]]>
   </mx:Script>
-  
-  <mx:TextArea id="titleImage" width="100%" height="100%" />
-  <mx:HBox width="100%">
-    <mx:Label text="どどんとふ　Ver.1.42.11(2013/11/11リリース)" selectable="true" />
-    <mx:Spacer width="100%"/>
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
-  </mx:HBox>
 </torgtaitai:CommonPopupWindow>

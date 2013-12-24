@@ -30,7 +30,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "ランダムダンジョン用カード山";
+            return Language.s.randomDungeonCardMount;
         }
         
         override public function getCardCount():int {
@@ -71,25 +71,8 @@ package {
         }
         
         override public function getTitleText():String {
-            return "山札:" + getCardCount() + "枚";
+            return Language.text("cardMountCountDisplay", getCardCount());
         }
-        
-        /*
-        override protected function initContextMenu():void {
-            super.initContextMenu();
-            
-            var menu:ContextMenu = view.contextMenu;
-            addMenuItem(menu, "Aのみ山に戻して次のダンジョンタイルを準備する", getContextShuffleForNextRandomDungeon, true);
-        }
-        
-        private function getContextShuffleForNextRandomDungeon(event:ContextMenuEvent):void {
-            try {
-                sender.shuffleForNextRandomDungeon(this.getId());
-            } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
-            }
-        }
-        */
         
         
     }

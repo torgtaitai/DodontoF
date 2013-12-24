@@ -12,7 +12,8 @@ package {
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
     import flash.geom.Point;
-    
+    import mx.utils.StringUtil;
+
     public class MagicRange extends InitiativedMovablePiece {
         
         private var radius:int = 1;
@@ -31,7 +32,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "魔法範囲";
+            return Language.s.magicRange3rd;
         }
         
         public static function getJsonData(name:String,
@@ -170,7 +171,8 @@ package {
         }
         
         override public function getAdditionalInfos():Array {
-            return ["魔法範囲 残り：" + getRestRoundLocal()  + "ラウンド"];
+            var text:String = Language.text("magicRangeRestRound", getRestRoundLocal());
+            return [text];
         }
         
         override public function isDead():Boolean {
@@ -182,8 +184,8 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "魔法範囲の変更", this.getItemPopUpChangeWindow);
-            addMenuItem(menu, "魔法範囲の削除", this.getContextMenuItemRemoveCharacter);
+            addMenuItem(menu, Language.s.changeMagicRangeRightMenu, this.getItemPopUpChangeWindow);
+            addMenuItem(menu, Language.s.addMagicRangeRightMenu, this.getContextMenuItemRemoveCharacter);
             
             view.contextMenu = menu;
         }
@@ -259,18 +261,18 @@ package {
         private var rangeTypeSquare:String = "square";
         
         private var rangeTypeDataList:Object = {
-            "corn1": [[1, 2], "円錐型(右上)"],
-            "corn2": [[2, 3], "円錐型(右)"],
-            "corn3": [[3, 4], "円錐型(右下)"],
-            "corn4": [[4, 5], "円錐型(下)"],
-            "corn5": [[5, 6], "円錐型(左下)"],
-            "corn6": [[6, 7], "円錐型(左)"],
-            "corn7": [[7, 8], "円錐型(左上)"],
-            "corn8": [[8, 1], "円錐型(上)"],
+            "corn1": [[1, 2], Language.s.magicRangeTypeCorn1],
+            "corn2": [[2, 3], Language.s.magicRangeTypeCorn2],
+            "corn3": [[3, 4], Language.s.magicRangeTypeCorn3],
+            "corn4": [[4, 5], Language.s.magicRangeTypeCorn4],
+            "corn5": [[5, 6], Language.s.magicRangeTypeCorn5],
+            "corn6": [[6, 7], Language.s.magicRangeTypeCorn6],
+            "corn7": [[7, 8], Language.s.magicRangeTypeCorn7],
+            "corn8": [[8, 1], Language.s.magicRangeTypeCorn8],
             
-            "circle": [[1, 2, 3, 4, 5, 6, 7, 8], "円型"],
+            "circle": [[1, 2, 3, 4, 5, 6, 7, 8], Language.s.magicRangeTypeCircle],
             
-            rangeTypeSquare: [[], "四角"]
+            rangeTypeSquare: [[], Language.s.magicRangeTypeSquare]
         };
         
         

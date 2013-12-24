@@ -74,7 +74,7 @@ package {
             fileReferenceForSessionReplay.addEventListener(Event.SELECT, replayFromSessionRecordOnSelect);
             
             var filters:Array = new Array();
-            filters.push(new FileFilter("プレイ録画データ(*.rec)","*.rec"));
+            filters.push(new FileFilter(Language.s.playRecordDataFileFormat,"*.rec"));
             
             fileReferenceForSessionReplay.browse(filters);
         }
@@ -121,14 +121,14 @@ package {
         }
         
         public function playReplayFromDataString(dataString:String):void {
-            Log.loggingError("録画データロード中……");
+            Log.loggingError(Language.s.loadingReplayData);
             
             history = SharedDataReceiver.getJsonDataFromString(dataString) as Array;
             DodontoF_Main.getInstance().getDodontoF().replaySeekSlider.maximum = history.length;
             
             init();
             
-            Log.loggingError("リプレイ録画を再生します。");
+            Log.loggingError(Language.s.startReplayRecording);
             
             historyIndex = DodontoF_Main.getInstance().getReplayStartPosition() - 1;
             replaySeekIndex = -1;
@@ -246,7 +246,7 @@ package {
                 var startIndex:int = 1;
                 changeReplayPoint( startIndex );
             } else {
-                Log.printSystemLogPublic("リプレイ再生を終了します。");
+                Log.printSystemLogPublic(Language.s.stopReplayRecording);
                 setPlayingState( false );
             }
         }

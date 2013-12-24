@@ -2,7 +2,6 @@
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
         xmlns:torgtaitai="*" 
         width="100%" height="100%"
-        label="チャットボックス"
         paddingTop="0"
         paddingBottom="0" 
         borderStyle="solid"

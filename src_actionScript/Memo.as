@@ -26,7 +26,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "共有メモ";
+            return Language.s.sharedMemo;
         }
         
         
@@ -79,8 +79,8 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "共有メモの変更", this.getItemPopUpChangeWindow);
-            addMenuItem(menu, "共有メモの削除", this.getContextMenuItemRemoveCharacter);
+            addMenuItem(menu, Language.s.changeSharedMemo, this.getItemPopUpChangeWindow);
+            addMenuItem(menu, Language.s.deleteSharedMemo, this.getContextMenuItemRemoveCharacter);
             
             view.contextMenu = menu;
             

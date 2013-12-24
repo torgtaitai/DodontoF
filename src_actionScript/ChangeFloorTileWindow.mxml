@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="500"
    height="250"
-   title="フロアタイル変更" 
+   title="{Language.s.changeFloorTile}" 
    showCloseButton="true"
    >
   
@@ -13,13 +13,13 @@
     
     <mx:HBox height="25" width="100%" minHeight="0" minWidth="0"
              horizontalAlign="left" verticalAlign="middle">
-	  <mx:Label text="縦マス数:" />
+	  <mx:Label text="{Language.s.heightSize}" />
       <mx:NumericStepper id="tileHeight" minimum="1" maximum="100" value="25" change="printPreview()" />
-	  <mx:Label text="横マス数:" />
+	  <mx:Label text="{Language.s.widthSize}" />
       <mx:NumericStepper id="tileWidth" minimum="1" maximum="100" value="25" change="printPreview()" />
       
       <!-- <mx:HBox height="25" width="100%" visible="false">
-        <mx:Label text="画像のURL" />
+        <mx:Label text="{Language.s.imageUrl}" />
         <mx:TextInput id="tileImageUrl" width="100%" editable="true" change="printPreview()" />
 	  </mx:HBox>
         -->

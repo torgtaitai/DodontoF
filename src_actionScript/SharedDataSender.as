@@ -185,7 +185,7 @@ package {
                                                     getFileSelectHandlerForLoad(commandName, resultFunction));
             
             var filters:Array = new Array();
-            filters.push(new FileFilter("セーブデータ(*." + extension + ")", "*." + extension));
+            filters.push(new FileFilter(Language.text("saveDataFilter", extension), "*." + extension));
             
             fileReferenceForUpload.browse(filters);
         }
@@ -216,7 +216,7 @@ package {
                                            getFileSelectHandlerForLoad(commandName, analyzeLoadAllSaveDataResult));
             
             var filters:Array = new Array();
-            filters.push( new FileFilter("全セーブデータ(" + allSaveDataFileExtensions + ")",
+            filters.push( new FileFilter(Language.text("allSaveDataFilter", allSaveDataFileExtensions),
                                          allSaveDataFileExtensions) );
             
             fileReference.browse(filters);
@@ -231,12 +231,12 @@ package {
             Log.loggingTuning('allSaveData jsonData', jsonData);
             
             if( jsonData.resultText != 'OK' ) {
-                Log.loggingError( "全セーブデータ読み込み時にエラーが発生しました：" + jsonData.resultText );
+                Log.loggingError( Language.s.loadAllSaveDataError + jsonData.resultText );
                 return;
             }
             
             DodontoF_Main.getInstance().getChatPaletteWindow().loadFromText( jsonData.chatPaletteSaveData );
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("全セーブデータ読み込みに成功しました。", false);
+            Utils.sendSystemMessage(Language.s.loadAllSaveDataSuccessfully);
             
             //ダイスボットの情報を取得します。
             //これでダイスボットの表情報をリロードして使用できるようにします。
@@ -373,7 +373,7 @@ package {
         }
         
         protected function retryRefresh():void {
-            Log.loggingErrorOnStatus("サーバとの接続でエラーが発生しました。再接続します。");
+            Log.loggingErrorOnStatus(Language.s.connectToServerErrorAndReconnect);
             
             isRetry = true;
             
@@ -385,7 +385,7 @@ package {
             }
             
             setTimeout(function():void {
-                    Log.loggingErrorOnStatus("再接続中……");
+                    Log.loggingErrorOnStatus(Language.s.reconnectingToServer);
                     thisObj.refresh();
                 },  (retryWaitSeconds * 1000));
         }
@@ -634,7 +634,7 @@ package {
             var obj:Object = getParamObject("addCharacter", clonedData);
             
             Log.logging("receiver.addCharacterInOwnMap(characterJsonData) begin");
-            data[keyName] = "(作成中・・・)" + data[keyName];
+            data[keyName] = Language.s.generating + data[keyName];
             receiver.addCharacterInOwnMap(data);
             
             Log.logging("SharedDataSender.sendCommandData(obj) begin");
@@ -658,8 +658,7 @@ package {
                     }
                 }
                 
-                var message:String = "\"" + addFailedCharacterNames.join("\" \"") + "\"という名前のキャラクターはすでに存在するため追加に失敗しました。";
-                //DodontoF_Main.getInstance().getChatWindow().sendSystemMessage(message, false);
+                var message:String = Language.text("TEXT_NO_00186", addFailedCharacterNames.join("\" \""));
                 DodontoF_Main.getInstance().getChatWindow().addLocalMessage(message);
             }
         }
@@ -729,10 +728,9 @@ package {
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             Log.logging("sendChatMessageAllCallBack jsonData", jsonData);
             if( jsonData["result"] == "OK" ) {
-                //Alert.show("送信成功");
-                Alert.show("成功\r送信した部屋：" + Utils.getJsonString(jsonData["rooms"]));
+                Alert.show(Language.s.sendChatAllRoomSuccess + Utils.getJsonString(jsonData["rooms"]));
             } else {
-                Alert.show("送信失敗");
+                Alert.show(Language.s.sendChatAllRoomFailed);
             }
         }
         
@@ -1335,7 +1333,7 @@ package {
             cardJsonData.x = x;
             cardJsonData.y = y;
             cardJsonData.draggable = false;
-            cardJsonData.ownerName = "(作成中・・・)";
+            cardJsonData.ownerName = Language.s.generating;
             
             return cardJsonData;
         }
@@ -1449,7 +1447,8 @@ package {
         }
         
         public function getMountCardInfos(mountNameForDisplay:String, mountName:String, mountId:String, resultFunction:Function):void {
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + mountNameForDisplay + "」の山札を参照しています。");
+            Utils.sendSystemMessage(Language.s.searchMountAnnounce,
+                                                                                  [mountNameForDisplay]);
             
             var data:Object = {
                 "mountName": mountName,
@@ -1462,7 +1461,7 @@ package {
         
         public function getTrushMountCardInfos(mountName:String, mountId:String, resultFunction:Function):void {
             var cardName:String = InitCardWindow.getCardName(mountName);
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage("が「" + cardName + "」の捨て札を参照しています。");
+            Utils.sendSystemMessage(Language.s.searchTrushMountAnnounce, [cardName]);
             
             var data:Object = {
                 "mountName": mountName,
@@ -1527,7 +1526,7 @@ package {
             Log.logging("sendCommandData obj : ", obj);
             
             if( isStopRefreshOn ) {
-                Log.loggingFatalError("サーバとの接続が切断されました。操作を行う事は出来ません");
+                Log.loggingFatalError(Language.s.refreshStopedError);
                 return;
             }
             

@@ -7,7 +7,7 @@ package {
         private var mapMask:MapMask = null;
         
         public function init(mapMask_:MapMask):void {
-            title = "マスク変更" 
+            title = Language.s.changeMapMaskWindowTitle 
             mapMask  = mapMask_;
             
             this.isCreate = false;

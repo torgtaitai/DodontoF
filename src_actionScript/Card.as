@@ -56,7 +56,7 @@ package {
          * ゴミ箱から拾い上げるときに使用する。
          */
         override public function getTypeName():String {
-            return "カード";
+            return Language.s.card;
         }
         
         
@@ -236,13 +236,13 @@ package {
             }
             
             if( this.owner == getNobodyOwner() ) {
-                return "完全非公開";
+                return Language.s.closedCard;
             }
             
             if( this.isOpen ) {
-                return "公開：" + this.ownerName;
+                return Language.s.publicCard + this.ownerName;
             } else {
-                return "非公開：" + this.ownerName;
+                return Language.s.privateCard + this.ownerName;
             }
         }
         
@@ -538,20 +538,20 @@ package {
             }
             
             if( ! isOwner() ) {
-                changeOwnerMenu.visible = true; //"カードの管理者を自分に変える")
+                changeOwnerMenu.visible = true; //カードの管理者を自分に変える
                 return;
             }
             
             if( this.isOpen ) {
-                closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す")
+                closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す
                 return;
             }
             
             if( this.isBack ) {
-                openPrivateMenu.visible = true; //"カードを見る：非公開で自分だけ")
+                openPrivateMenu.visible = true; //カードを見る：非公開で自分だけ
             }
             
-            openPublicMenu.visible = true; //"カードを全員に公開する")
+            openPublicMenu.visible = true; //カードを全員に公開する
         }
         
         override public function getViewRotationDiff():Number {
@@ -603,20 +603,20 @@ package {
             view.x = trushMount.getX();
             view.y = trushMount.getY();
             
-            var message:String = "";
             if( this.getCardName() == "" ) {
-                message = "がカードを捨てました。";
+                printCardLog( Language.s.discardMessage );
             } else {
-                message = "が「" + this.getCardName() + "」を捨てました。";
+                printCardLog( Language.s.discardMessageWithCardName, [this.getCardName()] );
             }
             
-            printCardLog( message );
             sender.dumpTrushCard( getId(), trushMount.getMountName(), trushMount.getId() );
         }
         
-        public function printCardLog(message:String):void {
-            var isPrintName:Boolean = true;
-            DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message, isPrintName, cardLogStrictlyUniqueId );
+        public function printCardLog(message:String, args:Array = null):void {
+            if( args == null ) {
+                args = [];
+            }
+            Utils.sendSystemMessage(message, args, cardLogStrictlyUniqueId);
         }
         
         
@@ -765,15 +765,15 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            commandMenu = addMenuItem(menu, "チャットメッセージ送信", sendChatMessage, false);
+            commandMenu = addMenuItem(menu, "", sendChatMessage, false);
             
-            openPrivateMenu = addMenuItem(menu, "カードを自分だけが見る（非公開）", openPrivate, false);
-            openPublicMenu = addMenuItem(menu, "カードを全員に見せる（公開）", openCard, true);
-            closeSecretMenu = addMenuItem(menu, "カードを伏せる（非公開）", closeSecret, false);
-            changeOwnerMenu = addMenuItem(menu, "カードを自分の管理へ", changeOwner, true);
-            printCardTextMenu = addMenuItem(menu, "カードテキストをチャットに引用", getContextMenuItemFunctionPrintCardText, true);
+            openPrivateMenu = addMenuItem(menu, Language.s.openCardForMe, openPrivate, false);
+            openPublicMenu = addMenuItem(menu, Language.s.openCardEveryone, openCard, true);
+            closeSecretMenu = addMenuItem(menu, Language.s.closeCard, closeSecret, false);
+            changeOwnerMenu = addMenuItem(menu, Language.s.changeCardOwnerToMe, changeOwner, true);
+            printCardTextMenu = addMenuItem(menu, Language.s.writeCardTextToChat, getContextMenuItemFunctionPrintCardText, true);
             
-            removeCardMenu = addMenuItem(menu, "カード削除", getContextMenuItemRemoveCharacter, true);
+            removeCardMenu = addMenuItem(menu, Language.s.deleteCard, getContextMenuItemRemoveCharacter, true);
             
             view.contextMenu = menu;
         }
@@ -806,7 +806,7 @@ package {
         private function getCardMessage(mainText:String, subText:String):String {
             if( subText == "" ) {
                 if( this.isUpDown ) {
-                    return ( mainText + "　：　" + (isUpSide() ? "正位置" : "逆位置") );
+                    return ( mainText + "　：　" + (isUpSide() ? Language.s.upSideCard : Language.s.downSideCard) );
                 } else {
                     return ( mainText );
                 }
@@ -865,7 +865,7 @@ package {
         
         private function openCard(event:ContextMenuEvent = null):void {
             if( ! isOwner() ) {
-                view.toolTip = "カードの所持者ではないため公開できません。";
+                view.toolTip = Language.s.yourAreNotCardOwner;
                 return;
             }
             
@@ -879,7 +879,7 @@ package {
             loadViewImage();
             sender.changeCharacter( getJsonData() );
             
-            printCardLog( "がカードを公開しました。「" + this.getCardName() + "」" );
+            printCardLog(Language.s.openCardMessage, [this.getCardName()]);
         }
         
         public function getSelfOwnerId():String {
@@ -905,7 +905,7 @@ package {
         
         private function changeOwnerLocal(isPrintMessage:Boolean):void {
             if( isPrintMessage ) {
-                printCardLog("が「" + this.ownerName + "」のカードを受け取りました。");
+                printCardLog(Language.s.changeCardOwnerMessage, [this.ownerName]);
             }
             
             var thisUserId:String = getSelfOwnerId();
@@ -917,7 +917,7 @@ package {
         public function changeOwnerToAnyoneOnLocal(ownerAnyone:String, ownerNameAneone:String):void {
             
             if( ownerAnyone != this.owner ) {
-                printCardLog("が「" + ownerNameAneone + "」へカードを渡しました。");
+                printCardLog(Language.s.changeCardOwnerToAnyoneMessage, [ownerNameAneone]);
             }
             
             this.owner = ownerAnyone;
@@ -937,7 +937,7 @@ package {
             Log.logging("Card.reverse begin");
             
             if( ! isOwner() ) {
-                view.toolTip = "カードの所持者ではないため操作できません。";
+                view.toolTip = Language.s.cardOwnerIsNotYouMessage;
                 return;
             }
             
@@ -960,7 +960,7 @@ package {
             if( ! isBackPrint ) {
                 //if( this.canDelete ) {
                 if( this.mountName == "messageCard" ){
-                    printCardLog("がメッセージカードを開きました。");
+                    printCardLog( Language.s.openMessageCardMessage );
                 }
             }
         }

@@ -24,7 +24,7 @@ package {
         }
         
         public function getTypeName():String {
-            return "魔法タイマー";
+            return Language.s.magicTimer;
         }
         
         public static function getJsonData(name_:String,
@@ -91,7 +91,7 @@ package {
         }
         
         public function getAdditionalInfos():Array {
-            return ["魔法タイマー 残り：" + getRestRoundLocal()  + "ラウンド"];
+            return [Language.text("magicTimerRestRound", getRestRoundLocal())];
         }
         
         public function getInitiativeListInfo():String {
@@ -147,7 +147,8 @@ package {
         }
         
         public function popUpDeleteWindow():void {
-            Alert.show("魔法タイマー「" + this.name + "」を削除してもよろしいですか？", "削除確認",
+            Alert.show(Language.text("magicTimerDeleteQuestion", this.name), 
+                       Language.s.deleteQuestionTitle,
                        Alert.OK | Alert.CANCEL,
                        null,
                        function(e : CloseEvent) : void {

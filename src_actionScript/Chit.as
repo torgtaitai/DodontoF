@@ -34,7 +34,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "チット";
+            return Language.s.Chit;
         }
         
         
@@ -118,8 +118,8 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            addMenuItem(menu, "チットの削除", this.getContextMenuItemRemoveCharacter);
-            addMenuItem(menu, "チットの複製", this.getContextMenuItemClonePiece, true);
+            addMenuItem(menu, Language.s.deleteChit, this.getContextMenuItemRemoveCharacter);
+            addMenuItem(menu, Language.s.cloneChit, this.getContextMenuItemClonePiece, true);
             
             view.contextMenu = menu;
         }

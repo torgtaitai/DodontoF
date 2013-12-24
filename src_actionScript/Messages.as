@@ -27,42 +27,21 @@ package {
             var params:Array = warning["params"];
             
             return getMessage(key, params);
+            
         }
         
         static public function getMessage(key:String, params:Array = null):String {
-            var messageBase:String = getInstance().messageBaseList[key];
-            
-            if( messageBase == null ) {
-                //return "Messages.getMessage key:" + key + " has no message";
-                //return key;
-            }
-            
             if( params == null ) {
-                params = new Array();
+                params = [];
             }
             
-            var message:String= StringUtil.substitute(messageBase, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]);
-            
-            return message;
+            return Language.text(key, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]);
         }
         
         private var messageBaseList:Object = 
 {
-    "noSmallImageDir" : "サムネイル画像格納用ディレクトリ「{0}」がありません。マニュアルの「設置方法」の「imageUploadSpace/smallImages」についての記載を参照しディレクトリの作成を実施して下さい。",
-    "canNotLoginBecauseMentenanceNow" : "現在メンテナンス作業中のためログインすることが出来ません。しばらくお待ち下さい。",
-    "canNotRefreshBecauseMentenanceNow" : "メンテナンス作業が発生したためサーバ接続が途絶しました。\nしばらく待ったうえで、再度ログインしてください。",
-    //
-    "dragMeForFloorTile" : "ドラッグ＆ドロップするとマップにタイルを貼り付けることが出来ます。",
-    "dragMeForChit" : "チットを配置したいところにドラッグしてください",
-    "unremovablePlayRoomNumber" : "指定されたプレイルームはシステム管理者によって削除不可に指定されています。",
-    "unloadablePlayRoomNumber" : "このプレイルームはシステム管理者によってロード不可に指定されています。ロードを行いたい場合は他のプレイルームを作成してください。",
-    "noPasswordPlayRoomNumber" : "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。パスワードは空にしてください。",
-    "loginTimeLimitHasComes" : "ログイン時間の上限（{0}秒）が経過しました。サーバとの接続を切断します。",
-    "loginTimeLimitWarning" : "このサーバでは{0}以上ログインすると接続が切断されます。実プレイには向きませんのでご注意下さい。",
-    "noEmptyPlayRoom" : "空きプレイルームが見つかりませんでした",
-    "errorPassword" : "パスワードが間違っています。",
-    "9999" : "dummy"
-};
+
+        }
         
     }
 }

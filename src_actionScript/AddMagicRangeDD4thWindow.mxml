@@ -8,32 +8,31 @@
    >
   
   <mx:Form>
-	<mx:FormItem label="名前:">
+	<mx:FormItem label="{Language.s.magicRangeName}:">
 	  <mx:TextInput id="magicRangeName" text="" />
 	</mx:FormItem>
-	<mx:FormItem label="範囲種別:">
-      <mx:ComboBox id="magicRangeType" width="100%" editable="false">
-      <mx:dataProvider>{MagicRangeDD4th.rangeTypes}</mx:dataProvider> 
+	<mx:FormItem label="{Language.s.magicRangeType}:">
+      <mx:ComboBox id="magicRangeType" width="100%" editable="false" dataProvider="{magicRangeTypeDataProvider}">
       </mx:ComboBox>
 	</mx:FormItem>
-	<mx:FormItem label="範囲(マス):">
+	<mx:FormItem label="{Language.s.magicRangeRadius}:">
 	  <mx:NumericStepper id="magicRangeRadius" minimum="1" maximum="100" value="1" stepSize="1" />
 	</mx:FormItem>
-	<mx:FormItem label="色:">
+	<mx:FormItem label="{Language.s.magicRangeColor}:">
     <mx:ColorPicker id="magicRangeColorPicker" showTextField="true" selectedColor="0x000000" />
 	</mx:FormItem>
-	<mx:FormItem label="持続時間:">
+	<mx:FormItem label="{Language.s.magicRangeTimeRange}:">
 	  <mx:NumericStepper id="magicRangeTimeRange" minimum="1" maximum="99" value="1" />
 	</mx:FormItem>
-	<mx:FormItem label="その他:">
+	<mx:FormItem label="{Language.s.initiativeWindowColumnTitleInfo}:">
 	  <mx:TextInput id="magicRangeInfo" text="" />
 	</mx:FormItem>
-    <mx:CheckBox id="isShowOnInitiativeWindow" label="イニシアティブ表に表示する" selected="true" />
+    <mx:CheckBox id="isShowOnInitiativeWindow" label="{Language.s.isShowOnInitiativeWindow}" selected="true" />
   </mx:Form>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="追加" click="this.execute()" />
-    <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+    <mx:Button id="executeButton" label="{Language.s.addButton}" click="this.execute()" />
+    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
 
   <mx:Script>
@@ -49,6 +48,9 @@
     private var characterPositionX:int;
     private var characterPositionY:int;
     
+    [Bindable]
+    private var magicRangeTypeDataProvider:Array = [];
+    
     /**
      * 魔法範囲の初期配置座標を指定
      */
@@ -61,7 +63,12 @@
      * Windowの初期化処理
      */
     override protected function setup():void {
-        title="魔法範囲追加(D&D4版)" ;
+        title = Language.s.addMagicRangeDD4thWindowTitle;
+        initRangeType();
+    }
+    
+    protected function initRangeType():void {
+        magicRangeTypeDataProvider = [MagicRangeDD4th.closeBurst, MagicRangeDD4th.blast];
     }
     
     /**

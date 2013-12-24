@@ -38,7 +38,7 @@ package {
         }
         
         override public function getTypeName():String {
-            return "マップマスク";
+            return Language.s.mapMask;
         }
         
         
@@ -141,9 +141,9 @@ package {
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
             
-            changeMenu  = addMenuItem(menu, "マップマスクの変更", this.getItemPopUpChangeWindow);
-            moveLockMenu = addMenuItem(menu, "マップマスクの固定", this.getContextMenuItemMoveLock);
-            addMenuItem(menu, "マップマスクの削除", this.getContextMenuItemRemoveCharacter);
+            changeMenu  = addMenuItem(menu, Language.s.changeMapMask, this.getItemPopUpChangeWindow);
+            moveLockMenu = addMenuItem(menu, Language.s.fixMapMask, this.getContextMenuItemMoveLock);
+            addMenuItem(menu, Language.s.deleteMapMask, this.getContextMenuItemRemoveCharacter);
             
             view.contextMenu = menu;
             setMenuVisible();

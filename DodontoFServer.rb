@@ -2179,11 +2179,62 @@ class DodontoFServer
       'defaultUserNames' => $defaultUserNames,
       'drawLineCountLimit' => $drawLineCountLimit,
       'logoutUrl' => $logoutUrl,
+      'languages' => getLanguages(),
     }
     
     logging(result, "result")
     logging("getLoginInfo end")
     return result
+  end
+  
+  
+  def getLanguages()
+    languages = {}
+    
+    unless( $isMultilingualization )
+      return languages 
+    end
+    
+    dir = "languages"
+    fileNames = Dir.glob("#{dir}/*.txt")
+    fileNames = fileNames.collect{|i| i.untaint}
+    
+    fileNames.each do |fileName|
+      next unless(/#{dir}\/(.+)\.txt$/ === fileName)
+      name = $1
+      
+      # "_README.txt" のように _ で始まるファイルは対象外とします
+      next if(/^_/ === name)
+      
+      lines = File.readlines(fileName).join
+      params = {}
+      lines.each do |line|
+        
+        line = line.chomp
+        
+        # 「#」で始まる行はコメント行として無効に
+        next if(/^#/ === line)
+        # 空白行もパス
+        next if(/^$/ === line)
+        
+        next unless( /^([^=]+?)\s*=\s?(.*)$/ === line )
+        key = $1
+        value = $2
+        
+        # \\n は \n に
+        # \\\\n は \\n に
+        value = value.gsub(/\\n/){"\n"}.gsub(/\\r/){"\r"}
+        value = value.gsub(/\\\n/){"\\n"}.gsub(/\\\r/){"\\r"}
+        
+        params[key] = value
+      end
+      
+      languages[name] = params
+    end
+    
+    logging(languages, "languages")
+    
+    return languages
   end
   
   

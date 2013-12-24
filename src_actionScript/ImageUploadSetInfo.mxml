@@ -6,14 +6,14 @@
         >
   
   <mx:HBox height="20" width="100%" horizontalAlign="left" verticalAlign="middle">
-    <mx:Label text="対応画像:JPEG/GIF/PNG/SWF（アニメGIFは1コマ目のみを表示）"/>
+    <mx:Label text="{Language.s.uploadImageFormat}"/>
     <mx:Spacer width="100%" />
     <mx:Label id="passwordStatus" text="" width="100%" textAlign="right" />
-    <mx:Button height="20" label="隠し画像パスワード設定" fontWeight="normal" click="createPasswordWindow()" />
+    <mx:Button height="20" label="{Language.s.secretImagePassword}" fontWeight="normal" click="createPasswordWindow()" />
   </mx:HBox>
   
   <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-	<mx:Label text="付与するタグ（半角・全角スペースで区切り）：" />
+	<mx:Label text="{Language.s.addedTags}" />
 	<mx:TextInput id="tagText" text="" width="100%" />
     <mx:ComboBox id="imageType" fontWeight="normal"  width="120" editable="false" change="imageTypeChanged()" >
     </mx:ComboBox>
@@ -31,8 +31,7 @@
         tagText.toolTip = "";
         
         if( imageType.selectedItem.label == ImageTag.getMapTag() ) {
-            //tagText.text += "縦20横20　";
-            tagText.toolTip = "タグ名に 縦nn横mm を記述することでマップ変更時に自動的にそのサイズが指定されます。";
+            tagText.toolTip = Language.s.addedTagsTips;
         }
     }
     
@@ -67,15 +66,12 @@
     
     private function createPasswordWindow():void {
         var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
-        var infoTexts:Array = ["隠し画像用パスワード（空文字場合は誰でも参照可能）",
-                               "このパスワードは管理・通信上暗号化されません。",
-                               "他者に参照される恐れがあるため、重要なパスワードの利用は避け",
-                               "簡易な文字を利用してください。"];
-        window.init(infoTexts, "隠し画像用パスワード入力", "パスワード入力", setPassword);
+        var infoTexts:Array = Language.s.imageUploaderSecretPasswordInfo.split("\n")
+        window.init(infoTexts, Language.s.secreteImagePasswordInput, Language.s.inputPassword, setPassword);
     }
     
     private function checkPasswordStatus():void {
-        passwordStatus.text = (passwordText == "" ? "パスワードなし" : "パスワードあり");
+        passwordStatus.text = (passwordText == "" ? Language.s.nopassword : Language.s.passworded);
     }
     
     

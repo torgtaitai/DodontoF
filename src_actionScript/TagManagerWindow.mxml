@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="690"
    height="430"
-   title="画像タグ名管理" 
+   title="{Language.s.tagManagerWindowTitle}" 
    showCloseButton="true"
    >
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
@@ -13,9 +13,9 @@
                                  width="100%" horizontalAlign="center" verticalAlign="middle" />
   
   <mx:HBox height="50" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="変更内容を保存" click="this.execute()" enabled="false" />
+    <mx:Button id="executeButton" label="{Language.s.saveTagManagedSetting}" click="this.execute()" enabled="false" />
     <mx:Spacer width="30" />
-    <mx:Button label="閉じる" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.closeButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
   
@@ -79,7 +79,7 @@
             return;
         }
         
-        Alert.show("「変更内容を保存」を実施していません。\n現在の変更内容を破棄しますがよろしいですか？？", "確認", 
+        Alert.show(Language.s.doYouLeaveHereWithNoSavingQuestion, Language.s.doYouLeaveHereWithNoSavingQuestionTitle, 
                    Alert.OK | Alert.CANCEL, null,
                    function(e : CloseEvent) : void {
                        if (e.detail == Alert.OK) {

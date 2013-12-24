@@ -79,6 +79,11 @@ class Card
          'fileName' => 'cards/torg.txt',
        },
        
+       { 'type' => 'torg_English',
+         'title' => 'TORG：Drama Deck',
+         'fileName' => 'cards/torg_English.txt',
+       },
+       
        { 'type' => 'bladeOfArcana',
          'title' => 'ブレイド・オブ・アルカナ：タロット',
          'fileName' => 'cards/bladeOfArcana.txt',

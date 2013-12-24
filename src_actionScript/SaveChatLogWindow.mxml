@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="270"
    height="180"
-   title="ログ保存" 
+   title="{Language.s.saveChatLog}" 
    showCloseButton="true"
    >
   
@@ -13,13 +13,13 @@
       <mx:RadioButtonGroup id="textTypeGroup"/>
 	  <mx:RadioButton groupName="textTypeGroup"
                       id="htmlFormat"
-                      label="HTMLとして保存"
+                      label="{Language.s.saveChatLogForHtml}"
                       selected="true"
                       />
       
 	  <mx:RadioButton groupName="textTypeGroup"
                       id="textFormat"
-                    label="テキストとして保存"
+                    label="{Language.s.saveChatLogForText}"
                       />
       </mx:HBox>
     <mx:Tile id="saveButtonBox" 
@@ -29,7 +29,7 @@
     </mx:Tile>
     
     <mx:Spacer width="20" />
-  <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+  <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   
   </mx:Box>
   

@@ -1,7 +1,7 @@
 //--*-coding:utf-8-*--
 
 package {
-    
+
     import flash.events.Event;
     import flash.events.MouseEvent;
     import flash.events.TimerEvent;
@@ -17,6 +17,15 @@ package {
     import mx.managers.PopUpManager;
     
     public class Voter {
+        
+        [Embed(source='image/icons/exclamation.png')]
+        [Bindable]
+        private static var rollCallIcon:Class;
+        
+        [Embed(source='image/icons/tick.png')]
+        [Bindable]
+        private static var voteIcon:Class;
+        
         
         private var chatWindow:ChatWindow;
         
@@ -90,11 +99,14 @@ package {
         
         private function getResultVoteReplay(params:Object):String {
             if( params.voteReplay == Alert.OK ) {
-                return "準備完了！（" + getVoteReplayCount() + "/" + calledMemberRequiredCount + "）";
+                return Language.text("rollCallResult",
+                                     getVoteReplayCount(), calledMemberRequiredCount)
             } else if( params.voteReplay == Alert.YES ) {
-                return "賛成。（" + getVoteReplayCount() + "/" + calledMemberRequiredCount + "）";
+                return Language.text("voteResultAgree",
+                                     getVoteReplayCount(), calledMemberRequiredCount)
             } else if( params.voteReplay == Alert.NO ) {
-                return "反対。（" + getVoteReplayCount() + "/" + calledMemberRequiredCount + "）";
+                return Language.text("voteResultDisagree",
+                                     getVoteReplayCount(), calledMemberRequiredCount)
             }
             return "";
         }
@@ -102,10 +114,10 @@ package {
         private function getVoteResult(params:Object):String {
             if( params.isCallTheRoll ) {
                 closeAnswerWindow();
-                return "全員準備完了しましたっ！";
+                return Language.s.allReady;
             }
             
-            return "投票結果　賛成：" + yesCount + "、" + "反対：" + noCount;
+            return Language.text("voteTotalResult", yesCount, noCount);
         }
         
         private function getVoteReplayCount():int {
@@ -152,9 +164,9 @@ package {
             }
             
             if( params.isCallTheRoll ) {
-                result = "点呼開始！";
+                result = Language.s.beginVote;
             } else {
-                result = "投票を開始しました：" + params.question;
+                result = Language.s.beginRollCall + params.question;
             }
             
             yesCount = 0;
@@ -170,22 +182,32 @@ package {
                 return result;
             }
             
-            
             //見学者には投票権無し。現実は非常だ…
-            if( ! DodontoF_Main.getInstance().isVisiterMode() ) {
-                
-                if( params.isCallTheRoll ) {
-                    answerWindow = Alert.show("準備が出来たらOKを押してください", "点呼", 
-                                              Alert.OK | Alert.NONMODAL, null, 
-                                              getSendVoteReplay(params));
-                } else {
-                    answerWindow = Alert.show(params.question, "投票", 
-                                              Alert.YES | Alert.NO | Alert.NONMODAL, null, 
-                                              getSendVoteReplay(params));
-                }
+            if( DodontoF_Main.getInstance().isVisiterMode() ) {
+                return result;
             }
             
+            
+            if( params.isCallTheRoll ) {
+                answerWindow = Alert.show(Language.s.preshOkWhenReady, Language.s.vote, 
+                                          Alert.OK | Alert.NONMODAL, null, 
+                                          getSendVoteReplay(params), rollCallIcon);
+            } else {
+                answerWindow = Alert.show(params.question, Language.s.rollCall, 
+                                          Alert.YES | Alert.NO | Alert.NONMODAL, null, 
+                                          getSendVoteReplay(params), voteIcon);
+            }
+            
+            initAnserWindow();
+            
             return result;
+        }
+        
+        private function initAnserWindow():void {
+            answerWindow.alpha = 10.0;
+            answerWindow.setStyle("backgroundColor", "0x333300");
+            answerWindow.setStyle("headerColors", [0x00CC66, 0x00CC66]);
+            answerWindow.setStyle("fillAlphas", 1);
         }
         
         private var answerWindow:Alert;

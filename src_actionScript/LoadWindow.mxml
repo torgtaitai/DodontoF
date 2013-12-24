@@ -4,7 +4,7 @@
    xmlns:torgtaitai="*" 
    width="400"
    height="475"
-   title="ロード" 
+   title="{Language.s.load}" 
    showCloseButton="true"
    >
   
@@ -12,37 +12,37 @@
 	<mx:RadioButtonGroup id="RadioGroup_Load"/>
 	<mx:RadioButton groupName="RadioGroup_Load"
       id="loadAll"
-      label="全データをロードする（現在のデータは全て破棄されます）"
+      label="{Language.s.loadAllSaveData}"
       click="loadSelectBox.enabled = false"
        selected="true"
       />
 	<mx:RadioButton groupName="RadioGroup_Load"
       id="loadSelected"
-      label="一部データのみをロードする"
+      label="{Language.s.loadAPartOfSaveData}"
       click="loadSelectBox.enabled = true"
       />
     
     <mx:HBox id="loadSelectBox" width="100%" height="100%" enabled="false" >
       <mx:Spacer width="15" height="100%" />
       <mx:Box width="100%" height="100%" >
-        <mx:CheckBox id="map" label="マップを変更する" />
-        <mx:Label text="以下は現状に該当データを追加します（現在のデータは保持されます）" />
-        <mx:CheckBox id="mapMask" label="マップマスク" />
-        <mx:CheckBox id="mapMarker" label="マップマーカー" />
-        <mx:CheckBox id="character" label="キャラクター" />
-        <mx:CheckBox id="characterWaitingRoom" label="キャラクター待合室" />
-        <mx:CheckBox id="magicRangeMarker" label="魔法範囲" />
-        <mx:CheckBox id="memo" label="共有メモ" />
-        <mx:CheckBox id="standingGraphicInfos" label="立ち絵" />
-        <mx:CheckBox id="cutIn" label="カットイン" />
-        <mx:CheckBox id="card" label="カード" />
-        <mx:CheckBox id="initiative" label="イニシアティブ表" />
+        <mx:CheckBox id="map" label="{Language.s.loadMapData}" />
+        <mx:Label text="{Language.s.loadAPartOfSaveDataInfomationForMapObject}" />
+        <mx:CheckBox id="mapMask" label="{Language.s.mapMask}" />
+        <mx:CheckBox id="mapMarker" label="{Language.s.mapMarker}" />
+        <mx:CheckBox id="character" label="{Language.s.character}" />
+        <mx:CheckBox id="characterWaitingRoom" label="{Language.s.characterWaitingRoom}" />
+        <mx:CheckBox id="magicRangeMarker" label="{Language.s.magicRangeBoth}" />
+        <mx:CheckBox id="memo" label="{Language.s.sharedMemo}" />
+        <mx:CheckBox id="standingGraphicInfos" label="{Language.s.standingGraphics}" />
+        <mx:CheckBox id="cutIn" label="{Language.s.cutIn}" />
+        <mx:CheckBox id="card" label="{Language.s.card}" />
+        <mx:CheckBox id="initiative" label="{Language.s.initiativeWindowTitle}" />
       </mx:Box>
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="実行" click="execute()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button id="executeButton" label="{Language.s.executeButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:HBox>
   </mx:Box>
   

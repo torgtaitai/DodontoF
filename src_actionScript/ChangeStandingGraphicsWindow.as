@@ -9,8 +9,8 @@ package {
         private var effectId:String = "";
         
         public function init(info:Object, index_:int):void {
-            title = "立ち絵変更";
-            executeButton.label = "変更";
+            title = Language.s.changeStandingGraphics;
+            executeButton.label = Language.s.changeButton;
             
             index = index_;
             effectId = info.effectId;

@@ -6,26 +6,26 @@
    y="0"
    width="610"
    height="400"
-   title="簡易マップ作成" 
+   title="{Language.s.createMapEasyWindow}" 
    showCloseButton="true"
    >
   
   <mx:HBox width="100%" height="100%">
     <mx:Box width="100" height="100%">
       <mx:HBox width="100%">
-	    <mx:Label text="色:" />
+	    <mx:Label text="{Language.s.createMapEasyColor}" />
         <mx:ColorPicker id="mapMaskColorPicker" showTextField="true" selectedColor="0x000000" />
       </mx:HBox>
       
-      <mx:Label text="ペン太さ:" />
+      <mx:Label text="{Language.s.createMapLineWeight}" />
       <mx:NumericStepper id="paintSize" minimum="1" maximum="99" value="1" stepSize="1" change="changePaintSize()"/>
       
-      <mx:RadioButton groupName="paindMode" id="paint"   label="鉛筆"     click="selectPaintMode()" selected="true" />
-      <mx:RadioButton groupName="paindMode" id="eraser"  label="消しゴム" click="selectPaintMode()" />
-      <mx:RadioButton groupName="paindMode" id="syringe" label="スポイト" click="selectPaintMode()" />
+      <mx:RadioButton groupName="paindMode" id="paint"   label="{Language.s.pencil}"     click="selectPaintMode()" selected="true" />
+      <mx:RadioButton groupName="paindMode" id="eraser"  label="{Language.s.eraser}" click="selectPaintMode()" />
+      <mx:RadioButton groupName="paindMode" id="syringe" label="{Language.s.spoit}" click="selectPaintMode()" />
       
-      <mx:Button label="決定" click="sendMapDraw()" />
-      <mx:Button label="キャンセル" click="PopUpManager.removePopUp(this)" />
+      <mx:Button label="{Language.s.createMapEasyExecuteButton}" click="sendMapDraw()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:Box>
     <mx:Box width="100%" height="100%">
       <torgtaitai:PaintablePreviewLoader id="previewLoader" width="100%" height="100%" />

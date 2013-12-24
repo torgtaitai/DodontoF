@@ -4,36 +4,36 @@
    xmlns:torgtaitai="*" 
    width="440"
    height="220"
-   title="プレイルーム作成" 
+   title="{Language.s.createNewPlayRoom}"
    showCloseButton="true"
    >
   
   <mx:Box width="100%" height="100%"
           verticalGap="1" horizontalGap="1" >
     
-	<mx:Label text="新規プレイルームを作成します。" />
+	<mx:Label text="{Language.s.createNewPlayRoomInfoText}" />
       
     <mx:HBox id="createPasswordBox" enabled="false" visible="false"
              height="0" width="100%" horizontalAlign="center" verticalAlign="middle" >
       <mx:HRule width="50" strokeWidth="1" shadowColor="black" strokeColor="black"/>
-	  <mx:Label text="認証パスワード:" />
+	  <mx:Label text="{Language.s.createPassword}:" />
       <mx:TextInput id="createPassword" width="100%" text="" />
       <mx:HRule width="50" strokeWidth="1" shadowColor="black" strokeColor="black"/>
     </mx:HBox>
       
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-	  <mx:Label text="プレイルーム名:" />
+	  <mx:Label text="{Language.s.playRoomName}:" />
       <mx:TextInput id="playRoomName" width="100%" text="" />
     </mx:HBox>
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-	  <mx:Label text="パスワード(空ならパスワード無し):" />
+	  <mx:Label text="{Language.s.loginPasswordWithTips}:" />
       <mx:TextInput id="playRoomPassword" width="100%" text=""
                     displayAsPassword="true"
                     />
     </mx:HBox>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
-	  <mx:Label text="ゲームシステム（自由入力も可）:" />
+	  <mx:Label text="{Language.s.gameTypeWithTips}:" />
       <torgtaitai:SuggestComboBox id="gameType" width="100%" rowCount="10"
                                   labelField="name"
                                   />
@@ -41,68 +41,68 @@
     
     <mx:Spacer width="100%" height="5" />
     
-    <mx:Button id="extendButton" label="＞＞拡張機能" click="extend()" />
+    <mx:Button id="extendButton" label="{Language.s.extendButton}" click="extend()" />
     
     <mx:Box id="extendBox" height="0" width="100%" visible="false" >
       
       <mx:HBox id="canUseExternalImageBox" height="25" width="100%"
-               toolTip="外部画像の許可を行うと画像指定時に外部URLが使用出来るようになります。指定していない場合に外部URLを画像に使用すると×マークに指し換わります。"
+               toolTip="{Language.s.useExternalImageTips}"
                >
-        <mx:Label text="外部URLの許容:" />
+        <mx:Label text="{Language.s.canUseExternalImageConfig}:" />
 	    <mx:RadioButtonGroup id="canUseExternalImageRadioGroup" />
 	    <mx:RadioButton groupName="canUseExternalImageRadioGroup"
                         id="canUseExternalImage" 
                         value="canUseExternalImage" 
-                        label="外部URL使用可"
+                        label="{Language.s.canUseExternalImage}"
                         />
 	    <mx:RadioButton groupName="canUseExternalImageRadioGroup"
                         selected="true"
                         id="canNotUseExternalImage"
                         value="canNotUseExternalImage"
-                        label="外部URL使用不可"
+                        label="{Language.s.canNotUseExternalImage}"
                         />
       </mx:HBox>
       
       <mx:HBox id="visiterBox" height="25" width="100%"
-               toolTip="見学可にすると、パスワード有りでも見学者ならログインできるようになります。見学者はチャットの「見学用」タブでの発言のみが許可され、名前は「（名前）＠見学」になります。チャット発言意外の、マップやキャラ等の操作は一切できません。"
+               toolTip="{Language.s.canVisitTips}"
                >
-        <mx:Label text="見学者の可否:" />
+        <mx:Label text="{Language.s.canVisitConfig}:" />
 	    <mx:RadioButtonGroup id="canVisitRadioGroup" />
 	    <mx:RadioButton groupName="canVisitRadioGroup"
                         id="canVisit" 
                         value="canVisit" 
-                        label="見学可"
+                        label="{Language.s.canVisitSetting}"
                         click="changeVisitMode(true)"
                         />
 	    <mx:RadioButton groupName="canVisitRadioGroup"
                         selected="true"
                         id="canNotVisit"
                         value="canNotVisit"
-                        label="見学不可"
+                        label="{Language.s.canNotVisitSetting}"
                         click="changeVisitMode(false)"
                         />
       </mx:HBox>
       
       <mx:Box width="100%">
-        <mx:Label text="使用するチャットのタブ:" />
-        <mx:Label text="半角・全角スペースでタブ名を区切ってください。（例：「雑談　打ち合わせ　メモ用」）" />
+        <mx:Label text="{Language.s.chatTabNameList}:" />
+        <mx:Label text="{Language.s.chatTabNameListInfo}:" />
         <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle" >
           <mx:Label id="publicChannelLabel" text="" />
-          <mx:TextInput id="chatChannelNamesText" width="100%" text="雑談" />
-          <mx:Label id="visiterChannlelLabel" width="0" text="見学用" />
+          <mx:TextInput id="chatChannelNamesText" width="100%" text="{Language.s.smallTalkTabName}" />
+          <mx:Label id="visiterChannlelLabel" width="0" text="{Language.s.visitorTabName}" />
         </mx:HBox>
       </mx:Box>
       
       <mx:Box id="viewStateInfosBox"
               width="100%" height="100%" >
-        <mx:Label text="この部屋の表示設定。変更するとルーム内全員の設定が変更されます。" />
+        <mx:Label text="{Language.s.viewStateInfo}" />
       </mx:Box>
       
     </mx:Box>
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:Button id="executeButton" label="作成" click="execute()" />
-      <mx:Button label="キャンセル" click="closeAction()" />
+      <mx:Button id="executeButton" label="{Language.s.createButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="closeAction()" />
     </mx:HBox>
     </mx:Box>
   <mx:Script>
@@ -123,8 +123,8 @@
         playRoomIndex = playRoomIndex_;
         resultFunction = resultFunction_;
         canselFunction = canselFunction_;
-        playRoomName.text = "仮プレイルーム（削除可能）";
-        playRoomName.toolTip = "プレイルーム名を設定しない場合、仮使用とみなして削除されます。\n正式に利用する場合には正しく名前をつけましょう。";
+        playRoomName.text = Language.s.defaultPlayRoomName;
+        playRoomName.toolTip = Language.s.playRoomNameTips;
         
         setCreatePasswordMod(isNeedCreatePassword);
     }
@@ -151,7 +151,7 @@
         }
         Log.logging("CreatePlayRoomWindow.setup end");
     }
-
+    
     override protected function teardown():void {
         if( canselFunction != null ) {
             canselFunction();
@@ -166,7 +166,8 @@
         Log.logging("initGameType begin");
         
         var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
-        gameType.dataProvider = diceBotInfos;
+        
+        Utils.setDiceBotDataProvider( gameType, diceBotInfos );
         
         if( ChatWindow.getInstance() != null ) {
             var gameTypeText:String = ChatWindow.getInstance().getGameType();
@@ -207,7 +208,7 @@
         }
         
         if( canVisit.selected ) {
-            chatChannelNames.push("見学用");
+            chatChannelNames.push( Language.s.forVisitor );
         }
         
         return chatChannelNames;
@@ -320,12 +321,12 @@
             + 90;//viewStateInfosBox.height;
         
         if( extendMode ) {
-            extendButton.label = "＜＜拡張機能を隠す";
+            extendButton.label = Language.s.hideExtendButton;
             extendBox.height = extendHeight;
             this.height += extendHeight;
             extendBox.visible = true;
         } else {
-            extendButton.label = "＞＞拡張機能";
+            extendButton.label = Language.s.extendButton;
             extendBox.height = 0;
             this.height -= extendHeight;
             extendBox.visible = false;

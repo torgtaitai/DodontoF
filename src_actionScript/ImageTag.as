@@ -6,13 +6,13 @@ package {
     
     public class ImageTag {
         
-        private static var allTag:String = "（全て）";
-        private static var noneTag:String = "（未選択）";
-        private static var characterTag:String = "キャラクター画像";
-        private static var mapTag:String = "マップ画像";
-        private static var floorTileTag:String = "フロアタイル画像";
-        private static var standingGraphicsTag:String = "立ち絵";
-        private static var monsterTag:String = "モンスター";
+        private static var allTag:String = Language.s.allTag;
+        private static var noneTag:String = Language.s.noselectTag;
+        private static var characterTag:String = Language.s.characterImageTag;
+        private static var mapTag:String = Language.s.mapImageTag;
+        private static var floorTileTag:String = Language.s.floorTileImageTag;
+        private static var standingGraphicsTag:String = Language.s.standingGraphicTag;
+        private static var monsterTag:String = Language.s.monsterImageTag;
         
         
         public static function getAllTag():String {
