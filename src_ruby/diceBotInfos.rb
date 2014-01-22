@@ -38,6 +38,8 @@ class DiceBotInfos
 　C(10-4*3/2+2)：C(計算式）で計算だけの実行も可能
 　choice[a,b,c]：列挙した要素から一つを選択表示。ランダム攻撃対象決定などに
 　S3d6 ： 各コマンドの先頭に「S」を付けると他人結果の見えないシークレットロール
+　3d6/2 ： ダイス出目を割り算（切り捨て）。切り上げは /2U、四捨五入は /2R。
+　D66 ： D66用。[6,1]が16,61どちらかはゲーム種別に判定。D66Nはそのまま、D66Sは入替を強制。
 INFO_MESSAGE_TEXT
     }
     
@@ -110,6 +112,33 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'ビーストバインド トリニティ',
+    'gameType' => 'BeastBindTrinity',
+    'fileName' => 'BeastBindTrinity',
+    'prefixs' => ['\d+BB','DCTH','DCTB','ENC','EMO','EGO\d+','MTT\d+','ROOT\d+'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定　(nBB+m@x#y)
+　n個のD6を振り、出目の大きい２個から達成値を算出。修正mも可能。
+　@xは「クリティカル値がx」、#yは「ファンブル値がy」であることを表し、省略が可能。
+　省略した場合、@12#2 を入力したものとして計算する。
+・各種表
+　・出自表　　(人間)DCTH　(魔物)DCTB
+　・邂逅表　　ENC　＊ライフパス絆の対応NPCまで表示
+　・感情表　　EMO　＊邂逅表から対応NPCを省いたもの
+　・エゴ表　　EGOn（nは0～134）※
+　・変異表　　MTTn（nは0～134）※
+　　※nは対応するルーツ番号(0～134)。下記の ROOT コマンドで確認可能。
+　　　0を入力した場合、汎用エゴ/変異表を呼び出す。
+　　　入力例) EGO0→汎用エゴ表を振る　MTT11→異能者の変異表を振る
+　・ルーツ番号対応表　ROOTn（nは1～13）
+　　nは以下のブラッドに対応する。
+　　1:イレギュラー　2:ヴァンパイア　3:ヴォイド　4:エトランゼ　5:コズミックホラー
+　　6:ストレンジャー　7:スピリット　8:セレスチャル　9:デーモン
+　　10:ネイバー　11:ハーミット　12:フルメタル　13:レジェンド
+・D66ダイスあり
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'ブラッド・クルセイド',
     'gameType' => 'BloodCrusade',
     'fileName' => 'BloodCrusade',
@@ -128,6 +157,24 @@ INFO_MESSAGE_TEXT
 　・ランダム全特技表　 AST
 　・軽度狂気表　　　　 MIT
 　・重度狂気表　　　　 SIT
+　・戦場シーン表　　　 BDST
+　・夢シーン表　　　　 DMST
+　・田舎シーン表　　　 CYST
+　・学校シーン表　　　 SLST
+　・館シーン表　　　　 MNST
+・D66ダイスあり
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'ブラッド・ムーン',
+    'gameType' => 'BloodMoon',
+    'fileName' => 'BloodMoon',
+    'prefixs' => [],
+    'info' => <<INFO_MESSAGE_TEXT
+・各種表
+　・関係属性表　RAT
+　・導入タイプ決定表(ノーマル)　IDT
+　・導入タイプ決定表(ハード込み)　ID2T
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -344,6 +391,18 @@ INFO_MESSAGE_TEXT
 INFO_MESSAGE_TEXT
   },
   {
+    'name' => 'エンドブレイカー',
+    'gameType' => 'EndBreaker',
+    'fileName' => 'EndBreaker',
+    'prefixs' => ['\d+EB','LDUT'],
+    'info' => <<INFO_MESSAGE_TEXT
+・判定 (nEB)
+  n個のD6を振る判定。ダブルトリガー発動で自動振り足し。
+・各種表
+  ・生死不明表 (LDUT)
+INFO_MESSAGE_TEXT
+  },
+  {
     'name' => 'ガープス',
     'gameType' => 'GURPS',
     'fileName' => 'Gurps',
@@ -533,7 +592,7 @@ INFO_MESSAGE_TEXT
     'name' => 'インセイン',
     'gameType' => 'Insane',
     'fileName' => 'Insane',
-    'prefixs' => ['ST','HJST','MTST','DVST','DT','BT','PT','FT','JT','BET','RTT','TVT','TET','TPT','TST','TKT','TMT'],
+    'prefixs' => ['ST','HJST','MTST','DVST','DT','BT','PT','FT','JT','BET','RTT','TVT','TET','TPT','TST','TKT','TMT','CHT','VHT','IHT','RHT','MHT','LHT'],
     'info' => <<INFO_MESSAGE_TEXT
 ・判定
 スペシャル／ファンブル／成功／失敗を判定
@@ -553,6 +612,12 @@ INFO_MESSAGE_TEXT
 指定特技(技術)表　　(TST)
 指定特技(知識)表　　(TKT)
 指定特技(怪異)表　　(TMT)
+会話ホラースケープ表(CHT)
+街中ホラースケープ表(VHT)
+不意訪問ホラースケープ表(IHT)
+廃墟遭遇ホラースケープ表(RHT)
+野外遭遇ホラースケープ表(MHT)
+情報潜在ホラースケープ表(LHT)
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -1091,6 +1156,23 @@ SAVEの難易度を「レベル」で表記することが出来ます。
 　"(ダイス数)BS(修正値)"でバーサーク、"(ダイス数)HBS(修正値)"でハイパーバーサークでロールできます。
 　最初のダイスの読替は、個別の出目はそのままで表示。
 　下から２番目の出目をずらした分だけ合計にマイナス修正を追加して表示します。
+INFO_MESSAGE_TEXT
+  },
+  {
+    'name' => 'ウタカゼ',
+    'gameType' => 'Utakaze',
+    'fileName' => 'Utakaze',
+    'prefixs' => ['\d*UK[@\d]*.*'],
+    'info' => <<INFO_MESSAGE_TEXT
+・行為判定ロール（nUK）
+  n個のサイコロで行為判定ロール。ゾロ目の最大個数を成功レベルとして表示。nを省略すると2UK扱い。
+  例）3UK ：サイコロ3個で行為判定
+  例）UK  ：サイコロ2個で行為判定
+  不等号用いた成否判定は現時点では実装してません。
+・クリティカルコール付き行為判定ロール（nUK@c or nUKc）
+　cに「龍のダイス目」を指定した行為判定ロール。
+  ゾロ目ではなく、cと同じ値の出目数x2が成功レベルとなります。
+  例）3UK@5 ：龍のダイス「月」でクリティカルコール宣言したサイコロ3個の行為判定
 INFO_MESSAGE_TEXT
   },
   {

@@ -3,7 +3,7 @@
 def initLog
   return unless( $log.nil? )
   
-  $log = Logger.new("log.txt", 1, 1048576 * 10)
+  $log = Logger.new($logFileName, $logFileMaxCount, $logFileMaxSize)
   $log.level = ( $debug ? Logger::DEBUG : Logger::ERROR )
   $log.level = Logger::FATAL if( $isModRuby )
 end

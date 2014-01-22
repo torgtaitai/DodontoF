@@ -32,6 +32,7 @@ require 'configBcDice.rb'
 class TableFileData
   
   def initialize(isLoadCommonTable = true)
+    @dirs = []
     @tableData = Hash.new
     
     return unless( isLoadCommonTable )
@@ -41,6 +42,9 @@ class TableFileData
   end
   
   def setDir(dir, prefix = '')
+    return if( @dirs.include?(dir) )
+    @dirs << dir
+    
     tableData = searchTableFileDefine(dir, prefix)
     @tableData.merge!( tableData )
   end

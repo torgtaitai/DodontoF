@@ -1550,16 +1550,6 @@ package {
             }
             
             var request:URLRequest = getUrlRequestForSendCommandData(obj);
-            
-            /*
-            if( callBack == null ) {
-                Log.loggingTuning("sendToURL begin");
-                sendToURL(request);
-                Log.loggingTuning("sendToURL end");
-                return;
-            }
-            */
-            
             var loader:URLLoader = null;
             
             if( isRefresh ) {

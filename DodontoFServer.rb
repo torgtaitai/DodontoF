@@ -190,7 +190,7 @@ class DodontoFServer
       return FileLock.new(lockFileName);
       #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
-      loggingForce(@saveDirInfo.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
+      loggingForce(@saveDirInfo, "when getSaveFileLock error : @saveDirInfo");
       raise
     end
   end
@@ -253,7 +253,7 @@ class DodontoFServer
       raise e
     end
     
-    logging(saveData.inspect, saveFileName)
+    logging(saveData, saveFileName)
     
     logging("loadSaveFile end")
     
@@ -2208,7 +2208,7 @@ class DodontoFServer
       
       lines = File.readlines(fileName).join
       params = {}
-      lines.each do |line|
+      lines.each_line do |line|
         
         line = line.chomp
         
@@ -4992,7 +4992,7 @@ class DodontoFServer
   
   def changeCharacter()
     characterData = getParamsFromRequestData()
-    logging(characterData.inspect, "characterData")
+    logging(characterData, "characterData")
     
     changeCharacterData(characterData)
   end
@@ -5028,7 +5028,7 @@ class DodontoFServer
         end
       end
       
-      logging(characterData.inspect, "character data change")
+      logging(characterData, "character data change")
       characters[index] = characterData
     end
   end
@@ -5719,7 +5719,7 @@ class DodontoFServer
     end
     
     if( findIndex.nil? )
-      throw Exception.new("deleteFindOne target is NOT found inspect:" ) #+ array.inspect)
+      throw Exception.new("deleteFindOne target is NOT found inspect:" )
     end
     
     logging(array.size, "array.size before")
@@ -6218,7 +6218,12 @@ class DodontoFServer
   
   def changeInitiativeData(roundTimeData)
     changeSaveData(@saveFiles['time']) do |saveData|
-      saveData['roundTimeData'] = roundTimeData;
+      
+      #要素に日本語を入れないと一部中国語(装甲の中国語表記)で文字化けするためダーティーハック。
+      #原因は不明。調査挫折。
+      saveData['_'] = 'あ'
+      
+      saveData['roundTimeData'] = roundTimeData
     end
   end
   
@@ -6267,8 +6272,8 @@ class DodontoFServer
     changed = (saveFileTimeStamp != lastUpdateTime)
     
     logging(saveFileName, "saveFileName")
-    logging(saveFileTimeStamp.inspect, "saveFileTimeStamp")
-    logging(lastUpdateTime.inspect,    "lastUpdateTime   ")
+    logging(saveFileTimeStamp, "saveFileTimeStamp")
+    logging(lastUpdateTime,    "lastUpdateTime   ")
     logging(changed, "changed")
     
     return changed

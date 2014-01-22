@@ -52,7 +52,7 @@
     
     override protected function setup():void {
     }
-
+    
     public function execute():void {
         try {
             var text:String = counterNames.text;

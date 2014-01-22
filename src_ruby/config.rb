@@ -4,6 +4,15 @@
 #デバッグログ出力設定 trueで出力。falseで非出力(ただしエラー処理は常に出力されます。)
 $debug = false
 
+#ログファイル名
+$logFileName = "log.txt"
+
+#ログファイルサイズ。デフォルト10MB。
+$logFileMaxSize = 10485760
+
+#ログファイルの世代管理数
+$logFileMaxCount = 1
+
 
 #サーバで許容できると思うログイン人数を指定。大体でいいです。
 #この人数以上になると、人数が多いと警告が表示されるようになります。
@@ -17,8 +26,8 @@ $aboutMaxLoginCount = 30
 $limitLoginCount = 100
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.43.00"
-$versionDate = "2013/12/24"
+$versionOnly = "Ver.1.43.04"
+$versionDate = "2014/01/22"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -267,9 +276,11 @@ $diceBotOrder = <<____END_MARKER____
 インセイン
 ウィッチクエスト
 ウォーハンマー
+ウタカゼ
 エリュシオン
 エルリック！
 エムブリオマシン
+エンドブレイカー
 カードランカー
 ガープス
 ガープスフィルトウィズ
@@ -308,8 +319,10 @@ $diceBotOrder = <<____END_MARKER____
 バルナ・クロニカ
 ハンターズムーン
 ピーカーブー
+ビーストバインド トリニティ
 ファンタズムアドベンチャー
 ブラッド・クルセイド
+ブラッド・ムーン
 ペンドラゴン
 マギカロギア
 迷宮デイズ

@@ -65,17 +65,17 @@
         titleText.text = Language.s.botTableSample;
         
         var text:String = "";
-        text += Language.s.botTableSampleText_2 + "\n";
-        text += Language.s.botTableSampleText_3 + "\n";
-        text += Language.s.botTableSampleText_4 + "\n";
-        text += Language.s.botTableSampleText_5 + "\n";
-        text += Language.s.botTableSampleText_6 + "\n";
-        text += Language.s.botTableSampleText_7 + "\n";
-        text += Language.s.botTableSampleText_8 + "\n";
-        text += Language.s.botTableSampleText_9 + "\n";
-        text += Language.s.botTableSampleText_10 + "\n";
-        text += Language.s.botTableSampleText_11 + "\n";
-        text += Language.s.botTableSampleText_12 + "\n";
+        text += Language.s.botTableSampleText_2;
+        text += Language.s.botTableSampleText_3;
+        text += Language.s.botTableSampleText_4;
+        text += Language.s.botTableSampleText_5;
+        text += Language.s.botTableSampleText_6;
+        text += Language.s.botTableSampleText_7;
+        text += Language.s.botTableSampleText_8;
+        text += Language.s.botTableSampleText_9;
+        text += Language.s.botTableSampleText_10;
+        text += Language.s.botTableSampleText_11;
+        text += Language.s.botTableSampleText_12;
         tableText.text = text;
     }
     
