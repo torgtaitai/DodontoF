@@ -162,6 +162,7 @@ INFO_MESSAGE_TEXT
 　・田舎シーン表　　　 CYST
 　・学校シーン表　　　 SLST
 　・館シーン表　　　　 MNST
+　・時間経過表（10代～60代、反吸血鬼）TD1T～TD6T、TDHT
 ・D66ダイスあり
 INFO_MESSAGE_TEXT
   },
@@ -574,7 +575,7 @@ INFO_MESSAGE_TEXT
 　・代償表　　　　　　　(ERT)
 　・ディフェンス遭遇表1/2/3 (DS1ET/DS2ET/DS3ET)
 　・エスケープ遭遇表1/2/3 (EE1ET/EE2ET/EE3ET)
-　・ディフェンス遭遇表1/2/3 (ET1ET/ET2ET/ET3ET)
+　・エスコート遭遇表1/2/3 (ET1ET/ET2ET/ET3ET)
 　・ディフェンス遭遇表1/2/3 (TK1ET/TK2ET/TK3ET)
 ・D66ダイスあり
 INFO_MESSAGE_TEXT

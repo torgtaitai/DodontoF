@@ -6,7 +6,7 @@
    showCloseButton="true"
    >
   
-  <mx:Tile id="diceList" width="100%" height="100%"
+  <mx:Tile id="buttonTile" width="100%" height="100%"
       paddingLeft="0"
       paddingRight="0"
            >
@@ -165,14 +165,14 @@
                 }
                 
                 var button:Button = createButton(params, i);
-                diceList.addChild(button);
+                buttonTile.addChild(button);
             }
             
             savePosition();
         }
         
         private function clearButtons():void {
-            var buttonList:Array = diceList.getChildren();
+            var buttonList:Array = buttonTile.getChildren();
             
             for(var i:int = 0 ; i < buttonList.length ; i++) {
                 var button:Button = buttonList[i] as Button;
@@ -181,9 +181,9 @@
                 }
                 
                 try {
-                    diceList.removeChild(button);
+                    buttonTile.removeChild(button);
                 } catch (e:Error) {
-                    Log.loggingError("diceList.removeChild error");
+                    Log.loggingError("buttonTile.removeChild error");
                 }
             }
         }
@@ -506,8 +506,24 @@
                                                          before, modifyResult);
             sendCharacterChange(character, message);
         }
-       
-        static public function getExecuteResultMessage(messageFormat:String, characterName:String, counterName:String, 
+        
+        private function getExecuteResultMessage(messageFormat:String, characterName:String, counterName:String, 
+                                                       before:String, modifyResult:Object):String {
+
+            var chatMessage:String = getExecuteResultChatMessage(messageFormat, characterName,
+                                                                 counterName, before, modifyResult);
+            
+            var diceRollInfo:Object = {
+                "randResults": modifyResult.randResults,
+                "uniqueId": DodontoF_Main.getInstance().getStrictlyUniqueId(),
+                "chatMessage": chatMessage };
+            
+            var command:CutInCommandRollVisualDice = new CutInCommandRollVisualDice();
+            
+            return command.getMark() + Utils.getJsonString(diceRollInfo);
+        }
+        
+        static public function getExecuteResultChatMessage(messageFormat:String, characterName:String, counterName:String, 
                                                        before:String, modifyResult:Object):String {
             var modify:String = "" + modifyResult.text;
             var modifyAbs:String = "" + Math.abs( parseInt(modify) );
@@ -521,12 +537,13 @@
             
             var result:String = StringUtil.substitute(Language.s.counterRemoconExecuteResultFormat, counterName, before, after);
             
-            return StringUtil.substitute(messageFormat, 
+            var chatMessage:String = StringUtil.substitute(messageFormat, 
                                          characterName,   //{0} 相手
                                          counterName,     //{1} カウンター名
                                          modify,          //{2} 修正値
                                          modifyAbs,       //{3} 修正値の絶対値(＋−無し）
                                          result);         //{4} 変更結果
+            return chatMessage;
         }
         
         private function sendCharacterChange(character:Character, message:String):void {
@@ -565,7 +582,8 @@
             
             var result:Object = {
                 value: value,
-                text: text };
+                text: text,
+                randResults: valueInfo.randResults };
             
             Log.logging("getModifiedValue result", result);
             return result;
@@ -580,55 +598,76 @@
                         value: params.value};
             }
             
-            var text:String = "(" + diceText + "→";
+            var text:String = "(" + diceText + "->";
             var value:int = 0;
+            var randResults:Array = new Array();
             
             for(var i:int = 0 ; i < params.diceCount ; i++) {
                 if( i != 0 ) {
                     text += ",";
                 }
                 
-                var randValue:int = Dice.getRandomNumber(params.diceType);
-                text += randValue
-                    value += randValue
-                    }
+                var randValue:int = getRandValue(params, randResults);
+                text += randValue;
+                value += randValue;
+            }
             
             text += getModifyString(params.modify) + ")";
             value += params.modify;
             
             var valueInfo:Object = {
                 text: text,
-                value: value
+                value: value,
+                randResults: randResults
             };
             
             return valueInfo;
         }
         
+        
         private function getDiceParamsFromDiceText(text:String):Object {
             Log.logging("getValueFromDiceText text", text);
             
-            var diceReg:RegExp = /(\d+)D(\d+)((\+|\-)\d+)?/i
+            var diceReg:RegExp = /^(\d*)D(\d+)(S|N)?((\+|\-)\d+)?$/i;
             var diceMatchResult:Object = diceReg.exec(text);
             
             if( diceMatchResult == null ) {
-                Log.logging("NOT match, so parseInt");
+                Log.logging("dice regexp is NOT match, so this is value text.");
                 return {value: parseInt(text)};
             }
             
-            var diceCount:int = parseInt(diceMatchResult[1]);
-            var diceType:int = parseInt(diceMatchResult[2]);
-            var modify:int = 0
-            if( diceMatchResult[3] != null ) {
-                modify = parseInt(diceMatchResult[3]);
-            }
+            var diceCount:int = getIntFromString(diceMatchResult[1], 1);
+            var diceType:int = getIntFromString(diceMatchResult[2]);
+            var isSwap:Boolean = isSwapText(diceMatchResult[3]);
+            var modify:int = getIntFromString(diceMatchResult[4]);
             
             var params:Object = {diceCount:diceCount,
                                  diceType: diceType,
+                                 isSwap: isSwap,
                                  modify: modify};
             Log.logging("getDiceParamsFromDiceText result params", params);
             return params
         }
         
+        private function getIntFromString(text:String, defaultValue:int = 0):int {
+            if( text == null || text == "") {
+                return defaultValue;
+            }
+            
+            var value:int = parseInt(text);
+            if( isNaN(value) ) {
+                value = defaultValue;
+            }
+            return value;
+        }
+        
+        private function isSwapText(text:String):Boolean {
+            if( text == null ) {
+                return false;
+            }
+            
+            return (text.toUpperCase() == "S");
+        }
         
         private function getModifyString(modify:int):String { 
             if( modify > 0 ) {
@@ -641,9 +680,45 @@
         }
         
         
+        private function getRandValue(params:Object, randResults:Array):int {
+            
+            if( params.diceType == 66 ) {
+                return getRandValueD66(params, randResults);
+            }
+            
+            var value:int = Dice.getRandomNumber(params.diceType);
+            randResults.push( [value, params.diceType] );
+            return value;
+        }
+        
+        private function getRandValueD66(params:Object, randResults:Array):int {
+            
+            var d66_1:int = Dice.getRandomNumber(6);
+            var d66_2:int = Dice.getRandomNumber(6);
+            randResults.push( [d66_1, 6] );
+            randResults.push( [d66_2, 6] );
+            
+            var value66:int = getSwapD66(d66_1, d66_2, params.isSwap);
+            
+            return value66;
+        }
+        
+        private function getSwapD66(d66_1:int, d66_2:int, isSwap:Boolean):int { 
+            var value:int = d66_1 * 10 + d66_2;
+            
+            if( isSwap ) {
+                if( d66_2 < d66_1 ) {
+                    value = d66_2 * 10 + d66_1;
+                }
+            }
+            
+            return value;
+        }
+        
         private function sendMessage(message:String):void {
             var window:ChatWindow = ChatWindow.getInstance();
-            window.sendChatMessage(window.publicChatChannel, message);
+            var isCheckDiceRoll:Boolean = false
+            window.sendChatMessage(window.publicChatChannel, message, isCheckDiceRoll);
         }
         
         

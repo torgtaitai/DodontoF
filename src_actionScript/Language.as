@@ -923,7 +923,7 @@ package {
             p.counterRemoconCounterNameTips = "イニシアティブは「#INI」で指定できます。";
             p.counterRemoconModifyValue = "修正値\{2\}:";
             p.counterRemoconModifyOperatorTips = "現状値に加減算するか、値を差し替えるかを選択できます。";
-            p.counterRemoconModifyValueTips = "設定可能な書式\n （空）　：任意の値を後から指定\n 数値　：指定した値\n 「xDy+n」形式：ダイスロール結果（例：２ｄ６＋１）";
+            p.counterRemoconModifyValueTips = "設定可能な書式\n （空）　：任意の値を後から指定\n 数値　：指定した値\n 「xDy+n」形式：ダイスロール結果（例：２ｄ６＋１、D66、D66s(値入れ替え)）";
             p.counterRemoconDisplayMessage = "表示メッセージ:";
             p.counterRemoconDisplayMessageDefault = "\{0\}の\{1\}を\{2\}した";
             p.counterRemoconDisplayMessageTips = "使用可能な置換文字：\n\{0\}：キャラクター名\n\{1\}：カウンター名\n\{2\}：修正値\n\{3\}：修正値絶対値（＋−無し）\n\{4\}：変更結果";
@@ -975,7 +975,7 @@ package {
             p.moveRightCounterRemoconButton = "ボタンを【　　右→】へ";
             p.toOthersCounterRemoconButton = "その他のキャラ";
             p.initiativeValue = "イニシアティブ値";
-            p.counterRemoconExecuteResultFormat = "（{0}：{1}→{2}）";
+            p.counterRemoconExecuteResultFormat = "（{0}：{1}->{2}）";
             // CreateSmallImagesWindow.mxml
             p.login = "ログイン";
             p.getData = "データ取得";

@@ -2,6 +2,7 @@
 #--*-coding:utf-8-*--
 $LOAD_PATH << File.dirname(__FILE__) + "/src_ruby"
 $LOAD_PATH << File.dirname(__FILE__) + "/src_bcdice"
+$LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 #CGI通信の主幹クラス用ファイル
 #ファイルアップロード系以外は全てこのファイルへ通知が送られます。

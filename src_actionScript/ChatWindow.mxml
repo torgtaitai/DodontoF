@@ -95,13 +95,16 @@
           
           <mx:HBox width="100%" height="100%">
 	        <mx:Label text="{Language.s.chatMessageLabel}"/>
-            <mx:Box id="chatMessageBase" width="100%" height="100%">
+            <mx:HBox id="chatMessageBase" width="100%" height="100%">
               <mx:TextArea id="chatMessageInput" width="100%" height="100%" text=""
                            keyDown="keyDownInChatMessage(event)"
                            keyUp="keyUpInChatMessage(event)"
                            tabIndex="3"
                            />
-            </mx:Box>
+              <mx:Label id="sendToCharacters" width="0" height="100%" text=""
+                           visible="false"
+                           />
+            </mx:HBox>
             
             
             <mx:Box id="sendCounterRemocon" width="60" height="100%" horizontalAlign="center" verticalAlign="middle">
@@ -1170,6 +1173,8 @@
                 return;
             }
             
+            data.replaceMessage(/$/, getSendToNames());
+            
             clearDice();
             
             if( checkDiceRoll(data, isCheckDiceRoll) ) {
@@ -1179,6 +1184,23 @@
             Log.logging("chatMessageTrader.sendMessage(data)");
             chatMessageTrader.sendMessage(data);
         }
+        
+        static private function getSendToNames():String {
+            var characters:Array = Character.getSelectedCharacters();
+            if( characters.length == 0 ) {
+                return "";
+            }
+            
+            var text:String = "";
+            for each (var character:Character in characters) {
+                text += " ＞" + character.getName();
+            }
+            
+            Character.unselectAllCharacters();
+            
+            return text;
+        }
+        
         
         static public function clearDice():void {
             if( DodontoF_Main.getInstance().getDiceBox() == null ) {
@@ -1195,7 +1217,14 @@
                 return false;
             }
             
-            var diceRollData:Object = getDiceRollText(data.getMessage());
+            var message:String = data.getMessage();
+            
+            if( message.indexOf( CutInCommandBase.getBeginMarker() ) == 0 ) {
+                message = "Wrong Message -> " + message;
+                data.setMessage(message);
+            }
+            
+            var diceRollData:Object = getDiceRollText(message);
             
             var diceRollMessage:String = diceRollData.message;
             Log.logging("diceRollMessage", diceRollMessage);
@@ -1426,7 +1455,7 @@
         
         
         public function sendSystemMessage(messageBase:String, args:Array = null, strictlyUniqueId:String = null):void {
-            chatMessageTrader.sendSystemMessage(messageBase, args);
+            chatMessageTrader.sendSystemMessage(messageBase, args, strictlyUniqueId);
         }
         
         public function addLocalMessage(message:String):void {
@@ -2084,6 +2113,28 @@
                              });
         }
         
+        
+        public function updateSendToCharacters():void {
+            var text:String = "";
+            
+            var characters:Array = Character.getSelectedCharacters();
+            for each (var character:Character in characters) {
+                if( text.length != 0 ) {
+                    text += "\n";
+                }
+                text += "> " + character.getName();
+            }
+            
+            sendToCharacters.text = text;
+            
+            if( text.length == 0 ) {
+                sendToCharacters.visible = false;
+                sendToCharacters.width = 0;
+            } else {
+                sendToCharacters.visible = true;
+                sendToCharacters.width = 100;
+            }
+        }
         
     ]]>
   </mx:Script>

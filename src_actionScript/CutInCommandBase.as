@@ -11,8 +11,16 @@ package {
             ChatWindow.getInstance().sendChatMessage_public(commandText);
         }
         
+        public static function getBeginMarker():String {
+            return "###CutInCommand:"
+        }
+        
+        public function getMark():String {
+            return getMarkString();
+        }
+        
         override protected function getMarkString():String {
-            return "###CutInCommand:" + getCommand() + "###";
+            return getBeginMarker() + getCommand() + "###";
         }
         
         //カットインが非表示の場合でも「カットインを流用したコマンド機能」（このクラスのこと）

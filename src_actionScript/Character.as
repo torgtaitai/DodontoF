@@ -359,24 +359,31 @@ package {
             //一度でもCtrlキーを離してキャラクターをクリックしたら解除へ。
             //あるいはマップをクリックしても選択解除されます。
             if( event.ctrlKey ) {
-                clickCharacterForBatchDelete(event);
+                clickCharacter(event);
                 return;
             }
             
-            unSelectAllCharacters();
+            unselectAllCharacters();
             
             super.mouseDownEvent(event);
         }
         
-        static private var charactersForBatchDelete:Array = new Array();
+        
+        static public var selectedCharacters:Array = new Array();
+        
+        static public function getSelectedCharacters():Array {
+            return selectedCharacters;
+        }
+        
         static private var dragDropForClone:DragDrop = new DragDrop("clone Character");
         
-        public function clickCharacterForBatchDelete(event:MouseEvent):void {
-            if( isInclude(charactersForBatchDelete, this) ) {
-                unSelectCharacterForBatchDelete();
+        
+        public function clickCharacter(event:MouseEvent):void {
+            if( isInclude(selectedCharacters, this) ) {
+                unselectCharacter();
                 dragDropForClone.removeDropEvent();
             } else {
-                selectCharacterForBatchDelete();
+                selectCharacter();
                 dragDropForClone.addDropEvent( getMap().getOverMapLayer(), this.cloneCharacterByDrag );
                 dragForCloneEvent(event);
             }
@@ -395,7 +402,7 @@ package {
             var point:Point = getMap().getMouseCurrentPoint();
             cloneCharacterAction(point);
             
-            unSelectAllCharacters();
+            unselectAllCharacters();
             dragDropForClone.removeDropEvent();
         }
         
@@ -408,27 +415,39 @@ package {
             return false;
         }
         
-        private function selectCharacterForBatchDelete():void {
-            charactersForBatchDelete.push(this);
+        private function selectCharacter():void {
+            pushSelectedCharacters(this);
             var color:int = 0xFF4500;
             changeSelectedColor(color);
         }
         
+        
+        static private function pushSelectedCharacters(character:Character):void {
+            selectedCharacters.push(character);
+            ChatWindow.getInstance().updateSendToCharacters();
+        }
+        
+        static private function popSelectedCharacters():Character {
+            var character:Character = selectedCharacters.pop();
+            ChatWindow.getInstance().updateSendToCharacters();
+            return character;
+        }
+        
+        
         public function changeSelectedColor(color:int = -1):void {
             view.setRoundColor(color);
-            //view.setBackGroundColor(color);
             view.setLineColor(color);
             loadViewImage();
         }
         
-        private function unSelectCharacterForBatchDelete():void {
-            deleteFromArray(charactersForBatchDelete, this);
+        private function unselectCharacter():void {
+            deleteFromArray(selectedCharacters, this);
             this.changeSelectedColor();
         }
         
-        static public function unSelectAllCharacters():void {
-            while( charactersForBatchDelete.length > 0 ) {
-                var character:Character = charactersForBatchDelete.pop();
+        static public function unselectAllCharacters():void {
+            while( selectedCharacters.length > 0 ) {
+                var character:Character = popSelectedCharacters();
                 character.changeSelectedColor();
             }
         }
@@ -448,7 +467,7 @@ package {
         }
         
         override public function sendDelete():void {
-            if( charactersForBatchDelete.length == 0 ) {
+            if( selectedCharacters.length == 0 ) {
                 super.sendDelete();
             } else {
                 sendDeleteBatch();
@@ -458,10 +477,10 @@ package {
         private function sendDeleteBatch():void {
             Log.logging("sendDeleteBatch begin");
             
-            sender.removeCharacters(charactersForBatchDelete);
+            sender.removeCharacters(selectedCharacters);
             
-            while( charactersForBatchDelete.length > 0 ) {
-                var character:Character = charactersForBatchDelete.pop();
+            while( selectedCharacters.length > 0 ) {
+                var character:Character = popSelectedCharacters();
                 character.deleteFromMap();
             }
             

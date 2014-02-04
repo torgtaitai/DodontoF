@@ -789,7 +789,7 @@ package {
                         mapPainter.beginDrawByPen(event);
                     } else {
                         baseLayer.startDrag();
-                        Character.unSelectAllCharacters();
+                        Character.unselectAllCharacters();
                     }
                     
                     event.stopPropagation();
