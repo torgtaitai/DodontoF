@@ -86,6 +86,7 @@ package {
             params["mountName"] = mountName;
             params["name"] = "";
             params["canDelete"] = false;
+            params["canRewrite"] = false;
             
             return params;
         }
@@ -108,6 +109,7 @@ package {
             params["mountName"] = this.mountName;
             params["name"] = "";
             params["canDelete"] = this.canDelete;
+            params["canRewrite"] = this.canRewrite;
             
             return params;
         }
@@ -123,6 +125,7 @@ package {
         private var isBack:Boolean = true;
         private var mountName:String = "";
         private var canDelete:Boolean = false;
+        private var canRewrite:Boolean = false;
         
         private var cardName:String = null;
         
@@ -193,6 +196,7 @@ package {
             this.isBack = params.isBack;
             this.mountName = params.mountName;
             this.canDelete = params.canDelete;
+            this.canRewrite = params.canRewrite;
             
             printTitle();
             setWidthHeight();
@@ -205,11 +209,19 @@ package {
             this.imageName = s;
         }
         
+        public function getImageName():String {
+            return this.imageName;
+        }
+        
         /** 
          * カード裏の画像URL(もしくはHTML文字列）を設定
          */
         public function setImageNameBack(s:String):void {
             this.imageNameBack = s;
+        }
+        
+        public function getImageNameBack():String {
+            return this.imageNameBack;
         }
         
         /** 
@@ -436,10 +448,15 @@ package {
             super.update(params);
             setParams(params);
             
-            loadViewImage();
+            updateRefresh();
             
             Log.loggingTuning("=>Card.update() End");
         }
+
+        override public function updateRefresh():void {
+            loadViewImage();
+        }
+        
         
         private function isCardChangeToOpened(isOpenBefore:Boolean):Boolean {
             if( isOpenBefore ) {
@@ -526,6 +543,7 @@ package {
             changeOwnerMenu.visible = false; //"カードの管理者を自分に変える
             printCardTextMenu.visible = false; //カードテキストをチャットに引用
             removeCardMenu.visible = false; //"カード削除
+            rewriteCardMenu.visible = false; //"カード書き換え
             
             if( this.isPrintCardText() ) {
                 if( ! isPrintBackSide() ) {
@@ -535,6 +553,10 @@ package {
             
             if( this.canDelete ) {
                 removeCardMenu.visible = true;
+            }
+            
+            if( this.canRewrite ) {
+                rewriteCardMenu.visible = true;
             }
             
             if( ! isOwner() ) {
@@ -549,6 +571,8 @@ package {
             
             if( this.isBack ) {
                 openPrivateMenu.visible = true; //カードを見る：非公開で自分だけ
+            } else {
+                closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す
             }
             
             openPublicMenu.visible = true; //カードを全員に公開する
@@ -606,7 +630,7 @@ package {
             if( this.getCardName() == "" ) {
                 printCardLog( Language.s.discardMessage );
             } else {
-                printCardLog( Language.s.discardMessageWithCardName, [this.getCardName()] );
+                printCardLog( Language.s.discardMessageWithCardName, [getCardName()] );
             }
             
             sender.dumpTrushCard( getId(), trushMount.getMountName(), trushMount.getId() );
@@ -759,6 +783,7 @@ package {
         private var closeSecretMenu:ContextMenuItem;
         private var changeOwnerMenu:ContextMenuItem;
         private var removeCardMenu:ContextMenuItem;
+        private var rewriteCardMenu:ContextMenuItem;
         private var printCardTextMenu:ContextMenuItem;
         
         override protected function initContextMenu():void {
@@ -769,10 +794,10 @@ package {
             
             openPrivateMenu = addMenuItem(menu, Language.s.openCardForMe, openPrivate, false);
             openPublicMenu = addMenuItem(menu, Language.s.openCardEveryone, openCard, true);
-            closeSecretMenu = addMenuItem(menu, Language.s.closeCard, closeSecret, false);
+            closeSecretMenu = addMenuItem(menu, Language.s.closeCard, closeSecret, true);
             changeOwnerMenu = addMenuItem(menu, Language.s.changeCardOwnerToMe, changeOwner, true);
             printCardTextMenu = addMenuItem(menu, Language.s.writeCardTextToChat, getContextMenuItemFunctionPrintCardText, true);
-            
+            rewriteCardMenu = addMenuItem(menu, Language.s.changeCard, getContextMenuItemRewriteCard, true);
             removeCardMenu = addMenuItem(menu, Language.s.deleteCard, getContextMenuItemRemoveCharacter, true);
             
             view.contextMenu = menu;
@@ -803,7 +828,36 @@ package {
             return this.isText;
         }
         
-        private function getCardMessage(mainText:String, subText:String):String {
+        protected function getContextMenuItemFunctionPrintCardText(event:ContextMenuEvent):void {
+            var cardMessage:String = getCardMessage();
+            DodontoF_Main.getInstance().getChatWindow().addTextToChatMessageInput(cardMessage);
+        }
+        
+        private function getCardMessage():String {
+            var message:String = getLoadImageUrl();
+            
+            var text:String = getCardToolTips(message);
+            if( text != "" ) {
+                return getCardNameFromMessage(message) + "\n" + text;
+            }
+            
+            var mainText:String = getCardMainText(message);
+            var subText:String = getCardSubText(message);
+            
+            var cardMessage:String = getCardMessageByMainAndSub(mainText, subText);
+            
+            cardMessage = cardMessage.replace(/<br\/?>/ig, " ");
+            cardMessage = cardMessage.replace(/<.+?>/g, '');
+            cardMessage = cardMessage.replace(/&amp;/g, '&');
+            cardMessage = cardMessage.replace(/&lt;/g, '<');
+            cardMessage = cardMessage.replace(/&gt;/g, '>');
+            
+            cardMessage = cardMessage.replace(/\n/ig, "／");
+            
+            return cardMessage;
+        }
+        
+        private function getCardMessageByMainAndSub(mainText:String, subText:String):String {
             if( subText == "" ) {
                 if( this.isUpDown ) {
                     return ( mainText + "　：　" + (isUpSide() ? Language.s.upSideCard : Language.s.downSideCard) );
@@ -819,33 +873,15 @@ package {
             return subText + "\n" + mainText;
         }
         
-        protected function getContextMenuItemFunctionPrintCardText(event:ContextMenuEvent):void {
-            var cardMessage:String = getCardMessageForPrintChatMessage();
-            cardMessage = cardMessage.replace(/\n/ig, "／");
-            DodontoF_Main.getInstance().getChatWindow().addTextToChatMessageInput(cardMessage);
+        
+        
+        protected function getContextMenuItemRewriteCard(event:ContextMenuEvent):void {
+            var window:ChangeMessageCardWindow = DodontoF.popup(ChangeMessageCardWindow, true) as ChangeMessageCardWindow;
+            var point:Point = new Point(getX(), getY());
+            window.setCreatePoint(point);
+            window.setCard(this);
         }
         
-        protected function getCardMessageForPrintChatMessage():String {
-            var message:String = getLoadImageUrl();
-            
-            var text:String = getCardToolTips(message);
-            if( text != "" ) {
-                return getCardNameFromMessage(message) + "\n" + text;
-            }
-            
-            var mainText:String = getCardMainText(message);
-            var subText:String = getCardSubText(message);
-            
-            var cardMessage:String = getCardMessage(mainText, subText);
-            
-            cardMessage = cardMessage.replace(/<br\/?>/ig, " ");
-            cardMessage = cardMessage.replace(/<.+?>/g, '');
-            cardMessage = cardMessage.replace(/&amp;/g, '&');
-            cardMessage = cardMessage.replace(/&lt;/g, '<');
-            cardMessage = cardMessage.replace(/&gt;/g, '>');
-            
-            return cardMessage;
-        }
         
         override public function isGotoGraveyard():Boolean {
             return true;
@@ -879,7 +915,11 @@ package {
             loadViewImage();
             sender.changeCharacter( getJsonData() );
             
-            printCardLog(Language.s.openCardMessage, [this.getCardName()]);
+            if( mountName == "messageCard" ) {
+                printCardLog(Language.s.openCardMessage, [getCardMessage()]);
+            } else {
+                printCardLog(Language.s.openCardMessage, [getCardName()]);
+            }
         }
         
         public function getSelfOwnerId():String {
@@ -933,7 +973,7 @@ package {
             sender.changeCharacter( getJsonData() );
         }
         
-        public function reverseCardLocal(isBackPrint:Boolean):void {
+        public function reverseCardLocal(isBack_:Boolean):void {
             Log.logging("Card.reverse begin");
             
             if( ! isOwner() ) {
@@ -941,24 +981,22 @@ package {
                 return;
             }
             
+            this.isBack = isBack_;
+            
             var thisUserId:String = getSelfOwnerId();
             var thisUserName:String = ChatWindow.getInstance().getChatCharacterName();
             
-            if( isBackPrint ) {
+            if( this.isBack ) {
                 Log.logging("カードを伏せた場合は、所有者も初期化(未所有）となる。");
-                this.isOpen = false;
                 thisUserId = "";
                 thisUserName = "";
-            } else {
-                this.isOpen = false;
             }
             
-            this.isBack = isBackPrint;
+            this.isOpen = false;
             this.owner = thisUserId;
             this.ownerName = thisUserName;
             
-            if( ! isBackPrint ) {
-                //if( this.canDelete ) {
+            if( ! this.isBack ) {
                 if( this.mountName == "messageCard" ){
                     printCardLog( Language.s.openMessageCardMessage );
                 }

@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="600"
+   width="650"
    height="420"
    title="{Language.s.imageUploader}" 
    showCloseButton="true"
@@ -66,6 +66,7 @@
     
     override protected function setup():void {
         imageUploadSetInfo.imageTypeChanged();
+        imageUploadSetInfo.setUploadMode();
         
         if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
             printWarningAboutSamnailNotSupport();
@@ -236,7 +237,7 @@
                 var smallImageData:ByteArray = smallImages[imageFileName];
                 var tagInfo:Object = imageUploadSetInfo.getTagInfo();
                 
-                uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo,
+                uploadImageFileOne(imageFileName, imageData, smallImageData, tagInfo,
                                  uploadImageFileResult, ioErrorHandler);
             }
         } catch(error:Error) {
@@ -261,9 +262,9 @@
         return bytes;
     }
     
-    public static function uploadSmallImage(imageFileName:String, imageData:ByteArray, smallImageData:ByteArray, tagInfo:Object,
+    public static function uploadImageFileOne(imageFileName:String, imageData:ByteArray, smallImageData:ByteArray, tagInfo:Object,
                                             successResult:Function, errorResult:Function):void {
-        Log.logging("ImageUploadWindow.uploadSmallImage begin");
+        Log.logging("ImageUploadWindow.uploadImageFileOne begin");
         
         var params:Object = {"imageFileName": imageFileName,
                              "tagInfo": tagInfo,
@@ -273,10 +274,10 @@
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.uploadImageData(params, successResult, errorResult);
         } catch (e:Error) {
-            Log.loggingException("uploadSmallImage", e);
+            Log.loggingException("uploadImageFileOne", e);
         }
         
-        Log.logging("ImageUploadWindow.uploadSmallImage end");
+        Log.logging("ImageUploadWindow.uploadImageFileOne end");
     }
     
     private function ioErrorHandler(event:Event):void {

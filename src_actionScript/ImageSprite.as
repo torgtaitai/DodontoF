@@ -2,6 +2,7 @@
 
 package {
     
+	import flash.display.Bitmap;
     import mx.core.FlexLoader;
     import flash.ui.ContextMenu;
     import flash.display.DisplayObject;
@@ -52,6 +53,8 @@ package {
             
             this.base.addChild( image );
             this.base.addChild( upperLayer );
+            
+            this.image.smoothBitmapContent = true;
             
             //FlexEvent.UPDATE_COMPLETE
             image.addEventListener(Event.COMPLETE, completeHandler);
@@ -257,6 +260,7 @@ package {
         
         private function completeHandler(event:Event = null):void {
             zoomImage();
+            Utils.smoothingImage(image);
         }
         
         private function zoomImage():void {

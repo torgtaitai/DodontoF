@@ -304,9 +304,8 @@ package {
             Log.logging("jsonData.characters", jsonData.characters);
             Log.logging("jsonData.lastUpdateTimes", jsonData.lastUpdateTimes);
             
-            if( jsonData.roundTimeData &&
-                sender.checkLastUpdateTimes('time', jsonData.lastUpdateTimes) ) {
-                this.analyzeTime(jsonData.roundTimeData);
+            if( sender.checkLastUpdateTimes('time', jsonData.lastUpdateTimes) ) {
+                analyzeTime(jsonData);
             }
             
             if( jsonData.characters &&
@@ -815,12 +814,25 @@ package {
         }
 
 
-        private function analyzeTime(roundTimeData:Object):void {
+        private function analyzeTime(jsonData:Object):void {
+            if( jsonData.roundTimeData ) {
+                analyzeRoundTimeData(jsonData.roundTimeData);
+            }
+            if( jsonData.resource ) {
+                analyzeResource(jsonData.resource);
+            }
+        }
+        
+        private function analyzeRoundTimeData(roundTimeData:Object):void {
             this.roundTimer.setExistCharacters( map.getExistPieces() );
             this.roundTimer.setCounterNames(roundTimeData.counterNames);
             this.roundTimer.setTime(roundTimeData.round,
                                     roundTimeData.initiative);
             this.refreshInitiativeList();
+        }
+        
+        private function analyzeResource(resource:Object):void {
+            ResourceWindow.getInstance().setResourceList(resource as Array);
         }
         
         

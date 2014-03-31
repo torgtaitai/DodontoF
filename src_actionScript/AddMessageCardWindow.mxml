@@ -91,9 +91,14 @@
         previewCard.setOwnerName(Language.s.faceSide);
         previewCardBack.setOwnerName(Language.s.backSide);
         
+        initPreview();
+    }
+    
+    protected function initPreview():void {
         printPreview(imageNameSize.value, imageName.text, previewCard);
         printPreview(imageNameBackSize.value, imageNameBack.text, previewCardBack);
     }
+    
     
     /** 
      * メッセージカードのプレビューを指定した場所に作製して、
@@ -135,7 +140,7 @@
      * @fontSize カードのフォントサイズ
      * @text カードに表示する文字
      */
-    private function getHtml(fontSize:int, text:String):String {
+    protected function getHtml(fontSize:int, text:String):String {
         return "<font size='" + (fontSize * 4) + "'>" + text + "</font>";
     }
     
@@ -149,7 +154,7 @@
         DodontoF_Main.getInstance().getGuiInputSender().getSender()
         .addMessageCard(imageNameText, imageNameBackText, createPoint.x, createPoint.y);
         
-        PopUpManager.removePopUp(this);
+        closeAction();
     }
     
     ]]>

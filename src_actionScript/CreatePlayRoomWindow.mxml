@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="440"
+   width="500"
    height="220"
    title="{Language.s.createNewPlayRoom}"
    showCloseButton="true"

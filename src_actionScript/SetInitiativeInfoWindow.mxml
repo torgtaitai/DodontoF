@@ -25,12 +25,8 @@
     <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
     
     
-    <mx:Box width="100%" verticalGap="2" horizontalGap="2" >
-      <mx:HBox width="100%" height="100%">
-        <mx:Label text="{Language.s.initiativeWindowFontSize}" />
-        <mx:NumericStepper id="fontSize" maximum="999" minimum="1" value="11" />
-      </mx:HBox>
-      <mx:Label text="{Language.s.initiativeWindowFontSizeTips}" />
+    <mx:Box height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button label="{Language.s.changeFontSize}" click="DodontoF.changeFontSize()" />
     </mx:Box>
     
     
@@ -47,7 +43,6 @@
     
     public function init(initText:String):void {
         counterNames.text = initText;
-        fontSize.value = DodontoF_Main.getInstance().getInitiativeWindow().getFontSize();
     }
     
     override protected function setup():void {
@@ -60,7 +55,6 @@
             text.replace(/\s$/, '');
             var counters:Array = text.split(/\s/);
             DodontoF_Main.getInstance().getRoundTimer().sendCounterNames(counters);
-            DodontoF_Main.getInstance().getInitiativeWindow().setFontSize(fontSize.value);
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {

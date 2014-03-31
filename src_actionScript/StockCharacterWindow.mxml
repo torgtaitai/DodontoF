@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <torgtaitai:CommonPopupWindow -->
 <mx:TitleWindow 
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
@@ -23,9 +22,9 @@
       <mx:Image id="view" width="50" height="50" horizontalAlign="center" verticalAlign="middle" source="{characterImageUrl}"/>
     </mx:Box>
     
-    <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
-      <mx:CheckBox width="70" id="isMany" label="{Language.s.manyCreateCheck}" selected="false" click="setCharacterName()" />
-      <mx:HBox id="indexBox" height="25" width="100%" horizontalAlign="center" verticalAlign="middle" > <!--visible="{isMany.selected}"> -->
+    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:CheckBox width="50%" id="isMany" label="{Language.s.manyCreateCheck}" selected="false" click="setCharacterName()" />
+      <mx:HBox id="indexBox" width="50%" horizontalAlign="center" verticalAlign="middle" > <!--visible="{isMany.selected}"> -->
         <mx:Label text="{Language.s.menyNumber}" />
 	    <mx:TextInput id="index" width="25" text="1" change="setCharacterName()" />
       </mx:HBox>
@@ -56,6 +55,9 @@
     
     private function setup():void {
         Log.loggingTuning("=>setup() Begin");
+        
+        CommonPopupWindow.initWindowSizeByFont18Public(250, 200, this);
+        Resizer.addResize(this, new Point(100, 100));
         
         statusTextField.background = true;
         statusTextField.backgroundColor = 0xFFFFDD;
@@ -114,7 +116,7 @@
         view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                 view.stopDrag();
                 
-                var globalPoint:Point = localToGlobal( new Point(view.x + 75 , view.y + 75) );
+                var globalPoint:Point = viewBox.localToGlobal( new Point(view.x , view.y) );
                 var dropMapPoint:Point = DodontoF_Main.getInstance().getMap().getCharacterPointFromGlobalPoint(globalPoint);
                 
                 addCharacter(dropMapPoint.x, dropMapPoint.y);
@@ -160,5 +162,4 @@
     ]]>
   </mx:Script>
       
-<!-- </torgtaitai:CommonPopupWindow> -->
 </mx:TitleWindow>

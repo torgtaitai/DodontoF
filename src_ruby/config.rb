@@ -25,11 +25,6 @@ $aboutMaxLoginCount = 30
 #     $limitLoginCount = -1
 $limitLoginCount = 100
 
-#サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.43.06"
-$versionDate = "2014/02/05"
-$version = "#{$versionOnly}(#{$versionDate})"
-
 
 #サーバがデータの更新をサーバ内で定期チェックして待つ最大待機時間（秒）
 #再接続が連発する場合には数値を「減らして」下さい。 $refreshTimeout = 1 とかに。
@@ -287,6 +282,7 @@ $diceBotOrder = <<____END_MARKER____
 カオスフレア
 央華封神RPG第三版
 神我狩
+艦これRPG
 ガンドッグ
 ガンドッグ・ゼロ
 キルデスビジネス
@@ -294,6 +290,7 @@ $diceBotOrder = <<____END_MARKER____
 クトゥルフテック
 ゲイシャ・ガール・ウィズ・カタナ
 ゲヘナ・アナスタシス
+ゴリラTRPG
 サタスペ
 シノビガミ
 シャドウラン

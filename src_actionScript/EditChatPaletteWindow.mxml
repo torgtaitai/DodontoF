@@ -49,7 +49,10 @@
         + Language.s.howToUseChatPallet_6
         + Language.s.howToUseChatPallet_7
         + Language.s.howToUseChatPallet_8
-        + Language.s.howToUseChatPallet_9;
+        + Language.s.howToUseChatPallet_9
+        + Language.s.howToUseChatPallet_10
+        + Language.s.howToUseChatPallet_11
+        + Language.s.howToUseChatPallet_12;
         
         return message;
     }

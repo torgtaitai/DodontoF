@@ -388,6 +388,10 @@ package {
         }
         
         
+        public function initAfterLanguageSet():void {
+            map.initContextMenu();
+        }
+        
         
         public function login():void {
             if( isReplayEditMode() ) {
@@ -699,6 +703,7 @@ package {
             chatPalette.setVisibleState(v);
         }
         
+        
         private var counterRemocon:CounterRemocon;
         
         public function setButtonWindow(window:IFlexDisplayObject, eventName:String):void {
@@ -711,6 +716,21 @@ package {
         public function setCounterRemoconVisible(v:Boolean):void {
             counterRemocon.setVisibleState(v);
         }
+        
+        
+        private var resourceWindow:ResourceWindow;
+        
+        public function setResourceWindow(window:IFlexDisplayObject, eventName:String):void {
+            resourceWindow = window as ResourceWindow;
+            resourceWindow.setChangeVisibleEvent( function(visible:Boolean):void {
+                    dodontoF.changeMainMenuToggle(eventName, visible);
+                });
+        }
+        
+        public function setResourceWindowVisible(v:Boolean):void {
+            resourceWindow.setVisibleState(v);
+        }
+        
         
         private var diceBox:DiceBox;
         
@@ -1035,13 +1055,15 @@ package {
 
     {label:Language.s.displayMenu, data:"pass_display", enabled:"true",
      children: [
-        {label:Language.s.isChatPaletteVisibleMenu, data:"isChatPaletteVisible", type:"check", toggled:false},
-        {label:Language.s.isCounterRemoconVisibleMenu, data:"isCounterRemoconVisible", type:"check", toggled:false},
-        {type:"separator"},
-        
-        {label:Language.s.isChatVisibleMenu, data:"isChatVisible", type:"check", toggled:true},
-        {label:Language.s.isDiceVisibleMenu, data:"isDiceVisible", type:"check", toggled:true},
-        {label:Language.s.isInitiativeListVisibleMenu, data:"isInitiativeListVisible", type:"check", toggled:true},
+                {label:Language.s.displayWindowMenu, data:"pass_displayWindow", enabled:"true",
+                        children: [
+                                   {label:Language.s.isChatVisibleMenu, data:"isChatVisible", type:"check", toggled:true},
+                                   {label:Language.s.isDiceVisibleMenu, data:"isDiceVisible", type:"check", toggled:true},
+                                   {label:Language.s.isInitiativeListVisibleMenu, data:"isInitiativeListVisible", type:"check", toggled:true},
+                                   {type:"separator"},
+                                   {label:Language.s.isChatPaletteVisibleMenu, data:"isChatPaletteVisible", type:"check", toggled:false},
+                                   {label:Language.s.isCounterRemoconVisibleMenu, data:"isCounterRemoconVisible", type:"check", toggled:false},
+                                   {label:Language.s.isResourceWindowVisibleMenu, data:"isResourceWindowVisible", type:"check", toggled:false}]},
         {type:"separator"},
         
         {label:Language.s.isStandingGraphicVisibleMenu, data:"isStandingGraphicVisible", type:"check", toggled:true},
@@ -1054,6 +1076,9 @@ package {
         
         {label:Language.s.isSnapMovablePieceMenu, data:"isSnapMovablePiece", type:"check", toggled:true},
         {label:Language.s.isAdjustImageSizeMenu, data:"isAdjustImageSize", type:"check", toggled:Config.isAdjustImageSizeDefault()},
+        {type:"separator"},
+        
+        {label:Language.s.changeFontSize, data:"changeFontSize"},
         {type:"separator"},
         
         {label:Language.s.initWindowPositionMenu, data:"initWindowPosition"},

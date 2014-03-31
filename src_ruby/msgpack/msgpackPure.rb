@@ -1,5 +1,19 @@
 # coding: utf-8
 
+
+#他のMessagePackライブラリと同一に使えるようにするため
+#元ソース（https://github.com/nayutaya/msgpack-pure）に以下のmoduleを追加。
+
+module MessagePack
+  def self.pack(value)
+    MessagePackPure.pack(value)
+  end
+  def self.unpack(binary)
+    MessagePackPure.unpack(binary)
+  end
+end
+
+
 require "stringio"
 
 module MessagePackPure

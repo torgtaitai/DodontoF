@@ -26,7 +26,7 @@ package {
             p.yourName = "あなたのお名前（初回ログイン用）";
             p.createNewPlayRoom = "新規プレイルーム作成";
             p.deleteSelectedPlayRoom = "指定プレイルームを削除";
-            p.playRoomNo = "プレイルームNo.{0}";
+            p.playRoomNo = "プレイルームNo.";
             p.roomNo = "ルームNo.{0}";
             p.loginButton = "ログイン";
             p.extendButton = "＞＞拡張機能";
@@ -64,11 +64,13 @@ package {
             p.stopSessionRecordingMenu = "録画終了";
             p.logoutMenu = "ログアウト";
             p.displayMenu = "表示";
+            p.displayWindowMenu = "ウィンドウ";
             p.isChatPaletteVisibleMenu = "チャットパレット表示";
             p.isCounterRemoconVisibleMenu = "カウンターリモコン表示";
             p.isChatVisibleMenu = "チャット表示";
             p.isDiceVisibleMenu = "ダイス表示";
             p.isInitiativeListVisibleMenu = "イニシアティブ表示";
+            p.isResourceWindowVisibleMenu = "資源管理表示";
             p.isStandingGraphicVisibleMenu = "立ち絵表示";
             p.isCutInVisibleMenu = "カットイン表示";
             p.isPositionVisibleMenu = "座標表示";
@@ -118,6 +120,13 @@ package {
             p.replaySpeed = "早送り倍率";
             p.repeat = "繰り返し";
             p.logoutFromReplay = "戻る";
+            p.resourceWindowTitle = "資源管理";
+            p.resourceName = "名称";
+            p.resourceCount = "数";
+            p.resourceOther = "その他";
+            p.addResourceWindowTitle = "資源追加";
+            p.deleteResourceQuestionWindoTitle = "削除確認";
+            p.deleteResourceQuestion = "{0}\nを削除します。よろしいですか？";
             p.initiativeWindowTitle = "イニシアティブ表";
             p.initiativeWindowRoundFormat = "ラウンド：{0}／イニシアティブ：{1}";
             p.initiativeWindowBackButton = "戻る";
@@ -322,7 +331,7 @@ package {
             p.cutInPreview = "プレビュー(自分のみ)";
             p.cutInYoutubeUrlTips = "YoutubeのURL指定時には「ルーム」ボタンから「プレイルーム情報変更」で外部URLを使用可にしてください";
             p.cutInInputTitleWarning = "タイトルを入力してください";
-            p.cutInInputImageSourceWarning = "画像／動画ファイル名を入力してください\n";
+            p.cutInInputImageSourceWarning = "画像／動画ファイル名を入力してください";
             
             p.discardMessage = "{0}がカードを捨てました。";
             p.discardMessageWithCardName = "{0}が「{1}」を捨てました。";
@@ -330,7 +339,7 @@ package {
             p.changeCardOwnerMessage = "{0}が「{1}」のカードを受け取りました。";
             p.changeCardOwnerToAnyoneMessage = "{0}が「{1}」へカードを渡しました。";
             p.cardOwnerIsNotYouMessage = "カードの所持者ではないため操作できません。";
-            p.openMessageCardMessage = "{0}がメッセージカードを開きました。";
+            p.openMessageCardMessage = "{0}がカードを開きました。";
             p.drawCardAndOpenMessage = "{0}が「{1}」の山札からカードを引いて公開しました。「{2}」";
             p.drawCardAndOpenMessageSeparactor = "」「";
             p.drawCardMessage = "{0}が「{1}」の山札からカードを引きました。";
@@ -389,6 +398,7 @@ package {
             p.closeCard = "カードを伏せる（非公開）";
             p.changeCardOwnerToMe = "カードを自分の管理へ";
             p.writeCardTextToChat = "カードテキストをチャットに引用";
+            p.changeCard = "カード変更";
             p.deleteCard = "カード削除";
             p.upSideCard = "正位置";
             p.downSideCard = "逆位置";
@@ -418,11 +428,13 @@ package {
             p.selectTrushCardInfo = "捨て札のカードは以下の通り。抜き取りたいカードをドラッグしてカード置き場にドロップしてください。";
             // AddMessageCardWindow.mxml
             p.addMessageCardWindow = "メッセージカード追加画面";
+            p.changeMessageCardWindow = "メッセージカード変更画面";
             p.cardBack = "背面:";
             p.toAnonymous = "ななしさん へ";
             p.message = "メッセージ:";
             p.sampleMessage = "サンプルメッセージ";
             p.addMessageCard = "メッセージカードの追加";
+            p.changeMessageCard = "メッセージカードの変更";
             p.faceSide = "表面";
             p.backSide = "裏面";
             // CardPickUpWindow.mxml
@@ -827,7 +839,10 @@ package {
             p.howToUseChatPallet_6 = "と書いておくと、｛予約語｝という記述で文字と値の差し替えが出来ます。\n";
             p.howToUseChatPallet_7 = "キャラクターの能力値やスキルの管理に便利かと思います。\n";
             p.howToUseChatPallet_8 = "予約語の宣言は文中どこでも構いません（他のタブには影響しません）。\n";
-            p.howToUseChatPallet_9 = " // や = や {} といった記号や数値は全角・半角どちらでもOKです。";
+            p.howToUseChatPallet_9 = " // や = や {} といった記号や数値は全角・半角どちらでもOKです。\n";
+            p.howToUseChatPallet_10 = "｛予約語｝にはイニシアティブ表のカウンター値を指定することもできます。\n";
+            p.howToUseChatPallet_11 = "その場合、チャットパレットの「名前」を元に参照するキャラクターが決まります。\n";
+            p.howToUseChatPallet_12 = "「名前」が空の場合はチャットウィンドウの「名前」を参照します。";
             
             
             // ImageManageWindow.mxml
@@ -847,6 +862,10 @@ package {
             p.inputPassword = "パスワード入力";
             p.passworded = "パスワードあり";
             p.nopassword = "パスワードなし";
+            p.uploadPrivate = "専用";
+            p.uploadPublic = "全体";
+            p.uploadPrivateToolTips = "アップロードした画像はこの部屋でのみ参照できるようになります";
+            p.uploadPublicToolTips = "アップロードした画像は全ての部屋で参照できるようになります";
             // ImageUploadWindow.mxml
             p.imageUploader = "画像／動画アップローダ";
             p.selectUploadTargetImage = "アップロード対象画像選択";
@@ -1031,8 +1050,9 @@ package {
             p.inputerCounterNamesInfo_2 = "　　　例）　HP　MP　AC　侵食率　ポシビリティ　*毒　＊転倒";
             p.inputerCounterNamesInfo_3 = "(注)この設定は同一プレイルームの全員に影響します。";
             p.counterNamelist = "カウンター名一覧:";
-            p.initiativeWindowFontSize = "イニシアティブ表フォントサイズ:";
-            p.initiativeWindowFontSizeTips = "(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。";
+            //p.initiativeWindowFontSize = "イニシアティブ表フォントサイズ:";
+            //p.initiativeWindowFontSizeTips = "(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。";
+            
             // TagManagerWindow.mxml
             p.tagManagerWindowTitle = "画像タグ名管理";
             p.saveTagManagedSetting = "変更内容を保存";
@@ -1053,7 +1073,21 @@ package {
             p.captureImageUploading = "転送中・・・";
             p.captureImageUploadResult = "転送結果：";
             p.captureImageUploadResultFailed = "失敗";
-
+            p.youNeedInstallMsgPack = "MsgPackがインストールされていません。サーバで\ngem install msgpack\nを実行して必要なライブラリを追加してください。";
+            
+            p.MotionEffectToolTip = "立ち絵に揺れなどのエフェクトをかけられます";
+            p.MotionEffectNone = "エフェクト無し";
+            p.MotionEffectZoom = "拡大・縮小";
+            p.MotionEffectShake = "車両";
+            p.MotionEffectWalk = "歩行";
+            p.cutinSortMoveable = "並べ替え許可";
+            p.cutinSortMoveableTip = "リストをドラッグして順番を入れ替え可能になります";
+            
+            p.lineHeight = "行間の高さ";
+            p.fontSize = "フォントサイズ";
+            p.changeFontSize = "フォントサイズ変更";
+            p.changeFontSizeText = "どどんとふ全体のフォントサイズを変更します";
+            p.default = "デフォルト";
             
             japaneseDefault = p;
             languageTable[""] = japaneseDefault;
@@ -1063,7 +1097,7 @@ package {
             var text:String = Language.s[key];
             if( text == null ) {
                 Log.loggingError("Language.s." + text + "is NOT exist!!!!!!!!!");
-                return "UNKNOWN";
+                return key;
             }
             
             var result:String = StringUtil.substitute(text,
@@ -1086,9 +1120,9 @@ package {
                 languageTable[name] = info;
             }
             
-            checkJapanese();
         }
         
+        /*
         static private function checkJapanese():void {
             var japanese:Object = languageTable[""];
             if( japanese == null ) {
@@ -1098,21 +1132,22 @@ package {
             
             for(var key:String in japaneseDefault) {
                 if( japaneseDefault[key] != japanese[key] ) {
-                    Log.logging("\rkey : " + key
-                                + "\r"+ japaneseDefault[key]
-                                + "\r" + japanese[key])
+                    Log.loggingTest("\rkey : " + key
+                                     + "\r"+ japaneseDefault[key]
+                                     + "\r" + japanese[key])
                 }
             }
         }
+         */
         
         
         //言語設定用。日本語なら"Japanese"、英語なら"English"
         static private var language:String = "";
         
         //言語設定
-        static public function setLanguage(lang:String):void {
+        static public function setLanguage(lang:String):String {
             if( lang == null ) {
-                return;
+                return "";
             }
             
             var beforeLang:String = language;
@@ -1123,31 +1158,41 @@ package {
             
             s = languageTable[language];
             
-            checkDiff(beforeLang, language, beforeKeys);
+            var result:String = checkDiff(beforeLang, language, beforeKeys);
             
             DodontoF_Main.getInstance().getDodontoF().initMenu();
+            
+            return result;
         }
         
         static public var diceBotLangPrefix:String = "DiceBotName_";
         
         static private function checkDiff(beforeLang:String, afterLang:String,
-                                   beforeKeys:Array):void {
+                                   beforeKeys:Array):String {
             
             if( ! isInitialized ) {
                 isInitialized = true;
-                return;
+                return "";
             }
             
             var afterKeys:Array = Utils.getKeys(s, diceBotLangPrefix);
             
             var diffString:String = Utils.getHashDiff(beforeKeys, afterKeys);
             if( diffString == "" ) {
-                return;
+                return "";
             }
             
-            var message:String = StringUtil.substitute("Language data has different,\rbefore:{0}\rafter:{1}\r{2}",
-                                                       beforeLang, language, diffString);
-            Alert.show(message);
+            
+            
+            var message:String = "Server directory \"language\" files has problem.please change thoase files\r\r";
+            
+            if( beforeLang != "" || language != "" ) {
+                message += StringUtil.substitute("Language data has different,\rbefore:{0}\rafter:{1}\r\r",
+                                                 beforeLang, language);
+            }
+            
+            message += diffString;
+            return message;
         }
         
         //言語取得

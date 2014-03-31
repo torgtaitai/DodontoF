@@ -2,18 +2,19 @@
 
 package {
     
-    import mx.controls.Alert;
+	import flash.display.Bitmap;
     import flash.display.Loader;
     import flash.display.LoaderInfo;
     import flash.display.Sprite;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.events.TimerEvent;
     import flash.net.URLRequest;
+    import flash.utils.Timer;
+    import mx.controls.Alert;
     import mx.controls.Image;
     import mx.core.UIComponent;
-    import flash.utils.Timer;
-    import flash.events.TimerEvent;
-    
+    import mx.effects.Effect;
     
     public class StandingGraphics {
         
@@ -43,34 +44,36 @@ package {
         }
         
         public function add(info:Object):void {
-            var name:String = info.name;
-            var state:String = info.state;
-            var source:String = info.source;
-            var mirrored:Boolean = info.mirrored;
-            var leftIndex:int = info.leftIndex;
-            if( leftIndex == 0 ) {
-                leftIndex = 1;
-            }
             
-            if( findTargetSource(name, state) != null ) {
-                Log.loggingError( Language.text("standingGraphicDuplicateError", name, state) );
+            info = copyInfoAjusted(info);
+            
+            if( findTargetSource(info.name, info.state) != null ) {
+                Log.loggingError( Language.text("standingGraphicDuplicateError",
+                                                info.name, info.state) );
                 return;
             }
             
-            var target:Object = {
-                "name" : name,
-                "state" : state,
-                "source" : source,
-                "mirrored": mirrored,
-                "leftIndex" : leftIndex
-            };
+            standingGraphicInfosOriginal.push(info);
+        }
+        
+        private function copyInfoAjusted(infoOriginal:Object):Object {
             
-            standingGraphicInfosOriginal.push(target);
+            var info:Object = Utils.clone(infoOriginal);
+            info.leftIndex = getLeftIndex(info.leftIndex);
+            return info;
+        }
+        
+        private function getLeftIndex(leftIndex:int):int {
+            if( leftIndex == 0 ) {
+                leftIndex = 1;
+            }
+            return leftIndex
         }
         
         public function isDisplayStateOn():Boolean {
             return displayState;
         }
+        
         
         public function setDisplayState(b:Boolean):void {
             displayState = b;
@@ -81,6 +84,20 @@ package {
             
             clearAllExistImages();
         }
+        
+        public function clearAllExistImages():void {
+            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
+                var imageInfo:Object = this.imageInfos[i] as Object;
+                if( imageInfo == null ) {
+                    continue;
+                }
+                
+                var component:UIComponent = imageInfo.component as UIComponent;
+                var leftIndex:int = i;
+                removeImageComponent(component, leftIndex);
+            }
+        }
+        
         
         
         private function pushStandingGraphicInfosFromCharacters(infos:Array):void {
@@ -179,9 +196,9 @@ package {
         }
         
         private function findTargetInfo(name:String,
-                                       state:String,
-                                       chatMessage:String = "",
-                                       pushCharacterInfoFinction:Function = null):Object {
+                                        state:String,
+                                        chatMessage:String = "",
+                                        pushCharacterInfoFinction:Function = null):Object {
             Log.logging("Standinggraphicinfos.findTargetInfo Begin");
             Log.logging("name", name);
             Log.logging("state", state);
@@ -250,83 +267,6 @@ package {
             return false;
         }
         
-        public function shiftAllImagesYPosition(diff:int):void {
-            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
-                var imageInfo:Object = this.imageInfos[i] as Object;
-                if( imageInfo == null ) {
-                    continue;
-                }
-                
-                var component:UIComponent = imageInfo.component as UIComponent;
-                component.y = diff;
-            }
-        }
-        
-        public function clearAllExistImages():void {
-            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
-                var imageInfo:Object = this.imageInfos[i] as Object;
-                if( imageInfo == null ) {
-                    continue;
-                }
-                
-                var component:UIComponent = imageInfo.component as UIComponent;
-                var leftIndex:int = i;
-                removeImageComponent(component, leftIndex);
-                this.imageInfos[leftIndex] = null;
-            }
-        }
-        
-        public function clearExistImages(name:String, leftIndex:int = -1):void {
-            Log.logging("clearExistImages name", name);
-            Log.logging("clearExistImages leftIndex", leftIndex);
-            
-            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
-                var imageInfo:Object = this.imageInfos[i] as Object;
-                if( imageInfo == null ) {
-                    continue;
-                }
-                
-                var component:UIComponent = imageInfo.component as UIComponent;
-                var imageName:String = imageInfo.name as String;
-                Log.logging("imageName", imageName);
-                Log.logging("imageInfos loop index i", i);
-                
-                if( isDeleteImage(i, leftIndex, imageName, name) ) {
-                    Log.logging("削除");
-                    removeImageComponent(component, i);
-                    this.imageInfos[i] = null;
-                    continue;
-                }
-                
-                Log.logging("半透明化");
-                component.alpha = noTargetImageAplha;
-            }
-            
-            Log.logging("clearExistImages End");
-        }
-        
-        private function isDeleteImage(index:int, leftIndex:int, 
-                                       imageName:String, name:String):Boolean {
-            if( imageName == name ) {
-                return true;
-            }
-            
-            if( leftIndex == index ) {
-                return true;
-            }
-            
-            return false;
-        }
-        
-        private function removeImageComponent(component:UIComponent, leftIndex:int):void {
-            try {
-                var dodontoFComp:UIComponent = DodontoF_Main.getInstance().getStandingGraphicLayer();
-                dodontoFComp.removeChild( component );
-            } catch(e:Error) {
-                //Log.loggingException("StandingGraphicInfos:clear", e);
-            }
-        }
-        
         static public function getTypeStatic():String {
             return "standingGraphicInfos";
         }
@@ -367,23 +307,16 @@ package {
                 return result;
             }
             
-            result.chatMessage = findResult.chatMessage
+            result.chatMessage = findResult.chatMessage;
             
-            var leftIndex:int = findResult.info.leftIndex;
-            if( leftIndex == 0 ) {
-                Log.logging("leftIndex == 0, result", result);
-                leftIndex = 1;
-            }
+            var info:Object = copyInfoAjusted( findResult.info );
             
             if( ! effectable ) {
                 Log.logging("StandingGraphics.print End, effectable == false, result", result);
                 return result;
             }
             
-            var source:String = findResult.info.source;
-            source = Config.getInstance().getUrlString(source);
-            
-            var mirrored:Boolean = findResult.info.mirrored;
+            info.source = Config.getInstance().getUrlString(info.source);
             
             Log.logging("findTargetInfo 2nd calling...");
             var speakImageResult:Object = findTargetInfo(name, state + speakMarker, chatMessage);
@@ -396,7 +329,7 @@ package {
             
             adjustmentPosition(chatWindowX, chatWindowY, chatWindowWidth);
             
-            printImage(leftIndex, filterImageInfos, name, source, mirrored);
+            printImage(filterImageInfos, info);
             
             Log.logging("StandingGraphics.print End, result", result);
             return result;
@@ -416,18 +349,19 @@ package {
         }
         
         
-        private function printImage(leftIndex:int, filterImageInfos:Array, name:String,
-                                    source:String, mirrored:Boolean):void {
+        private function printImage(filterImageInfos:Array, 
+                                    info:Object):void {
             Log.logging("printImage begin"); 
             
-            var imageCompleteHandlerFunction:Function = getImageCompleteHandler(leftIndex, filterImageInfos, name, source, mirrored);
+            var imageCompleteHandlerFunction:Function
+                = getImageCompleteHandler(filterImageInfos, info);
             
-            var existEvent:Event = imageLoaderEventHash[source] as Event;
-            Log.logging("imageLoaderEventHash source", source); 
+            var existEvent:Event = imageLoaderEventHash[info.source] as Event;
+            Log.logging("imageLoaderEventHash info.source", info.source); 
             
             if( existEvent == null ) {
                 Log.logging("existEvent is null, so loadImage called."); 
-                loadImage(source, imageCompleteHandlerFunction);
+                loadImage(info.source, imageCompleteHandlerFunction);
             } else {
                 Log.logging("existEvent is NOT null, get image from Hash DB"); 
                 imageCompleteHandlerFunction(existEvent);
@@ -446,31 +380,33 @@ package {
             imageLoader.load(new URLRequest(source));
         }
         
-        private function getImageCompleteHandler(leftIndex:int, filterImageInfos:Array,
-                                                 name:String, source:String, mirrored:Boolean):Function {
+        private function getImageCompleteHandler(filterImageInfos:Array,
+                                                 info:Object):Function {
             return function(event:Event):void {
-                imageCompleteHandler(event, leftIndex, filterImageInfos, name, source, mirrored);
+                imageCompleteHandler(event, filterImageInfos, info);
             };
         }
         
         private var imageWidthRate:Number = 1;//0.4;
         
-        private function imageCompleteHandler(event:Event, leftIndex:int, filterImageInfos:Array,
-                                              name:String, source:String, mirrored:Boolean):void {
+        private function imageCompleteHandler(event:Event, filterImageInfos:Array,
+                                              info:Object):void {
             
-            Log.loggingTuning("imageCompleteHandler begin name", name);
+            Log.loggingTuning("imageCompleteHandler begin info.name", info.name);
             
-            saveEventHash(event, source);
+            saveEventHash(event, info.source);
             
             var image:Loader = event.target.loader;
-            adjustmentImagePosition(image, leftIndex, mirrored);
-            addImage(leftIndex, image, filterImageInfos, name, mirrored);
+            adjustmentImagePosition(image, info);
+            addImage(image, filterImageInfos, info);
+            
+            Utils.smoothingLoader( image );
             
             Log.logging("imageCompleteHandler end");
         }
         
         
-        private function adjustmentImagePosition(image:Loader, leftIndex:int, mirrored:Boolean):void {
+        private function adjustmentImagePosition(image:Loader, info:Object):void {
             var imageHeigthMinimum:int = 200;
             var imageSizeInfo:Object = Utils.getSizeInfo(image, 0, 0, imageHeigthMinimum);
             
@@ -493,17 +429,33 @@ package {
                 }
             }
             
-            
+            var leftIndex:int = getLeftIndex(info.leftIndex);
             var leftIndexRate:Number = ((leftIndex - 1) / 12);
             var leftPadding:Number = ((baseWidth - image.width) * leftIndexRate);
+            
             image.x = baseX + leftPadding;
             image.y = baseY - image.height;
             
-            if( mirrored ) {
-                image.scaleX = -1;
+            if( info.mirrored ) {
                 image.x += image.width;
+                image.scaleX *= -1;
             }
         }
+        
+        
+        private function setImageSizeFromHeigth(height:int, image:Loader):void {
+            var rate:Number = (height / image.height);
+            image.width = image.width * rate;
+            image.height = height;
+        }
+        
+        private function setImageSizeFromWidth(width:int, image:Loader):void {
+            var rate:Number = (width / image.width);
+            image.width = width;
+            image.height = image.height * rate;
+        }
+        
+        
         
         private function saveEventHash(event:Event, source:String):void {
             Log.logging("saveEventHash begin"); 
@@ -514,45 +466,149 @@ package {
             Log.logging("saveEventHash end"); 
         }
         
-        private function addImage(leftIndex:int, imageLoader:Loader, filterImageInfos:Array, name:String, mirrored:Boolean):void {
+        
+        private function addImage(imageLoader:Loader,
+                                  filterImageInfos:Array,
+                                  info:Object):void {
+            
             var component:UIComponent = new UIComponent();
             component.addChild(imageLoader);
             
-            var dodontoFComp:UIComponent = DodontoF_Main.getInstance().getStandingGraphicLayer();
-            dodontoFComp.addChild(component);
-            
-            clearExistImages(name, leftIndex);
-            
-            this.imageInfos[leftIndex] = {"component" : component,
-                                          "name" : name};
+            clearExistImages(info.name, info.leftIndex);
+            addImageComponent(component, imageLoader, info);
             
             component.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-                    dodontoFComp.removeChild(component);
+                    removeImageComponent(component, info.leftIndex);
                 });
             
             Log.logging("filterImageInfos", filterImageInfos);
             
             for(var i:int = 0 ; i < filterImageInfos.length ; i++) {
-                var filterImageInfo:Object = filterImageInfos[i];
-                var imageName:String = filterImageInfo.image;
-                var message:String = filterImageInfo.message;
-                loadImage(imageName, getImageCompFundlerForFilter(imageLoader, component, message, mirrored));
+                var info:Object = filterImageInfos[i];
+                var imageName:String = info.image;
+                var message:String = info.message;
+                loadImage(imageName, getImageCompFundlerForFilter(imageLoader, component, message, info));
             }
         }
         
+        public function clearExistImages(name:String, leftIndex:int = -1):void {
+            
+            for(var i:int = 0 ; i < this.imageInfos.length ; i++) {
+                var imageInfo:Object = this.imageInfos[i] as Object;
+                if( imageInfo == null ) {
+                    continue;
+                }
+                
+                var component:UIComponent = imageInfo.component as UIComponent;
+                var imageName:String = imageInfo.name as String;
+                
+                if( isDeleteImage(i, leftIndex, imageName, name) ) {
+                    Log.logging("削除");
+                    removeImageComponent(component, leftIndex);
+                    continue;
+                }
+                
+                Log.logging("半透明化");
+                component.alpha = noTargetImageAplha;
+            }
+        }
+        
+        private function isDeleteImage(index:int, leftIndex:int, 
+                                       imageName:String, name:String):Boolean {
+            if( imageName == name ) {
+                return true;
+            }
+            
+            if( leftIndex == index ) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        private function removeImageComponent(component:UIComponent, leftIndex:int):void {
+            try {
+                getLayer().removeChild( component );
+                stopEffect(leftIndex);
+                this.imageInfos[leftIndex] = null;
+                
+            } catch(e:Error) {
+                //Log.loggingException("StandingGraphicInfos:clear", e);
+            }
+        }
+        
+        private function stopEffect(leftIndex:int):void {
+            
+            var info:Object = this.imageInfos[leftIndex];
+            
+            if( info == null || info.effect == null) {
+                return;
+            }
+            
+            try {
+                info.effct.stop();
+            } catch(e:Error) {
+                //エフェクト強制STOP処理でエラーになる＝すでに停止していると考えて特に対処無し。
+                //Log.loggingException("stopEffect error", e);
+            }
+        }
+        
+        
+        private function addImageComponent(component:UIComponent,
+                                           imageLoader:Loader, info:Object):void {
+
+            var leftIndex:int = info.leftIndex;
+            
+            getLayer().addChild(component);
+            this.imageInfos[leftIndex] = {"component" : component,
+                                          "imageLoader" : imageLoader,
+                                          "name" : info.name,
+                                          "motion" : info.motion,
+                                          "effect" : null };
+            addPlayNewEffect(info);
+        }
+        
+        private function addPlayNewEffect(info:Object):void {
+            
+            var leftIndex:int = info.leftIndex;
+            stopEffect(leftIndex);
+            
+            var info:Object = this.imageInfos[leftIndex];
+            if( info == null ) {
+                return;
+            }
+            
+            var height:int = info.imageLoader.height;
+            var width:int = info.imageLoader.width;
+            
+            var effect:Effect = new MotionEffect().
+                getMotionEffect(info.component, height, width, info.motion);
+            
+            if( effect == null ) {
+                return;
+            }
+            
+            effect.play();
+            info.effect = effect;
+        }
+        
+        
+        private function getLayer():UIComponent {
+            return DodontoF_Main.getInstance().getStandingGraphicLayer();
+        }
+        
+        
         private function getImageCompFundlerForFilter(baseLoader:Loader, component:UIComponent,
-                                                      message:String, mirrored:Boolean):Function {
+                                                      message:String, info:Object):Function {
             return function(event:Event):void {
                 var loader:Loader = event.target.loader;
                 loader.x = baseLoader.x;
                 loader.y = baseLoader.y;
                 var imageSizeInfo:Object = Utils.getSizeInfo(loader, 0, 0, baseLoader.height);
                 
-                imageSizeInfo.width;
-                
                 loader.width = (imageSizeInfo.width / imageSizeInfo.height) * baseLoader.height;
                 loader.height = baseLoader.height;
-                if( mirrored ) {
+                if( info.mirrored ) {
                     loader.scaleX = -1;
                 }
                 
@@ -610,17 +666,6 @@ package {
             loader.visible = isSpeak;
         }
         
-        private function setImageSizeFromHeigth(height:int,
-                                                image:Loader):void {
-            var rate:Number = (height / image.height);
-            image.width = image.width * rate;
-            image.height = height;
-        }
-        private function setImageSizeFromWidth(width:int,
-                                               image:Loader):void {
-            var rate:Number = (width / image.width);
-            image.width = width;
-            image.height = image.height * rate;
-        }
+
     }
 }

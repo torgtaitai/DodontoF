@@ -24,7 +24,8 @@
         <mx:TextInput id="source" width="100%" text="" change="printPreview()" />
       </mx:FormItem>
       <mx:FormItem label="{Language.s.standingGraphicPosition}：">
-          <mx:HSlider id="leftIndex"
+        <mx:HBox width="100%" height="100%" >
+          <mx:HSlider id="leftIndexSlider"
                       width="150"
                       liveDragging="true"
                       showTrackHighlight="false"
@@ -33,6 +34,10 @@
                       value="1"
                       snapInterval="1"
                       />
+          <mx:ComboBox id="motionComboBox" dataProvider="{MotionEffect.motionInfos}"
+                       change="changeMotion()"
+                       toolTip="{Language.s.MotionEffectToolTip}" />
+        </mx:HBox>
       </mx:FormItem>
     </mx:Form>
   </mx:Box>
@@ -48,6 +53,8 @@
     import mx.managers.PopUpManager;
     import mx.controls.Image;
     import mx.controls.Alert;
+    import mx.effects.Effect;
+    
     
     /** 
      * 立ち絵追加画面
@@ -160,9 +167,9 @@
             "state": state.text,
             "source": sourceText,
             "mirrored": imageSelecter.isMirrored(),
-            "leftIndex": leftIndex.value
+            "leftIndex": leftIndexSlider.value,
+            "motion": motionComboBox.selectedItem.data
         };
-    
         addIdToPrams(params);
     
         return params;
@@ -173,6 +180,36 @@
      * 追加画面なのでここでは処理無し。
      */
     protected function addIdToPrams(params:Object):void {
+    }
+    
+    
+    private var effect:Effect = null;
+    
+    private function changeMotion():void {
+        
+        if( effect != null ) {
+            effect.stop();
+            resetPreviewPosition();
+        }
+        
+        effect = new MotionEffect().
+            getMotionEffect(previewImage, 
+                            previewImage.height, previewImage.width,
+                            motionComboBox.selectedItem.data);
+        
+        if( effect == null ) {
+            resetPreviewPosition();
+            return;
+        }
+        
+        effect.play();
+    }
+    
+    private function resetPreviewPosition():void {
+        previewImage.scaleX = 1.0;
+        previewImage.scaleY = 1.0;
+        previewImage.x = 0;
+        previewImage.y = 0;
     }
     
     

@@ -42,13 +42,17 @@ package {
         }
         
         public static function loggingException(methodName:String, error:Error):void {
-            Log.loggingError("error in " + methodName, error.message);
-            Log.loggingError("exception : " + error);
-            Log.loggingError("stackTrace : " + error.getStackTrace());
+            Log.loggingError("error methodName", methodName);
+            Log.loggingError("errorID", error.errorID);
+            Log.loggingError("error name ", error.name);
+            Log.loggingError("error message", error.message);
+            Log.loggingError("exception", "" + error);
+            Log.loggingError("stackTrace", "" + error.getStackTrace());
         }
         
         public static function loggingExceptionDebug(methodName:String, error:Error):void {
-            Log.logging("error in " + methodName, error.message);
+            Log.logging("error methodName", methodName);
+            Log.logging("error ", error.message);
             Log.logging("exception", "" + error);
             Log.logging("stackTrace", error.getStackTrace());
         }

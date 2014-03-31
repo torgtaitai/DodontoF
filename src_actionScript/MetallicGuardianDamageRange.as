@@ -335,7 +335,7 @@ package {
             this.upperLayer.rotation = params.rotation;
         }
         
-        public function updateRefresh():void {
+        override public function updateRefresh():void {
             initDraw(getX(), getY());
         }
    }

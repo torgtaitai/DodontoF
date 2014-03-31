@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="270"
-   height="180"
+   width="400"
+   height="230"
    title="{Language.s.saveChatLog}" 
    showCloseButton="true"
    >
@@ -19,17 +19,40 @@
       
 	  <mx:RadioButton groupName="textTypeGroup"
                       id="textFormat"
-                    label="{Language.s.saveChatLogForText}"
+                      label="{Language.s.saveChatLogForText}"
                       />
-      </mx:HBox>
+    </mx:HBox>
+    
+    <mx:HBox enabled="{htmlFormat.selected}">
+      <mx:Label text="{Language.s.fontSize}" />
+      <torgtaitai:SuggestComboBox id="fontSize" >
+        <mx:Object label="{Language.s.default}"  data="default"/>
+        <mx:Object label="10" />
+        <mx:Object label="12" />
+        <mx:Object label="14" />
+      </torgtaitai:SuggestComboBox>
+      
+      <mx:Label text="{Language.s.lineHeight}" />
+      <torgtaitai:SuggestComboBox id="lineHeight" >
+        <mx:Object label="{Language.s.default}" data="default"/>
+        <mx:Object label="100" />
+        <mx:Object label="120" />
+        <mx:Object label="140" />
+        <mx:Object label="160" />
+      </torgtaitai:SuggestComboBox>
+      
+      <mx:Label text="％" />
+    </mx:HBox>
+    
+    <mx:HRule width="100%" height="20" strokeWidth="1" shadowColor="black" strokeColor="black" />
+    
     <mx:Tile id="saveButtonBox" 
              height="100%" width="100%"
              horizontalAlign="center" verticalAlign="middle"
              >
     </mx:Tile>
     
-    <mx:Spacer width="20" />
-  <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.cancelButton}" click="closeAction()" />
   
   </mx:Box>
   
@@ -39,17 +62,21 @@
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.utils.StringUtil;
+    import mx.controls.Button;
+    import flash.text.TextFormat;
+    import mx.controls.Alert;
     
     private var chatWindow:ChatWindow;
-    
-    /*
-    override protected function setup():void {
-    }
-    */
+    private var fontSaveKeyName:String = "SaveChatLogWindow";
     
     public function init(chatWindow_:ChatWindow):void {
         this.chatWindow = chatWindow_;
-        
+        initChannels();
+        initLoad();
+    }
+    
+    
+    private function initChannels():void {
         var channelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
         for(var i:int = 0 ; i < channelNames.length ; i++) {
             var button:Button = new Button();
@@ -60,13 +87,215 @@
         }
     }
     
-    public function getSaveChannelFunction(channel:int):Function {
+    private function getSaveChannelFunction(channel:int):Function {
         var thisObject:CommonPopupWindow = this;
         
         return function saveChannel():void {
-            chatWindow.saveTargetChannelChatLogHtml(channel, htmlFormat.selected);
-            PopUpManager.removePopUp(thisObject);
+            saveTargetChannelChatLogHtml(channel, htmlFormat.selected,
+                                         getComboBoxValue(fontSize),
+                                         getComboBoxValue(lineHeight));
+            saveFontSize();
         }
+    }
+    
+    private function getComboBoxValue(combobox:SuggestComboBox):int {
+        
+        var target:Object = combobox.selectedItem;
+        if( target == null || target.data == "default" ) {
+            return -1;
+        }
+        
+        var value:int = parseInt( combobox.text );
+        
+        return value;
+    }
+    
+    
+    private function saveFontSize():void {
+        
+        var info:Object = {
+            fontSize: fontSize.text,
+            lineHeight: lineHeight.text,
+            format: getSelectedFormat() };
+        
+        var isGlobal:Boolean = true;
+        
+        Config.getInstance().saveInfo(fontSaveKeyName, info, isGlobal);
+    }
+    
+    private function getSelectedFormat():String {
+        if( textFormat.selected ) {
+            return "text";
+        }
+        return "html";
+    }
+
+    
+    private function initLoad():void {
+        var isGlobal:Boolean = true;
+        var info:Object = Config.getInstance().loadInfo(fontSaveKeyName, isGlobal);
+        if( info == null ) {
+            return;
+        }
+        
+        var fontSizeString:String = info.fontSize;
+        var lineHeightString:String = info.lineHeight;
+        
+        Utils.selectSuggestComboBox(fontSize, fontSizeString, "label", fontSizeString);
+        Utils.selectSuggestComboBox(lineHeight, lineHeightString, "label", lineHeightString);
+        
+        if( info.format == "text" ) {
+            textFormat.selected = true;
+            htmlFormat.selected = false;
+        }
+    }
+    
+    public function saveTargetChannelChatLogHtml(channel:int, isHtmlFormat:Boolean,
+                                                 fontSize:int, lineHeight:int):void {
+        var chatLogList:Array = chatWindow.getChatChannle(channel).getAllChatLogList();
+        
+        var changedChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
+        var channelName:String = changedChannelNames[channel];
+        
+        saveChatLogByChatLogList(chatLogList, isHtmlFormat, channelName,
+                                 fontSize, lineHeight);
+    }
+    
+    static public function saveChatLogByChatLogList(chatLogList:Array,
+                                                    isHtmlFormat:Boolean, channelName:String,
+                                                    fontSize:int = -1,
+                                                    lineHeight:int = -1):void  {
+        
+        var chatLogText:String = getChatLogTextByChatLogList(chatLogList, isHtmlFormat);
+        
+        if( isHtmlFormat ) {
+            saveChatLogHtml(chatLogText, channelName, fontSize, lineHeight);
+        } else {
+            saveChatLogText(chatLogText);
+        }
+    }
+    
+    
+    static private function getChatLogTextByChatLogList(chatLogList:Array,
+                                                       isHtmlFormat:Boolean):String {
+        var enterText:String = Utils.getEnterText();
+        
+        if( isHtmlFormat ) {
+            enterText = "<br>" + enterText;
+        }
+        
+        var chatText:String = "";
+        
+        for(var i:int = 0 ; i < chatLogList.length ; i++) {
+            var text:String = chatLogList[i];
+            
+            if( ! isHtmlFormat ) {
+                text = Utils.htmlToText(text);
+            }
+            
+            text = text.replace(/\n/g, "\r");
+            text = text.replace(/\r/g, enterText) + enterText;
+            
+            chatText += text;
+        }
+        
+        return chatText;
+    }
+    
+    
+    static public function saveChatLogHtml(logText:String,
+                                           channelName:String,
+                                           fontSize:int, lineHeight:int):void {
+        
+        if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
+            Alert.show(Language.s.needFlashPlayerOverVer10ErrorMessage);
+        }
+        
+        var title:String = Language.s.chatLog;
+        if( channelName != "" ) {
+            title += "：" + channelName;
+        }
+        
+        var enterText:String = Utils.getEnterText();
+        
+        var list:Array = addSaveHtmlToList(fontSize, lineHeight, logText, title);
+        var html:String = list.join(enterText);
+        
+        saveChatLogHtmlFromString(html);
+    }
+    
+    static private function addSaveHtmlToList(fontSize:int, lineHeight:int,
+                                              logText:String, title:String):Array {
+        var list:Array = [];
+        
+        list.push( "<?xml version='1.0' encoding='UTF-8'?>" );
+        list.push( "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>" );
+        list.push( "<html xmlns='http://www.w3.org/1999/xhtml' lang='ja'>" );
+        list.push( "  <head>" );
+        list.push( "    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />" );
+        list.push( "    <title>" + title + "</title>" );
+        
+        addCssToList(list, fontSize, lineHeight);
+        
+        list.push( "  </head>" );
+        list.push( "  <body>" );
+        list.push( logText );
+        list.push( "  </body>" );
+        list.push( "</html>" );
+        
+        return list;
+    }
+    
+    static private function addCssToList(list:Array, fontSize:int, lineHeight:int):void {
+        
+        if( fontSize == -1 && lineHeight == -1 ) {
+            return;
+        }
+        
+        list.push( "    <style type='text/css'>" );
+        list.push( "<!-- " );
+        list.push( "body{ " );
+        
+        if( fontSize != -1 ) {
+            list.push( "font-size: " + fontSize + "px; " );
+        }
+        if( lineHeight != -1 ) {
+            list.push( "line-height: " + lineHeight + "%; } " );
+        }
+        
+        list.push( "//--> " );
+        list.push( "    </style>" );
+    }
+    
+    
+    static public function saveChatLogText(chatLogText:String):void {
+        saveChatLogHtmlFromString(chatLogText, "txt");
+    }
+    
+    static private function saveChatLogHtmlFromString(chatLogHtml:String, ext:String = "html"):void {
+        var fileReferenceForDownload:FileReference = new FileReference();
+        
+        var dateString:String = DodontoF_Main.getDateString();
+        var saveFileName:String = "chatLog_" + dateString + "." + ext;
+        fileReferenceForDownload.save(chatLogHtml, saveFileName);
+    }
+    
+    
+    public function requestSaveChatLogResult(event:Event):void {
+        Log.loggingTuning("=>requestSaveChatLogResult(event:Event) Begin");
+        
+        try {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
+            var chatLogFileName:String = jsonData.chatLogFileName;
+            Log.logging("chatLogFileName", chatLogFileName);
+            
+            var request:URLRequest = new URLRequest(chatLogFileName);
+            navigateToURL(request);
+        } catch(e:Error) {
+            Log.loggingException("requestSaveChatLogResult()", e);
+        }
+        
+        Log.loggingTuning("=>requestSaveChatLogResult(event:Event) End");
     }
     
     

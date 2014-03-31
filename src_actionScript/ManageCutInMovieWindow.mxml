@@ -13,13 +13,17 @@
       <mx:HBox width="100%">
         <mx:Button label="{Language.s.sendButton}" click="sendCutIn()" />
         <mx:Spacer width="100%" />
+        <mx:CheckBox id="listDraggable"  selected="false"
+                     label="{Language.s.cutinSortMoveable}"
+                     toolTip="{Language.s.cutinSortMoveableTip}"/>
+        <mx:Spacer width="100%" />
         <mx:Button label="{Language.s.previewButton}" click="previewCutIn()" />
       </mx:HBox>
       
 	  <mx:DataGrid id="cutInInfosList"
-                   dragEnabled="true"
-                   dropEnabled="true"
-                   dragMoveEnabled="true"
+                   dragEnabled="{listDraggable.selected}"
+                   dropEnabled="{listDraggable.selected}"
+                   dragMoveEnabled="{listDraggable.selected}"
                    dragComplete="dragComplete(event)"
                    width="100%"
                    height="100%"
@@ -28,6 +32,7 @@
 		           draggableColumns="false"
                    doubleClickEnabled="true"
                    doubleClick="sendCutIn()"
+                   allowMultipleSelection="true"
                    >
 	    <mx:columns>
           <mx:DataGridColumn headerText="{Language.s.executeCutInWhenChatTailMatched}"

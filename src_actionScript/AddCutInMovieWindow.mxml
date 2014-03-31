@@ -56,7 +56,7 @@
         </mx:FormItem>
         
 	    <mx:FormItem label="{Language.s.cutInPosition}:" >
-          <mx:ComboBox id="positionCoboBox"  fontWeight="normal" editable="false"
+          <mx:ComboBox id="positionComboBox"  fontWeight="normal" editable="false"
                        selectedIndex="3"
                        toolTip="{Language.s.cutInPositionTips}">
             <mx:Object label="{Language.s.cutInPositionLeftUp}"   data="up,left"  />
@@ -230,7 +230,7 @@
         var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
         var soundSource:String = soundSourceEdit.text;
         var isSoundLoop:Boolean = isSoundLoopCheck.selected;
-        var position:String = positionCoboBox.selectedItem.data;
+        var position:String = positionComboBox.selectedItem.data;
         
         var params:Object = {
             "message": message.text,

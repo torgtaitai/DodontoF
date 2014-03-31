@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.43.06(2014/02/05)";
+        private var version:String = "Ver.1.43.18(2014/03/31)";
         
         public function getVersion():String {
             return version;
@@ -31,8 +31,15 @@ package {
             return playRoomNumber;
         }
         
-        private function getSaveData():SharedObject {
-            return SharedObject.getLocal(saveDataKey + "_" + getPlayRoomNumber());
+        private function getSaveData(isGlobal:Boolean):SharedObject {
+            
+            var key:String = saveDataKey;
+            
+            if( ! isGlobal ) {
+                key +=  "_" + getPlayRoomNumber();
+            }
+            
+            return SharedObject.getLocal(key);
         }
         
         
@@ -145,54 +152,84 @@ package {
             return getUrlString("image/film.png");
         }
         
-        public function saveInfo(key:String, info:Object):void {
-            var saveData:SharedObject = getSaveData();
+        
+        private var fontSizeSaveKey:String = "fontSize";
+        public function saveFontInfo():void {
+            var info:Object = {"size": fontSize};
+            var isGlobal:Boolean = true;
+            saveInfo(fontSizeSaveKey, info, isGlobal);
+        }
+        
+        public function loadFontInfo():void {
+            var isGlobal:Boolean = true;
+            var info:Object = loadInfo(fontSizeSaveKey, isGlobal);
+            if( info == null || info.size == null ) {
+                return;
+            }
+            
+            if( fontSize == info.size ) {
+                return;
+            }
+            
+            fontSize = info.size;
+        }
+        
+        public function saveInfo(key:String, info:Object, isGlobal:Boolean = false):void {
+            var saveData:SharedObject = getSaveData(isGlobal);
             saveData.data[key] = info
             saveData.flush();
         }
         
         private var tinyModePrefix:String = "tinyMode:";
         
-        public function loadInfo(key:String):Object {
+        public function loadInfo(key:String, isGlobal:Boolean = false):Object {
             
             //リプレイモードでは常にデフォルト構成に
             if( DodontoF_Main.getInstance().isReplayMode() ) {
                 return null;
             }
             
-            var saveData:SharedObject = getSaveData();
+            var saveData:SharedObject = getSaveData(isGlobal);
             var info:Object = saveData.data[key];
             return info;
         }
         
         public function setToDefaultInfo():void {
-            var saveData:SharedObject = getSaveData();
+            var saveData:SharedObject = getSaveData(false);
+            saveData.clear();
+            saveData.flush();
+            
+            saveData = getSaveData(true);
             saveData.clear();
             saveData.flush();
         }
         
+        
         private var saveInfoKeyNameForViewState:String = "ViewState";
         
-        public function setViewStateKey(key:String):void {
+        /*
+         * サーバのセーブデータの方が新しくて書き換えが行われる場合には戻り値は true
+         */
+        public function checkViewStateKey(key:String):Boolean {
             if( key == null ) {
-                return;
+                return false;
             }
             
-            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
-            Log.logging("info", info);
+            var info:Object = loadInfo( saveInfoKeyNameForViewState );
+            
             if( info != null ) {
                 if( info.key == key ) {
-                    return;
+                    Log.logging("セーブデータのキー（書き込み時間）は同一。ってことは以前部屋設定してから変えていない。そのためサーバの設定は反映せずにスルー。");
+                    return false;
                 }
             }
             
-            //キーが今までと異なるなら、コレまでの表示状態は破棄
+            Log.logging("セーブデータのキー（書き込み時間）が今までと異なるなら、これまでの表示状態は破棄");
             var newInfo:Object = new Object();
-            saveInfo(getSaveInfoKeyNameForViewState(), newInfo);
-        }
-        
-        public function getSaveInfoKeyNameForViewState():String {
-            return saveInfoKeyNameForViewState;
+            newInfo.key = key;
+            saveInfo(saveInfoKeyNameForViewState, newInfo);
+            
+            return true;
         }
         
         
@@ -208,7 +245,7 @@ package {
         
         
         public function loadInfoForResiableWindow(key:String):Object {
-            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            var info:Object = loadInfo( saveInfoKeyNameForViewState );
             if( info == null ) {
                 info = new Object();
             }
@@ -223,14 +260,13 @@ package {
             
             Log.logging("serverInfo", serverInfo);
             var key:String = serverInfo.key;
-            Log.logging("loadViewStateInfo key", key);
-            setViewStateKey(key);
             
-            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            var isUseServer:Boolean = checkViewStateKey(key);
+            
+            var info:Object = loadInfo( saveInfoKeyNameForViewState );
             if( info == null ) {
                 info = new Object();
             }
-            Log.logging("local info", info);
             
             loadToggleState( serverInfo, info, "isSnapMovablePiece",
                              function(v:Boolean):void {isSnapMovablePiece = v} );
@@ -245,14 +281,16 @@ package {
             loadToggleState( serverInfo, info, "isGridVisible",
                              getDodontoFM().getMap().setVisibleGridLayer );
             
-            loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isButtonBoxVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isChatVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
-            loadToggleStateForRisizableWindow(serverInfo, "isCardHandleLogVisible");
-
+            if( isUseServer ) {
+                loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isButtonBoxVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isChatVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isCardHandleLogVisible");
+            }
+            
             Log.logging("loadViewStateInfo info", info);
             
             saveViewStateInfo();
@@ -283,8 +321,6 @@ package {
             var fullKey:String =  getMenuSateSaveKey(key);
             var toggleStateObj:Object = info[fullKey];
             
-            Log.logging("local value", toggleStateObj);
-            
             if( toggleStateObj == null ) {
                 toggleStateObj = serverInfo[key];
                 Log.logging("server value", toggleStateObj);
@@ -314,11 +350,12 @@ package {
         }
         
         private function saveMainManuStateToInfo(info:Object, key:String):void {
-            info[ getMenuSateSaveKey(key) ] = getDodontoF().getMainMenuToggle(key);
+            var fullKey:String =  getMenuSateSaveKey(key);
+            info[ fullKey ] = getDodontoF().getMainMenuToggle(key);
         }
         
         public function saveViewStateInfo():void {
-            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            var info:Object = loadInfo( saveInfoKeyNameForViewState );
             if( info == null ) {
                 info = new Object();
             }
@@ -330,18 +367,16 @@ package {
             saveMainManuStateToInfo(info, "isPositionVisible");
             saveMainManuStateToInfo(info, "isGridVisible");
             
-            Log.logging("saveViewStateInfo info", info);
-            
-            saveInfo(getSaveInfoKeyNameForViewState(), info);
+            saveInfo(saveInfoKeyNameForViewState, info);
         }
         
         public function saveInfoForResiableWindow(key:String, value:Object):void {
-            var info:Object = loadInfo( getSaveInfoKeyNameForViewState() );
+            var info:Object = loadInfo( saveInfoKeyNameForViewState );
             if( info == null ) {
                 info = new Object();
             }
             info[key] = value;
-            saveInfo(getSaveInfoKeyNameForViewState(), info);
+            saveInfo(saveInfoKeyNameForViewState, info);
         }
         
         
@@ -450,5 +485,18 @@ package {
             return DodontoF_Main.getInstance().getGuiInputSender().getSender().getReciever()
                 .isInitialRefresh();
         }
+        
+        public static function setFontSize(size:int):void {
+            fontSize = size;
+            
+            buttonFontSize = fontSize + 5;
+        }
+        
+        [Bindable]
+        static public var fontSize:int = 10;
+        
+        [Bindable]
+        static public var buttonFontSize:int = 15;
+        
     }
 }

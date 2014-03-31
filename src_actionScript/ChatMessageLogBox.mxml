@@ -35,6 +35,10 @@
             this.channel = channel_;
         }
         
+        public function getChannel():int {
+            return this.channel;
+        }
+        
         public function init(novelticMode:NovelticMode):void {
             defaultLabel = this.label;
             printLabelCount();

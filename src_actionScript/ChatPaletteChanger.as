@@ -2,27 +2,34 @@
 
 package {
     
+    import mx.controls.TextInput;
+    
     public class ChatPaletteChanger {
         
         private var buffer:Array = new Array();
         private var definitions:Object = new Object();
+        private var characterName:TextInput = null;
         
         public function setTexts(array:Array):void {
             buffer = array;
         }
         
-        public function getText(index:int):String {
+        public function getText(index:int, name:TextInput):String {
+            characterName = name;
             var line:String = buffer[index];
-            return getTextFromText(line);
+            
+            var definitionsFull:Object = addCounterNamesToDefinition(definitions);
+            
+            return getTextFromText(line, definitionsFull);
         }
         
-        public function getTextFromText(line:String):String {
+        public function getTextFromText(line:String, definitionsFull:Object):String {
             if( line == null ) {
                 return "";
             }
             
-            for (var key:String in definitions) {
-                var value:String = definitions[key];
+            for (var key:String in definitionsFull) {
+                var value:String = definitionsFull[key];
                 
                 var pattern:String = "{" + key + "}";
                 line = getChangedLine(line, pattern, value);
@@ -68,16 +75,20 @@ package {
         private function analizeBuffer(lines:Array):void {
             definitions = new Object();
             
-            for each(var line:String in lines) {
-                analizeDefinition(line);
-            }
+            analizeDefinition(lines);
             
             Log.logging("definitions", definitions);
         }
         
         static private var definitionRegExp:RegExp = /^(\/\/|／／)(.+?)\s*(=|＝)\s*(.+?)\s*$/m;
         
-        private function analizeDefinition(line:String):void {
+        private function analizeDefinition(lines:Array):void {
+            for each(var line:String in lines) {
+                analizeDefinitionByLine(line);
+            }
+        }
+        
+        private function analizeDefinitionByLine(line:String):void {
             var result:Object = definitionRegExp.exec(line);
             if( result == null ) {
                 return;
@@ -88,11 +99,40 @@ package {
             definitions[key] = value;
         }
         
+        private function addCounterNamesToDefinition(hash:Object):Object {
+            var result:Object = Utils.clone(hash);
+            
+            var character:Character = getCharacterFromNameText();
+            if( character == null ) {
+                return result;
+            }
+
+            var counterNames:Array = DodontoF_Main.getInstance().getInitiativeWindow().getCounterNameList();
+            
+            for each(var counterName:String in counterNames) {
+                var count:int = character.getCounter(counterName);
+                result[counterName] = "" + count;
+            }
+            
+            return result
+        }
+        
+        private function getCharacterFromNameText():Character {
+            var name:String = characterName.text;
+            if( name == "" ) {
+                name = ChatWindow.getInstance().getChatCharacterName()
+            }
+            
+            var character:Character = DodontoF_Main.getInstance().getMap().findCharacterByName(name);
+            return character;
+        }
+        
+        
         private function getChangedTexts(lines:Array):Array {
             var newLines:Array = new Array();
             
             for each(var line:String in lines) {
-                newLines.push( getTextFromText(line) );
+                newLines.push( getTextFromText(line, definitions) );
             }
             
             return newLines;

@@ -149,8 +149,7 @@
         inputList.percentHeight = 100;
         
         inputList.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-                //input.text = inputList.selectedItem as String;
-                input.text = changer.getText( inputList.selectedIndex );
+                input.text = changer.getText( inputList.selectedIndex, name );
             });
         
         inputList.doubleClickEnabled = true;

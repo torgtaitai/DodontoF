@@ -324,46 +324,6 @@
            tagNameChanged();
        }
        
-       private function createImage(imageUrl:String):Image {
-           if( staticImageHash[imageUrl] != null ) {
-               return staticImageHash[imageUrl];
-           }
-           
-           var image:Image = createImageAndCash(imageUrl);
-           staticImageHash[imageUrl] = image;
-           
-           return image;
-       }
-       
-       static public function createImageAndCash(imageUrl:String):Image {
-           var image:Image = new Image();
-           
-           image.setStyle("horizontalAlign", "center");
-           image.setStyle("verticalAlign", "middle");
-           image.setStyle("paddingLeft", 0);
-           image.setStyle("paddingRight", 0);
-           image.height = 50;
-           image.width = 50;
-           image.source = Config.getInstance().getUrlString(imageUrl);
-           
-           return image;
-       }
-       
-       static public function createImageBox(image:Image):Box {
-           var imageBox:Box = new Box();
-           
-           imageBox.setStyle("backgroundColor", nonselectedColor);
-           imageBox.setStyle("horizontalAlign", "center");
-           imageBox.setStyle("verticalAlign", "middle");
-           imageBox.setStyle("paddingLeft", 0);
-           imageBox.setStyle("paddingRight", 0);
-           imageBox.width = 60;
-           imageBox.height = 60;
-           
-           imageBox.addChild(image);
-           
-           return imageBox;
-       }
        
        private function addNewImageInfo(imageUrl:String):void {
            var imageInfo:Object = findImageInfo(imageUrl);
@@ -391,6 +351,48 @@
            imageInfos.push( imageInfo );
        }
        
+       private function createImage(imageUrl:String):Image {
+           if( staticImageHash[imageUrl] != null ) {
+               return staticImageHash[imageUrl];
+           }
+           
+           var image:Image = createEmptyImage();
+           staticImageHash[imageUrl] = image;
+           
+           return image;
+       }
+       
+       static public function createEmptyImage():Image {
+           var image:Image = new Image();
+           
+           image.setStyle("horizontalAlign", "center");
+           image.setStyle("verticalAlign", "middle");
+           image.setStyle("paddingLeft", 0);
+           image.setStyle("paddingRight", 0);
+           image.height = 50;
+           image.width = 50;
+           
+           return image;
+       }
+       
+       
+       static public function createImageBox(image:Image):Box {
+           var imageBox:Box = new Box();
+           
+           imageBox.setStyle("backgroundColor", nonselectedColor);
+           imageBox.setStyle("horizontalAlign", "center");
+           imageBox.setStyle("verticalAlign", "middle");
+           imageBox.setStyle("paddingLeft", 0);
+           imageBox.setStyle("paddingRight", 0);
+           imageBox.width = 60;
+           imageBox.height = 60;
+           
+           imageBox.addChild(image);
+           
+           return imageBox;
+       }
+       
+       
        public function requestImageListResult(imageList:Array, imageDir:String):void {
            Log.logging("characterImageList", imageList);
            
@@ -408,12 +410,17 @@
                imageUrl = Config.getInstance().getUrlString(imageUrl);
                Log.logging("ImageSelecter.imageUrl", imageUrl);
                
-               addNewImageInfo(imageUrl);
+               if( ImageTag.isTargetRoom(imageUrl, tagInfos) ) {
+                   addNewImageInfo(imageUrl);
+               }
                
                imageLoaded(null);
            }
+           
+           tagNameChanged();
            Log.loggingTuning("=>requestImageListResult End");
        }
+       
        
        private function findImageInfo(targetImageUrl:String):Object {
            for(var i:int = 0 ; i < imageInfos.length ; i++) {
@@ -535,10 +542,12 @@
            
            var displayIndex:int = 0;
            var targetImageType:String = tagName.text;
+           
            for(var i:int = 0 ; i < imageInfos.length ; i++) {
                var imageInfo:Object = imageInfos[i];
                displayIndex = addImageBoxOnSelectSpaceIfTagMatched(targetImageType, imageInfo, displayIndex);
            }
+           
            allDisplayedCount = displayIndex;
            printIndex(0);
        }
@@ -577,7 +586,7 @@
            return ( tag == ImageTag.getAllTag() );
        }
        
-       public function getImageVisible(imageUrl:String, targetImageType:String):Boolean {
+       private function getImageVisible(imageUrl:String, targetImageType:String):Boolean {
            Log.logging("getImageVisible imageUrl", imageUrl);
            Log.logging("getImageVisible targetImageType", targetImageType);
            

@@ -40,7 +40,7 @@ package {
                 isTail.selected = cutInInfo.isTail;
             }
             
-            Utils.selectComboBox(positionCoboBox, cutInInfo.position, 'data', 3);
+            Utils.selectComboBox(positionComboBox, cutInInfo.position, 'data', 3);
             
             checkImageUrl(imageSource.text);
         }

@@ -20,7 +20,10 @@ package {
             source.text = info.source;
             imageSelecter.setMirrored(info.mirrored);
             
-            leftIndex.value = ((parseInt(info.leftIndex) == 0) ? 1 : parseInt(info.leftIndex));
+            var leftIndex:int = parseInt(info.leftIndex);
+            leftIndexSlider.value = ((leftIndex == 0) ? 1 : leftIndex);
+            
+            Utils.selectComboBox(motionComboBox, info.motion);
         }
         
         protected override function isLoadInitImageList():Boolean {

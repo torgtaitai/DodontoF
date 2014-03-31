@@ -9,19 +9,19 @@
   >
   
   <mx:HBox id="roundBaseBox"
-          width="100%" height="15"
+          width="100%" height="{Config.fontSize + 5}"
           horizontalAlign="center"
           verticalGap="1"
           >
-    <mx:Button id="prevButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowBackButton}" click="previous()" />
-    <mx:Button id="nextButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowNextButton}" click="next()" />
+    <mx:Button id="prevButton" height="{Config.fontSize + 5}" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowBackButton}" click="previous()" />
+    <mx:Button id="nextButton" height="{Config.fontSize + 5}" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowNextButton}" click="next()" />
     
     <mx:Spacer width="100%" />
     
-    <mx:Button id="resetButton" height="15" width="60" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowInitButton}" click="reset()" />
+    <mx:Button id="resetButton" height="{Config.fontSize + 5}" width="60" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowInitButton}" click="reset()" />
       
     <mx:Spacer width="5" />
-    <mx:Button id="setConfigButton" height="15" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowConfigButton}" click="setConfig()" />
+    <mx:Button id="setConfigButton" height="{Config.fontSize + 5}" width="40" paddingLeft="2" paddingRight="2" label="{Language.s.initiativeWindowConfigButton}" click="setConfig()" />
     
   </mx:HBox>
   
@@ -1123,13 +1123,13 @@
 	</mx:columns>
   </mx:DataGrid>
   
-  <mx:HBox width="100%" height="15"
+  <mx:HBox width="100%" height="{Config.fontSize + 5}"
           horizontalAlign="center"
           verticalGap="1"
           >
-    <mx:Button id="editButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.editButton}" click="editListCharacter()" />
+    <mx:Button id="editButton" height="{Config.fontSize + 5}" paddingLeft="2" paddingRight="2" label="{Language.s.editButton}" click="editListCharacter()" />
     <mx:Spacer width="5" />
-    <mx:Button id="deleteButton" height="15" paddingLeft="2" paddingRight="2" label="{Language.s.deleteButton}" click="removeListCharacter()" />
+    <mx:Button id="deleteButton" height="{Config.fontSize + 5}" paddingLeft="2" paddingRight="2" label="{Language.s.deleteButton}" click="removeListCharacter()" />
   </mx:HBox>
     
   <mx:Script>
@@ -1185,7 +1185,7 @@
               defaultColors = initiativeInfoListView.getStyle("alternatingItemColors");
           }
           
-          initiativeInfoListView.addEventListener(DataGridEvent.COLUMN_STRETCH,changeColumnWidth);
+          initiativeInfoListView.addEventListener(DataGridEvent.COLUMN_STRETCH, changeColumnWidth);
           
           initCheckBoxColumnHeaderStyles();
       }
@@ -1272,6 +1272,10 @@
           }
           
           return checkBoxInfos;
+      }
+      
+      public function getCounterNameList():Array {
+          return Utils.clone( getCounterNames() );
       }
       
       private function getCounterNames():Array {
@@ -1477,7 +1481,7 @@
           
           this.clear(getRoundTimer().getCurrentRound(),
                      getRoundTimer().getCurrentInitiative());
-          
+
           this.initColumns();
           
           var colors:Array = new Array();
@@ -1501,19 +1505,13 @@
           
           initiativeInfoListView.setStyle("alternatingItemColors", colors);
           initiativeInfoListView.validateNow();
-          setDebeteButtonState();
+          setDeleteButtonState();
           
           Log.loggingTuning("InitiativeWindow.refresh End");
       }
       
       public function setFontSize(size:int):void {
-          initiativeInfoListView.setStyle("fontSize", size);
           savePosition();
-      }
-      
-      public function getFontSize():int {
-          var font:int = initiativeInfoListView.getStyle("fontSize");
-          return font;
       }
       
       private function getCurrentTargetMarker(piece:InitiativedPiece, isCurrent:Boolean):String {
@@ -1528,7 +1526,7 @@
           return "●";
       }
       
-      public function addCharacter(piece:InitiativedPiece, isCurrent:Boolean):void {
+      private function addCharacter(piece:InitiativedPiece, isCurrent:Boolean):void {
           Log.logging("addCharacter begin");
           
           var counterNames:Array = getCounterNames();
@@ -1625,10 +1623,10 @@
           }
           
           piece.pickup();
-          setDebeteButtonState();
+          setDeleteButtonState();
       }
       
-      private function setDebeteButtonState():void {
+      private function setDeleteButtonState():void {
           var piece:InitiativedPiece = getSelectedInitiativedPiece();
           var magicTimer:MagicTimer = piece as MagicTimer;
           deleteButton.enabled = (magicTimer != null);
@@ -1652,7 +1650,6 @@
           var info:Object = super.getWindowInfoSaveData(this);
           
           info.columnInfos = getColumnInfosFromSaveData();
-          info.fontSize = getFontSize();
           
           return info;
       }
@@ -1730,11 +1727,6 @@
       private function loadOthers(info:Object):void {
           columnInfos = info.columnInfos;
           Log.logging("loadOthers info.columnInfos", info.columnInfos);
-          
-          if( info.fontSize != null ) {
-              setFontSize( info.fontSize );
-          }
-          
       }
       
       override public function setInitPositionDefault():void {

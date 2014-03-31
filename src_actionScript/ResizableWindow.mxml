@@ -9,6 +9,7 @@
    borderThicknessBottom="0"
    close="closeEvent()"
    creationComplete="onThis_creationComplete();"
+   fontSize="{Config.fontSize}"
    >
   <mx:Script>
     <![CDATA[

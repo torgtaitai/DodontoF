@@ -1236,7 +1236,14 @@ package {
             MovablePiece.addMenuItem(menu, Language.s.addCardZoneMenu, addCardZone, true);
             MovablePiece.addMenuItem(menu, Language.s.addMessageCardMenu, addMessageCard);
             
+            MovablePiece.addMenuItem(menu, Language.s.initWindowPositionMenu, initWindowPosition, true);
+            
             overMapLayer.contextMenu = menu;
+        }
+        
+        
+        private function initWindowPosition(event:ContextMenuEvent):void {
+                DodontoF_Main.getInstance().initWindowPosition();
         }
         
         private function addCardZone(event:ContextMenuEvent):void {

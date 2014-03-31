@@ -5,6 +5,7 @@
    pageTitle="{Language.s.title}"
    applicationComplete="setup()"
    layout="absolute"
+   fontSize="{Config.fontSize}"
    >
   
   <mx:ApplicationControlBar 
@@ -218,9 +219,9 @@
         
         start();
         
-        Utils.setSkin(this);
-        
         setLogMode();
+        Utils.setSkin(this);
+        Config.getInstance().loadFontInfo();
     }
     
     private function setLogMode():void {
@@ -280,6 +281,7 @@
         dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
         dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
         dodontoF_Main.setButtonWindow( popup(CounterRemocon, false), "isCounterRemoconVisible" );
+        dodontoF_Main.setResourceWindow( popup(ResourceWindow, false), "isResourceWindowVisible" );
         
     }
     
@@ -336,6 +338,8 @@
             dodontoF_Main.setChatPaletteVisible( toggled );
         } else if( menuName == "isCounterRemoconVisible" ) {
             dodontoF_Main.setCounterRemoconVisible( toggled );
+        } else if( menuName == "isResourceWindowVisible" ) {
+            dodontoF_Main.setResourceWindowVisible( toggled );
         } else if( menuName == "isInitiativeListVisible" ) {
             InitiativeWindow.getInstance().setVisibleState( toggled );
         } else if( menuName == "isStandingGraphicVisible" ) {
@@ -362,6 +366,8 @@
         } else if( menuName == "isAdjustImageSize" ) {
             var isAdjustStandingGraphics:Boolean = toggled;
             Config.getInstance().setAdjustImageSizeMode(isAdjustStandingGraphics);
+        } else if( menuName == "changeFontSize" ) {
+            changeFontSize();
         } else if( menuName == "addCharacter" ) {
             var addCharacterWindow:AddCharacterWindow = popup(AddCharacterWindow, true) as AddCharacterWindow;
         } else if( menuName == "addMagicRange" ) {
@@ -791,6 +797,9 @@
         Utils.saveCaptureImage( this );
     }
     
+    static public function changeFontSize():void {
+           var window:ChangeAllFontWindow = DodontoF.popup(ChangeAllFontWindow, true) as ChangeAllFontWindow;
+    }
     
     ]]>
   </mx:Script>

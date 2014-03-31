@@ -15,12 +15,34 @@
     import mx.collections.ArrayCollection;
     
     [Bindable]
-    static public var headerColorsArray:Array = [0x00CC66, 0x00CC66];//[0x0099CC, 0x0099CC]
+    private var headerColorsArray:Array = [0x00CC66, 0x00CC66];
     
     import mx.managers.PopUpManager;
 
     protected function setup():void {
     }
+    
+    
+    private var isInit:Boolean = true;
+    
+    protected function initWindowSizeByFont18(width18:int, height18:int):void {
+        initWindowSizeByFont18Public(width18, height18, this);
+    }
+    
+    static public function initWindowSizeByFont18Public(width18:int, height18:int,
+                                                        window:TitleWindow):void {
+        var width10:int = window.width;
+        var height10:int = window.height;
+        
+        var widthRate:Number = (width18 - width10) / 8;
+        var heightRate:Number = (height18 - height10) / 8;
+        
+        var sizeDiff:int = Config.fontSize - 10;
+        
+        window.width = width10 + (sizeDiff * widthRate);
+        window.height = height10 + (sizeDiff * heightRate);
+    }
+    
     
     protected function isCentering():Boolean {
         return true;

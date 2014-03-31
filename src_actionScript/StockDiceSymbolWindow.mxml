@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- <torgtaitai:CommonPopupWindow -->
 <mx:TitleWindow 
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
@@ -15,7 +14,7 @@
    >
   
   <mx:HBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Box id="ctrlBox" height="100%" width="170" >
+    <mx:Box id="ctrlBox" height="100%" width="100%" >
       <mx:Form height="100%" width="100%">
 	    <mx:FormItem label="{Language.s.diceSymbomNumber}">
           <mx:NumericStepper id="number" minimum="1" maximum="100" value="1" change="changeView()" />
@@ -40,7 +39,7 @@
       </mx:Form>
     </mx:Box>
     
-    <mx:Box  width="60" height="80" >
+    <mx:Box id="viewBox" width="60" height="100%" >
       <mx:Image id="view" width="50" height="50" source=""/>
       <mx:ComboBox id="colorNameList" width="55" fontWeight="normal" editable="false" change="changeView()" >
         <mx:ArrayCollection>
@@ -62,6 +61,9 @@
     
     private function setup():void {
         Log.loggingTuning("=>setup() Begin");
+        
+        CommonPopupWindow.initWindowSizeByFont18Public(370, 200, this);
+        Resizer.addResize(this, new Point(100, 100));
         
         statusTextField.background = true;
         statusTextField.backgroundColor = 0xFFFFDD;
@@ -113,7 +115,7 @@
         view.addEventListener(MouseEvent.MOUSE_UP, function(event:MouseEvent):void {
                 view.stopDrag();
         
-                var globalPoint:Point = localToGlobal( new Point(view.x + ctrlBox.width + 25, view.y + 25 + 25) );
+                var globalPoint:Point = viewBox.localToGlobal( new Point(view.x, view.y) );
                 var dropMapPoint:Point = DodontoF_Main.getInstance().getMap().getCharacterPointFromGlobalPoint(globalPoint);
                 
                 addDice(dropMapPoint);
@@ -150,5 +152,4 @@
     ]]>
   </mx:Script>
       
-<!-- </torgtaitai:CommonPopupWindow> -->
 </mx:TitleWindow>

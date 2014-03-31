@@ -29,8 +29,8 @@
                        >
       </mx:TabNavigator>
       
-      <mx:Box id="chatControlBox" width="100%" height="75" verticalGap="1" >
-        <mx:HBox id="nameBox" width="100%" height="25">
+      <mx:Box id="chatControlBox" width="100%" height="{Config.fontSize + 65}" verticalGap="1" >
+        <mx:HBox id="nameBox" width="100%" height="{Config.fontSize + 15}">
 	      <mx:Label text="{Language.s.chatWindowSenderName}"/>
           <torgtaitai:SuggestComboBox id="chatCharacterName" 
                        change="changedChatCharacterName()"
@@ -246,7 +246,7 @@
         private var fileReferenceForDownload:FileReference = null;
         private var chatFontColor:String = "000000";
         private var chatBackgroundColor:String = "FFFFFF";
-        private var chatFontSize:int = 11;
+        private var chatFontSize:int = 12;
         private var isDisplayTime:Boolean = false;
         private var chatMessageTrader:ChatMessageTrader;
         private var novelticMode:NovelticMode = null;
@@ -334,30 +334,42 @@
         
         private var initLoaded:Boolean = false;
         
-        private function loadChatInfo():void {
-            initLoaded = true;
+        private function initLoadChatInfo():void {
+            Log.logging("initLoadChatInfo");
             
-            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForChatFont() );
-            
-            Log.logging("loadChatInfo info", info);
-            
-            if( info == null ) {
-                return;
+            try {
+                initLoadChatInfoLocal();
+            } catch(error:Error) {
+                Log.loggingException("ChatWindow.initLoadChatInfo", error);
             }
             
-            setDisplayTime( info["isDisplayTime"] );
-            setChatFontSize( info["chatFontSize"] );
-            setChatFontColor( info["chatFontColor"] );
-            setChatBackgroundColor( info["chatBackgroundColor"], true );
+            initLoaded = true;
+        }
             
-            var numberString:String = "" + DodontoF_Main.getInstance().getGuiInputSender().getRoomNumber();
-            setDiceBotGameType( info[getDiceBotGameTypeKeyName()] );
+        private function initLoadChatInfoLocal():void {
+            var localInfo:Object = loadChatInfo(false);
+            var globalInfo:Object = loadChatInfo(true);
             
-            Log.logging("loadChatInfo info", info);
-            Log.logging("diceBot", info[getDiceBotGameTypeKeyName()]);
+            if( localInfo != null ) {
+                setChatFontColor( localInfo["chatFontColor"] );
+                setChatBackgroundColor( localInfo["chatBackgroundColor"], true );
+                setDiceBotGameType( localInfo[getDiceBotGameTypeKeyName()] );
+            }
+            
+            if( globalInfo == null ) {
+                globalInfo = localInfo;
+            }
+            
+            if( globalInfo != null ) {
+                setDisplayTime( globalInfo["isDisplayTime"] );
+                setChatFontSize( globalInfo["chatFontSize"] );
+            }
         }
         
         public function setDiceBotGameType(gameType:String):void {
+            if( gameType == null ) {
+                return;
+            }
             Utils.setGameTypeToComboBox(gameType, diceBotGameType);
             changeDiceBotGameType();
         }
@@ -369,27 +381,37 @@
         }
         
         public function saveChatInfos():void {
-            Log.logging("initLoaded", initLoaded);
+            Log.logging("saveChatInfos initLoaded", initLoaded);
             
             if( ! initLoaded ) {
+                Log.logging("initLoaded not finished. so END");
                 return;
             }
             
-            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForChatFont() );
+            var localInfo:Object = loadChatInfo(false);
+            localInfo["chatFontColor"] = chatFontColor;
+            localInfo["chatBackgroundColor"] = chatBackgroundColor;
+            localInfo[getDiceBotGameTypeKeyName()] = getGameType();
+            saveChatInfo(localInfo, false);
+            
+            var globalInfo:Object = loadChatInfo(true);
+            globalInfo["isDisplayTime"] = isDisplayTime;
+            globalInfo["chatFontSize"] = chatFontSize;
+            saveChatInfo(globalInfo, true);
+        }
+        
+        private function loadChatInfo(isGlobal:Boolean):Object {
+            var info:Object = Config.getInstance().loadInfo( getSaveInfoKeyNameForChatFont(), isGlobal );
             if( info == null ) {
                 info = new Object();
             }
-            
-            info["isDisplayTime"] = isDisplayTime;
-            info["chatFontSize"] = chatFontSize;
-            info["chatFontColor"] = chatFontColor;
-            info["chatBackgroundColor"] = chatBackgroundColor;
-            info[getDiceBotGameTypeKeyName()] = getGameType();
-            
-            Log.logging("saveChatInfos", info);
-            
-            Config.getInstance().saveInfo(getSaveInfoKeyNameForChatFont(), info);
+            return info;
         }
+        
+        private function saveChatInfo(info:Object, isGlobal:Boolean):void {
+            Config.getInstance().saveInfo(getSaveInfoKeyNameForChatFont(), info, isGlobal);
+        }
+        
         
         public function setInitPosition():void {
             if( loadPosition() ) {
@@ -786,7 +808,7 @@
             setSendSoundButtonOn();
             
             novelticMode.init();
-            loadChatInfo();
+            initLoadChatInfo();
             setChatFontSize( chatFontSize );
             
             setResizeEventFunction( novelticMode.resizeAndMoveWindow );
@@ -1468,17 +1490,35 @@
             userNames[name] = true;
         }
         
+        
         public function setChatFontSize(size:int, isReplayMode:Boolean = false):void {
-            chatFontSize = size;
-            chatMessageInput.setStyle("fontSize", chatFontSize);
-            eachChatChannel(function(i:ChatMessageLogBox):void { i.setChatFontSize(chatFontSize); });
-            
-            if( isReplayMode ) {
+            if( size == 0 ) {
                 return;
             }
             
-            printChatLog();
+            chatFontSize = size;
+            chatMessageInput.setStyle("fontSize", chatFontSize);
+            
+            eachChatChannel(function(logBox:ChatMessageLogBox):void {
+                    logBox.setChatFontSize(chatFontSize);
+                    
+                    if( ! isReplayMode ) {
+                        printChatLog(logBox);
+                    }
+                });
         }
+        
+        private function printChatLog(logBox:ChatMessageLogBox):void {
+            logBox.stopNoCheckCount();
+            logBox.resizeChatLog(novelticMode);
+            
+            var channel:int = logBox.getChannel();
+            printAddedMessageToChatMessageLog();
+            scrollChatMessageLogIfPositionIsLast(channel, true);
+            
+            logBox.startNoCheckCount();
+        }
+        
         
         public function setDisplayTime(b:Boolean, isReplayMode:Boolean = false):void {
             if( isReplayMode ) {
@@ -1564,17 +1604,6 @@
             return getChatChannle(channel).isScrollPositionBottom();
         }
         
-        private function printChatLog():void {
-            var channel:int = publicChatChannel;
-            
-            getChatChannle(channel).stopNoCheckCount();
-            
-            getChatChannle(channel).resizeChatLog(novelticMode);
-            chatMessageTrader.printAddedMessageToChatMessageLog();
-            scrollChatMessageLogIfPositionIsLast(publicChatChannel, true);
-            
-            getChatChannle(channel).startNoCheckCount();
-        }
         
         private var allUserName:String = Language.s.allMember;
     
@@ -1618,115 +1647,6 @@
         public function saveChatLog():void {
             var window:SaveChatLogWindow = DodontoF.popup(SaveChatLogWindow, true) as SaveChatLogWindow;
             window.init(this);
-        }
-        
-        public function saveTargetChannelChatLogHtml(channel:int, isHtmlFormat:Boolean):void {
-            var chatLogList:Array = getChatChannle(channel).getAllChatLogList();
-            
-            var changedChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
-            var channelName:String = changedChannelNames[channel];
-            
-            saveChatLogByChatLogList(chatLogList, isHtmlFormat, channelName);
-        }
-        
-        static public function saveChatLogByChatLogList(chatLogList:Array,
-                                                        isHtmlFormat:Boolean, channelName:String):void  {
-            
-            var chatLogText:String = getChatLogTextByChatLogList(chatLogList, isHtmlFormat);
-            
-            if( isHtmlFormat ) {
-                saveChatLogHtml(chatLogText, channelName);
-            } else {
-                saveChatLogText(chatLogText);
-            }
-        }
-        
-        static public function saveChatLogHtml(chatLogText:String,
-                                                channelName:String):void {
-            
-            if( ! Utils.isFileRefecenseLoadMethodSupportVersion() ) {
-                Alert.show(Language.s.needFlashPlayerOverVer10ErrorMessage);
-            }
-            
-            var title:String = Language.s.chatLog;
-            if( channelName != "" ) {
-                title += "：" + channelName;
-            }
-            
-            var enterText:String = Utils.getEnterText();
-            
-            var chatLogHtml:String = "";
-            chatLogHtml += "<?xml version='1.0' encoding='UTF-8'?>" + enterText;
-            chatLogHtml += "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>" + enterText;
-            chatLogHtml += "<html xmlns='http://www.w3.org/1999/xhtml' lang='ja'>" + enterText;
-            chatLogHtml += "  <head>" + enterText;
-            chatLogHtml += "    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />" + enterText;
-            chatLogHtml += "    <title>" + title + "</title>" + enterText;
-            chatLogHtml += "  </head>" + enterText;
-            chatLogHtml += "  <body>" + enterText;
-            
-            chatLogHtml += chatLogText;
-            
-            chatLogHtml += "  </body>" + enterText;
-            chatLogHtml += "</html>";
-            
-            saveChatLogHtmlFromString(chatLogHtml);
-        }
-        
-        static public function getChatLogTextByChatLogList(chatLogList:Array,
-                                                           isHtmlFormat:Boolean):String {
-            var enterText:String = Utils.getEnterText();
-            
-            if( isHtmlFormat ) {
-                enterText = "<br>" + enterText;
-            }
-            
-            var chatText:String = "";
-            
-            for(var i:int = 0 ; i < chatLogList.length ; i++) {
-                var text:String = chatLogList[i];
-                
-                if( ! isHtmlFormat ) {
-                    text = Utils.htmlToText(text);
-                }
-                
-                text = text.replace(/\n/g, "\r");
-                text = text.replace(/\r/g, enterText) + enterText;
-                
-                chatText += text;
-            }
-            
-            return chatText;
-        }
-        
-        static public function saveChatLogText(chatLogText:String):void {
-            saveChatLogHtmlFromString(chatLogText, "txt");
-        }
-        
-        static private function saveChatLogHtmlFromString(chatLogHtml:String, ext:String = "html"):void {
-            var fileReferenceForDownload:FileReference = new FileReference();
-            
-            var dateString:String = DodontoF_Main.getDateString();
-            var saveFileName:String = "chatLog_" + dateString + "." + ext;
-            fileReferenceForDownload.save(chatLogHtml, saveFileName);
-        }
-    
-    
-        public function requestSaveChatLogResult(event:Event):void {
-            Log.loggingTuning("=>requestSaveChatLogResult(event:Event) Begin");
-        
-            try {
-                var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
-                var chatLogFileName:String = jsonData.chatLogFileName;
-                Log.logging("chatLogFileName", chatLogFileName);
-            
-                var request:URLRequest = new URLRequest(chatLogFileName);
-                navigateToURL(request);
-            } catch(e:Error) {
-                Log.loggingException("ChatWindow.requestSaveChatLogResult()", e);
-            }
-
-            Log.loggingTuning("=>requestSaveChatLogResult(event:Event) End");
         }
         
         [Embed(source="sound/page.mp3")]
@@ -1925,6 +1845,9 @@
         }
     
         public function setChatFontColor(color:String):void {
+            if( color == null ) {
+                return;
+            }
             chatFontColor = color;
             chatMessageBase.setStyle('color', '0x' + color);
         }

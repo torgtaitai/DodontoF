@@ -57,7 +57,13 @@
 		this.text = filteringText;	// refresh後、textの値が消去されるためfilteringTextの値をバックする
         
 		this.open();
+        setFocusToLast();
 	}
+    
+    private function setFocusToLast():void {
+        this.textInput.setSelection(textInput.text.length, textInput.text.length + 1);
+        this.textInput.validateNow();
+    }
 	
 	/**
 	 * データプロバイダ変更イベントハンドラ.
@@ -82,6 +88,10 @@
         collection.refresh();
         
         super.downArrowButton_buttonDownHandler(event);
+    }
+    
+    public function setText(str:String):void {
+        this.text = str;
     }
     
     

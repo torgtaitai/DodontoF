@@ -106,7 +106,7 @@
     
     private function getMessageFormat():String {
         var text:String = messageFormat.text;
-        text = Utils.changeZenkakuToHankakuOnNumber(text);
+        text = new ZenkakuToHankaku().changeOnNumber(text);
         return text.replace(/｛(\d+)｝/g, "{$1}");
     }
     

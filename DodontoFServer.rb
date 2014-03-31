@@ -10,6 +10,12 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 #変更可能な設定は config.rb にまとめているため、環境設定のためにこのファイルを変更する必要は基本的には無いです。
 
 
+#サーバCGIとクライアントFlashのバージョン一致確認用
+$versionOnly = "Ver.1.43.18"
+$versionDate = "2014/03/31"
+$version = "#{$versionOnly}(#{$versionDate})"
+
+
 
 
 if( RUBY_VERSION >= '1.9.0' )
@@ -34,7 +40,7 @@ require "config.rb"
 
 begin
   require "config_local.rb"
-rescue LoadError
+rescue Exception
 end
 
 
@@ -42,21 +48,31 @@ if( $loginCountFileFullPath.nil? )
   $loginCountFileFullPath = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
 end
 
-
-if( $isMessagePackInstalled )
-  # gem install msgpack バージョン
-  require 'rubygems'
-  require 'msgpack'
-else
-  # Pure Ruby MessagePackバージョン
-  require 'msgpack/msgpackPure'
-end
-
-
 require "loggingFunction.rb"
 require "FileLock.rb"
-# require "FileLock2.rb"
 require "saveDirInfo.rb"
+
+
+$dodontofWarning = nil
+
+if( $isMessagePackInstalled )
+  # gem install msgpack してる場合はこちら。
+  begin
+    require 'rubygems'
+    require 'msgpack'
+  rescue Exception
+    $dodontofWarning = {"key" => "youNeedInstallMsgPack"}
+  end
+else
+  if( RUBY_VERSION >= '1.9.0' )
+    # msgpack のRuby1.9用
+    require 'msgpack/msgpack19'
+  else
+    # MessagePackPure バージョン
+    require 'msgpack/msgpackPure'
+  end
+end
+
 
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
@@ -615,11 +631,7 @@ class DodontoFServer
   end  
   
   def self.getDataFromMessagePack(data)
-    if( $isMessagePackInstalled )
       MessagePack.pack(data)
-    else
-      MessagePackPure::Packer.new(StringIO.new).write(data).string
-    end
   end
   
   def getJsonDataFromText(text)
@@ -661,11 +673,7 @@ class DodontoFServer
     end
     
     begin
-      if( $isMessagePackInstalled )
         messagePack = MessagePack.unpack(data)
-      else
-        messagePack = MessagePackPure::Unpacker.new(StringIO.new(data, "r")).read
-      end
     rescue => e
       loggingForce("getMessagePackFromData rescue")
       loggingException(e)
@@ -807,6 +815,9 @@ class DodontoFServer
       ['clearDrawOnMap', hasNoReturn],
       ['sendChatMessage', hasNoReturn],
       ['changeRoundTime', hasNoReturn],
+      ['addResource', hasNoReturn],
+      ['changeResource', hasNoReturn],
+      ['removeResource', hasNoReturn],
       ['addEffect', hasNoReturn], 
       ['changeEffect', hasNoReturn], 
       ['changeEffectsAll', hasNoReturn], 
@@ -1195,16 +1206,23 @@ class DodontoFServer
     gameType = getWebIfRequestText('bot')
     logging(gameType, 'gameType')
     
-    rollResult, isSecret, randResults = rollDice(message, gameType, false)
+    isNeedResult = true
+    uniqueId = '0'
     
-    message = message + rollResult
-    logging(message, "diceRolled message")
+    params = {
+      'message' => message,
+      'gameType' => gameType,
+      'isNeedResult' => isNeedResult,
+      'uniqueId' => uniqueId,
+    }
+    
+    rolledMessage, isSecret, secretMessage = getRollDiceResult( params )
     
     chatData = {
       "senderName" => name,
-      "message" => message,
+      "message" => rolledMessage,
       "color" => color,
-      "uniqueId" => '0',
+      "uniqueId" => uniqueId,
       "channel" => channel,
     }
     logging("sendWebIfChatText chatData", chatData)
@@ -1524,8 +1542,7 @@ class DodontoFServer
   def changeCounterNames(counterNames)
     logging(counterNames, "changeCounterNames(counterNames)")
     changeSaveData(@saveFiles['time']) do |saveData|
-      saveData['roundTimeData'] ||= {}
-      roundTimeData = saveData['roundTimeData']
+      roundTimeData = getRoundTimeDataFromSaveData(saveData)
       roundTimeData['counterNames'] = counterNames
     end
   end
@@ -2216,7 +2233,7 @@ class DodontoFServer
         # 「#」で始まる行はコメント行として無効に
         next if(/^#/ === line)
         # 空白行もパス
-        next if(/^$/ === line)
+        next if(/^\s*$/ === line)
         
         next unless( /^([^=]+?)\s*=\s?(.*)$/ === line )
         key = $1
@@ -3439,7 +3456,6 @@ class DodontoFServer
   end
   
 
-  #getImageInfoFileName() ) do |saveData|
   def setReplayDataInfo(fileName, title, url)
     
     replayDataInfo = {
@@ -4098,6 +4114,7 @@ class DodontoFServer
   end
   
   
+  #新規ファイル名。reqにroomNumberを持っていた場合、ファイル名に付加するようにする
   def getNewFileName(fileName, preFix = "")
     @newFileNameIndex ||= 0
     
@@ -4105,7 +4122,17 @@ class DodontoFServer
     extName ||= ""
     logging(extName, "extName")
     
-    result = preFix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @newFileNameIndex.to_s + extName
+    roomNumber  = getRequestData('roomNumber')
+    if( roomNumber.nil? )
+      roomNumber  = getRequestData('room')
+    end
+    
+    result = nil
+    if( roomNumber.is_a?(Integer) )
+      result = 'room_' + roomNumber.to_s + '_' + preFix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @newFileNameIndex.to_s + extName
+    else
+      result = preFix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @newFileNameIndex.to_s + extName
+    end
     
     return result.untaint
   end
@@ -4334,21 +4361,18 @@ class DodontoFServer
     
     repeatCount = getDiceBotRepeatCount(params)
     
-    message = params['message']
-    
     results = []
+    
     repeatCount.times do |i|
-      oneMessage = message
       
-      if( repeatCount > 1 )
-        oneMessage = message + " #" + (i + 1).to_s
-      end
+      paramsClone = params.clone
+      paramsClone['message'] += " \##{ i + 1 }" if( repeatCount > 1 )
       
-      logging(oneMessage, "sendDiceBotChatMessage oneMessage")
-      result = sendDiceBotChatMessageOnece(params, oneMessage)
+      result = sendDiceBotChatMessageOnece( paramsClone )
       logging(result, "sendDiceBotChatMessageOnece result")
       
       next if( result.nil? )
+      
       results << result
     end
     
@@ -4369,47 +4393,29 @@ class DodontoFServer
     return repeatCount
   end
   
-  def sendDiceBotChatMessageOnece(params, message)
-    params = params.clone
-    name = params['name']
+  
+  def sendDiceBotChatMessageOnece(params)
+    
+    rolledMessage, isSecret, secretMessage = getRollDiceResult( params )
+    
     state = params['state']
-    color = params['color']
-    channel = params['channel']
-    sendto = params['sendto']
-    gameType = params['gameType']
-    isNeedResult = params['isNeedResult']
-    
-    rollResult, isSecret, randResults = rollDice(message, gameType, isNeedResult)
-    
-    logging(rollResult, 'rollResult')
-    logging(isSecret, 'isSecret')
-    logging(randResults, "randResults")
-    
-    secretResult = ""
-    if( isSecret )
-      secretResult = message + rollResult
-    else
-      message = message + rollResult
-    end
-    
-    message = getChatRolledMessage(message, isSecret, randResults, params)
-    
-    senderName = name
+    senderName = params['name']
     senderName << ("\t" + state) unless( state.empty? )
     
     chatData = {
       "senderName" => senderName,
-      "message" => message,
-      "color" => color,
+      "message" => rolledMessage,
+      "color" => params['color'],
       "uniqueId" => '0',
-      "channel" => channel
+      "channel" => params['channel']
     }
     
+    sendto = params['sendto']
     unless( sendto.nil? )
       chatData['sendto'] = sendto
     end
     
-    logging(chatData, 'sendDiceBotChatMessage chatData')
+    logging(chatData, 'sendDiceBotChatMessageOnece chatData')
     
     sendChatMessageByChatData(chatData)
     
@@ -4417,27 +4423,50 @@ class DodontoFServer
     result = nil
     if( isSecret )
       params['isSecret'] = isSecret
-      params['message'] = secretResult
+      params['message'] = secretMessage
       result = params
     end
     
     return result
   end
   
-  def rollDice(message, gameType, isNeedResult)
+  def getRollDiceResult( params )
+    
+    rollResult, isSecret, randResults = rollDice(params)
+    
+    secretMessage = ""
+    if( isSecret )
+      secretMessage = params['message'] + rollResult
+    else
+      params['message'] += rollResult
+    end
+    
+    rolledMessage = getRolledMessage(params, isSecret, randResults)
+    
+    return rolledMessage, isSecret, secretMessage
+  end
+  
+  
+  def rollDice(params)
+    require 'cgiDiceBot.rb'
+    
+    message = params['message']
+    gameType = params['gameType']
+    isNeedResult = params['isNeedResult']
+    
     logging(message, 'rollDice message')
     logging(gameType, 'rollDice gameType')
     
-    require 'cgiDiceBot.rb'
-    
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
+    
     result, randResults = bot.roll(message, gameType, dir, @diceBotTablePrefix, isNeedResult)
     
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/m, '')
     
     logging(result, 'rollDice result')
+    logging(randResults, 'rollDice randResults')
     
     return result, bot.isSecret, randResults
   end
@@ -4447,17 +4476,18 @@ class DodontoFServer
   end
   
   
-  def getChatRolledMessage(message, isSecret, randResults, params)
-    logging("getChatRolledMessage Begin")
-    logging(message, "message")
+  def getRolledMessage(params, isSecret, randResults)
+    logging("getRolledMessage Begin")
+
     logging(isSecret, "isSecret")
     logging(randResults, "randResults")
     
     if( isSecret )
-      message = "シークレットダイス"
+      params['message'] = "シークレットダイス"
+      randResults = randResults.collect{|value, max| [0, 0] }
     end
     
-    randResults = getRandResults(randResults, isSecret)
+    message = params['message']
     
     if( randResults.nil? )
       logging("randResults is nil")
@@ -4472,22 +4502,9 @@ class DodontoFServer
     }
     
     text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
-    logging(text, "getChatRolledMessage End text")
+    logging(text, "getRolledMessage End text")
     
     return text
-  end
-  
-  def getRandResults(randResults, isSecret)
-    logging(randResults, 'getRandResults randResults')
-    logging(isSecret, 'getRandResults isSecret')
-    
-    if(isSecret)
-      randResults = randResults.collect{|value, max| [0, 0] }
-    end
-    
-    logging(randResults, 'getRandResults result')
-    
-    return randResults
   end
   
   
@@ -5066,7 +5083,7 @@ class DodontoFServer
     return rotation
   end
   
-  def getCardData(isText, imageName, imageNameBack, mountName, isUpDown = false, canDelete = false)
+  def getCardData(isText, imageName, imageNameBack, mountName, isUpDown = false, canDelete = false, canRewrite = false)
     
     cardData = {
       "imageName" => imageName,
@@ -5080,6 +5097,7 @@ class DodontoFServer
       "ownerName" => "",
       "mountName" => mountName,
       "canDelete" => canDelete,
+      "canRewrite" => canRewrite,
       
       "name" => "",
       "imgId" =>  createCharacterImgId(),
@@ -5231,11 +5249,12 @@ class DodontoFServer
     mountName = addCardData['mountName']
     isUpDown = addCardData['isUpDown']
     canDelete = addCardData['canDelete']
+    canRewrite = addCardData['canRewrite']
     isOpen = addCardData['isOpen']
     isBack = addCardData['isBack']
     
     changeSaveData(@saveFiles['characters']) do |saveData|
-      cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete)
+      cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete, canRewrite)
       cardData["x"] = addCardData['x']
       cardData["y"] = addCardData['y']
       cardData["isOpen"] = isOpen unless( isOpen.nil? )
@@ -6142,22 +6161,33 @@ class DodontoFServer
     return getArrayInfoFromHash(cardMount, mountName)
   end
   
+  def getResourceFromSaveData(saveData)
+    return getArrayInfoFromHash(saveData, 'resource')
+  end
+  
+  
   def getArrayInfoFromHash(hash, key)
     hash[key] ||= []
     return hash[key]
   end
   
+  
   def getCardMountFromSaveData(saveData)
     return getHashInfoFromHash(saveData, 'cardMount')
   end
+  
+  def getRoundTimeDataFromSaveData(saveData)
+    return getHashInfoFromHash(saveData, 'roundTimeData')
+  end
+  
   
   def getHashInfoFromHash(hash, key)
     hash[key] ||= {}
     return hash[key]
   end
   
-
-
+  
+  
   def exitWaitingRoomCharacter
     
     setRecordWriteEmpty
@@ -6229,6 +6259,66 @@ class DodontoFServer
   end
   
   
+  
+  def addResource()
+    params = getParamsFromRequestData()
+    
+    changeSaveData(@saveFiles['time']) do |saveData|
+      resource = getResourceFromSaveData(saveData)
+      
+      params['resourceId'] = createCharacterImgId("resource_")
+      resource << params
+    end
+  end
+  
+  def changeResource()
+    params = getParamsFromRequestData()
+    
+    editResource(params) do |resource, index|
+      resource[index] = params
+    end
+  end
+  
+  def removeResource()
+    params = getParamsFromRequestData()
+    
+    editResource(params) do |resource, index|
+      resource.delete_at(index)
+    end
+  end
+  
+  
+  def editResource(params)
+    changeSaveData(@saveFiles['time']) do |saveData|
+      resource = getResourceFromSaveData(saveData)
+      
+      resourceId = params['resourceId']
+      
+      index = findIndexFromArray(resource) do |i|
+        i['resourceId'] == resourceId
+      end
+      
+      if( index.nil? )
+        return
+      end
+      
+      yield(resource, index)
+    end
+  end
+  
+  
+  def findIndexFromArray(array)
+    array.each_with_index  do |item, index|
+      if( yield(item) )
+        return index
+      end
+    end
+    
+    return nil
+  end
+  
+  
+  
   def moveCharacter()
     changeSaveData(@saveFiles['characters']) do |saveData|
 
@@ -6281,7 +6371,15 @@ class DodontoFServer
   end
   
   def getResponse
-    response = analyzeCommand
+    
+    response = nil
+    
+    if( $dodontofWarning.nil? )
+      response = analyzeCommand
+    else
+      response = {}
+      response["warning"] = $dodontofWarning
+    end
     
     if( isJsonResult )
       return getTextFromJsonData(response)
@@ -6413,23 +6511,22 @@ end
 
 def getCgiParams()
   logging("getCgiParams Begin")
-  
-  length = ENV['CONTENT_LENGTH'].to_i
-  logging(length, "getCgiParams length")
-  
+
+  logging(ENV['REQUEST_METHOD'], "ENV[REQUEST_METHOD]")
   input = nil
+  messagePackedData = {}
   if( ENV['REQUEST_METHOD'] == "POST" )
+    length = ENV['CONTENT_LENGTH'].to_i
+    logging(length, "getCgiParams length")
+
     input = $stdin.read(length)
-  else
-    input = ENV['QUERY_STRING']
+    logging(input, "getCgiParams input")
+    messagePackedData = DodontoFServer.getMessagePackFromData( input )
   end
-  
-  logging(input, "getCgiParams input")
-  messagePackedData = DodontoFServer.getMessagePackFromData( input )
-  
+
   logging(messagePackedData, "messagePackedData")
   logging("getCgiParams End")
-  
+
   return result = messagePackedData
 end
 

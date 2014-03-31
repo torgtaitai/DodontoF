@@ -69,26 +69,19 @@ package {
             
             var imageTags:Array = defaultTags.concat();
             
-            for(var key:String in tagInfos) {
-                var tagInfo:Object = tagInfos[key];
+            for(var imageUrl:String in tagInfos) {
+                
+                if( ! isTargetRoom(imageUrl, tagInfos) ) {
+                    continue;
+                }
+                
+                var tagInfo:Object = tagInfos[imageUrl];
                 var tags:Array = tagInfo["tags"];
                 if( tags == null ) {
                     continue;
                 }
                 
-                for(var i:int = 0 ; i < tags.length ; i++) {
-                    var tag:String = tags[i];
-                    
-                    if( tag == "" ) {
-                        continue;
-                    }
-                    
-                    if( isInclude(imageTags, tag) ) {
-                        continue;
-                    }
-                    
-                    imageTags.push(tag);
-                }
+                imageTags = addTagsToImageTags(tags, imageTags);
             }
             
             var selected:String = comboBox.text;
@@ -102,6 +95,46 @@ package {
             
             Log.logging("setImageTypes end");
         }
+        
+        
+        static public function isTargetRoom(imageUrl:String, tagInfos:Object):Boolean {
+           
+           if( tagInfos == null ) {
+               return true;
+           }
+           
+           var tagInfo:Object = tagInfos[imageUrl];
+           if( tagInfo == null ) {
+               return true;
+           }
+           
+           if( tagInfo["roomNumber"] == null ) {
+               return true;
+           }
+           
+           var roomNumber:int = parseInt(tagInfo["roomNumber"]);
+           return (roomNumber == TagManagerWindow.getRoomNumber());
+       }
+       
+
+        private function addTagsToImageTags(tags:Array, imageTags:Array):Array {
+            for(var i:int = 0 ; i < tags.length ; i++) {
+                var tag:String = tags[i];
+                
+                if( tag == "" ) {
+                    continue;
+                }
+                
+                if( isInclude(imageTags, tag) ) {
+                    continue;
+                }
+                
+                imageTags.push(tag);
+            }
+            
+            return imageTags;
+        }
+        
         
         public static function isInclude(array:Array, target:String):Boolean {
             for(var i:int = 0 ; i < array.length ; i++) {

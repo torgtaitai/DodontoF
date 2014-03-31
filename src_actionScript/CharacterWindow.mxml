@@ -10,12 +10,12 @@
   
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
   
-  <mx:HBox id="imageListBox" width="100%" height="15" 
+  <mx:HBox id="imageListBox" width="100%" height="{Config.fontSize + 5}" 
            paddingRight="0" paddingLeft="0" 
            paddingTop="0" paddingBottom="0" 
            verticalGap="0" horizontalGap="0" 
            >
-    <mx:Button id="imageListExtendButon" label="{Language.s.characterWindowImageSetting}" height="15" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
+    <mx:Button id="imageListExtendButon" label="{Language.s.characterWindowImageSetting}" height="{Config.fontSize + 5}" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
     <mx:HBox id="imageListExtendSpace"
              paddingTop="0" paddingBottom="0" 
              width="0" height="0" enabled="false" visible="false">
@@ -36,7 +36,7 @@
   
   <mx:DataGrid id="counterInfoListView"
                width="100%"
-               height="50"
+               height="{(Config.fontSize + 15) * 2}"
                dataProvider="{counterInfoList}"
                sortableColumns="false"
 		       draggableColumns="false"
@@ -1161,10 +1161,10 @@
           <mx:Label text="{Language.s.initiativeWindowColumnTitleInfo}:" width="100%" />
           <mx:Button id="changeStatusAliasButton"
                      label="■"
-                     height="20" fontWeight="normal" enabled="false"
+                     height="{Config.fontSize + 10}" fontWeight="normal" enabled="false"
                      click="openChangeStatusAliasWindow()" />
         </mx:HBox>
-	    <mx:TextArea id="characterOtherInfo" text="" width="100%" height="100%" minHeight="20"/>
+	    <mx:TextArea id="characterOtherInfo" text="" width="100%" height="100%" minHeight="{Config.fontSize + 10}"/>
       </mx:Box>
       
     </mx:Box>
@@ -1195,6 +1195,8 @@
     
     
     override protected function setup():void {
+        initWindowSizeByFont18(840, 600);
+        
         characterImageUrl.text = loadingMessage;
         
         initImageSelecter();
@@ -1222,8 +1224,10 @@
         return image;
     }
     
-    protected function addImageList(url:String):Image {
-        var image:Image = ImageSelecter.createImageAndCash(url);
+    protected function addImageList(imageUrl:String):Image {
+        var image:Image = ImageSelecter.createEmptyImage();
+        image.source = Config.getInstance().getUrlString(imageUrl);
+        
         var box:Box = ImageSelecter.createImageBox(image);
         box.addEventListener(MouseEvent.CLICK, getClickImageListEvent(box));
         

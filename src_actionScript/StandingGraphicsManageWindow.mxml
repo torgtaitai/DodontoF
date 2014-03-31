@@ -20,6 +20,7 @@
                    dataProvider="{ standingGraphicInfos }"
                    editable="false"
 		           draggableColumns="false"
+                   allowMultipleSelection="true"
                    >
 	    <mx:columns>
 		  <mx:DataGridColumn headerText="{Language.s.standingGraphicNameColumn}"
@@ -133,19 +134,19 @@
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.removeEffect(effectInfo.effectId);
     }
-
-
+    
+    
     private function changeEffect():void {
         status = "";
-    
+        
         var results:Array = getEffectInfoAndIndex();
         var effectInfo:Object = results[0];
         var index:int = results[1];
-    
+        
         if( effectInfo == null ) {
             return;
         }
-    
+        
         if( effectInfo.effectId == null ) {
             return;
         }

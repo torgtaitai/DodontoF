@@ -16,10 +16,10 @@
            horizontalAlign="center"
            verticalGap="1"
            > 
-    <mx:Button label="{Language.s.saveCounterRemoconButton}" click="saveButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
-    <mx:Button label="{Language.s.loadCounterRemoconButton}" click="loadButtons()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.saveCounterRemoconButton}" click="saveButtons()" height="15" fontWeight="normal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.loadCounterRemoconButton}" click="loadButtons()" height="15" fontWeight="normal" paddingLeft="1" paddingRight="1" />
     <mx:Spacer width="100%" />
-    <mx:Button label="{Language.s.addCounterRemoconButton}" click="addButton()" height="15" fontWeight="nomal" paddingLeft="1" paddingRight="1" />
+    <mx:Button label="{Language.s.addCounterRemoconButton}" click="addButton()" height="15" fontWeight="normal" paddingLeft="1" paddingRight="1" />
   </mx:HBox>
     
   <mx:Script>
@@ -339,7 +339,7 @@
                 var tensPlaceInfo:Object = {
                     label: ("" + tensPlace + "〜" + (tensPlace + 9)),
                     children: children,
-                    type: "nomal" };
+                    type: "normal" };
                 
                 result.push(tensPlaceInfo);
             }
@@ -717,7 +717,7 @@
         
         private function sendMessage(message:String):void {
             var window:ChatWindow = ChatWindow.getInstance();
-            var isCheckDiceRoll:Boolean = false
+            var isCheckDiceRoll:Boolean = false;
             window.sendChatMessage(window.publicChatChannel, message, isCheckDiceRoll);
         }
         

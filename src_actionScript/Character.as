@@ -375,35 +375,13 @@ package {
             return selectedCharacters;
         }
         
-        static private var dragDropForClone:DragDrop = new DragDrop("clone Character");
-        
         
         public function clickCharacter(event:MouseEvent):void {
             if( isInclude(selectedCharacters, this) ) {
                 unselectCharacter();
-                dragDropForClone.removeDropEvent();
             } else {
                 selectCharacter();
-                dragDropForClone.addDropEvent( getMap().getOverMapLayer(), this.cloneCharacterByDrag );
-                dragForCloneEvent(event);
             }
-        }
-        
-        public function dragForCloneEvent(event:MouseEvent):void {
-            var value:Object = {
-                "character" : this };
-            
-            dragDropForClone.startDrag(event,
-                                       this.getView(), value, 
-                                       this.getOwnWidth(), this.getOwnHeight());
-        }
-        
-        private function cloneCharacterByDrag(obj:Object = null):void {
-            var point:Point = getMap().getMouseCurrentPoint();
-            cloneCharacterAction(point);
-            
-            unselectAllCharacters();
-            dragDropForClone.removeDropEvent();
         }
         
         private function isInclude(array:Array, target:Object):Boolean {

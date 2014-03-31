@@ -123,20 +123,28 @@
         var tagInfo:Object = tagInfos[targetSource];
         
         tagInfo ||= new Object();
-        tagInfo['tags'] ||= [];
-        tagInfo['password'] ||= "";
+        tagInfo["tags"] ||= [];
+        tagInfo["password"] ||= "";
         
         tagInfos[targetSource] = tagInfo;
         
         return tagInfo;
     }
     
-    static public function getTagInfo(text:String, password:String):Object {
+    static public function getTagInfo(text:String, password:String, isLocal:Boolean):Object {
         var tagInfo:Object = new Object();
         tagInfo["tags"] = getTags(text);
-        tagInfo['password'] = password;
+        tagInfo["password"] = password;
+        
+        if( isLocal ) {
+            tagInfo["roomNumber"] = getRoomNumber();
+        }
         
         return tagInfo;
+    }
+    
+    static public function getRoomNumber():int {
+        return DodontoF_Main.getInstance().getPlayRoomNumber();
     }
     
     static public function getTags(text:String):Array {

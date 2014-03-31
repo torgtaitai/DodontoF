@@ -288,7 +288,7 @@ package {
             updateRefresh();
         }
         
-        public function updateRefresh():void {
+        override public function updateRefresh():void {
             initDraw(getX(), getY());
             setHideMode();
         }

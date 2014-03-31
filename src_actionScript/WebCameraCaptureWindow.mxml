@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="550"
+   width="650"
    height="470"
    verticalAlign="middle"
    horizontalAlign="center"
@@ -67,6 +67,7 @@
     override protected function setup():void {
         initCamera();
         imageUploadSetInfo.imageTypeChanged();
+        imageUploadSetInfo.setUploadMode();
     }
         
     // カメラの初期化
@@ -133,8 +134,8 @@
         var smallImageData:ByteArray = getSmallImageData(captureBitMap, imageData);
         var tagInfo:Object = imageUploadSetInfo.getTagInfo();
         
-        ImageUploadWindow.uploadSmallImage(imageFileName, imageData, smallImageData, tagInfo,
-                                           uploadSuccessResult, uploadErrorResult);
+        ImageUploadWindow.uploadImageFileOne(imageFileName, imageData, smallImageData, tagInfo,
+                                             uploadSuccessResult, uploadErrorResult);
         btnSave.enabled = false;
         previewPanle.status = Language.s.captureImageUploading;
     }

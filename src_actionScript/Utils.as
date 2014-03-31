@@ -226,6 +226,17 @@ package {
         }
         
         
+        static public function selectSuggestComboBox(comboBox:SuggestComboBox, key:String,
+                                                        field:String = "data", defaultString:String = null):int {
+            var index:int = selectComboBox(comboBox, key, field);
+            if( index >= 0 ) {
+                return index;
+            }
+            
+            comboBox.setText( defaultString );
+            return -1;
+        }
+        
         static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data", defaultIndex:int = 0):int {
             comboBox.validateNow();
             
@@ -325,110 +336,9 @@ package {
         }
         
         public static function changeZenkakuToHankaku(str:String):String{
-            str = changeZenkakuToHankakuOnAlphabet(str);
-            str = changeZenkakuToHankakuOnNumber(str);
-            str = changeZenkakuToHankakuOnOperator(str);
-            str = changeZenkakuToHankakuOnMark(str);
-            return str;
+            return new ZenkakuToHankaku().changeForDiceBot(str);
         }
         
-        // 文字列の中の全角記号を半角に直して戻す
-        public static function changeZenkakuToHankakuOnMark(str:String):String {
-            str = changeZenkakuToHankakuOnAll(str, "＠", null, "@");
-            str = changeZenkakuToHankakuOnAll(str, "「", null, "[");
-            str = changeZenkakuToHankakuOnAll(str, "」", null, "]");
-            str = changeZenkakuToHankakuOnAll(str, "［", null, "[");
-            str = changeZenkakuToHankakuOnAll(str, "］", null, "]");
-            str = changeZenkakuToHankakuOnAll(str, "、", null, ",");
-            str = changeZenkakuToHankakuOnAll(str, "，", null, ",");
-            str = changeZenkakuToHankakuOnAll(str, "＃", null, "#");
-            return str;
-        }
-        
-        // 文字列の中の全角算術記号を半角に直して戻す
-        public static function changeZenkakuToHankakuOnOperator(str:String):String {
-            str = changeZenkakuToHankakuOnAll(str, "（", null, "(");
-            str = changeZenkakuToHankakuOnAll(str, "）", null, ")");
-            str = changeZenkakuToHankakuOnAll(str, "＊", null, "*");
-            str = changeZenkakuToHankakuOnAll(str, "／", null, "/");
-            str = changeZenkakuToHankakuOnAll(str, "＋", null, "+");
-            str = changeZenkakuToHankakuOnAll(str, String.fromCharCode(65293),  null, "-");
-            str = changeZenkakuToHankakuOnAll(str, "＝", null, "=");
-            str = changeZenkakuToHankakuOnAll(str, "＞", null, ">");
-            str = changeZenkakuToHankakuOnAll(str, "＜", null, "<");
-            return str;
-        }
-        
-        // 文字列の中の全角英字を半角英字に直して戻す
-        public static function changeZenkakuToHankakuOnAlphabet(str:String):String {
-            str = changeZenkakuToHankakuOnAll(str, "Ａ", "Ｚ", "A");
-            str = changeZenkakuToHankakuOnAll(str, "ａ", "ｚ", "a");
-            return str;
-        }
-        
-        // 文字列の中の全角数字を半角数字に直して戻す
-        public static function changeZenkakuToHankakuOnNumber(str:String):String {
-            str = changeZenkakuToHankakuOnAll(str, "０", "９", "0");
-            return str;
-        }
-        
-        public static function getChangedCharacterZenkakuToHankaku(targetChar:String,
-                                                                   startCode:Number, endCode:Number,
-                                                                   changeStartCode:Number):String {
-            var code:Number = targetChar.charCodeAt(0);
-            
-            if( (code >= startCode) && (code <= endCode) ) {
-                var diff:Number = (code - startCode);
-                code = changeStartCode + diff;
-            }
-            
-            return String.fromCharCode(code);
-        }
-        
-        public static function changeZenkakuToHankakuOnAll(str:String,
-                                                           startString:String, endString:String,
-                                                           changeStartString:String):String {
-            var startCode:Number = startString.charCodeAt(0);
-            if( endString == null ) {
-                endString = startString;
-            }
-            var endCode:Number = endString.charCodeAt(0);
-            var changeStartCode:Number = changeStartString.charCodeAt(0);
-            
-            var resultString:String = "";
-            var isDiceStringEnd:Boolean = false;
-            
-            for(var i:int = 0 ; i < str.length ; i++){
-                var targetChar:String = str.charAt(i);
-                
-                if( isDiceStringEnd ) {
-                    resultString += targetChar;
-                    continue;
-                }
-                
-                //if( (targetChar == " ") || (targetChar == "　") ) {
-                //    isDiceStringEnd = true;
-                //} else {
-                //    targetChar = getChangedCharacterZenkakuToHankaku(targetChar, startCode, endCode, changeStartCode);
-                //}
-                targetChar = getChangedCharacterZenkakuToHankaku(targetChar, startCode, endCode, changeStartCode);
-                
-                resultString += targetChar;
-            }
-            
-            return resultString;
-        }
-        
-        
-        private static function setValue(obj:Object, key:String, value:int, defaultValue:int):void {
-            if( obj[key] == 0 ) {
-                obj[key] = value;
-            }
-            if( obj[key] == 0 ) {
-                obj[key] = defaultValue;
-            }
-            
-        }
         
         public static function getSizeInfo(imageLoader:Loader, width:int, height:int, defaultValue:int = 10):Object {
             var result:Object = {
@@ -441,6 +351,17 @@ package {
             
             return result;
         }
+        
+        private static function setValue(obj:Object, key:String, value:int, defaultValue:int):void {
+            if( obj[key] == 0 ) {
+                obj[key] = value;
+            }
+            if( obj[key] == 0 ) {
+                obj[key] = defaultValue;
+            }
+            
+        }
+        
         
         static public function newSameClassInstance(obj:Object):Object {
             var className:String = flash.utils.getQualifiedClassName(obj);
@@ -944,6 +865,21 @@ package {
                                                   args:Array = null, strictlyUniqueId:String = null):void {
             DodontoF_Main.getInstance().getChatWindow().sendSystemMessage( message, args, strictlyUniqueId );
         }
+        
+        static public function smoothingImage(image:Image):void {
+            smoothing( image.content );
+        }
+        static public function smoothingLoader(image:Loader):void {
+            smoothing( image.content );
+        }
+        
+        static public function smoothing(obj:Object):void {
+            var bmp:Bitmap = obj as Bitmap;
+            if (bmp != null) {
+                bmp.smoothing = true;
+            }
+        }
+        
     }
 }
 

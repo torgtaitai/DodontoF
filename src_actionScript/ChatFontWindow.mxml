@@ -144,7 +144,9 @@
         return htmlText;
     }
     
+    
     public function execute():void {
+        
         var color:String = getColor(chatMessageColorPicker);
         chatWindow.setChatFontColor(color);
            
@@ -155,7 +157,6 @@
         chatWindow.setChatFontSize(fontSize);
         
         chatWindow.setDisplayTime( isDisplayTimeCheckBox.selected );
-        
         chatWindow.saveChatInfos();
 
         PopUpManager.removePopUp(this);

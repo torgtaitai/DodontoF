@@ -4,7 +4,6 @@ require 'configBcDiceForSystem.rb'
 
 $isDebug = false
 
-$KCODE = 'UTF8'# このソースはUTF-8で書かれています
 $bcDiceVersion = "2.01.17"
 
 
@@ -43,7 +42,7 @@ BeastBindTrinity
 BloodCrusade
 BloodMoon
 CardRanker
-Chaos Flare
+Chaos_Flare
 Chill
 CrashWorld
 Cthulhu
@@ -60,6 +59,7 @@ EndBreaker
 GURPS
 GehennaAn
 GeishaGirlwithKatana
+Gorilla
 Gundog
 GundogZero
 GurpsFW
@@ -69,6 +69,7 @@ HuntersMoon
 InfiniteFantasia
 Insane
 Kamigakari
+KanColle
 KillDeathBusiness
 MagicaLogia
 MeikyuDays
@@ -98,7 +99,7 @@ SwordWorld
 SwordWorld2.0
 TORG
 TokumeiTenkousei
-Tunnels & Trolls
+Tunnels_&_Trolls
 Utakaze
 WARPS
 Warhammer

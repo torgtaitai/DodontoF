@@ -7,8 +7,11 @@ package {
     public class CutInCommandBase extends CutInBase {
         
         public function sendCommand(params:Object = null):void {
-            var commandText:String = getCutInMessage(params);
-            ChatWindow.getInstance().sendChatMessage_public(commandText);
+            var message:String = getCutInMessage(params);
+            
+            var window:ChatWindow = ChatWindow.getInstance();
+            var isCheckDiceRoll:Boolean = false;
+            window.sendChatMessage(window.publicChatChannel, message, isCheckDiceRoll);
         }
         
         public static function getBeginMarker():String {

@@ -575,6 +575,10 @@ package {
             }
         }
         
+        public function updateRefresh():void {
+        }
+        
+        
         public function updateByOwn():void {
             this.update( this.getJsonData() );
         }

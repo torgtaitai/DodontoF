@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <torgtaitai:CommonPopupWindow xmlns:mx="http://www.adobe.com/2006/mxml"
                 xmlns:torgtaitai="*" 
-                width="500" height="350"
+                width="550" height="350"
                 title="{Language.s.initCardWindow}" 
                 showCloseButton="true"
                 close="PopUpManager.removePopUp(this)"

@@ -593,12 +593,14 @@ package {
                 "mountName" : "messageCard",
                 "isUpDown" : false,
                 "canDelete" : true,
+                "canRewrite": true,
                 "x" : x,
                 "y" : y
             };
             var obj:Object = getParamObject("addCard", data);
             sendCommandData(obj);
         }
+        
         
         public function addCardZone(ownerId:String,
                                     ownerName:String,
@@ -1214,6 +1216,34 @@ package {
             var obj:Object = getParamObject("removeReplayData", replayData);
             sendCommandData(obj, resultFunction);
         }
+        
+        
+        
+        public function addResource(data:Object):void {
+            var obj:Object = getParamObject("addResource", data);
+            sendCommandData(obj);
+        }
+        
+        public function changeResource(data:Object):void {
+            var obj:Object = getParamObject("changeResource", data);
+            sendCommandData(obj);
+        }
+        
+        public function changeResourceAll(data:Object):void {
+            var obj:Object = getParamObject("changeResourceAll", data);
+            sendCommandData(obj);
+        }
+        
+        public function removeResource(resourceId:String):void {
+            var data:Object = {
+                "resourceId": resourceId
+            };
+            
+            var obj:Object = getParamObject("removeResource", data);
+            sendCommandData(obj);
+        }
+        
+        
         
         public function addEffect(data:Object):void {
             var obj:Object = getParamObject("addEffect", data);
