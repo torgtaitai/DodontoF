@@ -93,6 +93,8 @@ package {
                 return "";
             }
             
+            message = Language.getKeywordText(message);
+            
             var result:Object = diceBotResultReg.exec(message);
             
             if( result == null ) {

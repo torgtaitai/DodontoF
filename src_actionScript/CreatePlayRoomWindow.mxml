@@ -54,12 +54,14 @@
                         id="canUseExternalImage" 
                         value="canUseExternalImage" 
                         label="{Language.s.canUseExternalImage}"
+                        enabled="{Config.canUseExternalImageModeOn}"
                         />
 	    <mx:RadioButton groupName="canUseExternalImageRadioGroup"
                         selected="true"
                         id="canNotUseExternalImage"
                         value="canNotUseExternalImage"
                         label="{Language.s.canNotUseExternalImage}"
+                        enabled="{Config.canUseExternalImageModeOn}"
                         />
       </mx:HBox>
       
@@ -305,7 +307,7 @@
     }
     
     private function printError(resultText:String):void {
-        resultText = Messages.getMessage(resultText);
+        resultText = Language.getKeywordText(resultText);
         Alert.show(resultText);
         this.status = "server error : "+ resultText;
     }

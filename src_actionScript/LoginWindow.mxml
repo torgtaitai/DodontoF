@@ -608,6 +608,7 @@
         Log.logging("result jsonData.uniqueId", jsonData.uniqueId);
         saveUniqeId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
+        DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
         

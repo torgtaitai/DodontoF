@@ -255,6 +255,11 @@ $logoutUrl = ""
 #この処理の重さを嫌うのであれば false に設定し無効化してください。
 $isMultilingualization = true
 
+#外部画像URLの有効／無効を設定します。
+# true で有効、false で無効になります。
+$canUseExternalImageModeOn = false
+
+
 
 #ダイスボット一覧に表示するダイスボットの名前順序
 #標準添付ののダイスボットで表示したくない物ははここから削除して下さい。
@@ -327,6 +332,7 @@ $diceBotOrder = <<____END_MARKER____
 モノトーン・ミュージアム
 りゅうたま
 ルーンクエスト
+ログ・ホライズン
 六門世界2nd
 ロールマスター
 ワープス

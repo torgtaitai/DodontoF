@@ -152,7 +152,7 @@
             return true;
         }
         
-        status = jsonData.resultText;
+        status = Language.getKeywordText( jsonData.resultText );
         executeButton.enabled = true;
         return false;
     }

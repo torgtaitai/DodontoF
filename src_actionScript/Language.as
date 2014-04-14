@@ -70,7 +70,7 @@ package {
             p.isChatVisibleMenu = "チャット表示";
             p.isDiceVisibleMenu = "ダイス表示";
             p.isInitiativeListVisibleMenu = "イニシアティブ表示";
-            p.isResourceWindowVisibleMenu = "資源管理表示";
+            p.isResourceWindowVisibleMenu = "リソース表示";
             p.isStandingGraphicVisibleMenu = "立ち絵表示";
             p.isCutInVisibleMenu = "カットイン表示";
             p.isPositionVisibleMenu = "座標表示";
@@ -120,7 +120,7 @@ package {
             p.replaySpeed = "早送り倍率";
             p.repeat = "繰り返し";
             p.logoutFromReplay = "戻る";
-            p.resourceWindowTitle = "資源管理";
+            p.resourceWindowTitle = "リソース";
             p.resourceName = "名称";
             p.resourceCount = "数";
             p.resourceOther = "その他";
@@ -374,7 +374,7 @@ package {
             p.dragMeForChit = "チットを配置したいところにドラッグしてください";
             p.unremovablePlayRoomNumber = "指定されたプレイルームはシステム管理者によって削除不可に指定されています。";
             p.unloadablePlayRoomNumber = "このプレイルームはシステム管理者によってロード不可に指定されています。ロードを行いたい場合は他のプレイルームを作成してください。";
-            p.noPasswordPlayRoomNumber = "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。パスワードは空にしてください。";
+            p.noPasswordPlayRoomNumber = "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。\nパスワードは空にしてください。";
             p.loginTimeLimitHasComes = "ログイン時間の上限（{0}秒）が経過しました。サーバとの接続を切断します。";
             p.loginTimeLimitWarning = "このサーバでは{0}以上ログインすると接続が切断されます。実プレイには向きませんのでご注意下さい。";
             p.noEmptyPlayRoom = "空きプレイルームが見つかりませんでした";
@@ -435,8 +435,11 @@ package {
             p.sampleMessage = "サンプルメッセージ";
             p.addMessageCard = "メッセージカードの追加";
             p.changeMessageCard = "メッセージカードの変更";
+            p.changingMessageCardMessage = "「{0}」がメッセージカードを変更しています。";
+            p.changeMessageCardMessage = "「{0}」がメッセージカードを変更しました";
             p.faceSide = "表面";
             p.backSide = "裏面";
+            
             // CardPickUpWindow.mxml
             p.cardPickup = "カードピックアップ";
             // DrawCardWindow.mxml
@@ -615,9 +618,11 @@ package {
             // Dice.as
             p.diceTotal = "ダイス合計：";
             p.deleteDice = "ダイスの削除";
-            // SecretDiceWindow.mxml
+            
+            p.secretDice = "シークレットダイス";
             p.secretDiceResult = "隠しダイスロール結果";
             p.openSecretDiceResult = "結果公開";
+            
             // DiceSymbol.as
             p.diceSymbol = "ダイスシンボル";
             p.openDiceSymbol = "ダイス目を公開する";
@@ -1087,24 +1092,62 @@ package {
             p.fontSize = "フォントサイズ";
             p.changeFontSize = "フォントサイズ変更";
             p.changeFontSizeText = "どどんとふ全体のフォントサイズを変更します";
-            p.default = "デフォルト";
+            p.defaultText = "デフォルト";
+            p.invalidFileNameExtension = "ファイル名 \"{0}\" は拡張子が不正です";
+            p.commandNameAlreadyExist = "そのコマンド名は既に使用されています。";
+            p.commandNameIsNotExist = "そのコマンド名は存在しません。";
+            p.commandNameCanUseOnlyAlphabetAndNumber = "コマンド名には英数字のみ使用できます";
+            p.commandNameIsEmpty = "コマンド名が空です";
+            p.tableFormatIsInvalid = "{0}行目の表記({1})は「数字:文字列」になっていません。";
+            p.changeCommandNameFaild = "コマンド名の変更に失敗しました（ファイル移動でエラーが発生しました）";
+            
             
             japaneseDefault = p;
             languageTable[""] = japaneseDefault;
         }
         
-        static public function text(key:String, ...args):String {
-            var text:String = Language.s[key];
-            if( text == null ) {
-                Log.loggingError("Language.s." + text + "is NOT exist!!!!!!!!!");
+        
+        
+        static private var keywordFormat:RegExp = /^###Language:(.+)###$/;
+        
+        static public function getKeywordText(message:String):String {
+            
+            var matchResult:Object = keywordFormat.exec(message);
+            if( matchResult == null ) {
+                return message;
+            }
+            
+            var keybase:String = matchResult[1];
+            
+            var args:Array = keybase.split(/\t/);
+            var key:String = args.shift();
+            
+            var str:String = Language.s[key];
+            if( str == null ) {
                 return key;
             }
             
-            var result:String = StringUtil.substitute(text,
+            return getText(str, args);
+        }
+        
+        
+        static public function text(key:String, ...args):String {
+            var str:String = Language.s[key];
+            if( str == null ) {
+                Log.loggingError("Language.s." + str + "is NOT exist!!!!!!!!!");
+                return key;
+            }
+            
+            return getText(str, args);
+        }
+        
+        static private function getText(str:String, args:Array):String {
+            var result:String = StringUtil.substitute(str,
                                   args[0], args[1], args[2], args[3], args[4], 
                                   args[5], args[6], args[7], args[8], args[9]);
             return result;
         }
+        
         
         static public function initLanguage(languageInfos:Object):void {
             if( languageInfos == null ){

@@ -636,17 +636,6 @@ package {
                 StringUtil.substitute("{0}:{1}：", 
                                       formatZero(date.hours, 2),
                                       formatZero(date.minutes, 2));
-            /*
-            var dateString:String = 
-                StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}.{6}", 
-                                      formatZero(date.fullYear, 2),
-                                      formatZero(date.month, 2),
-                                      formatZero(date.date, 2),
-                                      formatZero(date.hours, 2),
-                                      formatZero(date.minutes, 2),
-                                      formatZero(date.seconds, 2),
-                                      formatZero(date.milliseconds, 2));
-            */
             
             return dateString;
         }
@@ -658,6 +647,26 @@ package {
             }
             return string;
         }
+
+        static public function getDateString(date:Date = null):String {
+            if( date == null ) {
+                date = new Date();
+            }
+            
+            var dateString:String = 
+                StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}.{6}", 
+                                      formatZero(date.fullYear, 2),
+                                      formatZero(date.month, 2),
+                                      formatZero(date.date, 2),
+                                      formatZero(date.hours, 2),
+                                      formatZero(date.minutes, 2),
+                                      formatZero(date.seconds, 2),
+                                      formatZero(date.milliseconds, 2));
+            
+                return dateString;
+        }
+        
+        
         
         static public function isEqual(obj1:Object, obj2:Object):Boolean {
             return (mx.utils.ObjectUtil.compare(obj1, obj2) == 0);
@@ -879,6 +888,11 @@ package {
                 bmp.smoothing = true;
             }
         }
+        
+        static public function isValidSendTo(sendto:String):Boolean {
+            return ((sendto != null) && (sendto != ""));
+        }
+        
         
     }
 }

@@ -26,7 +26,7 @@
     <mx:HBox enabled="{htmlFormat.selected}">
       <mx:Label text="{Language.s.fontSize}" />
       <torgtaitai:SuggestComboBox id="fontSize" >
-        <mx:Object label="{Language.s.default}"  data="default"/>
+        <mx:Object label="{Language.s.defaultText}"  data="default"/>
         <mx:Object label="10" />
         <mx:Object label="12" />
         <mx:Object label="14" />
@@ -34,7 +34,7 @@
       
       <mx:Label text="{Language.s.lineHeight}" />
       <torgtaitai:SuggestComboBox id="lineHeight" >
-        <mx:Object label="{Language.s.default}" data="default"/>
+        <mx:Object label="{Language.s.defaultText}" data="default"/>
         <mx:Object label="100" />
         <mx:Object label="120" />
         <mx:Object label="140" />

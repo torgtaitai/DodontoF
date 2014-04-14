@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="300"
+   height="150"
+   title="{Language.s.changeFontSize}" 
+   showCloseButton="true"
+   >
+  
+  <mx:Label text="{Language.s.changeFontSizeText}" />
+  
+  <mx:Box width="100%" height="100%">
+    <mx:HBox width="100%" height="100%">
+      <mx:Label id="inputLabel" text="{Language.s.fontSize}:" />
+      <mx:ComboBox id="input" width="100%" change="changeFontSize()">
+        <mx:Object label="10" />
+        <mx:Object label="11" />
+        <mx:Object label="12" />
+        <mx:Object label="14" />
+        <mx:Object label="16" />
+        <mx:Object label="18" />
+      </mx:ComboBox>
+    </mx:HBox>
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="{Language.s.executeButton}" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="closeAction()" />
+    </mx:HBox>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    
+    private var defaultSize:int = 0;
+    
+    override protected function setup():void {
+        defaultSize = Config.fontSize;
+        Utils.selectComboBox(input, "" + Config.fontSize, "label");
+    }
+    
+    private function changeFontSize():void {
+        Config.setFontSize( parseInt(input.text) );
+        
+        //イニシアティブ表の「その他」欄に複数行の文字が入っていると、
+        //行の高さが広がって全行表示されしまい読みにくくなるので以下の処理が必要。
+        DodontoF_Main.getInstance().getInitiativeWindow().validateNow();
+        DodontoF_Main.getInstance().getInitiativeWindow().refresh();
+    }
+    
+    public function execute():void {
+        try {
+            changeFontSize();
+            Config.getInstance().saveFontInfo();
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    override protected function teardown():void {
+        Config.setFontSize( defaultSize );
+    }
+    
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

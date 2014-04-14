@@ -94,7 +94,7 @@ package {
             
             playRoomName = local_playRoomName;
             //playRoomPassword = local_password;
-            canUseExternalImageMode = local_canUseExternalImageMode;
+            setUseExternalImage( local_canUseExternalImageMode );
             canVisitValue = local_canVisit;
             
             setDiceBotGameType(gameType);
@@ -963,16 +963,26 @@ package {
         }
         
         
-        private var canUseExternalImageMode:Boolean = false
+        private var canUseExternalImageMode:Boolean = false;
         
         public function setUseExternalImage(b:Boolean):void {
-            canUseExternalImageMode = b;
+            if( Config.canUseExternalImageModeOn ) {
+                canUseExternalImageMode = b;
+            }
         }
         
         public function canUseExternalImage():Boolean {
+            if( ! Config.canUseExternalImageModeOn ) {
+                return false;
+            }
+            
             return canUseExternalImageMode;
         }
         
+        
+        public function setCanUseExternalImageModeOn( b:Boolean ):void {
+            Config.canUseExternalImageModeOn = b;
+        }
         
         private var isMentenanceModeOn:Boolean = false;
         private var isWelcomeMessageOn:Boolean = true;
@@ -1060,10 +1070,10 @@ package {
                                    {label:Language.s.isChatVisibleMenu, data:"isChatVisible", type:"check", toggled:true},
                                    {label:Language.s.isDiceVisibleMenu, data:"isDiceVisible", type:"check", toggled:true},
                                    {label:Language.s.isInitiativeListVisibleMenu, data:"isInitiativeListVisible", type:"check", toggled:true},
+                                   {label:Language.s.isResourceWindowVisibleMenu, data:"isResourceWindowVisible", type:"check", toggled:false},
                                    {type:"separator"},
                                    {label:Language.s.isChatPaletteVisibleMenu, data:"isChatPaletteVisible", type:"check", toggled:false},
-                                   {label:Language.s.isCounterRemoconVisibleMenu, data:"isCounterRemoconVisible", type:"check", toggled:false},
-                                   {label:Language.s.isResourceWindowVisibleMenu, data:"isResourceWindowVisible", type:"check", toggled:false}]},
+                                   {label:Language.s.isCounterRemoconVisibleMenu, data:"isCounterRemoconVisible", type:"check", toggled:false}]},
         {type:"separator"},
         
         {label:Language.s.isStandingGraphicVisibleMenu, data:"isStandingGraphicVisible", type:"check", toggled:true},

@@ -231,7 +231,8 @@ package {
             Log.loggingTuning('allSaveData jsonData', jsonData);
             
             if( jsonData.resultText != 'OK' ) {
-                Log.loggingError( Language.s.loadAllSaveDataError + jsonData.resultText );
+                var message:String = Language.getKeywordText( jsonData.resultText );
+                Log.loggingError( Language.s.loadAllSaveDataError + message );
                 return;
             }
             
@@ -744,18 +745,7 @@ package {
                 return;
             }
             
-            var data:Object = {
-                "senderName": chatSendData.getNameAndState(),
-                "message" : chatSendData.getMessage(),
-                "channel": chatSendData.getChannel(),
-                "color" : chatSendData.getColor(),
-                "uniqueId" : chatSendData.getStrictlyUniqueId(this) };
-            
-            var sendto:String = chatSendData.getSendto();
-            if( ChatMessageTrader.isValidSendTo(sendto) ) {
-                data.sendto = sendto;
-            }
-            
+            var data:Object = chatSendData.getSendChatMessageData( getStrictlyUniqueId() );
             var obj:Object = getParamObject("sendChatMessage", data);
             
             var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
@@ -763,38 +753,12 @@ package {
         }
         
         public function sendDiceBotChatMessage(chatSendData:ChatSendData, callBack:Function):void {
-            var data:Object = {
-                "name" : chatSendData.getNameAndState(),
-                "state" : chatSendData.getState(),
-                "message" : chatSendData.getMessage(),
-                "channel" : chatSendData.getChannel(),
-                "color" : chatSendData.getColor(),
-                "sendto" : chatSendData.getSendto(),
-                "randomSeed" : chatSendData.getRandSeed(),
-                "repeatCount" : chatSendData.getRepeatCount(),
-                "gameType" : chatSendData.getGameType(),
-                "uniqueId" : chatSendData.getStrictlyUniqueId(this) };
-            
-            addIsNeedResultParam(data);
+            var data:Object = chatSendData.getSendDiceBotChatMessageData( getStrictlyUniqueId() );
             
             var obj:Object = getParamObject("sendDiceBotChatMessage", data);
             
             var errorFunction:Function = getChatMessageErrorFunction(chatSendData);
             sendCommandData(obj, callBack, errorFunction);
-        }
-        
-        private function addIsNeedResultParam(jsonData:Object):void {
-            /*
-            var diceBox:DiceBox = DodontoF_Main.getInstance().getDiceBox();
-            if( diceBox == null ) {
-                return;
-            }
-            
-            if( ! diceBox.visible ) {
-                return;
-            }
-            */
-            jsonData.isNeedResult = true;
         }
         
         private function getChatMessageErrorFunction(data:ChatSendData):Function {
@@ -1229,8 +1193,8 @@ package {
             sendCommandData(obj);
         }
         
-        public function changeResourceAll(data:Object):void {
-            var obj:Object = getParamObject("changeResourceAll", data);
+        public function changeResourcesAll(data:Object):void {
+            var obj:Object = getParamObject("changeResourcesAll", data);
             sendCommandData(obj);
         }
         

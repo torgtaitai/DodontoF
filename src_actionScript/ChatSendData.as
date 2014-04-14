@@ -223,12 +223,12 @@ package {
             strictlyUniqueId = targetId;
         }
         
-        public function getStrictlyUniqueId(sender:SharedDataSender):String {
+        public function getStrictlyUniqueId(strictlyUniqueIdOwn:String):String {
             if( strictlyUniqueId != null ) {
                 return strictlyUniqueId;
             }
             
-            return sender.getStrictlyUniqueId();
+            return strictlyUniqueIdOwn;
         }
         
         public function toString():String {
@@ -265,6 +265,51 @@ package {
         
         public function getParamsString(key:String):String {
             return params[key];
+        }
+        
+        public function getSecretDiceText():String {
+            return Language.s.secretDice;
+        }
+        
+        
+        public function getSendChatMessageData(strictlyUniqueIdOwn:String):Object{
+            var data:Object = {
+                "senderName": getNameAndState(),
+                "message" : getMessage(),
+                "channel": getChannel(),
+                "color" : getColor(),
+                "uniqueId" : getStrictlyUniqueId(strictlyUniqueIdOwn) };
+            
+            setSendtoToData(data);
+            
+            return data;
+        }
+        
+        public function getSendDiceBotChatMessageData(strictlyUniqueIdOwn:String):Object{
+            var data:Object = {
+                "name" : getNameAndState(),
+                "state" : getState(),
+                "message" : getMessage(),
+                "channel" : getChannel(),
+                "color" : getColor(),
+                "uniqueId" : getStrictlyUniqueId(strictlyUniqueIdOwn),
+                
+                "randomSeed" : getRandSeed(),
+                "repeatCount" : getRepeatCount(),
+                "gameType" : getGameType(),
+                "isNeedResult" : true };
+            
+            setSendtoToData(data);
+            
+            return data;
+        }
+        
+        private function setSendtoToData(data:Object):void {
+            var sendto:String = getSendto();
+            if( Utils.isValidSendTo(sendto) ) {
+                data.sendto = sendto;
+            }
+            
         }
         
     }

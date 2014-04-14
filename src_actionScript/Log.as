@@ -94,19 +94,6 @@ package {
             logWindow = null;
         }
         
-        private static function getDateString():String {
-            var now:Date = new Date();
-            var dateString:String = StringUtil.substitute("{0}/{1}/{2} {3}:{4}:{5}.{6}", 
-                                                          now.fullYear,
-                                                          now.month,
-                                                          now.date,
-                                                          now.hours,
-                                                          now.minutes,
-                                                          now.seconds,
-                                                          now.milliseconds);
-                return dateString;
-        }
-        
         public static function loggingByLevel(text:String, level:int, obj:Object = null, isOnStatus:Boolean = false):void {
             if( logLevel < level ) {
                 return;
@@ -118,7 +105,7 @@ package {
                 text = text + " : " + objText;
             }
             
-            var logText:String = "[" + getDateString() + "]" + text + "\n";
+            var logText:String = "[" + Utils.getDateString() + "]" + text + "\n";
             logAny(logText);
             
             if( logWindow != null ) {

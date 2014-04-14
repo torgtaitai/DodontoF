@@ -1449,12 +1449,12 @@
             Log.logging("jsonData", jsonData);
             
             var channel:int = jsonData.channel;
+            var message:String = jsonData.message;
             var name:String = jsonData.name;
             var state:String = jsonData.state;
             var sendto:String = jsonData.sendto;
             var color:String = jsonData.color;
             
-            var message:String = jsonData.message;
             var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
             data.setColorString(color);
             data.setDiceRollResult();

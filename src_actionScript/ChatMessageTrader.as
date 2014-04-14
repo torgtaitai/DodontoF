@@ -168,7 +168,7 @@ package {
                 return true;
             }
             
-            if( ! isValidSendTo(sendto) ) {
+            if( ! Utils.isValidSendTo(sendto) ) {
                 Log.logging("秘話指定無しなので表示可能");
                 return true;
             }
@@ -244,7 +244,10 @@ package {
             
             
             var effectResult:Object = checkEffect(channel, chatMessage, senderName);
+            
             chatMessage = effectResult.chatMessage;
+            chatMessage = Language.getKeywordText(chatMessage);
+            
             senderName = effectResult.senderName;
             if( chatMessage == null ) {
                 Log.logging("effectResult.chatMessage is null");
@@ -312,12 +315,8 @@ package {
             return messageLine;
         }
         
-        static public function isValidSendTo(sendto:String):Boolean {
-            return ((sendto != null) && (sendto != ""));
-        }
-        
         private function getSendtoName(sendto:String):String {
-            if( ! isValidSendTo(sendto) ) {
+            if( ! Utils.isValidSendTo(sendto) ) {
                 return "";
             }
             

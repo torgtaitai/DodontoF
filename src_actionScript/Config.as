@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.43.18(2014/03/31)";
+        private var version:String = "Ver.1.44.01(2014/04/15)";
         
         public function getVersion():String {
             return version;
@@ -473,10 +473,8 @@ package {
         }
         
         public function isHaveZeroDice(maxNumber:int):Boolean {
-            if( isGameType("Elysion") ) {
-                if( maxNumber == 6 ) {
-                    return true;
-                }
+            if( maxNumber == 6 ) {
+                return true;
             }
             return false;
         }
@@ -497,6 +495,10 @@ package {
         
         [Bindable]
         static public var buttonFontSize:int = 15;
+        
+        
+        [Bindable]
+        static public var canUseExternalImageModeOn:Boolean = false;
         
     }
 }

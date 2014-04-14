@@ -77,6 +77,7 @@ package {
         private var isAlternately:Boolean = false;
         private var squareColors:Array = new Array();
         private var menuClickPoint:Point = new Point();
+        private var menuClickPointOnCard:Point = new Point();
         
         private var existPieces:Array = new Array();
         
@@ -1153,13 +1154,22 @@ package {
         }
         
         
-        public function getMouseCurrentPoint():Point {
-            return getLayerPoint(baseLayer);
+        private function getCreatePoint():Point {
+            return new Point(menuClickPoint.x, menuClickPoint.y);
         }
         
-        private function getCreatePoint():Point {
-            return getLayerPoint(baseLayer);
+        private function setCreatePoint():void {
+            menuClickPoint =  getLayerPoint(baseLayer);
         }
+        
+        private function getCreatePointOnCardLayer():Point {
+            return new Point(menuClickPointOnCard.x, menuClickPointOnCard.y);
+        }
+        
+        private function setCreatePointOnCardLayer():void {
+            menuClickPointOnCard = new Point(cardLayer.mouseX, cardLayer.mouseY);
+        }
+        
         
         private function getLayerPoint(layer:UIComponent):Point {
             var mouseX:Number = layer.mouseX;
@@ -1222,7 +1232,8 @@ package {
             menu.hideBuiltInItems();
             
             menu.addEventListener(ContextMenuEvent.MENU_SELECT, function(event:ContextMenuEvent):void {
-                    thisObj.menuClickPoint = getCreatePoint();
+                    setCreatePoint();
+                    setCreatePointOnCardLayer();
                 });
             
             MovablePiece.addMenuItem(menu, Language.s.addCharacterMenu, addCharacter);
@@ -1256,12 +1267,10 @@ package {
         
         private function addMessageCard(event:ContextMenuEvent):void {
             var window:AddMessageCardWindow = DodontoF.popup(AddMessageCardWindow, true) as AddMessageCardWindow;
+            
             var point:Point = getCreatePointOnCardLayer();
+                
             window.setCreatePoint(point);
-        }
-        
-        private function getCreatePointOnCardLayer():Point {
-            return new Point(cardLayer.mouseX, cardLayer.mouseY);
         }
         
         

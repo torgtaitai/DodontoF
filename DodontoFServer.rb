@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.43.18"
-$versionDate = "2014/03/31"
+$versionOnly = "Ver.1.44.01"
+$versionDate = "2014/04/15"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -208,7 +208,7 @@ class DodontoFServer
       #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
       loggingForce(@saveDirInfo, "when getSaveFileLock error : @saveDirInfo");
-      raise
+      raise e
     end
   end
   
@@ -674,9 +674,6 @@ class DodontoFServer
     
     begin
         messagePack = MessagePack.unpack(data)
-    rescue => e
-      loggingForce("getMessagePackFromData rescue")
-      loggingException(e)
     rescue Exception => e
       loggingForce("getMessagePackFromData Exception rescue")
       loggingException(e)
@@ -817,6 +814,7 @@ class DodontoFServer
       ['changeRoundTime', hasNoReturn],
       ['addResource', hasNoReturn],
       ['changeResource', hasNoReturn],
+      ['changeResourcesAll', hasNoReturn],
       ['removeResource', hasNoReturn],
       ['addEffect', hasNoReturn], 
       ['changeEffect', hasNoReturn], 
@@ -1970,9 +1968,6 @@ class DodontoFServer
     
     begin
       playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
-    rescue => e
-      loggingForce("getPlayRoomStateLocal rescue")
-      loggingException(e)
     rescue Exception => e
       loggingForce("getPlayRoomStateLocal Exception rescue")
       loggingException(e)
@@ -2198,6 +2193,7 @@ class DodontoFServer
       'drawLineCountLimit' => $drawLineCountLimit,
       'logoutUrl' => $logoutUrl,
       'languages' => getLanguages(),
+      'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
     }
     
     logging(result, "result")
@@ -2420,7 +2416,7 @@ class DodontoFServer
       
       if( playRoomIndex == -1 )
         playRoomIndex = findEmptyRoomNumber()
-        raise Exception.new("noEmptyPlayRoom") if(playRoomIndex == -1)
+        raise "noEmptyPlayRoom" if(playRoomIndex == -1)
         
         logging(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
       end
@@ -2458,11 +2454,8 @@ class DodontoFServer
       end
       
       sendRoomCreateMessage(playRoomIndex)
-    rescue => e
-      loggingException(e)
-      resultText = e.inspect + "$@ : " + $@.join("\n")
-    rescue Exception => errorMessage
-      resultText = errorMessage.to_s
+    rescue Exception => e
+      resultText = getLanguageKey( e.to_s )
     end
     
     result = {
@@ -2482,7 +2475,7 @@ class DodontoFServer
     return if( $createPlayRoomPassword.empty? )
     return if( $createPlayRoomPassword == password )
     
-    raise Exception.new("errorPassword")
+    raise "errorPassword"
   end
   
   
@@ -2546,12 +2539,8 @@ class DodontoFServer
         end
         
       end
-    rescue => e
-      loggingException(e)
-      resultText = e.to_s
     rescue Exception => e
-      loggingException(e)
-      resultText = e.to_s
+      resultText = getLanguageKey( e.to_s )
     end
     
     result = {
@@ -2571,7 +2560,7 @@ class DodontoFServer
     end
     
     if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
-      raise Exception.new("noPasswordPlayRoomNumber")
+      raise "noPasswordPlayRoomNumber"
     end
   end
   
@@ -3317,7 +3306,7 @@ class DodontoFServer
       creator.execute
     rescue Exception => e
       loggingException(e)
-      resultText = e.to_s
+      resultText = getLanguageKey( e.to_s )
     end
     
     logging(resultText, "addBotTableMain End resultText")
@@ -3353,7 +3342,7 @@ class DodontoFServer
       creator.execute 
     rescue Exception => e
       loggingException(e)
-      resultText = e.to_s
+      resultText = getLanguageKey( e.to_s )
     end
     
     logging(resultText, "changeBotTableMain End resultText")
@@ -3599,9 +3588,10 @@ class DodontoFServer
       File.chmod(0666, fileNameFullPath)
       
       result["resultText"] = "OK"
+      
     rescue => e
       logging(e, "error")
-      result["resultText"] = e.to_s
+      result["resultText"] = getLanguageKey( e.to_s )
     end
     
     logging(result, "load result")
@@ -3745,7 +3735,7 @@ class DodontoFServer
   end
   
   def getAllowedFileExtName(fileName)
-    rule = /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/
+    rule = /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/i
     
     return nil unless( rule === fileName )
     
@@ -4096,9 +4086,13 @@ class DodontoFServer
       end
       
       saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+      
     rescue => e
-      result["resultText"] = e.to_s
+      result["resultText"] = getLanguageKey( e.to_s )
     end
+    
+    logging(result, "uploadImageData result")
+    logging("uploadImageData load End")
     
     return result
   end
@@ -4119,7 +4113,11 @@ class DodontoFServer
     @newFileNameIndex ||= 0
     
     extName = getAllowedFileExtName(fileName)
-    extName ||= ""
+    
+    if( extName.nil? )
+      raise "invalidFileNameExtension\t#{fileName}"
+    end
+    
     logging(extName, "extName")
     
     roomNumber  = getRequestData('roomNumber')
@@ -4483,7 +4481,7 @@ class DodontoFServer
     logging(randResults, "randResults")
     
     if( isSecret )
-      params['message'] = "シークレットダイス"
+      params['message'] = getLanguageKey('secretDice')
       randResults = randResults.collect{|value, max| [0, 0] }
     end
     
@@ -4505,6 +4503,11 @@ class DodontoFServer
     logging(text, "getRolledMessage End text")
     
     return text
+  end
+  
+  
+  def getLanguageKey(key)
+    '###Language:' + key + '###'
   end
   
   
@@ -5739,7 +5742,7 @@ class DodontoFServer
     end
     
     if( findIndex.nil? )
-      throw Exception.new("deleteFindOne target is NOT found inspect:" )
+      raise "deleteFindOne target is NOT found"
     end
     
     logging(array.size, "array.size before")
@@ -6276,6 +6279,23 @@ class DodontoFServer
     
     editResource(params) do |resource, index|
       resource[index] = params
+    end
+  end
+  
+  def changeResourcesAll()
+    params = getParamsFromRequestData()
+    return if( params.nil? )
+    return if( params.empty? )
+    
+    changeSaveData(@saveFiles['time']) do |saveData|
+      resource = getResourceFromSaveData(saveData)
+      
+      resource.clear
+      
+      params.each do |param|
+        resource << param
+      end
+      
     end
   end
   

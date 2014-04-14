@@ -13,10 +13,6 @@
       <mx:HBox width="100%">
         <mx:Button label="{Language.s.sendButton}" click="sendCutIn()" />
         <mx:Spacer width="100%" />
-        <mx:CheckBox id="listDraggable"  selected="false"
-                     label="{Language.s.cutinSortMoveable}"
-                     toolTip="{Language.s.cutinSortMoveableTip}"/>
-        <mx:Spacer width="100%" />
         <mx:Button label="{Language.s.previewButton}" click="previewCutIn()" />
       </mx:HBox>
       
@@ -65,7 +61,9 @@
         <mx:Button label="{Language.s.changeButton}" click="changeCutInEffect()" />
         <mx:Button label="{Language.s.deleteButton}"  click="removeCutInEffect()" />
         <mx:Spacer width="100%" />
-        <mx:Button label="{Language.s.closeButton}"  click="PopUpManager.removePopUp(this)" />
+        <mx:CheckBox id="listDraggable"  selected="false"
+                     label="{Language.s.cutinSortMoveable}"
+                     toolTip="{Language.s.cutinSortMoveableTip}"/>
       </mx:HBox>
     </mx:Box>
     

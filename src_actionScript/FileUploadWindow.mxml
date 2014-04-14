@@ -81,7 +81,8 @@
             
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(dataEvent);
             Log.loggingTuning("jsonData", jsonData);
-            result.text = (jsonData.resultText);
+            
+            result.text = Language.getKeywordText( jsonData.resultText );
             
             if( result.text == "OK") {
                 var fileName:String = jsonData.uploadFileInfo.fileName;

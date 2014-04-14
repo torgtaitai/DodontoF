@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:ResizableWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*"
+   title="{Language.s.resourceWindowTitle}"
+   width="300" height="300"
+   x="100" y="100"
+   showCloseButton="true"
+   visible="false"
+  >
+  
+  <mx:DataGrid id="resourceListView"
+               dragEnabled="{listDraggable.selected}"
+               dropEnabled="{listDraggable.selected}"
+               dragMoveEnabled="{listDraggable.selected}"
+               dragComplete="dragComplete(event)"
+               width="100%"
+               height="100%"
+               dataProvider="{resourceList}"
+               sortableColumns="false"
+		       draggableColumns="false"
+               enabled="true"
+               editable="true"
+               itemEditEnd="changeResourceListItemEditEndFunction(event)"
+               >
+	<mx:columns>
+	  <mx:DataGridColumn headerText="{Language.s.resourceName}"
+                         dataField="name"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="0"
+                         width="50"
+                         />
+	  <mx:DataGridColumn headerText="{Language.s.resourceCount}"
+                         editorDataField="value"
+                         dataField="value"
+                         textAlign="left"
+                         editable="true"
+      	                 minWidth="0"
+                         width="30">
+        <mx:itemEditor>
+          <mx:Component>
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
+          </mx:Component>
+        </mx:itemEditor>
+      </mx:DataGridColumn>
+      
+	  <mx:DataGridColumn headerText="{Language.s.resourceOther}"
+                         dataField="unit"
+                         textAlign="left"
+                         editable="false"
+      	                 minWidth="20"
+                         width="20"
+                         />
+      
+	</mx:columns>
+  </mx:DataGrid>
+  
+  <mx:HBox width="100%"
+          horizontalAlign="center"
+          verticalGap="1"
+          >
+    <mx:Button id="addButton" paddingLeft="2" paddingRight="2" label="{Language.s.addButton}" click="add()" />
+    <mx:Button id="changeButton" paddingLeft="2" paddingRight="2" label="{Language.s.editButton}" click="change()" />
+    <mx:Button id="deleteButton" paddingLeft="2" paddingRight="2" label="{Language.s.deleteButton}" click="remove()" />
+
+    <mx:Spacer width="100%" />
+    <mx:CheckBox id="listDraggable"  selected="false"
+                 label="{Language.s.cutinSortMoveable}"
+                 toolTip="{Language.s.cutinSortMoveableTip}"/>
+  </mx:HBox>
+  
+  
+  <mx:Script>
+    <![CDATA[
+      
+      [Bindable]
+      private var resourceList:Array;
+      
+      import mx.core.IFlexDisplayObject;
+      import mx.events.DragEvent;
+      import mx.managers.DragManager;
+      import mx.events.ListEvent;
+      import mx.controls.dataGridClasses.DataGridColumn;
+      import mx.controls.NumericStepper;
+      import mx.controls.TextInput;
+      import mx.events.DataGridEvent;
+      import mx.collections.ArrayCollection;
+      import mx.core.Application;
+      import mx.managers.PopUpManager;
+      import mx.controls.Alert;
+      import flash.events.Event;
+      import flash.events.FocusEvent;
+      import mx.controls.TextArea;
+      import mx.containers.Box;
+      import mx.containers.HBox;
+      import mx.controls.Label;
+      import flash.events.KeyboardEvent;
+      import mx.effects.Glow;
+      import mx.controls.TextArea;
+      import mx.controls.CheckBox;
+      import mx.styles.CSSStyleDeclaration;
+      
+      
+      private static var instance:ResourceWindow;
+      private var guiInputSender:GuiInputSender;
+      
+      public static function getInstance():ResourceWindow {
+          return instance;
+      }
+      
+      
+      override public function getSaveInfoKeyName():String {
+          return "ResourceWindow";
+      }
+        
+      override public function setup():void {
+          resourceList = new Array();
+          instance = this;
+          
+          guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+          
+          setInitPosition();
+          
+          setResizeEventFunction( resizeInitiativeInfoBox );
+          resizeInitiativeInfoBox.call();
+      }
+      
+      
+      public function resizeInitiativeInfoBox():void {
+      }
+      
+      
+      override protected function getWindowInfoSaveData(window:IFlexDisplayObject):Object {
+          var info:Object = super.getWindowInfoSaveData(this);
+          
+          //info.anydata = getAnyData
+          
+          return info;
+      }
+      
+      public function setInitPosition():void {
+          //setLoadAddAction( loadOthers );
+          
+          if( loadPosition() ) {
+              return;
+          }
+      }
+      
+      /*
+      private function loadOthers(info:Object):void {
+          columnInfos = info.columnInfos;
+          Log.logging("loadOthers info.columnInfos", info.columnInfos);
+      }
+      */
+      
+      
+      private function changeResourceListItemEditEndFunction(event:DataGridEvent):void {
+          Log.logging(" called.");
+          
+          //キャンセル操作（ESCキーでのキャンセル）なら送信しないようチェック
+          if( event.reason == mx.events.DataGridEventReason.CANCELLED ) {
+              return;
+          }
+          
+          changeByEvent(event);
+          
+          //次回のリフレッシュで必ず値を更新するように更新時刻を0にリセット
+          //DodontoF_Main.getInstance().getGuiInputSender().getSender().resetLastUpdateTimeOfInitiativeTimer();
+      }
+      
+      public function setResourceList(list:Array):void {
+          if( list == null ) {
+              return;
+          }
+          resourceList = list;
+      }
+      
+      
+      private function add():void {
+          var window:AddResourceWindow = DodontoF.popup(AddResourceWindow, true) as AddResourceWindow;
+      }
+      
+      
+      private function change():void {
+          var data:Object = resourceList[ resourceListView.selectedIndex ];
+          
+          if( data == null ) {
+              return;
+          }
+          
+          var window:ChangeResourceWindow = DodontoF.popup(ChangeResourceWindow, true) as ChangeResourceWindow;
+          window.init(data);
+      }
+      
+      
+      private function changeByEvent(event:DataGridEvent):void {
+          var index:int = event.rowIndex;
+          var target:Object = resourceList[index];
+          
+          var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
+          var newCount:int = stepper.value;
+          
+          if( newCount == target.value ) {
+              Log.logging("値の変更なしのため処理無し。");
+              return;
+          }
+          
+          var data:Object = {
+              "name": target.name,
+              "value": newCount,
+              "unit": target.unit,
+              "resourceId": target.resourceId };
+          
+          guiInputSender.getSender().changeResource(data);
+      }
+      
+      private function remove():void {
+          var data:Object = resourceList[ resourceListView.selectedIndex ];
+          
+          if( data == null ) {
+              return;
+          }
+          
+          var resourceId:String = data.resourceId;
+          
+          Utils.askByAlert(Language.s.deleteResourceQuestionWindoTitle,
+                           Language.text("deleteResourceQuestion", data.name),
+                           function():void {
+                               guiInputSender.getSender().removeResource(resourceId);
+                           });
+      }
+      
+      
+      private function dragComplete(event:DragEvent):void { 
+          var paramsList:Array = resourceList;
+          for each(var params:Object in paramsList) {
+                  delete params.mx_internal_uid;
+              }
+          
+          Log.logging("dragComplete paramsList", paramsList);
+          
+          var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+          guiInputSender.getSender().changeResourcesAll(paramsList);
+      }
+      
+      
+    ]]>
+  </mx:Script>
+
+</torgtaitai:ResizableWindow>

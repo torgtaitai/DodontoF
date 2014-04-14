@@ -292,7 +292,9 @@
             Log.loggingTuning("event", event);
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(event);
             Log.loggingTuning("jsonData", jsonData);
-            resultList.push(jsonData.resultText);
+            
+            resultList.push( Language.getKeywordText(jsonData.resultText) );
+            
             printResultList();
         } catch(e:Error) {
             Log.loggingException("uploadImageFileResult", e);

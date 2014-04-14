@@ -160,6 +160,7 @@ package {
             this.base.visible = true;
             
             imageUrl = Config.getInstance().getUrlString(imageUrl);
+            
             if( preImageUrl == imageUrl ) {
                 zoomImage();
             } else {

@@ -683,10 +683,14 @@
     
 
     public function collectMainMenuInfos():Array {
-        var targetTyep:String = "check";
         var result:Array = new Array();
-        
         var array:Array = menuArray;
+        
+        return collectMenuInfos(array, result);
+    }
+    
+    private function collectMenuInfos(array:Array, result:Array):Array {
+        var targetTyep:String = "check";
         
         for(var i:int = 0 ; i < array.length ; i++) {
             var item:Object = array[i];
@@ -694,16 +698,14 @@
                 continue;
             }
             
-            var children:Array = item.children;
-            if( children == null ) {
-                continue;
+            if( item.type == targetTyep ) {
+                result.push( item );
             }
             
-            for each(var child:Object in children) {
-                    if( child.type == targetTyep ) {
-                        result.push( child );
-                    }
-                }
+            var children:Array = item.children;
+            if( children != null ) {
+                result = collectMenuInfos(children, result);
+            }
         }
         
         return result;
