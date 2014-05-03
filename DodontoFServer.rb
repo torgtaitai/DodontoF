@@ -3986,7 +3986,11 @@ class DodontoFServer
   
   
   def getImageDataFromParams(params, key)
-    value = params[key]
+    if '1.9.0'  <= RUBY_VERSION
+      value = params[key].encode(Encoding::BINARY, Encoding::BINALY)
+    else
+      value = params[key]
+    end
     
     sizeCheckResult = checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
     raise sizeCheckResult unless( sizeCheckResult.empty? )
