@@ -31,7 +31,8 @@ def loggingForce(obj, *options)
   end
 end
 
-
+def loggingTest(*args)
+end
 
 def debug(obj1, *obj2)
   logging(obj1, *obj2)

@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.44.01"
-$versionDate = "2014/04/15"
+$versionOnly = "Ver.1.45.04"
+$versionDate = "2014/07/25"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -96,6 +96,7 @@ $saveFiles = {
 $recordKey = 'record'
 $record = 'record.json'
 
+$diceBotTableSaveKey = "diceBotTable"
 
 class DodontoFServer
   
@@ -1078,7 +1079,7 @@ class DodontoFServer
     return if( chats.nil? )
     
     chats.delete_if do |writtenTime, data|
-      ((writtenTime < time) or (not data['sendto'].nil?))
+      ((writtenTime <= time) or (not data['sendto'].nil?))
     end
     
     logging('deleteOldChatTextForWebIf End')
@@ -2194,6 +2195,7 @@ class DodontoFServer
       'logoutUrl' => $logoutUrl,
       'languages' => getLanguages(),
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
+      'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
     }
     
     logging(result, "result")
@@ -2581,48 +2583,6 @@ class DodontoFServer
   end
   
   
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
-    roomNumberRange = (roomNumber..roomNumber)
-    logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
-    
-    unless( ignoreLoginUser )
-      userNames = getLoginUserNames()
-      userCount = userNames.size
-      logging(userCount, "checkRemovePlayRoom userCount");
-      
-      if( userCount > 0 )
-        return "userExist"
-      end
-    end
-    
-    if( not password.nil? )
-      if( not checkPassword(roomNumber, password) )
-        return "password"
-      end
-    end
-    
-    if( $unremovablePlayRoomNumbers.include?(roomNumber) )
-      return "unremovablePlayRoomNumber"
-    end
-    
-    lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    lastAccessTime = lastAccessTimes[roomNumber]
-    logging(lastAccessTime, "lastAccessTime")
-    
-    unless( lastAccessTime.nil? )
-      now = Time.now
-      spendTimes = now - lastAccessTime
-      logging(spendTimes, "spendTimes")
-      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-      if( spendTimes < $deletablePassedSeconds )
-        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
-      end
-    end
-    
-    return "OK"
-  end
-  
-  
   def checkPassword(roomNumber, password)
     
     return true unless( $isPasswordNeedFroDeletePlayRoom )
@@ -2650,6 +2610,12 @@ class DodontoFServer
     ignoreLoginUser = params['ignoreLoginUser']
     password = params['password']
     password ||= ""
+    
+    adminPassword = params["adminPassword"]
+    logging(adminPassword, "removePlayRoom() adminPassword")
+    if( isMentenanceMode(adminPassword) )
+      password = nil
+    end
     
     removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
   end
@@ -2693,6 +2659,51 @@ class DodontoFServer
     
     return result
   end
+
+
+  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+    roomNumberRange = (roomNumber..roomNumber)
+    logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
+    
+    unless( ignoreLoginUser )
+      userNames = getLoginUserNames()
+      userCount = userNames.size
+      logging(userCount, "checkRemovePlayRoom userCount");
+      
+      if( userCount > 0 )
+        return "userExist"
+      end
+    end
+    
+    if( not password.nil? )
+      if( not checkPassword(roomNumber, password) )
+        return "password"
+      end
+    end
+    
+    if( $unremovablePlayRoomNumbers.include?(roomNumber) )
+      return "unremovablePlayRoomNumber"
+    end
+    
+    lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
+    lastAccessTime = lastAccessTimes[roomNumber]
+    logging(lastAccessTime, "lastAccessTime")
+    
+    unless( lastAccessTime.nil? )
+      now = Time.now
+      spendTimes = now - lastAccessTime
+      logging(spendTimes, "spendTimes")
+      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+      if( spendTimes < $deletablePassedSeconds )
+        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+      end
+    end
+    
+    return "OK"
+  end
+  
+  
+
   
   def removeLocalSpaceDir(roomNumber)
     dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
@@ -2933,8 +2944,22 @@ class DodontoFServer
   def save()
     isAddPlayRoomInfo = true
     extension = getRequestData('extension')
-    saveSelectFiles($saveFiles.keys, extension, isAddPlayRoomInfo)
+    
+    addInfos = {}
+    addInfos[$diceBotTableSaveKey] = getDiceTableData()
+    
+    saveSelectFiles($saveFiles.keys, extension, isAddPlayRoomInfo, addInfos)
   end
+  
+  def getDiceTableData()
+    dir = getDiceBotExtraTableDirName
+    tableInfos = getBotTableInfosFromDir(dir)
+    
+    tableInfos.each{|i| i.delete('fileName') }
+    
+    return tableInfos
+  end
+  
   
   def saveMap()
     extension = getRequestData('extension')
@@ -2943,12 +2968,12 @@ class DodontoFServer
   end
   
   
-  def saveSelectFiles(selectTypes, extension, isAddPlayRoomInfo = false)
+  def saveSelectFiles(selectTypes, extension, isAddPlayRoomInfo = false, addInfos = {})
     saveDataAll = getSelectFilesData(selectTypes, isAddPlayRoomInfo)
-    saveSelectFilesFromSaveDataAll(saveDataAll, extension)
+    saveSelectFilesFromSaveDataAll(saveDataAll, extension, addInfos)
   end
-    
-  def saveSelectFilesFromSaveDataAll(saveDataAll, extension)
+  
+  def saveSelectFilesFromSaveDataAll(saveDataAll, extension, addInfos = {})
     result = {}
     result["result"] = "unknown error"
     
@@ -2961,6 +2986,10 @@ class DodontoFServer
     
     saveData = {}
     saveData['saveDataAll'] = saveDataAll
+    
+    addInfos.each do |key, data|
+      saveData[key] = data
+    end
     
     text = getTextFromJsonData(saveData)
     saveFileName = getNewSaveFileName(extension)
@@ -3087,16 +3116,16 @@ class DodontoFServer
   def checkRoomStatus()
     deleteOldUploadFile()
     
-    checkRoomStatusData = getParamsFromRequestData()
-    logging(checkRoomStatusData, 'checkRoomStatusData')
+    params = getParamsFromRequestData()
+    logging(params, 'params')
     
-    roomNumber = checkRoomStatusData['roomNumber']
+    roomNumber = params['roomNumber']
     logging(roomNumber, 'roomNumber')
     
     @saveDirInfo.setSaveDataDirIndex(roomNumber)
     
-    isMentenanceModeOn = false;
-    isWelcomeMessageOn = $isWelcomeMessageOn;
+    isMentenanceModeOn = false
+    isWelcomeMessageOn = $isWelcomeMessageOn
     playRoomName = ''
     chatChannelNames = nil
     canUseExternalImage = false
@@ -3118,12 +3147,12 @@ class DodontoFServer
       end
     end
     
-    unless( $mentenanceModePassword.nil? )
-      if( checkRoomStatusData["adminPassword"] == $mentenanceModePassword )
-        isPasswordLocked = false
-        isWelcomeMessageOn = false
-        isMentenanceModeOn = true
-      end
+    adminPassword = params["adminPassword"]
+    if( isMentenanceMode(adminPassword) )
+      isPasswordLocked = false
+      isWelcomeMessageOn = false
+      isMentenanceModeOn = true
+      canVisit = false
     end
     
     logging("isPasswordLocked", isPasswordLocked);
@@ -3143,6 +3172,11 @@ class DodontoFServer
     logging(result, "checkRoomStatus End result")
     
     return result
+  end
+  
+  def isMentenanceMode(adminPassword)
+    return false if( $mentenanceModePassword.nil? )
+    return ( adminPassword == $mentenanceModePassword )
   end
   
   def loginPassword()
@@ -3183,11 +3217,11 @@ class DodontoFServer
         result['resultText'] = "OK"
         result['visiterMode'] = true
       else
-        changedPassword = saveData['playRoomChangedPassword']
-        if( isPasswordMatch?(password, changedPassword) )
+        playRoomChangedPassword = saveData['playRoomChangedPassword']
+        if( isPasswordMatch?(password, playRoomChangedPassword) )
           result['resultText'] = "OK"
         else
-          result['resultText'] = "パスワードが違います"
+          result['resultText'] = "passwordMismatch"
         end
       end
     end
@@ -3277,7 +3311,9 @@ class DodontoFServer
   
   def addBotTable()
     result = {}
-    result['resultText'] = addBotTableMain()
+    
+    params = getParamsFromRequestData()
+    result['resultText'] = addBotTableMain(params)
     
     if( result['resultText'] != "OK" )
       return result
@@ -3291,12 +3327,11 @@ class DodontoFServer
     return result
   end
   
-  def addBotTableMain()
+  def addBotTableMain(params)
     logging("addBotTableMain Begin")
     
     dir = getDiceBotExtraTableDirName
     makeDir(dir)
-    params = getParamsFromRequestData()
     
     require 'TableFileData'
     
@@ -3817,7 +3852,7 @@ class DodontoFServer
       checkLoad()
       
       setRecordWriteEmpty
-    
+      
       params = getParamsFromRequestData()
       logging(params, 'load params')
       
@@ -3875,7 +3910,6 @@ class DodontoFServer
   def loadFromJsonData(jsonData)
     logging(jsonData, 'loadFromJsonData jsonData')
     
-    saveDataAll = getSaveDataAllFromSaveData(jsonData)
     params = getParamsFromRequestData()
     
     removeCharacterDataList = params['removeCharacterDataList']
@@ -3887,11 +3921,11 @@ class DodontoFServer
     logging(targets, "targets")
     
     if( targets.nil? ) 
-      logging("loadSaveFileDataAll(saveDataAll)")
-      loadSaveFileDataAll(saveDataAll)
+      logging("loadSaveFileDataAll(jsonData)")
+      loadSaveFileDataAll(jsonData)
     else
-      logging("loadSaveFileDataFilterByTargets(saveDataAll, targets)")
-      loadSaveFileDataFilterByTargets(saveDataAll, targets)
+      logging("loadSaveFileDataFilterByTargets(jsonData, targets)")
+      loadSaveFileDataFilterByTargets(jsonData, targets)
     end
     
     result = {
@@ -3925,7 +3959,9 @@ class DodontoFServer
     addCharacterData( characterDataList )
   end
   
-  def loadSaveFileDataFilterByTargets(saveDataAll, targets)
+  def loadSaveFileDataFilterByTargets(jsonData, targets)
+    saveDataAll = getSaveDataAllFromSaveData(jsonData)
+    
     targets.each do |target|
       logging(target, 'loadSaveFileDataFilterByTargets each target')
       
@@ -3933,7 +3969,7 @@ class DodontoFServer
       when "map"
         mapData = getLoadData(saveDataAll, 'map', 'mapData', {})
         changeMapSaveData(mapData)
-      when "characterData", "mapMask", "mapMarker", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", getCardType()
+      when "characterData", "mapMask", "mapMarker", "floorTile", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", getCardType()
         loadCharacterDataList(saveDataAll, target)
       when "characterWaitingRoom"
         logging("characterWaitingRoom called")
@@ -3951,13 +3987,20 @@ class DodontoFServer
       when "initiative"
         roundTimeData = getLoadData(saveDataAll, 'time', 'roundTimeData', {})
         changeInitiativeData(roundTimeData)
+      when "resource"
+        resource = getLoadData(saveDataAll, 'time', 'resource', [])
+        changeResourcesAllByParam(resource)
+      when "diceBotTable"
+        loadDiceBotTable(jsonData)
       else
         loggingForce(target, "invalid load target type")
       end
     end
   end
   
-  def loadSaveFileDataAll(saveDataAll)
+  def loadSaveFileDataAll(jsonData)
+    saveDataAll = getSaveDataAllFromSaveData(jsonData)
+    
     logging("loadSaveFileDataAll(saveDataAll) begin")
     
     @saveFiles.each do |fileTypeName, trueSaveFileName|
@@ -3976,6 +4019,8 @@ class DodontoFServer
       saveDataForType = saveDataAll[$playRoomInfoTypeName]
       loadSaveFileDataForEachType($playRoomInfoTypeName, trueSaveFileName, saveDataForType)
     end
+    
+    loadDiceBotTable(jsonData)
     
     logging("loadSaveFileDataAll(saveDataAll) end")
   end
@@ -3998,6 +4043,27 @@ class DodontoFServer
   end
   
   
+  def loadDiceBotTable(jsonData)
+    
+    data = jsonData[$diceBotTableSaveKey]
+    return if( data.nil? )
+    
+    data.each do |info|
+      info['table'] = getDiceBotTableString(info['table'])
+      addBotTableMain(info)
+    end
+  
+  end
+  
+  def getDiceBotTableString(table)
+    
+    lines = []
+    table.each do |line|
+      lines << line.join(":")
+    end
+    
+    return lines.join("\n")
+  end
   
   def getSmallImageDir
     saveDir = $imageUploadDir
@@ -6284,6 +6350,10 @@ class DodontoFServer
   
   def changeResourcesAll()
     params = getParamsFromRequestData()
+    changeResourcesAllByParam(params)
+  end
+  
+  def changeResourcesAllByParam(params)
     return if( params.nil? )
     return if( params.empty? )
     

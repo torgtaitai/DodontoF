@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.44.01(2014/04/15)";
+        private var version:String = "Ver.1.45.04(2014/07/25)";
         
         public function getVersion():String {
             return version;
@@ -280,6 +280,8 @@ package {
                              getDodontoFM().getMap().setVisibleGridPositionLayer );
             loadToggleState( serverInfo, info, "isGridVisible",
                              getDodontoFM().getMap().setVisibleGridLayer );
+            loadToggleState( serverInfo, info, "isRotateMarkerVisible",
+                             Rotater.setGlobalVisible );
             
             if( isUseServer ) {
                 loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
@@ -289,6 +291,8 @@ package {
                 loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isCardHandleLogVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isResourceWindowVisible");
+                loadToggleStateForRisizableWindow(serverInfo, "isCounterRemoconVisible");
             }
             
             Log.logging("loadViewStateInfo info", info);
@@ -500,5 +504,60 @@ package {
         [Bindable]
         static public var canUseExternalImageModeOn:Boolean = false;
         
+        
+        
+        private var characterInfoToolTipMaxWidth:int = 50;
+        private var characterInfoToolTipMaxHeight:int = 20;
+        
+        public function setCharacterInfoToolTipMax(maxInfo:Array):void {
+            if( maxInfo == null ) {
+                return;
+            }
+            
+            characterInfoToolTipMaxWidth = parseInt(maxInfo[0]);
+            characterInfoToolTipMaxHeight= parseInt(maxInfo[1]);
+        }
+        
+        public function getToolTipMessage(piece:InitiativedPiece):String {
+            var toolTipMessage:String = "";
+            
+            toolTipMessage += "[" + piece.getName() + "]";
+            
+            var addInfos:Array = piece.getAdditionalInfos();
+            toolTipMessage += addInfos.join("\n");
+            toolTipMessage += "\n";
+            toolTipMessage += piece.getInfo();
+            
+            toolTipMessage = cutToolTip(toolTipMessage);
+            
+            return toolTipMessage;
+        }
+        
+        private function cutToolTip(message:String):String {
+            var result:Array = new Array();
+            
+            var lines:Array = message.split("\r");
+            for(var i:int ; i < lines.length ; i++) {
+                
+                if( characterInfoToolTipMaxHeight > 0 ) {
+                    if( i >= characterInfoToolTipMaxHeight ) {
+                        break;
+                    }
+                }
+                
+                var line:String = lines[i];
+                
+                if( characterInfoToolTipMaxWidth > 0 ) {
+                    line = line.substring(0, characterInfoToolTipMaxWidth);
+                }
+                
+                result.push(line);
+            }
+            
+            var resultString:String = result.join("\n");
+            return resultString;
+        }
+        
+
     }
 }

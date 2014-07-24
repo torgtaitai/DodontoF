@@ -75,37 +75,35 @@ package {
             }
         }
         
-        override protected function initDrawRange():void {
-            loadViewImage();
-            initDrawSquareDD4th();
-        }
-        
         override public function loadViewImage():void {
             var size:int = 0;
             if( this.getRangeType() == closeBurst.data ) {
-                size = 1;
+                size = Utils.getMapRangeSize();
             }
             view.setIsDrawRound(false);
-            view.loadImage(getCenterImageUrl(), size);
+            view.loadImage(Utils.getCenterImageUrl(), size);
         }
         
-        private function initDrawSquareDD4th():void {
-            view.graphics.lineStyle(0, 0x000000);
-            view.graphics.beginFill(getColor(), 0.5);
+        
+        override public function initDrawRangeSquare():void {
+            
+            var drawAlpha:Number = 0.5;
+            view.graphics.beginFill(getColor(), drawAlpha);
             
             var radius:int = getRadius();
+            var length:int = Utils.getMapRangeSquareLength();
             
             if( this.getRangeType() == closeBurst.data ) {
-                view.graphics.drawRect( radius * getSquareLength() * -1,
-                                        radius * getSquareLength() * -1,
-                                        (radius * 2 + 1) * getSquareLength(),
-                                        (radius * 2 + 1) * getSquareLength() );
+                view.graphics.drawRect( radius * length * -1,
+                                        radius * length * -1,
+                                        (radius * 2 + 1) * length,
+                                        (radius * 2 + 1) * length );
                                         
             } else if( this.getRangeType() == blast.data ) {
                 view.graphics.drawRect( 0,
                                         0,
-                                        radius * getSquareLength(),
-                                        radius * getSquareLength() );
+                                        radius * length,
+                                        radius * length );
             } else {
                 Log.loggingError("MagicRangeDD4th.initDrawSquareDD4th rangeType is invalid", this.getRangeType());
             }

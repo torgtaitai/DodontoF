@@ -58,7 +58,7 @@
                          width="30">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -90,7 +90,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -124,7 +124,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -158,7 +158,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -192,7 +192,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -226,7 +226,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -260,7 +260,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -294,7 +294,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -328,7 +328,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -362,7 +362,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -396,7 +396,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -430,7 +430,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -464,7 +464,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -498,7 +498,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -532,7 +532,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -566,7 +566,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -600,7 +600,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -634,7 +634,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -668,7 +668,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -702,7 +702,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -736,7 +736,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -770,7 +770,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -804,7 +804,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -838,7 +838,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -872,7 +872,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -906,7 +906,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -940,7 +940,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -974,7 +974,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -1008,7 +1008,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -1042,7 +1042,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>
@@ -1076,7 +1076,7 @@
                          width="25">
         <mx:itemEditor>
           <mx:Component>
-            <mx:NumericStepper maximum="999" minimum="-999" />
+            <mx:NumericStepper maximum="9999999999" minimum="-9999999999" />
           </mx:Component>
         </mx:itemEditor>
       </mx:DataGridColumn>

@@ -233,6 +233,7 @@ package {
             
             //カード操作時のログを残さない指定の場合、表示なしだが発言は正しいので true
             if( isInvisibleChatHandleLog(chatSenderUniqueId) ) {
+                Log.logging("it's card  log. and config is set NOT record card");
                 return true;
             }
             

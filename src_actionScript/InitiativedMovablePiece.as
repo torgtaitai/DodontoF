@@ -212,7 +212,7 @@ package {
         }
         
         public function getToolTipMessage():String {
-            return Utils.getToolTipMessage(this);
+            return Config.getInstance().getToolTipMessage(this);
         }
         
         protected function getItemPopUpChangeWindow(event:ContextMenuEvent):void {

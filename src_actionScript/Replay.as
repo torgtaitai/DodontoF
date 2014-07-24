@@ -136,6 +136,7 @@ package {
         }
         
         public function addRestChatSendDataForReplay(chatSendData:ChatSendData):void {
+            Log.logging("addRestChatSendDataForReplay !!!!");
             restChatSendDataForReplay.push(chatSendData);
         }
         
@@ -164,12 +165,15 @@ package {
         }
         
         public function isIgnoreChannel(channel:int):Boolean {
-            //Log.loggingError("isIgnoreChannel channel", channel);
             var channelName:String = DodontoF_Main.getInstance().getChatChannelName(channel);
             return isIgnoreChannelName(channelName);
         }
         
         public function isIgnoreChannelName(channelName:String):Boolean {
+            if( channelName == null ) {
+                return false;
+            }
+            
             for(var i:int = 0 ; i < activeChannelNames.length ; i++) {
                 if( channelName == activeChannelNames[i] ) {
                     return false;
@@ -361,11 +365,15 @@ package {
         }
         
         private function printRestChatMessage():int {
+            Log.logging("printRestChatMessage Begin");
             
             var chatSendData:ChatSendData= restChatSendDataForReplay.shift();
             
             var channel:int = chatSendData.getChannel();
+            Log.logging("channel",  channel);
+            
             if( isIgnoreChannel(channel) ) {
+                Log.logging("isIgnoreChannel");
                 return 0;
             }
             

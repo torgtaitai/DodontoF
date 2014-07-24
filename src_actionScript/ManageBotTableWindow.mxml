@@ -17,6 +17,10 @@
                doubleClick="openEditWindow()"
                >
 	<mx:columns>
+	  <mx:DataGridColumn headerText="{Language.s.gameSystem}"
+                         dataField="gameName"
+                         textAlign="center"
+                         width="100"/>
 	  <mx:DataGridColumn headerText="{Language.s.botTableCommandName}"
                          dataField="command"
                          textAlign="center"
@@ -93,7 +97,7 @@
             }
             
             Log.loggingTuning("jsonData.tableInfos", jsonData.tableInfos);
-            tableInfos = new ArrayCollection( jsonData.tableInfos );
+            setTableInfos( jsonData.tableInfos );
             
             if( isGetDiceBotInfos ) {
                 new CutInCommandGetDiceBotInfos().sendCommand();
@@ -104,6 +108,13 @@
         }
         
         Log.loggingTuning("=>getBotTableInfosResult() End");
+    }
+    
+    private function setTableInfos(infos:Array):void {
+        for each(var data:Object in infos) {
+            data.gameName = DodontoF_Main.getInstance().getDiceBotName(data.gameType);
+        }
+        tableInfos = new ArrayCollection( infos );
     }
     
     private function openAddWindow():void {
@@ -133,7 +144,7 @@
         var title:String = data.title;
         var text:String = getTableText(data.table);
         
-        window.init( this, command, dice, title, text );
+        window.init( this, command, dice, title, text, data.gameType );
     }
     
     private function getSelectData():Object {
@@ -159,25 +170,26 @@
     
     
     public function addBotTable(command:String, dice:String, title:String, table:String,
-                              checkFunction:Function):void {
+                                gameType:String, checkFunction:Function):void {
         
         var resultFunction:Function = function(obj:Object):void {
             thisObj.getBotTableInfosResult(obj, checkFunction);
         }
         
-        sender.addBotTable(command, dice, title, table, resultFunction);
+        sender.addBotTable(command, dice, title, table, gameType, resultFunction);
     }
     
     
     public function changeBotTable(command:String, dice:String, title:String, table:String,
-                                   originalCommand:String,
+                                   gameType:String, originalCommand:String, originalGameType:String,
                                    checkFunction:Function):void {
         
         var resultFunction:Function = function(obj:Object):void {
             thisObj.getBotTableInfosResult(obj, checkFunction);
         }
         
-        sender.changeBotTable(command, dice, title, table, originalCommand, resultFunction);
+        sender.changeBotTable(command, dice, title, table, gameType,
+                              originalCommand, originalGameType, resultFunction);
     }
     
     

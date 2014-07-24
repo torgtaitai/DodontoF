@@ -22,11 +22,12 @@
       click="loadSelectBox.enabled = true"
       />
     
-    <mx:HBox id="loadSelectBox" width="100%" height="100%" enabled="false" >
+    <mx:HBox id="loadSelectBox" width="100%" height="{this.height-150}" enabled="false" >
       <mx:Spacer width="15" height="100%" />
       <mx:Box width="100%" height="100%" >
         <mx:CheckBox id="map" label="{Language.s.loadMapData}" />
         <mx:Label text="{Language.s.loadAPartOfSaveDataInfomationForMapObject}" />
+        <mx:CheckBox id="floorTile" label="{Language.s.floorTile}" />
         <mx:CheckBox id="mapMask" label="{Language.s.mapMask}" />
         <mx:CheckBox id="mapMarker" label="{Language.s.mapMarker}" />
         <mx:CheckBox id="character" label="{Language.s.character}" />
@@ -37,6 +38,8 @@
         <mx:CheckBox id="cutIn" label="{Language.s.cutIn}" />
         <mx:CheckBox id="card" label="{Language.s.card}" />
         <mx:CheckBox id="initiative" label="{Language.s.initiativeWindowTitle}" />
+        <mx:CheckBox id="resource" label="{Language.s.resourceWindowTitle}" />
+        <mx:CheckBox id="diceBotTable" label="{Language.s.diceBotTable}" />
       </mx:Box>
     </mx:HBox>
     
@@ -64,6 +67,9 @@
         
         if( map.selected ) {
             targets.push("map");
+        }
+        if( floorTile.selected ) {
+            targets.push( FloorTile.getTypeStatic() );
         }
         if( mapMask.selected ) {
             targets.push( MapMask.getTypeStatic() );
@@ -96,6 +102,12 @@
         }
         if( initiative.selected ) {
             targets.push( "initiative" );
+        }
+        if( resource.selected ) {
+            targets.push( "resource" );
+        }
+        if( diceBotTable.selected ) {
+            targets.push( "diceBotTable" );
         }
         
         Log.logging("targets", targets);

@@ -70,7 +70,6 @@ package {
         }
         
         
-        
         public static function loggingFatalError(text:String, obj:Object = "noLogPrint"):void {
             loggingByLevel(text, fatalError, obj);
         }

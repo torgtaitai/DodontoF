@@ -376,6 +376,9 @@ package {
                 roundTimer.setSender( sender );
                 roundTimer.setReciever( sender.getReciever() );
                 
+                Log.logging("init sessionRecorder.");
+                initSessionRecord();
+                
                 Log.logging("init end.");
                 
             } catch(e:Error) {
@@ -408,7 +411,7 @@ package {
         }
         
         public function logout():void {
-            if( isSessionRecording() ) {
+            if( RecordHistory.getInstance().isRecording() ) {
                 Alert.show(Language.s.nowYouAreRecordingErrorMessage);
                 return;
             }
@@ -446,31 +449,41 @@ package {
             logoutUrl = url;
         }
         
-        public function isSessionRecording():Boolean {
-            return getGuiInputSender().getSender().getReciever().isSessionRecording();
-        }
         
-        public function startSessionRecording():void {
-            chatWindow.sendSystemMessage(Language.s.startRecordMessage);
+        public function startSessionRecording(isResume:Boolean):void {
+            if( isResume ) {
+                chatWindow.sendSystemMessage(Language.s.resumeRecordMessage);
+            } else {
+                chatWindow.sendSystemMessage(Language.s.startRecordMessage);
+            }
+            
             var sender:SharedDataSender = getGuiInputSender().getSender();
             sender.startSessionRecording();
         }
         
-        public function stopSessionRecording():void {
-            var reciever:SharedDataReceiver = getGuiInputSender().getSender().getReciever();
-            if( ! reciever.stopHistory() ) {
+        public function stopSessionRecording(action:Function = null):void {
+            if( ! RecordHistory.getInstance().stopRecord() ) {
                 return;
             }
             
-            var history:Array = reciever.getHistory();
+            var history:Array = RecordHistory.getInstance().getHistory();
             
             var saveFileBaseName:String = "DodontoF_PlayRecord_";
             saveHistory(history, saveFileBaseName);
-            
-            chatWindow.sendSystemMessage(Language.s.stopRecordMessage);
         }
         
         private var fileReferenceForSessionRecording:FileReference = new FileReference();
+        
+        private function initSessionRecord():void {
+            fileReferenceForSessionRecording.addEventListener(Event.COMPLETE, function(event:Event):void {
+                    clearHistory();
+                    chatWindow.sendSystemMessage(Language.s.stopRecordMessage);
+                });
+        }
+        
+        private function clearHistory():void {
+            RecordHistory.getInstance().clearHistory(dodontoF);
+        }
         
         public function saveHistory(history:Array, baseName:String):void {
             var dateString:String = DodontoF_Main.getDateString();
@@ -478,6 +491,19 @@ package {
             
             var historyString:String = Utils.getJsonString(history);
             fileReferenceForSessionRecording.save(historyString, saveFileName);
+        }
+        
+        
+        public function cancelSessionRecording():void {
+            
+            var reciever:SharedDataReceiver = getGuiInputSender().getSender().getReciever();
+            
+            Utils.askByAlert(Language.s.cancelRecordQuestionTitle,
+                             Language.s.cancelRecordQuestion,
+                             function():void {
+                                 clearHistory();
+                                 chatWindow.sendSystemMessage(Language.s.cancelRecordMessage);
+                             });
         }
         
         
@@ -1029,7 +1055,20 @@ package {
             chatWindow.initForFirstRefresh(isWelcomeMessageOn);
             
             dodontoF.findMainMenuItem("pass_display").enabled = true;
+            
+            checkRecording();
         }
+
+        private function checkRecording():void {
+            
+            if( ! RecordHistory.getInstance().isHaveHistory() ) {
+                return;
+            }
+            
+            dodontoF.startSessionRecording(true);
+        }
+        
+        
         
         private var localReplayMode:Boolean = false;
         public function isLocalReplayMode():Boolean {
@@ -1059,6 +1098,7 @@ package {
         {type:"separator"},
         {label:Language.s.startSessionRecordingMenu, data:"startSessionRecording", enabled:"true"},
         {label:Language.s.stopSessionRecordingMenu, data:"stopSessionRecording", enabled:"false"},
+        {label:Language.s.cancelSessionRecordingMenu, data:"cancelSessionRecording", enabled:"false"},
         {type:"separator"},
         {label:Language.s.logoutMenu, data:"logout", enabled:"true"},
                 ]},
@@ -1103,6 +1143,7 @@ package {
                 children: [
                            {label:Language.s.addMagicRangeMenu, data:"addMagicRange"},
                            {label:Language.s.addMagicRangeDD4thMenu, data:"addMagicRangeDD4th"},
+                           {label:Language.s.addLogHorizonRangeMenu, data:"addLogHorizonRange"},
                            {label:Language.s.addMetallicGuardianDamageRangeMenu, data:"addMetallicGuardianDamageRange"},
                            ]},
         {label:Language.s.addMagicTimerMenu, data:"addMagicTimer"},

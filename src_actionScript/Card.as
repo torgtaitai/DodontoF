@@ -537,13 +537,14 @@ package {
                 return;
             }
             
-            openPrivateMenu.visible = false; //"カードを見る：非公開で自分だけ
-            openPublicMenu.visible = false; //"カードを全員に公開する
+            openPrivateMenu.visible = false; //カードを見る：非公開で自分だけ
+            openPublicMenu.visible = false; //カードを全員に公開する
             closeSecretMenu.visible = false;  //カードを伏せる：非公開に戻す
-            changeOwnerMenu.visible = false; //"カードの管理者を自分に変える
+            changeOwnerMenu.visible = false; //カードの管理者を自分に変える
             printCardTextMenu.visible = false; //カードテキストをチャットに引用
-            removeCardMenu.visible = false; //"カード削除
-            rewriteCardMenu.visible = false; //"カード書き換え
+            removeCardMenu.visible = false; //カード削除
+            rewriteCardMenu.visible = false; //カード書き換え
+            dumpToTrushMountCardMenu.visible = false; //カード捨て
             
             if( this.isPrintCardText() ) {
                 if( ! isPrintBackSide() ) {
@@ -551,18 +552,22 @@ package {
                 }
             }
             
-            if( this.canDelete ) {
-                removeCardMenu.visible = true;
-            }
-            
-            if( this.canRewrite ) {
-                rewriteCardMenu.visible = true;
-            }
-            
-            if( ! isOwner() ) {
+            if( isOwner() ) {
+                setContextMenuForOwner();
+            } else {
                 changeOwnerMenu.visible = true; //カードの管理者を自分に変える
-                return;
             }
+        }
+        
+        private function setContextMenuForOwner():void {
+            
+            if( isTrashable() ) {
+                dumpToTrushMountCardMenu.visible = ( ! this.canDelete );
+            }
+            
+            removeCardMenu.visible = this.canDelete;
+            rewriteCardMenu.visible = this.canRewrite;
+            
             
             if( this.isOpen ) {
                 closeSecretMenu.visible = true ;  //カードを伏せる：非公開に戻す
@@ -577,6 +582,7 @@ package {
             
             openPublicMenu.visible = true; //カードを全員に公開する
         }
+        
         
         override public function getViewRotationDiff():Number {
             var rotationDiff:Number = 0;
@@ -621,6 +627,16 @@ package {
         
         public function isTrashable():Boolean {
             return true;
+        }
+        
+        
+        protected function getContextMenuItemDumptToTrushMountCard(event:ContextMenuEvent):void {
+            var trushMount:CardTrushMount = getMap().getTrushMount(this);
+            if( trushMount == null ) {
+                return;
+            }
+            
+            moveAndDumpToTrushMount(trushMount);
         }
         
         private function moveAndDumpToTrushMount(trushMount:CardTrushMount):void {
@@ -785,6 +801,7 @@ package {
         private var removeCardMenu:ContextMenuItem;
         private var rewriteCardMenu:ContextMenuItem;
         private var printCardTextMenu:ContextMenuItem;
+        private var dumpToTrushMountCardMenu:ContextMenuItem;
         
         override protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
@@ -799,6 +816,7 @@ package {
             printCardTextMenu = addMenuItem(menu, Language.s.writeCardTextToChat, getContextMenuItemFunctionPrintCardText, true);
             rewriteCardMenu = addMenuItem(menu, Language.s.changeCard, getContextMenuItemRewriteCard, true);
             removeCardMenu = addMenuItem(menu, Language.s.deleteCard, getContextMenuItemRemoveCharacter, true);
+            dumpToTrushMountCardMenu = addMenuItem(menu, Language.s.dumpCard, getContextMenuItemDumptToTrushMountCard, true);
             
             view.contextMenu = menu;
         }

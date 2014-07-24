@@ -14,7 +14,7 @@ package {
     import flash.geom.Point;
     import flash.display.Graphics;
     
-    public class MetallicGuardianDamageRange extends MovablePiece {
+    public class MetallicGuardianDamageRange extends MovablePiece implements MapRange {
         
         private var name:String = "";
         private var maxRange:int = 1;
@@ -80,8 +80,6 @@ package {
             
             view.setIsDrawBack(false);
             view.addChild(upperLayer);
-            upperLayer.x = getSquareLength() / 2;
-            upperLayer.y = getSquareLength() / 2;
         }
         
         override public function getName():String {
@@ -165,34 +163,37 @@ package {
             return true;
         }
         
-        protected function getCenterImageUrl():String {
-            return "image/centerMarker.png";
-        }
-        
         override public function loadViewImage():void {
             Log.logging("loadViewImage Begin");
             
-            var size:int = 1;
+            var size:int = Utils.getMapRangeSize();
             view.setIsDrawRound(false);
-            view.loadImageWidthHeightRotation(getCenterImageUrl(), size, size, getRotation());
+            view.loadImageWidthHeightRotation(Utils.getCenterImageUrl(), size, size, getRotation());
             super.loadViewImage();
             
             this.upperLayer.rotation = getRotation();
-            initDrawRangeSquare();
+            
+            
+            var length:int = Utils.getMapRangeSquareLength();
+            upperLayer.x = length / 2;
+            upperLayer.y = length / 2;
             
             Log.logging("loadViewImage End");
         }
         
         override protected function initDraw(x:Number, y:Number):void {
-            clearDrown();
             move(x, y, true);
+            initDrawRange();
+        }
+        
+        public function initDrawRange():void {
             loadViewImage();
+            clearDrown();
+            initDrawRangeSquare();
         }
         
         
-        private function initDrawRangeSquare():void {
-            clearDrown();
-            
+        public function initDrawRangeSquare():void {
             var points:Array = getSquarePoints(this.maxRange);
             var ignorePoints:Array = getSquarePoints(this.minRange - 1);
             
@@ -265,7 +266,7 @@ package {
         
         private var alreadyDrawedPosition:Object = new Object();
         
-        private function clearDrown():void {
+        public function clearDrown():void {
             getViewGraphics().clear();
             alreadyDrawedPosition = new Object();
         }
@@ -275,10 +276,6 @@ package {
         }
         
         private function drawSquare(x:int, y:int, isTranparent:Boolean):void {
-            var lineAlpha:Number = (isTranparent ? 0.001 : 1.0);
-            getViewGraphics().lineStyle(0, 0x000000, lineAlpha);
-            
-            
             var drawAlpha:Number = (isTranparent ? 0.001 : 0.5);
             getViewGraphics().beginFill(color, drawAlpha);
             
@@ -296,10 +293,12 @@ package {
                 return;
             }
             
-            getViewGraphics().drawRect( (x * getSquareLength()) - getSquareLength() / 2,
-                                    (y * getSquareLength() * -1) - getSquareLength() / 2,
-                                    getSquareLength(),
-                                    getSquareLength() );
+            
+            var length:int = Utils.getMapRangeSquareLength();
+            getViewGraphics().drawRect( (x * length) - length / 2,
+                                    (y * length * -1) - length / 2,
+                                    length,
+                                    length );
             getViewGraphics().endFill();
         }
         
@@ -338,5 +337,10 @@ package {
         override public function updateRefresh():void {
             initDraw(getX(), getY());
         }
+        
+        override public function snapViewPosition():Boolean {
+            return snapViewPositionForMapRange(this);
+        }
+        
    }
 }

@@ -111,12 +111,26 @@ package {
         }
         
         public function findExistPiecesByTypeName(typeName:String):Array {
+            return findExistPiecesByAction(function(piece:Piece):Boolean {
+                    return (piece.getType() == typeName);
+                });
+        }
+        
+        public function findExistPiecesByClass(klass:Class):Array {
+            
+            return findExistPiecesByAction(function(piece:Piece):Boolean {
+                    return (piece is klass);
+                });
+        }
+
+        public function findExistPiecesByAction(isMatch:Function):Array {
             var result:Array = new Array();
             
             for(var i:int = 0 ; i < existPieces.length ; i++) {
-                var existCharacter:Piece = existPieces[i];
-                if( existCharacter.getType() == typeName ) {
-                    result.push( existCharacter );
+                var piece:Piece = existPieces[i];
+                
+                if( isMatch(piece) ) {
+                    result.push( piece );
                 }
             }
             
@@ -618,7 +632,29 @@ package {
                 value = 1;
             }
             
+            //変更なしなら処理無し。
+            if( this.gridInterval == value ) {
+                return;
+            }
+            
             this.gridInterval = value;
+            
+            //変更ありなら、MapRangeを再描画
+            changeMapRanges();
+        }
+        
+        private function changeMapRanges():void {
+            
+            var ranges:Array = findExistPiecesByClass( MapRange );
+            
+            for(var i:int = 0 ; i < ranges.length ; i++) {
+                var range:MapRange = ranges[i] as MapRange;
+                if( range == null ) {
+                    continue;
+                }
+                
+                range.initDrawRange();
+            }
         }
         
         public function setVisibleGridPositionLayer(visible:Boolean):void {
@@ -849,7 +885,7 @@ package {
             return copy;
         }
         
-        public function changeMarks(squareColors_:Object):void {
+        public function changeMarks(squareColors_:Object, alpha:Object):void {
             try {
                 marksLayer.graphics.clear();
                 
@@ -857,31 +893,15 @@ package {
                     return;
                 }
                 
+                setMarksAlpha(alpha);
+                
                 squareColors = deepCopy(squareColors_ as Array);
                 Log.logging("squareColors", squareColors);
                 
                 for(var y:int = 0 ; y < squareColors.length; y++) {
                     for(var x:int = 0 ; x < squareColors[y].length ; x++) {
                         var color:int = squareColors[y][x];
-                        Log.logging("color", color);
-                        
-                        var xPadding:Number = 0;
-                        if( isAlternatelyPosition(y) ) {
-                            xPadding = -1 * getSquareLength() / 2;
-                        }
-                        
-                        if( color >= 0 ) {
-                            Log.logging("drawing...");
-                            Log.logging("x", x * getSquareLength());
-                            Log.logging("y", y * getSquareLength());
-                            Log.logging("getSquareLength", getSquareLength());
-                            marksLayer.graphics.beginFill(color);
-                            marksLayer.graphics.drawRect(x * getSquareLength() + xPadding,
-                                                         y * getSquareLength(),
-                                                         getSquareLength(),
-                                                         getSquareLength());
-                            marksLayer.graphics.endFill();
-                        }
+                        changeOneSquareMark(x, y, color);
                     }
                 }
             } catch( error:Error ) {
@@ -889,8 +909,46 @@ package {
             }
         }
         
+        private function setMarksAlpha(alpha:Object):void {
+            
+            var value:Number = alpha as Number;
+            if( alpha == null ) {
+                value = 1;
+            }
+            
+            marksLayer.alpha = value;
+        }
+
+        
+        private function changeOneSquareMark(x:int, y:int, color:int):void {
+            Log.logging("color", color);
+            
+            var xPadding:Number = 0;
+            if( isAlternatelyPosition(y) ) {
+                xPadding = -1 * getSquareLength() / 2;
+            }
+            
+            if( color >= 0 ) {
+                Log.logging("drawing...");
+                Log.logging("x", x * getSquareLength());
+                Log.logging("y", y * getSquareLength());
+                Log.logging("getSquareLength", getSquareLength());
+                marksLayer.graphics.beginFill(color);
+                marksLayer.graphics.drawRect(x * getSquareLength() + xPadding,
+                                             y * getSquareLength(),
+                                             getSquareLength(),
+                                             getSquareLength());
+                marksLayer.graphics.endFill();
+            }
+        }
+        
+        
         public function getMarks():Array {
             return squareColors;
+        }
+        
+        public function getMarksAlpha():Number {
+            return marksLayer.alpha;
         }
         
         
@@ -1209,6 +1267,14 @@ package {
             Log.logging("addMagicRangeDD4th end");
         }
         
+        private function addLogHorizonRange(event:ContextMenuEvent):void {
+            var point:Point = getCreatePoint();
+            var window:AddLogHorizonRangeWindow
+                = DodontoF.popup(AddLogHorizonRangeWindow, true) as AddLogHorizonRangeWindow;
+            
+            window.setPosition(point.x, point.y);
+        }
+        
         private function addMagicTimer(event:ContextMenuEvent):void {
             DodontoF.popup(AddMagicTimerWindow, true);
         }
@@ -1239,6 +1305,7 @@ package {
             MovablePiece.addMenuItem(menu, Language.s.addCharacterMenu, addCharacter);
             MovablePiece.addMenuItem(menu, Language.s.addMagicRangeMenu, addMagicRange);
             MovablePiece.addMenuItem(menu, Language.s.addMagicRangeDD4thMenu, addMagicRangeDD4th);
+            MovablePiece.addMenuItem(menu, Language.s.addLogHorizonRangeMenu, addLogHorizonRange);
             MovablePiece.addMenuItem(menu, Language.s.addMagicTimerMenu, addMagicTimer);
             MovablePiece.addMenuItem(menu, Language.s.addMapMaskMenu, addMapMask);
             MovablePiece.addMenuItem(menu, Language.s.addMapMarkerMenue, addMapMarker);
@@ -1276,6 +1343,15 @@ package {
         
         public function getTrushMountIfHit(card:Card):CardTrushMount {
             
+            var isHit:Function = function(target:CardTrushMount):Boolean {
+                return target.hitTestObject(card);
+            }
+                
+            return getTrushMount(card, isHit);
+        }
+        
+        public function getTrushMount(card:Card, isCheck:Function = null):CardTrushMount {
+            
             if( ! card.isTrashable() ) {
                 return null;
             }
@@ -1293,7 +1369,7 @@ package {
                     continue;
                 }
                 
-                if( trushMount.hitTestObject(card) ) {
+                if( isCheck == null || isCheck(trushMount) ) {
                     return trushMount;
                 }
             }

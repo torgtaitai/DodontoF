@@ -17,7 +17,16 @@
     <mx:TextInput id="titleText" width="100%"/>
   </mx:HBox>
   
-  <mx:Label text="{Language.s.botTableText}：" />
+  
+  <mx:HBox width="100%" height="25">
+    <mx:Label text="{Language.s.botTableText}：" />
+    <mx:Spacer width="100%" />
+    <mx:Label text="{Language.s.gameSystem}：" />
+    <mx:ComboBox id="diceBotGameType"
+                 labelField="name"
+                 rowCount="10"
+                 />
+  </mx:HBox>
   <mx:TextArea id="tableText" text="" height="100%" width="100%" />
   
   <mx:HBox height="25" width="100%" verticalAlign="middle" horizontalAlign="center" >
@@ -46,6 +55,12 @@
      * Window の初期化処理
      */
     override protected function setup():void {
+        var types:Object = Utils.clone(ChatWindow.getInstance().diceBotGameType.dataProvider);
+        types[0].gameType = "";
+        diceBotGameType.dataProvider = types;
+        
+        Utils.selectComboBox(diceBotGameType, firstGameType, "gameType");
+        initAfter();
     }
     
     /**
@@ -80,6 +95,7 @@
     }
     
     protected var window:ManageBotTableWindow;
+    private var firstGameType:String = "";
     
     /**
      * 初期化処理。
@@ -93,13 +109,16 @@
                          command:String = "",
                          dice:String = "",
                          titleText_:String = "",
-                         tableText_:String = ""):void {
+                         tableText_:String = "",
+                         gameType:String = ""):void {
         window = window_;
         
         commandText.text = command;
         diceText.text = dice;
         titleText.text = titleText_;
         tableText.text = tableText_;
+        firstGameType = gameType;
+        Utils.selectComboBox(diceBotGameType, firstGameType, "gameType");
         
         initAfter();
     }
@@ -126,9 +145,11 @@
      * 表追加処理
      */
     public function execute():void {
+        var gameType:String = diceBotGameType.selectedItem.gameType;
+        
         window.addBotTable(commandText.text, diceText.text, titleText.text,
                            getTableTextFromTextArea(),
-                           checkResult);
+                           gameType, checkResult);
     }
     
     /**

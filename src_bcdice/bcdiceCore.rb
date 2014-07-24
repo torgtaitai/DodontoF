@@ -824,13 +824,14 @@ class BCDice
     secret = (not $1.nil?)
     
     output = @diceBot.dice_command_xRn(arg, @nick_e)
+    return nil if( output.nil? or output == '1' )
     
     if( output.empty? )
       dice = RerollDice.new(self, @diceBot)
       output = dice.rollDice(arg)
     end
     
-    return nil if(output == '1')
+    return nil if( output.nil? or output == '1' )
     
     debug('xRn output', output)
     
@@ -1476,7 +1477,8 @@ class BCDice
     if(dice_max == 6)
       if(dice_cnt == 2)
         debug('2d6判定')
-        return @diceBot.check_2D6(*check_param)
+        result = @diceBot.check_2D6(*check_param)
+        return result unless( result.empty? )
       end
       
       debug('xD6判定')
@@ -1967,6 +1969,12 @@ class BCDice
     when /(^|\s)(KanColle)$/i
       require 'diceBot/KanColle'
       diceBot = KanColle.new
+    when /(^|\s)(Grancrest)$/i
+      require 'diceBot/GranCrest'
+      diceBot = GranCrest.new
+    when /(^|\s)(HouraiGakuen)$/i
+      require 'diceBot/HouraiGakuen'
+      diceBot = HouraiGakuen.new
     when /(^|\s)None$/i, ""
       diceBot = DiceBot.new
     else

@@ -609,6 +609,7 @@
         saveUniqeId( jsonData.uniqueId );
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
         DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
+        Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
         
@@ -803,7 +804,8 @@
                                           Alert.OK | Alert.CANCEL, null, 
                                           function(e : CloseEvent) : void { if (e.detail == Alert.OK) {
                                                   guiInputSender.removePlayRoom(roomNumbers, removePlayRoomResult,
-                                                                                ignoreLoginUser, password);
+                                                                                ignoreLoginUser, password,
+                                                                                adminPassword.text);
                                               }});
         } catch(error:Error) {
             status = error.message;
@@ -872,7 +874,8 @@
         var ignoreLoginUser:Boolean = true;
         
         window.init(texts, Language.s.deletePlayRoom, Language.s.inputPassword, function(password:String):void {
-                guiInputSender.removePlayRoom([roomNumber], removePlayRoomResult, ignoreLoginUser, password);
+                guiInputSender.removePlayRoom([roomNumber], removePlayRoomResult, ignoreLoginUser,
+                                              password, adminPassword.text);
             });
     }
     

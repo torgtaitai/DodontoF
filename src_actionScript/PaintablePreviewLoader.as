@@ -311,5 +311,8 @@ package {
             return  width;
         }
         
+        public function setSquareAlpha(value:Number):void {
+            paintSquare.alpha = value;
+        }
     }
 }

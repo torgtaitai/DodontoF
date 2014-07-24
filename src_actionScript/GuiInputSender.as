@@ -8,6 +8,7 @@ package {
         
         private var sender:SharedDataSender;
         private var feetsLimit:int = 100;
+        private var rangeLimit:int = 100;
         private var characterCreationLimit:int = 10;
         private var maskCreationLimit:int = 100;
         private var playRoomMaxNumber:int = 100;
@@ -87,7 +88,8 @@ package {
                                   gridColor:uint,
                                   gridInterval:int,
                                   isAlternately:Boolean,
-                                  mapMarks:Array):void {
+                                  mapMarks:Array, 
+                                  mapMarksAlpha:Number):void {
             if( ( mapHeight < 1 ) ||
                 ( mapHeight > ChangeMapWindow.getMapMaxHeigth() )) {
                 throw new Error(Language.text("checkMapHeightWarning",
@@ -101,7 +103,7 @@ package {
             }
             
             sender.changeMap(mapImageUrl, mirrored, mapWidth, mapHeight,
-                             gridColor, gridInterval, isAlternately, mapMarks);
+                             gridColor, gridInterval, isAlternately, mapMarks, mapMarksAlpha);
         }
         
         public function drawOnMap(data:Array):void {
@@ -533,6 +535,36 @@ package {
             Log.logging("changeMagicRangeDD4th end");
         }
         
+        public function changeLogHorizonRange(logHorizonRange:LogHorizonRange,
+                                              name:String,
+                                              range:int,
+                                              color:String):void {
+            Log.logging("changeLogHorizonRange begin");
+            
+            if( name.length == 0 ) {
+                throw new Error(Language.s.inputNameError);
+            }
+            
+            if( ( range < 0 ) || ( range > rangeLimit ) ) {
+                throw new Error(Language.text("checkDD4thRadiusWarning", rangeLimit));
+            }
+            
+            if( color.length == 0 ) {
+                throw new Error(Language.s.noColorErro);
+            }
+            
+            logHorizonRange.setName(name);
+            logHorizonRange.setRange(range)
+            logHorizonRange.setColor( parseInt(color) );
+            
+            logHorizonRange.updateRefresh();
+            
+            sender.changeCharacter( logHorizonRange.getJsonData() );
+            
+            Log.logging("changeLogHorizonRange end");
+        }
+        
+        
         public function changeMagicTimer(magicTimer:MagicTimer,
                                          name:String,
                                          timeRange:int,
@@ -676,8 +708,9 @@ package {
             sender.removeCharacters(pieces);
         }
         
-        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean, password:String):void {
-            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser, password);
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean,
+                                       password:String, adminPassword:String):void {
+            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser, password, adminPassword);
         }
         
         public function removeOldPlayRoom(resultFunction:Function):void {

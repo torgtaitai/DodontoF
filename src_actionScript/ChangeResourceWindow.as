@@ -7,10 +7,13 @@ package {
         private var target:Object;
         
         public function init(data:Object):void {
+            title = Language.s.changeResourceWindowTitle;
+            
             target = data;
             
             resourceName.text = target.name;
             resourceCount.value = target.value;
+            resourceCheck.selected = target.check;
             resourceUnit.text = target.unit;
         }
         

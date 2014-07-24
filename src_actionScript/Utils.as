@@ -211,21 +211,6 @@ package {
             return initiative;
         }
         
-        static public function getToolTipMessage(piece:InitiativedPiece):String {
-            var toolTipMessage:String = "";
-            
-            toolTipMessage += "[" + piece.getName() + "]";
-            
-            var addInfos:Array = piece.getAdditionalInfos();
-            toolTipMessage += addInfos.join("\n");
-            toolTipMessage += "\n";
-            
-            toolTipMessage += piece.getInfo();
-            
-            return toolTipMessage;
-        }
-        
-        
         static public function selectSuggestComboBox(comboBox:SuggestComboBox, key:String,
                                                         field:String = "data", defaultString:String = null):int {
             var index:int = selectComboBox(comboBox, key, field);
@@ -883,6 +868,12 @@ package {
         }
         
         static public function smoothing(obj:Object):void {
+            
+            //外部URL有効の場合にsmoothingすると外部URL使用した全セーブデータのロードでクラッシュするため、ここでsmoothingを拒否。
+            if( Config.canUseExternalImageModeOn ) {
+                return;
+            }
+            
             var bmp:Bitmap = obj as Bitmap;
             if (bmp != null) {
                 bmp.smoothing = true;
@@ -893,6 +884,18 @@ package {
             return ((sendto != null) && (sendto != ""));
         }
         
+        
+        static public function getMapRangeSize():int {
+            return DodontoF_Main.getInstance().getMap().getGridInterval();
+        }
+        
+        static public function getMapRangeSquareLength():int {
+            return Map.getSquareLength() * getMapRangeSize();
+        }
+        
+        static public function getCenterImageUrl():String {
+            return "image/centerMarker.png";
+        }
         
     }
 }

@@ -31,6 +31,23 @@
       	                 minWidth="0"
                          width="50"
                          />
+      
+	  <mx:DataGridColumn headerText="{Language.s.resourceCheck}"
+                         editorDataField="selected"
+                         dataField="check"
+                         textAlign="center"
+                         editable="true"
+      	                 minWidth="0"
+                         width="30"
+                         rendererIsEditor="true"
+                         >
+        <mx:itemRenderer>
+          <mx:Component>
+            <mx:CheckBox />
+          </mx:Component>
+        </mx:itemRenderer>
+      </mx:DataGridColumn>
+      
 	  <mx:DataGridColumn headerText="{Language.s.resourceCount}"
                          editorDataField="value"
                          dataField="value"
@@ -163,11 +180,74 @@
               return;
           }
           
-          changeByEvent(event);
+          var index:int = event.rowIndex;
+          var target:Object = Utils.clone( resourceList[index] );
+          
+          var changed:Boolean = false;
+          
+          if( setCheckBox(event, target) ) {
+              changed = true;
+          }
+          if( setValue(event, target) ) {
+              changed = true;
+          }
+          if( changed ) {
+              changeResource(target);
+          }
           
           //次回のリフレッシュで必ず値を更新するように更新時刻を0にリセット
           //DodontoF_Main.getInstance().getGuiInputSender().getSender().resetLastUpdateTimeOfInitiativeTimer();
       }
+      
+      
+      private function setCheckBox(event:DataGridEvent, target:Object):Boolean {
+          var field:String = event.dataField;
+          if( field != "check" ) {
+              return false;
+          }
+          
+          var checkBox:CheckBox = CheckBox(event.currentTarget.itemEditorInstance);
+          var newChecked:Boolean = checkBox.selected;
+          
+          if( newChecked == target.check ) {
+              return false;
+          }
+          
+          target.check = newChecked;
+          return true;
+      }
+      
+      private function setValue(event:DataGridEvent, target:Object):Boolean {
+          var field:String = event.dataField;
+          if( field != "value" ) {
+              return false;
+          }
+          
+          var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
+          var newValue:int = stepper.value;
+          
+          if( newValue == target.value ) {
+              Log.logging("値の変更なしのため処理無し。");
+              return false;
+          }
+          
+          target.value = newValue;
+          return true;
+      }
+      
+      private function changeResource(target:Object):void {
+          
+          var data:Object = {
+              "name": target.name,
+              "value": target.value,
+              "check" : target.check,
+              "unit": target.unit,
+              "resourceId": target.resourceId };
+          
+          guiInputSender.getSender().changeResource(data);
+      }
+      
+
       
       public function setResourceList(list:Array):void {
           if( list == null ) {
@@ -193,27 +273,6 @@
           window.init(data);
       }
       
-      
-      private function changeByEvent(event:DataGridEvent):void {
-          var index:int = event.rowIndex;
-          var target:Object = resourceList[index];
-          
-          var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
-          var newCount:int = stepper.value;
-          
-          if( newCount == target.value ) {
-              Log.logging("値の変更なしのため処理無し。");
-              return;
-          }
-          
-          var data:Object = {
-              "name": target.name,
-              "value": newCount,
-              "unit": target.unit,
-              "resourceId": target.resourceId };
-          
-          guiInputSender.getSender().changeResource(data);
-      }
       
       private function remove():void {
           var data:Object = resourceList[ resourceListView.selectedIndex ];

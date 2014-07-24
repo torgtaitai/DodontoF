@@ -8,10 +8,10 @@ package {
             return "Elysion";
         }
         
-        private var preDate:Object = null;
+        static private var preDate:Object = null;
         
-        private var elysionDateReg:RegExp = /(\r|\n)Elysion : DATE → (\d+)/i;
-        private var elysionDateCompleteReg:RegExp = /(\r|\n)Elysion : DATE\d\d/i;
+        private var elysionDateReg:RegExp = /(\r|\n)Elysion : (.*DATE) → (\d+)/i;
+        private var elysionDateCompleteReg:RegExp = /(\r|\n)Elysion : (.*DATE)\d\d/i;
         
         public function executeCommand(params:Object):void {
             try {
@@ -24,7 +24,8 @@ package {
         private function dateCommandForElysionCatched(params:Object):void {
             
             if( elysionDateCompleteReg.exec(params.chatMessage) != null ) {
-                Log.logging("Dateコマンドが一度実行されたようなので、前回保持データを削除。");
+                Log.logging("Date Command is already Finished.");
+                //Dateコマンドが一度正式に完了したので、前回保持データを削除。
                 preDate = null;
                 return;
             }
@@ -36,7 +37,8 @@ package {
                 return;
             }
             
-            var number:String = result[2];
+            var dateCommand:String = result[2];
+            var number:String = result[3];
             
             if( preDate == null ) {
                 preDate = {
@@ -66,7 +68,7 @@ package {
                 diceString = "" + dice2 + dice1;
             }
             
-            var command:String = "DATE" + diceString + "[" + pcList + "]";
+            var command:String = dateCommand.toUpperCase() + diceString + "[" + pcList + "]";
             Log.logging("command", command);
             ChatWindow.getInstance().sendChatMessage(ChatWindow.getInstance().publicChatChannel, command);
         }

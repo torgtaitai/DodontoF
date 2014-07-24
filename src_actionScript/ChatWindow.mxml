@@ -535,6 +535,8 @@
             
             channels.push(box);
             box.setChannel(channels.length - 1);
+            box.setChatFontSize(getChatFontSize());
+            box.setBackGroundColor(getChatBackgroundColor());
         }
         
         public function get publicChatChannel():int {

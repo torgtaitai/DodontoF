@@ -468,7 +468,7 @@ package {
                 data["isVisiter"] = true;
             }
             
-            if( getReciever().isSessionRecording() ) {
+            if( RecordHistory.getInstance().isRecording() ) {
                 data["isGetOwnRecord"] = true;
             }
             
@@ -517,7 +517,8 @@ package {
                                   gridColor:uint,
                                   gridInterval:int,
                                   isAlternately:Boolean,
-                                  mapMarks:Array):void {
+                                  mapMarks:Array,
+                                  mapMarksAlpha:Number):void {
             var data:Object = {
                 "mapType": "imageGraphic",
                 "imageSource": mapImageUrl,
@@ -527,7 +528,8 @@ package {
                 "gridColor": gridColor,
                 "gridInterval": gridInterval,
                 "isAlternately": isAlternately,
-                "mapMarks": mapMarks};
+                "mapMarks": mapMarks,
+                "mapMarksAlpha": mapMarksAlpha};
             
             var obj:Object = getParamObject("changeMap", data);
             sendCommandData(obj);
@@ -821,15 +823,16 @@ package {
         
         
         public function addBotTable(command:String, dice:String, title:String, table:String,
-                                    resultFunction:Function):void {
+                                    gameType:String, resultFunction:Function):void {
+                                    
             Log.logging("SharedDataSender.addBotTable Begin");
             
             var data:Object = {
                 "command" : command,
                 "dice" : dice,
                 "title" : title,
-                "table" : table
-            };
+                "table" : table,
+                "gameType" : gameType };
             
             var obj:Object = getParamObject("addBotTable", data);
             sendCommandData(obj, resultFunction);
@@ -839,7 +842,7 @@ package {
         
         
         public function changeBotTable(command:String, dice:String, title:String, table:String,
-                                       originalCommand:String,
+                                       gameType:String, originalCommand:String, originalGameType:String,
                                        resultFunction:Function):void {
             Log.logging("SharedDataSender.changeBotTable Begin");
             
@@ -848,8 +851,9 @@ package {
                 "dice" : dice,
                 "title" : title,
                 "table" : table,
-                "originalCommand" : originalCommand
-            };
+                "gameType" : gameType,
+                "originalCommand" : originalCommand,
+                "originalGameType" : originalGameType };
             
             var obj:Object = getParamObject("changeBotTable", data);
             sendCommandData(obj, resultFunction);
@@ -1026,7 +1030,8 @@ package {
             var tmpTimes:Object = getInitLastUpdateTimes();
             tmpTimes.chatMessageDataLog = lastUpdateTimes.chatMessageDataLog;
             lastUpdateTimes = tmpTimes;
-            receiver.startHistory();
+            
+            RecordHistory.getInstance().startRecord();
         }
         
         public function clearLastUpdateTimes():void {
@@ -1082,10 +1087,10 @@ package {
             request.url = Config.getInstance().getDodontoFServerCgiUrl();
             request.method = URLRequestMethod.POST;
             
-            Log.logging("POST to", request.url);
+            request.contentType = "application/x-msgpack";
+            request.data = Utils.getMessagePack(params);
             
-            var bytes:ByteArray = Utils.getMessagePack(params);
-            request.data = bytes;
+            Log.logging("POST to", request.url);
             
             return request;
         }
@@ -1153,11 +1158,13 @@ package {
             return map.getExistPiecesCount();
         }
         
-        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean, password:String):void {
+        public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean,
+                                       password:String, adminPassword:String):void {
             var data:Object = {
                 "roomNumbers": roomNumbers,
                 "ignoreLoginUser": ignoreLoginUser,
-                "password" : password
+                "password" : password,
+                "adminPassword" : adminPassword
             };
             
             
@@ -1271,9 +1278,10 @@ package {
                                          owner:String,
                                          imgId:String,
                                          x:int,
-                                         y:int):void {
+                                         y:int,
+                                         mountName:String = ""):void {
             var text:String = "<p align='center'><font size=\"72\">LOADING...</font><p>";
-            var cardJsonData:Object = getJsonDataFunction(text, text, x, y);
+            var cardJsonData:Object = getJsonDataFunction(text, text, x, y, mountName);
             
             cardJsonData = getCloneCardJsonData(cardJsonData, x, y);
             cardJsonData.owner = owner;
@@ -1293,7 +1301,7 @@ package {
                                   count:int,
                                   action:Function):void {
             
-            drawCardOnLocal(Card.getJsonData, owner, newCardImgId, x, y);
+            drawCardOnLocal(Card.getJsonData, owner, newCardImgId, x, y, mountName);
             
             var data:Object = {
                 "isOpen": isOpen,

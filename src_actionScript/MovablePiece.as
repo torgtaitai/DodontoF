@@ -746,6 +746,24 @@ package {
             return move(point.x, point.y, true);
         }
         
+        
+        static public function snapViewPositionForMapRange(piece:MovablePiece):Boolean {
+            var length:int = Utils.getMapRangeSquareLength();
+            var rangeSize:int = Utils.getMapRangeSize();
+            
+            var view:ImageSprite = piece.view;
+            var point:Point = piece.getMap().getSnapViewPoint(view.x, view.y, length);
+            
+            point.x *= rangeSize;
+            point.y *= rangeSize;
+            
+            view.x = point.x * piece.getSquareLength();
+            view.y = point.y * piece.getSquareLength();
+            
+            return piece.move(point.x, point.y, true);
+        }
+        
+
         protected function initDraw(x:Number, y:Number):void {
             throwNotImplimentedError("initDraw");
         }

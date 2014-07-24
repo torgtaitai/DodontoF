@@ -38,6 +38,7 @@
                doubleClick="doubleclickInitiativeInfoListView()"
                showDataTips="false"
                dataTipFunction="getCharacterInfoTip"
+               itemEditBegin="initiativeInfoListItemEditBegin(event)"
                itemEditEnd="initiativeInfoListItemEditEndFunction(event)"
                dragEnabled="true"
                >
@@ -1607,7 +1608,14 @@
           return piece;
       }
       
+      private var isEditing:Boolean = false;
+      
       private function doubleclickInitiativeInfoListView():void {
+          
+          if( isEditing ) {
+              return;
+          }
+          
           var piece:InitiativedPiece = getSelectedInitiativedPiece();
           if( piece == null ) {
               return;
@@ -1779,8 +1787,14 @@
           getRoundTimer().reset();
       }
       
+      private function initiativeInfoListItemEditBegin(event:DataGridEvent):void {
+          isEditing = true;
+      }
+      
       private function initiativeInfoListItemEditEndFunction(event:DataGridEvent):void {
           Log.logging("initiativeInfoListItemEditEndFunction called.");
+          
+          isEditing = false;
           
           //キャンセル操作（ESCキーでのキャンセル）なら送信しないようチェック
           if( event.reason == mx.events.DataGridEventReason.CANCELLED ) {

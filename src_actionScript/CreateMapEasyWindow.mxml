@@ -24,6 +24,11 @@
       <mx:RadioButton groupName="paindMode" id="eraser"  label="{Language.s.eraser}" click="selectPaintMode()" />
       <mx:RadioButton groupName="paindMode" id="syringe" label="{Language.s.spoit}" click="selectPaintMode()" />
       
+	  <mx:Label text="{Language.s.mapMaskAlpha}" />
+      <mx:HSlider id="alphaSlider" width="90" minimum="0.2" maximum="1" value="1"
+        change="changeAlphaSlider()"
+        />
+      
       <mx:Button label="{Language.s.createMapEasyExecuteButton}" click="sendMapDraw()" />
       <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
     </mx:Box>
@@ -41,9 +46,12 @@
     import com.adobe.serialization.json.JSON;
     
     private var thisObj:CreateMapEasyWindow;
+    private var map:Map;
     
     override protected function setup():void {
         thisObj = this;
+        map = DodontoF_Main.getInstance().getMap();
+
         
         Resizer.addResize(this, new Point(100,50));
         selectPaintMode();
@@ -52,10 +60,11 @@
         setResizeEventFunction(resizeWindow);
         
         previewLoader.setSyringeAfter( function():void { thisObj.paint.selected = true} );
+        
+        setAlphaSlider();
     }
     
     public function resizeWindow(isInit:Boolean = false):void {
-        var map:Map = DodontoF_Main.getInstance().getMap();
         var mapWidth:int = map.getWidth();
         var mapHeight:int = map.getHeight();
         var imageUrl:String = map.getImageUrl();
@@ -79,7 +88,7 @@
         
         previewLoader.loadImageWidthHeight(imageUrl, mapWidth, mapHeight, widthCount);//count);
     }
-
+    
     private function getColor():int {
         return parseInt("0x" + mapMaskColorPicker.selectedColor.toString(16));
     }
@@ -87,6 +96,14 @@
     private function setColor(color_:int):void {
         Log.logging("CreateMapEasyWindow.setClolr=>color", color_);
         mapMaskColorPicker.selectedColor = color_;
+    }
+    
+    private function setAlphaSlider():void {
+        alphaSlider.value = map.getMarksAlpha();
+        changeAlphaSlider();
+    }
+    private function changeAlphaSlider():void {
+        previewLoader.setSquareAlpha( alphaSlider.value );
     }
     
     
@@ -109,14 +126,14 @@
         var mapMarks:Array = previewLoader.getResult();
         //    logAny(mapMarks);
     
-        var map:Map = DodontoF_Main.getInstance().getMap();
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         guiInputSender.changeMap(map.getImageUrl(), map.isMirrored(),
                                  map.getWidth(), map.getHeight(),
                                  map.getGridColor(),
                                  map.getGridInterval(),
                                  map.isAlternatelyMode(),
-                                 mapMarks);
+                                 mapMarks,
+                                 alphaSlider.value);
     
         PopUpManager.removePopUp(this);
     }

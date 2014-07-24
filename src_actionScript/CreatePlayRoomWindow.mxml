@@ -106,7 +106,9 @@
       <mx:Button id="executeButton" label="{Language.s.createButton}" click="execute()" />
       <mx:Button label="{Language.s.cancelButton}" click="closeAction()" />
     </mx:HBox>
-    </mx:Box>
+    
+  </mx:Box>
+  
   <mx:Script>
     <![CDATA[
              

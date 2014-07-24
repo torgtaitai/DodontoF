@@ -49,10 +49,41 @@ INFO_MESSAGE_TEXT
   
   def getInfos
     
-    ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-    
     @orders = getDiceBotOrder
-    deleteInfos()
+    
+    addAnotherDiceBotToInfos()
+    sortInfos()
+    deleteInfos() unless( $isDisplayAllDice )
+    
+    return @infos
+  end
+  
+  def deleteInfos
+    logging(@orders, '@orders')
+    
+    @infos.delete_if do |info|
+      not @orders.include?(info['name'])
+    end
+    
+  end
+  
+  def sortInfos
+    @infos = @infos.sort_by do |info|
+      index = @orders.index(info['name'])
+      index ||= 999
+      index.to_i
+    end
+  end
+  
+  def getDiceBotOrder
+    orders = $diceBotOrder.split("\n")
+    return orders
+  end
+  
+  
+  def addAnotherDiceBotToInfos
+    
+    ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
     
     require 'diceBot/DiceBot'
     
@@ -67,31 +98,6 @@ INFO_MESSAGE_TEXT
       diceBot = Module.const_get(botName).new
       @infos << diceBot.info
     end
-    
-    sortInfos()
-    
-    return @infos
-  end
-  
-  def deleteInfos
-    logging(@orders, '@orders')
-    
-    @infos.delete_if do |info|
-      not @orders.include?(info['name'])
-    end
-  end
-  
-  def sortInfos
-    @infos = @infos.sort_by do |info|
-      index = @orders.index(info['name'])
-      index ||= 999
-      index.to_i
-    end
-  end
-  
-  def getDiceBotOrder
-    orders = $diceBotOrder.split("\n")
-    return orders
   end
   
 end

@@ -55,8 +55,9 @@ package {
         public static function getJsonData(imageName_:String,
                                            imageNameBack_:String,
                                            x_:int,
-                                           y_:int):Object {
-            var characterJsonData:Object = Card.getJsonData(imageName_, imageNameBack_, x_, y_);
+                                           y_:int,
+                                           mountName:String = ""):Object {
+            var characterJsonData:Object = Card.getJsonData(imageName_, imageNameBack_, x_, y_, mountName);
             
             characterJsonData.type = getTypeStatic();
             

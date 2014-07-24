@@ -18,6 +18,9 @@
         <mx:NumericStepper maximum="9999999999" minimum="-9999999999"
                            id="resourceCount" />
       </mx:FormItem>
+      <mx:FormItem label="{Language.s.resourceCheck}：" >
+        <mx:CheckBox id="resourceCheck" width="100%" />
+      </mx:FormItem>
       <mx:FormItem label="{Language.s.resourceOther}：" >
         <mx:TextInput id="resourceUnit" width="100%" />
       </mx:FormItem>
@@ -42,6 +45,7 @@
         var data:Object = {
             "name": resourceName.text,
             "value": resourceCount.value,
+            "check": resourceCheck.selected,
             "unit": resourceUnit.text };
         
         DodontoF_Main.getInstance().getGuiInputSender().getSender().addResource(data);

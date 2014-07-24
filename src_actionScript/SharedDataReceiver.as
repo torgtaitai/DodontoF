@@ -18,9 +18,6 @@ package {
         private var roundTimer:RoundTimer;
         private var fileReferenceForDownload:FileReference = new FileReference();
         private var map:Map = null;
-        private var history:Array;
-        private var isHistoryOn:Boolean = false;
-        
         private static var dodontoF:DodontoF;
         
         public static function setDodontoF(dodontoF_:DodontoF):void {
@@ -29,7 +26,6 @@ package {
         
         
         public function SharedDataReceiver():void {
-            history = new Array();
         }
         
         public function setSender(sender_:SharedDataSender):void {
@@ -68,10 +64,7 @@ package {
                 return;
             }
             
-            if( isHistoryOn ) {
-                Log.logging("addHistory jsonData", jsonData);
-                addHistory(jsonData);
-            }
+            RecordHistory.getInstance().addHistory(jsonData);
             
             if( sender.clearRetry() ) {
                 retryConnectedCount++;
@@ -80,31 +73,6 @@ package {
             }
             
             sender.refreshNext();
-        }
-        
-        private function addHistory(jsonData_original:Object):void {
-            var jsonData:Object = Utils.clone(jsonData_original);
-            
-            delete jsonData.loginUserInfo;
-            delete jsonData.refreshIndex;
-            delete jsonData.lastUpdateTimes;
-            
-            Log.logging("history jsonData", jsonData);
-            
-            if( ! hasKey(jsonData) ) {
-                Log.logging("jsonData has NO key.");
-                return;
-            }
-            
-            Log.logging("jsonData has key, so push history!!");
-            history.push(jsonData);
-        }
-        
-        private function hasKey(params:Object):Boolean {
-            for(var key: String in params){
-                return true;
-            }
-            return false;
         }
         
         private var retryConnectedCount:int = 0;
@@ -296,7 +264,6 @@ package {
             
             if( jsonData.chatMessageDataLog &&
                 sender.checkLastUpdateTimes('chatMessageDataLog', jsonData.lastUpdateTimes) ) {
-                Log.logging("analyzeChatMessageDataLog(jsonData.chatMessageDataLog) begin");
                 jsonData.chatMessageDataLog = this.analyzeChatMessageDataLog(jsonData.chatMessageDataLog);
                 isFirstChatRefreshFlag = false;
             }
@@ -423,6 +390,8 @@ package {
         }
         
         private function analyzeChatMessageDataLog(chatMessageDataLogObj:Object):Object {
+            Log.logging("analyzeChatMessageDataLog() Begin", chatMessageDataLogObj);
+            
             var result:Array = new Array();
             
             var chatMessageDataLog:Array = chatMessageDataLogObj as Array;
@@ -430,12 +399,15 @@ package {
             var lastWrittenTime:Number = this.chatMessageDataLastWrittenTime;
             
             for(var i:int = 0 ; i < chatMessageDataLog.length ; i++) {
+                
                 var chatMessageDataSet:Object = chatMessageDataLog[i];
+                Log.logging("chatMessageDataSet", chatMessageDataSet);
                 
                 var writtenTime:Number = chatMessageDataSet[0];
                 var chatMessageData:Object = chatMessageDataSet[1];
                 
                 if( this.chatMessageDataLastWrittenTime >= writtenTime ) {
+                    Log.logging("chatMessage is NOT new");
                     continue;
                 }
                 
@@ -443,6 +415,7 @@ package {
                 
                 if( writtenTime > lastWrittenTime ) {
                     lastWrittenTime = writtenTime;
+                    Log.logging("lastWrittenTime", lastWrittenTime);
                 }
                 
                 var senderName:String = chatMessageData['senderName'];
@@ -459,9 +432,10 @@ package {
                 
                 var isValidMessage:Boolean = ChatWindow.getInstance()
                     .addMessageToChatLogParts(data, writtenTime, chatSenderUniqueId);
+                Log.logging("addMessageToChatLogParts result", isValidMessage);
                 
                 if( isValidMessage ) {
-                    Log.logging("chatMessageDataSet", chatMessageDataSet);
+                    Log.logging("isValidMessage");
                     result.push(chatMessageDataSet);
                 }
             }
@@ -481,7 +455,7 @@ package {
             map.changeMap(mapData.imageSource, mapData.mirrored,
                           mapData.xMax, mapData.yMax,
                           mapData.gridColor, mapData.gridInterval, mapData.isAlternately);
-            map.changeMarks(mapData.mapMarks);
+            map.changeMarks(mapData.mapMarks, mapData.mapMarksAlpha);
             map.changeDraws(mapData.draws);
             
             Log.logging("analyzeMap End");
@@ -625,28 +599,6 @@ package {
         }
         
         
-        public function startHistory():void {
-            history = new Array();
-            isHistoryOn = true;
-        }
-        
-        public function isSessionRecording():Boolean {
-            return isHistoryOn;
-        }
-        
-        public function stopHistory():Boolean {
-            if( ! isHistoryOn ) {
-                return false;
-            }
-            
-            isHistoryOn = false;
-            return true;
-        }
-        
-        public function getHistory():Array {
-            return history;
-        }
-        
         private static var pieceClassList:Array = [MagicRange,
                                                    MagicRangeDD4th,
                                                    MapMask,
@@ -663,6 +615,7 @@ package {
                                                    CardTrushMount,
                                                    RandomDungeonCardTrushMount,
                                                    MetallicGuardianDamageRange,
+                                                   LogHorizonRange,
                                                    Character ];
         
         static public function createPieceFromCharacterData(characterData:Object):Piece {
@@ -843,28 +796,6 @@ package {
             Log.logging("refreshInitiativeList() end");
         }
         
-
-        /*
-        public function saveResult(event:Event):void {
-            Log.loggingTuning("saveResult begin");
-            try {
-                var jsonData:Object = getJsonDataFromResultEvent(event);
-                Log.loggingError("jsonData", jsonData);
-                var saveData:Object = jsonData.saveData;
-                Log.loggingError("saveData", saveData);
-                var saveDataString:String = JSON.encode(jsonData);
-                Log.loggingError("saveDataString", saveDataString);
-                
-                var fileReferenceForSave:FileReference = new FileReference();
-                fileReferenceForSave.addEventListener(Event.COMPLETE, function(event:Event):void {});
-                fileReferenceForSave.save(saveDataString, "DodontoF.sav");
-            } catch(e:Error) {
-                Log.loggingException("SharedDataReceiver.saveResult()", e);
-            }
-            Log.loggingTuning("saveResult end");
-        }
-        */
-
     }
 }
 

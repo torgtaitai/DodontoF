@@ -1,6 +1,8 @@
 #!/usr/local/bin/ruby -Ku
 #--*-coding:utf-8-*--
 
+$LOAD_PATH << File.dirname(__FILE__) # require_relative対策
+
 require 'DodontoFServer.rb'
 #require 'rubygems'
 require 'mysql'
@@ -10,7 +12,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.44.01(2014/04/15)"
+$version = "Ver.1.45.04(2014/07/25)"
 
 class SaveDataManagerOnMySql
   def initialize

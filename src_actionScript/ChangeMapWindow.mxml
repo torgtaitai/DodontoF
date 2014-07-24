@@ -123,7 +123,8 @@
                                      gridColorPicker.selectedColor,
                                      gridInterval.value,
                                      isAlternately.selected,
-                                     map.getMarks());
+                                     map.getMarks(),
+                                     map.getMarksAlpha());
         
             PopUpManager.removePopUp(this);
         } catch(error:Error) {

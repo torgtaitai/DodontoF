@@ -193,7 +193,7 @@ package {
         }
         
         public function getToolTipMessage():String {
-            return Utils.getToolTipMessage(this);
+            return Config.getInstance().getToolTipMessage(this);
         }
         
         //動かさない場合は不要なIF

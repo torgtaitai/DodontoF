@@ -14,7 +14,7 @@ package {
     import flash.geom.Point;
     import mx.utils.StringUtil;
 
-    public class MagicRange extends InitiativedMovablePiece {
+    public class MagicRange extends InitiativedMovablePiece implements MapRange {
         
         private var radius:int = 1;
         private var rangeType:String = "circle";
@@ -206,32 +206,63 @@ package {
             return getMap().getMagicRangeLayer();
         }
         
-        protected function getCenterImageUrl():String {
-            return "image/centerMarker.png";
-        }
-        
         override public function loadViewImage():void {
-            var size:int = 1;
-            var halfSquareLength:Number = getSquareLength() / 2;
+            var size:int = Utils.getMapRangeSize();
+            var halfSquareLength:Number = Utils.getMapRangeSquareLength() / 2;
             var diffPoint:Point = new Point(halfSquareLength,
                                             halfSquareLength * -1);
             view.setIsDrawRound(false);
-            view.loadImage(getCenterImageUrl(), size, diffPoint);
+            view.loadImage(Utils.getCenterImageUrl(), size, diffPoint);
         }
         
         override protected function initDraw(x:Number, y:Number):void {
-            clearDrown();
             move(x, y, true);
             initDrawRange();
         }
         
-        protected function initDrawRange():void {
+        public function initDrawRange():void {
             loadViewImage();
+            clearDrown();
             initDrawRangeSquare();
         }
         
+        private var alreadyDrawedPosition:Object = new Object();
         
-        private function initDrawRangeSquare():void {
+        public function clearDrown():void {
+            view.graphics.clear();
+            alreadyDrawedPosition = new Object();
+        }
+        
+        private function drawSquare(x:int, y:int):void {
+            view.graphics.beginFill(color, 0.5);
+            
+            if( y < 0 ) {
+                y += 1;
+            }
+            
+            if( x < 0 ) {
+                x += 1;
+            }
+            
+            var positionInfo:String = "[" + x + ", " + y + "]";
+            if( alreadyDrawedPosition[positionInfo] != null ) {
+                Log.logging("this position is already dorawd", positionInfo);
+                return;
+            }
+            Log.logging("fist dorawing...", positionInfo);
+            alreadyDrawedPosition[positionInfo] = true;
+            
+            var length:int = Utils.getMapRangeSquareLength();
+            view.graphics.drawRect( (x * length),
+                                    (y * length * -1),
+                                    length,
+                                    length );
+            view.graphics.endFill();
+        }
+        
+        
+        public function initDrawRangeSquare():void {
+            
             if( rangeType == rangeTypeSquare ) {
                 drawSquareMagicRange();
                 return;
@@ -323,40 +354,6 @@ package {
             }
         }
         
-        private var alreadyDrawedPosition:Object = new Object();
-        
-        private function clearDrown():void {
-            view.graphics.clear();
-            alreadyDrawedPosition = new Object();
-        }
-        
-        private function drawSquare(x:int, y:int):void {
-            view.graphics.lineStyle(0, 0x000000);
-            view.graphics.beginFill(color, 0.5);
-            
-            if( y < 0 ) {
-                y += 1;
-            }
-            
-            if( x < 0 ) {
-                x += 1;
-            }
-            
-            var positionInfo:String = "[" + x + ", " + y + "]";
-            if( alreadyDrawedPosition[positionInfo] != null ) {
-                Log.logging("this position is already dorawd", positionInfo);
-                return;
-            }
-            Log.logging("fist dorawing...", positionInfo);
-            alreadyDrawedPosition[positionInfo] = true;
-            
-            view.graphics.drawRect( (x * getSquareLength()),
-                                    (y * getSquareLength() * -1),
-                                    getSquareLength(),
-                                    getSquareLength() );
-            view.graphics.endFill();
-        }
-        
         override protected function update(params:Object):void {
             Log.loggingTuning("=>MagicRange update Begin");
             
@@ -377,5 +374,10 @@ package {
         override public function updateRefresh():void {
             initDraw(getX(), getY());
         }
+        
+        override public function snapViewPosition():Boolean {
+            return snapViewPositionForMapRange(this);
+        }
+        
    }
 }

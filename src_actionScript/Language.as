@@ -62,6 +62,7 @@ package {
             p.saveLogMenu = "チャットログ保存";
             p.startSessionRecordingMenu = "録画開始";
             p.stopSessionRecordingMenu = "録画終了";
+            p.cancelSessionRecordingMenu = "録画キャンセル";
             p.logoutMenu = "ログアウト";
             p.displayMenu = "表示";
             p.displayWindowMenu = "ウィンドウ";
@@ -84,6 +85,7 @@ package {
             p.addRangeMenu = "範囲追加";
             p.addMagicRangeMenu = "魔法範囲追加(D&D3版)";
             p.addMagicRangeDD4thMenu = "魔法範囲追加(D&D4版)";
+            p.addLogHorizonRangeMenu = "ログホライズン用範囲";
             p.addMetallicGuardianDamageRangeMenu = "攻撃範囲(メタリックガーディアン)";
             p.addMagicTimerMenu = "魔法タイマー追加";
             p.createChitMenu = "チット作成";
@@ -123,8 +125,10 @@ package {
             p.resourceWindowTitle = "リソース";
             p.resourceName = "名称";
             p.resourceCount = "数";
+            p.resourceCheck = "チェック";
             p.resourceOther = "その他";
-            p.addResourceWindowTitle = "資源追加";
+            p.addResourceWindowTitle = "リソース追加";
+            p.changeResourceWindowTitle = "リソース変更";
             p.deleteResourceQuestionWindoTitle = "削除確認";
             p.deleteResourceQuestion = "{0}\nを削除します。よろしいですか？";
             p.initiativeWindowTitle = "イニシアティブ表";
@@ -171,6 +175,7 @@ package {
             p.viewStateInfo = "この部屋の表示設定。変更するとルーム内全員の設定が変更されます。";
             p.createButton = "作成";
             p.cancelButton = "キャンセル";
+            p.passwordMismatch = "パスワードが違います";
             p.diceWindow = "ダイス";
             p.mainTabName = "メイン";
             p.smallTalkTabName = "雑談";
@@ -200,7 +205,11 @@ package {
             p.searchTrushMountAnnounce = "「{0}」が「{1}」の捨て札を参照しています。";
             p.logoutMessage = "「{0}」がログアウトしました。";
             p.startRecordMessage = "「{0}」が録画を開始しました。";
+            p.resumeRecordMessage = "「{0}」の録画を再開します。";
             p.stopRecordMessage = "「{0}」の録画が終了しました。";
+            p.cancelRecordQuestion = "録画を取り消しますか？\n取り消すと今までの録画内容は削除されます。";
+            p.cancelRecordQuestionTitle = "録画キャンセル確認";
+            p.cancelRecordMessage = "「{0}」の録画をキャンセルしました。";
             p.diceOpenMessage = "「{0}」がダイスをオープンしました。出目は{1}({2}面ダイス)です。";
             p.changeCardOwnerMessage = "「{0}」が「{1}」のカード一式を受け取りました。";
             p.returnCardNoNameMessage = "「{0}」が「{1}」の捨て札からカードを引き戻しました。";
@@ -219,6 +228,7 @@ package {
             p.initWindowPositionFinished = "保存していた表示情報を初期化しました。\nお手数ですが再度ログインし直してしてください。";
             p.loginUserList = "ログイン中メンバー一覧：";
             p.loginUserNameAndId = "{0}（ユーザーＩＤ：{1}）";
+            p.diceBotTable = "ダイスボット表";
             p.addBotTableWindowTitle = "ダイスボット表追加";
             p.changeBotTableWindowTitle = "ダイスボット表変更";
             p.botTableCommandName = "コマンド名";
@@ -351,7 +361,8 @@ package {
             p.checkMapWidthWarning = "横マス数の入力値が不正です。1〜{0}の整数を入力してください。";
             p.checkDD3rdRadiusWarning = "半径の入力値が不正です。1〜{0}の整数で5の倍数を入力してください。";
             p.checkDD4thRadiusWarning = "半径の入力値が不正です。1〜{0}の整数を入力してください。";
-            
+            p.rangeOverWarning = "射程の入力値が不正です。0〜{0}の整数を入力してください。";
+                                                            
             p.magicTimerRestRound = "魔法タイマー 残り：{0}ラウンド";
             p.magicTimerDeleteQuestion = "魔法タイマー「{0}」を削除してもよろしいですか？";
             p.rollCallResult = "準備完了！（{0}/{1}）";
@@ -376,7 +387,7 @@ package {
             p.unloadablePlayRoomNumber = "このプレイルームはシステム管理者によってロード不可に指定されています。ロードを行いたい場合は他のプレイルームを作成してください。";
             p.noPasswordPlayRoomNumber = "このプレイルームはシステム管理者によってパスワード設定不可に指定されています。\nパスワードは空にしてください。";
             p.loginTimeLimitHasComes = "ログイン時間の上限（{0}秒）が経過しました。サーバとの接続を切断します。";
-            p.loginTimeLimitWarning = "このサーバでは{0}以上ログインすると接続が切断されます。実プレイには向きませんのでご注意下さい。";
+            p.loginTimeLimitWarning = "このサーバでは{0}以上ログインすると接続が切断されます。";
             p.noEmptyPlayRoom = "空きプレイルームが見つかりませんでした";
             p.errorPassword = "パスワードが間違っています。";
             
@@ -398,8 +409,9 @@ package {
             p.closeCard = "カードを伏せる（非公開）";
             p.changeCardOwnerToMe = "カードを自分の管理へ";
             p.writeCardTextToChat = "カードテキストをチャットに引用";
-            p.changeCard = "カード変更";
             p.deleteCard = "カード削除";
+            p.changeCard = "カード変更";
+            p.dumpCard = "カード捨て";
             p.upSideCard = "正位置";
             p.downSideCard = "逆位置";
             p.yourAreNotCardOwner = "カードの所持者ではないため公開できません。";
@@ -479,6 +491,11 @@ package {
             p.maxRange = "最大射程:";
             p.minRange = "最小射程:";
             p.color = "色:";
+            
+            //LogHorizonRange
+            p.logHorizonRange = "ログホライズン用範囲";
+            p.name = "名前";
+            p.range = "射程";
             
             
             // Character.as
@@ -1227,7 +1244,7 @@ package {
             
             
             
-            var message:String = "Server directory \"language\" files has problem.please change thoase files\r\r";
+            var message:String = "Server directory \"language\" files has problem. please change language file.\r\r";
             
             if( beforeLang != "" || language != "" ) {
                 message += StringUtil.substitute("Language data has different,\rbefore:{0}\rafter:{1}\r\r",

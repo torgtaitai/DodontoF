@@ -124,7 +124,8 @@
     import mx.events.MenuEvent;
     import mx.managers.DragManager;
     import mx.managers.PopUpManager;
-
+    import mx.binding.utils.BindingUtils;
+    
     
     
     protected static var thisObj:DodontoF;
@@ -309,17 +310,11 @@
         } else if( menuName == "saveLog" ) {
             DodontoF_Main.getInstance().getChatWindow().saveChatLog();
         } else if( menuName == "startSessionRecording" ) {
-            findMainMenuItem("startSessionRecording").enabled = false;
-            findMainMenuItem("stopSessionRecording").enabled = true;
-            refreshMainMenu();
-            
-            dodontoF_Main.startSessionRecording();
+            startSessionRecording();
         } else if( menuName == "stopSessionRecording" ) {
-            findMainMenuItem("startSessionRecording").enabled = true;
-            findMainMenuItem("stopSessionRecording").enabled = false;
-            refreshMainMenu();
-            
-            dodontoF_Main.stopSessionRecording();
+            stopSessionRecording();
+        } else if( menuName == "cancelSessionRecording" ) {
+            cancelSessionRecording();
         } else if( menuName == "saveAllData" ) {
             popup(SaveAllDataWindow, true);
         } else if( menuName == "loadAllSaveData" ) {
@@ -377,6 +372,10 @@
             var addMagicRangeDD4thWindow:AddMagicRangeDD4thWindow
               = popup(AddMagicRangeDD4thWindow, true) as AddMagicRangeDD4thWindow;
             addMagicRangeDD4thWindow.setCharacterPosition();
+        } else if( menuName == "addLogHorizonRange" ) {
+            var addLogHorizonRangeWindow:AddLogHorizonRangeWindow
+            = popup(AddLogHorizonRangeWindow, true) as AddLogHorizonRangeWindow;
+            addLogHorizonRangeWindow.setPosition();
         } else if( menuName == "addMetallicGuardianDamageRange" ) {
             popup(AddMetallicGuardianDamageRangeWindow, true);
         } else if( menuName == "addMagicTimer" ) {
@@ -803,6 +802,26 @@
            var window:ChangeAllFontWindow = DodontoF.popup(ChangeAllFontWindow, true) as ChangeAllFontWindow;
     }
     
+    public function startSessionRecording(isResume:Boolean = false):void {
+        setMenuSessionRecording(true);
+        dodontoF_Main.startSessionRecording(isResume);
+    }
+    
+    public function stopSessionRecording():void {
+        dodontoF_Main.stopSessionRecording();
+    }
+    
+    public function setMenuSessionRecording(isRecording:Boolean):void {
+        findMainMenuItem("startSessionRecording").enabled = ( ! isRecording);
+        findMainMenuItem("stopSessionRecording").enabled = isRecording;
+        findMainMenuItem("cancelSessionRecording").enabled = isRecording;
+        refreshMainMenu();
+    }
+    
+    public function cancelSessionRecording():void {
+        dodontoF_Main.cancelSessionRecording();
+    }
+
     ]]>
   </mx:Script>
 </mx:Application>
