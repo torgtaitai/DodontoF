@@ -1,0 +1,6 @@
+/saveData/data_0/*.lock
+/saveData/data_1/*.json
+/saveData/data_1/*.lock
+/saveData/loginCount.txt.lock
+/saveData/loginCount.txt
+/saveData/data_1/chatLongLines.txt
