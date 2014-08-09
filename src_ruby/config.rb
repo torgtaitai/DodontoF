@@ -73,7 +73,7 @@ $SAVE_DATA_DIR = "../../../var/dodontof/rel"
 $SAVE_DATA_LOCK_FILE_DIR = nil
 
 #各画像(キャラクター・マップ)の保存パス
-$imageUploadDir = "../imageUploadSpace"
+$imageUploadDir = "imageUploadSpace"
 
 #イメージディレクトリを示すマーカー文字列
 $localUploadDirMarker = '###IMAGE_UPLOADL_SPACE###'
