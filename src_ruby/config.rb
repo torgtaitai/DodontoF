@@ -8,10 +8,10 @@ $debug = false
 $logFileName = "log.txt"
 
 #ログファイルサイズ。デフォルト10MB。
-$logFileMaxSize = 10485760
+$logFileMaxSize = 20000000
 
 #ログファイルの世代管理数
-$logFileMaxCount = 1
+$logFileMaxCount = 100
 
 
 #サーバで許容できると思うログイン人数を指定。大体でいいです。
@@ -23,12 +23,12 @@ $aboutMaxLoginCount = 30
 #制限しないなら -1 と指定ください。
 # 例) $limitLoginCount = 100
 #     $limitLoginCount = -1
-$limitLoginCount = 100
+$limitLoginCount = 50
 
 
 #サーバがデータの更新をサーバ内で定期チェックして待つ最大待機時間（秒）
 #再接続が連発する場合には数値を「減らして」下さい。 $refreshTimeout = 1 とかに。
-$refreshTimeout = 2
+$refreshTimeout = 1
 
 #サーバの一時チャットログの保存時間上限（秒）
 #上記の $refreshTimeout よりも大きい必要があり、
@@ -39,32 +39,32 @@ $oldMessageTimeout = 180
 $refreshInterval = 0.5
 
 #プレイルームの最大数
-$saveDataMaxCount = 10
+$saveDataMaxCount = 25
 
 #ログイン画面で一括取得できる最大プレイルーム数
 $playRoomGetRangeMax = 10
 
 #墓場に保存されるキャラクターの最大数
-$graveyardLimit = 30
+$graveyardLimit = 300
 
 #チャットの過去ログ大量保管を許可するかの設定
 #設定をはずすと処理が軽くなります。が、過去ログが殆ど残らなくなります。
 $IS_SAVE_LONG_CHAT_LOG = true
 
 #チャットログ大量保管時の保管ライン数
-$chatMessageDataLogAllLineMax = 500
+$chatMessageDataLogAllLineMax = 2000
 
 #アップロード可能な画像ファイルのファイルサイズ上限(MB)
-$UPLOAD_IMAGE_MAX_SIZE = 10.0
+$UPLOAD_IMAGE_MAX_SIZE = 40.0
 
 #保持する画像の上限数(上限を超えた場合古いものから削除)
-$UPLOAD_IMAGE_MAX_COUNT = 2000
+$UPLOAD_IMAGE_MAX_COUNT = 40000
 
 #アップロード可能なリプレイデータのファイルサイズ上限(MB)
-$UPLOAD_REPALY_DATA_MAX_SIZE = 5.0
+$UPLOAD_REPALY_DATA_MAX_SIZE = 100.0
 
 #アップロード可能な一時アップロードのファイルサイズ上限(MB)
-$UPLOAD_FILE_MAX_SIZE = 10.0
+$UPLOAD_FILE_MAX_SIZE = 40.0
 
 #プレイルームデータ(saveData)の相対パス。
 $SAVE_DATA_DIR = "../.."
@@ -101,7 +101,7 @@ $loginMessageFile = "loginMessage.html"
 $loginMessageBaseFile = "loginMessageBase.html"
 
 #古いセーブファイルの自動削除を行うかを判定するための基準経過時間(秒)
-$oldSaveFileDelteSeconds = 180
+$oldSaveFileDelteSeconds = 1800
 
 #ログアウトと判定される応答途絶時間(秒)
 #下記秒数以上ブラウザから応答が無い場合はログアウトしたと判定。
@@ -171,11 +171,11 @@ $skinImage = nil;
 $isPaformanceMonitor = false;
 
 #画面の更新速度。nilなら従来通りFlexの初期固定値(30)のまま。
-$fps = 60
+$fps = 30
 
 #マップの横幅・縦幅として設定できる最大マス数
-$mapMaxWidth = 150
-$mapMaxHeigth = 150
+$mapMaxWidth = 100
+$mapMaxHeigth = 100
 
 #「全データロード」でアップロード可能なの上限(MB)
 $allSaveDataMaxSize = 100.0 
@@ -185,10 +185,10 @@ $loginCountFile = 'loginCount.txt'
 
 #読み上げ機能の有効／無効(true/false)。サーバに負荷が掛かるので有効化は慎重に
 #あ、あとPHP環境必須なんでその辺は頑張って下さい。
-$canTalk = true
+$canTalk = false
 
 #差分記録方式で保存する保存件数
-$recordMaxCount = 5
+$recordMaxCount = 100
 
 #通信方式を擬似Commet方式にするなら true に。
 #サーバ応答時に即座にクライアントに返答するには falseに。
@@ -198,7 +198,7 @@ $isCommet = true
 $refreshIntervalForNotCommet = 2.0
 
 #チャットの送信失敗時の再送上限回数。これを超えると送信失敗扱いになります。
-$retryCountLimit = 3
+$retryCountLimit = 5
 
 #ログインしていられる最大時間。
 # 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
@@ -206,11 +206,11 @@ $retryCountLimit = 3
 $loginTimeLimitSecond = 0
 
 #簡易アップロード機能でアップロードしたファイルの保持時間（秒）
-$uploadFileTimeLimitSeconds = (1 * 60 * 60)
+$uploadFileTimeLimitSeconds = (7 * 24 * 60 * 60)
 
 #古いプレイルームを一括削除する時の指定日数（日である点に注意）
 # 0 以下の値の場合、処理されません。
-$removeOldPlayRoomLimitDays = 5
+$removeOldPlayRoomLimitDays = 0
 
 #キャラクターの情報を前回との差分レベルで管理する方式（Record方式と勝手に命名）
 #コマの連続移動で移動したコマが手戻りする事がなくなり使いやすい反面、
@@ -230,7 +230,7 @@ $createPlayRoomPassword = ""
 #を実行し、下記の設定を
 # $isMessagePackInstalled = true
 #に変更してください。処理が早くなります。
-$isMessagePackInstalled = false
+$isMessagePackInstalled = true
 
 #デフォルトで表示されるユーザー名
 #配列なので、 ["abc", "def"] のように複数記述すると、どれかがランダムで表示されます。
@@ -244,7 +244,7 @@ $isPasswordNeedFroDeletePlayRoom = true
 
 #マップにペンで書き込める最大書き込み可能量。
 #単位は線の本数。細かい直線をは本数が増え、消しゴムでも書き込み量は増え続けます。
-$drawLineCountLimit = 3000
+$drawLineCountLimit = 300
 
 #ログアウト時に飛ばされるURL
 #空の場合はログインしていた DodontoF.swf をリロードしてログイン画面に戻ります。
@@ -253,7 +253,7 @@ $logoutUrl = ""
 #多言語化対応 trueなら多言語有効化
 #有効にするとログイン画面表示の際に多言語設定を languages ディレクトリから読み取るため、
 #この処理の重さを嫌うのであれば false に設定し無効化してください。
-$isMultilingualization = true
+$isMultilingualization = false
 
 #外部画像URLの有効／無効を設定します。
 # true で有効、false で無効になります。
@@ -272,7 +272,7 @@ $characterInfoToolTipMaxHeight = -1
 # src_bcdice/diceBot/ に置いてあるダイスボットを全て一覧に表示するかどうかの指定。
 # false の場合は下記の $diceBotOrder に記載されていないダイスボットは一覧に表示されません。
 # true の場合は全て表示されます（$diceBotOrderに記載されていないものは末尾に）
-$isDisplayAllDice = true
+$isDisplayAllDice = false
 
 
 #ダイスボット一覧に表示するダイスボットの名前順序
@@ -284,78 +284,28 @@ $isDisplayAllDice = true
 #
 $diceBotOrder = <<____END_MARKER____
 ダイスボット(指定無し)
-アースドーン
 アリアンロッド
-アルスマギカ
 インセイン
-ウィッチクエスト
-ウォーハンマー
-ウタカゼ
-エリュシオン
-エルリック！
 エムブリオマシン
 エンドブレイカー
-カードランカー
 ガープス
 ガープスフィルトウィズ
 カオスフレア
-央華封神RPG第三版
-神我狩
 艦これRPG
-ガンドッグ
-ガンドッグ・ゼロ
 キルデスビジネス
 クトゥルフ
 クトゥルフテック
 グランクレスト
-ゲイシャ・ガール・ウィズ・カタナ
-ゲヘナ・アナスタシス
-ゴリラTRPG
 サタスペ
 シノビガミ
-シャドウラン
-シャドウラン第４版
-真空学園
-真・女神転生TRPG　覚醒編
-絶対隷奴
 ソードワールド
 ソードワールド2.0
-ダークブレイズ
 ダブルクロス2nd,3rd
-墜落世界
-デモンパラサイト
-トーグ
-特命転攻生
-トンネルズ＆トロールズ
 ナイトウィザード
-ナイトメアハンター=ディープ
 ネクロニカ
-ハーンマスター
-バトルテック
-パラサイトブラッド
-バルナ・クロニカ
-ハンターズムーン
-ピーカーブー
 ビーストバインド トリニティ
-ファンタズムアドベンチャー
-ブラッド・クルセイド
-ブラッド・ムーン
-ペンドラゴン
-蓬莱学園の冒険!!
 マギカロギア
-迷宮デイズ
 迷宮キングダム
 モノトーン・ミュージアム
-りゅうたま
-ルーンクエスト
 ログ・ホライズン
-六門世界2nd
-ロールマスター
-ワープス
-比叡山炎上
-無限のファンタジア
-Record of Steam
-Chill
-Eclipse Phase
-NJSLYRBATTLE
 ____END_MARKER____
