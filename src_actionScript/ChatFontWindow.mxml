@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="300"
-   height="300"
+   height="350"
    title="{Language.s.chatFontWindow}" 
    showCloseButton="true"
    >
@@ -33,6 +33,13 @@
 	  <mx:FormItem label="{Language.s.chatFontTimeFormat}">
         <mx:CheckBox id="isDisplayTimeCheckBox" 
                      label="{Language.s.chatFontTimeFormatInfo}"
+                     change="printSample()"
+                     />
+      </mx:FormItem>
+      
+	  <mx:FormItem label="{Language.s.chatFontDisplayOtherChannel}">
+        <mx:CheckBox id="isDisplayOtherChannelCheckBox" 
+                     label="{Language.s.chatFontDisplayOtherChannelInfo}"
                      change="printSample()"
                      />
       </mx:FormItem>
@@ -69,13 +76,15 @@
                          chatFontColor:String,
                          chatBackgroundColor:String,
                          chatFontSize:int,
-                         isDisplayTime:Boolean):void {
+                         isDisplayTime:Boolean,
+                         isDisplayOtherChannel:Boolean):void {
         
         chatWindow = chatWindow_;
         chatMessageColorPicker.selectedColor = parseInt("0x" + chatFontColor);
         chatBackgroundColorPicker.selectedColor = parseInt("0x" + chatBackgroundColor);
         defaultFontSize = chatFontSize;
         isDisplayTimeCheckBox.selected = isDisplayTime;
+        isDisplayOtherChannelCheckBox.selected = isDisplayOtherChannel;
         
         setDefaultFontSize();
     }
@@ -141,7 +150,18 @@
                                    color,
                                    time,
                                    isDisplayTimeCheckBox.selected);
-        return htmlText;
+        
+        var oterhChannelHtml:String = "";
+        
+        if( isDisplayOtherChannelCheckBox.selected ) {
+            var channel:int = chatWindow.lastChatChannel;
+            var tabName:String = chatWindow.getChatChannle(channel).getDefaultLabel();
+            
+            oterhChannelHtml = "\n" + 
+                ChatMessageTrader.getChatMessageOtherChannel(htmlText, tabName);
+        }
+        
+        return (htmlText + oterhChannelHtml);
     }
     
     
@@ -157,6 +177,7 @@
         chatWindow.setChatFontSize(fontSize);
         
         chatWindow.setDisplayTime( isDisplayTimeCheckBox.selected );
+        chatWindow.setDisplayOtherChannel( isDisplayOtherChannelCheckBox.selected );
         chatWindow.saveChatInfos();
 
         PopUpManager.removePopUp(this);

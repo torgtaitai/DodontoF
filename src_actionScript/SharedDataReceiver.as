@@ -466,6 +466,8 @@ package {
             Log.loggingTuning("=>Begin analyzeCharacterData");
             Log.logging("analyzeCharacterData characterDataList", characterDataList);
             
+            characterDataList = getCharacterDataList(characterDataList);
+            
             for(var i:int = 0 ; i < characterDataList.length ; i++) {
                 var characterData:Object = characterDataList[i];
                 Log.logging("characterData is ", characterData);
@@ -489,6 +491,30 @@ package {
             ChatWindow.getInstance().refreshChatCharacterName();
             
             Log.loggingTuning("=>End analyzeCharacterData");
+        }
+        
+        private function getCharacterDataList(characterDataList:Object):Object {
+            if( ! isNeedChangeCharacterData() ) {
+                return characterDataList;
+            }
+            
+            for(var i:int = 0 ; i < characterDataList.length ; i++) {
+                characterDataList[i] = 
+                    SharedDataReceiver.getJsonDataFromString(characterDataList[i]);
+            }
+            
+            return characterDataList;
+        }
+        
+        private function isNeedChangeCharacterData():Boolean {
+            if( DodontoF_Main.getInstance().isSQLiteMode() ) {
+                return true;
+            }
+            if( DodontoF_Main.getInstance().isMySqlKaiMode() ) {
+                return true;
+            }
+            
+            return false;
         }
         
         private function analyzeAddCharacters(list:Array):void {

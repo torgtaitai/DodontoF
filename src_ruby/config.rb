@@ -134,7 +134,7 @@ $isWelcomeMessageOn = true
 $dbType = nil
 
 #MySQLを使用する場合のDB設定。
-$databaseHostName = "localhost"
+$databaseHostName = "127.0.0.1"
 $databaseName = "databaseName"
 $databaseUserName = "user"
 $databasePassword = "password"
@@ -285,6 +285,7 @@ $isDisplayAllDice = true
 $diceBotOrder = <<____END_MARKER____
 ダイスボット(指定無し)
 アースドーン
+アースドーン3版
 アリアンロッド
 アルスマギカ
 インセイン
@@ -325,6 +326,7 @@ $diceBotOrder = <<____END_MARKER____
 墜落世界
 デモンパラサイト
 トーグ
+トーグ1.5版
 特命転攻生
 トンネルズ＆トロールズ
 ナイトウィザード

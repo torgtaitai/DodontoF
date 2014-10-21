@@ -619,10 +619,6 @@ package {
             sender.getPlayRoomStates(minRoom, maxRoom, resultFunction);
         }
         
-        public function getPlayRoomStatesByCount(minRoom:int, count:int, resultFunction:Function):void {
-            sender.getPlayRoomStatesByCount(minRoom, count, resultFunction);
-        }
-        
         public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
             sender.getLoginInfo(resultFunction, uniqueId);
         }
@@ -733,8 +729,8 @@ package {
             sender.changeEffectsAll(params);
         }
         
-        public function removeEffect(effectId:String):void {
-            sender.removeEffect(effectId);
+        public function removeEffect(effectIds:Array):void {
+            sender.removeEffect(effectIds);
         }
         
         public function getMountCardInfos(mountNameForDisplay:String, mountName:String, mountId:String, resultFunction:Function):void {

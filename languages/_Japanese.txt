@@ -684,6 +684,7 @@ canNotOpenSaveDataBecauseInvalid = セーブデータが不正なため開けま
 saveChatLog = ログ保存
 saveChatLogForHtml = HTMLとして保存
 saveChatLogForText = テキストとして保存
+saveChatLogAllTabs = [ 全タブ ]
 save = セーブ
 saveInfomation = サーバのデータをファイルとして保存します。
 initSaveData = データ取得
@@ -727,9 +728,7 @@ chatPalletSaveData = チャットパレットセーブデータ
 channerCoundIsEmptyErrorMessage = チャンネル数が0で設定されています。正しいチャンネル設定を行ってください
 sendChatErrorMessage = チャット送信エラー
 visitorNameSaffix = ＠見学
-diceBotOtherInfomation1 = ==【その他】===============================\n
-diceBotOtherInfomation2 = ゲーム固有の判定がある場合はこの場所に記載されます。
-diceBotCustomInfomation = 専用】=======================\n
+diceBotCustomInfomation = ==【{0}専用】=======================\n
 alarmMessage = [アラーム発生：{0}]:
 alarmMessageSecond = :{0}秒後
 needFlashPlayerOverVer10ErrorMessage = この機能を使用するにはFlashPlayerのバージョン10以上が必要です。
@@ -863,6 +862,8 @@ chatFontSize = 文字サイズ:
 chatFontSizeTips = チャット文字サイズ
 chatFontTimeFormat = フォーマット:
 chatFontTimeFormatInfo = 「時：分」表示
+chatFontDisplayOtherChannel = 別タブメッセージ:
+chatFontDisplayOtherChannelInfo = 表示する
 chatFontInputSample = 入力例:
 chatFontOutputSample = 出力例：
 chatFontSetting = 設定

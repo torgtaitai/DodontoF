@@ -12,11 +12,11 @@ package {
             return "";
         }
         
-        override public function getAllChatLogList():Array {
+        override public function getChatLogList():Array {
             return new Array();
         }
         
-        override public function addBuffer(line:String, time:Number):void {
+        override public function addBuffer(line:String):void {
         }
         
         override public function checkNovelMode():void {

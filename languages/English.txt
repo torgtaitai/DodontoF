@@ -686,6 +686,7 @@ canNotOpenSaveDataBecauseInvalid = Save Data can NOT open because it invalid dat
 saveChatLog = Save Chat Log
 saveChatLogForHtml = Save Chat Log for HTML
 saveChatLogForText = Save Chat Log for TEXT
+saveChatLogAllTabs = [ All Tabs ]
 save = Save
 saveInfomation = Save Server Data to faile
 initSaveData = Create Save File
@@ -729,9 +730,7 @@ chatPalletSaveData = Chat Palette Save Data
 channerCoundIsEmptyErrorMessage = Channel Count is Empty. set valid channel
 sendChatErrorMessage = Send Chat Error
 visitorNameSaffix = @Visitor
-diceBotOtherInfomation1 = ==【other】===============================\n
-diceBotOtherInfomation2 = Any Game Roll way was written here
-diceBotCustomInfomation = Only】=======================\n
+diceBotCustomInfomation = ==【{0}Only】=======================\n
 alarmMessage = [Alarm：{0}]:
 alarmMessageSecond = :{0} seconds after
 needFlashPlayerOverVer10ErrorMessage = If you want to use this, need FlashPlayer Ver.10 or after.
@@ -865,6 +864,8 @@ chatFontSize = Font Size:
 chatFontSizeTips = Chat Font Size
 chatFontTimeFormat = Format :
 chatFontTimeFormatInfo = Display "Hour：Minute"
+chatFontDisplayOtherChannel = Other Tab Message
+chatFontDisplayOtherChannelInfo = Display
 chatFontInputSample = Input Sample:
 chatFontOutputSample = Output Sample：
 chatFontSetting = Setting

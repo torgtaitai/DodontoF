@@ -4,9 +4,9 @@ class DiceBotInfos
   
   def initialize
     
-    noneDiceBot = {
-    'name' => 'ダイスボット(指定無し)',
-    'gameType' => 'DiceBot',
+    @baseDiceBot = {
+    'name' => 'BaseDiceBot',
+    'gameType' => 'BaseDiceBot',
     'prefixs' => [
       '\d+D\d*', #加算ロール　(xDn)
       '\d+B\d+', #バラバラロール　(xBn)
@@ -42,6 +42,16 @@ class DiceBotInfos
 INFO_MESSAGE_TEXT
     }
     
+    noneDiceBot = {
+    'name' => 'ダイスボット(指定無し)',
+    'gameType' => 'DiceBot',
+    'prefixs' => [
+    ],
+    'info' => <<INFO_MESSAGE_TEXT
+ゲーム固有の判定がある場合はこの場所に記載されます。
+INFO_MESSAGE_TEXT
+    }
+    
     @infos = [noneDiceBot,
              ]
   end
@@ -54,6 +64,8 @@ INFO_MESSAGE_TEXT
     addAnotherDiceBotToInfos()
     sortInfos()
     deleteInfos() unless( $isDisplayAllDice )
+    
+    @infos << @baseDiceBot
     
     return @infos
   end

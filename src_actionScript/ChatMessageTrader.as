@@ -264,7 +264,7 @@ package {
             
             var messageLine:String = getChatMessageForPrintHtml(chatMessage, senderName, color,
                                                                 time, chatWindow.getDisplayTime(), sendto);
-            chatWindow.getChatChannle(channel).addBuffer(messageLine, time);
+            addPrintBuffer(channel, messageLine);
             
             chatWindow.playAddMessageSound(senderName);
             chatWindow.setUserNames(senderName);
@@ -272,27 +272,6 @@ package {
             Log.logging("addMessageToChatLog end");
             return true;
         }
-        
-        private function isInvisibleChatHandleLog(chatSenderUniqueId:String):Boolean {
-            if( chatSenderUniqueId != Card.cardLogStrictlyUniqueId ) {
-                return false;
-            }
-            
-            return ( ! DodontoF_Main.getInstance().getCardHandleLogVisible() );
-        }
-        
-        private function pushToReplayChatLog(time:Number, uniqueId:String, chatSendData:ChatSendData):void {
-            chatSendData.setParams('time', time);
-            chatSendData.setParams('uniqueId', uniqueId);
-            DodontoF_Main.getInstance().addRestChatSendDataForReplay(chatSendData);
-        }
-        
-        static private var separator:String = "：";
-        
-        static public function getChatMessageSeparator():String {
-            return separator;
-        }
-        
         
         public function getChatMessageForPrintHtml(chatMessage:String, 
                                                    senderName:String, 
@@ -315,6 +294,67 @@ package {
             
             return messageLine;
         }
+        
+        
+        private function addPrintBuffer(channel:int, message:String):void {
+            var count:int = chatWindow.chatChannelCount;
+            
+            for(var i:int = 0 ; i < count ; i++) {
+                
+                var text:String = getChatMessage(message, i, channel);
+                
+                if( text == null ) {
+                    continue;
+                }
+                
+                chatWindow.getChatChannle(i).addBuffer(text);
+            }
+        }
+        
+        private function getChatMessage(message:String,
+                                        targetChannel:int, sendChannel:int):String {
+            if(targetChannel == sendChannel) {
+                return message;
+            }
+            
+            if( ! chatWindow.isDisplayOtherChannelMode() ) {
+                return null;
+            }
+            
+            var tabName:String = chatWindow.getChatChannle(sendChannel).getDefaultLabel();
+            return getChatMessageOtherChannel(message, tabName);
+        }
+            
+        static public function getChatMessageOtherChannel(message:String,
+                                                          tabName:String):String {
+            message = ( otherChannelPrefix + '<i>[' + tabName + "]" +message + '</i>');
+            return message;
+        }
+        
+        static public function get otherChannelPrefix():String {
+            return "　　　　　";
+        }
+        
+        private function isInvisibleChatHandleLog(chatSenderUniqueId:String):Boolean {
+            if( chatSenderUniqueId != Card.cardLogStrictlyUniqueId ) {
+                return false;
+            }
+            
+            return ( ! DodontoF_Main.getInstance().getCardHandleLogVisible() );
+        }
+        
+        private function pushToReplayChatLog(time:Number, uniqueId:String, chatSendData:ChatSendData):void {
+            chatSendData.setParams('time', time);
+            chatSendData.setParams('uniqueId', uniqueId);
+            DodontoF_Main.getInstance().addRestChatSendDataForReplay(chatSendData);
+        }
+        
+        static private var separator:String = "：";
+        
+        static public function getChatMessageSeparator():String {
+            return separator;
+        }
+        
         
         private function getSendtoName(sendto:String):String {
             if( ! Utils.isValidSendTo(sendto) ) {

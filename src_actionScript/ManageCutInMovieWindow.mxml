@@ -134,36 +134,43 @@
     private function removeCutInEffect():void {
         status = "";
         
-        var cutInInfo:Object = getCutInInfo();
-        
-        if( cutInInfo == null ) {
-            return;
-        }
-        
-        if( cutInInfo.effectId == null ) {
-            return;
-        }
-        
-        checkQuestionForRemoveCutInfEffect(cutInInfo);
+        var cutInInfos:Object = getCutInInfos();
+        checkQuestionForRemoveCutInfEffects(cutInInfos);
     }
     
-    private function checkQuestionForRemoveCutInfEffect(cutInInfo:Object):void {
+    private function getCutInInfos():Array {
+        var array:Array = cutInInfosList.selectedItems;
+        return array;
+    }
+    
+    private function checkQuestionForRemoveCutInfEffects(cutInInfos:Object):void {
         var message:String = "";
-        message += Language.s.cutInTitle + "：" + cutInInfo.message + "\n";
-        message += Language.s.cutInImageFileName + "：" + cutInInfo.source + "\n";
+        
+        var effectIds:Array = new Array();
+        
+        for(var i:int = 0 ; i < cutInInfos.length ; i++) {
+            var cutInInfo:Object = cutInInfos[i];
+            Log.logging("cutInInfo", cutInInfo);
+            
+            message += Language.s.cutInTitle + "：" + cutInInfo.message + "\n";
+            // message += Language.s.cutInImageFileName + "：" + cutInInfo.source + "\n";
+            
+            effectIds.push(cutInInfo.effectId);
+        }
         message += "\n";
         message += Language.s.deleteCutInMovieQuestion;
+        
         Alert.show(message, Language.s.deleteCutInMovieQuestionTitle, 
                    Alert.OK | Alert.CANCEL, null, 
                    function(e : CloseEvent) : void {
                        if (e.detail == Alert.OK) {
-                           removeCutInEffectAfterCheck(cutInInfo);
+                           removeCutInEffectAfterCheck(effectIds);
                        }});
     }
     
-    private function removeCutInEffectAfterCheck(cutInInfo:Object):void {
+    private function removeCutInEffectAfterCheck(effectIds:Array):void {
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        guiInputSender.removeEffect(cutInInfo.effectId);
+        guiInputSender.removeEffect(effectIds);
     }
 
 

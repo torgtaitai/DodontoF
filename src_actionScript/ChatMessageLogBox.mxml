@@ -27,7 +27,8 @@
         private var nocheckCount:int = 0;
         private var defaultLabel:String = null;
         private var buffer:Array = new Array();
-        private var allChatLogList:Array = new Array();
+        private var chatLogList:Array = new Array();
+        static private var allChatLogList:Array = new Array();
         private var chatFontSize:int = 11;
         private var channel:int = 0;
         
@@ -55,12 +56,16 @@
             return defaultLabel;
         }
         
+        public function getChatLogList():Array {
+            return chatLogList;
+        }
+        
         public function getAllChatLogList():Array {
             return allChatLogList;
         }
         
-        public function addBuffer(line:String, time:Number):void {
-            pushAllChatLogList(line, time);
+        public function addBuffer(line:String):void {
+            pushChatLogList(line);
             
             if( buffer.length != 0 ) {
                 line = ("<br>" + line);
@@ -73,8 +78,16 @@
             buffer.push(line);
         }
         
-        private function pushAllChatLogList(messageLine:String, time:Number):void {
-            allChatLogList.push(messageLine);
+        private function pushChatLogList(message:String):void {
+            //他のチャンネルのログは保存しない。
+            if( message.indexOf( ChatMessageTrader.otherChannelPrefix ) == 0 ) {
+                return;
+            }
+            
+            chatLogList.push(message);
+            
+            var allMessage:String = "[" + getDefaultLabel() + "]" + message;
+            allChatLogList.push( allMessage );
         }
         
         public function checkNovelMode():void {
@@ -281,8 +294,8 @@
             this.setLastText( novelticMode );
             clearChatMessageLog();
             
-            for(var i:int = 0 ; i < allChatLogList.length ; i++) {
-                var line:String = "<br>" + allChatLogList[i];
+            for(var i:int = 0 ; i < chatLogList.length ; i++) {
+                var line:String = "<br>" + chatLogList[i];
                 addBufferOnly( line );
             }
         }

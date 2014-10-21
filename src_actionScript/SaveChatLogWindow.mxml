@@ -46,25 +46,29 @@
     
     <mx:HRule width="100%" height="20" strokeWidth="1" shadowColor="black" strokeColor="black" />
     
+    <mx:Box id="saveAllButtonBox" 
+            height="25" width="100%"
+            horizontalAlign="center" verticalAlign="middle"
+            />
     <mx:Tile id="saveButtonBox" 
              height="100%" width="100%"
              horizontalAlign="center" verticalAlign="middle"
-             >
-    </mx:Tile>
+             />
     
     <mx:Button label="{Language.s.cancelButton}" click="closeAction()" />
-  
+    
   </mx:Box>
   
   
   <mx:Script>
     <![CDATA[
+    import flash.text.TextFormat;
     import mx.containers.TitleWindow;
+    import mx.controls.Alert;
+    import mx.controls.Button;
+    import mx.core.UIComponent;
     import mx.managers.PopUpManager;
     import mx.utils.StringUtil;
-    import mx.controls.Button;
-    import flash.text.TextFormat;
-    import mx.controls.Alert;
     
     private var chatWindow:ChatWindow;
     private var fontSaveKeyName:String = "SaveChatLogWindow";
@@ -77,14 +81,27 @@
     
     
     private function initChannels():void {
+        
+        addNewLogSaveButon(-1, Language.s.saveChatLogAllTabs, saveAllButtonBox);
+        
         var channelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
         for(var i:int = 0 ; i < channelNames.length ; i++) {
-            var button:Button = new Button();
-            button.label = channelNames[i];
-            saveButtonBox.addChild(button);
-            
-            button.addEventListener(MouseEvent.CLICK, getSaveChannelFunction(i));
+            addNewLogSaveButon(i, channelNames[i]);
         }
+    }
+    
+    private function addNewLogSaveButon(channel:int, channelName:String,
+                                        parent:UIComponent = null):void {
+        
+        if( parent == null ) {
+            parent = saveButtonBox;
+        }
+        
+        var button:Button = new Button();
+        button.label = channelName;
+        parent.addChild(button);
+        
+        button.addEventListener(MouseEvent.CLICK, getSaveChannelFunction(channel));
     }
     
     private function getSaveChannelFunction(channel:int):Function {
@@ -152,7 +169,13 @@
     
     public function saveTargetChannelChatLogHtml(channel:int, isHtmlFormat:Boolean,
                                                  fontSize:int, lineHeight:int):void {
-        var chatLogList:Array = chatWindow.getChatChannle(channel).getAllChatLogList();
+        
+        var chatLogList:Array = null;
+        if( channel == -1 ) {
+            chatLogList = chatWindow.getChatChannle(0).getAllChatLogList();
+        } else {
+            chatLogList = chatWindow.getChatChannle(channel).getChatLogList();
+        }
         
         var changedChannelNames:Array = DodontoF_Main.getInstance().getChatChannelNames();
         var channelName:String = changedChannelNames[channel];

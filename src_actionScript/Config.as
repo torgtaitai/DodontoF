@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.45.04(2014/07/25)";
+        private var version:String = "Ver.1.45.10(2014/10/22)";
         
         public function getVersion():String {
             return version;
@@ -82,6 +82,7 @@ package {
         
         public function getDodontoFServerCgiUrl():String {
             var cgiUrl:String = "DodontoFServer.rb";
+            
             
             if( DodontoF_Main.getInstance().isMySqlMode() ) {
                 cgiUrl = "DodontoFServerMySql.rb";

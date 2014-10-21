@@ -332,6 +332,14 @@ package {
             return isMode('mysql');
         }
         
+        public function isSQLiteMode():Boolean {
+            return isMode('sqlite');
+        }
+        
+        public function isMySqlKaiMode():Boolean {
+            return isMode('mysqlkai');
+        }
+        
         public function isErrorLogMode():Boolean {
             return isMode('errorLog');
         }

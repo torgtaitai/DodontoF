@@ -150,6 +150,10 @@ package {
         }
         
         public function drawCard(isOpen_:Boolean, count:int = 1):void {
+            if( this.cardCount <= 0 ) {
+                return;
+            }
+            
             sender.drawCard( isOpen_,
                              getSelfOwnerId(),
                              getSelfOwnerName(),

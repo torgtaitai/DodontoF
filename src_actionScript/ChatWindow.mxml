@@ -248,10 +248,17 @@
         private var chatBackgroundColor:String = "FFFFFF";
         private var chatFontSize:int = 12;
         private var isDisplayTime:Boolean = false;
+        private var isDisplayOtherChannel:Boolean = false;
         private var chatMessageTrader:ChatMessageTrader;
         private var novelticMode:NovelticMode = null;
         
         private var diceRollPlace:UIComponent = new UIComponent();
+        
+        static private var baseDiceBotGameType:String = 'BaseDiceBot';
+        private var baseDiceBot:Object = {name: baseDiceBotGameType, 
+                                          gameType: baseDiceBotGameType,
+                                          prefixs: [],
+                                          info: '' };
         
         public static function getInstance():ChatWindow {
             return instance;
@@ -362,6 +369,7 @@
             
             if( globalInfo != null ) {
                 setDisplayTime( globalInfo["isDisplayTime"] );
+                setDisplayOtherChannel( globalInfo["isDisplayOtherChannel"] );
                 setChatFontSize( globalInfo["chatFontSize"] );
             }
         }
@@ -396,6 +404,7 @@
             
             var globalInfo:Object = loadChatInfo(true);
             globalInfo["isDisplayTime"] = isDisplayTime;
+            globalInfo["isDisplayOtherChannel"] = isDisplayOtherChannel;
             globalInfo["chatFontSize"] = chatFontSize;
             saveChatInfo(globalInfo, true);
         }
@@ -463,6 +472,8 @@
             addChannels(changedChannelNames);
             renameChanells(changedChannelNames);
             
+            setDisplayOtherChannelCounting();
+            
             selectChatChannelWhenVisiterMode();
         }
 
@@ -508,6 +519,19 @@
             for(var i:int = 0 ; i < changedChannelNames.length ; i++) {
                 var box:ChatMessageLogBox = getChatChannle(i);
                 box.setLabel(changedChannelNames[i]);
+            }
+        }
+        
+        private function setDisplayOtherChannelCounting():void {
+            
+            for(var i:int = 0 ; i < chatChannelCount ; i++) {
+                var box:ChatMessageLogBox = getChatChannle(i);
+                
+                if( isDisplayOtherChannel ) {
+                    box.stopNoCheckCount();
+                } else {
+                    box.startNoCheckCount();
+                }
             }
         }
         
@@ -829,13 +853,32 @@
         
         public function setDiceBotInfos(diceBotInfos:Array):void {
             Log.logging("setDiceBotInfos called");
+            
             var gameType:String = diceBotGameType.selectedItem.gameType;
+            
+            baseDiceBot = removeBaseDiceBot( diceBotInfos );
             Utils.setDiceBotDataProvider( diceBotGameType, diceBotInfos );
-            //Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            
             setDiceBotGameType(gameType);
             
             initDicePatterns();
         }
+        
+        
+        private function removeBaseDiceBot(diceBotInfos:Object):Object {
+            
+            for(var i:int = 0 ; i < diceBotInfos.length; i++) {
+                var info:Object = diceBotInfos[i];
+                
+                if( info.gameType == baseDiceBotGameType ) {
+                    diceBotInfos.splice(i, 1);
+                    return info;
+                }
+            }
+            
+            return baseDiceBot;
+        }
+        
         
         private function wheelEvent(event:MouseEvent):void {
             if( novelticMode.isNovelticModeOn() )  {
@@ -962,28 +1005,14 @@
         private function getDiceBotHelpText(item:Object):String {
             var text:String = "";
             
-            if( item.gameType == '' || item.gameType == 'DiceBot' ) {
-                text += Language.s.diceBotOtherInfomation1;
-                text += Language.s.diceBotOtherInfomation2;
-                return text;
-            }
-            
-            text += ("==【" + item.name + Language.s.diceBotCustomInfomation);
+            text += Language.text("diceBotCustomInfomation", item.name);
             text += item.info;
             
             return text;
         }
         
         private function getBaseHelpText():String {
-            var helpText:String = '';
-            
-            for each (var item:Object in diceBotGameType.dataProvider ) {
-                    if( item.gameType == 'DiceBot' ) {
-                        helpText = item.info;
-                        break;
-                    }
-                }
-            
+            var helpText:String = baseDiceBot.info;
             return helpText;
         }
         
@@ -1365,11 +1394,10 @@
             
             patterns = new Array();
             
-            addPrefixToPatterns( 0, patterns);
+            addPrefixToPatterns( baseDiceBot.prefixs, patterns);
             
-            if( gameTypeIndex != 0 ) {
-                addPrefixToPatterns( gameTypeIndex, patterns );
-            }
+            var prefixs:Array = diceBotGameType.dataProvider[gameTypeIndex].prefixs;
+            addPrefixToPatterns( prefixs, patterns );
             
             Log.logging("create new patterns");
             dicePatternsList[gameTypeIndex] = patterns
@@ -1377,8 +1405,7 @@
             return patterns;
         }
         
-        private function addPrefixToPatterns(index:int, patterns:Array):void {
-            var prefixs:Array = diceBotGameType.dataProvider[index].prefixs;
+        private function addPrefixToPatterns(prefixs:Array, patterns:Array):void {
             
             for each(var prefix:String in prefixs) {
                     patterns.push( new RegExp("^((\\d+)\\s+)?(S" + prefix + ".*)", "is") );
@@ -1511,14 +1538,24 @@
         }
         
         private function printChatLog(logBox:ChatMessageLogBox):void {
-            logBox.stopNoCheckCount();
+            
+            var isCheckCounting:Boolean = ( ! logBox.isNoCheckCountingMode());
+            
+            //未読件数がカウントされていたなら、ここで一時的に止める。
+            if( ! isCheckCounting ) {
+                logBox.stopNoCheckCount();
+            }
+            
             logBox.resizeChatLog(novelticMode);
             
             var channel:int = logBox.getChannel();
             printAddedMessageToChatMessageLog();
             scrollChatMessageLogIfPositionIsLast(channel, true);
             
-            logBox.startNoCheckCount();
+            //未読件数がカウントされていたなら、ここで再開する。
+            if( ! isCheckCounting ) {
+                logBox.startNoCheckCount();
+            }
         }
         
         
@@ -1530,8 +1567,21 @@
             isDisplayTime = b;
         }
         
+        public function setDisplayOtherChannel(b:Boolean, isReplayMode:Boolean = false):void {
+            if( isReplayMode ) {
+                return;
+            }
+            
+            isDisplayOtherChannel = b;
+            setDisplayOtherChannelCounting();
+        }
+        
         public function getDisplayTime():Boolean {
             return isDisplayTime
+        }
+        
+        public function isDisplayOtherChannelMode():Boolean {
+            return isDisplayOtherChannel;
         }
         
         public function getChatMessageTrader():ChatMessageTrader {
@@ -1843,7 +1893,7 @@
     
         private function setChatFontWindow():void {
             var chatFontWindow:ChatFontWindow = DodontoF.popup(ChatFontWindow, true) as ChatFontWindow;
-            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize, isDisplayTime);
+            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize, isDisplayTime, isDisplayOtherChannel);
         }
     
         public function setChatFontColor(color:String):void {

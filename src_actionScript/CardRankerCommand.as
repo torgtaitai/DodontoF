@@ -11,7 +11,7 @@ package {
         }
         
         private var count:int = 0;
-        private var cardRankerRandomChoice:RegExp = /CardRanker : .*ランダムモンスター選択.+→\s*(.+：(.+))/m;
+        private var cardRankerRandomChoice:RegExp = /CardRanker : .*モンスター選択.+→\s*(.+：(.+))/m;
         
         public function executeCommand(params:Object):void {
             

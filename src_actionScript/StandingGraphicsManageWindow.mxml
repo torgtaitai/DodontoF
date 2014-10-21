@@ -72,11 +72,15 @@
             this.status = error.message;
         }
     }
-
+    
     private function getEffectInfoAndIndex():Array {
+        var index:int = effectInfosList.selectedIndex;
+        return getEffectInfoAndIndexByIndex(index);
+    }
+    
+    private function getEffectInfoAndIndexByIndex(index:int):Array {
         status = "";
     
-        var index:int = effectInfosList.selectedIndex;
         if( index == -1 ) {
             status = Language.s.selectStandingImage;
             return [null, index];
@@ -95,44 +99,42 @@
         DodontoF.popup(AddStandingGraphicsWindow, true);
     }
 
-    private function checkQuestionForRemoveEffect(info:Object, index:int):void {
+
+    private function removeEffect():void {
+        status = "";
+        
+        var infos:Array = effectInfosList.selectedItems;
+        checkQuestionForRemoveEffect(infos);
+    }
+    
+    private function checkQuestionForRemoveEffect(infos:Array):void {
         var message:String = "";
-        message += Language.s.characterName + info.name + "\n";
-        message += Language.s.standingGraphicState + info.state + "\n";
-        message += Language.s.imageFileName + info.source + "\n";
+        var effectIds:Array = new Array();
+        
+        for(var i:int = 0 ; i < infos.length ; i++) {
+            var info:Object = infos[i];
+            message += Language.s.characterName + info.name + "　";
+            message += Language.s.standingGraphicState + info.state + "\n";
+            //message += Language.s.imageFileName + info.source + "\n";
+            
+            effectIds.push(info.effectId);
+        }
+        
         message += "\n";
         message += Language.s.deleteStandingGraphicStateQuestion;
+        
         Alert.show(message, Language.s.deleteStandingGraphicStateQuestionTitle, 
                    Alert.OK | Alert.CANCEL, null, 
                    function(e : CloseEvent) : void {
                        if (e.detail == Alert.OK) {
-                           removeEffectAfterCheck(info, index);
+                           removeEffectAfterCheck(effectIds);
                        }});
     }
 
-    private function removeEffect():void {
-        status = "";
-    
-        var results:Array = getEffectInfoAndIndex();
-        var effectInfo:Object = results[0];
-        var index:int = results[1];
-    
-        if( effectInfo == null ) {
-            return;
-        }
-    
-        if( effectInfo.effectId == null ) {
-            return;
-        }
-    
-        checkQuestionForRemoveEffect(effectInfo, index);
-    }
 
-    private function removeEffectAfterCheck(effectInfo:Object, index:int):void {
-        //standingGraphicInfos.removeItemAt(index);
-        
+    private function removeEffectAfterCheck(effectIds:Array):void {
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-        guiInputSender.removeEffect(effectInfo.effectId);
+        guiInputSender.removeEffect(effectIds);
     }
     
     

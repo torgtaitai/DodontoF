@@ -663,7 +663,7 @@ package {
                     }
                 }
                 
-                var message:String = Language.text("TEXT_NO_00186", addFailedCharacterNames.join("\" \""));
+                var message:String = Language.text("characterNameDuplicate", addFailedCharacterNames.join("\" \""));
                 DodontoF_Main.getInstance().getChatWindow().addLocalMessage(message);
             }
         }
@@ -962,14 +962,6 @@ package {
             sendCommandData(obj, resultFunction);
         }
         
-        public function getPlayRoomStatesByCount(minRoom:int, count:int, resultFunction:Function):void {
-            var data:Object = {"minRoom": minRoom,
-                               "count": count };
-            
-            var obj:Object = getParamObject("getPlayRoomStatesByCount", data);
-            sendCommandData(obj, resultFunction);
-        }
-        
         public function getLoginInfo(resultFunction:Function, uniqueId:String = null):void {
             var data:Object = {"uniqueId": uniqueId};
             
@@ -1231,9 +1223,9 @@ package {
             sendCommandData(obj);
         }
         
-        public function removeEffect(effectId:String):void {
+        public function removeEffect(effectIds:Array):void {
             var data:Object = {
-                "effectId": effectId
+                "effectIds": effectIds
             };
             
             var obj:Object = getParamObject("removeEffect", data);

@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.45.04"
-$versionDate = "2014/07/25"
+$versionOnly = "Ver.1.45.10"
+$versionDate = "2014/10/22"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -751,7 +751,6 @@ class DodontoFServer
       ['clearGraveyard', hasReturn], 
       ['getLoginInfo', hasReturn], 
       ['getPlayRoomStates', hasReturn], 
-      ['getPlayRoomStatesByCount', hasReturn], 
       ['deleteImage', hasReturn], 
       ['uploadImageUrl', hasReturn], 
       ['save', hasReturn], 
@@ -2047,43 +2046,6 @@ class DodontoFServer
   end
   
   
-  
-  def getPlayRoomStatesByCount()
-    params = getParamsFromRequestData()
-    logging(params, "params")
-    
-    minRoom = getMinRoom(params)
-    count = params["count"]
-    playRoomStates = getPlayRoomStatesByCountLocal(minRoom, count)
-    
-    result = {
-      "playRoomStates" => playRoomStates,
-    }
-    
-    logging(result, "getPlayRoomStatesByCount result");
-    
-    return result
-  end
-  
-  def getPlayRoomStatesByCountLocal(startRoomNo, count)
-    playRoomStates = []
-    
-    (startRoomNo .. ($saveDataMaxCount - 1)).each do |roomNo|
-      
-      break if( playRoomStates.length > count )
-      
-      @saveDirInfo.setSaveDataDirIndex(roomNo)
-      
-      playRoomState = getPlayRoomState(roomNo)
-      next if( playRoomState.nil? )
-      
-      playRoomStates << playRoomState
-    end
-    
-    return playRoomStates;
-  end
-  
-
   
   def getAllLoginCount()
     roomNumberRange = (0 .. $saveDataMaxCount)
@@ -4903,11 +4865,16 @@ class DodontoFServer
     
     changeSaveData(@saveFiles['effects']) do |saveData|
       params = getParamsFromRequestData()
-      effectId = params['effectId']
-      logging(effectId, 'effectId')
+      
+      effectIds = params['effectIds']
+      logging(effectIds, 'effectIds')
       
       effects = getArrayInfoFromHash(saveData, 'effects')
-      effects.delete_if{|i| (effectId == i['effectId'])}
+      logging(effects, 'effects')
+      
+      effects.delete_if{|i|
+        effectIds.include?(i['effectId'])
+      }
     end
     
     logging('removeEffect End')

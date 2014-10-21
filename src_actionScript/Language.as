@@ -775,6 +775,8 @@ package {
             p.saveChatLog = "ログ保存";
             p.saveChatLogForHtml = "HTMLとして保存";
             p.saveChatLogForText = "テキストとして保存";
+            p.saveChatLogAllTabs = "[ 全タブ ]";
+            
             // SaveWindow.mxml
             p.save = "セーブ";
             p.saveInfomation = "サーバのデータをファイルとして保存します。";
@@ -829,9 +831,7 @@ package {
             p.channerCoundIsEmptyErrorMessage = "チャンネル数が0で設定されています。正しいチャンネル設定を行ってください";
             p.sendChatErrorMessage = "チャット送信エラー";
             p.visitorNameSaffix = "＠見学";
-            p.diceBotOtherInfomation1 = "==【その他】===============================\n";
-            p.diceBotOtherInfomation2 = "ゲーム固有の判定がある場合はこの場所に記載されます。";
-            p.diceBotCustomInfomation = "専用】=======================\n";
+            p.diceBotCustomInfomation = "==【{0}専用】=======================\n";
             p.alarmMessage = "[アラーム発生：{0}]:";
             p.alarmMessageSecond = ":{0}秒後";
             p.needFlashPlayerOverVer10ErrorMessage = "この機能を使用するにはFlashPlayerのバージョン10以上が必要です。";
@@ -984,6 +984,8 @@ package {
             p.chatFontSizeTips = "チャット文字サイズ";
             p.chatFontTimeFormat = "フォーマット:";
             p.chatFontTimeFormatInfo = "「時：分」表示";
+            p.chatFontDisplayOtherChannel = "別タブメッセージ:";
+            p.chatFontDisplayOtherChannelInfo = "表示する";
             p.chatFontInputSample = "入力例:";
             p.chatFontOutputSample = "出力例：";
             p.chatFontSetting = "設定";

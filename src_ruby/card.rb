@@ -24,7 +24,7 @@ class Card
        
        
        { 'type' => 'insane',
-         'title' => 'インセイン：恐怖カード',
+         'title' => 'インセイン：狂気カード',
          'fileName' => 'cards/insane.txt',
        },
        
@@ -80,7 +80,7 @@ class Card
        },
        
        { 'type' => 'torg_English',
-         'title' => 'TORG：Drama Deck',
+         'title' => 'TORG：Drama Deck [English]',
          'fileName' => 'cards/torg_English.txt',
        },
        
