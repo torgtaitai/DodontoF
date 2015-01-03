@@ -249,6 +249,7 @@
         private var chatFontSize:int = 12;
         private var isDisplayTime:Boolean = false;
         private var isDisplayOtherChannel:Boolean = false;
+        private var isChatChannelColored:Boolean = false;
         private var chatMessageTrader:ChatMessageTrader;
         private var novelticMode:NovelticMode = null;
         
@@ -351,6 +352,9 @@
             }
             
             initLoaded = true;
+            
+            //var window:ColorWindow = DodontoF.popup(ColorWindow) as ColorWindow;
+            //window.init(this);
         }
             
         private function initLoadChatInfoLocal():void {
@@ -370,6 +374,7 @@
             if( globalInfo != null ) {
                 setDisplayTime( globalInfo["isDisplayTime"] );
                 setDisplayOtherChannel( globalInfo["isDisplayOtherChannel"] );
+                setChatChannelColoed( globalInfo["isChatChannelColored"] );
                 setChatFontSize( globalInfo["chatFontSize"] );
             }
         }
@@ -396,6 +401,12 @@
                 return;
             }
             
+            if( DodontoF_Main.getInstance().isReplayMode() ) {
+                Log.logging("Replay Mode dose NOT save window infos.");
+                return;
+            }
+
+            
             var localInfo:Object = loadChatInfo(false);
             localInfo["chatFontColor"] = chatFontColor;
             localInfo["chatBackgroundColor"] = chatBackgroundColor;
@@ -405,6 +416,7 @@
             var globalInfo:Object = loadChatInfo(true);
             globalInfo["isDisplayTime"] = isDisplayTime;
             globalInfo["isDisplayOtherChannel"] = isDisplayOtherChannel;
+            globalInfo["isChatChannelColored"] = isChatChannelColored;
             globalInfo["chatFontSize"] = chatFontSize;
             saveChatInfo(globalInfo, true);
         }
@@ -626,6 +638,7 @@
             chatMessageLogBoxTab.getTabAt(channel).styleName = undefined;
             
             setTalkButton();
+            changeWindowStyle();
         }
         
         public function setChatChannelVisible(channel:int, b:Boolean):void {
@@ -840,7 +853,7 @@
             setResizeEventFunction( novelticMode.resizeAndMoveWindow );
             setMoveEventFunction( novelticMode.resizeAndMoveWindow );
             
-            changeVisiterMode();
+            changeWindowStyle();
             setTalkButton();
         }
         
@@ -1521,6 +1534,7 @@
         
         
         public function setChatFontSize(size:int, isReplayMode:Boolean = false):void {
+            
             if( size == 0 ) {
                 return;
             }
@@ -1574,6 +1588,11 @@
             
             isDisplayOtherChannel = b;
             setDisplayOtherChannelCounting();
+        }
+        
+        public function setChatChannelColoed(b:Boolean):void {
+            isChatChannelColored = b;
+            changeWindowStyle();
         }
         
         public function getDisplayTime():Boolean {
@@ -1893,7 +1912,8 @@
     
         private function setChatFontWindow():void {
             var chatFontWindow:ChatFontWindow = DodontoF.popup(ChatFontWindow, true) as ChatFontWindow;
-            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize, isDisplayTime, isDisplayOtherChannel);
+            chatFontWindow.init(this, chatFontColor, chatBackgroundColor, chatFontSize, 
+                                isDisplayTime, isDisplayOtherChannel, isChatChannelColored);
         }
     
         public function setChatFontColor(color:String):void {
@@ -1980,6 +2000,88 @@
             sendtoBox.width = 100;
         }
         
+        
+        private function changeSendtoBox():void {
+            changeWindowStyle();
+        }
+        
+        
+        private var defaultWindowColor:String = "#F4FBFF";
+        private var secretSendtoWindowColor:String = "#FFFF99";
+        private var visiterModeWindowColor:String = "#FFFFCC";
+        
+        static public function get windowColorsDefault():Array {
+            return ["#F4FBFF"];
+        }
+        
+        static public function get windowColorsColored():Array {
+            return ["#F4FBFF",
+                    "#999999",  //Infra-Red
+                    "#FF9999",  //Red
+                    "#FF9900",  //Orange
+                    "#FFFF99",  //Yellow
+                    "#66CC99",  //Green
+                    "#33CCCC",  //Blue
+                    "#0099CC",  //Indigo
+                    "#6666CC"]; //Violet
+        //                                     "#FFFFFF"]; //Ultra-Violet
+        /*
+          "#EEEEEE",  //Infra-Red
+          "#FFFBFB",  //Red
+          "#FFF4E3",  //Orange
+          "#FFFFEC",  //Yellow
+          "#ECFFEC",  //Green
+          "#E3FCFF",  //Blue
+          "#ECECFF",  //Indigo
+          "#F8ECFF",  //Violet
+          "#FFFFFF"]; //Ultra-Violet
+        */
+        }
+
+        static private function getWindowColors(b:Boolean):Array {
+            if( b ) {
+                return windowColorsColored;
+            } else {
+                return windowColorsDefault;
+            }
+        }
+        
+        public function changeWindowStyle():void {
+            if( isVisiterMode() ) {
+                changeWindowColorAndTitle(Language.s.visitorMode, visiterModeWindowColor);
+                return;
+            }
+            
+            if( sendtoBox.selectedItem != null && sendtoBox.selectedItem.data != null ) {
+                changeWindowColorAndTitle(sendtoBox.selectedItem.label, secretSendtoWindowColor);
+                return;
+            }
+            
+            var index:int = getSelectedChatChannleIndex();
+            var color:String = getChannelColor(index);
+            changeWindowColorAndTitle("", color);
+        }
+        
+        
+        public function getChannelColor(index:int):String {
+            return getChannelColorByColored(index, isChatChannelColored);
+        }
+        
+        static public function getChannelColorByColored(index:int, isColored:Boolean):String {
+            var colors:Array = getWindowColors(isColored);
+            
+            var max:int = colors.length;
+            index = index % max;
+            
+            var color:String = colors[index];
+            return color;
+        }
+        
+        
+        public function changeLogVisible(event:MouseEvent, visible:Boolean):void {
+            novelticMode.setLogVisible(event, visible);
+        }
+        
         private function changeWindowColorAndTitle(titleTail:String, color:String):void {
             var titleString:String = Language.s.chatWindowTitle;
             if( titleTail != "" ) {
@@ -1990,31 +2092,6 @@
             setStyle("backgroundColor", color);
         }
         
-        private function changeDefaultWindowColorAndTitle():void {
-            changeWindowColorAndTitle("", "#F4FBFF");
-        }
-        
-        private function changeSendtoBox():void {
-            
-            if( sendtoBox.selectedItem.data != null ) {
-                changeWindowColorAndTitle(sendtoBox.selectedItem.label, "#FFFF99");
-            } else {
-                changeDefaultWindowColorAndTitle();
-            }
-        }
-        
-        public function changeLogVisible(event:MouseEvent, visible:Boolean):void {
-            novelticMode.setLogVisible(event, visible);
-        }
-        
-        
-        public function changeVisiterMode():void {
-            if( isVisiterMode() ) {
-                changeWindowColorAndTitle(Language.s.visitorMode,"#FFFFCC");
-            } else {
-                changeDefaultWindowColorAndTitle();
-            }
-        }
         
         private var preDataProvider:Array = [];
         

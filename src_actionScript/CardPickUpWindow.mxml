@@ -35,10 +35,13 @@
             
             setResizeEventFunction( function():void { setCardPickUpPosition() });
             
-            this.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+            initEvent();
+        }
+        
+        protected function initEvent():void {
+            addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
                     thisObj.hideCardPickUp();
                 });
-            
         }
         
         override public function getSaveInfoKeyName():String {
@@ -58,6 +61,11 @@
         }
         
         public function displayCardPickUp(card:Card):void {
+            if( card == cardPickUp ) {
+                cardPickUp.getView().visible = true;
+                return;
+            }
+            
             cardPickUp.setCard( card );
             setCardPickUpPosition();
             
@@ -70,14 +78,15 @@
         
         public function setCardPickUpPosition():void {
             var cardView:Sprite = cardPickUp.getView();
-            cardView.x = 0;
-            cardView.y = 0;
             
             var cardWidth:int = cardPickUp.getWidth() * Map.getSquareLength();
-            var windowWidth:int = this.width * 0.9;
+            var windowWidth:int = this.width - 15;
             var rate:Number = (windowWidth / cardWidth);
             
             cardPickUp.setRate(rate);
+            
+            cardView.x = 10;
+            cardView.y = 20 + 3 * rate;
         }
         
         override public function setInitPositionDefault():void {

@@ -41,7 +41,7 @@
                       snapInterval="0.01"
                       />
         </mx:FormItem>
-	    <mx:FormItem label="{Language.s.cutInMatchWithChatTail}" toolTip="Language.s.cutInMatchWithChatTailTips">
+	    <mx:FormItem label="{Language.s.cutInMatchWithChatTail}" toolTip="{Language.s.cutInMatchWithChatTailTips}">
           <mx:CheckBox id="isTail" selected="true"/>
         </mx:FormItem>
       </mx:Form>

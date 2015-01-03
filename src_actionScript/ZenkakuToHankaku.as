@@ -37,6 +37,7 @@ package {
             str = changeOnAll(str, "、", null, ",");
             str = changeOnAll(str, "，", null, ",");
             str = changeOnAll(str, "＃", null, "#");
+            str = changeOnAll(str, "＄", null, "$");
             return str;
         }
         

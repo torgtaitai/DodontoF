@@ -181,7 +181,8 @@
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(dataEvent);
             Log.loggingTuning("jsonData", jsonData);
             
-            result.text = (jsonData.resultText);
+            var resultText:String = jsonData.resultText;
+            result.text = Language.getKeywordText(resultText);
             
             if( result.text == "OK" ) {
                 replayDataTitle.text = "";

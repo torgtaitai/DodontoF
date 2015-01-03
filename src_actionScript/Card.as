@@ -544,6 +544,7 @@ package {
             printCardTextMenu.visible = false; //カードテキストをチャットに引用
             removeCardMenu.visible = false; //カード削除
             rewriteCardMenu.visible = false; //カード書き換え
+            copyCardMenu.visible = false; //カードコピー
             dumpToTrushMountCardMenu.visible = false; //カード捨て
             
             if( this.isPrintCardText() ) {
@@ -567,6 +568,7 @@ package {
             
             removeCardMenu.visible = this.canDelete;
             rewriteCardMenu.visible = this.canRewrite;
+            copyCardMenu.visible = isMessageCard();
             
             
             if( this.isOpen ) {
@@ -735,21 +737,28 @@ package {
         override protected function initEvent():void {
             Log.logging("Card.initEvent begin");
             
-            view.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
-                    if( ! thisObj.isPickupable() ) {
-                        return;
-                    }
-                    
-                    DodontoF_Main.getInstance().displayCardPickUp(thisObj);
-                });
-            
-            view.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
-                    DodontoF_Main.getInstance().hideCardPickUp();
-                });
-            
+            initEventMouseOverOutCardVisible();
             view.doubleClickEnabled = canDoubleClick()
             view.addEventListener(MouseEvent.DOUBLE_CLICK, doubleClickEvent);
         }
+        
+        protected function initEventMouseOverOutCardVisible():void {
+            view.addEventListener(MouseEvent.MOUSE_OVER, mouseOverEvent);
+            view.addEventListener(MouseEvent.MOUSE_OUT, mouseOutEvent);
+        }
+        
+        protected function mouseOverEvent(event:MouseEvent):void {
+            if( ! thisObj.isPickupable() ) {
+                return;
+            }
+            
+            DodontoF_Main.getInstance().displayCardPickUp(thisObj);
+        }
+        
+        protected function mouseOutEvent(event:MouseEvent):void {
+            DodontoF_Main.getInstance().hideCardPickUp();
+        }
+        
         
         override protected function canDoubleClick():Boolean {
             return true;
@@ -800,6 +809,7 @@ package {
         private var changeOwnerMenu:ContextMenuItem;
         private var removeCardMenu:ContextMenuItem;
         private var rewriteCardMenu:ContextMenuItem;
+        private var copyCardMenu:ContextMenuItem;
         private var printCardTextMenu:ContextMenuItem;
         private var dumpToTrushMountCardMenu:ContextMenuItem;
         
@@ -815,6 +825,7 @@ package {
             changeOwnerMenu = addMenuItem(menu, Language.s.changeCardOwnerToMe, changeOwner, true);
             printCardTextMenu = addMenuItem(menu, Language.s.writeCardTextToChat, getContextMenuItemFunctionPrintCardText, true);
             rewriteCardMenu = addMenuItem(menu, Language.s.changeCard, getContextMenuItemRewriteCard, true);
+            copyCardMenu = addMenuItem(menu, Language.s.copyCard, getContextMenuItemCopyCard, true);
             removeCardMenu = addMenuItem(menu, Language.s.deleteCard, getContextMenuItemRemoveCharacter, true);
             dumpToTrushMountCardMenu = addMenuItem(menu, Language.s.dumpCard, getContextMenuItemDumptToTrushMountCard, true);
             
@@ -901,6 +912,12 @@ package {
         }
         
         
+        protected function getContextMenuItemCopyCard(event:ContextMenuEvent):void {
+            var json:Object = getJsonData();
+            DodontoF_Main.getInstance().getGuiInputSender().getSender().addCard(json);
+        }
+        
+        
         override public function isGotoGraveyard():Boolean {
             return true;
         }
@@ -933,11 +950,15 @@ package {
             loadViewImage();
             sender.changeCharacter( getJsonData() );
             
-            if( mountName == "messageCard" ) {
+            if( isMessageCard() ) {
                 printCardLog(Language.s.openCardMessage, [getCardMessage()]);
             } else {
                 printCardLog(Language.s.openCardMessage, [getCardName()]);
             }
+        }
+        
+        private function isMessageCard():Boolean {
+            return (mountName == "messageCard");
         }
         
         public function getSelfOwnerId():String {
@@ -1015,7 +1036,7 @@ package {
             this.ownerName = thisUserName;
             
             if( ! this.isBack ) {
-                if( this.mountName == "messageCard" ){
+                if( isMessageCard() ) {
                     printCardLog( Language.s.openMessageCardMessage );
                 }
             }

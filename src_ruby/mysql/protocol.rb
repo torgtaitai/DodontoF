@@ -62,7 +62,13 @@ class Mysql
     end
 
     def self.eof_packet?(data)
-      data[0] == ?\xfe && data.length == 5
+      # data[0] == ?\xfe && data.length == 5
+      
+      if( RUBY_VERSION >= '1.9.0' )
+        (data.getbyte(0) == 254 && data.length == 5)
+      else
+        data[0] == ?\xfe && data.length == 5
+      end
     end
 
     # Convert netdata to Ruby value

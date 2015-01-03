@@ -32,16 +32,17 @@ package {
             }
             
             var resultText:String = getRollResultText(params);
+            var power:int = params['power'];
             
             for(var i:int = 0 ; i < randResults.length ; i++) {
                 var result:Array = randResults[i];
-                rollDiceByRandResult(result, resultText);
+                rollDiceByRandResult(result, resultText, power);
             }
             
             getDiceBox().castDice();
         }
         
-        private function rollDiceByRandResult(result:Array, resultText:String):void {
+        private function rollDiceByRandResult(result:Array, resultText:String, power:int):void {
             if( (result == null) || (result.length != 2) ) {
                 return;
             }
@@ -54,10 +55,10 @@ package {
             }
             
             if( diceType == 100 ) {
-                addDice(100, getD10Value(value / 10), resultText);
-                addDice( 10, getD10Value(value % 10), resultText);
+                addDice(100, getD10Value(value / 10), resultText, power);
+                addDice( 10, getD10Value(value % 10), resultText, power);
             } else {
-                addDice(diceType, value, resultText);
+                addDice(diceType, value, resultText, power);
             }
         }
         
@@ -116,7 +117,9 @@ package {
             return message.slice(index + 1);
         }
         
-        private function addDice(diceType:int, value:int, text:String):void {
+        private function addDice(diceType:int, value:int,
+                                 text:String, power:int):void {
+            
             if( ! isDiceBoxVisible() ) {
                 Log.logging("diceBox invisible.");
                 return;
@@ -124,7 +127,8 @@ package {
             
             var params:Object = {
                 "resultValue" : value,
-                "resultText" : text
+                "resultText" : text,
+                "power" : power
             }
             
             getDiceBox().createDice('d' + diceType, params);

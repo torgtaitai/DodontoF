@@ -600,6 +600,11 @@ package {
                 "x" : x,
                 "y" : y
             };
+            
+            addCard(data);
+        }
+        
+        public function addCard(data:Object):void {
             var obj:Object = getParamObject("addCard", data);
             sendCommandData(obj);
         }

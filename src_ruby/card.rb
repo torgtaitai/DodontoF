@@ -3,7 +3,11 @@
 class Card
   
   def initialize
-    @cardsListInfos =
+    @cardsListInfos = getInitCardsListInfos
+  end
+  
+  def getInitCardsListInfos
+    cardsListInfos =
       [
        
        { 'type' => 'trump_swf',
@@ -11,9 +15,11 @@ class Card
          'fileName' => 'cards/trump_swf.txt',
        },
        
-       { 'type' => "trump_swf\t1x1",
+       { 'type' => "trump_swf",
          'title' => 'トランプ',
          'fileName' => 'cards/trump_mini_swf.txt',
+         'width' => 1,
+         'height' => 1,
        },
        
        
@@ -171,7 +177,25 @@ class Card
        
        
       ]
+    
+    initCardSize(cardsListInfos)
+    
+    return cardsListInfos
   end
+  
+  
+  def initCardSize(cardsListInfos)
+    
+    cardsListInfos.each do |info|
+      width = info['width']
+      height = info['height']
+      
+      next if width.nil? or height.nil?
+      
+      info['type'] = info['type'] + "\t#{width}x#{height}"
+    end
+  end
+  
   
   def collectCardTypeAndTypeName()
     result = @cardsListInfos.collect do |cardsInfo|

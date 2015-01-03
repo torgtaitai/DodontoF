@@ -16,6 +16,8 @@ package {
             setTitleVisible(card.isTitleVisible());
             
             update( card.getJsonDataForPreview() );
+            
+            initEventMouseOverOutCardVisible();
         }
         
         /** 
@@ -62,7 +64,6 @@ package {
         override protected function canDoubleClick():Boolean {
             return false;
         }
-        
         
     }
 }

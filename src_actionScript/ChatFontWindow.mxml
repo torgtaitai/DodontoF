@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="300"
-   height="350"
+   width="350"
+   height="400"
    title="{Language.s.chatFontWindow}" 
    showCloseButton="true"
    >
@@ -44,6 +44,13 @@
                      />
       </mx:FormItem>
       
+	  <mx:FormItem label="{Language.s.chatChannelColored}">
+        <mx:CheckBox id="isChatChannelColoredCheckBox" 
+                     label="{Language.s.chatChannelColoredInfo}"
+                     change="printSample()"
+                     />
+      </mx:FormItem>
+      
 	  <mx:FormItem label="{Language.s.chatFontInputSample}">
         <mx:TextInput id="input" height="25" width="100%" text="{Language.s.title}"
                      change="printSample()"
@@ -53,9 +60,32 @@
     </mx:Form>
     
     <mx:Label text="{Language.s.chatFontOutputSample}" />
-    <mx:Box id="sampleBase" height="100%" width="100%" >
-      <mx:TextArea id="sample" height="100%" width="100%" text="{Language.s.title}" editable="false" />
+    <mx:Box id="sampleTabsBox" width="100%" height="100%"
+                       paddingTop="5"
+                       paddingBottom="5"
+                       paddingRight="5"
+                       paddingLeft="5"
+                       >
+      <mx:TabNavigator id="sampleTabs" width="100%" height="100%"
+                       paddingTop="0"
+                       paddingBottom="0"
+                       change="printSample()"
+                       >
+        <mx:Box height="100%" width="100%" label="{DodontoF_Main.publicChatChannelName}">
+          <mx:TextArea height="100%" width="100%" editable="false" />
+        </mx:Box>
+        
+        <mx:Box height="100%" width="100%" label="{DodontoF_Main.publicChatChannelName}">
+          <mx:TextArea height="100%" width="100%" editable="false" />
+        </mx:Box>
+        
+        <mx:Box id="sampleBase" height="100%" width="100%" label="{Language.s.smallTalkTabName}">
+          <mx:TextArea id="sample" height="100%" width="100%" text="{Language.s.title}" editable="false"
+                       creationComplete="setupForSample()" />
+        </mx:Box>
+      </mx:TabNavigator>
     </mx:Box>
+        
     
     <mx:HBox height="25" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button id="executeButton" label="{Language.s.chatFontSetting}" click="execute()" />
@@ -77,7 +107,8 @@
                          chatBackgroundColor:String,
                          chatFontSize:int,
                          isDisplayTime:Boolean,
-                         isDisplayOtherChannel:Boolean):void {
+                         isDisplayOtherChannel:Boolean,
+                         isChatChannelColored:Boolean):void {
         
         chatWindow = chatWindow_;
         chatMessageColorPicker.selectedColor = parseInt("0x" + chatFontColor);
@@ -85,6 +116,7 @@
         defaultFontSize = chatFontSize;
         isDisplayTimeCheckBox.selected = isDisplayTime;
         isDisplayOtherChannelCheckBox.selected = isDisplayOtherChannel;
+        isChatChannelColoredCheckBox.selected = isChatChannelColored;
         
         setDefaultFontSize();
     }
@@ -92,6 +124,7 @@
     override protected function setup():void {
         Log.loggingTuning("=>setup() Begin");
         try {
+            sampleTabs.selectedIndex = 2;
             setChatFontComboBoxDefault();
         } catch(error:Error) {
             this.status = error.message;
@@ -111,7 +144,7 @@
                
             fontSizeOptionList.push(option);
         }
-           
+        
         chatFontSizeComboBox.dataProvider = fontSizeOptionList;
         setDefaultFontSize();
     }
@@ -125,10 +158,18 @@
         return Utils.getColorString(colorPicker.selectedColor);
     }
        
+    private function setupForSample():void {
+        printSample();
+    }
+    
     private function printSample():void {
+        if( sample == null ) {
+            return;
+        }
+        
         var color:String = getColor(chatMessageColorPicker);
         //sampleBase.setStyle('color', '0x' + color);
-           
+        
         var backgroundColor:String = getColor(chatBackgroundColorPicker);
         sample.setStyle('backgroundColor', '0x' + backgroundColor);
            
@@ -137,6 +178,11 @@
         
         var htmlText:String = getChatMessageForPrintHtml(color);
         sample.htmlText = htmlText
+        
+        var channeclColor:String
+        = ChatWindow.getChannelColorByColored(sampleTabs.selectedIndex,
+                                              isChatChannelColoredCheckBox.selected );
+        sampleTabsBox.setStyle("backgroundColor", channeclColor);
     }
     
     private function getChatMessageForPrintHtml(color:String):String {
@@ -178,6 +224,7 @@
         
         chatWindow.setDisplayTime( isDisplayTimeCheckBox.selected );
         chatWindow.setDisplayOtherChannel( isDisplayOtherChannelCheckBox.selected );
+        chatWindow.setChatChannelColoed( isChatChannelColoredCheckBox.selected );
         chatWindow.saveChatInfos();
 
         PopUpManager.removePopUp(this);

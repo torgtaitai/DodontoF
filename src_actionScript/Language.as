@@ -411,6 +411,7 @@ package {
             p.writeCardTextToChat = "カードテキストをチャットに引用";
             p.deleteCard = "カード削除";
             p.changeCard = "カード変更";
+            p.copyCard = "カード複製";
             p.dumpCard = "カード捨て";
             p.upSideCard = "正位置";
             p.downSideCard = "逆位置";
@@ -825,6 +826,7 @@ package {
             p.chatPalletName = "名前：";
             p.chatPalletColorTips = "指定文字色が白（FFFFFF）の場合はチャットウィンドウの文字色で発言します。";
             p.chatPalletNameTips = "名前が空欄の場合、チャットウィンドウの名前で発言します";
+            p.chatPalletTabName = "タブ名：";
             p.chatPalletSendButton = "送信";
             p.chatPalletSaveData = "チャットパレットセーブデータ";
             // ChatWindow.mxml
@@ -986,6 +988,8 @@ package {
             p.chatFontTimeFormatInfo = "「時：分」表示";
             p.chatFontDisplayOtherChannel = "別タブメッセージ:";
             p.chatFontDisplayOtherChannelInfo = "表示する";
+            p.chatChannelColored = "タブの色:";
+            p.chatChannelColoredInfo = "色分けする";
             p.chatFontInputSample = "入力例:";
             p.chatFontOutputSample = "出力例：";
             p.chatFontSetting = "設定";

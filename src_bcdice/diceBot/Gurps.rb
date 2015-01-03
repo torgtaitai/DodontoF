@@ -5,7 +5,6 @@ class Gurps < DiceBot
   def initialize
     super
     @sendMode = 2
-    @sortType = 1
     @d66Type = 1
   end
   
@@ -22,7 +21,7 @@ class Gurps < DiceBot
   end
   
   def getHelpMessage
-    info = <<INFO_MESSAGE_TEXT
+    return <<INFO_MESSAGE_TEXT
 ・判定においてクリティカル・ファンブルの自動判別、成功度の自動計算。(3d6<=目標値)
  ・祝福等のダイス目にかかる修正は「3d6-1<=目標値」といった記述で計算されます。(ダイス目の修正値はクリティカル・ファンブルに影響を与えません)
  ・クリティカル値・ファンブル値への修正については現在対応していません。

@@ -21,7 +21,7 @@ class ShinobiGami < DiceBot
   end
   
   def getHelpMessage
-    info = <<INFO_MESSAGE_TEXT
+    return <<INFO_MESSAGE_TEXT
 ・各種表
 　・(無印)シーン表　ST／ファンブル表　FT／感情表　ET
 　　　／変調表　WT／戦場表　BT／異形表　MT／ランダム特技決定表　RTT
@@ -155,7 +155,7 @@ INFO_MESSAGE_TEXT
                'ふわわわわ、いつの間にか寝ていたようだ。……って、あれ？　お前、いつからそこにいたッ!!',
                '買い物帰りの友人と出会う。方向が同じなので、しばらく一緒に歩いていると、思わず会話が盛り上がる。',
                'コンビニ。商品に手を伸ばしたら、同時にその商品をとろうとした別の人物と手が触れあう。なんという偶然！',
-               'みんなで食卓を囲むことになる。鍋にしようか？　それとも焼き肉？　お好み焼きなんかもい〜な〜♪ ',
+               'みんなで食卓を囲むことになる。鍋にしようか？　それとも焼き肉？　お好み焼きなんかもい〜な〜♪',
                'どこからか楽しそうな歌声が聞こえてくる。……って、あれ？　何でお前がこんなところに？',
                '野良猫に餌をやる。……猫はのどを鳴らし、すっかりあなたに甘えているようだ。',
                '「……！　……？　……♪」テレビは、なにやら楽しげな場面を映している。あら。もう、こんな時間か。',
@@ -275,7 +275,7 @@ INFO_MESSAGE_TEXT
   
   
   def get_sinobigami_2d6_scene_table_output(sceneType, table)
-    total_n, dice_dmy = roll(2, 6)
+    total_n, = roll(2, 6)
     index = total_n - 2
     
     text = table[index]
@@ -287,7 +287,7 @@ INFO_MESSAGE_TEXT
   end
   
   def get_sinobigami_1d6_table_output(tableName, table)
-    total_n, dice_dmy = roll(1, 6)
+    total_n, = roll(1, 6)
     index = total_n - 1
     
     text = table[index]
@@ -432,7 +432,7 @@ INFO_MESSAGE_TEXT
              '妖魔化している間、【接近戦攻撃】によって与える接近戦ダメージが2点になる。',
              '妖魔化している間、このキャラクターの攻撃に対する回避判定と、このキャラクターの奥義に対する奥義破り判定にマイナス1の修正がつく。'
             ]
-    total_n, dice_dmy = roll(1, 6)
+    total_n, = roll(1, 6)
     text = table[total_n - 1]
     return '1' if( text.nil? )
     
@@ -481,7 +481,7 @@ INFO_MESSAGE_TEXT
                    ]
     end
     
-    total_n, dice_dmy = roll(1, 6)
+    total_n, = roll(1, 6)
     text = powerTable[total_n - 1]
     return '1' if( text.nil? )
     

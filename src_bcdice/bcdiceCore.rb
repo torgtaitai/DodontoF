@@ -39,6 +39,10 @@ def encode(code, str)
   return Kconv.kconv(str, code)
 end
 
+# WindowsでかつRuby 1.9未満の環境であるかどうかを示す
+# 端末にShift_JISで出力する必要性の判定に用いる
+$RUBY18_WIN = RUBY_VERSION < '1.9' &&
+  /mswin(?!ce)|mingw|cygwin|bccwin/i === RUBY_PLATFORM
 
 $secretRollMembersHolder = {}
 $secretDiceResultHolder = {}
@@ -1961,6 +1965,9 @@ class BCDice
     when /(^|\s)GurpsFW$/i
       require 'diceBot/GurpsFW'
       diceBot = GurpsFW.new
+    when /(^|\s)FilledWith$/i
+      require 'diceBot/FilledWith'
+      diceBot = FilledWith.new
     when /(^|\s)HarnMaster$/i
       require 'diceBot/HarnMaster'
       diceBot = HarnMaster.new
@@ -2000,6 +2007,12 @@ class BCDice
     when /(^|\s)(HouraiGakuen)$/i
       require 'diceBot/HouraiGakuen'
       diceBot = HouraiGakuen.new
+    when /(^|\s)(TwilightGunsmoke)$/i
+      require 'diceBot/TwilightGunsmoke'
+      diceBot = TwilightGunsmoke.new
+    when /(^|\s)(Garako)$/i
+      require 'diceBot/Garako'
+      diceBot = Garako.new
     when /(^|\s)None$/i, ""
       diceBot = DiceBot.new
     else

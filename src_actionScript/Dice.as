@@ -481,11 +481,26 @@ package {
                 diceInfo.accelerationY = this.diceSize;
             }
             
-            diceInfo.vx = (getWindowWidth() / 1000) * (1 - 0.1 * diceInfo.number) * castPower * -1;// * 25;
+            var castPowerRate:Number =  getCastPowerRate(diceInfo);
+            diceInfo.vx = (getWindowWidth() / 1000) * (1 - 0.1 * diceInfo.number) * castPower * castPowerRate * -1;
             diceInfo.boundBasePositionY = diceInfo.lastPositionY + (getWindowHeight() - diceInfo.lastPositionY) * 0.1;//0.2;
             
             diceInfo.state = "move";
         }
+        
+        private function getPower(diceInfo:Object):int {
+            var power:int = diceInfo.params.power;
+            
+            if( power > 10 ) {
+                power = 10;
+            }
+            if( power < 0 ) {
+                power = 0;
+            }
+            
+            return power;
+        }
+        
 
         private function changeDirection(diceInfo:Object):void {
             if( diceInfo.direct == null ) {
@@ -647,10 +662,11 @@ package {
         private function getDiceViewImageStop(diceInfo:Object):Image {
             var image:Image = new Image();
             var diceType:String = diceInfo.diceType;
+            var sizeRate:Number =  getSizeRate(diceInfo);
             
             image.source = DiceInfo.getDiceMaxNumberImage(diceType);
-            image.width = diceSize;
-            image.height = diceSize;
+            image.width = diceSize * sizeRate;
+            image.height = diceSize  * sizeRate;
             image.visible = true;
             
             return image;
@@ -660,15 +676,28 @@ package {
             var image:Image = new Image();
             var diceType:String = diceInfo.diceType;
             var resultValue:int = getRoolResult(diceInfo);
+            var sizeRate:Number =  getSizeRate(diceInfo);
             
             image.source = DiceInfo.getDiceImage(diceType, resultValue);
-            image.width = diceSize;
-            image.height = diceSize;
+            image.width = diceSize * sizeRate;
+            image.height = diceSize * sizeRate;
             image.visible = false;
             image.rotation = 270;
             image.y = diceSize;
             
             return image;
+        }
+        
+        private function getCastPowerRate(diceInfo:Object):Number {
+            var power:int = getPower(diceInfo);
+            var castPowerRate:Number =  (1 + power * 0.25);
+            return castPowerRate;
+        }
+        
+        private function getSizeRate(diceInfo:Object):Number {
+            var power:int = getPower(diceInfo);
+            var sizeRate:Number =  (1 + power * 0.125);
+            return sizeRate;
         }
         
         private function changeDiceImageToResult(diceInfo:Object, diceType:String, resultValue:int):void {

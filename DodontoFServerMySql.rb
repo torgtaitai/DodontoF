@@ -12,7 +12,7 @@ require 'mysql'
 $SAVE_DATA_DIR = '.'
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.45.10(2014/10/22)"
+$version = "Ver.1.46.10.01(2015/01/03)"
 
 class SaveDataManagerOnMySql
   def initialize
@@ -682,7 +682,7 @@ class DodontoFServer_MySql < DodontoFServer
     
     begin
       return FileLockMySql.new(fileName, isReadOnly)
-    rescue => e
+    rescue
       loggingForce(@saveDirInfo.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
       raise
     end

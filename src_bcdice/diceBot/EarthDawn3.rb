@@ -23,13 +23,13 @@ class EarthDawn3 < EarthDawn
   end
   
   def getHelpMessage
-    info = <<INFO_MESSAGE_TEXT
+    return <<INFO_MESSAGE_TEXT
 ステップダイス　(xEn+k)
 ステップx、目標値n(省略可能）、カルマダイスk(D2～D20)でステップダイスをロールします。
 振り足しも自動。
 例）ステップ10：10E
 　　ステップ10、目標値8：10E8
-　　ステップ12、目標値8、カルマダイスD12：10E+1D12
+　　ステップ12、目標値8、カルマダイスD12：10E8+1D6
 INFO_MESSAGE_TEXT
   end
   
@@ -54,7 +54,6 @@ INFO_MESSAGE_TEXT
     
     stepTotal = 0
     @isFailed = true
-    dice_now = 0
     
     step  = $1.to_i      #ステップ
     targetNumber = [$2.to_i, 20].min #目標値
@@ -200,7 +199,7 @@ INFO_MESSAGE_TEXT
     return 'Good(上出来)' if(stepTotal >= good)
     return 'Average(そこそこ)' if(stepTotal >= average)
     return 'Poor(お粗末)' if(stepTotal >= poor)
-    return 'Pathetic(惨め)'
+    return 'Pathetic(惨め)' if( stepTotal >= pathetic )
     
   end
   

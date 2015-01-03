@@ -4,7 +4,7 @@ require 'configBcDiceForSystem.rb'
 
 $isDebug = false
 
-$bcDiceVersion = "2.01.17"
+$bcDiceVersion = "2.02.29"
 
 
 $NOTICE_SW = 1;                  # 送信の際に、どちらのコマンドを使うか？(notice=1, msg=0)
@@ -51,12 +51,15 @@ DarkBlaze
 DemonParasite
 DoubleCross
 EarthDawn
+EarthDawn3
 EclipsePhase
 Elric!
 Elysion
 EmbryoMachine
 EndBreaker
+FilledWith
 GURPS
+Garako
 GehennaAn
 GeishaGirlwithKatana
 Gorilla
@@ -101,8 +104,10 @@ ShinobiGami
 SwordWorld
 SwordWorld2.0
 TORG
+TORG1.5
 TokumeiTenkousei
 Tunnels_&_Trolls
+TwilightGunsmoke
 Utakaze
 WARPS
 Warhammer

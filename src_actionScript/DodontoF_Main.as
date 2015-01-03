@@ -208,7 +208,7 @@ package {
             Log.logging("DodontoF_Main.setVisiterMode visiterMode", visiterMode);
             
             if( chatWindow != null ) {
-                chatWindow.changeVisiterMode();
+                chatWindow.changeWindowStyle();
             }
         }
         
