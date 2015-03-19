@@ -371,6 +371,9 @@
         private function getOtherCharactersMenu(exists:Array, params:Object):Array {
             var menuData:Array = [];
             var characters:Array = DodontoF_Main.getInstance().getMap().findExistPiecesByTypeName(Character.getTypeStatic());
+            
+            characters = deleteHiddenCharacter(characters);
+            
             characters.sort( function(a:Character, b:Character):int {
                     return a.getName().localeCompare(b.getName());} );
             
@@ -390,6 +393,23 @@
             
             
             return menuData;
+        }
+        
+        
+        private function deleteHiddenCharacter(characters:Array):Array {
+            var result:Array = [];
+            
+            for(var i:int = 0 ; i < characters.length ; i++) {
+                var character:Character = characters[i];
+                
+                if( character.isHideMode() ) {
+                    continue;
+                }
+                
+                result.push(character);
+            }
+            
+            return result;
         }
         
         

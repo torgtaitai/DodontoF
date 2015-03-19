@@ -61,12 +61,12 @@ package {
         }
         
         protected override function execute():void {
-            var params:Object = getCommandParams();
-            var index:int = getCutInIndex();
+            var index:int = getEffectIndex(effectId)
             if( index == -1 ) {
                 PopUpManager.removePopUp(this);
             }
             
+            var params:Object = getCommandParams();
             CutInBase.cutInInfos[index] = params;
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
@@ -75,7 +75,7 @@ package {
             PopUpManager.removePopUp(this);
         }
         
-        private function getCutInIndex():int {
+        static public function getEffectIndex(effectId:String):int {
             var array:Array = CutInBase.cutInInfos;
             
             for(var i:int ; i < array.length ; i++) {

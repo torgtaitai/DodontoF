@@ -314,6 +314,7 @@ $diceBotOrder = <<____END_MARKER____
 ゲヘナ・アナスタシス
 ゴリラTRPG
 サタスペ
+Shared†Fantasia
 シノビガミ
 シャドウラン
 シャドウラン第４版
@@ -325,6 +326,7 @@ $diceBotOrder = <<____END_MARKER____
 ダークブレイズ
 ダブルクロス2nd,3rd
 墜落世界
+でたとこサーガ
 デモンパラサイト
 トーグ
 トーグ1.5版

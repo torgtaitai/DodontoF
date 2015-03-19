@@ -61,7 +61,7 @@ package {
             
         }
         
-        private function paintUpperLayer():void {
+        public function paintUpperLayer():void {
             var color:int = 0xBBBBBB;
             
             upperLayer.alpha = 0.001;

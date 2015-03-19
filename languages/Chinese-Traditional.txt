@@ -498,6 +498,7 @@ standingGraphicState = 狀態：
 imageFileName = 圖像檔案名稱：
 deleteStandingGraphicStateQuestion = 要刪除上述立繪嗎？
 deleteStandingGraphicStateQuestionTitle = 立繪刪除確認
+pleaseSelectStandinggraphic = 請選擇立繪
 changeSharedMemoWindowTitle = 變更共同筆記
 changeSharedMemo = 變更共同筆記
 deleteSharedMemo = 刪除共同筆記

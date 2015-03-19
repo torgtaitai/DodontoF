@@ -180,7 +180,7 @@
         [Embed(source='image/icons/bell.png')]
         [Bindable]
         private static var sendSoundIcon:Class;
-    
+        
         [Embed(source='image/icons/cancel.png')]
         [Bindable]
         private static var stopSoundIcon:Class;

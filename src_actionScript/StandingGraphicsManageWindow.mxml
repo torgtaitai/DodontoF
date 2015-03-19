@@ -73,26 +73,7 @@
         }
     }
     
-    private function getEffectInfoAndIndex():Array {
-        var index:int = effectInfosList.selectedIndex;
-        return getEffectInfoAndIndexByIndex(index);
-    }
     
-    private function getEffectInfoAndIndexByIndex(index:int):Array {
-        status = "";
-    
-        if( index == -1 ) {
-            status = Language.s.selectStandingImage;
-            return [null, index];
-        }
-    
-        return [standingGraphicInfos[index], index];
-    }
-
-    private function getEffectInfo():Object {
-        return getEffectInfoAndIndex()[0];
-    }
-
     private function addEffect():void {
         status = "";
     
@@ -141,6 +122,45 @@
     private function changeEffect():void {
         status = "";
         
+        var info:Object = getStandInfo();
+        
+        if( info == null ) {
+            return;
+        }
+        
+        if( info.effectId == null ) {
+            return;
+        }
+        
+        var window:ChangeStandingGraphicsWindow =
+        DodontoF.popup(ChangeStandingGraphicsWindow, true) as ChangeStandingGraphicsWindow;
+        window.init(info);
+    }
+    
+    /*
+    private function getEffectInfoAndIndex():Array {
+        var index:int = effectInfosList.selectedIndex;
+        return getEffectInfoAndIndexByIndex(index);
+    }
+    
+    private function getEffectInfoAndIndexByIndex(index:int):Array {
+        status = "";
+    
+        if( index == -1 ) {
+            status = Language.s.selectStandingImage;
+            return [null, index];
+        }
+    
+        return [standingGraphicInfos[index], index];
+    }
+
+    private function getEffectInfo():Object {
+        return getEffectInfoAndIndex()[0];
+    }
+
+    private function changeEffect():void {
+        status = "";
+        
         var results:Array = getEffectInfoAndIndex();
         var effectInfo:Object = results[0];
         var index:int = results[1];
@@ -152,10 +172,26 @@
         if( effectInfo.effectId == null ) {
             return;
         }
-    
+        
         var window:ChangeStandingGraphicsWindow =
         DodontoF.popup(ChangeStandingGraphicsWindow, true) as ChangeStandingGraphicsWindow;
         window.init(effectInfo, index);
+    }
+
+     */
+    
+    private function getStandInfo():Object {
+        status = "";
+        
+        var obj:Object = effectInfosList.selectedItem;
+        Log.logging("getStandInfo selectedItem", obj);
+        
+        if( obj == null ) {
+            status = Language.s.pleaseSelectCutIn;
+                    
+        }
+        
+        return obj;
     }
     
     

@@ -500,6 +500,7 @@ standingGraphicState = 状態：
 imageFileName = 画像ファイル名：
 deleteStandingGraphicStateQuestion = 上記の立ち絵を削除してよろしいですか？
 deleteStandingGraphicStateQuestionTitle = 立ち絵削除確認
+pleaseSelectStandinggraphic = 立ち絵を選択してください。
 changeSharedMemoWindowTitle = 共有メモ変更
 changeSharedMemo = 共有メモの変更
 deleteSharedMemo = 共有メモの削除

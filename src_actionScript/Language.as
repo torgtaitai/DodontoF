@@ -535,6 +535,7 @@ package {
             p.imageFileName = "画像ファイル名：";
             p.deleteStandingGraphicStateQuestion = "上記の立ち絵を削除してよろしいですか？";
             p.deleteStandingGraphicStateQuestionTitle = "立ち絵削除確認";
+            p.pleaseSelectStandinggraphic = "立ち絵を選択してください。";
             
             
             // ChangeMemoWindow.as

@@ -131,6 +131,8 @@
         var size:int = 1;
         image.loadImage(url, size);
         
+        image.paintUpperLayer();
+        
         var nameTextField:TextField = getNameTextField(data.name);
         image.addChild(nameTextField);
         

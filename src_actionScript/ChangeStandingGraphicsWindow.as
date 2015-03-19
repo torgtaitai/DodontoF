@@ -5,14 +5,15 @@ package {
     
     public class ChangeStandingGraphicsWindow extends AddStandingGraphicsWindow {
         
-        private var index:int = 0;
         private var effectId:String = "";
+        private var info:Object = new Object();
         
-        public function init(info:Object, index_:int):void {
+        public function init(info_:Object):void {
+            info = info_;
+            
             title = Language.s.changeStandingGraphics;
             executeButton.label = Language.s.changeButton;
             
-            index = index_;
             effectId = info.effectId;
             
             characterName.text = info.name;
@@ -35,8 +36,12 @@ package {
         }
         
         protected override function execute():void {
-            var params:Object = getEffectParams();
+            var index:int = ChangeCutInMovieWindow.getEffectIndex(effectId)
+            if( index == -1 ) {
+                PopUpManager.removePopUp(this);
+            }
             
+            var params:Object = getEffectParams();
             StandingGraphicsManageWindow.standingGraphicInfos[index] = params;
             
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
@@ -44,6 +49,7 @@ package {
             
             PopUpManager.removePopUp(this);
         }
+        
         
     }
 }

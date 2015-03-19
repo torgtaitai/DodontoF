@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="500"
+   width="520"
    height="250"
    title="{Language.s.addChitWindowTitle}" 
    showCloseButton="true"

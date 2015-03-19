@@ -150,9 +150,9 @@ class Card
          'fileName' => 'cards/farRoadsToLoad/reien_uta.txt',
        },
        
-       { 'type' => 'actCard',
-         'title' => 'マスカレイド・スタイル：アクト・カード',
-         'fileName' => 'cards/actCard.txt',
+       { 'type' => 'actCard2',
+         'title' => 'マスカレイド・スタイル：アクト・カード 改定β版',
+         'fileName' => 'cards/actCard2.txt',
        },
        
        { 'type' => 'tatoono',

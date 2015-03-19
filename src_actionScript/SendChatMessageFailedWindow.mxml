@@ -19,16 +19,39 @@
                  doubleClick="sendMessage()"
                  >
 	  <mx:columns>
+
+        <mx:DataGridColumn id="deleteButtonColumn"
+                           headerText="deleteButton"
+                           textAlign="center"
+      	                   minWidth="20"
+                           width="20"
+                           >
+          <mx:itemRenderer>
+            <mx:Component>
+              <mx:Image source="{SendChatMessageFailedWindow.deleteIcon}" click="SendChatMessageFailedWindow.deleteMessage()" />
+            </mx:Component>
+          </mx:itemRenderer>
+        </mx:DataGridColumn>
+      
 		<mx:DataGridColumn headerText="Failed Data"
                            dataField="text"
                            />
+      
+        <mx:DataGridColumn id="sendButtonColumn"
+                           headerText="sendButton"
+                           textAlign="center"
+      	                   minWidth="90"
+                           width="90"
+                           >
+          <mx:itemRenderer>
+            <mx:Component>
+              <mx:Button label="{Language.s.resend}" click="SendChatMessageFailedWindow.sendMessage()" />
+            </mx:Component>
+          </mx:itemRenderer>
+        </mx:DataGridColumn>
+      
       </mx:columns>
     </mx:DataGrid>
-    <mx:HBox width="100%">
-      <mx:Spacer width="50%" />
-      <mx:Button label="{Language.s.resend}" click="sendMessage()" />
-      <mx:Spacer width="50%" />
-    </mx:HBox>
   </mx:Box>
   
   <mx:Script>
@@ -37,11 +60,20 @@
     import mx.collections.ArrayCollection;
     import mx.core.UIComponent;
     
+
+    [Embed(source='image/icons/cancel.png')]
+    [Bindable]
+    public static var deleteIcon:Class;
+    
     [Bindable]
     private var listData:ArrayCollection = new ArrayCollection();
     
     static private var self:SendChatMessageFailedWindow = null;
     
+    override protected function setup():void {
+        
+    }
+
     static public function setData(data:ChatSendData):void {
         if( self == null ) {
             self = DodontoF.popup(SendChatMessageFailedWindow, false) as SendChatMessageFailedWindow;
@@ -67,6 +99,22 @@
         Log.logging("setWindowVisible b", b);
         
         self.visible = b;
+    }
+    
+    
+    static public function deleteMessage():void {
+        self.deleteMessage();
+    }
+    
+    public function deleteMessage():void {
+        
+        var index:int = list.selectedIndex;
+        var obj:Object = listData.removeItemAt(index);
+    }
+    
+    
+    static public function sendMessage():void {
+        self.sendMessage();
     }
     
     public function sendMessage():void {

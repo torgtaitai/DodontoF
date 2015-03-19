@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.46.10.01"
-$versionDate = "2015/01/03"
+$versionOnly = "Ver.1.46.15"
+$versionDate = "2015/03/15"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -1572,10 +1572,8 @@ class DodontoFServer
   def getWebIfRefresh
     logging("getWebIfRefresh Begin")
     
-    chatTime = getWebIfRequestNumber('chat', -1)
-    
     @lastUpdateTimes = {
-      'chatMessageDataLog' => chatTime,
+      'chatMessageDataLog' => getWebIfRequestNumber('chat', -1),
       'map' => getWebIfRequestNumber('map', -1),
       'characters' => getWebIfRequestNumber('characters', -1),
       'time' => getWebIfRequestNumber('time', -1),
@@ -1588,7 +1586,11 @@ class DodontoFServer
     
     saveData = {}
     refreshLoop(saveData)
-    deleteOldChatTextForWebIf(chatTime, saveData)
+    
+    chatLastTime = getWebIfRequestNumber('chatLastTime', nil)
+    unless( chatLastTime.nil? )
+      deleteOldChatTextForWebIf(chatLastTime, saveData)
+    end
     
     result = {}
     ["chatMessageDataLog", "mapData", "characters", "graveyard", "effects"].each do |key|
@@ -3637,7 +3639,10 @@ class DodontoFServer
       return result
     end
     
+    beforeTime = getImageInfoFileTime()
     extendSaveData(saveFile, fileUploadDir)
+    localizeImageInfo() if( getImageInfoFileTime() != beforeTime)
+    
     
     chatPaletteSaveData = loadAllSaveDataDefaultInfo(fileUploadDir)
     result['chatPaletteSaveData'] = chatPaletteSaveData
@@ -3646,6 +3651,58 @@ class DodontoFServer
     
     return result
   end
+  
+  
+  def getImageInfoFileTime()
+    imageInfoFileName = getImageInfoFileNameLocal
+    return 0 unless File.exist?(imageInfoFileName)
+    return File.mtime(imageInfoFileName)
+  end
+  
+  def localizeImageInfo()
+    imageInfoFileName = getImageInfoFileNameLocal
+    
+    changeSaveData( imageInfoFileName ) do |saveData|
+      imageTags = saveData['imageTags']
+      return false if imageTags.nil?
+      
+      imageTags = localizeImageInfoSource(imageTags)
+      imageTags = localizeImageInfoSmallImage(imageTags)
+      
+      saveData['imageTags'] = imageTags
+    end
+  end
+  
+  def localizeImageInfoSource(imageTags)
+    
+    keys = imageTags.keys
+    
+    keys.each do |source|
+      tagInfo = imageTags.delete(source)
+      next if tagInfo.nil?
+      
+      base = File.basename(source)
+      dir = getRoomLocalSpaceDirName()
+      newSource = File.join(dir, base)
+      
+      next unless File.exist?(newSource)
+      
+      imageTags[newSource] = tagInfo
+    end
+    
+    return imageTags
+  end
+  
+  def localizeImageInfoSmallImage(imageTags)
+    imageTags.each do |source, tagInfo|
+      next if tagInfo.nil?
+      
+      tagInfo.delete("smallImage")
+    end
+    
+    return imageTags
+  end
+  
   
   def clearDir(dir)
     logging(dir, "clearDir dir")
@@ -3735,7 +3792,7 @@ class DodontoFServer
       return true
     end
     
-    loggingForce(fileName, 'NG! checkUnpackFile else paturn')
+    # loggingForce(fileName, 'NG! checkUnpackFile else paturn')
     
     return false
   end
@@ -4932,6 +4989,12 @@ class DodontoFServer
   end
   
   
+  
+  def getImageInfoFileNameLocal
+    roomNo = @saveDirInfo.getSaveDataDirIndex
+    imageInfoFileName = getImageInfoFileName(roomNo)
+    return imageInfoFileName
+  end
   
   def getImageInfoFileName(roomNumber)
     
