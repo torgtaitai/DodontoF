@@ -705,8 +705,9 @@ package {
         }
         
         public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean,
-                                       password:String, adminPassword:String):void {
-            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser, password, adminPassword);
+                                       password:String, adminPassword:String,
+                                       isForce:Boolean = false):void {
+            sender.removePlayRoom(roomNumbers, resultFunction, ignoreLoginUser, password, adminPassword, isForce);
         }
         
         public function removeOldPlayRoom(resultFunction:Function):void {

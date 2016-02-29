@@ -39,6 +39,11 @@ package {
         private var canVisitValue:Boolean = false;
         private var logoutUrl:String = "";
 
+        //ダイスボットの情報
+        private var diceBotInfos:Array = new Array();
+        //多言語対応含めた、フィルタ前のダイスボットの全情報
+        private var diceBotInfosRaw:Array = new Array();
+        
         
         public function setCommet(b:Boolean):void {
             sender.setCommet(b);
@@ -104,8 +109,9 @@ package {
             if( info == null ) {
                 info = new Object();
             }
+            Log.logging("info", info);
             
-            initServerViewStateInfo();
+            initServerViewStateInfo(true);
             
             Log.logging("serverViewStateInfo.key", serverViewStateInfo.key);
             Log.logging("info.key", info.key);
@@ -145,6 +151,8 @@ package {
                     serverViewStateInfo = new Object();
                 }
                 
+                Log.logging("serverViewStateInfo", serverViewStateInfo);
+                
                 Config.getInstance().loadViewStateInfo(serverViewStateInfo);
                 Config.getInstance().saveInfo(serverViewStateInfo_saveKey, serverViewStateInfo);
             } catch(e:Error) {
@@ -154,13 +162,14 @@ package {
         
         private var serverViewStateInfo_saveKey:String = "serverViewStateInfo_saveKey";
         
-        private function initServerViewStateInfo():void {
+        private function initServerViewStateInfo(isForceInit:Boolean = false):void {
             Log.logging("initServerViewStateInfo begin");
             
             if( serverViewStateInfo != null ) {
                 Log.logging("serverViewStateInfo is NOT null", serverViewStateInfo);
-                return;
-                
+                if( ! isForceInit ) {
+                    return;
+                }
             }
             
             Log.logging("serverViewStateInfo is null");
@@ -424,13 +433,27 @@ package {
                 return;
             }
             
-            Utils.askByAlert(Language.s.logoutQuestionTitle, Language.s.logoutQuestion, 
-                             function():void { thisObj.logoutExecute() });
+            var deleteRoomAction:Function = function():void { 
+                var roomNumbers:Array = [getPlayRoomNumber()];
+                var ignoreLoginUser:Boolean = true;
+                var action:Function = function(event:Event):void {
+                    thisObj.logoutExecute();
+                };
+                guiInputSender.removePlayRoom(roomNumbers, 
+                                              action,
+                                              ignoreLoginUser, playRoomPassword,
+                                              "",
+                                              true);
+            };
+            
+            var userCount:int = dodontoF.getLoginUserCount(false);
+            
+            var window:LogoutWindow = DodontoF.popup(LogoutWindow, true) as LogoutWindow;
+            window.init(deleteRoomAction, logoutExecute, userCount);
         }
         
         public function logoutFromReplay():void {
-            Utils.askByAlert(Language.s.returnToLoginWindow, Language.s.returnToLoginWindowQuestion, 
-                             function():void { thisObj.logoutExecute() });
+            thisObj.logoutExecute();
         }
         
         public function logoutExecute():void {
@@ -582,6 +605,7 @@ package {
         
         public function setCardHandleLogVisible(b:Boolean):void {
             isCardHandleLogVisible = b;
+            Config.getInstance().saveViewStateInfo();
         }
         
         public function getCardHandleLogVisible():Boolean {
@@ -932,9 +956,8 @@ package {
         }
         
         
-        private var diceBotInfos:Array = new Array();
-        
         public function getDiceBotInfosResult(obj:Object):void {
+            Log.logging("getDiceBotInfosResult Called");
             var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
             setDiceBotInfos( jsonData );
         }
@@ -949,9 +972,18 @@ package {
                 return;
             }
             
+            diceBotInfosRaw = infos;
+            filterDiceBotInfos();
+        }
+        
+        public function filterDiceBotInfos():void {
+            var infos:Array = filterDiceBotByLanguage(diceBotInfosRaw);
+            Log.logging("infos", infos);
+            
             diceBotInfos = infos;
             
             if( chatWindow == null ) {
+                Log.logging("chatWindow is NULL");
                 return;
             }
             
@@ -959,6 +991,70 @@ package {
             
             Log.logging("setDiceBotInfos End");
         }
+        
+        private function filterDiceBotByLanguage(infos:Array):Array {
+            var filtered:Array = new Array();
+            var gameTypes:Array = collectGameTypesFromDiceBotInfos(infos);
+            
+            for each(var info:Object in infos) {
+                var gameType:String = info['gameType'];
+                if( isDiceBotMatchedInLanguage(gameTypes, gameType) ) {
+                    filtered.push( info );
+                }
+            }
+            
+            return filtered;
+        }
+        
+        private function collectGameTypesFromDiceBotInfos(infos:Array):Array {
+            var gameTypes:Array = new Array();
+            
+            for each(var info:Object in infos) {
+                var gameType:String = info['gameType'];
+                gameTypes.push(gameType);
+            }
+            
+            gameTypes.push(gameType);
+            
+            return gameTypes;
+        }
+        
+        private function isDiceBotMatchedInLanguage(gameTypes:Array, gameType:String):Boolean {
+            
+            var separator:String = ":";
+            var currentLanguage:String = Language.getLanguage();
+            
+            //現在の言語が日本語の場合、ゲーム種別に言語指定がないものを常に採用
+            // o LogHorizon / x LogHorizon:Korean
+            if( currentLanguage == "" ) {
+                var index:int = gameType.indexOf(separator);
+                return (index == -1);
+            }
+            
+            //ゲーム種別に言語が指定してある場合、一致するかどうかをチェック
+            var matched:Object = /:(.+)$/.exec(gameType);
+            if( matched != null ) {
+                var targetLanguage:String = matched[1];
+                return (targetLanguage == currentLanguage);
+            }
+            
+            //ゲーム種別に言語指定がない場合、現在の言語と合致するゲーム種別がないかをチェック
+            var targetGameType:String = gameType + separator + currentLanguage;
+            var found:Boolean = isIncludeArray(targetGameType, gameTypes);
+            
+            return ( ! found);
+        }
+        
+        private function isIncludeArray(targetGameType:String, gameTypes:Array):Boolean {
+            for each(var type:String in gameTypes) {
+                if( targetGameType == type ) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
         
         public function getDiceBotInfos():Array {
             return Utils.clone(diceBotInfos);
@@ -970,6 +1066,7 @@ package {
             }
             
             var localGameName:String = Utils.getDiceBotLanguageName(gameType);
+            //Log.loggingTest("localGameName", localGameName);
             if( localGameName != null ) {
                 return localGameName;
             }

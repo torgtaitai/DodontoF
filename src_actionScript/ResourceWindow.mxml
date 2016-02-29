@@ -249,6 +249,16 @@
       
 
       
+      public function getResourceItem(name:String):Object {
+          for each(var item:Object in resourceList) {
+              if( item.name == name ) {
+                  return Utils.clone(item);
+              }
+          }
+          
+          return null;
+      }
+      
       public function setResourceList(list:Array):void {
           if( list == null ) {
               return;

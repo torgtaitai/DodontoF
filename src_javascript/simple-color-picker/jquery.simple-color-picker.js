@@ -67,7 +67,7 @@ $.fn.simpleColorPicker = function(options) {
 			var left = pos.left + txt.outerWidth() - box.outerWidth();
 			if (left < pos.left) left = pos.left;
 			//box.css({ left: left, top: (pos.top + txt.outerHeight()) });
-            box.css({ left: left, top: (pos.top - box.height()) });
+            box.css({ left: left, top: (pos.top) });
 			showBox(box);
 		}
 

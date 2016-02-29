@@ -47,6 +47,13 @@
                paddingRight="1" paddingLeft="1" 
                verticalGap="2" horizontalGap="2" 
                tileWidth="50" />
+      <mx:HBox width="100%" minWidth="0" minHeight="0"
+               height="{(Config.canUseExternalImageModeOn ? (Config.fontSize + 5) : 0)}" 
+               visible="{Config.canUseExternalImageModeOn}"
+               horizontalAlign="center" verticalAlign="middle">
+        <mx:Label id="imageUrlInputLabel" text="{Language.s.characterImageUrlItem}：" fontWeight="normal"/>
+        <mx:TextInput id="imageUrlInput" editable="{Config.canUseExternalImageModeOn}" enabled="false" width="100%" text="" />
+      </mx:HBox>
       <mx:HBox width="100%" minHeight="0" minWidth="0"
                horizontalAlign="center" verticalAlign="middle">
         <mx:Label text="{Language.s.tagName}：" fontWeight="bold"/>
@@ -183,6 +190,34 @@
        
        public function setImageLoadCompleteFunction(function_:Function):void {
            imageLoadCompleteFunction = function_;
+
+           imageUrlInput.text = getImageUrlChanger().getShort( imageUrlInput.text );
+           if( imageUrlInput.editable ) {
+               imageUrlInput.enabled = true;
+           }
+       }
+       
+       public function selectImageUrl(imageUrl:String):void {
+           imageUrl = getImageUrlChanger().getShort( imageUrl );
+           imageUrlInput.text = imageUrl;
+           imageUrlInput.validateNow();
+           setImageUrl(imageUrl);
+       }
+       
+       private var blankImageUrl:String = "image/whiteBack.png";
+       
+       public function isBlankImage():Boolean{
+           if( imageUrlInput.text == blankImageUrl ) {
+               return true;
+           }
+           if( imageUrlInput.text == "" ) {
+               return true;
+           }
+           return false;
+       }
+       
+       public function getSelectedImageUrl():String {
+           return getImageUrlChanger().getLong( imageUrlInput.text );
        }
        
        public function setDefaultTags(tags:Array):void {
@@ -497,11 +532,41 @@
            var imageUrl:String = imageInfo["imageUrl"] as String;
            
            changeBackgroundColor( imageBox );
+           
+           setImageUrl(imageUrl);
+           
            imageClickEventFunction( imageUrl );
+           
            printIndex( parseInt(imageInfo.displayIndex) );
            
            if( tagDispalyBox.visible ) {
                tagList.text = getTags( Config.getInstance().getOriginalUrlString(imageUrl) ).join("　");
+           }
+       }
+       
+       private var isWhiteImage:Boolean = false;
+       
+       public function keepWhiteImage(b:Boolean):void {
+           isWhiteImage = b;
+           
+           if( imageUrlInput.editable ) {
+               imageUrlInput.enabled = ( ! isWhiteImage );
+           }
+           
+           setImageUrl();
+       }
+       
+       private var currentImageUrl:String = "";
+       
+       private function setImageUrl(imageUrl:String = null):void {
+           if( imageUrl != null ) {
+               currentImageUrl = imageUrl;
+           }
+           
+           if( isWhiteImage ) {
+               imageUrlInput.text = blankImageUrl;
+           } else {
+               imageUrlInput.text = currentImageUrl;
            }
        }
        
@@ -690,6 +755,14 @@
            }
            
            return false;
+       }
+       
+       public function setImageInputToolTip(text:String):void {
+           imageUrlInput.toolTip = text;
+       }
+       
+       public function setImageInputLabel(text:String):void {
+           imageUrlInputLabel.text = text;
        }
        
     ]]>

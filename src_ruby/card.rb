@@ -10,6 +10,11 @@ class Card
     cardsListInfos =
       [
        
+       { 'type' => 'amadeus02',
+         'title' => 'アマデウス脅威カード',
+         'fileName' => 'cards/amadeus.txt',
+       },
+       
        { 'type' => 'trump_swf',
          'title' => 'トランプ',
          'fileName' => 'cards/trump_swf.txt',
@@ -88,6 +93,12 @@ class Card
        { 'type' => 'torg_English',
          'title' => 'TORG：Drama Deck [English]',
          'fileName' => 'cards/torg_English.txt',
+       },
+       
+       { 'type' => 'hanafuda',
+         'title' => '花札',
+         'fileName' => 'cards/hanafuda.txt',
+#         'fileName' => 'cards/hanafuda_dodontof.txt',
        },
        
        { 'type' => 'bladeOfArcana',

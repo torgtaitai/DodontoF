@@ -897,6 +897,23 @@ package {
             return "image/centerMarker.png";
         }
         
+        static public function removeBaseDiceBot(diceBotInfos:Object):Object {
+            
+            for(var i:int = 0 ; i < diceBotInfos.length; i++) {
+                var info:Object = diceBotInfos[i];
+                
+                if( info.gameType == baseDiceBotGameType ) {
+                    diceBotInfos.splice(i, 1);
+                    return info;
+                }
+            }
+            return null;
+        }
+        
+        static public function get baseDiceBotGameType():String {
+            return 'BaseDiceBot';
+        }
+        
     }
 }
 

@@ -17,7 +17,7 @@ package {
             executeButton.label = Language.s.addButton;
             initCounterValues();
             
-            characterImageUrl.text = "./image/defaultImageSet/pawn/pawnBlack.png";
+            imageSelecter.selectImageUrl( Config.defaultImageUrl );
             printPreview();
         }
         

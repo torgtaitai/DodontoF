@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.46.15(2015/03/15)";
+        private var version:String = "Ver.1.47.21(2016/02/29)";
         
         public function getVersion():String {
             return version;
@@ -286,6 +286,8 @@ package {
                              getDodontoFM().getMap().setVisibleGridLayer );
             loadToggleState( serverInfo, info, "isRotateMarkerVisible",
                              Rotater.setGlobalVisible );
+            loadToggleState( serverInfo, info, "isCardHandleLogVisible",
+                             getDodontoFM().setCardHandleLogVisible);
             
             if( isUseServer ) {
                 loadToggleStateForRisizableWindow(serverInfo, "isChatPaletteVisible");
@@ -294,7 +296,6 @@ package {
                 loadToggleStateForRisizableWindow(serverInfo, "isDiceVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isCardPickUpVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isInitiativeListVisible");
-                loadToggleStateForRisizableWindow(serverInfo, "isCardHandleLogVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isResourceWindowVisible");
                 loadToggleStateForRisizableWindow(serverInfo, "isCounterRemoconVisible");
             }
@@ -374,6 +375,7 @@ package {
             saveMainManuStateToInfo(info, "isCutInVisible");
             saveMainManuStateToInfo(info, "isPositionVisible");
             saveMainManuStateToInfo(info, "isGridVisible");
+            saveMainManuStateToInfo(info, "isCardHandleLogVisible");
             
             saveInfo(saveInfoKeyNameForViewState, info);
         }
@@ -562,6 +564,20 @@ package {
             return resultString;
         }
         
-
+        static public function get defaultImageUrl():String {
+            return "./image/defaultImageSet/pawn/pawnBlack.png";
+        }
+        
+        
+        private var isAskRemoveRoomWhenLogoutMode:Boolean = true;
+        
+        public function set isAskRemoveRoomWhenLogout(b:Boolean):void {
+            isAskRemoveRoomWhenLogoutMode = b;
+        }
+        
+        public function get isAskRemoveRoomWhenLogout():Boolean {
+            return isAskRemoveRoomWhenLogoutMode;
+        }
+        
     }
 }

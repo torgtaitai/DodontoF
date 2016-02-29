@@ -917,6 +917,15 @@ package {
                                        viewStates:Object,
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
+            DodontoF_Main.getInstance()
+                .setPlayRoomInfo(playRoomName,
+                                 chatChannelNames,
+                                 canUseExternalImage,
+                                 canVisit,
+                                 backgroundImage,
+                                 gameType,
+                                 viewStates);
+            
             var data:Object = {
                 "playRoomName": playRoomName,
                 "playRoomPassword": playRoomPassword,
@@ -1012,8 +1021,9 @@ package {
             return true;
         }
         
-        protected var visiterCommands:Array = ["loginPassword", "getLoginInfo", "checkRoomStatus",
-                                             "refresh", "sendChatMessage"];
+        protected var visiterCommands:Array = 
+            ["loginPassword", "getLoginInfo", "checkRoomStatus",
+             "refresh", "sendChatMessage", "getDiceBotInfos"];
         
         protected function isIgnoreCommandAtVisiterMode(commandName:String):Boolean {
             if( ! DodontoF_Main.getInstance().isVisiterMode() ) {
@@ -1156,12 +1166,13 @@ package {
         }
         
         public function removePlayRoom(roomNumbers:Array, resultFunction:Function, ignoreLoginUser:Boolean,
-                                       password:String, adminPassword:String):void {
+                                       password:String, adminPassword:String, isForce:Boolean):void {
             var data:Object = {
                 "roomNumbers": roomNumbers,
                 "ignoreLoginUser": ignoreLoginUser,
                 "password" : password,
-                "adminPassword" : adminPassword
+                "adminPassword" : adminPassword,
+                "isForce" : isForce
             };
             
             
@@ -1192,9 +1203,9 @@ package {
             sendCommandData(obj);
         }
         
-        public function changeResource(data:Object):void {
+        public function changeResource(data:Object, resultFunction:Function = null):void {
             var obj:Object = getParamObject("changeResource", data);
-            sendCommandData(obj);
+            sendCommandData(obj, resultFunction);
         }
         
         public function changeResourcesAll(data:Object):void {
@@ -1431,6 +1442,30 @@ package {
             };
             
             var obj:Object = getParamObject("shuffleCards", data);
+            sendCommandData(obj);
+        }
+        
+        public function shuffleOnlyMountCards( mountName:String, id_:String ):void {
+            var data:Object = {
+                "mountName": mountName,
+                "mountId": id_
+            };
+            
+            var cardName:String = InitCardWindow.getCardName(mountName);
+            Utils.sendSystemMessage(Language.s.shuffleMountAnnounce, [cardName]);
+            
+            var obj:Object = getParamObject("shuffleOnlyMountCards", data);
+            sendCommandData(obj);
+        }
+        
+        public function returnCardToMount( targetCardId:String, mountName:String, id_:String ):void {
+            var data:Object = {
+                "returnCardId": targetCardId,
+                "mountName": mountName,
+                "cardMountId": id_
+            };
+            
+            var obj:Object = getParamObject("returnCardToMount", data);
             sendCommandData(obj);
         }
         

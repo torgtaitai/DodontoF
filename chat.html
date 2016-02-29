@@ -1,768 +1,815 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<meta name="viewport" content="initial-scale=1.0">
-    <title></title>
-<style type="text/css">
-<!--
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <meta name="viewport" content="initial-scale=1.0">
+      <title>どどんとふ</title>
+      <style type="text/css">
+      <!--
 
-body { font-size: 100%; }
+      body { font-size: 100%; }
 
-#modal-content{
-   width:50%;
-   margin:0;
-   padding:10px 20px;
-   border:2px solid #aaa;
-   background:#fff;
-   position:fixed;
-   display:none;
-   z-index:2;
-}
-  
-.button-link{
-   color:#00f;
-   text-decoration:underline;
-}
- 
-.button-link:hover{
-   cursor:pointer;
-   color:#f00;
-}
+      #modal-content{
+            width:50%;
+            margin:0;
+            padding:10px 20px;
+            border:2px solid #aaa;
+            background:#fff;
+            position:fixed;
+            display:none;
+            z-index:2;
+      }
 
-#modal-overlay{
-   z-index:1;
-   display:none;
-   position:fixed;
-   top:0;
-   left:0;
-   width:100%;
-   height:120%;
-   background-color:rgba(0,0,0,0.75);
-}
+      .button-link{
+            color:#00f;
+            text-decoration:underline;
+      }
 
-select{
-height:1.5em;
-font-size:0.9em;
-}
+      .button-link:hover{
+            cursor:pointer;
+            color:#f00;
+      }
 
-input[type=text],input{
-height:1.5em;
-font-size:1.5em;
-}
+      #modal-overlay{
+            z-index:1;
+            display:none;
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:120%;
+            background-color:rgba(0,0,0,0.75);
+      }
 
-#messages {
-font-size:1.0em;
-}
+      select{
+            height:1.5em;
+            font-size:0.9em;
+      }
 
-//-->
-</style>
-    <script type="text/javascript" src="getInfo/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript">
-    
+      #roomSelectForm{
+            display: block;
+      }
 
-var params = {}
+      #messages {
+            font-size:1.0em;
+      }
 
-window.onload = function onLoad() {
-    changeDisplay(false);
-    
-    params = getQueryParams();
-    
-    centeringMessages();
-    
-    checkClient( displayRoomInfo );
-}
-
-function getQueryParams() {
-    
-    var result = new Object();
-    var queryTextOriginal = document.location.search;
-    
-    if (queryTextOriginal.length <= 0) {
-        return result;
-    }
-    
-    // 最初の1文字 (?記号) を除いた文字列を取得する
-    var queryText = queryTextOriginal.substring(1);
-    
-    // クエリの区切り記号 (&) で文字列を配列に分割する
-    var parameters = queryText.split('&');
-    
-    for (var i = 0; i < parameters.length; i++) {
-        // パラメータ名とパラメータ値に分割する
-        var element = parameters[i].split('=');
-        
-        var paramName = decodeURIComponent(element[0]);
-        var paramValue = decodeURIComponent(element[1]);
-        
-        // パラメータ名をキーとして連想配列に追加する
-        result[paramName] = decodeURIComponent(paramValue);
-    }
-    
-    return result;
-}
-
-function trace( obj ) {
-    return;
-    
-    var text = '';
-    
-    if( typeof(obj) == 'object' ){
-        for(var key in obj){
-            text += key + ' : ' + obj[key] + "\r\n";
-        }
-    }else{
-        text = obj;
-    }
-    
-    console.log(text);
-};
+      //-->
+      </style>
+      <script type="text/javascript" src="getInfo/jquery-1.7.1.min.js"></script>
+      <script type="text/javascript">
 
 
+      var params = {}
 
-function checkClient(action) {
-    
-    url = getServerUrl() + "?webif=getBusyInfo&callback=?";
-    trace(url);
-    
-    jQuery.getJSON(url, function(data) {
-        trace(data);
-        
-        if( data.result != "OK" ) {
-            shutdown( "ERROR: " + data.result );
-            return;
-        }
-        
-        if( data.loginCount >= data.maxLoginCount ) {
-            shutdown( "server FULL !!" );
-            return;
-        }
-        
-        action();
-    });
-}
+      window.onload = function onLoad() {
+            changeDisplay(false);
 
+            params = getQueryParams();
 
-function displayRoomInfo() {
-    
-    url = getServerUrl() + "?webif=getRoomList&callback=?"
-    trace(url);
-    
-    jQuery.getJSON(url, getRoomListResult);
-}
+            centeringMessages();
 
-var roomInfos = [];
+            checkClient( displayRoomInfo );
+      }
 
-function getRoomListResult(data) {
-    trace(data);
-    
-    if( data.result != "OK" ) {
-        alert( "ERROR: " + data.result );
-        return;
-    }
-    
-    roomInfos = data.playRoomStates;
+      function getQueryParams() {
 
-    for(var i in roomInfos){
-        
-        var info = roomInfos[i];
-        
-        if( isEmptyRoom(info) ) {
-            continue;
-        }
-        
-        trace(info);
-        
-        var title = info.index + ":" + info.playRoomName
-        trace("title : " + title);
-        
-        var roomNo = parseInt(info.index);
-        $('#roomNo').append( $('<option>').html(title).val(roomNo) );
-    }
-    
-    initRoom();
-}
+            var result = new Object();
+            var queryTextOriginal = document.location.search;
 
-
-function isEmptyRoom(info) {
-    return ( info.lastUpdateTime == "" );
-}
-
-
-function initRoom() {
-    var roomNo = params["r"];
-    
-    if( (roomNo == null) || (roomNo == undefined)) {
-        $('#preloader').hide();
-        return;
-    }
-    
-    $("#roomNo").val( roomNo );
-    
-    
-    var color = getBeginChatColor();
-    onChangeColor(color);
-    beginClient();
-}
-
-
-function getBeginChatColor() {
-    
-    var color = getCookie('color');
-    if( color ) {
-        return color;
-    }
-    
-    color = chatFontColor;
-    
-    return color;
-}
-
-
-function selectRoomNo() {
-    var roomNo = $("#roomNo").val();
-    trace("roomNo : " + roomNo);
-    
-    url = location.href
-    url = url.replace(/(\?|&)r=(\d*)/g, '');
-    
-    if( /\?/.exec( url ) == null ) {
-        url += '?';
-    } else {
-        url += '&';
-    }
-    
-    url += 'r=' + roomNo;
-    trace(url);
-    
-    location.href = url 
-}
-
-
-function getServerUrl() {
-    //var url = "http://localhost/";
-    var url = "./";
-    
-    url = url.replace(/DodontoF.swf$/, "");
-    url = url.replace(/DodontoFServer.rb.*$/, "");
-    url = url.replace(/\/$/, "");
-    url = url + "/DodontoFServer.rb";
-    return url
-}
-
-
-var lastTime = 0;
-
-function beginClient() {    
-    initClient();
-    
-    getChatLog();
-}
-
-
-var autoReloadTimer = 0;
-
-function setAutoReload() {
-    clearAutoReload();
-    
-    if( $("#autoReload").attr("checked") ) {
-        getChatLog();
-        autoReloadTimer = setInterval(getChatLog, 5000);
-    }
-}
-
-function clearAutoReload() {
-    if( autoReloadTimer == 0 ) {
-        return;
-    }
-    
-    clearInterval(autoReloadTimer);
-    autoReloadTimer = 0;
-}
-
-
-function getDisplayTarget() {
-    return $('#text,#sendButton,#messages,#gameType,#diceHelp,#diceHelpOpen,#bottomSpace');
-}
-
-function getAntiDisplayTarget() {
-    return $('#preloader');
-}
-
-
-function changeDisplay( isEnable ) {
-    if( isEnable ) {
-        getDisplayTarget().show();
-        getAntiDisplayTarget().hide();
-    } else {
-        getDisplayTarget().hide();
-        getAntiDisplayTarget().show();
-    }
-    
-    centering();
-}
-
-function shutdown(message) {
-    alert(message);
-    
-    getDisplayTarget().hide();
-    getAntiDisplayTarget().hide();
-}
-
-
-var diceInfos = {};
-
-function initClient() {
-    url = getServerUrl() + "?webif=getServerInfo&dice=true&callback=?"
-    trace(url);
-    
-    jQuery.getJSON(url, function(data) {
-        //trace(data);
-        
-        if( data.result != "OK" ) {
-            alert( "ERROR: " + data.result );
-            return;
-        }
-        
-        var infos = data.diceBotInfos;
-        if( infos == null ) {
-            return;
-        }
-        
-        var baseDiceBotHelp = '';
-        
-        for(var i in infos){
-            var info = infos[i];
-            if( info.gameType == "BaseDiceBot" ) {
-                baseDiceBotHelp = info.info;
-                continue;
+            if (queryTextOriginal.length <= 0) {
+                  return result;
             }
-            
-            $('#gameType').append($('<option>').html(info.name).val(info.gameType));
-            diceInfos[info.gameType] = info;
-        }
-        
-        diceInfos['DiceBot'].info = baseDiceBotHelp;
-        
-        selectRoomDefaultDiceBot();
-    });
-    
-}
 
+            // 最初の1文字 (?記号) を除いた文字列を取得する
+            var queryText = queryTextOriginal.substring(1);
 
-function selectRoomDefaultDiceBot() {
-    
-    var info = getRoomInfo();
-    if( info != null ) {
-        $("#gameType").val( info.gameType );
-    }
-    
-    changeGameType();
-}
+            // クエリの区切り記号 (&) で文字列を配列に分割する
+            var parameters = queryText.split('&');
 
+            for (var i = 0; i < parameters.length; i++) {
+                  // パラメータ名とパラメータ値に分割する
+                  var element = parameters[i].split('=');
 
-function getRoomInfo() {
-    
-    for(var i in roomInfos){
-        var info = roomInfos[i];
-        var roomNo = parseInt(info.index);
-        
-        if( $("#roomNo").val() == roomNo ) {
-            return info;
-        }
-    }
-    
-    return null;
-}
+                  var paramName = decodeURIComponent(element[0]);
+                  var paramValue = decodeURIComponent(element[1]);
 
+                  // パラメータ名をキーとして連想配列に追加する
+                  result[paramName] = decodeURIComponent(paramValue);
+            }
 
-function changeGameType() {
-    
-    //trace(diceInfos);
-    
-    var gameType = $("#gameType").val();
-    var info = diceInfos[gameType];
-    if( info == null ) {
-        return;
-    }
-    
-    $("#modal-content").height('auto');
-    $('#diceHelp').text( info.info );
-}
+            return result;
+      }
+
+      function trace( obj ) {
+
+            var text = '';
+
+            if( typeof(obj) == 'object' ){
+                  for(var key in obj){
+                        text += key + ' : ' + obj[key] + "\r\n";
+                  }
+            }else{
+                  text = obj;
+            }
+
+            console.log(text);
+            return;
+      };
 
 
 
-//./DodontoFServer.rb?webif=chat&room=10&time=0
+      function checkClient(action) {
 
-function getChatLog() {
-    trace("getChatLog Begin");
-    
-    roomNo = $("#roomNo").val();
-    
-    url = getServerUrl() + "?webif=chat&room=" + roomNo + "&time=" + lastTime + "&callback=?"
-    trace(url);
-    
-    jQuery.getJSON(url, getChatLogResult);
-    
-    trace("getChatLog End");
-}
+            url = getServerUrl() + "?webif=getBusyInfo&callback=?";
+            trace(url);
 
-function getChatLogResult(data) {
-    trace(data);
-    
-    if( data == null ) {
-        return;
-    }
-    
-    if( data.result != "OK" ) {
-        alert( "ERROR: " + data.result );
-        return;
-    }
-    
-    var chats = data.chatMessageDataLog;
-    
-    if( chats == null ) {
-        return;
-    }
-    if( chats.length == 0 ) {
-        return;
-    }
-    
-    changeDisplay(true);
-    
-    //[1231768657.515,{"senderName":"name","uniqueId":"1231768388.609","color":"000000","message":"Welcome."}]
-    
-    var html = "";
-    for (var i = 0; i < chats.length; i++) {
-        var data = chats[i];
-        var time = data[0];
-        
-        if( time <= lastTime ) {
-            continue;
-        }
-        lastTime = time;
-        
-        var params = data[1];
-        
-        var name = params.senderName;
-        var color = params.color;
-        var message = getPrintMessage(params.message);
-        
-        html += getMessageHtml(color, name, message);
-    }
-    
-    printMessage(html);
-    
-    trace(lastTime);
-}
+            jQuery.getJSON(url, function(data) {
+                  trace(data);
 
-function printMessage(html) {
-    trace( html );
-    $("#messages").append(html);
-    $("#messages").scrollTop(100000000);
-}
+                  if( data.result != "OK" ) {
+                        shutdown( "ERROR: " + data.result );
+                        return;
+                  }
+
+                  if( data.loginCount >= data.maxLoginCount ) {
+                        shutdown( "server FULL !!" );
+                        return;
+                  }
+
+                  action();
+            });
+      }
 
 
-var cutInReg = /###CutInCommand:(.+)###(.+)/;
+      function displayRoomInfo() {
 
-function getPrintMessage(message) {
-    
-    var result = cutInReg.exec(message);
-    
-    if( result == null ) {
-        return message;
-    }
-    
-    var json = result[2];
-    data = JSON.parse( json );
-    
-    var result = data.chatMessage;
-    trace(result);
-    
-    return result;
-}
+            url = getServerUrl() + "?webif=getRoomList&callback=?"
+            trace(url);
 
+            jQuery.getJSON(url, getRoomListResult);
+      }
 
-function getMessageHtml(color, name, message) {
-    return '<div style="color:#' + color + ';" >' + name + ' : ' + message + '</div>';
-}
+      var roomInfos = [];
 
+      function getRoomListResult(data) {
+            trace(data);
 
-$(function(){
-    $( "#text" ).keypress( function ( e ) {
-        if ( e.which == 13 ) {
-            sendMessage();
-            return false;
-        }
-    } );
-});
+            if( data.result != "OK" ) {
+                  alert( "ERROR: " + data.result );
+                  return;
+            }
 
-function sendMessage () {
-    var text = $("#text").val();
-    $("#text").val("");
-    
-    if( text == '' ) {
-        return;
-    }
-    
-    text = getSendMessage(text);
-    trace("text : " + text);
-    
-    var name = $("#name").val();
-    var gameType = $("#gameType").val();
-    var color = chatFontColor.replace("#", "");
-    url = getServerUrl() + "?webif=talk&room=" + roomNo + "&name=" + name + "&message=" + text + "&bot=" + gameType +"&color=" + color + "&callback=?"
-    trace( url );
-    
-    jQuery.getJSON(url, function(data){
-    })
-    .done(function(json) {
-        getChatLog();
-    })
-    .error(function(jqXHR, textStatus, errorThrown) {
-        $("#text").val(text);
-        //console.log("エラー：" + textStatus);
-        //console.log("テキスト：" + jqXHR.responseText);
-        var html = getMessageHtml("000000", "System", "==Send Message Failed==");
-        printMessage(html);
-    });
-}
+            roomInfos = data.playRoomStates;
+
+            for(var i in roomInfos){
+
+                  var info = roomInfos[i];
+
+                  if( isEmptyRoom(info) ) {
+                        continue;
+                  }
+
+                  trace(info);
+
+                  var title = info.index + ":" + info.playRoomName
+                  trace("title : " + title);
+
+                  var roomNo = parseInt(info.index);
+                  $('#roomNo').append( $('<option>').html(title).val(roomNo) );
+            }
+
+            initRoom();
+      }
 
 
-function getSendMessage(text) {
-    text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
-        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-    });
-    
-    
-    zenkaku = "＠「」［］、，＃＄（）＊／＋－＝＞＜";
-    hankaku = "@[][],,#$()*/+-=><";
-    var tr = buildTr(zenkaku, hankaku);
-    text = tr(text);
-    
-    text = encodeURIComponent(text)
-    
-    return text;
-}
-
-function buildTr(from, to) {
-    
-    var replaces = {};
-    var exp = '';
-    
-    for (var i in from) {
-        var c = from[i];
-        
-        replaces[c] = to.substr(i, 1);
-        exp += '[]-^\\'.indexOf(c) < 0 ? c : '\\' + c;
-    }
-    
-    var re = RegExp('[' + exp + ']', 'g');
-    function replacer(c) { return replaces[c]; }
-    return function(str) { return str.replace(re, replacer); };
-}
-
-    
-$(function(){
-    
-    $("#diceHelpOpen").click( function(){
-        $("body").append('<div id="modal-overlay"></div>');
-        $("#modal-overlay").fadeIn("slow");
-        
-        centeringModalSyncer();
-        
-        $("#modal-content").fadeIn("slow");
-        
-        var closeAction = function(){
-            $("#modal-content,#modal-overlay").fadeOut("slow", function(){
-                $("#modal-overlay").remove();
-            })};
-        
-        $("#modal-overlay,#modal-close").unbind().click(closeAction);
-        $("#modal-content").unbind().dblclick(closeAction);
-    });
-    
-    //リサイズされたら、センタリングをする
-    $(window).resize(centering);
-});
+      function isEmptyRoom(info) {
+            return ( info.lastUpdateTime == "" );
+      }
 
 
-//センタリングをする関数
-function centering(){
-    centeringMessages();
-    centeringModalSyncer();
-}
+      function initRoom() {
+            var roomNo = params["r"];
+            var roomPass = params["p"];
 
-function centeringMessages() {
-    var height = $(window).height();
-    var diff = height - $("#topSpace").height() - $("#bottomSpace").height();
-    $("#messages").height(diff - 40);
-}
+            if( (roomNo == null) || (roomNo == undefined)) {
+                  $('#preloader').hide();
+                  return;
+            }
 
-function centeringModalSyncer() {
-    
-    adjustModalHeight()
-    
-    var width = $(window).width();
-    var height = $(window).height();
-    
-    var contentWidth = $("#modal-content").outerWidth({margin:true});
-    var contentHeight = $("#modal-content").outerHeight({margin:true});
-    
-    //コンテンツ(#modal-content)を真ん中に配置するのに、端から何ピクセル離せばいいか？を計算
-    var pxleft = ((width - contentWidth) / 2);
-    var pxtop = ((height - contentHeight) / 2);
-    
-    $("#modal-content").css({"left": pxleft + "px"});
-    $("#modal-content").css({"top": pxtop + "px"});
-    
-}
+            $("#roomNo").val( roomNo );
+            $("#roomPass").val(roomPass);
 
 
-function adjustModalHeight() {
-    
-    var target = $("#modal-content");
-    
-    target.height('auto');
-    target.width('auto');
-    
-    var height = $(window).height();
-    
-    if( height < target.height() ) {
-        target.height(height - 50);
-    }
-    
-    var width = $(window).width();
-    
-    if( width < target.width() ) {
-        target.width(width - 50);
-    }
-}
-
-var chatFontColor = "#BF9000";
-
-$(document).ready(function() {
-	$('label#color').simpleColorPicker({ onChangeColor: onChangeColor});
-});
+            var color = getBeginChatColor();
+            onChangeColor(color);
+            beginClient();
+      }
 
 
-function onChangeColor(color) {
-    color = color.toUpperCase();
-    trace(color);
-    
-    $('label#color').css("color", color);
-    $('#name').css("color", color);
-    $('#text').css("color", color);
-    
-    setCookie('color', color);
-    
-    chatFontColor = color;
-    trace(chatFontColor);
-}
+      function getBeginChatColor() {
+
+            var color = getCookie('color');
+            if( color ) {
+                  return color;
+            }
+
+            color = chatFontColor;
+
+            return color;
+      }
+
+
+      function selectRoomNo() {
+            var roomNo = $("#roomNo").val();
+            var roomPass = $("#roomPass").val();
+            trace("roomNo : " + roomNo);
+            trace("roomPass : " + roomPass);
+
+            url = location.href
+            url = url.replace(/\?r=(\d*)(&p=(.*))?/g, '');
+
+            if( /\?/.exec( url ) == null ) {
+                  url += '?';
+            } else {
+                  url += '&';
+            }
+
+            if(roomPass == null || roomPass == ""){
+                  url += 'r=' + roomNo;
+            }else{
+                  url += 'r=' + roomNo + '&p=' + roomPass;
+            }
+
+            trace(url);
+
+            location.href = url
+      }
+
+
+      function getServerUrl() {
+            //var url = "http://localhost/";
+            var url = "./";
+
+            url = url.replace(/DodontoF.swf$/, "");
+            url = url.replace(/DodontoFServer.rb.*$/, "");
+            url = url.replace(/\/$/, "");
+            url = url + "/DodontoFServer.rb";
+            return url
+      }
+
+
+      var lastTime = 0;
+
+      function beginClient() {
+            initClient();
+            toggleRoomSelectForm();
+            getChatLog();
+      }
+
+
+      var autoReloadTimer = 0;
+
+      function setAutoReload() {
+            clearAutoReload();
+            $("#reloadButton").css("display", "inline");
+
+            if( $("#autoReload").attr("checked") ) {
+                  getChatLog();
+                  autoReloadTimer = setInterval(getChatLog, 3000);
+                  $("#reloadButton").css("display", "none");
+            }
+      }
+
+      function clearAutoReload() {
+            if( autoReloadTimer == 0 ) {
+                  return;
+            }
+
+            clearInterval(autoReloadTimer);
+            autoReloadTimer = 0;
+      }
+
+
+      function getDisplayTarget() {
+            return $('#text,#sendButton,#messages,#gameType,#diceHelp,#diceHelpOpen,#bottomSpace');
+      }
+
+      function getAntiDisplayTarget() {
+            return $('#preloader');
+      }
+
+
+      function changeDisplay( isEnable ) {
+            if( isEnable ) {
+                  getDisplayTarget().show();
+                  getAntiDisplayTarget().hide();
+            } else {
+                  getDisplayTarget().hide();
+                  getAntiDisplayTarget().show();
+            }
+
+            centering();
+      }
+
+      function shutdown(message) {
+            alert(message);
+
+            getDisplayTarget().hide();
+            getAntiDisplayTarget().hide();
+      }
+
+
+      var diceInfos = {};
+
+      function initClient() {
+            url = getServerUrl() + "?webif=getServerInfo&dice=true&callback=?"
+            trace(url);
+
+            jQuery.getJSON(url, function(data) {
+                  //trace(data);
+
+                  if( data.result != "OK" ) {
+                        alert( "ERROR: " + data.result );
+                        return;
+                  }
+
+                  var infos = data.diceBotInfos;
+                  if( infos == null ) {
+                        return;
+                  }
+
+                  var baseDiceBotHelp = '';
+
+                  for(var i in infos){
+                        var info = infos[i];
+                        if( info.gameType == "BaseDiceBot" ) {
+                              baseDiceBotHelp = info.info;
+                              continue;
+                        }
+
+                        $('#gameType').append($('<option>').html(info.name).val(info.gameType));
+                        diceInfos[info.gameType] = info;
+                  }
+
+                  diceInfos['DiceBot'].info = baseDiceBotHelp;
+
+                  selectRoomDefaultDiceBot();
+            });
+
+      }
+
+
+      function selectRoomDefaultDiceBot() {
+
+            var info = getRoomInfo();
+            if( info != null ) {
+                  $("#gameType").val( info.gameType );
+            }
+
+            changeGameType();
+      }
+
+
+      function getRoomInfo() {
+
+            for(var i in roomInfos){
+                  var info = roomInfos[i];
+                  var roomNo = parseInt(info.index);
+
+                  if( $("#roomNo").val() == roomNo ) {
+                        return info;
+                  }
+            }
+
+            return null;
+      }
+
+
+      function changeGameType() {
+
+            //trace(diceInfos);
+
+            var gameType = $("#gameType").val();
+            var info = diceInfos[gameType];
+            if( info == null ) {
+                  return;
+            }
+
+            $("#modal-content").height('auto');
+            $('#diceHelp').text( info.info );
+      }
 
 
 
-// クッキー保存　setCookie(クッキー名, クッキーの値, クッキーの有効日数)
-function setCookie(key, value, expiredays) {
-    
-    // pathの指定
-    var path = location.pathname;
-    trace("path : " + path);
-    
-    // pathをフォルダ毎に指定する場合のIE対策
-    var paths = path.split("/");
-    
-    if(paths[paths.length-1] != "") {
-        paths[paths.length-1] = "";
-        path = paths.join("/");
-    }
-    
-    // 有効期限の日付
-    var extime = new Date().getTime();
-    var cltime = new Date(extime + (60 * 60 * 24 * 1000 * expiredays));
-    var exdate = cltime.toUTCString();
-    
-    // クッキーに保存する文字列を生成
-    var string = key +"="+ escape(value);// 値はエンコードしておく
-    string += "; path="+ path;
-    string += "; ";
-    
-    if(expiredays) {
-        string += "expires=" + exdate + "; ";
-    }
-    
-    // クッキーに保存
-    document.cookie = string;
-}
+      //./DodontoFServer.rb?webif=chat&room=10&time=0
+
+      function getChatLog() {
+            trace("getChatLog Begin");
+
+            roomNo = $("#roomNo").val();
+            roomPass = $("#roomPass").val();
+            if(roomPass != "" || roomPass == null){
+                  url = getServerUrl() + "?webif=chat&room=" + roomNo + "&password=" + encodeURIComponent(roomPass) + "&time=" + lastTime;
+            }else{
+                  url = getServerUrl() + "?webif=chat&room=" + roomNo + "&time=" + lastTime;
+            }
+            trace(url);
+
+            jQuery.getJSON(url, getChatLogResult);
+
+            trace("getChatLog End");
+      }
+
+      function getChatLogResult(data) {
+            trace(data);
+
+            if( data == null ) {
+                  return;
+            }
+
+            if( data.result != "OK" ) {
+                  alert( "ERROR: " + data.result );
+                  return;
+            }
+
+            var chats = data.chatMessageDataLog;
+
+            if( chats == null ) {
+                  return;
+            }
+            if( chats.length == 0 ) {
+                  return;
+            }
+
+            changeDisplay(true);
+
+            //[1231768657.515,{"senderName":"name","uniqueId":"1231768388.609","color":"000000","message":"Welcome."}]
+
+            var html = "";
+            for (var i = 0; i < chats.length; i++) {
+                  var data = chats[i];
+                  var time = data[0];
+
+                  if( time <= lastTime ) {
+                        continue;
+                  }
+                  lastTime = time;
+
+                  var params = data[1];
+
+                  var name = params.senderName;
+                  var color = params.color;
+                  var message = getPrintMessage(params.message);
+
+                  html = getMessageHtml(color, name, message) + html;
+            }
+
+            printMessage(html);
+
+            trace(lastTime);
+      }
+
+      function printMessage(html) {
+            trace( html );
+            $("#messages").prepend(html);
+            $("#messages").scrollTop(100000000);
+      }
 
 
-// クッキーの値を取得 getCookie(クッキー名)
-function getCookie(key) {
-    
-    if( document.cookie.length <= 0 ) {
-        return "";
-    }
-    
-    // クッキーの値を取り出す
-    var startIndex = document.cookie.indexOf(key + "=");
-    if(startIndex == -1) {
-        return "";
-    }
-    
-    startIndex += key.length + 1;
-    
-    var endIndex = document.cookie.indexOf(";", startIndex);
-    if( endIndex == -1) {
-        endIndex = document.cookie.length;
-    }
-    
-    // 値をデコードして返す
-    var string = document.cookie.substring(startIndex, endIndex);
-    var value = unescape(string);
-    
-    trace("cookie " + key + "=" + value);
-    
-    return value;
-}
+      var cutInReg = /###CutInCommand:(.+)###(.+)/;
+      var soundReg = /^###CutInMovie###(.+)/;
+
+      function getPrintMessage(message) {
+
+            var result = cutInReg.exec(message);
+
+            if( result == null ) {
+                  //下のifは､BGM/SE再生用です
+                  if(soundReg.test(message)){
+                        message = message.replace('###CutInMovie###', '');
+                        cutinData = JSON.parse(message);
+                        return cutinData.message + '<br />' + getPlayer(cutinData);
+                  }
+                  return message;
+            }
+
+            var json = result[2];
+
+            data = JSON.parse( json );
+
+            var result = data.chatMessage;
+            trace(result);
+
+            return result;
+      }
+
+      function getPlayer(jsonData){
+            var source = jsonData.soundSource;
+            var id = jsonData.mx_internal_uid;
+            var isLoop = jsonData.isSoundLoop;
+            var audioTag;
+            if(isLoop){
+                  audioTag = '<audio src="'+source+'" id="'+id+'" controls loop preload="metadata">';
+            }else{
+                  audioTag = '<audio src="'+source+'" id="'+id+'" controls preload="metadata">';
+            }
+            return audioTag;
+      }
+
+      function getMessageHtml(color, name, message) {
+            return '<div style="color:#' + color + ';" >' + '<b>' + name + '</b><br />' + message + '</div><hr>';
+      }
+
+      function sendMessage () {
+            var text = $("#text").val();
+            $("#text").val("");
+
+            if( text == '' ) {
+                  return;
+            }
+
+            text = getSendMessage(text);
+            trace("text : " + text);
+
+            var name = $("#name").val();
+            var gameType = $("#gameType").val();
+            var color = chatFontColor.replace("#", "");
+            url = getServerUrl() + "?webif=talk&room=" + roomNo + "&password=" + roomPass + "&name=" + name + "&message=" + text + "&bot=" + gameType +"&color=" + color + "&callback=?"
+            trace( url );
+
+            jQuery.getJSON(url, function(data){
+            })
+            .done(function(json) {
+                  getChatLog();
+            })
+            .error(function(jqXHR, textStatus, errorThrown) {
+                  $("#text").val(text);
+                  //console.log("エラー：" + textStatus);
+                  //console.log("テキスト：" + jqXHR.responseText);
+                  var html = getMessageHtml("000000", "System", "==Send Message Failed==");
+                  printMessage(html);
+            });
+      }
 
 
-</script>
-<link type="text/css" href="src_javascript/simple-color-picker/jquery.simple-color-picker.css" rel="stylesheet">
-<script type="text/javascript" src="src_javascript/simple-color-picker/jquery.simple-color-picker.js"></script>
-</head>
-<body>
-  
-  <div id="topSpace">
-    <div>RoomNo.
-      <select id="roomNo" onChange="selectRoomNo()" >
-        <option value="null"> </option>
-      </select>
-    
-      <select id="gameType" onChange="changeGameType()" style="width:200px;" ></select>
-      
-      <a id="diceHelpOpen" class="button-link">？</a>
-    </div>
-  </div>
-  
-  <img id="preloader" src="image/preloader.gif" />
-  
-  <div id="messages"
-       style="overflow: auto; border:1px solid #aaaaaa;height:100px">
-  </div>
-  
-  
-  <div id="modal-content" height="10" style="overflow: auto; ">
-    <pre id="diceHelp"></pre>
-    <p><a id="modal-close" class="button-link">閉じる</a></p>
-  </div>
-  
-  <span id="bottomSpace" width="100%">
-    <label id="color" >■</label><label>NAME</label>
-    <input id="name" value="" style="width: 75px; " /><label> : </label>
-    <input id="text" value="" style="width:150px; " />
-    <input id="reloadButton" type="button" onClick="getChatLog()" value="更新" />
-    <input type="checkbox" id="autoReload" onClick="setAutoReload()" >自動更新（5秒）
-  </div>
-  
-</body>
-</html>
+      function getSendMessage(text) {
+            text = text.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
+                  return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+
+
+            zenkaku = "＠「」［］、，＃＄（）＊／＋－＝＞＜";
+            hankaku = "@[][],,#$()*/+-=><";
+            var tr = buildTr(zenkaku, hankaku);
+            text = tr(text);
+
+            text = encodeURIComponent(text)
+
+            return text;
+      }
+
+      function buildTr(from, to) {
+
+            var replaces = {};
+            var exp = '';
+
+            for (var i in from) {
+                  var c = from[i];
+
+                  replaces[c] = to.substr(i, 1);
+                  exp += '[]-^\\'.indexOf(c) < 0 ? c : '\\' + c;
+            }
+
+            var re = RegExp('[' + exp + ']', 'g');
+            function replacer(c) { return replaces[c]; }
+            return function(str) { return str.replace(re, replacer); };
+      }
+
+
+      $(function(){
+
+            $("#diceHelpOpen").click( function(){
+                  $("body").append('<div id="modal-overlay"></div>');
+                  $("#modal-overlay").fadeIn("slow");
+
+                  centeringModalSyncer();
+
+                  $("#modal-content").fadeIn("slow");
+
+                  var closeAction = function(){
+                        $("#modal-content,#modal-overlay").fadeOut("slow", function(){
+                              $("#modal-overlay").remove();
+                        })};
+
+                        $("#modal-overlay,#modal-close").unbind().click(closeAction);
+                        $("#modal-content").unbind().dblclick(closeAction);
+                  });
+
+                  //リサイズされたら、センタリングをする
+                  $(window).resize(centering);
+            });
+
+
+            $(function($){
+                  $("#text").keydown(function(e){
+                        if(e.ctrlKey && e.keyCode === 13){
+                              sendMessage();
+                              return false;
+                        }
+                  });
+            });
+
+            function toggleRoomSelectForm(){
+                  var isOpen = $("#roomSelectForm").css("display") != "none" ? true : false;
+                  if(isOpen){
+                        $("#roomSelectForm").css("display", "none");
+                        $("#toggleRoomSelectForm").html('Room選択を開く');
+                  }else{
+                        $("#roomSelectForm").css("display", "block");
+                        $("#toggleRoomSelectForm").html('Room選択を閉じる');
+                  }
+            }
+
+            //センタリングをする関数
+            function centering(){
+                  centeringMessages();
+                  centeringModalSyncer();
+            }
+
+            function centeringMessages() {
+                  var height = $(window).height();
+                  var diff = height - $("#topSpace").height() - $("#bottomSpace").height();
+                  $("#messages").height(diff - 40);
+            }
+
+            function centeringModalSyncer() {
+
+                  adjustModalHeight()
+
+                  var width = $(window).width();
+                  var height = $(window).height();
+
+                  var contentWidth = $("#modal-content").outerWidth({margin:true});
+                  var contentHeight = $("#modal-content").outerHeight({margin:true});
+
+                  //コンテンツ(#modal-content)を真ん中に配置するのに、端から何ピクセル離せばいいか？を計算
+                  var pxleft = ((width - contentWidth) / 2);
+                  var pxtop = ((height - contentHeight) / 2);
+
+                  $("#modal-content").css({"left": pxleft + "px"});
+                  $("#modal-content").css({"top": pxtop + "px"});
+
+            }
+
+
+            function adjustModalHeight() {
+
+                  var target = $("#modal-content");
+
+                  target.height('auto');
+                  target.width('auto');
+
+                  var height = $(window).height();
+
+                  if( height < target.height() ) {
+                        target.height(height - 50);
+                  }
+
+                  var width = $(window).width();
+
+                  if( width < target.width() ) {
+                        target.width(width - 50);
+                  }
+            }
+
+            var chatFontColor = "#BF9000";
+
+            $(document).ready(function() {
+                  $('label#color').simpleColorPicker({ onChangeColor: onChangeColor});
+            });
+
+
+            function onChangeColor(color) {
+                  color = color.toUpperCase();
+                  trace(color);
+
+                  $('label#color').css("color", color);
+                  $('#name').css("color", color);
+                  $('#text').css("color", color);
+
+                  setCookie('color', color);
+
+                  chatFontColor = color;
+                  trace(chatFontColor);
+            }
+
+
+
+            // クッキー保存　setCookie(クッキー名, クッキーの値, クッキーの有効日数)
+            function setCookie(key, value, expiredays) {
+
+                  // pathの指定
+                  var path = location.pathname;
+                  trace("path : " + path);
+
+                  // pathをフォルダ毎に指定する場合のIE対策
+                  var paths = path.split("/");
+
+                  if(paths[paths.length-1] != "") {
+                        paths[paths.length-1] = "";
+                        path = paths.join("/");
+                  }
+
+                  // 有効期限の日付
+                  var extime = new Date().getTime();
+                  var cltime = new Date(extime + (60 * 60 * 24 * 1000 * expiredays));
+                  var exdate = cltime.toUTCString();
+
+                  // クッキーに保存する文字列を生成
+                  var string = key +"="+ escape(value);// 値はエンコードしておく
+                  string += "; path="+ path;
+                  string += "; ";
+
+                  if(expiredays) {
+                        string += "expires=" + exdate + "; ";
+                  }
+
+                  // クッキーに保存
+                  document.cookie = string;
+            }
+
+
+            // クッキーの値を取得 getCookie(クッキー名)
+            function getCookie(key) {
+
+                  if( document.cookie.length <= 0 ) {
+                        return "";
+                  }
+
+                  // クッキーの値を取り出す
+                  var startIndex = document.cookie.indexOf(key + "=");
+                  if(startIndex == -1) {
+                        return "";
+                  }
+
+                  startIndex += key.length + 1;
+
+                  var endIndex = document.cookie.indexOf(";", startIndex);
+                  if( endIndex == -1) {
+                        endIndex = document.cookie.length;
+                  }
+
+                  // 値をデコードして返す
+                  var string = document.cookie.substring(startIndex, endIndex);
+                  var value = unescape(string);
+
+                  trace("cookie " + key + "=" + value);
+
+                  return value;
+            }
+
+
+            </script>
+            <link type="text/css" href="src_javascript/simple-color-picker/jquery.simple-color-picker.css" rel="stylesheet">
+            <script type="text/javascript" src="src_javascript/simple-color-picker/jquery.simple-color-picker.js"></script>
+      </head>
+      <body>
+
+            <div id="topSpace">
+                  <div>RoomNo.
+                        <div id="roomSelectForm">
+                              <select id="roomNo" >
+                                    <option value="null"> </option>
+                              </select>
+                              <input type="password" id="roomPass" placeholder="password(見学の場合はなし)">
+                              <input type="button" value="入室" onClick="selectRoomNo()">
+                        </div>
+                        <a id="toggleRoomSelectForm" class="button-link" onClick="toggleRoomSelectForm()">Room選択を閉じる</a><br />
+
+                        <select id="gameType" onChange="changeGameType()" style="width:200px;" ></select>
+
+                        <a id="diceHelpOpen" class="button-link">ダイスヘルプ</a>
+                  </div>
+                  <span id="bottomSpace" width="100%">
+                        <label id="color" >■文字色変更■</label><br />
+                        <input id="name" placeholder="name" /><br />
+                        <textarea id="text" cols="40" rows="4" placeholder="text"></textarea><br />
+                        <input type="button" onClick="sendMessage()" value="送信">
+                        <input id="reloadButton" type="button" onClick="getChatLog()" value="更新" />
+                        <input type="checkbox" id="autoReload" onClick="setAutoReload()" >自動更新（3秒）
+                        <hr>
+                  </div>
+
+                  <img id="preloader" src="image/preloader.gif" />
+
+                  <div id="messages"></div>
+
+
+                  <div id="modal-content" height="10" style="overflow: auto; ">
+                        <pre id="diceHelp"></pre>
+                        <p><a id="modal-close" class="button-link">閉じる</a></p>
+                  </div>
+
+            </body>
+            </html>

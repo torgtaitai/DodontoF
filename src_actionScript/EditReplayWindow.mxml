@@ -438,7 +438,8 @@
                                           (jsonData.replayConfig.grid ? Language.s.ON : Language.s.OFF),
                                           (jsonData.replayConfig.position ? Language.s.ON : Language.s.OFF),
                                           (jsonData.replayConfig.dice ? Language.s.ON : Language.s.OFF),
-                                          (jsonData.replayConfig.adjustStand ? Language.s.ON : Language.s.OFF));
+                                          (jsonData.replayConfig.adjustStand ? Language.s.ON : Language.s.OFF),
+                                          (jsonData.replayConfig.sound ? Language.s.ON : Language.s.OFF));
         }
         
         return result;

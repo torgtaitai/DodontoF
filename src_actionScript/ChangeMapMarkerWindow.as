@@ -14,7 +14,6 @@ package {
             title = Language.s.changeMapMarkerWindowTitle;
             
             this.isCreate = false;
-            this.isMany.height = 0;
             this.changeExecuteSpace.height = 25;
             this.height += 25;
             
@@ -23,6 +22,7 @@ package {
             isPaint.selected = mapMarker.isPaintMode();
             mapMarkerWidth.value = mapMarker.getWidth();
             mapMarkerHeigth.value = mapMarker.getHeight();
+            isFixed.selected = ( ! mapMarker.getDraggable());
         }
         
         override protected function setDragEvent():void {
@@ -38,6 +38,7 @@ package {
                 mapMarker.setPaintMode( isPaint.selected );
                 mapMarker.setWidth( mapMarkerWidth.value );
                 mapMarker.setHeight( mapMarkerHeigth.value );
+                mapMarker.setDraggable( ! isFixed.selected );
                 mapMarker.updateImage();
                 
                 guiInputSender.getSender().changeCharacter( mapMarker.getJsonData() );

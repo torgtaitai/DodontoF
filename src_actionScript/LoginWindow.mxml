@@ -69,6 +69,15 @@
                              dataField="lastUpdateTime"
                              textAlign="center"
                              width="140"/>
+		  <mx:DataGridColumn headerText="{Language.s.deleteButton}"
+                             textAlign="center"
+                             width="30">
+            <mx:itemRenderer>
+              <mx:Component>
+                <mx:Button label="{Language.s.deleteButton}" height="20" paddingLeft="0" paddingRight="0" click="LoginWindow.removeCurrentSelectedPlayRoom()" enabled="{data.lastUpdateTime != ''}" />
+              </mx:Component>
+            </mx:itemRenderer>
+          </mx:DataGridColumn>
 		</mx:columns>
 	  </mx:DataGrid>
     </mx:Box>
@@ -169,7 +178,7 @@
     
     private var guiInputSender:GuiInputSender;
     private var isReplay:Boolean;
-    private var thisObj:LoginWindow;
+    static private var thisObj:LoginWindow;
     private var autoLoginRoom:int = 0;
     
     [Bindable]
@@ -266,7 +275,13 @@
     private var languageSaveKey:String = 'language';
     
     private function initLanguage(jsonData:Object):void {
-        Language.initLanguage( jsonData.languages );
+        var error:String = Language.initLanguage( jsonData.languages );
+        
+        if( error != "" ) {
+            Alert.show(error);
+        }
+        
+        
         languageList = Language.getDataProvider();
         
         if( languageList.length <= 1 ) {
@@ -284,10 +299,10 @@
         
         Utils.selectComboBox(languageComboBox, language);
         
-        changeLanguage();
+        changeLanguage(true);
     }
     
-    private function changeLanguage():void {
+    private function changeLanguage(isInitLanguage:Boolean = false):void {
         
         var result:String = Language.setLanguage( languageComboBox.selectedItem.data as String );
         if( result != "" ) {
@@ -307,6 +322,11 @@
         yourName.text = loadDefaultCharacterName();
         
         DodontoF_Main.getInstance().getMap().initContextMenu();
+        DodontoF_Main.getInstance().filterDiceBotInfos();
+        
+        if( ! isInitLanguage ) {
+            status = Language.s.selectLanguageMessage;
+        }
     }
     
     private function setAdminMode():void {
@@ -610,6 +630,7 @@
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
         DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
         Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
+        Config.getInstance().isAskRemoveRoomWhenLogout = jsonData.isAskRemoveRoomWhenLogout;
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
         
@@ -763,7 +784,6 @@
     }
     
     public function removePlayRoom():void {
-        try{
             var indexs:Array = playRoomStateInfo.selectedIndices;
             Log.logging("indexs", indexs)
             
@@ -774,6 +794,16 @@
                 return;
             }
             
+            removePlayRoomByIndexes(indexs);
+    }
+    
+    static public function removeCurrentSelectedPlayRoom():void {
+        var index:int = thisObj.playRoomStateInfo.selectedIndex;
+        thisObj.removePlayRoomByIndexes( [index] );
+    }
+    
+    public function removePlayRoomByIndexes(indexs:Array):void {
+        try{
             var roomText:String = "";
             var roomNumbers:Array = new Array();
             for each(var index:int in indexs) {
@@ -863,11 +893,11 @@
         }
         
         for each(var roomNumber:int in passwordRoomNumbers) {
-            inputPaswordToDeleteTargetRoom(roomNumber);
+            inputPasswordToDeleteTargetRoom(roomNumber);
         }
     }
     
-    private function inputPaswordToDeleteTargetRoom(roomNumber:int):void {
+    private function inputPasswordToDeleteTargetRoom(roomNumber:int):void {
         var window:InputTextWindow = DodontoF.popup(InputTextWindow, true) as InputTextWindow;
         
         var texts:Array = [Language.text("deletePlayRoomPasswordMessage", roomNumber)];

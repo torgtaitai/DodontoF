@@ -101,6 +101,7 @@ package {
             addMenuItem(menu, Language.s.drawCardMany, getContextMenuItemCardDrawMany, true);
             
             addMenuItem(menu, Language.s.selectCardFromMount, getContextMenuItemCardSelect, true);
+            addMenuItem(menu, Language.s.shuffleOnlyMountCards, getContextMenuShuffleMountCards, true);
             
             view.contextMenu = menu;
         }
@@ -144,6 +145,11 @@ package {
                 Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
             }
         }
+        
+        protected function getContextMenuShuffleMountCards(event:ContextMenuEvent):void {
+            sender.shuffleOnlyMountCards( getMountName(), getId() );
+        }
+            
         
         override protected function isPrintCardText():Boolean {
             return false;

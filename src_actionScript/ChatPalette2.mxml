@@ -16,13 +16,24 @@
     </mx:TabNavigator>
     
     <mx:HBox width="100%" height="20">
-      <mx:Button label="{Language.s.chatPalletEdit}" click="edit()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="{Language.s.chatPalletEdit}" click="edit()" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
+      
       <mx:Spacer width="20"/>
-      <mx:Button label="{Language.s.chatPalletSave}" click="save()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
-      <mx:Button label="{Language.s.chatPalletLoad}" click="load()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      
+      <mx:Button label="{Language.s.chatPalletSave}" click="save()" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button label="{Language.s.chatPalletLoad}" click="load()" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
+      
       <mx:Spacer width="20"/>
-      <mx:Button id="addPaletTabButton" label="{Language.s.chatPalletAddTab}" click="addPaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
-      <mx:Button id="deletePaletTabButton" label="{Language.s.chatPalletDeleteTab}" click="deletePaletTab()" height="20" fontSize="10" paddingLeft="0" paddingRight="0" />
+      
+      <mx:Button id="addPaletTabButton" label="{Language.s.chatPalletAddTab}"
+                 click="addPaletTab()" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
+      <mx:Button id="deletePaletTabButton" label="{Language.s.chatPalletDeleteTab}"
+                 click="deletePaletTab()" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
     </mx:HBox>
     
   </mx:Box>

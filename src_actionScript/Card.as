@@ -23,6 +23,8 @@ package {
     import mx.core.UIComponent;
     import mx.effects.Glow;
     import mx.managers.PopUpManager;
+    import mx.events.MenuEvent;
+    import mx.controls.Menu;
     
     /** 
      * カードクラス
@@ -542,10 +544,12 @@ package {
             closeSecretMenu.visible = false;  //カードを伏せる：非公開に戻す
             changeOwnerMenu.visible = false; //カードの管理者を自分に変える
             printCardTextMenu.visible = false; //カードテキストをチャットに引用
+            giveCardMenu.visible = true; //カード譲渡
             removeCardMenu.visible = false; //カード削除
             rewriteCardMenu.visible = false; //カード書き換え
             copyCardMenu.visible = false; //カードコピー
             dumpToTrushMountCardMenu.visible = false; //カード捨て
+            returnToCardMountCardMenu.visible = true; //カード捨て
             
             if( this.isPrintCardText() ) {
                 if( ! isPrintBackSide() ) {
@@ -632,6 +636,41 @@ package {
         }
         
         
+        protected function getContextMenuItemReturnToCardMountCard(event:ContextMenuEvent):void {
+            var cardMount:CardMount = getCardMount();
+            if( cardMount == null ) {
+                return;
+            }
+            
+            moveAndReturnToCardMount(cardMount);
+        }
+        
+        private function getCardMount():CardMount {
+            var cardMountList:Array = getMap().findExistPiecesByTypeName( CardMount.getTypeStatic() );
+            
+            for each(var cardMount:CardMount in cardMountList) {
+                if( getMountName() == cardMount.getMountName() ) {
+                    return cardMount;
+                }
+            }
+            return null;
+        }
+        
+        private function moveAndReturnToCardMount(cardMount:CardMount):void {
+            view.x = cardMount.getX();
+            view.y = cardMount.getY();
+            
+            if( this.getCardName() == "" ) {
+                printCardLog( Language.s.returnCardMessage );
+            } else {
+                printCardLog( Language.s.returnCardMessageWithCardName, [getCardName()] );
+            }
+            
+            sender.returnCardToMount( getId(), cardMount.getMountName(), cardMount.getId() );
+        }
+        
+        
+        
         protected function getContextMenuItemDumptToTrushMountCard(event:ContextMenuEvent):void {
             var trushMount:CardTrushMount = getMap().getTrushMount(this);
             if( trushMount == null ) {
@@ -681,16 +720,19 @@ package {
 
             var cardZone:CardZone = getHitedCardZone();
             if( cardZone != null ) {
-                var isForce:Boolean = true;
-                move(cardZone.getCenterX(), cardZone.getCenterY(), isForce);
-                changeOwnerToAnyoneOnLocal(cardZone.getOwner(), cardZone.getOwnerName());
-                sender.changeCharacter( thisObj.getJsonData() );
+                moveToCardZone(cardZone);
                 return false;
             }
             
-            
             return snapViewPositionCard();
             //return super.snapViewPosition();
+        }
+        
+        private function moveToCardZone(cardZone:CardZone):void {
+            var isForce:Boolean = true;
+            move(cardZone.getCenterX(), cardZone.getCenterY(), isForce);
+            changeOwnerToAnyoneOnLocal(cardZone.getOwner(), cardZone.getOwnerName());
+            sender.changeCharacter( thisObj.getJsonData() );
         }
 
         private function snapViewPositionCard():Boolean {
@@ -811,7 +853,9 @@ package {
         private var rewriteCardMenu:ContextMenuItem;
         private var copyCardMenu:ContextMenuItem;
         private var printCardTextMenu:ContextMenuItem;
+        private var giveCardMenu:ContextMenuItem;
         private var dumpToTrushMountCardMenu:ContextMenuItem;
+        private var returnToCardMountCardMenu:ContextMenuItem;
         
         override protected function initContextMenu():void {
             var menu:ContextMenu = new ContextMenu();
@@ -826,8 +870,10 @@ package {
             printCardTextMenu = addMenuItem(menu, Language.s.writeCardTextToChat, getContextMenuItemFunctionPrintCardText, true);
             rewriteCardMenu = addMenuItem(menu, Language.s.changeCard, getContextMenuItemRewriteCard, true);
             copyCardMenu = addMenuItem(menu, Language.s.copyCard, getContextMenuItemCopyCard, true);
+            giveCardMenu = addMenuItem(menu, Language.s.giveCard, getContextMenuItemGiveCard, true);
             removeCardMenu = addMenuItem(menu, Language.s.deleteCard, getContextMenuItemRemoveCharacter, true);
             dumpToTrushMountCardMenu = addMenuItem(menu, Language.s.dumpCard, getContextMenuItemDumptToTrushMountCard, true);
+            returnToCardMountCardMenu = addMenuItem(menu, Language.s.returnToCardMount, getContextMenuItemReturnToCardMountCard, true);
             
             view.contextMenu = menu;
         }
@@ -915,6 +961,66 @@ package {
         protected function getContextMenuItemCopyCard(event:ContextMenuEvent):void {
             var json:Object = getJsonData();
             DodontoF_Main.getInstance().getGuiInputSender().getSender().addCard(json);
+        }
+        
+        
+        protected function getContextMenuItemGiveCard(event:ContextMenuEvent):void {
+            var menuData:Array = getCardZoneMenuData();
+            popupMenu(getView(), menuData, clickCardZoneListHandler);
+        }
+
+        private function clickCardZoneListHandler(event:MenuEvent):void {
+            var cardZone:CardZone = event.item.cardZone;
+            moveToCardZone(cardZone);
+        }
+        
+        private function getCardZoneMenuData():Array{
+            var cardZoneList:Array = getMap().findExistPiecesByTypeName( CardZone.getTypeStatic() );
+            
+            var menuData:Array = new Array();
+            
+            for each(var cardZone:CardZone in cardZoneList) {
+                var info:Object = getCardZoneMenuInfo(cardZone);
+                menuData.push(info);
+            }
+            
+            return menuData;
+        }
+        
+        private function getCardZoneMenuInfo(cardZone:CardZone):Object {
+            var info:Object = {
+                label: cardZone.getOwnerName(),
+                cardZone: cardZone,
+                type: "normal" };
+            
+            return info;
+        }
+
+        private function popupMenu(parent:UIComponent, menuData:Array, handler:Function):void {
+            if( (menuData == null) || (menuData.lenth == 0) ){
+                return;
+            }
+            
+            var menu:Menu = Menu.createMenu(parent, menuData);
+            menu.addEventListener(mx.events.MenuEvent.ITEM_CLICK, handler);
+            menu.addEventListener(mx.events.MenuEvent.ITEM_ROLL_OVER, rollOverMenuItemEvent);
+            menu.addEventListener(flash.events.MouseEvent.ROLL_OUT,
+                                  function(event:Object):void {menu.hide();});
+            
+            //var point:Point = parent.localToGlobal(new Point(0, 0));
+            //menu.show(point.x + parent.width, point.y);
+            var base:UIComponent = DodontoF_Main.getInstance().getDodontoF();
+            var point:Point = new Point(base.mouseX, base.mouseY);
+            menu.show(point.x - 5, point.y - 5);
+        }
+        
+        private function rollOverMenuItemEvent(event:MenuEvent):void {
+            var cardZone:CardZone = event.item.cardZone;
+            if( cardZone == null ) {
+                return;
+            }
+            
+            Utils.glowEffect( cardZone.getView() );
         }
         
         

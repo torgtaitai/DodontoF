@@ -19,11 +19,6 @@
           <mx:TextInput id="message" width="200" text="" />
         </mx:FormItem>
         
-	    <mx:FormItem label="{Language.s.cutInImageSourceLabel}:" >
-          <mx:TextInput id="imageSource" width="200" text=""  change="printPreview()"
-                        toolTip="{Language.s.cutInImageSourceTips}"/>
-        </mx:FormItem>
-        
 	    <mx:FormItem label="{Language.s.cutInDisplaySecondsLabel}" >
           <mx:NumericStepper id="displaySeconds" minimum="0" maximum="300" value="0" stepSize="0.1"
       />
@@ -119,11 +114,16 @@
      */
     override protected function setup():void {
         initPreview();
+        
+        imageSelecter.setImageInputLabel(Language.s.cutInImageSourceLabel);
+        imageSelecter.setImageInputToolTip(Language.s.cutInImageSourceTips);
+        
         imageSelecter.addPreview(previewImage, 200);
         imageSelecter.setMoviewFileSelectable(true);
         
-        imageSource.enabled = false;
-        imageSource.text = loadingMessage;
+        if( imageSelecter.isBlankImage() ) {
+            imageSelecter.selectImageUrl( Config.defaultImageUrl );
+        }
         
         imageSelecter.setImageClickEventFunction(imageClickEvent);
         imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
@@ -159,29 +159,20 @@
      * 画像一覧選択時のプレビュー画像更新処理
      */
     public function imageClickEvent(imageName:String):void {
-        imageSource.text = imageSelecter.getImageUrlChanger().getShort( imageName );
         printPreview();
     }
-    
-    private var loadingMessage:String = "Loading...";
     
     /**
      * プレビュー画像読み込み完了時の処理
      */
     public function imageLoadComplete():void {
-        if( imageSource.text == loadingMessage ) {
-            imageSource.text =  "";
-        }
-        
-        imageSource.text = imageSelecter.getImageUrlChanger().getShort( imageSource.text );
-        imageSource.enabled = true;
     }
     
     /**
      * プレビュー画像更新処理
      */
     protected function printPreview():void {
-        var imageSourceText:String = imageSource.text;
+        var imageSourceText:String = imageSelecter.getSelectedImageUrl();
         Log.logging("printPreview imageSourceText", imageSourceText);
         
         checkImageUrl(imageSourceText);
@@ -222,12 +213,13 @@
             Alert.show(Language.s.cutInInputTitleWarning);
             return null;
         }
-        if( imageSource.text == "" ) {
+        
+        var imageUrl:String = imageSelecter.getSelectedImageUrl();
+        if( imageUrl == "" ) {
             Alert.show(Language.s.cutInInputImageSourceWarning);
             return null;
         }
         
-        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( imageSource.text );
         var soundSource:String = soundSourceEdit.text;
         var isSoundLoop:Boolean = isSoundLoopCheck.selected;
         var position:String = positionComboBox.selectedItem.data;

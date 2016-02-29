@@ -14,7 +14,7 @@
             />
     <mx:HBox width="100%" height="100%">
       <mx:Label id="inputLabel" text="{Language.s.input}:" />
-      <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" />
+      <mx:TextInput id="input" width="100%" text="" displayAsPassword="true" focusIn="setInputIme()"/>
     </mx:HBox>
     
     <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
@@ -63,6 +63,10 @@
         } catch(error:Error) {
             this.status = error.message;
         }
+    }
+    
+    private function setInputIme():void {
+        IME.enabled = ( ! input.displayAsPassword);
     }
     
     ]]>

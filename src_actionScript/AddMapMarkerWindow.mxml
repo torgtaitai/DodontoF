@@ -45,6 +45,8 @@
         
         <mx:CheckBox id="isMany" label="{Language.s.manyCreateCheck}" selected="false" height="100%"
                      visible="{isCreate}" />
+        <mx:CheckBox id="isFixed" label="{Language.s.mapMarkerFix}" selected="false" height="100%"
+                     visible="{ ! isCreate}" />
       </mx:HBox>
       
       <mx:Label text="{Language.s.message}" />
@@ -83,6 +85,14 @@
         init();
         changeView();
         setDragEvent();
+        
+        if( isCreate ) {
+            isFixed.width = 0;
+            isFixed.height = 0;
+        } else {
+            isMany.width = 0;
+            isMany.height = 0;
+        }
     }
     
     /**

@@ -170,6 +170,7 @@
         Log.logging("initGameType begin");
         
         var diceBotInfos:Array = DodontoF_Main.getInstance().getDiceBotInfos();
+        Utils.removeBaseDiceBot(diceBotInfos);
         
         Utils.setDiceBotDataProvider( gameType, diceBotInfos );
         

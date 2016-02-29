@@ -244,7 +244,14 @@ package {
         
         public function changeNumber(targetNumber:int):void {
             this.number = targetNumber;
-            sender.changeCharacter( getJsonData() );
+            
+            var resultFunction:Function = function(event:Event):void { 
+                var message:String = Language.text("changeDiceSimboleNumber", ownerName);
+                var window:ChatWindow = ChatWindow.getInstance();
+                window.sendChatMessage(window.publicChatChannel, message);
+            }
+            
+            sender.changeCharacter( getJsonData(), resultFunction );
             drawDice();
         }
         

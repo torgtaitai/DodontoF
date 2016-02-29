@@ -295,20 +295,21 @@ package {
                 'chatMessage' : chatMessage
             }
             
-            if( name == "" ) {
-                Log.logging("StandingGraphics.print End, name == null, result", result);
+            if( result.senderName == "" ) {
+                Log.logging("StandingGraphics.print End, result.senderName == null, result", result);
                 return result;
             }
             
+            result = analyzeAtmarkNameAndStand(result);
+            
             Log.logging("findTargetInfo calling...");
-            var findResult:Object = findTargetInfo(name, state, chatMessage);
+            var findResult:Object = findTargetInfo(result.senderName, state, result.chatMessage);
             if(findResult.info == null) {
                 Log.logging("StandingGraphics.print End, findResult.info == null, result", result);
                 return result;
             }
             
             result.chatMessage = findResult.chatMessage;
-            
             var info:Object = copyInfoAjusted( findResult.info );
             
             if( ! effectable ) {
@@ -319,11 +320,11 @@ package {
             info.source = Config.getInstance().getUrlString(info.source);
             
             Log.logging("findTargetInfo 2nd calling...");
-            var speakImageResult:Object = findTargetInfo(name, state + speakMarker, chatMessage);
+            var speakImageResult:Object = findTargetInfo(result.senderName, state + speakMarker, result.chatMessage);
             if( speakImageResult.info != null ) {
                 var speakInfo:Object = {
                     "image" : speakImageResult.info.source,
-                    "message" : findResult.chatMessage};
+                    "message" : result.chatMessage};
                 filterImageInfos.splice(0, 0, speakInfo);
             }
             
@@ -335,6 +336,36 @@ package {
             return result;
         }
         
+        
+        private function analyzeAtmarkNameAndStand(result:Object):Object {
+            var names:Array = findAllNames();
+            
+            var nameMarkderReg:RegExp = /(@|＠)([^@＠]+)/g;
+            var match:Object = nameMarkderReg.exec(result.chatMessage);
+            
+            while( match != null ) {
+                var matchFullText:String = match[0];
+                var matchText:String = match[2];
+
+                Log.logging("result.chatMessage", result.chatMessage);
+                Log.logging("names", names);
+                for each(var name:String in names) {
+                    if( matchText != name ) {
+                        continue;
+                    }
+                    
+                    result.senderName = name;
+                    result.chatMessage = result.chatMessage.replace(matchFullText, '');
+                    Log.logging("match result.chatMessage", result.chatMessage);
+                    return result;
+                }
+                
+                match = nameMarkderReg.exec(result.chatMessage);
+            }
+            
+            Log.logging("NO match result.chatMessage", result.chatMessage);
+            return result;
+        }
         
         
         private function adjustmentPosition(chatWindowX:int, chatWindowY:int, chatWindowWidth:int):void {

@@ -10,7 +10,11 @@ package {
         static public var s:Object = new Object();
         
         static private var japaneseDefault:Object = new Object();
+        
+        //言語設定用。日本語なら"Japanese"、英語なら"English"
+        static private var currentLanguage:String = "";
         static private var languageTable:Object = new Object();
+        
         static private var isInitialized:Boolean = false;
         
         static public function setup():void {
@@ -23,6 +27,7 @@ package {
             p.language = "日本語";
             p.title = "どどんとふ";
             p.loginWindowTitle = "ログイン";
+            p.selectLanguageMessage = "";
             p.yourName = "あなたのお名前（初回ログイン用）";
             p.createNewPlayRoom = "新規プレイルーム作成";
             p.deleteSelectedPlayRoom = "指定プレイルームを削除";
@@ -192,6 +197,7 @@ package {
             p.rollCallAndVote = "点呼／投票";
             p.cutInSetting = "カットイン設定";
             p.standingImageConfig = "立ち絵設定";
+            p.sound = "音再生";
             p.soundOn = "音再生あり";
             p.soundOff = "音再生なし";
             p.sendWakeUpSound = "目覚ましアラーム送信";
@@ -345,6 +351,8 @@ package {
             
             p.discardMessage = "{0}がカードを捨てました。";
             p.discardMessageWithCardName = "{0}が「{1}」を捨てました。";
+            p.returnCardMessage = "{0}がカードを山札に戻しました。";
+            p.returnCardMessageWithCardName = "{0}が「{1}」を山札に戻しました。";
             p.openCardMessage = "{0}がカードを公開しました。「{1}」";
             p.changeCardOwnerMessage = "{0}が「{1}」のカードを受け取りました。";
             p.changeCardOwnerToAnyoneMessage = "{0}が「{1}」へカードを渡しました。";
@@ -371,7 +379,7 @@ package {
             p.voteTotalResult = "投票結果　賛成：{0}、反対：{1}";
             p.checkLoginCount = "このサーバへのログイン回数が{0}回 になりました！\rそろそろ自前サーバの構築はいかがでしょうか！？";
             p.counterRemoconCounterNameWarning = "カウンター値に「{0}」は存在しません";
-            p.replaySetting = "グリッド表示{0}、座標文字{1}、ダイス表示{2}、立ち絵調整{3}";
+            p.replaySetting = "グリッド表示{0}、座標文字{1}、ダイス表示{2}、立ち絵調整{3}、音再生{4}";
             p.deletePlayRoomPasswordMessage = "部屋 [ No.{0} ] を削除します。パスワードを入力してください。";
             p.deleteReplayDataQuestion = "タイトル：{0}\nのリプレイデータを削除します。よろしいですか？";
             p.invalidDiceBotText = "{0}のチャットメッセージに不正なダイスロール結果が検出されました。\n{1}";
@@ -409,10 +417,12 @@ package {
             p.closeCard = "カードを伏せる（非公開）";
             p.changeCardOwnerToMe = "カードを自分の管理へ";
             p.writeCardTextToChat = "カードテキストをチャットに引用";
+            p.giveCard = "カード譲渡";
             p.deleteCard = "カード削除";
             p.changeCard = "カード変更";
             p.copyCard = "カード複製";
             p.dumpCard = "カード捨て";
+            p.returnToCardMount = "カードを山札に戻す";
             p.upSideCard = "正位置";
             p.downSideCard = "逆位置";
             p.yourAreNotCardOwner = "カードの所持者ではないため公開できません。";
@@ -422,6 +432,8 @@ package {
             p.drawCardClosed = "カードを引く：全員に非公開で";
             p.drawCardMany = "カードをN枚引く";
             p.selectCardFromMount = "山からカードを選び出す";
+            p.shuffleOnlyMountCards = "山札をシャッフルする";
+            p.shuffleMountAnnounce = "「{0}」が「{1}」の山札をシャッフルしました。";
             // CardTrushMount.as
             p.returnMountTopCardToField = "一番上のカードを場に戻す";
             p.shuffleTrushCardsAndToMount = "捨て札を山札に積んでシャッフルする";
@@ -582,6 +594,8 @@ package {
             p.mapMarkerWidthSize = "幅:";
             p.mapMarkerColor = "背景色:";
             p.mapMarkerPaint = "塗りつぶす";
+            p.mapMarkerFix = "マーカー固定";
+
             // AddMapMaskWindow.mxml
             p.addMapMask = "マスク作成";
             p.mapMaskName = "名前:";
@@ -650,6 +664,8 @@ package {
             p.hideDiceSymbol = "ダイスを隠す";
             p.deleteDiceSymbol = "ダイスの削除";
             p.diceSymbolPrivateMode = "非公開：";
+            p.changeDiceSimboleNumber = "「{0}」のダイスシンボルの値が変更されました。";
+            
             // StockDiceSymbolWindow.mxml
             p.createDiceSymbol = "ダイスシンボル生成";
             p.diceSymbomNumber = "ダイス目:";
@@ -787,6 +803,7 @@ package {
             p.saveDataSetting = "サーバデータ取得中...しばらくお待ち下さい...";
             p.saveDataReady = "セーブ(ファイル保存)準備完了";
             p.nowSaving = "保存中…";
+            p.whenDownloadDoNotBeginWarning = "ダウンロードが始まらない場合はキャンセルを押してください";
             
             
             // LoadWindow.mxml
@@ -913,6 +930,7 @@ package {
             p.nowYouAreRecordingErrorMessage = "録画中です。ログアウトするには録画を終了してください。";
             p.logoutQuestionTitle = "ログアウト確認";
             p.logoutQuestion = "ログアウトしてよろしいですか？";
+            p.deleteWhenLogout = "ログアウト時に部屋を削除する";
             p.returnToLoginWindow = "ログイン画面に戻る";
             p.returnToLoginWindowQuestion = "リプレイ再生を止め、ログイン画面に戻りますか？";
             // GuiInputSender.as
@@ -964,7 +982,7 @@ package {
             p.buttonName = "ボタン名:";
             p.addHp = "HP増加";
             p.counterRemoconCounterName = "カウンター名\{1\}:";
-            p.counterRemoconCounterNameTips = "イニシアティブは「#INI」で指定できます。";
+            p.counterRemoconCounterNameTips = "イニシアティブは「#INI」で指定できます。\nリソースウィンドの名前を指定することも可能。";
             p.counterRemoconModifyValue = "修正値\{2\}:";
             p.counterRemoconModifyOperatorTips = "現状値に加減算するか、値を差し替えるかを選択できます。";
             p.counterRemoconModifyValueTips = "設定可能な書式\n （空）　：任意の値を後から指定\n 数値　：指定した値\n 「xDy+n」形式：ダイスロール結果（例：２ｄ６＋１、D66、D66s(値入れ替え)）";
@@ -1173,9 +1191,9 @@ package {
         }
         
         
-        static public function initLanguage(languageInfos:Object):void {
+        static public function initLanguage(languageInfos:Object):String {
             if( languageInfos == null ){
-                return;
+                return "";
             }
             
             for(var name:Object in languageInfos) {
@@ -1187,6 +1205,8 @@ package {
                 languageTable[name] = info;
             }
             
+            
+            return checkLanguageNames();
         }
         
         /*
@@ -1208,8 +1228,42 @@ package {
          */
         
         
-        //言語設定用。日本語なら"Japanese"、英語なら"English"
-        static private var language:String = "";
+        static private function checkLanguageNames():String {
+            
+            var names:Array = Utils.getKeys(languageTable);
+            var langNames:Array = new Array();
+            
+            for each(var name:String in names) {
+                if( name == "" ) {
+                    continue;
+                }
+                var langName:String = languageTable[name].language;
+                var duplicate:Array = getDuplicateLangage(langNames, langName);
+                if( duplicate != null ) {
+                    var message:String = "";
+                    message += "[" + langName + "] is duplicated ! please check \r";
+                    message += "  language/" + duplicate[1] + ".txt\r";
+                    message += "  language/" + name + ".txt\r";
+                    message += "and delete old file.";
+                    return message;
+                }
+                
+                langNames.push( [langName, name] );
+            }
+            
+            return "";
+        }
+        
+        static private function getDuplicateLangage(array:Array, name:String):Array {
+            for each(var item:Array in array) {
+                var itemName:String = item[0];
+                if( itemName == name ) {
+                    return item;
+                }
+            }
+            return null;
+        }
+        
         
         //言語設定
         static public function setLanguage(lang:String):String {
@@ -1217,15 +1271,15 @@ package {
                 return "";
             }
             
-            var beforeLang:String = language;
+            var beforeLang:String = currentLanguage;
             var beforeKeys:Array = Utils.getKeys(s, diceBotLangPrefix);
             
-            language = lang;
-            Log.logging("language", language);
+            currentLanguage = lang;
+            Log.logging("language", currentLanguage);
             
-            s = languageTable[language];
+            s = languageTable[currentLanguage];
             
-            var result:String = checkDiff(beforeLang, language, beforeKeys);
+            var result:String = checkDiff(beforeLang, currentLanguage, beforeKeys);
             
             DodontoF_Main.getInstance().getDodontoF().initMenu();
             
@@ -1253,9 +1307,9 @@ package {
             
             var message:String = "Server directory \"language\" files has problem. please change language file.\r\r";
             
-            if( beforeLang != "" || language != "" ) {
+            if( beforeLang != "" || currentLanguage != "" ) {
                 message += StringUtil.substitute("Language data has different,\rbefore:{0}\rafter:{1}\r\r",
-                                                 beforeLang, language);
+                                                 beforeLang, currentLanguage);
             }
             
             message += diffString;
@@ -1264,7 +1318,7 @@ package {
         
         //言語取得
         static public function getLanguage():String {
-            return language;
+            return currentLanguage;
         }
         
         static public function getDataProvider():Array {
@@ -1278,6 +1332,11 @@ package {
             }
             
             return result;
+        }
+        
+        static public function getLangageTypes():Array {
+            var types:Array = Utils.getKeys(languageTable);
+            return types;
         }
         
     }

@@ -12,8 +12,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.46.15"
-$versionDate = "2015/03/15"
+$versionOnly = "Ver.1.47.21"
+$versionDate = "2016/02/29"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 

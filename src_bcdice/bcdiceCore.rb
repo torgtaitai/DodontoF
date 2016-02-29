@@ -1161,7 +1161,7 @@ class BCDice
   
   ####################             D66ダイス        ########################
   def rollD66(string)
-    return nil unless( /^D66/i === string )
+    return nil unless( /^S?D66/i === string )
     return nil if(@diceBot.d66Type == 0)
     
     debug("match D66 roll")
@@ -1453,7 +1453,7 @@ class BCDice
     debug('check params : total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max',
           total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max)
     
-    return "" unless(/([\d]+)[)]?$/ =~ total_n.to_s)
+    return "" unless(/((\+|\-)?[\d]+)[)]?$/ =~ total_n.to_s)
     
     total_n = $1.to_i
     diff = diff.to_i
@@ -1461,6 +1461,7 @@ class BCDice
     check_paramNew = [total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max]
     
     text = getSuccessText(*check_paramNew)
+    text ||= ""
     
     if( text.empty? )
       if( signOfInequality != "" )
@@ -1587,7 +1588,7 @@ class BCDice
       
       par_i = $2
       
-      debug(par_i)
+      debug("par_i", par_i)
       par_o = paren_k(par_i)
       debug("par_o", par_o)
       
@@ -1655,108 +1656,140 @@ class BCDice
   end
   
   def paren_k(string)
-    kazu_o = 0
+    result = 0
     
-    unless (/([\d\/*+-]+)/ =~ string)
-      return kazu_o
-    end
+    return result unless (/([\d\/*+-]+)/ =~ string)
     
     string = $1
     
-    kazu_p = string.split(/\+/)
+    #ex: --X => +X
+    string.gsub!(/\-\-/, '+')
     
-    kazu_p.each do |kazu_a|
-      dec_p = ""
-      
-      if(/(.*?)(-)(.*)/ =~ kazu_a)
-        kazu_a = $1
-        dec_p = $3
-      end
-      
-      mul = 1
-      dev = 1
-      
-      while(/(.*?)(\*[\d]+)(.*)/ =~ kazu_a)
-        par_b = $1
-        par_a = $3
-        par_c = $2
-        kazu_a = "#{par_b}#{par_a}"
-        if(/([\d]+)/ =~ par_c)
-          mul = mul * $1.to_i
+    debug("paren_k string", string )
+    list = split_plus_minus(string)
+    debug("paren_k list", list)
+    
+    result = 0
+    
+    list.each do |text|
+      result += paren_k_loop(text)
+    end
+    
+    return result
+  end
+  
+  def split_plus_minus(string)
+    
+    list = string.scan(/[\+\-]?[^\+\-]+/)
+    
+    debug('split_plus_minus list', list)
+    
+    result = []
+    
+    list.length.times do |i|
+      unless result.empty?
+        if /(\*|\/)$/ === result.last
+          result.last << list[i]
+          next
         end
       end
       
-      while(/(.*?)(\/[\d]+)(.*)/ =~ kazu_a)
-        par_b = $1
-        par_a = $3
-        par_c = $2
-        kazu_a = "#{par_b}#{par_a}"
-        if(/([\d]+)/ =~ par_c)
-          dev = dev * $1.to_i
-        end
-      end
-      
-      work = 0
-      if(/([\d]+)/ =~ kazu_a)
-        work = ($1.to_i) * mul
-        
-        if( dev != 0 )
-          case @diceBot.fractionType
-          when "roundUp"  # 端数切り上げ
-            kazu_o += (work / dev + 0.999).to_i
-          when "roundOff" # 四捨五入
-            kazu_o += (work / dev + 0.5).to_i
-          else #切り捨て
-            kazu_o += (work / dev).to_i
-          end
-        end
-      end
-      
-      next if( dec_p == "" )
-      
-      kazu_m = dec_p.split(/-/)
-      kazu_m.each do |kazu_s|
-        mul = 1
-        dev = 1
-        while(/(.*?)(\*[\d]+)(.*)/ =~ kazu_s)
-          par_b = $1
-          par_a = $3
-          par_c = $2
-          kazu_s = "#{par_b}#{par_a}"
-          if(/([\d]+)/ =~ par_c)
-            mul = mul * $1.to_i
-          end
-        end
-        while(/(.*?)(\/[\d]+)(.*)/ =~ kazu_s)
-          par_b = $1
-          par_a = $3
-          par_c = $2
-          kazu_s = "#{par_b}#{par_a}"
-          if(/([\d]+)/ =~ par_c)
-            dev = dev * $1.to_i
-          end
-        end
-        
-        if( /([\d]+)/ =~ kazu_s )
-          work = ($1.to_i) * mul
-          
-          if( dev != 0 )
-            case @diceBot.fractionType
-            when "roundUp"     # 端数切り上げに設定
-              kazu_o -= (work / dev + 0.999).to_i
-            when "roundOff"    # 四捨五入
-              kazu_o -= (work / dev + 0.5).to_i
-            else #切り捨て
-              kazu_o -= (work / dev).to_i
-            end
-          end
-        end
+      result << list[i] 
+    end
+    
+    debug('split_plus_minus result', result)
+    return result
+  end
+  
+  
+  def paren_k_loop(string)
+    debug("paren_k_plus Begin", string)
+    
+    result = paren_k_calculate_multiple_divide_text(string)
+    debug("paren_k_plus End result", result)
+    
+    return result
+  end
+  
+  
+  def paren_k_calculate_multiple_divide_text(string)
+    multi = 1
+    divide = 1
+    
+    #ex: X*Y(...) => X(...) & multi(=*Y)
+    string, multi = paren_k_multi(string)
+    
+    #ex: X/Y(...) => X(...) & divide(=/Y)
+    string, divide = paren_k_devide(string)
+    
+    # 掛け算・割り算
+    result = calculate_multiple_divide(string, multi, divide)
+    return result
+  end
+  
+
+  #ex: X*Y(...) => X(...) & multi(=*Y)
+  def paren_k_multi(string)
+    debug("paren_k_multi Begin string", string)
+    multi = 1
+    
+    while(/(.*?)(\*[-\d]+)(.*)/ =~ string)
+      before = $1
+      after = $3
+      calculate_text = $2
+      string = "#{before}#{after}"
+      if(/([-\d]+)/ =~ calculate_text)
+        multi = multi * $1.to_i
       end
     end
     
-    return kazu_o
+    debug("paren_k_multi End multi", multi)
+    debug("paren_k_multi End", string)
     
+    return string, multi
   end
+  
+  
+  #ex: X/Y(...) => X(...) & divide(=/Y)
+  def paren_k_devide(string)
+    divide = 1
+    
+    while(/(.*?)(\/[-\d]+)(.*)/ =~ string)
+      before = $1
+      after = $3
+      calculate_text = $2
+      string = "#{before}#{after}"
+      if(/([-\d]+)/ =~ calculate_text)
+        divide = divide * $1.to_i
+      end
+    end
+    
+    return string, divide
+  end
+  
+  
+  def calculate_multiple_divide(string, multi, divide)
+    
+    result = 0
+    
+    return result if( divide == 0 )
+    return result unless(/([-\d]+)/ =~ string)
+    
+    work = ($1.to_i) * multi
+    
+    case @diceBot.fractionType
+    when "roundUp"  # 端数切り上げ
+      result = (work / divide + 0.999).to_i
+    when "roundOff" # 四捨五入
+      result = (work / divide + 0.5).to_i
+    else #切り捨て
+      result = (work / divide).to_i
+    end
+    
+    return result
+  end
+  
+  
   
   
   def setGameByTitle(gameTitle)  # 各種ゲームモードの設定
@@ -1891,6 +1924,10 @@ class BCDice
       require 'diceBot/EarthDawn'
       require 'diceBot/EarthDawn3'
       diceBot = EarthDawn3.new
+    when /(^|\s)(Earth\s*Dawn|ED)4$/i
+      require 'diceBot/EarthDawn'
+      require 'diceBot/EarthDawn4'
+      diceBot = EarthDawn4.new
     when /(^|\s)(Embryo\s*Machine|EM)$/i
       require 'diceBot/EmbryoMachine'
       diceBot = EmbryoMachine.new
@@ -2013,6 +2050,9 @@ class BCDice
     when /(^|\s)(Garako)$/i
       require 'diceBot/Garako'
       diceBot = Garako.new
+    when /(^|\s)(ShoujoTenrankai)$/i
+      require 'diceBot/ShoujoTenrankai'
+      diceBot = ShoujoTenrankai.new
     when /(^|\s)None$/i, ""
       diceBot = DiceBot.new
     else

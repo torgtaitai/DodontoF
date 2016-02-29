@@ -117,7 +117,18 @@ package {
             sendto = to;
         }
         
+        
+        private var isNoSendto:Boolean = false;
+        
+        public function setNoSendto():void {
+            isNoSendto = true;
+        }
+        
         public function setSendtoFromChatWindow():void {
+            if( isNoSendto ) {
+                return;
+            }
+            
             sendto = getValue(sendto, getComboBoxText(getChatWindw().sendtoBox));
         }
         

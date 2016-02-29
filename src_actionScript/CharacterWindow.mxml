@@ -10,7 +10,7 @@
   
   <torgtaitai:ImageSelecter id="imageSelecter" height="100%" width="100%" />
   
-  <mx:HBox id="imageListBox" width="100%" height="{Config.fontSize + 5}" 
+  <mx:HBox id="imageListBox" width="100%" height="{Config.fontSize + 10}" 
            paddingRight="0" paddingLeft="0" 
            paddingTop="0" paddingBottom="0" 
            verticalGap="0" horizontalGap="0" 
@@ -1104,32 +1104,17 @@
   
   
   <mx:HBox id="inputBox"
-           height="135" width="100%" horizontalAlign="center" 
+           height="110" width="100%" horizontalAlign="center" 
            verticalGap="0"
-           horizontalGap="0"
            paddingTop="0"
            paddingBottom="0"
            >
     <mx:Box height="100%" width="300" horizontalAlign="center"
-            verticalGap="0"
-            horizontalGap="0"
-            paddingTop="0"
-            paddingBottom="0"
             >
-      <mx:Form width="100%"
-               paddingTop="0"
-               paddingBottom="0"
-               >
-        <mx:FormItem label="{Language.s.initiativeWindowColumnTitleCharacterName}:"
-                     paddingTop="0"
-                     >
-	      <mx:TextInput id="characterName" width="170" />
-        </mx:FormItem>
-        
-	    <mx:FormItem id="characterImageUrlItem" label="{Language.s.characterImageUrlItem}:">
-          <mx:TextInput id="characterImageUrl" width="150" change="printPreview();" editable="true" enabled="false" />
-        </mx:FormItem>
-      </mx:Form>
+      <mx:HBox height="30" width="100%" horizontalAlign="left">
+        <mx:Label text="{Language.s.initiativeWindowColumnTitleCharacterName}:" />
+        <mx:TextInput id="characterName" width="170" />
+      </mx:HBox>
       
       <mx:HBox id="characterSizeBox" height="30" width="100%" horizontalAlign="left">
 	    <mx:Label text="{Language.s.size}:" />
@@ -1143,14 +1128,11 @@
         <mx:Text text="{Language.s.hideCharacterUnderMapMask}" />
       </mx:HBox>
       
-      <mx:Form width="100%"
-               >
-        <mx:FormItem label="{Language.s.characterDataUrl}:" width="100%"
-                     toolTip="{Language.s.characterDataUrlTips}"
-                     >
-	      <mx:TextInput id="url" width="100%" />
-        </mx:FormItem>
-      </mx:Form>
+      <mx:HBox height="30" width="100%" horizontalAlign="left">
+        <mx:Label text="{Language.s.characterDataUrl}:"
+                     toolTip="{Language.s.characterDataUrlTips}" />
+        <mx:TextInput id="url" width="100%" />
+      </mx:HBox>
       
     </mx:Box>
     
@@ -1171,8 +1153,7 @@
   </mx:HBox>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-    <mx:Button id="executeButton" label="button..." click="this.setCharacterOnButton()"
-               enabled="{ (characterImageUrl.text != '') }" />
+    <mx:Button id="executeButton" label="button..." click="this.setCharacterOnButton()"  />
     <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
   </mx:HBox>
   
@@ -1190,14 +1171,11 @@
     public var statusAlias:Object = new Object();
     protected var character:Character;
     
-    private var loadingMessage:String = "Loading...";
     private var previewImage:Image = new Image();
     
     
     override protected function setup():void {
         initWindowSizeByFont18(840, 600);
-        
-        characterImageUrl.text = loadingMessage;
         
         initImageSelecter();
         initCounterColumns();
@@ -1219,8 +1197,7 @@
     protected var currentImage:Image;
     
     protected function addImageListDefault():Image {
-        var defaultImageUrl:String = "./image/defaultImageSet/pawn/pawnBlack.png";
-        var image:Image = addImageList( defaultImageUrl );
+        var image:Image = addImageList( Config.defaultImageUrl );
         return image;
     }
     
@@ -1480,17 +1457,11 @@
        
     public function clickImageEvent(imageName:String):void {
         var url:String = imageSelecter.getImageUrlChanger().getShort( imageName );
-        characterImageUrl.text = url;
+        imageSelecter.selectImageUrl(url);
         printPreview();
     }
     
     public function loadImageComplete():void {
-        if( characterImageUrl.text == loadingMessage ) {
-            characterImageUrl.text =  "";
-        }
-        
-        characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( characterImageUrl.text );
-        characterImageUrl.enabled = true;
     }
     
     private var counterStartIndex:int = 2;
@@ -1532,7 +1503,7 @@
     public function setCharacterOnButton():void {
         Log.logging("CharacterWindow.setCharacterOnButton Begin");
         try{
-            var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+            var imageUrl:String = imageSelecter.getSelectedImageUrl();
             var images:Array = getImages();
             var mirrored:Boolean = imageSelecter.isMirrored();
             var counters:Object = new Object();
@@ -1593,8 +1564,7 @@
     }
        
     protected function printPreview():void {
-        Log.logging("printPreview characterImageUrl.text", characterImageUrl.text);
-        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( characterImageUrl.text );
+        var imageUrl:String = imageSelecter.getSelectedImageUrl();
         Log.logging("imageUrl", imageUrl);
         previewImage.source = imageUrl;
         currentImage.source = imageUrl;

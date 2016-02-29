@@ -263,16 +263,24 @@
             var params:Object = buttonInfos[index];
             Log.logging("params", params);
             
-            var menuData:Array = getCharacterListMenuData(params);
-            popupMenu(parent, menuData, clickPopupCharacterListHandler);
+            var menuDataList:Array = getCharacterListMenuData(params);
+            popupMenu(parent, menuDataList, clickPopupCharacterListHandler);
             
             Log.logging("popupCharacterList End");
         }
         
         
         private function getCharacterListMenuData(params:Object):Array {
+            var menuDataList:Array = [];
+            
+            var resourceMenuInfo:Object = getMenuInfoForResource(params);
+            if( resourceMenuInfo != null) {
+                menuDataList.push(resourceMenuInfo);
+                return menuDataList;
+            }
+            
+            
             var characters:Array = DodontoF_Main.getInstance().getDodontoF().getLoingUserCharacterList();
-            var menuData:Array = [];
             
             for(var i:int = 0 ; i < characters.length ; i++) {
                 var character:Character = characters[i];
@@ -281,7 +289,7 @@
                     continue;
                 }
                 
-                menuData.push(info);
+                menuDataList.push(info);
             }
             
             var others:Array = getOtherCharactersMenu(characters, params);
@@ -291,11 +299,39 @@
                     label: Language.s.toOthersCounterRemoconButton,
                     children: others };
                 
-                menuData.push(childrenInfo);
+                menuDataList.push(childrenInfo);
             }
             
-            return menuData;
+            return menuDataList;
         }
+        
+        
+        
+        private function getMenuInfoForResource(params:Object):Object {
+            if( ! isExistOnResourceWindow(params.counterName) ) {
+                return null;
+            }
+            
+            var info:Object = {
+                isResource: true,
+                label: Language.s.resourceWindowTitle,
+                character: null,
+                pickupCharacter: null,
+                params: params,
+                type: "normal" };
+            
+            if( isSelectValue(params.modifyValue) ) {
+                info.children = getValueSelectMenu(params, "isResource", true);
+            }
+            
+            return info;
+        }
+        
+        private function isExistOnResourceWindow(counterName:String):Boolean {
+            var target:Object = ResourceWindow.getInstance().getResourceItem(counterName);
+            return ( target != null);
+        }
+        
         
         private function getMenuInfo(character:Character, params:Object):Object {
             if( character == null ) {
@@ -310,7 +346,7 @@
                 type: "normal" };
             
             if( isSelectValue(params.modifyValue) ) {
-                info.children = getValueSelectMenu(params, character);
+                info.children = getValueSelectMenu(params, "character", character);
             }
             
             return info;
@@ -324,7 +360,7 @@
         }
         
         
-        private function getValueSelectMenu(params:Object, character:Character):Array {
+        private function getValueSelectMenu(params:Object, keyName:String, info:Object):Array {
             var result:Array = [];
             
             for(var i:int = 0 ; i < 10 ; i++) {
@@ -332,7 +368,7 @@
                 var children:Array = [];
                 for(var j:int = 0 ; j < 10 ; j++) {
                     var value:int = tensPlace + j;
-                    var valueInfo:Object = getValueMenuItem(params, character, value);
+                    var valueInfo:Object = getValueMenuItem(params, keyName, info, value);
                     children.push(valueInfo);
                 }
                 
@@ -347,7 +383,7 @@
             return result;
         }
         
-        private function getValueMenuItem(params:Object, character:Character, value:int):Object {
+        private function getValueMenuItem(params:Object, keyName:String, info:Object, value:int):Object {
             var params:Object = Utils.clone(params);
             
             params.modifyValue = "" + value;
@@ -361,15 +397,15 @@
             
             var valueInfo:Object = {
                 label: valueString,
-                character: character,
                 params: params,
                 type: "normal" };
+            valueInfo[keyName] = info;
             
             return valueInfo;
         }
         
         private function getOtherCharactersMenu(exists:Array, params:Object):Array {
-            var menuData:Array = [];
+            var menuDataList:Array = [];
             var characters:Array = DodontoF_Main.getInstance().getMap().findExistPiecesByTypeName(Character.getTypeStatic());
             
             characters = deleteHiddenCharacter(characters);
@@ -388,11 +424,11 @@
                 if( info == null ) {
                     continue;
                 }
-                menuData.push(info);
+                menuDataList.push(info);
             }
             
             
-            return menuData;
+            return menuDataList;
         }
         
         
@@ -422,8 +458,8 @@
             return false;
         }
         
-        private function popupMenu(parent:UIComponent, menuData:Array, handler:Function):void {
-            var menu:Menu = Menu.createMenu(parent, menuData);
+        private function popupMenu(parent:UIComponent, menuDataList:Array, handler:Function):void {
+            var menu:Menu = Menu.createMenu(parent, menuDataList);
             menu.addEventListener("itemClick", handler);
             menu.addEventListener("itemRollOver", rollOverMenuItemEvent);
             
@@ -433,13 +469,18 @@
         
         
         private function clickPopupCharacterListHandler(event:MenuEvent):void {
-            var character:Character = event.item.character;
-            if( character == null ) {
+            var params:Object = event.item.params;
+            if( params == null ) {
                 return;
             }
             
-            var params:Object = event.item.params;
-            if( params == null ) {
+            if( event.item.isResource ) {
+                changeResourceWindow(params);
+                return;
+            }
+            
+            var character:Character = event.item.character;
+            if( character == null ) {
                 return;
             }
             
@@ -522,10 +563,40 @@
             var modifyResult:Object = getModifiedValue(value, modifyValue, operator);
             character.setCounter(counterName, modifyResult.value);
             
-            var message:String = getExecuteResultMessage(messageFormat, character.getName(), counterName,
-                                                         before, modifyResult);
+            var message:String = getExecuteResultMessage(messageFormat, character.getName(),
+                                                         counterName, before, modifyResult);
+                                                         
             sendCharacterChange(character, message);
         }
+        
+        
+        private function changeResourceWindow(params:Object):void {
+            
+            var counterName:String = params.counterName;
+            var modifyValue:String = params.modifyValue;
+            var operator:String = params.operator;
+            var messageFormat:String = params.messageFormat;
+            
+            var target:Object = ResourceWindow.getInstance().getResourceItem(counterName);
+            if( target == null) { 
+                return;
+            }
+            
+            var value:int = target.value;
+            var before:String = "" + value;
+            
+            var modifyResult:Object = getModifiedValue(value, modifyValue, operator);
+            target.value = modifyResult.value;
+            
+            var message:String = getExecuteResultMessage(messageFormat, Language.s.resourceWindowTitle,
+                                                         counterName, before, modifyResult);
+            
+            var resultFunction:Function = function(event:Event):void { sendMessage(message); } 
+            
+            var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+            guiInputSender.getSender().changeResource(target, resultFunction);
+        }
+        
         
         private function getExecuteResultMessage(messageFormat:String, characterName:String, counterName:String, 
                                                        before:String, modifyResult:Object):String {

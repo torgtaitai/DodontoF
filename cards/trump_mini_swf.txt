@@ -50,8 +50,8 @@ cards/trump_mini_swf/spade8s.swf	スペードの8
 cards/trump_mini_swf/spade9s.swf	スペードの9
 cards/trump_mini_swf/spade10s.swf	スペードの10
 cards/trump_mini_swf/spadeJs.swf	スペードのJ
-cards/trump_mini_swf/spadeKs.swf	スペードのQ
-cards/trump_mini_swf/spadeQs.swf	スペードのK
+cards/trump_mini_swf/spadeQs.swf	スペードのQ
+cards/trump_mini_swf/spadeKs.swf	スペードのK
 cards/trump_mini_swf/jokers.swf	ジョーカー
 cards/trump_mini_swf/jokers.swf	ジョーカー
 cards/trump_mini_swf/jokers.swf	ジョーカー

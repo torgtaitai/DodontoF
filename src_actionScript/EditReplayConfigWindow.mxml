@@ -3,7 +3,7 @@
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
    width="400"
-   height="225"
+   height="250"
    title="{Language.s.editReplayConfig}" 
    showCloseButton="true"
    >
@@ -18,6 +18,9 @@
                height="100%"
                />
   <mx:CheckBox id="adjustStand" label="{Language.s.isStandingGraphicsOnReplay}" selected="true"
+               height="100%"
+               />
+  <mx:CheckBox id="sound" label="{Language.s.sound}" selected="true"
                height="100%"
                />
   <mx:HBox width="100%">
@@ -45,6 +48,7 @@
         initCheckBox(position, replayConfig, "position");
         initCheckBox(dice, replayConfig, "dice");
         initCheckBox(adjustStand, replayConfig, "adjustStand");
+        initCheckBox(sound, replayConfig, "sound");
         initColorPicker(chatBackgroundColorPicker, replayConfig, "chatBackgroundColor");
     }
     
@@ -87,6 +91,7 @@
                 "position" : position.selected,
                 "dice" : dice.selected,
                 "adjustStand" : adjustStand.selected,
+                "sound" : sound.selected,
                 "chatBackgroundColor" : ChatFontWindow.getColor(chatBackgroundColorPicker)
 //              "channelNames" : channelNames.text.split(/[\s　]+/)
             };

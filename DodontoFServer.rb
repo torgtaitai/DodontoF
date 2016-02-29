@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.46.15"
-$versionDate = "2015/03/15"
+$versionOnly = "Ver.1.47.21"
+$versionDate = "2016/02/29"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -808,8 +808,10 @@ class DodontoFServer
       ['initCards', hasReturn],
       ['returnCard', hasNoReturn],
       ['shuffleCards', hasNoReturn],
+      ['shuffleOnlyMountCards', hasNoReturn],
       ['shuffleForNextRandomDungeon', hasNoReturn],
       ['dumpTrushCards', hasNoReturn],
+      ['returnCardToMount', hasNoReturn],
       
       ['clearCharacterByType', hasNoReturn],
       ['moveCharacter', hasNoReturn],
@@ -863,12 +865,13 @@ class DodontoFServer
     
     begin
       result = analyzeWebInterfaceCatched
-      logging("analyzeWebInterfaceCatched end result", result)
-      setJsonpCallBack
-    rescue => e
+    rescue Exception => e
       result['result'] = e.to_s
     end
     
+    setJsonpCallBack
+    
+    logging("analyzeWebInterfaceCatched end result", result)
     return result
   end
   
@@ -892,44 +895,83 @@ class DodontoFServer
     
     logging(commandName, "commandName")
     
-    case commandName
-    when 'getBusyInfo'
-      return getBusyInfo
-    when 'getServerInfo'
-      return getWebIfServerInfo
-    when 'getRoomList'
-      return getWebIfRoomList
-    when 'getLoginInfo'
-      return getWebIfLoginInfo
-    end
+    result = analyzeWebInterfaceNoLogin(commandName)
+    return result unless result.nil?
     
-    loginOnWebInterface
+    loginData = loginOnWebInterface()
+    @isVisitorOnWebIf = loginData['visiterMode']
     
-    case commandName
-    when 'chat'
-      return getWebIfChatText
-    when 'talk'
-      return sendWebIfChatText
-    when 'addCharacter'
-      return sendWebIfAddCharacter
-    when 'changeCharacter'
-      return sendWebIfChangeCharacter
-    when 'addMemo'
-      return sendWebIfAddMemo
-    when 'getRoomInfo'
-      return getWebIfRoomInfo
-    when 'setRoomInfo'
-      return setWebIfRoomInfo
-    when 'getChatColor'
-      return getChatColor
-    when 'refresh'
-      return getWebIfRefresh
-    when 'getLoginUserInfo'
-      return getWebIfLoginUserInfo
-    end
+    result = analyzeWebInterfaceLogined(commandName)
+    return result unless result.nil?
     
     return {'result'=> "command [#{commandName}] is NOT found"}
   end
+  
+  
+  def analyzeWebInterfaceNoLogin(commandName)
+    case commandName
+    when 'getBusyInfo'
+      getBusyInfo
+    when 'getServerInfo'
+      getWebIfServerInfo
+    when 'getRoomList'
+      getWebIfRoomList
+    when 'getLoginInfo'
+      getWebIfLoginInfo
+    else
+      nil
+    end
+  end  
+  
+  
+  def analyzeWebInterfaceLogined(command)
+    
+    result = analyzeWebInterfaceLoginedEveryone(command)
+    return result unless result.nil?
+    
+    return nil if( @isVisitorOnWebIf )
+    
+    result = analyzeWebInterfaceParticipant(command)
+    return result unless result.nil?
+  end
+    
+  def analyzeWebInterfaceLoginedEveryone(command)
+    case command
+    when 'chat'
+      getWebIfChatText
+    when 'talk'
+      sendWebIfChatText
+    when 'refresh'
+      getWebIfRefresh
+    when 'getRoomInfo'
+      getWebIfRoomInfo
+    when 'getLoginUserInfo'
+      getWebIfLoginUserInfo
+    when 'getChatColor'
+      getChatColor
+    else
+      nil
+    end
+  end
+  
+  
+  def analyzeWebInterfaceParticipant(command)
+    case command
+    when 'addCharacter'
+      sendWebIfAddCharacter
+    when 'changeCharacter'
+      sendWebIfChangeCharacter
+    when 'addMemo'
+      sendWebIfAddMemo
+    when 'changeMemo'
+      sendWebIfChangeMemo
+    when 'setRoomInfo'
+      setWebIfRoomInfo
+    else
+      nil
+    end
+  end
+  
   
   def getWebIfLoginInfo
     uniqueId = getRequestData('uniqueId')
@@ -947,6 +989,30 @@ class DodontoFServer
   
   
   def loginOnWebInterface
+    logging('loginOnWebInterface Begin')
+    
+    roomNumber = getRoomNumberOnWebInterface
+    password = getRequestData('password')
+    password ||= ''
+    
+    visiterMode = false
+    
+    checkResult = checkLoginPassword(roomNumber, password, visiterMode)
+    
+    resultText = checkResult['resultText']
+    if( resultText != "OK" )
+      logging(resultText, 'resultText')
+      raise resultText
+    end
+    
+    initSaveFiles(roomNumber)
+    
+    logging('loginOnWebInterface End')
+
+    return checkResult
+  end
+  
+  def getRoomNumberOnWebInterface
     roomNumberText = getRequestData('room')
     if( isInvalidRequestParam(roomNumberText) )
       raise "プレイルーム番号(room)を指定してください"
@@ -957,17 +1023,7 @@ class DodontoFServer
     end
     
     roomNumber = roomNumberText.to_i
-    
-    password = getRequestData('password')
-    visiterMode = true
-    
-    checkResult = checkLoginPassword(roomNumber, password, visiterMode)
-    if( checkResult['resultText'] != "OK" )
-      result['result'] = result['resultText']
-      return result
-    end
-    
-    initSaveFiles(roomNumber)
+    return roomNumber
   end
   
   
@@ -1202,7 +1258,7 @@ class DodontoFServer
     logging(color, "color")
     
     channel = getWebIfRequestInt('channel')
-    logging(channel, "channel")
+    channel = getWebIfChatChannel(channel)
     
     gameType = getWebIfRequestText('bot')
     logging(gameType, 'gameType')
@@ -1234,6 +1290,28 @@ class DodontoFServer
     result['result'] = 'OK'
     return result
   end
+  
+  
+  def getWebIfChatChannel(channel)
+    logging(channel, "getWebIfChatChannel channel")
+    
+    return channel unless @isVisitorOnWebIf
+    
+    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+    
+    getSaveData(trueSaveFileName) do |saveData|
+      names = saveData['chatChannelNames']
+      
+      unless names.nil?
+        channel = [0, (names.length - 1)].max
+      end
+    end
+    
+    logging(channel, 'channel visitor')
+    
+    return channel
+  end
+  
   
   def getWebIfRequestText(key, default = '')
     text = getRequestData(key)
@@ -1323,6 +1401,42 @@ class DodontoFServer
     addCharacterData( [jsonData] )
     
     return result
+  end
+  
+  
+  def sendWebIfChangeMemo
+    
+    logging('sendWebIfChangeMemo begin')
+    
+    result = {}
+    
+    begin
+      result['result'] = sendWebIfChangeMemoChatched
+    rescue => e
+      loggingException(e)
+          result['result'] =  e.to_s
+    end
+    
+    return result
+  end
+  
+  def sendWebIfChangeMemoChatched
+    targetId = getWebIfRequestText('targetId')
+    
+    return "no targetId" if(targetId.nil?)
+    
+    logging(targetId, "targetId")
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      characters = getCharactersFromSaveData(saveData)
+      data = characters.find{ |i| i['imgId'] == targetId }
+      
+      return "targetId Memo NOT found" if(data.nil?)
+    
+      data['message'] = getWebIfRequestAny(:getWebIfRequestText, 'message', data)
+    end
+    
+    return "OK"
   end
   
   
@@ -1872,7 +1986,8 @@ class DodontoFServer
     
     ignoreLoginUser = true
     password = nil
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    isForce = true
+    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
     logging(result, "removePlayRoomByParams result")
     
     return result
@@ -2163,6 +2278,7 @@ class DodontoFServer
       'languages' => getLanguages(),
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
+      'isAskRemoveRoomWhenLogout' => $isAskRemoveRoomWhenLogout,
     }
     
     logging(result, "result")
@@ -2577,6 +2693,7 @@ class DodontoFServer
     ignoreLoginUser = params['ignoreLoginUser']
     password = params['password']
     password ||= ""
+    isForce = params['isForce']
     
     adminPassword = params["adminPassword"]
     logging(adminPassword, "removePlayRoom() adminPassword")
@@ -2584,10 +2701,10 @@ class DodontoFServer
       password = nil
     end
     
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
   end
   
-  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
     logging(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
     
     deletedRoomNumbers = []
@@ -2599,7 +2716,7 @@ class DodontoFServer
       roomNumber = roomNumber.to_i
       logging(roomNumber, 'roomNumber')
       
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
       logging(resultText, "checkRemovePlayRoom resultText")
       
       case resultText
@@ -2639,7 +2756,7 @@ class DodontoFServer
   end
   
   
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
     roomNumberRange = (roomNumber..roomNumber)
     logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
     
@@ -2665,16 +2782,17 @@ class DodontoFServer
     
     lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
     lastAccessTime = lastAccessTimes[roomNumber]
+    lastAccessTime ||= 0
     logging(lastAccessTime, "lastAccessTime")
     
-    unless( lastAccessTime.nil? )
-      now = Time.now
-      spendTimes = now - lastAccessTime
-      logging(spendTimes, "spendTimes")
-      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-      if( spendTimes < $deletablePassedSeconds )
-        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
-      end
+    lastAccessTime = 0 if isForce
+    
+    now = Time.now.to_f
+    spendTimes = now - lastAccessTime.to_f
+    logging(spendTimes, "spendTimes")
+    logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+    if( spendTimes < $deletablePassedSeconds )
+      return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
     end
     
     return "OK"
@@ -2838,6 +2956,12 @@ class DodontoFServer
     logging(fromDir, "fromDir")
     if( fromDir == to )
       logging("from, to is equal dir")
+      return true
+    end
+    
+    toFileName = File.join(to, File.basename(from))
+    if( File.exist?(toFileName) )
+      loggingForce("toFileName(#{toFileName}) is exist")
       return true
     end
     
@@ -3190,13 +3314,22 @@ class DodontoFServer
     trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
     
     getSaveData(trueSaveFileName) do |saveData|
+      
+      playRoomChangedPassword = saveData['playRoomChangedPassword']
+      passwordMatched = isPasswordMatch?(password, playRoomChangedPassword)
+      
+      if @isWebIf
+        unless passwordMatched
+          visiterMode = true 
+        end
+      end
+      
       canVisit = saveData['canVisit']
       if( canVisit and visiterMode )
         result['resultText'] = "OK"
         result['visiterMode'] = true
       else
-        playRoomChangedPassword = saveData['playRoomChangedPassword']
-        if( isPasswordMatch?(password, playRoomChangedPassword) )
+        if( passwordMatched )
           result['resultText'] = "OK"
         else
           result['resultText'] = "passwordMismatch"
@@ -3209,6 +3342,7 @@ class DodontoFServer
   
   def isPasswordMatch?(password, changedPassword)
     return true if( changedPassword.nil? )
+    return false if( password.nil? )
     ( password.crypt(changedPassword) == changedPassword )
   end
   
@@ -3817,7 +3951,10 @@ class DodontoFServer
   end
   
   def getRoomLocalSpaceDirNameByRoomNo(roomNo)
-    dir = File.join($imageUploadDir, "room_#{roomNo}")
+    dir = $imageUploadDir
+    unless roomNo.nil?
+      dir = File.join($imageUploadDir, "room_#{roomNo}")
+    end
     return dir
   end
   
@@ -4124,10 +4261,10 @@ class DodontoFServer
     
     params = getParamsFromRequestData()
     tagInfo = params['tagInfo']
-    logging(tagInfo, "uploadImageData tagInfo")
+    logging(tagInfo, "saveSmallImage tagInfo")
     
     tagInfo["smallImage"] = uploadSmallImageFileName
-    logging(tagInfo, "uploadImageData tagInfo smallImage url added")
+    logging(tagInfo, "saveSmallImage tagInfo smallImage url added")
     
     margeTagInfo(tagInfo, uploadImageFileName)
     logging(tagInfo, "saveSmallImage margeTagInfo tagInfo")
@@ -4173,7 +4310,7 @@ class DodontoFServer
         return result
       end
       
-      saveDir = $imageUploadDir
+      saveDir = getUploadImageDataUploadDir(params)
       imageFileNameBase = getNewFileName(imageFileName, "img")
       logging(imageFileNameBase, "imageFileNameBase")
       
@@ -4196,6 +4333,15 @@ class DodontoFServer
     return result
   end
   
+  def getUploadImageDataUploadDir(params)
+    tagInfo = params['tagInfo']
+    tagInfo ||= {}
+    roomNumber = tagInfo["roomNumber"]
+    saveDir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
+    makeDir(saveDir)
+    
+    return saveDir
+  end
   
   def getImageDataFromParams(params, key)
     value = params[key]
@@ -4520,9 +4666,11 @@ class DodontoFServer
     
     rolledMessage, isSecret, secretMessage = getRollDiceResult( params )
     
-    state = params['state']
     senderName = params['name']
-    senderName << ("\t" + state) unless( state.empty? )
+    unless /\t/ === senderName
+      state = params['state']
+      senderName += ("\t" + state)  unless( state.empty? )
+    end
     
     chatData = {
       "senderName" => senderName,
@@ -5099,12 +5247,14 @@ class DodontoFServer
         tmpTags = saveData['imageTags']
         tmpTags ||= {}
         
+=begin
         unless( roomNumber.nil? )
           tmpTags.each do |key, value|
             next if value.nil?
             value.delete("roomNumber")
           end
         end
+=end
         
         imageTags.merge!( tmpTags )
       end
@@ -5868,6 +6018,45 @@ class DodontoFServer
     cardMountData["imageNameBack"] = image;
   end
   
+  
+  
+  def returnCardToMount()
+    logging("returnCardToMount Begin")
+    
+    setdNoBodyCommanSender
+    
+    params = getParamsFromRequestData()
+    logging(params, 'params')
+    
+    mountName = params['mountName']
+    logging(mountName, 'mountName')
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      
+      cardMount = getCardMountFromSaveData(saveData)
+      mountCards = getCardsFromCardMount(cardMount, mountName)
+      
+      characters = getCharactersFromSaveData(saveData)
+      
+      returnCardId = params['returnCardId']
+      logging( returnCardId, "returnCardId")
+      
+      logging(characters.size, "characters.size before")
+      cardData = deleteFindOne(characters) {|i| i['imgId'] === returnCardId }
+      mountCards << cardData
+      logging(characters.size, "characters.size after")
+      
+      cardMountData = characters.find{|i| i['imgId'] === params['cardMountId'] }
+      return if( cardMountData.nil?) 
+      
+      setCardCountAndBackImage(cardMountData, mountCards)
+    end
+    
+    logging("dumpTrushCards End")
+  end
+  
+  
+  
   def dumpTrushCards()
     logging("dumpTrushCards Begin")
     
@@ -5926,6 +6115,43 @@ class DodontoFServer
     logging(array.size, "array.size before")
     return item
   end
+  
+  
+  
+  def shuffleOnlyMountCards
+    logging("shuffleOnlyMountCards Begin")
+    
+    setRecordWriteEmpty
+    
+    params = getParamsFromRequestData()
+    mountName = params['mountName']
+    cardMountId = params['mountId']
+    
+    
+    changeSaveData(@saveFiles['characters']) do |saveData|
+      
+      cardMount = getCardMountFromSaveData(saveData)
+      mountCards = getCardsFromCardMount(cardMount, mountName)
+      
+      characters = getCharactersFromSaveData(saveData)
+      
+      cardMountData = findCardMountDataByType(characters, mountName, getCardMountType)
+      return if( cardMountData.nil?) 
+      
+      
+      isUpDown = cardMountData['isUpDown']
+      mountCards = getShuffledMount(mountCards, isUpDown)
+      
+      cardMount[mountName] = mountCards
+      saveData['cardMount'] = cardMount
+      
+      setCardCountAndBackImage(cardMountData, mountCards)
+    end
+    
+    logging("shuffleOnlyMountCards End")
+  end
+  
+  
   
   def shuffleCards
     logging("shuffleCard Begin")

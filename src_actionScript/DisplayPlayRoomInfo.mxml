@@ -35,6 +35,7 @@
     
     protected function changePlarRoomInfo():void {
         var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        
         var roomNumber:int = guiInputSender.getRoomNumber();
         var playRoomName:String = DodontoF_Main.getInstance().getPlayRoomName();
         var password:String = DodontoF_Main.getInstance().getPlayRoomPassword();

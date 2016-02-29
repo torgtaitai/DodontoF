@@ -255,9 +255,8 @@
         
         private var diceRollPlace:UIComponent = new UIComponent();
         
-        static private var baseDiceBotGameType:String = 'BaseDiceBot';
-        private var baseDiceBot:Object = {name: baseDiceBotGameType, 
-                                          gameType: baseDiceBotGameType,
+        private var baseDiceBot:Object = {name: Utils.baseDiceBotGameType, 
+                                          gameType: Utils.baseDiceBotGameType,
                                           prefixs: [],
                                           info: '' };
         
@@ -880,13 +879,9 @@
         
         private function removeBaseDiceBot(diceBotInfos:Object):Object {
             
-            for(var i:int = 0 ; i < diceBotInfos.length; i++) {
-                var info:Object = diceBotInfos[i];
-                
-                if( info.gameType == baseDiceBotGameType ) {
-                    diceBotInfos.splice(i, 1);
-                    return info;
-                }
+            var info:Object = Utils.removeBaseDiceBot(diceBotInfos);
+            if( info != null ) {
+                return info;
             }
             
             return baseDiceBot;
@@ -1283,6 +1278,10 @@
                 return false;
             }
             
+            if( isSecretTalkMode() ) {
+                return false;
+            }
+            
             var message:String = data.getMessage();
             
             if( message.indexOf( CutInCommandBase.getBeginMarker() ) == 0 ) {
@@ -1320,6 +1319,17 @@
             return true;
         }
         
+        private function isSecretTalkMode():Boolean {
+            var target:String = Utils.getComboBoxText(sendtoBox);
+            if( target == null )  {
+                return false;
+            }
+            if( target == "" ) {
+                return false;
+            }
+            return true;
+        }
+        
         
         public function chatMessageTrader_sendMessage_selectedChat(chatMessage:String):void {
             var channel:int = getSelectedChatChannleIndex();
@@ -1327,11 +1337,15 @@
         }
         
         public function chatMessageTrader_sendMessage_publicChatChannel(chatMessage:String):void {
-            chatMessageTrader_sendMessage(publicChatChannel, chatMessage);
+            var isForcePublic:Boolean = true
+            chatMessageTrader_sendMessage(publicChatChannel, chatMessage, isForcePublic);
         }
         
-        public function chatMessageTrader_sendMessage(channel:int, chatMessage:String):void {
+        public function chatMessageTrader_sendMessage(channel:int, chatMessage:String, isForcePublic:Boolean = false):void {
             var data:ChatSendData = new ChatSendData(channel, chatMessage);
+            if( isForcePublic ) {
+                data.setNoSendto();
+            }
             
             chatMessageTrader.sendMessage(data);
         }

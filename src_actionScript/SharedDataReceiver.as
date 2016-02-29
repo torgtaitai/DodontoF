@@ -334,20 +334,27 @@ package {
             selectMenuByManuName("isDiceVisible", replayConfig.dice, true);
             selectMenuByManuName("isAdjustImageSize", replayConfig.adjustStand, true);
             
+            var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
+            chatWindow.setSoundState( getToggledValue(replayConfig.sound, true) );
+            
             ChatWindow.getInstance().setChatBackgroundColor(replayConfig.chatBackgroundColor);
         }
         
         
         public function selectMenuByManuName(menuName:String, toggledObject:Object, defaultValue:Boolean):void {
+            var toggled:Boolean = getToggledValue(toggledObject, defaultValue);
+            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName(menuName, toggled);
+        }
+
+        private function getToggledValue(toggledObject:Object, defaultValue:Boolean):Boolean {
             var toggled:Boolean = toggledObject as Boolean;
             
             if( toggledObject == null ) {
                 toggled = defaultValue;
             }
-            
-            DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName(menuName, toggled);
+            return toggled;
         }
-        
+            
         
         private var isFirstChatRefreshFlag:Boolean = true;
         

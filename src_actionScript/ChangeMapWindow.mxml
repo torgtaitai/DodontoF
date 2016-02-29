@@ -5,7 +5,7 @@
    x="200"
    y="30"
    width="770"
-   height="500"
+   height="475"
    title="{Language.s.changeMap}" 
    showCloseButton="true"
    >
@@ -15,10 +15,6 @@
   <mx:HBox height="100" width="100%" horizontalAlign="center" verticalAlign="top">
     
     <mx:Box height="100%" width="100%" verticalAlign="middle">
-      <mx:HBox height="25" width="100%">
-        <mx:Label text="{Language.s.mapImageUrl}" />
-        <mx:TextInput id="mapImageUrl" width="100%" editable="true" change="printPreview()" />
-	  </mx:HBox>
       
       <mx:HBox height="25" width="100%" horizontalAlign="left" verticalAlign="middle">
         <mx:CheckBox id="checkBoxWhiteMap" label="{Language.s.changeToBrankMap}" selected="false" change="checkWhiteMap()"/>
@@ -35,7 +31,7 @@
       </mx:HBox>
       
       <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
-        <mx:Button id="executeButton" label="{Language.s.mapSet}" click="this.changeMap()" enabled="false" />
+        <mx:Button id="executeButton" label="{Language.s.mapSet}" click="changeMap()" enabled="false" />
         <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
       </mx:HBox>
     </mx:Box>
@@ -78,28 +74,28 @@
         
         mapHeight.value = map.getHeight();
         mapWidth.value = map.getWidth();
-        mapImageUrl.text = map.getImageUrl();
+        
+        imageSelecter.selectImageUrl( map.getImageUrl() );
         gridColorPicker.selectedColor = map.getGridColor();
         gridInterval.value = map.getGridInterval();
         isAlternately.selected = map.isAlternatelyMode();
         
-        printPreview();
-        
-        checkBoxWhiteMap.selected = (mapImageUrl.text == "");
-        mapImageUrl.enabled = (mapImageUrl.text != "");
+        checkBoxWhiteMap.selected = imageSelecter.isBlankImage();
+        imageSelecter.keepWhiteImage( checkBoxWhiteMap.selected );
         
         imageSelecter.setImageClickEventFunction(imageClickEvent);
         imageSelecter.setImageLoadCompleteFunction(imageLoadComplete);
         imageSelecter.setDefaultTags( [ImageTag.getNoneTag(), ImageTag.getMapTag(), ImageTag.getAllTag()] );
         imageSelecter.initImage( false );
+        
+        printPreview();
     }
-       
+    
     public function imageClickEvent(imageName:String):void {
         if( checkBoxWhiteMap.selected ){
             return;
         }
            
-        mapImageUrl.text = imageSelecter.getImageUrlChanger().getShort( imageName );
         printPreview();
     }
              
@@ -109,13 +105,9 @@
        
     private function changeMap():void {
         try{
-            var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( mapImageUrl.text );
+            var imageUrl:String = imageSelecter.getSelectedImageUrl();
             var mirrored:Boolean = imageSelecter.isMirrored();
             
-            if( checkBoxWhiteMap.selected ) {
-                imageUrl = "";
-            }
-        
             var map:Map = DodontoF_Main.getInstance().getMap();
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             guiInputSender.changeMap(imageUrl, mirrored,
@@ -133,15 +125,13 @@
     }
 
     private function printPreview():void {
-        Log.logging("printPreview mapImageUrl.text", mapImageUrl.text);
         var xCount:int = mapWidth.value;
         var yCount:int = mapHeight.value;
         
-        Log.logging("mapImageUrl.text", mapImageUrl.text);
         Log.logging("xCount", xCount);
         Log.logging("yCount", yCount);
         
-        var imageUrl:String = imageSelecter.getImageUrlChanger().getLong( mapImageUrl.text );
+        var imageUrl:String = imageSelecter.getSelectedImageUrl();
         Log.logging("imageUrl getLonged", imageUrl);
         
         previewLoader.loadImageWidthHeight(imageUrl, xCount, yCount, 6);
@@ -176,10 +166,10 @@
             }
     }
     
-    
     private function checkWhiteMap():void {
-        var isWhiteMap:Boolean = ( ! checkBoxWhiteMap.selected);
-        mapImageUrl.enabled = isWhiteMap;
+        imageSelecter.keepWhiteImage( checkBoxWhiteMap.selected );
+        
+        printPreview();
     }
 
     ]]>

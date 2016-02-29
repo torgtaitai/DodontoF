@@ -15,7 +15,7 @@
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Button id="readyButton" label="{Language.s.initSaveData}" click="executeServerSaveLocal()" />
     <mx:Button id="saveButton" label="{Language.s.saveSaveData}" click="this.save()" enabled="false" />
-    <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
+    <mx:Button label="{Language.s.cancelButton}" click="cancelAction()" />
   </mx:HBox>
   
   <mx:Script>
@@ -27,6 +27,7 @@
     
     private var saveFileName:String = "";
     private var thisObj:SaveWindow;
+    private var manualDownload:Boolean = false;
     
     override protected function setup():void {
         Log.loggingTuning("=>setup() Begin");
@@ -38,6 +39,17 @@
         Log.loggingTuning("=>setup() End");
     }
     
+    protected function cancelAction():void {
+        
+        // ダウンロード失敗時のフォロー
+        if(manualDownload){
+            var url:URLRequest = new URLRequest(saveFileName);
+            navigateToURL(url,"_blank");
+        }
+
+        PopUpManager.removePopUp(this);
+    }
+
     protected function executeServerSaveLocal():void {
         readyButton.enabled=false;
         loadingMessage.text = Language.s.saveDataSetting;
@@ -83,6 +95,13 @@
             saveButton.enabled = false;
             
             loadingMessage.text = Language.s.nowSaving;
+
+            // ダウンロード失敗時のフォロー
+            if(saveFileName.match(/\.gz$/)){
+                manualDownload = true;
+                loadingMessage2.text = Language.s.whenDownloadDoNotBeginWarning;
+            }
+
         } catch(error:Error) {
             this.status = error.message;
         }

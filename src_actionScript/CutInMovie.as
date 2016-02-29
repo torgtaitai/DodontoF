@@ -81,11 +81,7 @@ package {
             
             isSoundLoop = params.isSoundLoop;
             
-            if( params.volume == null ) {
-                this.volume = volumeDefault;
-            } else {
-                this.volume = parseFloat(params.volume);
-            }
+            this.volume = getEffectSoundVolume(params);
             
             if( isFlvFile(params.source) ) {
                 setCutInFlv();
@@ -94,6 +90,19 @@ package {
             } else {
                 setCutInImage();
             }
+        }
+        
+        private function getEffectSoundVolume(params:Object):Number {
+            
+            if( ! ChatWindow.getInstance().isSoundOnMode() ) {
+                return 0;
+            }
+            
+            if( params.volume == null ) {
+                return volumeDefault;
+            }
+            
+            return parseFloat(params.volume);
         }
         
         private function setCutInImage():void {
@@ -128,7 +137,9 @@ package {
         
         private function playSound():SoundChannel {
             var soundChannel:SoundChannel = new SoundChannel();
-            if( this.soundSource == null ) {
+            
+            if( this.soundSource == null ||
+                this.volume == 0 ) {
                 return soundChannel;
             }
             

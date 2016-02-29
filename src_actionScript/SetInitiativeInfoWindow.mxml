@@ -24,7 +24,6 @@
     
     <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
     
-    
     <mx:Box height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
       <mx:Button label="{Language.s.changeFontSize}" click="DodontoF.changeFontSize()" />
     </mx:Box>

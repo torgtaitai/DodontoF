@@ -38,7 +38,7 @@ package {
             
             characterName.text = character.getName();
             
-            characterImageUrl.text = imageSelecter.getImageUrlChanger().getShort( character.getImageUrl() );
+            imageSelecter.selectImageUrl( character.getImageUrl() );
             imageSelecter.setMirrored(character.isMirrored());
             
             characterSize.value = character.getSize();

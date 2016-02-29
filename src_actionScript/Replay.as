@@ -104,7 +104,7 @@ package {
             DodontoF_Main.getInstance().setLocalReplayMode(true);
             
             var chatWindow:ChatWindow = DodontoF_Main.getInstance().getChatWindow();
-            chatWindow.setSoundState(false);
+            chatWindow.setSoundState(true);
             
             for(var i:int = 0 ; i < ChatWindow.getInstance().chatChannelCount ; i++) {
                 if( i != ChatWindow.getInstance().publicChatChannel ) {

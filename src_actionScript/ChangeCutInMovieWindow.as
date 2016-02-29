@@ -42,14 +42,14 @@ package {
             
             Utils.selectComboBox(positionComboBox, cutInInfo.position, 'data', 3);
             
-            checkImageUrl(imageSource.text);
+            var imageSourceText:String = imageSelecter.getSelectedImageUrl();
+            checkImageUrl(imageSourceText);
         }
         
         override public function imageLoadComplete():void {
-            imageSource.text = cutInInfo.source;
+            imageSelecter.selectImageUrl( cutInInfo.source );
             soundSourceEdit.text = cutInInfo.soundSource;
             isSoundLoopCheck.selected = cutInInfo.isSoundLoop;
-            imageSource.enabled = true;
             printPreview();
         }
         
