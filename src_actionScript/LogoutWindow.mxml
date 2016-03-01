@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="400"
+   height="120"
+   title="{Language.s.logoutQuestionTitle}" 
+   showCloseButton="true"
+   >
+  
+  <mx:Box width="100%" height="100%">
+    <mx:Label text="{Language.s.logoutQuestion}" />
+    
+    <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Button id="executeButton" label="OK" click="execute()" />
+      <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
+    </mx:HBox>
+      
+    <mx:Box id="isDeleteRoomCheckBox" height="0" visible="false" width="100%" horizontalAlign="center" verticalAlign="middle">
+      <mx:Spacer height="5" />
+      <mx:HRule width="100%" strokeWidth="1" shadowColor="black" strokeColor="black"/>
+      <mx:Spacer height="5" />
+      
+      <mx:CheckBox id="isDeleteRoomCheck" label="{Language.s.deleteWhenLogout}" selected="false" />
+    </mx:Box>
+  </mx:Box>
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.controls.Label;
+    
+    private var deleteRoomAction:Function;
+    private var logoutAction:Function;
+    
+    public function init(_deleteRoomAction:Function, _logoutAction:Function, userCount:int):void {
+        deleteRoomAction = _deleteRoomAction;
+        logoutAction = _logoutAction;
+        
+        var isRemoveRoom:Boolean = (userCount <= 1);
+        
+        if( ! Config.getInstance().isAskRemoveRoomWhenLogout ) {
+            isRemoveRoom = false;
+        }
+        
+        if( isRemoveRoom ) {
+            var addHeight:int = 55;
+            height += addHeight;
+            isDeleteRoomCheckBox.height = addHeight;
+            isDeleteRoomCheckBox.visible = true;
+        }
+    }
+    
+    override protected function setup():void {
+    }
+
+    public function execute():void {
+        try {
+            
+            if( isDeleteRoomCheck.selected ) {
+                deleteRoomAction();
+            } else {
+                logoutAction();
+            }
+            
+            PopUpManager.removePopUp(this);
+        } catch(error:Error) {
+            this.status = error.message;
+        }
+    }
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>
