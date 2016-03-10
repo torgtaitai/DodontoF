@@ -728,7 +728,7 @@ chatPalletAddTab = 追加分頁
 chatPalletDeleteTab = 刪除分頁
 chatPalletInputSample1 = 對話組合板輸入範例：
 chatPalletInputSample2 = 2d6+1 擲骰
-chatPalletInputSample3 = １ｄ２０＋{敏捷}＋｛格鬥｝　格鬥！
+chatPalletInputSample3 = １ｄ２０＋{敏捷}＋｛格鬥@2｝　格鬥！
 chatPalletInputSample4 = //敏捷=10
 chatPalletInputSample5 = //格鬥＝１
 chatPalletName = 名稱：

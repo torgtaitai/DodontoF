@@ -14,16 +14,21 @@ package {
             buffer = array;
         }
         
-        public function getText(index:int, name:TextInput):String {
+        public function getDefinitions():Object {
+            return Utils.clone(definitions);
+        }
+        
+        public function getText(index:int, name:TextInput, changerInfos:Array):String {
             characterName = name;
             var line:String = buffer[index];
             
             var definitionsFull:Object = addCounterNamesToDefinition(definitions);
+            definitionsFull = addAllChangerToDefinition(definitionsFull, changerInfos, characterName.text);
             
             return getTextFromText(line, definitionsFull);
         }
         
-        public function getTextFromText(line:String, definitionsFull:Object):String {
+        private function getTextFromText(line:String, definitionsFull:Object):String {
             if( line == null ) {
                 return "";
             }
@@ -54,38 +59,40 @@ package {
         }
         
         
-        private var loopMax:int = 30; //無限ルーム回避のためのMAXループ回数
-        
         public function analize():void {
             var lines:Array = buffer;
             
-            for(var i:int = 0 ; i < loopMax ; i++) { //本来は無限ループで良いが、安全のため上限を設ける
-                analizeBuffer(lines);
-                var newLines:Array = getChangedTexts(lines);
+            var loopMax:int = 30;  //無限ループに、安全のため上限を設ける
+            var index:int = 0;
+            
+            while( true ) {
+                if( index > loopMax ) {
+                    break;
+                }
+                index++;
                 
+                analizeDefinition(lines);
+                
+                var newLines:Array = getChangedTexts(lines);
                 if( Utils.isSameArray(lines, newLines) ) {
                     break;
                 }
                 
                 lines = newLines;
             }
-            
         }
         
-        private function analizeBuffer(lines:Array):void {
-            definitions = new Object();
-            
-            analizeDefinition(lines);
-            
-            Log.logging("definitions", definitions);
-        }
         
         static private var definitionRegExp:RegExp = /^(\/\/|／／)(.+?)\s*(=|＝)\s*(.+?)\s*$/m;
         
         private function analizeDefinition(lines:Array):void {
+            definitions = new Object();
+            
             for each(var line:String in lines) {
                 analizeDefinitionByLine(line);
             }
+            
+            Log.logging("definitions", definitions);
         }
         
         private function analizeDefinitionByLine(line:String):void {
@@ -115,6 +122,36 @@ package {
             }
             
             return result
+        }
+        
+        private function addAllChangerToDefinition(definitionsFull:Object, changerInfos:Array, currentName:String):Object {
+            
+            for each(var changerInfo:Object in changerInfos) {
+                
+                var name:String = changerInfo.name;
+                if( name == currentName ) {
+                    continue;
+                }
+                
+                var changer:ChatPaletteChanger = changerInfo.changer as ChatPaletteChanger;
+                if( changer == null ) {
+                    continue;
+                }
+                
+                var anotherDefinitions:Object = changer.getDefinitions();
+                for (var key:String in anotherDefinitions) {
+                    var newKey:String = key + "@" + name;
+                    var newKey2:String = key + "＠" + name;
+                    if( definitionsFull[newKey] == null ) {
+                        var value:Object = anotherDefinitions[key];
+                        definitionsFull[newKey] = value;
+                        definitionsFull[newKey2] = value;
+                    }
+                }
+                
+            }
+            
+            return definitionsFull;
         }
         
         private function getCharacterFromNameText():Character {

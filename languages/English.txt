@@ -732,9 +732,9 @@ chatPalletAddTab = Add Tab
 chatPalletDeleteTab = Delete Tab
 chatPalletInputSample1 = Chat Palet Sample：
 chatPalletInputSample2 = 2d6+1 Dice Roll
-chatPalletInputSample3 = 1d20+{DEX}+{Atack}　Atack！
+chatPalletInputSample3 = 1d20+{DEX}+{Atack@2}　Atack！
 chatPalletInputSample4 = //DEX=10
-chatPalletInputSample5 = //Atack＝１
+chatPalletInputSample5 = //Atack=１
 chatPalletName = Name：
 chatPalletColorTips = White(FFFFFF) chat text color means use chat window's color.
 chatPalletNameTips = Empty Name means use chat windw's name.

@@ -838,7 +838,7 @@ package {
             p.chatPalletDeleteTab = "タブ削除";
             p.chatPalletInputSample1 = "チャットパレット入力例：";
             p.chatPalletInputSample2 = "2d6+1 ダイスロール";
-            p.chatPalletInputSample3 = "１ｄ２０＋{敏捷}＋｛格闘｝　格闘！";
+            p.chatPalletInputSample3 = "１ｄ２０＋{敏捷}＋｛格闘＠2｝　格闘！";
             p.chatPalletInputSample4 = "//敏捷=10";
             p.chatPalletInputSample5 = "//格闘＝１";
             p.chatPalletName = "名前：";

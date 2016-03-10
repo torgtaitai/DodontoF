@@ -730,7 +730,7 @@ chatPalletAddTab = タブ追加
 chatPalletDeleteTab = タブ削除
 chatPalletInputSample1 = チャットパレット入力例：
 chatPalletInputSample2 = 2d6+1 ダイスロール
-chatPalletInputSample3 = １ｄ２０＋{敏捷}＋｛格闘｝　格闘！
+chatPalletInputSample3 = １ｄ２０＋{敏捷}＋｛格闘＠2｝　格闘！
 chatPalletInputSample4 = //敏捷=10
 chatPalletInputSample5 = //格闘＝１
 chatPalletName = 名前：

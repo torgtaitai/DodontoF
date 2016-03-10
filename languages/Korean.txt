@@ -730,7 +730,7 @@ chatPalletAddTab = 탭 추가
 chatPalletDeleteTab = 탭 삭제
 chatPalletInputSample1 = 채팅 팔레트 입력예：
 chatPalletInputSample2 = 2d6+1 다이스 롤
-chatPalletInputSample3 = １ｄ２０＋{민첩}＋｛격투｝ 격투!
+chatPalletInputSample3 = １ｄ２０＋{민첩}＋｛격투@2｝ 격투!
 chatPalletInputSample4 = //민첩=10
 chatPalletInputSample5 = //격투=1
 chatPalletName = 이름：

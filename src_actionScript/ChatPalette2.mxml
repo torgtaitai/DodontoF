@@ -108,10 +108,13 @@
         var lines:Array = [Language.s.chatPalletInputSample1,
                            Language.s.chatPalletInputSample2,
                            Language.s.chatPalletInputSample3,
-                           Language.s.chatPalletInputSample4,
-                           Language.s.chatPalletInputSample5];
+                           Language.s.chatPalletInputSample4];
         
         var tabEditorInfo:Object = tabEditors[0];
+        setLines(lines, tabEditorInfo);
+        
+        lines = [Language.s.chatPalletInputSample5]
+        tabEditorInfo = tabEditors[1];
         setLines(lines, tabEditorInfo);
     }
     
@@ -151,7 +154,8 @@
     
     private function createInputList(input:TextInput, name:TextInput,
                                      state:ComboBox, colorPicker:ColorPicker,
-                                     tabName:TextInput, changeNameFunction:Function):List {
+                                     tabName:TextInput, changeNameFunction:Function,
+                                     tab:Box):List {
         
         var changer:ChatPaletteChanger = new ChatPaletteChanger();
         
@@ -160,7 +164,16 @@
         inputList.percentHeight = 100;
         
         inputList.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
-                input.text = changer.getText( inputList.selectedIndex, name );
+                
+                var changerInfos:Array = new Array();
+                
+                for each(var tabEditorInfo:Object in tabEditors) {
+                    var changerInfo:Object =
+                        { name: tabEditorInfo.tab.label,
+                          changer: tabEditorInfo.changer };
+                    changerInfos.push( changerInfo );
+                }
+                input.text = changer.getText( inputList.selectedIndex, name, changerInfos );
             });
         
         inputList.doubleClickEnabled = true;
@@ -177,7 +190,8 @@
             colorPicker : colorPicker,
             tabName: tabName,
             list : inputList,
-            changer : changer };
+            changer : changer,
+            tab: tab };
         
         tabEditors.push(tabEditorInfo);
                     
@@ -251,7 +265,7 @@
         var sendBox:Box = createSendBox(input, name, state, colorPicker);
         
         var inputList:List = createInputList(input, name, state, colorPicker,
-                                             tabName, changeNameFunction);
+                                             tabName, changeNameFunction, tab);
         
         tab.addChild(nameBox);
         tab.addChild(sendBox);
