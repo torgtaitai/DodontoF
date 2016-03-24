@@ -70,3 +70,15 @@ output:
 GardenOrder : D100 → 100 (≦ 500／100) ⇒ Critical!! 〔効果的成功！！〕
 rand:100/100
 ============================
+input:
+c:0
+output:
+GardenOrder : D100 → 2 (≦ 0／1) ⇒ 〔失敗〕
+rand:2/100
+============================
+input:
+c:0
+output:
+GardenOrder : D100 → 1 (≦ 0／1) ⇒ Critical!! 〔効果的成功！！〕
+rand:1/100
+============================
