@@ -1,0 +1,198 @@
+input:
+c:50
+output:
+GardenOrder : D100 → 50 (≦ 50／10) ⇒ 〔成功！〕
+rand:50/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 51 (≦ 50／10) ⇒ 〔失敗〕
+rand:51/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 95 (≦ 50／10) ⇒ 〔失敗〕
+rand:95/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 96 (≦ 50／10) ⇒ fumble... 〔致命的失敗…〕
+rand:96/100
+============================
+input:
+c:96
+output:
+GardenOrder : D100 → 96 (≦ 96／19) ⇒ fumble... 〔致命的失敗…〕
+rand:96/100
+============================
+input:
+c:99
+output:
+GardenOrder : D100 → 96 (≦ 99／19) ⇒ fumble... 〔致命的失敗…〕
+rand:96/100
+============================
+input:
+c:100
+output:
+GardenOrder : D100 → 96 (≦ 100／20) ⇒ 〔成功！〕
+rand:96/100
+============================
+input:
+c:100
+output:
+GardenOrder : D100 → 98 (≦ 100／20) ⇒ 〔成功！〕
+rand:98/100
+============================
+input:
+c:100
+output:
+GardenOrder : D100 → 99 (≦ 100／20) ⇒ fumble... 〔致命的失敗…〕
+rand:99/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 11 (≦ 50／10) ⇒ 〔成功！〕
+rand:11/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 10 (≦ 50／10) ⇒ Critical!! 〔効果的成功！！〕
+rand:10/100
+============================
+input:
+c:500
+output:
+GardenOrder : D100 → 100 (≦ 500／100) ⇒ Critical!! 〔効果的成功！！〕
+rand:100/100
+============================
+input:
+c:0
+output:
+GardenOrder : D100 → 2 (≦ 0／1) ⇒ 〔失敗〕
+rand:2/100
+============================
+input:
+c:0
+output:
+GardenOrder : D100 → 1 (≦ 0／1) ⇒ Critical!! 〔効果的成功！！〕
+rand:1/100
+============================
+input:
+c:50
+output:
+GardenOrder : D100 → 11 (≦ 50／10) ⇒ 〔成功！〕
+rand:11/100
+============================
+input:
+c:50@11
+output:
+GardenOrder : D100 → 11 (≦ 50／11) ⇒ Critical!! 〔効果的成功！！〕
+rand:11/100
+============================
+input:
+c:50@11
+output:
+GardenOrder : D100 → 12 (≦ 50／11) ⇒ 〔成功！〕
+rand:12/100
+============================
+input:
+c:100/2
+output:
+GardenOrder : D100 → 50 (≦ 50／20) ⇒ 〔成功！〕
+rand:50/100
+============================
+input:
+c:100/2
+output:
+GardenOrder : D100 → 51 (≦ 50／20) ⇒ 〔失敗〕
+rand:51/100
+============================
+input:
+c:100/2
+output:
+GardenOrder : D100 → 96 (≦ 50／20) ⇒ fumble... 〔致命的失敗…〕
+rand:96/100
+============================
+input:
+c:100/2
+output:
+GardenOrder : D100 → 21 (≦ 50／20) ⇒ 〔成功！〕
+rand:21/100
+============================
+input:
+c:100/2
+output:
+GardenOrder : D100 → 20 (≦ 50／20) ⇒ Critical!! 〔効果的成功！！〕
+rand:20/100
+============================
+input:
+c:150/2
+output:
+GardenOrder : D100 → 51 (≦ 75／30) ⇒ 〔成功！〕
+rand:51/100
+============================
+input:
+c:150/2
+output:
+GardenOrder : D100 → 30 (≦ 75／30) ⇒ Critical!! 〔効果的成功！！〕
+rand:30/100
+============================
+input:
+c:150/3
+output:
+GardenOrder : D100 → 51 (≦ 50／30) ⇒ 〔失敗〕
+rand:51/100
+============================
+input:
+dcSL=1
+output:
+GardenOrder : 負傷表：切断［1］ => 軽傷1 ｜ 切り傷 … 皮膚が切り裂かれる。
+rand:
+============================
+input:
+dcSL=5
+output:
+GardenOrder : 負傷表：切断［5］ => 軽傷1 ｜ 切り傷 … 皮膚が切り裂かれる。
+rand:
+============================
+input:
+dcSL=6
+output:
+GardenOrder : 負傷表：切断［6］ => 軽傷２／マヒ ｜ 脚部負傷 … 足が切り裂かれ、思わずひざまずく。
+rand:
+============================
+input:
+dcBL=1
+output:
+GardenOrder : 負傷表：銃弾［1］ => 軽傷２ ｜ 腕部損傷 … 銃弾が腕をかすめた。
+rand:
+============================
+input:
+dcIM=1
+output:
+GardenOrder : 負傷表：衝撃［1］ => 軽傷1 ｜ 打撲 … 攻撃を受けた箇所がどす黒く腫れ上がる。
+rand:
+============================
+input:
+dcBR=1
+output:
+GardenOrder : 負傷表：灼熱［1］ => 軽傷1 ｜ 火傷 … 皮膚に小さな火傷を負う。
+rand:
+============================
+input:
+dcRF=1
+output:
+GardenOrder : 負傷表：冷却［1］ => 軽傷1 ｜ 冷気 … 軽い凍傷を受ける。
+rand:
+============================
+input:
+dcEL=1
+output:
+GardenOrder : 負傷表：電撃［1］ => 疲労３ ｜ 静電気 … 全身の毛が逆立つ。
+rand:
+============================
