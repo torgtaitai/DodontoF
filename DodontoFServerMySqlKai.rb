@@ -111,7 +111,7 @@ class Mysql::Stmt
   end
 end
 
-class DodontoFServer
+class DodontoFServer_MySqlKai
   include DodontoF::Utils
 
   def self.getMessagePackFromData(data)
@@ -6983,7 +6983,7 @@ def main(cgiParams)
   logger = DodontoF::Logger.instance
 
   logger.debug("main called")
-  server = DodontoFServer.new(SaveDirInfo.new(), cgiParams)
+  server = DodontoFServer_MySqlKai.new(SaveDirInfo.new(), cgiParams)
   logger.debug("server created")
   printResult(server)
   logger.debug("printResult called")
@@ -7079,7 +7079,7 @@ def getCgiParams()
 
     input = $stdin.read(length)
     logger.debug(input, "getCgiParams input")
-    messagePackedData = DodontoFServer.getMessagePackFromData( input )
+    messagePackedData = DodontoFServer_MySqlKai.getMessagePackFromData( input )
   end
 
   logger.debug(messagePackedData, "messagePackedData")

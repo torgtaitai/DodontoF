@@ -9,15 +9,16 @@ require 'test/unit'
 # テスト用のコンフィグファイルをDodontoFServerに読みこませる
 $isTestMode = true
 require 'DodontoFServer.rb'
-
-TARGET_DODONTF_SERVER_CLASS = DodontoFServer
 require 'server_test_impl.rb'
 
 class DodontoFServerTest < Test::Unit::TestCase
-  include ServerTestImpl
+  include DodontoFServerTestImpl
 
-  class DodontoFServerForGetPlayRoomState < DodontoFServerForTest
+  def getTargetDodontoFServer
+    DodontoFServer
   end
+
+  # ------------------------ room系コマンドテスト
 
   def create_mock_playroom(name = 'testroom', index = -1)
     params = {
@@ -33,7 +34,7 @@ class DodontoFServerTest < Test::Unit::TestCase
         'viewStates' => {}
       }
     }
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     server.getResponse
   end
 
@@ -57,7 +58,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     create_mock_playroom('TESTROOM_ALPHA', 1)
     create_mock_playroom('TESTROOM_BETA', 5)
-    server = DodontoFServerForGetPlayRoomState.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
 
     # 必要なキーは帰ってきてますよね？
@@ -87,7 +88,7 @@ class DodontoFServerTest < Test::Unit::TestCase
       }
     }
 
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     assert_match /isRoomExist/, result
     assert_match /roomName/, result
@@ -117,7 +118,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     }
 
     create_mock_playroom('TESTROOM', 1)
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     assert_match /resultText/, result
     assert_match /OK/, result
@@ -137,7 +138,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     create_mock_playroom('TESTROOM2', 2) # テスト中作って10秒立たないからこれは消せないはず
 
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
@@ -177,7 +178,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     create_mock_playroom('TESTROOM2', 2)
 
     savedirs = SaveDirInfoForRemoveOldPlayRoom.new
-    server = DodontoFServerForTest.new savedirs, params
+    server = getDodontoFServerForTest.new savedirs, params
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 

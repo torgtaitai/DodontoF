@@ -9,10 +9,11 @@ require 'test/unit'
 # テスト用のコンフィグファイルをDodontoFServerに読みこませる
 $isTestMode = true
 require 'DodontoFServerMySqlKai.rb'
-
-TARGET_DODONTF_SERVER_CLASS = DodontoFServer
 require 'server_test_impl.rb'
 
 class DodontoFServerMySqlKaiTest < Test::Unit::TestCase
-  include ServerTestImpl
+  include DodontoFServerTestImpl
+  def getTargetDodontoFServer
+    DodontoFServer_MySqlKai
+  end
 end

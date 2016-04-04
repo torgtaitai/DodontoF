@@ -3,19 +3,27 @@
 require 'fileutils'
 
 # 3種類あるサーバ実装を統一的に検査するためのテスト実装モジュール
-# それぞれのサーバ用のテストからincludeして使います
-# テスト中でインスタンス化するのに使うため
-# このrbファイルをrequireする前に
-# TARGET_DODONTF_SERVER_CLASSという定数を、
-# 対象のサーバクラスを代入して初期化してください
-# 例: TARGET_DODONTF_SERVER_CLASS = DodontoFServer
-module ServerTestImpl
+# それぞれのサーバ用のテストケースでincludeして使います。
+# 共通するテストはこのクラスの中で書いてしまってください。
+# またどのサーバ実装を対象にするのかは
+# getTargetDodontoFServerメソッドをオーバライドして
+# クラス定数を返却しておくことで、こちらに伝えるようにしてください
+# (内部的にDodontoFServer類をテストに乗せるためのモックオブジェクトを生成します)
+module DodontoFServerTestImpl
+  # テスト対象にするDodontoFServer
+  # 利用者コードでinclude後にオーバライドしてください
+  def getTargetDodontoFServer
+    fail NotImplementedError, 'ServerTestimpl need override TargetDodontoFServer()'
+  end
+
   # テスト用のモックオブジェクト
   # コンストラクション時にいい加減な物を渡してもエラーを抑止する
   # モック要件に応じて増やしたり継承したりして使う
-  class DodontoFServerForTest < TARGET_DODONTF_SERVER_CLASS
-    attr_accessor :mock_raw_cgi_value
-    def getRawCGIValue; @mock_raw_cgi_value; end
+  def getDodontoFServerForTest
+    @dodontof_server_for_Test ||= Class.new(getTargetDodontoFServer) do
+      attr_accessor :mock_raw_cgi_value
+      def getRawCGIValue; @mock_raw_cgi_value; end
+    end
   end
 
   def setup
@@ -32,12 +40,12 @@ module ServerTestImpl
   end
 
   def test_request_analyze
-    instance = DodontoFServerForTest.new SaveDirInfo.new, {'test' => 'ok'}
+    instance = getDodontoFServerForTest.new SaveDirInfo.new, {'test' => 'ok'}
     assert_equal 'ok', instance.getRequestData('test'), 'ok'
   end
 
   def test_response
-    instance = DodontoFServerForTest.new SaveDirInfo.new, {'cmd' => ''}
+    instance = getDodontoFServerForTest.new SaveDirInfo.new, {'cmd' => ''}
     assert_match /「.+」の動作環境は正常に起動しています。/, instance.getResponse
   end
 end
