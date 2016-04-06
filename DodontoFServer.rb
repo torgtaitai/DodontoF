@@ -745,107 +745,101 @@ class DodontoFServer
     if( commandName.nil? or commandName.empty? )
       return getResponseTextWhenNoCommandName
     end
-    
-    hasReturn = "hasReturn";
-    hasNoReturn = "hasNoReturn";
-    
-    commands = [
-      ['refresh', hasReturn],
-      
-      ['getGraveyardCharacterData', hasReturn], 
-      ['resurrectCharacter', hasReturn], 
-      ['clearGraveyard', hasReturn], 
-      ['getLoginInfo', hasReturn], 
-      ['getPlayRoomStates', hasReturn], 
-      ['deleteImage', hasReturn], 
-      ['uploadImageUrl', hasReturn], 
-      ['save', hasReturn], 
-      ['saveMap', hasReturn], 
-      ['saveAllData', hasReturn], 
-      ['load', hasReturn], 
-      ['loadAllSaveData', hasReturn], 
-      ['getDiceBotInfos', hasReturn], 
-      ['getBotTableInfos', hasReturn], 
-      ['addBotTable', hasReturn], 
-      ['changeBotTable', hasReturn], 
-      ['removeBotTable', hasReturn], 
-      ['requestReplayDataList', hasReturn], 
-      ['uploadReplayData', hasReturn], 
-      ['removeReplayData', hasReturn], 
-      ['checkRoomStatus', hasReturn], 
-      ['loginPassword', hasReturn], 
-      ['uploadFile', hasReturn], 
-      ['uploadImageData', hasReturn], 
-      ['createPlayRoom', hasReturn], 
-      ['changePlayRoom', hasReturn], 
-      ['removePlayRoom', hasReturn], 
-      ['removeOldPlayRoom', hasReturn], 
-      ['getImageTagsAndImageList', hasReturn], 
-      ['addCharacter', hasReturn],
-      ['getWaitingRoomInfo', hasReturn], 
-      ['exitWaitingRoomCharacter', hasReturn],
-      ['enterWaitingRoomCharacter', hasReturn], 
-      ['sendDiceBotChatMessage', hasReturn],
-      ['deleteChatLog', hasReturn], 
-      ['sendChatMessageAll', hasReturn],
-      ['undoDrawOnMap', hasReturn],
-      
-      ['logout', hasNoReturn], 
-      ['changeCharacter', hasNoReturn],
-      ['removeCharacter', hasNoReturn],
-      
+
+    commands = {
+      'refresh' => :hasReturn,
+
+      'getGraveyardCharacterData' => :hasReturn,
+      'resurrectCharacter' => :hasReturn,
+      'clearGraveyard' => :hasReturn,
+      'getLoginInfo' => :hasReturn,
+      'getPlayRoomStates' => :hasReturn,
+      'deleteImage' => :hasReturn,
+      'uploadImageUrl' => :hasReturn,
+      'save' => :hasReturn,
+      'saveMap' => :hasReturn,
+      'saveAllData' => :hasReturn,
+      'load' => :hasReturn,
+      'loadAllSaveData' => :hasReturn,
+      'getDiceBotInfos' => :hasReturn,
+      'getBotTableInfos' => :hasReturn,
+      'addBotTable' => :hasReturn,
+      'changeBotTable' => :hasReturn,
+      'removeBotTable' => :hasReturn,
+      'requestReplayDataList' => :hasReturn,
+      'uploadReplayData' => :hasReturn,
+      'removeReplayData' => :hasReturn,
+      'checkRoomStatus' => :hasReturn,
+      'loginPassword' => :hasReturn,
+      'uploadFile' => :hasReturn,
+      'uploadImageData' => :hasReturn,
+      'createPlayRoom' => :hasReturn,
+      'changePlayRoom' => :hasReturn,
+      'removePlayRoom' => :hasReturn,
+      'removeOldPlayRoom' => :hasReturn,
+      'getImageTagsAndImageList' => :hasReturn,
+      'addCharacter' => :hasReturn,
+      'getWaitingRoomInfo' => :hasReturn,
+      'exitWaitingRoomCharacter' => :hasReturn,
+      'enterWaitingRoomCharacter' => :hasReturn,
+      'sendDiceBotChatMessage' => :hasReturn,
+      'deleteChatLog' => :hasReturn,
+      'sendChatMessageAll' => :hasReturn,
+      'undoDrawOnMap' => :hasReturn,
+
+      'logout' => :hasNoReturn,
+      'changeCharacter' => :hasNoReturn,
+      'removeCharacter' => :hasNoReturn,
+
       # Card Command Get
-      ['getMountCardInfos', hasReturn],
-      ['getTrushMountCardInfos', hasReturn],
-      ['getCardList', hasReturn],
-      
+      'getMountCardInfos' => :hasReturn,
+      'getTrushMountCardInfos' => :hasReturn,
+      'getCardList' => :hasReturn,
+
       # Card Command Set
-      ['drawTargetCard', hasReturn],
-      ['drawTargetTrushCard', hasReturn],
-      ['drawCard', hasReturn],
-      ['addCard', hasNoReturn],
-      ['addCardZone', hasNoReturn],
-      ['initCards', hasReturn],
-      ['returnCard', hasNoReturn],
-      ['shuffleCards', hasNoReturn],
-      ['shuffleOnlyMountCards', hasNoReturn],
-      ['shuffleForNextRandomDungeon', hasNoReturn],
-      ['dumpTrushCards', hasNoReturn],
-      ['returnCardToMount', hasNoReturn],
-      
-      ['clearCharacterByType', hasNoReturn],
-      ['moveCharacter', hasNoReturn],
-      ['changeMap', hasNoReturn],
-      ['drawOnMap', hasNoReturn],
-      ['clearDrawOnMap', hasNoReturn],
-      ['sendChatMessage', hasNoReturn],
-      ['changeRoundTime', hasNoReturn],
-      ['addResource', hasNoReturn],
-      ['changeResource', hasNoReturn],
-      ['changeResourcesAll', hasNoReturn],
-      ['removeResource', hasNoReturn],
-      ['addEffect', hasNoReturn], 
-      ['changeEffect', hasNoReturn], 
-      ['changeEffectsAll', hasNoReturn], 
-      ['removeEffect', hasNoReturn], 
-      ['changeImageTags', hasNoReturn], 
-    ]
-    
-    commands.each do |command, commandType|
-      next unless( command == commandName )
-      logging(commandType, "commandType")
-      
-      case commandType
-      when hasReturn
-        return eval( command )
-      when hasNoReturn
-        eval( command )
-        return nil
-      end
+      'drawTargetCard' => :hasReturn,
+      'drawTargetTrushCard' => :hasReturn,
+      'drawCard' => :hasReturn,
+      'addCard' => :hasNoReturn,
+      'addCardZone' => :hasNoReturn,
+      'initCards' => :hasReturn,
+      'returnCard' => :hasNoReturn,
+      'shuffleCards' => :hasNoReturn,
+      'shuffleOnlyMountCards' => :hasNoReturn,
+      'shuffleForNextRandomDungeon' => :hasNoReturn,
+      'dumpTrushCards' => :hasNoReturn,
+      'returnCardToMount' => :hasNoReturn,
+
+      'clearCharacterByType' => :hasNoReturn,
+      'moveCharacter' => :hasNoReturn,
+      'changeMap' => :hasNoReturn,
+      'drawOnMap' => :hasNoReturn,
+      'clearDrawOnMap' => :hasNoReturn,
+      'sendChatMessage' => :hasNoReturn,
+      'changeRoundTime' => :hasNoReturn,
+      'addResource' => :hasNoReturn,
+      'changeResource' => :hasNoReturn,
+      'changeResourcesAll' => :hasNoReturn,
+      'removeResource' => :hasNoReturn,
+      'addEffect' => :hasNoReturn,
+      'changeEffect' => :hasNoReturn,
+      'changeEffectsAll' => :hasNoReturn,
+      'removeEffect' => :hasNoReturn,
+      'changeImageTags' => :hasNoReturn
+    }
+
+    commandType = commands[commandName]
+    logging(commandType, "commandType")
+
+    case commandType
+    when :hasReturn
+      return self.send( commandName )
+    when :hasNoReturn
+      self.send( commandName )
+      return nil
+    else
+      throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
     end
-    
-    throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
-    
   end
   
   def getResponseTextWhenNoCommandName
