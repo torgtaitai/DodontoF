@@ -13,7 +13,7 @@ class DiceBotLoader
   def loadUnknownGame(gameTitle)
     debug("loadUnknownGame gameTitle", gameTitle)
     
-    gameTitle = gameTitle.gsub(/(\.\.|\/)/, '_')
+    gameTitle = gameTitle.gsub(/(\.\.|\/|:)/, '_')
     
     botFile = "diceBot/#{gameTitle}.rb"
     fileName = "#{@@bcDicePath}/#{botFile}"
@@ -31,7 +31,8 @@ class DiceBotLoader
     begin
       require "#{botFile}"
       diceBot = Module.const_get(gameTitle).new
-    rescue
+    rescue => e
+      debug("DiceBot load ERROR!!!", e.to_s)
     end
     
     return diceBot

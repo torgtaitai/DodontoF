@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.47.22"
-$versionDate = "2016/03/19"
+$versionOnly = "Ver.1.47.24"
+$versionDate = "2016/04/07"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -745,107 +745,101 @@ class DodontoFServer
     if( commandName.nil? or commandName.empty? )
       return getResponseTextWhenNoCommandName
     end
-    
-    hasReturn = "hasReturn";
-    hasNoReturn = "hasNoReturn";
-    
-    commands = [
-      ['refresh', hasReturn],
-      
-      ['getGraveyardCharacterData', hasReturn], 
-      ['resurrectCharacter', hasReturn], 
-      ['clearGraveyard', hasReturn], 
-      ['getLoginInfo', hasReturn], 
-      ['getPlayRoomStates', hasReturn], 
-      ['deleteImage', hasReturn], 
-      ['uploadImageUrl', hasReturn], 
-      ['save', hasReturn], 
-      ['saveMap', hasReturn], 
-      ['saveAllData', hasReturn], 
-      ['load', hasReturn], 
-      ['loadAllSaveData', hasReturn], 
-      ['getDiceBotInfos', hasReturn], 
-      ['getBotTableInfos', hasReturn], 
-      ['addBotTable', hasReturn], 
-      ['changeBotTable', hasReturn], 
-      ['removeBotTable', hasReturn], 
-      ['requestReplayDataList', hasReturn], 
-      ['uploadReplayData', hasReturn], 
-      ['removeReplayData', hasReturn], 
-      ['checkRoomStatus', hasReturn], 
-      ['loginPassword', hasReturn], 
-      ['uploadFile', hasReturn], 
-      ['uploadImageData', hasReturn], 
-      ['createPlayRoom', hasReturn], 
-      ['changePlayRoom', hasReturn], 
-      ['removePlayRoom', hasReturn], 
-      ['removeOldPlayRoom', hasReturn], 
-      ['getImageTagsAndImageList', hasReturn], 
-      ['addCharacter', hasReturn],
-      ['getWaitingRoomInfo', hasReturn], 
-      ['exitWaitingRoomCharacter', hasReturn],
-      ['enterWaitingRoomCharacter', hasReturn], 
-      ['sendDiceBotChatMessage', hasReturn],
-      ['deleteChatLog', hasReturn], 
-      ['sendChatMessageAll', hasReturn],
-      ['undoDrawOnMap', hasReturn],
-      
-      ['logout', hasNoReturn], 
-      ['changeCharacter', hasNoReturn],
-      ['removeCharacter', hasNoReturn],
-      
+
+    commands = {
+      'refresh' => :hasReturn,
+
+      'getGraveyardCharacterData' => :hasReturn,
+      'resurrectCharacter' => :hasReturn,
+      'clearGraveyard' => :hasReturn,
+      'getLoginInfo' => :hasReturn,
+      'getPlayRoomStates' => :hasReturn,
+      'deleteImage' => :hasReturn,
+      'uploadImageUrl' => :hasReturn,
+      'save' => :hasReturn,
+      'saveMap' => :hasReturn,
+      'saveAllData' => :hasReturn,
+      'load' => :hasReturn,
+      'loadAllSaveData' => :hasReturn,
+      'getDiceBotInfos' => :hasReturn,
+      'getBotTableInfos' => :hasReturn,
+      'addBotTable' => :hasReturn,
+      'changeBotTable' => :hasReturn,
+      'removeBotTable' => :hasReturn,
+      'requestReplayDataList' => :hasReturn,
+      'uploadReplayData' => :hasReturn,
+      'removeReplayData' => :hasReturn,
+      'checkRoomStatus' => :hasReturn,
+      'loginPassword' => :hasReturn,
+      'uploadFile' => :hasReturn,
+      'uploadImageData' => :hasReturn,
+      'createPlayRoom' => :hasReturn,
+      'changePlayRoom' => :hasReturn,
+      'removePlayRoom' => :hasReturn,
+      'removeOldPlayRoom' => :hasReturn,
+      'getImageTagsAndImageList' => :hasReturn,
+      'addCharacter' => :hasReturn,
+      'getWaitingRoomInfo' => :hasReturn,
+      'exitWaitingRoomCharacter' => :hasReturn,
+      'enterWaitingRoomCharacter' => :hasReturn,
+      'sendDiceBotChatMessage' => :hasReturn,
+      'deleteChatLog' => :hasReturn,
+      'sendChatMessageAll' => :hasReturn,
+      'undoDrawOnMap' => :hasReturn,
+
+      'logout' => :hasNoReturn,
+      'changeCharacter' => :hasNoReturn,
+      'removeCharacter' => :hasNoReturn,
+
       # Card Command Get
-      ['getMountCardInfos', hasReturn],
-      ['getTrushMountCardInfos', hasReturn],
-      ['getCardList', hasReturn],
-      
+      'getMountCardInfos' => :hasReturn,
+      'getTrushMountCardInfos' => :hasReturn,
+      'getCardList' => :hasReturn,
+
       # Card Command Set
-      ['drawTargetCard', hasReturn],
-      ['drawTargetTrushCard', hasReturn],
-      ['drawCard', hasReturn],
-      ['addCard', hasNoReturn],
-      ['addCardZone', hasNoReturn],
-      ['initCards', hasReturn],
-      ['returnCard', hasNoReturn],
-      ['shuffleCards', hasNoReturn],
-      ['shuffleOnlyMountCards', hasNoReturn],
-      ['shuffleForNextRandomDungeon', hasNoReturn],
-      ['dumpTrushCards', hasNoReturn],
-      ['returnCardToMount', hasNoReturn],
-      
-      ['clearCharacterByType', hasNoReturn],
-      ['moveCharacter', hasNoReturn],
-      ['changeMap', hasNoReturn],
-      ['drawOnMap', hasNoReturn],
-      ['clearDrawOnMap', hasNoReturn],
-      ['sendChatMessage', hasNoReturn],
-      ['changeRoundTime', hasNoReturn],
-      ['addResource', hasNoReturn],
-      ['changeResource', hasNoReturn],
-      ['changeResourcesAll', hasNoReturn],
-      ['removeResource', hasNoReturn],
-      ['addEffect', hasNoReturn], 
-      ['changeEffect', hasNoReturn], 
-      ['changeEffectsAll', hasNoReturn], 
-      ['removeEffect', hasNoReturn], 
-      ['changeImageTags', hasNoReturn], 
-    ]
-    
-    commands.each do |command, commandType|
-      next unless( command == commandName )
-      logging(commandType, "commandType")
-      
-      case commandType
-      when hasReturn
-        return eval( command )
-      when hasNoReturn
-        eval( command )
-        return nil
-      end
+      'drawTargetCard' => :hasReturn,
+      'drawTargetTrushCard' => :hasReturn,
+      'drawCard' => :hasReturn,
+      'addCard' => :hasNoReturn,
+      'addCardZone' => :hasNoReturn,
+      'initCards' => :hasReturn,
+      'returnCard' => :hasNoReturn,
+      'shuffleCards' => :hasNoReturn,
+      'shuffleOnlyMountCards' => :hasNoReturn,
+      'shuffleForNextRandomDungeon' => :hasNoReturn,
+      'dumpTrushCards' => :hasNoReturn,
+      'returnCardToMount' => :hasNoReturn,
+
+      'clearCharacterByType' => :hasNoReturn,
+      'moveCharacter' => :hasNoReturn,
+      'changeMap' => :hasNoReturn,
+      'drawOnMap' => :hasNoReturn,
+      'clearDrawOnMap' => :hasNoReturn,
+      'sendChatMessage' => :hasNoReturn,
+      'changeRoundTime' => :hasNoReturn,
+      'addResource' => :hasNoReturn,
+      'changeResource' => :hasNoReturn,
+      'changeResourcesAll' => :hasNoReturn,
+      'removeResource' => :hasNoReturn,
+      'addEffect' => :hasNoReturn,
+      'changeEffect' => :hasNoReturn,
+      'changeEffectsAll' => :hasNoReturn,
+      'removeEffect' => :hasNoReturn,
+      'changeImageTags' => :hasNoReturn
+    }
+
+    commandType = commands[commandName]
+    logging(commandType, "commandType")
+
+    case commandType
+    when :hasReturn
+      return self.send( commandName )
+    when :hasNoReturn
+      self.send( commandName )
+      return nil
+    else
+      throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
     end
-    
-    throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
-    
   end
   
   def getResponseTextWhenNoCommandName
@@ -5586,6 +5580,8 @@ class DodontoFServer
       cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete, canRewrite)
       cardData["x"] = addCardData['x']
       cardData["y"] = addCardData['y']
+      cardData["owner"] = addCardData['owner']
+      cardData["ownerName"] = addCardData['ownerName']
       cardData["isOpen"] = isOpen unless( isOpen.nil? )
       cardData["isBack"] = isBack unless( isBack.nil? )
       

@@ -33,6 +33,9 @@ package {
                 return "";
             }
             
+            line = line.replace('＊', '*');
+            line = line.replace('＠', '@');
+            
             for (var key:String in definitionsFull) {
                 var value:String = definitionsFull[key];
                 
@@ -141,11 +144,9 @@ package {
                 var anotherDefinitions:Object = changer.getDefinitions();
                 for (var key:String in anotherDefinitions) {
                     var newKey:String = key + "@" + name;
-                    var newKey2:String = key + "＠" + name;
                     if( definitionsFull[newKey] == null ) {
                         var value:Object = anotherDefinitions[key];
                         definitionsFull[newKey] = value;
-                        definitionsFull[newKey2] = value;
                     }
                 }
                 
