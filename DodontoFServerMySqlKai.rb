@@ -138,6 +138,30 @@ class DodontoFServer
     @saveDirInfo.init(roomNumber, $saveDataMaxCount, $SAVE_DATA_DIR)
   end
 
+
+  # 次のメソッドをどのモードで追加するか
+  @@next_method_type = :notCommand
+  # CGIに飛んできたコマンドのどれを実際にコマンドとして扱うかのテーブル
+  @@commands = { }
+
+  # コマンド関数を作る
+  def self.command
+    @@next_method_type = :hasReturn
+  end
+
+  # 戻り値を使わないタイプのコマンド関数を作る
+  def self.command_noreturn
+    @@next_method_type = :hasNoReturn
+  end
+
+  # メソッド追加時に呼ばれるコールバック
+  def self.method_added(name)
+    return if @@next_method_type == :notCommand
+    @@commands[name.to_s] = @@next_method_type
+    @@next_method_type = :notCommand
+  end
+
+
   def getRawCGIValue
     @cgi ||= CGI.new
     @cgi.params[key].first
@@ -431,89 +455,7 @@ class DodontoFServer
       return getResponseTextWhenNoCommandName
     end
 
-    commands = {
-      'refresh' => :hasReturn,
-
-      'getGraveyardCharacterData' => :hasReturn,
-      'resurrectCharacter' => :hasReturn,
-      'clearGraveyard' => :hasReturn,
-      'getLoginInfo' => :hasReturn,
-      'getPlayRoomStates' => :hasReturn,
-      'deleteImage' => :hasReturn,
-      'uploadImageUrl' => :hasReturn,
-      'save' => :hasReturn,
-      'saveMap' => :hasReturn,
-      'saveAllData' => :hasReturn,
-      'load' => :hasReturn,
-      'loadAllSaveData' => :hasReturn,
-      'getDiceBotInfos' => :hasReturn,
-      'getBotTableInfos' => :hasReturn,
-      'addBotTable' => :hasReturn,
-      'changeBotTable' => :hasReturn,
-      'removeBotTable' => :hasReturn,
-      'requestReplayDataList' => :hasReturn,
-      'uploadReplayData' => :hasReturn,
-      'removeReplayData' => :hasReturn,
-      'checkRoomStatus' => :hasReturn,
-      'loginPassword' => :hasReturn,
-      'uploadFile' => :hasReturn,
-      'uploadImageData' => :hasReturn,
-      'createPlayRoom' => :hasReturn,
-      'changePlayRoom' => :hasReturn,
-      'removePlayRoom' => :hasReturn,
-      'removeOldPlayRoom' => :hasReturn,
-      'getImageTagsAndImageList' => :hasReturn,
-      'addCharacter' => :hasReturn,
-      'getWaitingRoomInfo' => :hasReturn,
-      'exitWaitingRoomCharacter' => :hasReturn,
-      'enterWaitingRoomCharacter' => :hasReturn,
-      'sendDiceBotChatMessage' => :hasReturn,
-      'deleteChatLog' => :hasReturn,
-      'sendChatMessageAll' => :hasReturn,
-      'undoDrawOnMap' => :hasReturn,
-
-      'logout' => :hasNoReturn,
-      'changeCharacter' => :hasNoReturn,
-      'removeCharacter' => :hasNoReturn,
-
-      # Card Command Get
-      'getMountCardInfos' => :hasReturn,
-      'getTrushMountCardInfos' => :hasReturn,
-      'getCardList' => :hasReturn,
-
-      # Card Command Set
-      'drawTargetCard' => :hasReturn,
-      'drawTargetTrushCard' => :hasReturn,
-      'drawCard' => :hasReturn,
-      'addCard' => :hasNoReturn,
-      'addCardZone' => :hasNoReturn,
-      'initCards' => :hasReturn,
-      'returnCard' => :hasNoReturn,
-      'shuffleCards' => :hasNoReturn,
-      'shuffleForNextRandomDungeon' => :hasNoReturn,
-      'dumpTrushCards' => :hasNoReturn,
-
-      'clearCharacterByType' => :hasNoReturn,
-      'moveCharacter' => :hasNoReturn,
-      'changeMap' => :hasNoReturn,
-      'drawOnMap' => :hasNoReturn,
-      'clearDrawOnMap' => :hasNoReturn,
-      'sendChatMessage' => :hasNoReturn,
-      'changeRoundTime' => :hasNoReturn,
-      'addResource' => :hasNoReturn,
-      'changeResource' => :hasNoReturn,
-      'changeResourcesAll' => :hasNoReturn,
-      'removeResource' => :hasNoReturn,
-      'addEffect' => :hasNoReturn,
-      'changeEffect' => :hasNoReturn,
-      'changeEffectsAll' => :hasNoReturn,
-      'removeEffect' => :hasNoReturn,
-      'changeImageTags' => :hasNoReturn,
-
-      'dropAllDb' => :hasNoReturn,
-    }
-
-    commandType = commands[commandName]
+    commandType = @@commands[commandName]
     logging(commandType, "commandType")
 
     begin
@@ -1129,6 +1071,7 @@ class DodontoFServer
     logging("initDb End")
   end
 
+  command_noreturn
   def dropAllDb
     %w{chats characters maps times effects users rooms}.each do |target|
       
@@ -1930,8 +1873,8 @@ SQL_TEXT
     return result
   end
   
-  
-  def refresh()
+  command
+  def refresh
     logging("==>Begin refresh");
     
     saveData = {}
@@ -2167,9 +2110,9 @@ SQL_TEXT
     
     return result
   end
-  
-  
-  def removeOldPlayRoom()
+
+  command
+  def removeOldPlayRoom
     roomNumberRange = (0 .. $saveDataMaxCount)
     accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
     result = removeOldRoomFromAccessTimes(accessTimes)
@@ -2258,7 +2201,8 @@ COMMAND_END
     return emptyRoomNubmer
   end
   
-  def getPlayRoomStates()
+  command
+  def getPlayRoomStates
     logging("getPlayRoomStates Begin");
     
     params = getParamsFromRequestData()
@@ -2484,7 +2428,8 @@ COMMAND_END
     [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
   end
   
-  def getLoginInfo()
+  command
+  def getLoginInfo
     logging("getLoginInfo begin")
     
     uniqueId ||= createUniqueId()
@@ -2643,7 +2588,8 @@ COMMAND_END
     return loginMessage
   end
   
-  def getDiceBotInfos()
+  command
+  def getDiceBotInfos
     logging("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
@@ -2736,9 +2682,9 @@ COMMAND_END
     query("INSERT INTO #{tableName} (roomNo, json, update_index) VALUES (?, ?, ?)", 
            roomNo, json, 1)
   end
-  
-  
-  def createPlayRoom()
+
+  command
+  def createPlayRoom
     logging('createPlayRoom begin')
     
     resultText = "OK"
@@ -2856,8 +2802,9 @@ COMMAND_END
     salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
     return pass.crypt(salt)
   end
-  
-  def changePlayRoom()
+
+  command
+  def changePlayRoom
     logging("changePlayRoom begin")
     
     resultText = "OK"
@@ -2953,9 +2900,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return matched
   end
-  
-  
-  def removePlayRoom()
+
+  command
+  def removePlayRoom
     params = getParamsFromRequestData()
     
     roomNumbers = params['roomNumbers']
@@ -3087,8 +3034,9 @@ logging(saveData, 'changePlayRoom() saveData end')
   def getTrueSaveFileName(fileName)
     @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
-  
-  def saveAllData()
+
+  command
+  def saveAllData
     logging("saveAllData begin")
     dir = getRoomLocalSpaceDirName
     makeDir(dir)
@@ -3314,8 +3262,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return File.join(dir, saveFile)
   end
   
-  
-  def save()
+  command
+  def save
     isAddPlayRoomInfo = true
     extension = getRequestData('extension')
     
@@ -3334,8 +3282,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return tableInfos
   end
   
-  
-  def saveMap()
+  command
+  def saveMap
     extension = getRequestData('extension')
     selectTypes = ['map', 'characters']
     saveSelectFiles( selectTypes, extension)
@@ -3489,9 +3437,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     loggingForce( $@.join("\n"), "exception from" )
     loggingForce($!.inspect, "$!.inspect" )
   end
-  
-  
-  def checkRoomStatus()
+
+  command
+  def checkRoomStatus
     deleteOldUploadFile()
     
     params = getParamsFromRequestData()
@@ -3556,8 +3504,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     return false if( $mentenanceModePassword.nil? )
     return ( adminPassword == $mentenanceModePassword )
   end
-  
-  def loginPassword()
+
+  command
+  def loginPassword
     loginData = getParamsFromRequestData()
     logging(loginData, 'loginData')
     
@@ -3608,9 +3557,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     return true if( changedPassword.nil? )
     ( password.crypt(changedPassword) == changedPassword )
   end
-  
-  
-  def logout()
+
+  command_noreturn
+  def logout
     logoutData = getParamsFromRequestData()
     logging(logoutData, 'logoutData')
     
@@ -3640,8 +3589,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return ""
   end
   
-  
-  def getBotTableInfos()
+  command
+  def getBotTableInfos
     logging("getBotTableInfos Begin")
     result = {
       "resultText"=> "OK",
@@ -3673,9 +3622,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return tableInfos
   end
   
-  
-  
-  def addBotTable()
+  command
+  def addBotTable
     result = {}
     
     params = getParamsFromRequestData()
@@ -3714,9 +3662,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return resultText
   end
   
-  
-  
-  def changeBotTable()
+  command
+  def changeBotTable
     result = {}
     result['resultText'] = changeBotTableMain()
     
@@ -3749,9 +3696,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return resultText
   end
   
-  
-  
-  def removeBotTable()
+  command
+  def removeBotTable
     removeBotTableMain()
     return getBotTableInfos()
   end
@@ -3790,10 +3736,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("removeBotTableMain End")
   end
-  
-  
-  
-  def requestReplayDataList()
+
+  command
+  def requestReplayDataList
     logging("requestReplayDataList begin")
     result = {
       "resultText"=> "OK",
@@ -3805,8 +3750,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     logging("requestReplayDataList end")
     return result
   end
-  
-  def uploadReplayData()
+
+  command
+  def uploadReplayData
     uploadFileBase($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
       
@@ -3860,9 +3806,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return replayDataInfo
   end
-  
 
-  def removeReplayData()
+  command
+  def removeReplayData
     logging("removeReplayData begin")
     
     result = {
@@ -3900,9 +3846,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return result
   end
-  
-  
-  def uploadFile()
+
+  command
+  def uploadFile
     uploadFileBase($fileUploadDir, $UPLOAD_FILE_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       
       deleteOldUploadFile()
@@ -3999,8 +3945,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return result
   end
   
-  
-  def loadAllSaveData()
+  command
+  def loadAllSaveData
     logging("loadAllSaveData() Begin")
     checkLoad()
     
@@ -4259,8 +4205,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return buffer
   end
   
-  
-  def load()
+  command
+  def load
     logging("load() Begin")
     
     result = {}
@@ -4549,8 +4495,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging(tagInfo, "margeTagInfo tagInfo")
   end
-  
-  def uploadImageData()
+
+  command
+  def uploadImageData
     logging("uploadImageData load Begin")
     
     result = {
@@ -4634,7 +4581,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return result.untaint
   end
   
-  def deleteImage()
+  command
+  def deleteImage
     logging("deleteImage begin")
     
     imageData = getParamsFromRequestData()
@@ -4729,7 +4677,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
   end
   
-  def uploadImageUrl()
+  command
+  def uploadImageUrl
     logging("uploadImageUrl begin")
     
     imageData = getParamsFromRequestData()
@@ -4763,8 +4712,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return result
   end
   
-  
-  def getGraveyardCharacterData()
+  command
+  def getGraveyardCharacterData
     logging("getGraveyardCharacterData start.")
     
     result = getAllCharacters($characterStateGraveyard, true)
@@ -4774,8 +4723,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return graveyard
   end
-  
-  def getWaitingRoomInfo()
+ 
+  command
+  def getWaitingRoomInfo
     logging("getWaitingRoomInfo start.")
     
     result = getAllCharacters($characterStateWaitingRoom, true)
@@ -4865,8 +4815,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     imageList.delete_if{|i| (/^.svn$/===i)}
     imageList.delete_if{|i| (/\.db$/===i)}
   end
-  
-  
+
+
+  command
   def sendDiceBotChatMessage
     logging('sendDiceBotChatMessage')
     
@@ -5036,8 +4987,9 @@ logging(saveData, 'changePlayRoom() saveData end')
   def getLanguageKey(key)
     '###Language:' + key + '###'
   end
-  
-  
+
+
+  command
   def sendChatMessageAll
     logging("sendChatMessageAll Begin")
     
@@ -5072,7 +5024,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return result
   end
-  
+
+  command_noreturn
   def sendChatMessage
     chatData = getParamsFromRequestData()
     sendChatMessageByChatData(chatData)
@@ -5150,8 +5103,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging('delete old chats')
   end
-  
-  
+
+  command
   def deleteChatLog
     result = {'result' => "OK" }
     
@@ -5171,8 +5124,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     getArrayInfoFromHash(saveData, 'chatMessageDataLog')
   end
   
-  
-  def changeMap()
+  command_noreturn
+  def changeMap
     mapData = getParamsFromRequestData()
     logging(mapData, "changeMap mapData")
     
@@ -5198,8 +5151,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     id = row['id']
     return id
   end
-  
-  
+
+
+  command_noreturn
   def drawOnMap
     logging('drawOnMap Begin')
     
@@ -5285,14 +5239,15 @@ logging(saveData, 'changePlayRoom() saveData end')
     draws = getDraws(mapData)
     draws << data
   end
-  
-  
+
+
+  command_noreturn
   def clearDrawOnMap
     mapMarks = []
     drawOnMapByMapMarks(mapMarks)
   end
-  
-  
+
+  command
   def undoDrawOnMap
     result = {
       'data' => nil
@@ -5311,9 +5266,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     mapData['draws'] ||= []
     return mapData['draws']
   end
-  
-  
-  def addEffect()
+
+  command_noreturn
+  def addEffect
     effectData = getParamsFromRequestData()
     effectDataList = [effectData]
     addEffectData(effectDataList)
@@ -5372,7 +5327,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       end
     end
   end
-  
+
+  command_noreturn
   def changeEffect
     effectData = getParamsFromRequestData()
     targetCutInId = effectData['effectId']
@@ -5394,9 +5350,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       effects[findIndex] = effectData
     end
   end
-  
-  
-  
+
+  command_noreturn
   def changeEffectsAll
     paramEffects = getParamsFromRequestData()
     return if( paramEffects.nil? )
@@ -5418,9 +5373,9 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveData
     end
   end
-  
-  
-  def removeEffect()
+
+  command_noreturn
+  def removeEffect
     logging('removeEffect Begin')
     
     params = getParamsFromRequestData()
@@ -5464,8 +5419,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return imageInfoFileName
   end
-  
-  def changeImageTags()
+
+  command_noreturn
+  def changeImageTags
     effectData = getParamsFromRequestData()
     source = effectData['source']
     tagInfo = effectData['tagInfo']
@@ -5526,7 +5482,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return unless File.exist?(file)
     File.delete(file)
   end
-  
+
+  command
   def getImageTagsAndImageList
     result = {}
     
@@ -5580,9 +5537,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     return (prefix + sprintf("%.4f_%04d", Time.now.to_f, @imgIdIndex));
 =end
   end
-  
-  
-  def addCharacter()
+
+  command
+  def addCharacter
     characterData = getParamsFromRequestData()
     characterDataList = [characterData]
     
@@ -5672,9 +5629,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     failedName = isAlreadyExistCharacter?( allCharacters, characterData )
     return failedName
   end
-  
-  
-  def changeCharacter()
+
+  command_noreturn
+  def changeCharacter
     logging("changeCharacter")
     
     characterData = getParamsFromRequestData()
@@ -5767,10 +5724,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cardData
   end
-  
 
-
-  def addCardZone()
+  command_noreturn
+  def addCardZone
     logging("addCardZone Begin");
     
     data = getParamsFromRequestData()
@@ -5787,9 +5743,10 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("addCardZone End");
   end
-  
-  
-  def initCards()
+
+
+  command
+  def initCards
     logging("initCards Begin");
     
     clearAllCards
@@ -5893,9 +5850,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cardMount
   end
-  
-  
-  def addCard()
+
+  command_noreturn
+  def addCard
     logging("addCard begin");
     
     addCardData = getParamsFromRequestData()
@@ -6130,8 +6087,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return getCardTrushMountType
   end
-  
-  
+
+  command_noreturn
   def returnCard
     logging("returnCard Begin");
     
@@ -6166,8 +6123,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("returnCard End");
   end
-  
-  def drawCard()
+
+  command
+  def drawCard
     logging("drawCard Begin")
     
     params = getParamsFromRequestData()
@@ -6254,8 +6212,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cardData
   end
-  
 
+  command
   def drawTargetTrushCard
     logging("drawTargetTrushCard Begin");
     
@@ -6285,7 +6243,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return {"result" => "OK"}
   end
-  
+
+  command
   def drawTargetCard
     logging("drawTargetCard Begin")
     
@@ -6347,8 +6306,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("setCardCountAndBackImage End")
   end
-  
-  def dumpTrushCards()
+
+  command_noreturn
+  def dumpTrushCards
     logging("dumpTrushCards Begin")
     
     params = getParamsFromRequestData()
@@ -6372,8 +6332,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("dumpTrushCards End")
   end
-  
-  
+
+  command_noreturn
   def shuffleCards
     logging("shuffleCard Begin")
     
@@ -6427,7 +6387,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     return if cards.first.nil?
     cardMountData['nextCardId'] = cards.first['imgId']
   end
-  
+
+  command_noreturn
   def shuffleForNextRandomDungeon
     logging("shuffleForNextRandomDungeon Begin")
     
@@ -6542,8 +6503,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     cardData['owner'] = ""
     cardData['ownerName'] = ""
   end
-  
-  
+
+
+  command
   def getMountCardInfos
     params = getParamsFromRequestData()
     logging(params, 'getMountCardInfos params')
@@ -6576,7 +6538,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cards
   end
-  
+
+  command
   def getTrushMountCardInfos
     
     params = getParamsFromRequestData()
@@ -6590,8 +6553,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cards
   end
-  
-  
+
+  command
   def getCardList
     params = getParamsFromRequestData()
     logging(params, 'getCardList params')
@@ -6606,9 +6569,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return cardMount
   end
-  
-  
-  def clearCharacterByType()
+
+  command_noreturn
+  def clearCharacterByType
     logging("clearCharacterByType Begin")
     
     clearData = getParamsFromRequestData()
@@ -6635,9 +6598,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     logging("clearCharacterByTypeLocal End")
   end
-  
-  
-  def removeCharacter()
+
+  command_noreturn
+  def removeCharacter
     removeCharacterDataList = getParamsFromRequestData()
     removeCharacterByRemoveCharacterDataList(removeCharacterDataList)
   end
@@ -6675,8 +6638,8 @@ logging(saveData, 'changePlayRoom() saveData end')
 =end
   
   end
-  
 
+  command
   def enterWaitingRoomCharacter
     params = getParamsFromRequestData()
     characterId = params['characterId']
@@ -6698,8 +6661,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       
 =end
   end
-  
-  
+
+  command
   def resurrectCharacter
     params = getParamsFromRequestData()
     resurrectCharacterId = params['imgId']
@@ -6714,6 +6677,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     return nil
   end
   
+  command
   def clearGraveyard
     logging("clearGraveyard begin")
 
@@ -6762,9 +6726,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     hash[key] ||= {}
     return hash[key]
   end
-  
-  
-  
+
+  command
   def exitWaitingRoomCharacter
     logging("exitWaitingRoomCharacter Begin")
     
@@ -6819,8 +6782,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     item = array.delete_at(index)
     return item
   end
-  
-  
+
+  command_noreturn
   def changeRoundTime
     roundTimeData = getParamsFromRequestData()
     changeInitiativeData(roundTimeData)
@@ -6832,10 +6795,10 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveData
     end
   end
-  
-  
-  
-  def addResource()
+
+
+  command_noreturn
+  def addResource
     params = getParamsFromRequestData()
     
     changeTimerData do |saveData|
@@ -6854,8 +6817,9 @@ logging(saveData, 'changePlayRoom() saveData end')
       resource[index] = params
     end
   end
-  
-  def changeResourcesAll()
+
+  command_noreturn
+  def changeResourcesAll
     params = getParamsFromRequestData()
     changeResourcesAllByParam(params)
   end
@@ -6876,8 +6840,9 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveData
     end
   end
-  
-  def removeResource()
+
+  command_noreturn
+  def removeResource
     params = getParamsFromRequestData()
     
     editResource(params) do |resource, index|
@@ -6917,9 +6882,9 @@ logging(saveData, 'changePlayRoom() saveData end')
     return nil
   end
   
-  
-  #FIXME
-  def moveCharacter()
+  command_noreturn
+  def moveCharacter
+    #FIXME
     
     params = getParamsFromRequestData()
     
