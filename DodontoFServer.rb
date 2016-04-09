@@ -45,6 +45,10 @@ begin
 rescue Exception
 end
 
+if $isTestMode
+  require "config_test.rb"
+end
+
 
 if( $loginCountFileFullPath.nil? )
   $loginCountFileFullPath = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
@@ -196,7 +200,10 @@ class DodontoFServer
     end
     
   end
-  
+  def getRawCGIValue
+    @cgi ||= CGI.new
+    @cgi.params[key].first
+  end
   
   def getRequestData(key)
     @logger.debug(key, "getRequestData key")
@@ -207,8 +214,7 @@ class DodontoFServer
     
     if( value.nil? )
       if( @isWebIf )
-        @cgi ||= CGI.new
-        value = @cgi.params[key].first
+        value = getRawCGIValue
       end
     end
     
