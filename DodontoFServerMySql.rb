@@ -9,7 +9,9 @@ require 'mysql'
 
 
 
-$SAVE_DATA_DIR = '.'
+unless $isTestMode
+  $SAVE_DATA_DIR = '.'
+end
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
 $version = "Ver.1.47.24(2016/04/07)"
