@@ -80,4 +80,54 @@ class CommandServer
       throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
     end
   end
+
+  def getResponseTextWhenNoCommandName
+    logging("getResponseTextWhenNoCommandName Begin")
+
+    response = analyzeWebInterfaceCatcher
+
+    if( response.nil? )
+      response =  getTestResponseText
+    end
+
+    return response
+  end
+
+  def server_type_name
+    fail NotImplementedError, 'server_type_name is not implemented.'
+  end
+
+  def getTestResponseText
+    unless ( FileTest::directory?( $SAVE_DATA_DIR + '/saveData') )
+      return "Error : saveData ディレクトリ(#{$SAVE_DATA_DIR + '/saveData'}) が存在しません。"
+    end
+    if ( Dir::mkdir( $SAVE_DATA_DIR + '/saveData/data_checkTestResponse') )
+      Dir::rmdir($SAVE_DATA_DIR + '/saveData/data_checkTestResponse' )
+    end
+    unless ( FileTest::directory?( $imageUploadDir ) )
+      return "Error : 画像保存用ディレクトリ #{$imageUploadDir} が存在しません。"
+    end
+    if ( Dir::mkdir( $imageUploadDir + '/data_checkTestResponse' ) )
+      Dir::rmdir($imageUploadDir + '/data_checkTestResponse' )
+    end
+    return "「#{server_type_name}」の動作環境は正常に起動しています。"
+  end
+
+  def analyzeWebInterfaceCatcher
+    result = { 'result'=> 'NG' }
+
+    begin
+      result = analyzeWebInterface
+      logging("analyzeWebInterface end result", result)
+      setJsonpCallBack
+    rescue Exception => e
+      result['result'] = e.to_s
+    end
+
+    return result
+  end
+
+  def analyzeWebInterface
+    fail NotImplementedError, 'analyzeWebInterface is not implemented.'
+  end
 end

@@ -716,35 +716,8 @@ class DodontoFServer < CommandServer
     
     return text
   end
-
-  def getResponseTextWhenNoCommandName
-    logging("getResponseTextWhenNoCommandName Begin")
-    
-    response = analyzeWebInterface 
-    
-    if( response.nil? )
-      response =  getTestResponseText
-    end
-    
-    return response
-  end
   
   def analyzeWebInterface
-    result = { 'result'=> 'NG' }
-    
-    begin
-      result = analyzeWebInterfaceCatched
-    rescue Exception => e
-      result['result'] = e.to_s
-    end
-    
-    setJsonpCallBack
-    
-    logging("analyzeWebInterfaceCatched end result", result)
-    return result
-  end
-  
-  def analyzeWebInterfaceCatched
     logging("analyzeWebInterfaceCatched begin")
     
     @isWebIf = true
@@ -790,7 +763,7 @@ class DodontoFServer < CommandServer
     else
       nil
     end
-  end  
+  end
   
   
   def analyzeWebInterfaceLogined(command)
@@ -910,25 +883,11 @@ class DodontoFServer < CommandServer
     
     @jsonpCallBack = callBack
   end
-  
-  
-  def getTestResponseText
-    unless ( FileTest::directory?( $SAVE_DATA_DIR + '/saveData') )
-      return "Error : saveData ディレクトリ(#{$SAVE_DATA_DIR + '/saveData'}) が存在しません。"
-    end
-    if ( Dir::mkdir( $SAVE_DATA_DIR + '/saveData/data_checkTestResponse') )
-      Dir::rmdir($SAVE_DATA_DIR + '/saveData/data_checkTestResponse' )
-    end
-    unless ( FileTest::directory?( $imageUploadDir ) )
-      return "Error : 画像保存用ディレクトリ #{$imageUploadDir} が存在しません。"
-    end
-    if ( Dir::mkdir( $imageUploadDir + '/data_checkTestResponse' ) )
-      Dir::rmdir($imageUploadDir + '/data_checkTestResponse' )
-    end
-    return "「どどんとふ」の動作環境は正常に起動しています。"
+
+  def server_type_name
+    "どどんとふ"
   end
-  
-  
+
   def getCurrentSaveData()
     @saveFiles.each do |saveFileTypeName, saveFileName|
       logging(saveFileTypeName, "saveFileTypeName");

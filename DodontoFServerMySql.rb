@@ -751,9 +751,13 @@ class DodontoFServer_MySql < DodontoFServer
   def deleteChatLogBySaveFile(trueSaveFileName)
     getDataAccesser().deleteChatLogBySaveFile(trueSaveFileName)
   end
+
+  def server_type_name
+    'どどんとふ（MySQL）'
+  end
   
   def getTestResponseText
-    "「どどんとふ（MySQL）」の動作環境は正常に起動しています。";
+    "「#{server_type_name}」の動作環境は正常に起動しています。";
   end
   
 end
