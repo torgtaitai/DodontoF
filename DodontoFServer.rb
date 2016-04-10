@@ -113,7 +113,6 @@ class DodontoFServer < CommandServer
     
     @isAddMarker = false
     @jsonpCallBack = nil
-    @isWebIf = false
     @isJsonResult = true
     @isRecordEmpty = false
     
@@ -720,7 +719,6 @@ class DodontoFServer < CommandServer
   def analyzeWebInterface
     logging("analyzeWebInterfaceCatched begin")
     
-    @isWebIf = true
     @isJsonResult = true
     
     commandName = getRequestData('webif')
@@ -3159,7 +3157,7 @@ class DodontoFServer < CommandServer
       playRoomChangedPassword = saveData['playRoomChangedPassword']
       passwordMatched = isPasswordMatch?(password, playRoomChangedPassword)
       
-      if @isWebIf
+      if web_interface?
         unless passwordMatched
           visiterMode = true 
         end

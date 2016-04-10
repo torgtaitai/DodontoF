@@ -30,6 +30,12 @@ class CommandServer
 
   def initialize(cgiParams)
     @cgiParams = cgiParams
+
+    @isWebIf = false
+  end
+
+  def web_interface?
+    @isWebIf
   end
 
   # このメソッドはCGIクラスへのアクセスを伴いますが
@@ -114,6 +120,8 @@ class CommandServer
   end
 
   def analyzeWebInterfaceCatcher
+    @isWebIf = true
+
     result = { 'result'=> 'NG' }
 
     begin

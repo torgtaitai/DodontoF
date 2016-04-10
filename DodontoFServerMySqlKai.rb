@@ -123,7 +123,6 @@ class DodontoFServer < CommandServer
     
     @isAddMarker = false
     @jsonpCallBack = nil
-    @isWebIf = false
     @isJsonResult = true
     
     @diceBotTablePrefix = 'diceBotTable_'
@@ -401,7 +400,6 @@ class DodontoFServer < CommandServer
   def analyzeWebInterface
     logging("analyzeWebInterfaceCatched begin")
     
-    @isWebIf = true
     @isJsonResult = true
     
     commandName = getRequestData('webif')
