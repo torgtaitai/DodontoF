@@ -2813,10 +2813,6 @@ logging(saveData, 'changePlayRoom() saveData end')
     dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
     rmdir(dir)
   end
-  
-  def getTrueSaveFileName(fileName)
-    @saveDirInfo.getTrueSaveFileName($saveFileTempName)
-  end
 
   command
   def saveAllData
