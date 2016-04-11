@@ -102,6 +102,7 @@ class DodontoFServerTest < Test::Unit::TestCase
   def test_changePlayRoom
     params = {
       'cmd' => 'changePlayRoom',
+      'room' => 1,
       'params' => {
         'playRoomName' => 'TESTROOM_CHANGED',
         'playRoomPassword' => '',
