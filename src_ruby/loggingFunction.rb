@@ -3,8 +3,10 @@
 require 'dodontof/logger'
 
 def initLog
-  # ロガーのインスタンスが存在しなければ自動で生成され準備が行われる
-  DodontoF::Logger.instance
+  logger = DodontoF::Logger.instance
+  logger.
+    reset.
+    updateLevel
 end
 
 def logging(obj, *options)

@@ -19,9 +19,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # デバッグモードでは logging は出力を行う
-  def test_logging_should_output_if_debug
+  def test_loggingShouldOutputIfDebug
     out = StringIO.new
-    init_logger_with_debug_level(out)
+    initLoggerWithDebugLevel(out)
 
     logging('debug')
 
@@ -29,9 +29,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # 非デバッグモードでは logging は出力しない
-  def test_logging_should_not_output_unless_debug
+  def test_loggingShouldNotOutputUnlessDebug
     out = StringIO.new
-    init_logger_with_error_level(out)
+    initLoggerWithErrorLevel(out)
 
     logging('debug')
 
@@ -39,9 +39,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # デバッグモードでは loggingForce は出力を行う
-  def test_loggingForce_should_output_if_debug
+  def test_loggingForceShouldOutputIfDebug
     out = StringIO.new
-    init_logger_with_error_level(out)
+    initLoggerWithErrorLevel(out)
 
     loggingForce('error')
 
@@ -49,9 +49,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # 非デバッグモードでも loggingForce は出力を行う
-  def test_loggingForce_should_output_unless_debug
+  def test_loggingForceShouldOutputUnlessDebug
     out = StringIO.new
-    init_logger_with_error_level(out)
+    initLoggerWithErrorLevel(out)
 
     loggingForce('error')
 
@@ -59,9 +59,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # String のログの形式が正しい
-  def test_format_of_string_log_should_be_correct
+  def test_formatOfStringLogShouldBeCorrect
     out = StringIO.new
-    init_logger_with_debug_level(out)
+    initLoggerWithDebugLevel(out)
 
     logging('getBusyInfo', 'commandName')
 
@@ -69,9 +69,9 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # Array のログの形式が正しい
-  def test_format_of_array_log_should_be_correct
+  def test_formatOfArrayLogShouldBeCorrect
     out = StringIO.new
-    init_logger_with_debug_level(out)
+    initLoggerWithDebugLevel(out)
 
     logging('getBusyInfo', 'commandName')
 
@@ -84,7 +84,7 @@ class LoggingFunctionTest < Test::Unit::TestCase
   private
 
   # デバッグモード用ロガーを準備する
-  def init_logger_with_debug_level(io)
+  def initLoggerWithDebugLevel(io)
     $log = nil
     $debug = true
     $logFileName = io
@@ -93,7 +93,7 @@ class LoggingFunctionTest < Test::Unit::TestCase
   end
 
   # 非デバッグモード用ロガーを準備する
-  def init_logger_with_error_level(io)
+  def initLoggerWithErrorLevel(io)
     $log = nil
     $debug = false
     $logFileName = io

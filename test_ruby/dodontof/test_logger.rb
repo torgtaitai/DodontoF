@@ -22,30 +22,30 @@ module DodontoF
     end
 
     # mod_ruby 使用時はログレベルが FATAL になる
-    def test_level_should_be_fatal_on_mod_ruby
-      @logger.update_level(true, true)
+    def test_levelShouldBeFatalOnModRuby
+      @logger.updateLevel(true, true)
 
       assert_equal(::Logger::FATAL, @logger.level)
     end
 
     # デバッグモードではログレベルが DEBUG になる
-    def test_level_should_be_debug_if_debug
-      @logger.update_level(false, true)
+    def test_levelShouldBeDebugIfDebug
+      @logger.updateLevel(false, true)
 
       assert_equal(::Logger::DEBUG, @logger.level)
     end
 
     # 非デバッグモードではログレベルが ERROR になる
-    def test_level_should_be_error_unless_debug
-      @logger.update_level(false, false)
+    def test_levelShouldBeErrorUnlessDebug
+      @logger.updateLevel(false, false)
 
       assert_equal(::Logger::ERROR, @logger.level)
     end
 
     # デバッグモードでは debug は出力を行う
-    def test_debug_should_output_if_debug
+    def test_debugShouldOutputIfDebug
       out = StringIO.new
-      init_logger_with_debug_level(out)
+      initLoggerWithDebugLevel(out)
 
       @logger.debug('debug')
 
@@ -53,9 +53,9 @@ module DodontoF
     end
 
     # 非デバッグモードでは debug は出力しない
-    def test_debug_should_not_output_unless_debug
+    def test_debugShouldNotOutputUnlessDebug
       out = StringIO.new
-      init_logger_with_error_level(out)
+      initLoggerWithErrorLevel(out)
 
       @logger.debug('debug')
 
@@ -63,9 +63,9 @@ module DodontoF
     end
 
     # デバッグモードでは error は出力を行う
-    def test_error_should_output_if_debug
+    def test_ErrorShouldOutputIfDebug
       out = StringIO.new
-      init_logger_with_error_level(out)
+      initLoggerWithErrorLevel(out)
 
       @logger.error('error')
 
@@ -73,9 +73,9 @@ module DodontoF
     end
 
     # 非デバッグモードでも error は出力を行う
-    def test_error_should_output_unless_debug
+    def test_errorShouldOutputUnlessDebug
       out = StringIO.new
-      init_logger_with_error_level(out)
+      initLoggerWithErrorLevel(out)
 
       @logger.error('error')
 
@@ -83,9 +83,9 @@ module DodontoF
     end
 
     # String のログの形式が正しい
-    def test_format_of_string_log_should_be_correct
+    def test_formatOfStringLogShouldBeCorrect
       out = StringIO.new
-      init_logger_with_debug_level(out)
+      initLoggerWithDebugLevel(out)
 
       @logger.debug('getBusyInfo', 'commandName')
 
@@ -93,9 +93,9 @@ module DodontoF
     end
 
     # Array のログの形式が正しい
-    def test_format_of_array_log_should_be_correct
+    def test_formatOfArrayLogShouldBeCorrect
       out = StringIO.new
-      init_logger_with_debug_level(out)
+      initLoggerWithDebugLevel(out)
 
       @logger.debug('getBusyInfo', 'commandName')
 
@@ -108,17 +108,17 @@ module DodontoF
     private
 
     # デバッグモード用ロガーを準備する
-    def init_logger_with_debug_level(io)
+    def initLoggerWithDebugLevel(io)
       @logger.
         reset(io).
-        update_level(false, true)
+        updateLevel(false, true)
     end
 
     # 非デバッグモード用ロガーを準備する
-    def init_logger_with_error_level(io)
+    def initLoggerWithErrorLevel(io)
       @logger.
         reset(io).
-        update_level(false, false)
+        updateLevel(false, false)
     end
   end
 end
