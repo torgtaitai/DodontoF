@@ -107,23 +107,6 @@ class Mysql::Stmt
 end
 
 class DodontoFServer
-  def self.getLockFileName(saveFileName)
-    defaultLockFileName = (saveFileName + ".lock")
-
-    if( $SAVE_DATA_LOCK_FILE_DIR.nil? )
-      return defaultLockFileName;
-    end
-
-    if( saveFileName.index($SAVE_DATA_DIR) != 0 )
-      return defaultLockFileName
-    end
-
-    subDirName = saveFileName[$SAVE_DATA_DIR.size .. -1]
-
-    lockFileName = File.join($SAVE_DATA_LOCK_FILE_DIR, subDirName) + ".lock"
-    return lockFileName
-  end
-
   def self.getTextFromJsonData(jsonData)
     return JsonBuilder.new.build(jsonData)
   end
@@ -284,7 +267,24 @@ class DodontoFServer
   def getSaveFileLockReadOnlyRealFile(saveFileName)
     getSaveFileLockRealFile(saveFileName, true)
   end
-  
+
+  def getLockFileName(saveFileName)
+    defaultLockFileName = (saveFileName + ".lock")
+
+    if( $SAVE_DATA_LOCK_FILE_DIR.nil? )
+      return defaultLockFileName;
+    end
+
+    if( saveFileName.index($SAVE_DATA_DIR) != 0 )
+      return defaultLockFileName
+    end
+
+    subDirName = saveFileName[$SAVE_DATA_DIR.size .. -1]
+
+    lockFileName = File.join($SAVE_DATA_LOCK_FILE_DIR, subDirName) + ".lock"
+    return lockFileName
+  end
+
   #override
   def getSaveFileLock(saveFileName, isReadOnly = false)
     getSaveFileLockRealFile(saveFileName, isReadOnly)
@@ -292,7 +292,7 @@ class DodontoFServer
   
   def getSaveFileLockRealFile(saveFileName, isReadOnly = false)
     begin
-      lockFileName = self.class.getLockFileName(saveFileName)
+      lockFileName = getLockFileName(saveFileName)
       return FileLock.new(lockFileName);
       #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
