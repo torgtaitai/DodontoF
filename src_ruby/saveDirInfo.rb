@@ -220,8 +220,7 @@ class SaveDirInfo
       
       return File.join(saveDataDirName, saveFileName)
     rescue => e
-      @logger.error($!.inspect )
-      @logger.error(e.inspect )
+      @logger.exceptionConcisely(e)
       raise e
     end
   end

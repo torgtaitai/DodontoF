@@ -147,7 +147,7 @@ class DodontoFServer
         logger.debug("getJsonDataFromText 2 end")
       end
     rescue => e
-      # loggingException(e)
+      # logger.exception(e)
       jsonData = {}
     end
 
@@ -170,7 +170,7 @@ class DodontoFServer
       messagePack = MessagePack.unpack(data)
     rescue Exception => e
       logger.error("getMessagePackFromData Exception rescue")
-      loggingException(e)
+      logger.exception(e)
     end
 
     logger.debug(messagePack, "messagePack")
@@ -210,14 +210,6 @@ class DodontoFServer
     end
 
     return messagePack
-  end
-
-  def self.loggingException(e)
-    logger = DodontoF::Logger.instance
-
-    logger.error( e.to_s, "exception mean" )
-    logger.error( $@.join("\n"), "exception from" )
-    logger.error($!.inspect, "$!.inspect" )
   end
   
   def initialize(saveDirInfo, cgiParams)
@@ -395,7 +387,7 @@ class DodontoFServer
         file.write(text.toutf8)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       raise e
     end
   end
@@ -541,7 +533,7 @@ class DodontoFServer
         @db.close unless( @db.nil? )
       rescue Exception
         # @logger.error("close Exception")
-        # loggingException(e)
+        # @logger.exception(e)
       end
     end
   end
@@ -1004,7 +996,7 @@ class DodontoFServer
     begin
       result = queryCatched(commandText, *params)
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       @logger.error([commandText, params].inspect)
       @logger.error("commandText : #{commandText}")
       throw e
@@ -1132,7 +1124,7 @@ class DodontoFServer
       initLoginUserDb
       initPlayRoomDb
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       throw e
     end
     
@@ -2809,7 +2801,7 @@ COMMAND_END
       
       sendRoomCreateMessage(playRoomIndex)
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
       resultText = getLanguageKey( e.to_s )
     end
     
@@ -3442,7 +3434,7 @@ COMMAND_END
     begin
       deleteOldSaveFileCatched
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
     @logger.debug('deleteOldSaveFile end')
   end
@@ -3471,7 +3463,7 @@ COMMAND_END
         begin
           deleteFile(saveFileName)
         rescue => e
-          loggingException(e)
+          @logger.exception(e)
         end
         
         deleteTargets << saveFileName
@@ -3488,12 +3480,6 @@ COMMAND_END
     end
     
   end
-  
-  
-  def loggingException(e)
-    self.class.loggingException(e)
-  end
-  
   
   def checkRoomStatus()
     deleteOldUploadFile()
@@ -3789,7 +3775,7 @@ COMMAND_END
     begin
       File.delete(fileName)
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
     end
     
     @logger.debug("removeBotTableMain End")
@@ -3899,7 +3885,7 @@ COMMAND_END
       result = requestReplayDataList()
     rescue => e
       result["resultText"] = e.to_s
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return result
@@ -3943,7 +3929,7 @@ COMMAND_END
         File.delete(fileName)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
   end
   
@@ -5119,7 +5105,7 @@ COMMAND_END
       @db.commit
     rescue => e
       @db.rollback
-      loggingException(e)
+      @logger.exception(e)
       throw e
     end
     
@@ -5165,7 +5151,7 @@ COMMAND_END
       end
     rescue => e
       result['result'] = getErrorResponseText(e)
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return result
@@ -5519,7 +5505,7 @@ COMMAND_END
       begin
         deleteFile(smallImage)
       rescue => e
-        loggingException(e)
+        @logger.exception(e)
       end
     end
     

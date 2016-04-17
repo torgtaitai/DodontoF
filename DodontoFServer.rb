@@ -139,7 +139,7 @@ class DodontoFServer
         logger.debug("getJsonDataFromText 2 end")
       end
     rescue => e
-      # loggingException(e)
+      # logger.exception(e)
       jsonData = {}
     end
 
@@ -162,7 +162,7 @@ class DodontoFServer
         messagePack = MessagePack.unpack(data)
     rescue Exception => e
       logger.error("getMessagePackFromData Exception rescue")
-      loggingException(e)
+      logger.exception(e)
     end
 
     logger.debug(messagePack, "messagePack")
@@ -202,14 +202,6 @@ class DodontoFServer
     end
 
     return messagePack
-  end
-
-  def self.loggingException(e)
-    logger = DodontoF::Logger.instance
-
-    logger.error( e.to_s, "exception mean" )
-    logger.error( $@.join("\n"), "exception from" )
-    logger.error($!.inspect, "$!.inspect" )
   end
 
   def initialize(saveDirInfo, cgiParams)
@@ -364,7 +356,7 @@ class DodontoFServer
         saveData = loadSaveFileForDefault(typeName, saveFileName)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       raise e
     end
     
@@ -717,7 +709,7 @@ class DodontoFServer
         file.write(text.toutf8)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       raise e
     end
   end
@@ -1416,18 +1408,17 @@ class DodontoFServer
   
   
   def sendWebIfChangeMemo
-    
     @logger.debug('sendWebIfChangeMemo begin')
-    
+
     result = {}
-    
+
     begin
       result['result'] = sendWebIfChangeMemoChatched
     rescue => e
-      loggingException(e)
-          result['result'] =  e.to_s
+      @logger.exception(e)
+      result['result'] =  e.to_s
     end
-    
+
     return result
   end
   
@@ -1524,7 +1515,7 @@ class DodontoFServer
     begin
       sendWebIfChangeCharacterChatched
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       result['result'] =  e.to_s
     end
     
@@ -2102,7 +2093,7 @@ class DodontoFServer
       playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
     rescue Exception => e
       @logger.error("getPlayRoomStateLocal Exception rescue")
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return playRoomState
@@ -3167,7 +3158,7 @@ class DodontoFServer
     begin
       deleteOldSaveFileCatched
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
     @logger.debug('deleteOldSaveFile end')
   end
@@ -3196,7 +3187,7 @@ class DodontoFServer
         begin
           deleteFile(saveFileName)
         rescue => e
-          loggingException(e)
+          @logger.exception(e)
         end
         
         deleteTargets << saveFileName
@@ -3213,13 +3204,7 @@ class DodontoFServer
     end
     
   end
-  
-  
-  def loggingException(e)
-    self.class.loggingException(e)
-  end
-  
-  
+
   def checkRoomStatus()
     deleteOldUploadFile()
     
@@ -3443,31 +3428,29 @@ class DodontoFServer
     
     return result
   end
-  
+
   def addBotTableMain(params)
     @logger.debug("addBotTableMain Begin")
-    
+
     dir = getDiceBotExtraTableDirName
     makeDir(dir)
-    
+
     require 'TableFileData'
-    
+
     resultText = 'OK'
     begin
       creator = TableFileCreator.new(dir, @diceBotTablePrefix, params)
       creator.execute
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
       resultText = getLanguageKey( e.to_s )
     end
-    
+
     @logger.debug(resultText, "addBotTableMain End resultText")
-    
+
     return resultText
   end
-  
-  
-  
+
   def changeBotTable()
     result = {}
     result['resultText'] = changeBotTableMain()
@@ -3479,31 +3462,29 @@ class DodontoFServer
     result = getBotTableInfos()
     return result
   end
-  
+
   def changeBotTableMain()
     @logger.debug("changeBotTableMain Begin")
-    
+
     dir = getDiceBotExtraTableDirName
     params = getParamsFromRequestData()
-    
+
     require 'TableFileData'
-    
+
     resultText = 'OK'
     begin
       creator = TableFileEditer.new(dir, @diceBotTablePrefix, params)
       creator.execute 
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
       resultText = getLanguageKey( e.to_s )
     end
-    
+
     @logger.debug(resultText, "changeBotTableMain End resultText")
-    
+
     return resultText
   end
-  
-  
-  
+
   def removeBotTable()
     removeBotTableMain()
     return getBotTableInfos()
@@ -3511,36 +3492,36 @@ class DodontoFServer
   
   def removeBotTableMain()
     @logger.debug("removeBotTableMain Begin")
-    
+
     params = getParamsFromRequestData()
     command = params["command"]
-    
+
     dir = getDiceBotExtraTableDirName
-    
+
     require 'TableFileData'
-    
+
     isLoadCommonTable = false
     tableFileData = TableFileData.new( isLoadCommonTable )
     tableFileData.setDir(dir, @diceBotTablePrefix)
     tableInfos = tableFileData.getAllTableInfo
-    
+
     tableInfo = tableInfos.find{|i| i["command"] == command}
     @logger.debug(tableInfo, "tableInfo")
     return if( tableInfo.nil? )
-    
+
     fileName = tableInfo["fileName"]
     @logger.debug(fileName, "fileName")
     return if( fileName.nil? )
-    
+
     @logger.debug("isFile exist?")
     return unless( File.exist?(fileName) )
-    
+
     begin
       File.delete(fileName)
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
     end
-    
+
     @logger.debug("removeBotTableMain End")
   end
   
@@ -3648,7 +3629,7 @@ class DodontoFServer
       result = requestReplayDataList()
     rescue => e
       result["resultText"] = e.to_s
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return result
@@ -3692,7 +3673,7 @@ class DodontoFServer
         File.delete(fileName)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
   end
   
@@ -5214,7 +5195,7 @@ class DodontoFServer
       begin
         deleteFile(smallImage)
       rescue => e
-        loggingException(e)
+        @logger.exception(e)
       end
     end
     

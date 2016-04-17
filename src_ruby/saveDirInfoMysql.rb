@@ -190,8 +190,7 @@ class SaveDirInfo
       
       return File.join(saveDataDirName, saveFileName)
     rescue Exception => e
-      @logger.error($!.inspect )
-      @logger.error(e.inspect )
+      @logger.exceptionConcisely(e)
       raise e
     end
   end
@@ -202,8 +201,7 @@ class SaveDirInfo
       dir = getSaveDataBaseDir()
       return File.join(dir, fileName)
     rescue => e
-      @logger.error($!.inspect )
-      @logger.error(e.inspect )
+      @logger.exceptionConcisely(e)
       raise e
     end
   end
