@@ -38,7 +38,7 @@ module DodontoF
     # @param [Boolean] debug デバッグログ出力を行うかどうか
     # @return [self]
     def updateLevel(modRuby = $isModRuby,
-                     debug = $debug)
+                    debug = $debug)
       @logger.level =
         if modRuby
           ::Logger::FATAL
@@ -66,6 +66,30 @@ module DodontoF
     def error(obj, *headers)
       # ブロックは遅延評価されるのでフィルターする必要はない
       @logger.error { logMessage(obj, headers) }
+      self
+    end
+
+    # 例外ログ出力を行う
+    # @param [Exception] e 例外オブジェクト
+    # @return [self]
+    def exception(e)
+      error(e.to_s, 'exception mean')
+
+      unless $!.nil?
+        error($!.backtrace.join("\n"), 'exception from')
+        error($!.inspect, '$!.inspect')
+      end
+
+      self
+    end
+
+    # 簡潔に例外ログ出力を行う
+    # @param [Exception] e 例外オブジェクト
+    # @return [self]
+    def exceptionConcisely(e)
+      error($!.inspect) unless $!.nil?
+      error(e.inspect)
+
       self
     end
 

@@ -105,6 +105,44 @@ module DodontoF
       assert_match(/array,symbol:\[:a, :b, :c\]/, out.string)
     end
 
+    # exception のログの形式が正しい
+    def test_formatOfExceptionShouldBeCorrect
+      out = StringIO.new
+      initLoggerWithErrorLevel(out)
+
+      begin
+        raise 'Test exception'
+      rescue => e
+        @logger.exception(e)
+      end
+
+      output = out.string
+      assert_match(/exception mean:/, output)
+      assert_match(/exception from:/, output)
+      assert_match(/\$!\.inspect:/, output)
+    end
+
+    # exceptionConcisely のログの形式が正しい
+    def test_formatOfExceptionConciselyShouldBeCorrect
+      out = StringIO.new
+      initLoggerWithErrorLevel(out)
+
+      exception = StandardError.new('Test exception')
+      last_exception = nil
+      begin
+        raise exception
+      rescue => e
+        # $! を保存する
+        last_exception = $!
+
+        @logger.exceptionConcisely(e)
+      end
+
+      output = out.string
+      assert(output.include?(last_exception.inspect), '$!.inspect が含まれる')
+      assert(output.include?(exception.inspect), 'e.inspect が含まれる')
+    end
+
     private
 
     # デバッグモード用ロガーを準備する
