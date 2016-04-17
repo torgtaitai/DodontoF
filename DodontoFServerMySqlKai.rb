@@ -35,6 +35,7 @@ require 'json/jsonParser'
 require 'mysql'
 
 require 'dodontof/logger'
+require 'dodontof/utils'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -107,35 +108,7 @@ class Mysql::Stmt
 end
 
 class DodontoFServer
-  def self.getTextFromJsonData(jsonData)
-    return JsonBuilder.new.build(jsonData)
-  end
-
-  def self.getDataFromMessagePack(data)
-    MessagePack.pack(data)
-  end
-
-  def self.getJsonDataFromText(text)
-    logger = DodontoF::Logger.instance
-
-    jsonData = nil
-    begin
-      logger.debug(text, "getJsonDataFromText start")
-      begin
-        jsonData = JsonParser.new.parse(text)
-        logger.debug("getJsonDataFromText 1 end")
-      rescue => e
-        text = CGI.unescape(text)
-        jsonData = JsonParser.new.parse(text)
-        logger.debug("getJsonDataFromText 2 end")
-      end
-    rescue => e
-      # logger.exception(e)
-      jsonData = {}
-    end
-
-    return jsonData
-  end
+  include DodontoF::Utils
 
   def self.getMessagePackFromData(data)
     logger = DodontoF::Logger.instance
@@ -326,7 +299,7 @@ class DodontoFServer
       text = getSaveTextOnFileLocked(saveFileName)
     end
     
-    saveData = getJsonDataFromText(text)
+    saveData = getObjectFromJsonString(text)
     yield(saveData)
   end
   
@@ -336,11 +309,11 @@ class DodontoFServer
     
     saveFileLock.lock do
       saveDataText = getSaveTextOnFileLocked(saveFileName)
-      saveData = getJsonDataFromText(saveDataText)
+      saveData = getObjectFromJsonString(saveDataText)
       
       yield(saveData)
       
-      saveDataText = getTextFromJsonData(saveData)
+      saveDataText = getJsonString(saveData)
       createFile(saveFileName, saveDataText)
     end
   end
@@ -390,18 +363,6 @@ class DodontoFServer
       @logger.exception(e)
       raise e
     end
-  end
-  
-  def getTextFromJsonData(jsonData)
-    self.class.getTextFromJsonData(jsonData)
-  end
-  
-  def getDataFromMessagePack(data)
-    self.class.getDataFromMessagePack(data)
-  end  
-  
-  def getJsonDataFromText(text)
-    self.class.getJsonDataFromText(text)
   end
   
   def getMessagePackFromData(data)
@@ -746,7 +707,7 @@ class DodontoFServer
     saveData = {}
     result.each do |row|
       saveData["characters"] ||= []
-      saveData["characters"] << row["json"] # getJsonDataFromText( row["json"] )
+      saveData["characters"] << row["json"] # getObjectFromJsonString( row["json"] )
     end
     
     @lastUpdateTimes['characters'] = lastTime
@@ -892,7 +853,7 @@ class DodontoFServer
     return if row.nil?
     
     time = row.delete('update_index')
-    data = getJsonDataFromText( row["json"] )
+    data = getObjectFromJsonString( row["json"] )
     
     yield(data)
     
@@ -916,7 +877,7 @@ class DodontoFServer
     list = {}
     result.each do |row|
       roomNo = row['roomNo'].to_i
-      list[roomNo] = getJsonDataFromText( row["json"] )
+      list[roomNo] = getObjectFromJsonString( row["json"] )
     end
     
     return list
@@ -933,7 +894,7 @@ class DodontoFServer
     row = result.first
     return {} if row.nil?
     
-    data = getJsonDataFromText( row["json"] )
+    data = getObjectFromJsonString( row["json"] )
     data ||= {}
 
     return data
@@ -1726,7 +1687,7 @@ SQL_TEXT
       
       characterData = nil
       result.each do |row|
-        data = getJsonDataFromText( row["json"] )
+        data = getObjectFromJsonString( row["json"] )
         
         if data['name'] == targetName
           characterData = data
@@ -3367,7 +3328,7 @@ COMMAND_END
       saveData[key] = data
     end
     
-    text = getTextFromJsonData(saveData)
+    text = getJsonString(saveData)
     saveFileName = getNewSaveFileName(extension)
     createSaveFile(saveFileName, text)
     
@@ -3393,7 +3354,7 @@ COMMAND_END
       
       if saveFileTypeName == 'characters'
         jsons = targetSaveData["characters"]
-        characters = jsons.collect {|i| getJsonDataFromText(i) }
+        characters = jsons.collect {|i| getObjectFromJsonString(i) }
         targetSaveData["characters"] = characters
       end
       
@@ -4308,7 +4269,7 @@ COMMAND_END
   def loadFromJsonDataString(jsonDataString)
     jsonDataString = changeLoadText(jsonDataString)
     
-    jsonData = getJsonDataFromText(jsonDataString)
+    jsonData = getObjectFromJsonString(jsonDataString)
     loadFromJsonData(jsonData)
   end
   
@@ -4759,7 +4720,7 @@ COMMAND_END
     
     result = getAllCharacters($characterStateGraveyard, true)
     
-    graveyard = result.collect{|i| getJsonDataFromText(i["json"])}
+    graveyard = result.collect{|i| getObjectFromJsonString(i["json"])}
     @logger.debug(graveyard, "getGraveyardCharacterData graveyard")
     
     return graveyard
@@ -4769,7 +4730,7 @@ COMMAND_END
     @logger.debug("getWaitingRoomInfo start.")
     
     result = getAllCharacters($characterStateWaitingRoom, true)
-    waitingRoom = result.collect{|i| getJsonDataFromText(i["json"])}
+    waitingRoom = result.collect{|i| getObjectFromJsonString(i["json"])}
     
     return waitingRoom
   end
@@ -5005,7 +4966,7 @@ COMMAND_END
       "power" => getDiceBotPower(params),
     }
     
-    text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
+    text = "###CutInCommand:rollVisualDice###" + getJsonString(data)
     @logger.debug(text, "getRolledMessage End text")
     
     return text
@@ -5225,11 +5186,11 @@ COMMAND_END
     
     id = row['id']
     json = row['json']
-    data = getJsonDataFromText(json)
+    data = getObjectFromJsonString(json)
     
     data = yield(data)
     
-    json = getTextFromJsonData(data)
+    json = getJsonString(data)
     changeDb do 
       updateDb(:table => tableName,
                :set => {"json" => json},
@@ -5249,11 +5210,11 @@ COMMAND_END
     return if row.nil?
     
     json = row['json']
-    data = getJsonDataFromText(json)
+    data = getObjectFromJsonString(json)
     
     data = yield(data)
     
-    json = getTextFromJsonData(data)
+    json = getJsonString(data)
     changeDb do 
       updateDb(:table => tableName,
                :set => {"json" => json},
@@ -6201,7 +6162,7 @@ COMMAND_END
     result = getAllCharacters(mountType, true)
     @logger.debug(result, "drawCard base targets.")
     
-    cards = result.collect{|i| getJsonDataFromText(i["json"])}
+    cards = result.collect{|i| getObjectFromJsonString(i["json"])}
     cards.delete_if{|i| i['mountName'] != mountName}
     
     return cards
@@ -6349,7 +6310,7 @@ COMMAND_END
     
     changeDb do
       card = findCharacterById( params['dumpedCardId'] )
-      cardData = getJsonDataFromText(card["json"])
+      cardData = getObjectFromJsonString(card["json"])
       
       updateCharacters(cardData, nil, $characterStateCardTrushMount)
       
@@ -6440,7 +6401,7 @@ COMMAND_END
       @logger.debug(aceList, "aceList")
       
       result = getAllCharacters()
-      characters = result.collect{|i| getJsonDataFromText(i["json"])}
+      characters = result.collect{|i| getObjectFromJsonString(i["json"])}
       
       aceCards = []
       aceCards += deleteAceFromCards(trushCards, aceList)
@@ -6506,7 +6467,7 @@ COMMAND_END
     result = readDb( "SELECT *",
                      :from => "characters",
                      :where => {"type = ? " => cardMountType} )
-    characters = result.collect{|i| getJsonDataFromText(i["json"])}
+    characters = result.collect{|i| getObjectFromJsonString(i["json"])}
     
     cardMountData = characters.find do |i| 
       i['mountName'] == mountName
@@ -6771,7 +6732,7 @@ COMMAND_END
       character = findCharacterById(characterId)
       return result if(character.nil?)
       
-      data = getJsonDataFromText(character["json"])
+      data = getObjectFromJsonString(character["json"])
       data['x'] = x
       data['y'] = y
       
@@ -6919,7 +6880,7 @@ COMMAND_END
       
       return if(character.nil?)
       
-      data = getJsonDataFromText(character["json"])
+      data = getObjectFromJsonString(character["json"])
       data['x'] = params['x']
       data['y'] = params['y']
       
@@ -6933,7 +6894,7 @@ COMMAND_END
     character = findCharacterById(imgId)
     return nil if character.nil?
     
-    return getJsonDataFromText( character["json"] )
+    return getObjectFromJsonString( character["json"] )
   end
   
   def findCharacterById(imgId)
@@ -6956,20 +6917,17 @@ COMMAND_END
   end
   
   def getResponse
-    
-    response = nil
-    
-    if( $dodontofWarning.nil? )
-      response = analyzeCommand
+    response =
+      if $dodontofWarning.nil?
+        analyzeCommand
+      else
+        { 'warning' => $dodontofWarning }
+      end
+
+    if isJsonResult
+      return getJsonString(response)
     else
-      response = {}
-      response["warning"] = $dodontofWarning
-    end
-    
-    if( isJsonResult )
-      return getTextFromJsonData(response)
-    else
-      return getDataFromMessagePack(response)
+      return MessagePack.pack(response)
     end
   end
   

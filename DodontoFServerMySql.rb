@@ -8,6 +8,7 @@ require 'DodontoFServer.rb'
 require 'mysql'
 
 require 'dodontof/logger'
+require 'dodontof/utils'
 
 $SAVE_DATA_DIR = '.'
 
@@ -15,6 +16,8 @@ $SAVE_DATA_DIR = '.'
 $version = "Ver.1.47.24(2016/04/07)"
 
 class SaveDataManagerOnMySql
+  include DodontoF::Utils
+
   def initialize
     @tableLocked = false
     @db = nil
@@ -413,7 +416,7 @@ SQL
       return {}
     end
     
-    data = lines.collect{|line| DodontoFServer.getJsonDataFromText(line.chomp) }
+    data = lines.collect{|line| getObjectFromJsonString(line.chomp) }
     saveData = {"chatMessageDataLog" => data}
     
     return saveData
@@ -471,7 +474,7 @@ SQL
     open(nil, isReadOnly, tableName) do
       
       time = getCurrentTime
-      text = DodontoFServer.getTextFromJsonData([time, chatMessageData])
+      text = getJsonString([time, chatMessageData])
       
       numberLimit = $chatMessageDataLogAllLineMax
       oldestNumber = 0
@@ -507,7 +510,7 @@ SQL
       unless( saveDataForChat.nil? )
         chatData = saveDataForChat[number]
         unless( chatData.nil? )
-          text = DodontoFServer.getTextFromJsonData(chatData)
+          text = getJsonString(chatData)
         end
       end
       

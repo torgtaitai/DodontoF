@@ -32,6 +32,7 @@ require 'fileutils'
 require 'json/jsonParser'
 
 require 'dodontof/logger'
+require 'dodontof/utils'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -99,35 +100,7 @@ $record = 'record.json'
 $diceBotTableSaveKey = "diceBotTable"
 
 class DodontoFServer
-  def self.getTextFromJsonData(jsonData)
-    return JsonBuilder.new.build(jsonData)
-  end
-
-  def self.getDataFromMessagePack(data)
-    MessagePack.pack(data)
-  end
-
-  def self.getJsonDataFromText(text)
-    logger = DodontoF::Logger.instance
-
-    jsonData = nil
-    begin
-      logger.debug(text, "getJsonDataFromText start")
-      begin
-        jsonData = JsonParser.new.parse(text)
-        logger.debug("getJsonDataFromText 1 end")
-      rescue => e
-        text = CGI.unescape(text)
-        jsonData = JsonParser.new.parse(text)
-        logger.debug("getJsonDataFromText 2 end")
-      end
-    rescue => e
-      # logger.exception(e)
-      jsonData = {}
-    end
-
-    return jsonData
-  end
+  include DodontoF::Utils
 
   def self.getMessagePackFromData(data)
     logger = DodontoF::Logger.instance
@@ -334,7 +307,7 @@ class DodontoFServer
       return {}
     end
     
-    chatMessageDataLog = lines.collect{|line| getJsonDataFromText(line.chomp) }
+    chatMessageDataLog = lines.collect{|line| getObjectFromJsonString(line.chomp) }
     
     saveData = {"chatMessageDataLog" => chatMessageDataLog}
     
@@ -502,7 +475,7 @@ class DodontoFServer
       saveDataText = getSaveTextOnFileLocked(saveFileName)
     end
     
-    saveData = getJsonDataFromText(saveDataText)
+    saveData = getObjectFromJsonString(saveDataText)
     
     return saveData
   end
@@ -516,7 +489,7 @@ class DodontoFServer
       text = getSaveTextOnFileLocked(saveFileName)
     end
     
-    saveData = getJsonDataFromText(text)
+    saveData = getObjectFromJsonString(text)
     yield(saveData)
   end
   
@@ -528,7 +501,7 @@ class DodontoFServer
     
     saveFileLock.lock do
       saveDataText = getSaveTextOnFileLocked(saveFileName)
-      saveData = getJsonDataFromText(saveDataText)
+      saveData = getObjectFromJsonString(saveDataText)
       
       if( isCharacterSaveData )
         saveCharacterHsitory(saveData) do
@@ -538,7 +511,7 @@ class DodontoFServer
         yield(saveData)
       end
       
-      saveDataText = getTextFromJsonData(saveData)
+      saveDataText = getJsonString(saveData)
       createFile(saveFileName, saveDataText)
     end
   end
@@ -712,18 +685,6 @@ class DodontoFServer
       @logger.exception(e)
       raise e
     end
-  end
-  
-  def getTextFromJsonData(jsonData)
-    self.class.getTextFromJsonData(jsonData)
-  end
-  
-  def getDataFromMessagePack(data)
-    self.class.getDataFromMessagePack(data)
-  end  
-  
-  def getJsonDataFromText(text)
-    self.class.getJsonDataFromText(text)
   end
   
   def getMessagePackFromData(data)
@@ -3095,7 +3056,7 @@ class DodontoFServer
       saveData[key] = data
     end
     
-    text = getTextFromJsonData(saveData)
+    text = getJsonString(saveData)
     saveFileName = getNewSaveFileName(extension)
     createSaveFile(saveFileName, text)
     
@@ -4059,7 +4020,7 @@ class DodontoFServer
   def loadFromJsonDataString(jsonDataString)
     jsonDataString = changeLoadText(jsonDataString)
     
-    jsonData = getJsonDataFromText(jsonDataString)
+    jsonData = getObjectFromJsonString(jsonDataString)
     loadFromJsonData(jsonData)
   end
   
@@ -4758,7 +4719,7 @@ class DodontoFServer
       "power" => getDiceBotPower(params),
     }
     
-    text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
+    text = "###CutInCommand:rollVisualDice###" + getJsonString(data)
     @logger.debug(text, "getRolledMessage End text")
     
     return text
@@ -4913,7 +4874,7 @@ class DodontoFServer
       if( isExist?(saveFileName) )
         lines = readLines(saveFileName)
       end
-      lines << getTextFromJsonData(chatMessageData)
+      lines << getJsonString(chatMessageData)
       lines << "\n"
       
       while( lines.size > $chatMessageDataLogAllLineMax )
@@ -6784,20 +6745,17 @@ class DodontoFServer
   end
   
   def getResponse
-    
-    response = nil
-    
-    if( $dodontofWarning.nil? )
-      response = analyzeCommand
+    response =
+      if $dodontofWarning.nil?
+        analyzeCommand
+      else
+        { 'warning' => $dodontofWarning }
+      end
+
+    if isJsonResult
+      return getJsonString(response)
     else
-      response = {}
-      response["warning"] = $dodontofWarning
-    end
-    
-    if( isJsonResult )
-      return getTextFromJsonData(response)
-    else
-      return getDataFromMessagePack(response)
+      return MessagePack.pack(response)
     end
   end
   
