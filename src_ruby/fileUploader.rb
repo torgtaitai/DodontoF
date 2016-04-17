@@ -3,10 +3,14 @@
 require 'kconv'
 require 'config'
 
+require 'dodontof/logger'
+
 class FileUploader
   
   def initialize
     @resultMessage = "...."
+
+    @logger = DodontoF::Logger.instance
   end
   
   def init(uploadFileInfo, fileSizeLimit, fileCountLimit)
@@ -17,7 +21,7 @@ class FileUploader
   
   def getUploadFileName
     uploadFileName = @uploadFileInfo.original_filename
-    logging(uploadFileName, "uploadFileName")
+    @logger.debug(uploadFileName, "uploadFileName")
     
     return uploadFileName
   end
@@ -29,7 +33,7 @@ class FileUploader
   
   def checkUploadFileSize
     fileSize = @uploadFileInfo.size
-    logging(fileSize, "fileSize");
+    @logger.debug(fileSize, "fileSize");
     if( fileSize > (@fileSizeLimit * 1024 * 1024))
       raise "ファイルのサイズが上限の#{ sprintf('%0.2f', @fileSizeLimit) }MBを超えています。（アップロードしようとしたファイルのサイズ:#{ sprintf('%0.2f', 1.0 * fileSize / 1024 / 1024) }MB)"
     end
@@ -41,17 +45,17 @@ class FileUploader
     end
     
     files = Dir.glob( File.join(dirName, "*") )
-    logging(files, "dir include fileNames")
+    @logger.debug(files, "dir include fileNames")
     
     newOrderFiles = files.sort!{|a, b| File.mtime(b) <=> File.mtime(a)}
     newOrderFiles.each_with_index do |file, index|
       if( index < (@fileCountLimit - 1) )
-        logging("@fileCountLimit", @fileCountLimit)
-        logging("delete pass file", file)
+        @logger.debug("@fileCountLimit", @fileCountLimit)
+        @logger.debug("delete pass file", file)
         next
       end
       File.delete(file)
-      logging("deleted file", file)
+      @logger.debug("deleted file", file)
     end
   end
   
@@ -59,24 +63,24 @@ class FileUploader
     
     saveDirInfo = SaveDirInfo.new(saveDataDirIndex, $saveDataMaxCount, $SAVE_DATA_DIR)
     saveDirName = saveDirInfo.getTrueSaveFileName(subDirName)
-    logging(saveDirName, "saveDirName")
+    @logger.debug(saveDirName, "saveDirName")
     
     unless(subDirName == ".")
       createDirAndCrean(saveDirName)
     end
     
     saveFileName = File.join(saveDirName, fileName)
-    logging(saveFileName, "saveFileName")
+    @logger.debug(saveFileName, "saveFileName")
     
-    logging("open...")
+    @logger.debug("open...")
     open(saveFileName, "w+") do |file|
       
       file.binmode
       file.write(@uploadFileInfo.read)
     end
-    logging("close...")
+    @logger.debug("close...")
     
-    logging("createUploadFile end.")
+    @logger.debug("createUploadFile end.")
     
     return saveFileName
   end
@@ -90,7 +94,7 @@ class FileUploader
   end
   
   def setExceptionErrorMeesage(exception)
-    logging("Exception")
+    @logger.debug("Exception")
     
     $debug = true
     
@@ -100,7 +104,7 @@ class FileUploader
     @resultMessage += exception.inspect.toutf8
     @resultMessage += $!.inspect.toutf8
     @resultMessage += $@.inspect.toutf8
-    logging(@resultMessage)
+    @logger.debug(@resultMessage)
   end
   
   def printResultHtml
@@ -114,7 +118,7 @@ class FileUploader
 </body></html>'
     message = message.toutf8
     
-    logging(message)
+    @logger.debug(message)
     
     print message.toutf8
   end

@@ -1,9 +1,10 @@
 #--*-coding:utf-8-*--
 
+require 'dodontof/logger'
+
 class DiceBotInfos
   
   def initialize
-    
     @baseDiceBot = {
     'name' => 'BaseDiceBot',
     'gameType' => 'BaseDiceBot',
@@ -41,7 +42,7 @@ class DiceBotInfos
 　D66 ： D66用。[6,1]が16,61どちらかはゲーム種別に判定。D66Nはそのまま、D66Sは入替を強制。
 INFO_MESSAGE_TEXT
     }
-    
+
     noneDiceBot = {
     'name' => 'ダイスボット(指定無し)',
     'gameType' => 'DiceBot',
@@ -51,9 +52,11 @@ INFO_MESSAGE_TEXT
 ゲーム固有の判定がある場合はこの場所に記載されます。
 INFO_MESSAGE_TEXT
     }
-    
+
     @infos = [noneDiceBot,
              ]
+
+    @logger = DodontoF::Logger.instance
   end
   
   
@@ -71,12 +74,11 @@ INFO_MESSAGE_TEXT
   end
   
   def deleteInfos
-    logging(@orders, '@orders')
-    
+    @logger.debug(@orders, '@orders')
+
     @infos.delete_if do |info|
       not @orders.include?(info['name'])
     end
-    
   end
   
   def sortInfos
@@ -94,18 +96,17 @@ INFO_MESSAGE_TEXT
   
   
   def addAnotherDiceBotToInfos
-    
     ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-    
+
     require 'diceBot/DiceBot'
-    
+
     botFiles = Dir.glob("src_bcdice/diceBot/*.rb")
-    
+
     botNames = botFiles.collect{|i| File.basename(i, ".rb").untaint}
     botNames.delete_if{|i| ignoreBotNames.include?(i) }
-    
+
     botNames.each do |botName|
-      logging(botName, 'load unknown dice bot botName')
+      @logger.debug(botName, 'load unknown dice bot botName')
       require "diceBot/#{botName}"
       diceBot = Module.const_get(botName).new
       @infos << diceBot.info
