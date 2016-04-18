@@ -36,6 +36,7 @@ require 'mysql'
 
 require 'dodontof/logger'
 require 'dodontof/utils'
+require 'dodontof/dice_adapter'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -4163,21 +4164,6 @@ COMMAND_END
     return dir
   end
   
-  def makeDir(dir)
-    @logger.debug(dir, "makeDir dir")
-    
-    if( File.exist?(dir) )
-      if( File.directory?(dir) )
-        return
-      end
-      
-      File.delete(dir)
-    end
-    
-    Dir::mkdir(dir)
-    File.chmod(0777, dir)
-  end
-  
   def rmdir(dir)
     SaveDirInfo.removeDir(dir)
   end
@@ -4989,13 +4975,7 @@ COMMAND_END
     
     return power
   end
-  
-  
-  def getLanguageKey(key)
-    '###Language:' + key + '###'
-  end
-  
-  
+
   def sendChatMessageAll
     @logger.debug("sendChatMessageAll Begin")
     
