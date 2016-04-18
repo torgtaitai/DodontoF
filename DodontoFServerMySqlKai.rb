@@ -188,6 +188,8 @@ class DodontoFServer_MySqlKai
     @isJsonResult = true
 
     @diceBotTablePrefix = 'diceBotTable_'
+    @dice_adapter = DodontoF::DiceAdapter.new(getDiceBotExtraTableDirName, @diceBotTablePrefix)
+
     @fullBackupFileBaseName = "DodontoFFullBackup"
 
     @allSaveDataFileExt = '.tar.gz'
@@ -2662,22 +2664,14 @@ COMMAND_END
   
   def getGameCommandInfos
     @logger.debug('getGameCommandInfos Begin')
-    
+
     if( @saveDirInfo.getSaveDataDirIndex == -1 )
       @logger.debug('getGameCommandInfos room is -1, so END')
-      
+
       return []
     end
-    
-    require 'cgiDiceBot.rb'
-    bot = CgiDiceBot.new
-    dir = getDiceBotExtraTableDirName
-    @logger.debug(dir, 'dir')
-    
-    commandInfos = bot.getGameCommandInfos(dir, @diceBotTablePrefix)
-    @logger.debug(commandInfos, "getGameCommandInfos End commandInfos")
-    
-    return commandInfos
+
+    return @dice_adapter.getGameCommandInfos
   end
   
   
@@ -3297,8 +3291,7 @@ COMMAND_END
   end
   
   def getDiceTableData()
-    dir = getDiceBotExtraTableDirName
-    tableInfos = getBotTableInfosFromDir(dir)
+    tableInfos = @dice_adapter.getBotTableInfosFromDir
     
     tableInfos.each{|i| i.delete('fileName') }
     
@@ -3606,39 +3599,18 @@ COMMAND_END
       "resultText"=> "OK",
     }
     
-    dir = getDiceBotExtraTableDirName
-    result["tableInfos"] = getBotTableInfosFromDir(dir)
+    result["tableInfos"] = @dice_adapter.getBotTableInfosFromDir
     
     @logger.debug(result, "result")
     @logger.debug("getBotTableInfos End")
     return result
   end
-  
-  def getBotTableInfosFromDir(dir)
-    @logger.debug(dir, 'getBotTableInfosFromDir dir')
-    
-    require 'TableFileData'
-    
-    isLoadCommonTable = false
-    tableFileData = TableFileData.new( isLoadCommonTable )
-    tableFileData.setDir(dir, @diceBotTablePrefix)
-    tableInfos = tableFileData.getAllTableInfo
-    
-    @logger.debug(tableInfos, "getBotTableInfosFromDir tableInfos")
-    tableInfos.sort!{|a, b| a["command"].to_i <=> b["command"].to_i}
-    
-    @logger.debug(tableInfos, 'getBotTableInfosFromDir result tableInfos')
-    
-    return tableInfos
-  end
-  
-  
-  
+ 
   def addBotTable()
     result = {}
     
     params = getParamsFromRequestData()
-    result['resultText'] = addBotTableMain(params)
+    result['resultText'] = @dice_adapter.addBotTableMain(params)
     
     if( result['resultText'] != "OK" )
       return result
@@ -3652,106 +3624,26 @@ COMMAND_END
     return result
   end
   
-  def addBotTableMain(params)
-    @logger.debug("addBotTableMain Begin")
-    
-    dir = getDiceBotExtraTableDirName
-    makeDir(dir)
-    
-    require 'TableFileData'
-    
-    resultText = 'OK'
-    begin
-      creator = TableFileCreator.new(dir, @diceBotTablePrefix, params)
-      creator.execute
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    @logger.debug(resultText, "addBotTableMain End resultText")
-    
-    return resultText
-  end
-  
-  
-  
   def changeBotTable()
+    params = getParamsFromRequestData()
+
     result = {}
-    result['resultText'] = changeBotTableMain()
-    
+    result['resultText'] = @dice_adapter.changeBotTableMain(params)
+
     if( result['resultText'] != "OK" )
       return result
     end
-    
+
     result = getBotTableInfos()
     return result
   end
   
-  def changeBotTableMain()
-    @logger.debug("changeBotTableMain Begin")
-    
-    dir = getDiceBotExtraTableDirName
-    params = getParamsFromRequestData()
-    
-    require 'TableFileData'
-    
-    resultText = 'OK'
-    begin
-      creator = TableFileEditer.new(dir, @diceBotTablePrefix, params)
-      creator.execute 
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    @logger.debug(resultText, "changeBotTableMain End resultText")
-    
-    return resultText
-  end
-  
-  
-  
   def removeBotTable()
-    removeBotTableMain()
+    params = getParamsFromRequestData()
+    @dice_adapter.removeBotTableMain(params)
     return getBotTableInfos()
   end
-  
-  def removeBotTableMain()
-    @logger.debug("removeBotTableMain Begin")
-    
-    params = getParamsFromRequestData()
-    command = params["command"]
-    
-    dir = getDiceBotExtraTableDirName
-    
-    require 'TableFileData'
-    
-    isLoadCommonTable = false
-    tableFileData = TableFileData.new( isLoadCommonTable )
-    tableFileData.setDir(dir, @diceBotTablePrefix)
-    tableInfos = tableFileData.getAllTableInfo
-    
-    tableInfo = tableInfos.find{|i| i["command"] == command}
-    @logger.debug(tableInfo, "tableInfo")
-    return if( tableInfo.nil? )
-    
-    fileName = tableInfo["fileName"]
-    @logger.debug(fileName, "fileName")
-    return if( fileName.nil? )
-    
-    @logger.debug("isFile exist?")
-    return unless( File.exist?(fileName) )
-    
-    begin
-      File.delete(fileName)
-    rescue Exception => e
-      @logger.exception(e)
-    end
-    
-    @logger.debug("removeBotTableMain End")
-  end
-  
-  
-  
+
   def requestReplayDataList()
     @logger.debug("requestReplayDataList begin")
     result = {
@@ -4427,7 +4319,7 @@ COMMAND_END
     
     data.each do |info|
       info['table'] = getDiceBotTableString(info['table'])
-      addBotTableMain(info)
+      @dice_adapter.addBotTableMain(info)
     end
   
   end
@@ -4889,7 +4781,7 @@ COMMAND_END
   
   def getRollDiceResult( params )
     
-    rollResult, isSecret, randResults = rollDice(params)
+    rollResult, isSecret, randResults = @dice_adapter.rollDice(params)
     
     secretMessage = ""
     if( isSecret )
@@ -4901,31 +4793,6 @@ COMMAND_END
     rolledMessage = getRolledMessage(params, isSecret, randResults)
     
     return rolledMessage, isSecret, secretMessage
-  end
-  
-  
-  def rollDice(params)
-    require 'cgiDiceBot.rb'
-    
-    message = params['message']
-    gameType = params['gameType']
-    isNeedResult = params['isNeedResult']
-    
-    @logger.debug(message, 'rollDice message')
-    @logger.debug(gameType, 'rollDice gameType')
-    
-    bot = CgiDiceBot.new
-    dir = getDiceBotExtraTableDirName
-    
-    result, randResults = bot.roll(message, gameType, dir, @diceBotTablePrefix, isNeedResult)
-    
-    result.gsub!(/＞/, '→')
-    result.sub!(/\r?\n?\Z/m, '')
-    
-    @logger.debug(result, 'rollDice result')
-    @logger.debug(randResults, 'rollDice randResults')
-    
-    return result, bot.isSecret, randResults
   end
   
   def getDiceBotExtraTableDirName
