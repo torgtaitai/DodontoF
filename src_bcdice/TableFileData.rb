@@ -397,7 +397,7 @@ class TableFileEditer < TableFileCreator
     originalCommand = @originalCommand
     originalCommand ||= @command
     originalGameType = @originalGameType
-    originalGameType ||= gameType
+    originalGameType ||= @gameType
     
     originalFileName = getTableFileName(originalCommand, originalGameType)
     
