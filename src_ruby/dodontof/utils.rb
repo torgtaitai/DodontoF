@@ -65,5 +65,12 @@ module DodontoF
       File.chmod(0777, dir)
     end
     module_function :makeDir
+
+    # 指定されたキー値(文字列)に翻訳のための
+    # 置換キーであることを示すラッピングを施して返します
+    def getLanguageKey(key)
+      '###Language:' + key + '###'
+    end
+    module_function :getLanguageKey
   end
 end

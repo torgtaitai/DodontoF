@@ -44,5 +44,14 @@ module DodontoF
       assert File.exists? './.temp/makeDirTest'
       assert File.directory? './.temp/makeDirTest'
     end
+
+    # getLanguageKeyはキー値に対して何らかのラッピングを施す
+    # (ラップキーが適切についているか？というのを検査するのは
+    # ただのChangeDetectorになるので避けた)
+    def test_getLanguageKey
+      # LanguageKeyはキー値を何らかの形でラップしたものであるはずだから
+      # 少なくとも指定したキーとマッチする部分列があるはずだ
+      assert_match /test/, Utils.getLanguageKey('test')
+    end
   end
 end

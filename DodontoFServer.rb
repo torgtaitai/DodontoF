@@ -4728,11 +4728,6 @@ class DodontoFServer
   end
   
   
-  def getLanguageKey(key)
-    '###Language:' + key + '###'
-  end
-  
-  
   def sendChatMessageAll
     @logger.debug("sendChatMessageAll Begin")
     
