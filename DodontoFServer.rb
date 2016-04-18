@@ -3911,21 +3911,6 @@ class DodontoFServer
     return dir
   end
   
-  def makeDir(dir)
-    @logger.debug(dir, "makeDir dir")
-    
-    if( File.exist?(dir) )
-      if( File.directory?(dir) )
-        return
-      end
-      
-      File.delete(dir)
-    end
-    
-    Dir::mkdir(dir)
-    File.chmod(0777, dir)
-  end
-  
   def rmdir(dir)
     SaveDirInfo.removeDir(dir)
   end

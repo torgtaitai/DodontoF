@@ -8,6 +8,8 @@ require 'test/unit'
 
 require 'dodontof/utils'
 
+require 'fileutils'
+
 module DodontoF
   # ユーティリティメソッドのテスト
   class UtilsTest < Test::Unit::TestCase
@@ -29,6 +31,18 @@ module DodontoF
       assert_equal({ 'a' => 1 },
                    Utils.getObjectFromJsonString('{"a":1}'),
                    'オブジェクトを表す JSON 文字列を渡した場合')
+    end
+
+    # makeDir は 適当なディレクトリをその場に「存在する状態」にする
+    # この時他にファイルがあれば上書きする
+    def test_makeDir
+      # そういうディレクトリを構成しておく
+      FileUtils.mkdir_p './.temp'
+      open('./.temp/makeDirTest', 'w') { |f| f.puts 'test' }
+
+      Utils.makeDir('.temp/makeDirTest')
+      assert File.exists? './.temp/makeDirTest'
+      assert File.directory? './.temp/makeDirTest'
     end
   end
 end

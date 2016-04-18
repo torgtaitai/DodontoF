@@ -43,5 +43,27 @@ module DodontoF
       end
     end
     module_function :getObjectFromJsonString
+
+    # ディレクトリが作成された状態にする
+    # この時なければパーミッションが0777の状態で作る
+    # またディレクトリではなくファイルが存在したならば
+    # そのファイルを削除しながらディレクトリにする
+    # (慣例に従ったが、ensureSaveDirとかそういう名前のほうが適切かも)
+    def makeDir(dir)
+      logger = DodontoF::Logger.instance
+      logger.debug(dir, "makeDir dir")
+
+      if( File.exist?(dir) )
+        if( File.directory?(dir) )
+          return
+        end
+
+        File.delete(dir)
+      end
+
+      Dir::mkdir(dir)
+      File.chmod(0777, dir)
+    end
+    module_function :makeDir
   end
 end
