@@ -7,7 +7,8 @@ require 'DodontoFServer.rb'
 #require 'rubygems'
 require 'mysql'
 
-
+require 'dodontof/logger'
+require 'dodontof/utils'
 
 $SAVE_DATA_DIR = '.'
 
@@ -15,9 +16,13 @@ $SAVE_DATA_DIR = '.'
 $version = "Ver.1.47.24(2016/04/07)"
 
 class SaveDataManagerOnMySql
+  include DodontoF::Utils
+
   def initialize
     @tableLocked = false
     @db = nil
+
+    @logger = DodontoF::Logger.instance
   end
   
   def getDb
@@ -29,14 +34,14 @@ class SaveDataManagerOnMySql
   end
   
   def openDb
-    logging("OPEN DB")
+    @logger.debug("OPEN DB")
     Mysql::new($databaseHostName, $databaseUserName, $databasePassword, $databaseName)
   end
   
   def closeDb
     return if( @db.nil? )
     
-    logging("CLOSE DB")
+    @logger.debug("CLOSE DB")
     
     getDb.close
     @db = nil
@@ -88,8 +93,8 @@ class SaveDataManagerOnMySql
   
   def executeSql(sqlOriginal, *args)
     sqlOriginal += " "
-    logging(sqlOriginal, "executeSql sqlOriginal")
-    #logging(args.join(", "), "executeSql args")
+    @logger.debug(sqlOriginal, "executeSql sqlOriginal")
+    #@logger.debug(args.join(", "), "executeSql args")
     
     sqlParts = sqlOriginal.split(/\?/)
     
@@ -107,7 +112,7 @@ class SaveDataManagerOnMySql
       sql += sqlParts.shift
     end
     
-    logging(sql, "SQL query")
+    @logger.debug(sql, "SQL query")
     
     result = getDb.query(sql)
     
@@ -115,8 +120,8 @@ class SaveDataManagerOnMySql
   end
   
   def getSaveDataLastAccessTimes(dirNames, roomNumberRange)
-    logging(dirNames, "getSaveDataLastAccessTimes dirNames")
-    logging(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
+    @logger.debug(dirNames, "getSaveDataLastAccessTimes dirNames")
+    @logger.debug(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
     
     lastAccessTimeInfos = {}
     dirNames.each do |dirName|
@@ -134,20 +139,20 @@ class SaveDataManagerOnMySql
       
       result.each do |row|
         fileName = row.shift
-        logging(fileName, "fileName")
+        @logger.debug(fileName, "fileName")
         
         baseName = File.basename(fileName)
-        logging(baseName, "baseName")
+        @logger.debug(baseName, "baseName")
         
         timeValue = row.shift.to_f
-        logging(timeValue, "timeValue")
+        @logger.debug(timeValue, "timeValue")
         times << Time.at(timeValue)
       end
       
       lastAccessTimeInfos[dirIndex] = times.max
     end
     
-    logging(lastAccessTimeInfos, "getSaveDataLastAccessTimes lastAccessTimeInfos")
+    @logger.debug(lastAccessTimeInfos, "getSaveDataLastAccessTimes lastAccessTimeInfos")
     
     return lastAccessTimeInfos
   end
@@ -179,7 +184,7 @@ class SaveDataManagerOnMySql
   end
   
   def getChatTime(fileName)
-    logging(fileName, "getChatTime fileName")
+    @logger.debug(fileName, "getChatTime fileName")
     
     dirName = File.dirname(fileName)
     tableName = getChatTableName(dirName)
@@ -193,13 +198,13 @@ class SaveDataManagerOnMySql
       maxTime = row.first.to_f
     end
     
-    logging(maxTime, "getChatTime maxTime")
+    @logger.debug(maxTime, "getChatTime maxTime")
     
     return maxTime
   end
     
   def getTime(fileName)
-    logging(fileName, "getTime fileName")
+    @logger.debug(fileName, "getTime fileName")
     
     if( isChatFileName(fileName) )
       return getChatTime(fileName)
@@ -246,15 +251,15 @@ SQL
     saveFileNames.each do |saveFileName|
       
       sourceFileName = File.join(sourceDir, saveFileName)
-      logging(sourceFileName, "insertNewData sourceFileName")
+      @logger.debug(sourceFileName, "insertNewData sourceFileName")
       
       next unless( File.exist?(sourceFileName) )
-      logging(sourceFileName, "insertNewData exist sourceFileName")
+      @logger.debug(sourceFileName, "insertNewData exist sourceFileName")
       
       text = File.readlines(sourceFileName).join
       
       fileName = File.join(dirName, saveFileName)
-      logging(fileName, "insertNewData fileName")
+      @logger.debug(fileName, "insertNewData fileName")
       
       createData(fileName, text)
     end
@@ -270,10 +275,10 @@ SQL
   end
   
   def createChatTableOnly(tableName)
-    logging(tableName, "createChatTableOnly tableName")
+    @logger.debug(tableName, "createChatTableOnly tableName")
     return if( isExistTable?(tableName) )
     
-    logging(tableName, "createChatTableOnly tableName NOT exist")
+    @logger.debug(tableName, "createChatTableOnly tableName NOT exist")
     
     sql = <<SQL
 CREATE TABLE #{tableName} (
@@ -289,17 +294,17 @@ SQL
   
   def executeMaxSql(tableName, item)
     sql = "SELECT MAX(#{item}) FROM #{tableName}"
-    logging(sql, "executeCountSql sql")
+    @logger.debug(sql, "executeCountSql sql")
     
     result = executeSql(sql)
     
     row = result.fetch_row
-    logging(row, "result.fetch_row")
+    @logger.debug(row, "result.fetch_row")
     
     return -1 if( row.nil? )
     
     maxNumber = row.first
-    logging(maxNumber, "row.first")
+    @logger.debug(maxNumber, "row.first")
     
     if( maxNumber == nil )
       maxNumber = -1
@@ -311,17 +316,17 @@ SQL
   end
   
   def createChatTableInstance(tableName)
-    logging(tableName, "createChatTableInstance tableName")
+    @logger.debug(tableName, "createChatTableInstance tableName")
     
     numberLimit = $chatMessageDataLogAllLineMax
-    logging(numberLimit, "createChatTableInstance numberLimit")
+    @logger.debug(numberLimit, "createChatTableInstance numberLimit")
     
     maxNumber = executeMaxSql(tableName, "number")
-    logging(maxNumber, "maxNumber")
+    @logger.debug(maxNumber, "maxNumber")
     return if( maxNumber >= numberLimit )
     
     ((maxNumber + 1) ... numberLimit).each do |number|
-      logging(number, "createChatTableInstance each number")
+      @logger.debug(number, "createChatTableInstance each number")
       text = ""
       time = getCurrentTime
       executeSql("INSERT INTO #{tableName} VALUES (?, ?, ?)", number, text, time)
@@ -374,7 +379,7 @@ SQL
   end
   
   def executeCountSql(sql, *args)
-    logging(sql, "executeCountSql sql")
+    @logger.debug(sql, "executeCountSql sql")
     
     result = executeSql(sql, *args)
     row = result.fetch_row
@@ -383,15 +388,15 @@ SQL
     first = row.first
     count = first.to_i
     
-    logging(count, "executeCountSql count")
+    @logger.debug(count, "executeCountSql count")
     
     return count
   end
   
   def loadSaveFileForChat(typeName, fileName, lastUpdateTimes)
     lastTime = lastUpdateTimes[typeName]
-    logging(lastUpdateTimes, "loadSaveFileForChat lastUpdateTimes")
-    logging(lastTime, "loadSaveFileForChat lastTime")
+    @logger.debug(lastUpdateTimes, "loadSaveFileForChat lastUpdateTimes")
+    @logger.debug(lastTime, "loadSaveFileForChat lastTime")
     
     dirName = File.dirname(fileName)
     tableName = getChatTableName(dirName)
@@ -411,7 +416,7 @@ SQL
       return {}
     end
     
-    data = lines.collect{|line| DodontoFServer.getJsonDataFromText(line.chomp) }
+    data = lines.collect{|line| getObjectFromJsonString(line.chomp) }
     saveData = {"chatMessageDataLog" => data}
     
     return saveData
@@ -420,14 +425,14 @@ SQL
   def isSaveData(dirName)
     saveDir = File.join($SAVE_DATA_DIR, "saveData")
     saveDir2 = File.join(saveDir, "")
-    logging(saveDir, "saveDir")
-    logging(saveDir2, "saveDir2")
+    @logger.debug(saveDir, "saveDir")
+    @logger.debug(saveDir2, "saveDir2")
     
     return (( saveDir == dirName ) || ( dirName.index(saveDir2) == 0 ))
   end
   
   def isExistTable?(tableName)
-    logging(tableName, "isExistDir? tableName")
+    @logger.debug(tableName, "isExistDir? tableName")
     
     @allTableNames ||= []
     if( @allTableNames.empty? )
@@ -437,23 +442,23 @@ SQL
       end
     end
     
-    logging(@allTableNames, "@allTableNames")
+    @logger.debug(@allTableNames, "@allTableNames")
     
     isExist = @allTableNames.include?(tableName)
-    logging(isExist, "isExistDir? isExist")
+    @logger.debug(isExist, "isExistDir? isExist")
     
     return isExist
   end
   
   def isExistDir?(dirName)
-    logging(dirName, "isExistDir? dirName")
+    @logger.debug(dirName, "isExistDir? dirName")
     
     unless( isSaveData(dirName) )
-      logging("unless( isSaveData(dirName) )")
+      @logger.debug("unless( isSaveData(dirName) )")
       return File.exist?(dirName)
     end
     
-    logging(dirName, "this dir is SaveData dir")
+    @logger.debug(dirName, "this dir is SaveData dir")
     
     tableName = getTableName(dirName)
     isExistTable?(tableName)
@@ -469,7 +474,7 @@ SQL
     open(nil, isReadOnly, tableName) do
       
       time = getCurrentTime
-      text = DodontoFServer.getTextFromJsonData([time, chatMessageData])
+      text = getJsonString([time, chatMessageData])
       
       numberLimit = $chatMessageDataLogAllLineMax
       oldestNumber = 0
@@ -478,7 +483,7 @@ SQL
         oldestNumber = row.first
       end
       
-      logging(oldestNumber, "oldestNumber")
+      @logger.debug(oldestNumber, "oldestNumber")
       
       executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=#{oldestNumber})", text, time);
                  
@@ -488,7 +493,7 @@ SQL
   
   
   def loadSaveFileDataForChatType(trueSaveFileName, saveDataForChat)
-    logging("loadSaveFileDataForChatType begin")
+    @logger.debug("loadSaveFileDataForChatType begin")
     
     dirName = File.dirname(trueSaveFileName)
     tableName = getChatTableName(dirName)
@@ -505,7 +510,7 @@ SQL
       unless( saveDataForChat.nil? )
         chatData = saveDataForChat[number]
         unless( chatData.nil? )
-          text = DodontoFServer.getTextFromJsonData(chatData)
+          text = getJsonString(chatData)
         end
       end
       
@@ -513,7 +518,7 @@ SQL
       executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=?)", text, time, number);
     end
     
-    logging("loadSaveFileDataForChatType end")
+    @logger.debug("loadSaveFileDataForChatType end")
   end
   
   def deleteChatLogBySaveFile(trueSaveFileName)
@@ -591,27 +596,27 @@ class SaveDirInfoMySql < SaveDirInfo
     dirName = getDirNameByIndex(saveDataDirIndex)
     @@saveDataManager.removeSaveDir(dirName)
   end
-  
+
   def getExistFileNames(dirName, fileNames)
     existFileNames = []
-    
+
     fileNames.each do |fileName|
       full_fileName = File.join(dirName, fileName)
-      logging(full_fileName, "getExistFileNames full_fileName")
-      
+      @logger.debug(full_fileName, "getExistFileNames full_fileName")
+
       if( @@saveDataManager.isExistDir?(full_fileName) or
             @@saveDataManager.isExist?(full_fileName) )
-        
-        logging(full_fileName, "getExistFileNames full_fileName exist")
+
+        @logger.debug(full_fileName, "getExistFileNames full_fileName exist")
         existFileNames << full_fileName
       end
     end
-    
-    logging(existFileNames, "getExistFileNames existFileNames")
-    
+
+    @logger.debug(existFileNames, "getExistFileNames existFileNames")
+
     return existFileNames
   end
-  
+
   def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
     saveDirs = getSaveDataDirs(roomNumberRange)
     return @@saveDataManager.getSaveDataLastAccessTimes(saveDirs, roomNumberRange)
@@ -683,7 +688,7 @@ class DodontoFServer_MySql < DodontoFServer
     begin
       return FileLockMySql.new(fileName, isReadOnly)
     rescue
-      loggingForce(@saveDirInfo.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
+      @logger.error(@saveDirInfo.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
       raise
     end
   end
@@ -731,7 +736,7 @@ class DodontoFServer_MySql < DodontoFServer
   
   
   def sendChatMessageByChatData(chatData)
-    logging(chatData, "sendChatMessage chatData")
+    @logger.debug(chatData, "sendChatMessage chatData")
     saveFileName = @saveFiles['chatMessageDataLog']
     getDataAccesser().sendChatMessage(chatData, saveFileName)
   end
@@ -777,12 +782,7 @@ end
 
 
 if( $0 === __FILE__ )
-  initLog();
-  
   cgiParams = getCgiParams()
-  
-  
-  mainMySql(cgiParams)
-  
-end
 
+  mainMySql(cgiParams)
+end

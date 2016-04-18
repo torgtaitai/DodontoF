@@ -28,12 +28,14 @@ end
 require 'kconv'
 require 'cgi'
 require 'stringio'
-require 'logger'
 require 'uri'
 require 'fileutils'
 require 'json/jsonParser'
 
 require 'mysql'
+
+require 'dodontof/logger'
+require 'dodontof/utils'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -48,7 +50,6 @@ rescue Exception
 end
 
 
-require "loggingFunction.rb"
 require "FileLock.rb"
 require "saveDirInfoMysql.rb"
 
@@ -107,26 +108,87 @@ class Mysql::Stmt
 end
 
 class DodontoFServer
+  include DodontoF::Utils
+
+  def self.getMessagePackFromData(data)
+    logger = DodontoF::Logger.instance
+
+    logger.debug("getMessagePackFromData Begin")
+
+    messagePack = {}
+
+    if( data.nil? )
+      logger.debug("data is nil")
+      return messagePack 
+    end
+
+    begin
+      messagePack = MessagePack.unpack(data)
+    rescue Exception => e
+      logger.error("getMessagePackFromData Exception rescue")
+      logger.exception(e)
+    end
+
+    logger.debug(messagePack, "messagePack")
+
+    if( isWebIfMessagePack(messagePack) )
+      logger.debug(data, "data is webif.")
+      messagePack = parseWebIfMessageData(data)
+    end
+
+    logger.debug(messagePack, "getMessagePackFromData End messagePack")
+
+    return messagePack
+  end
+
+  def self.isWebIfMessagePack(messagePack)
+    logger = DodontoF::Logger.instance
+
+    logger.debug(messagePack, "isWebif messagePack")
+
+    unless( messagePack.kind_of?(Hash) )
+      logger.debug("messagePack is NOT Hash")
+      return true
+    end
+
+    return false
+  end
+
+  def self.parseWebIfMessageData(data)
+    logger = DodontoF::Logger.instance
+
+    params = CGI.parse(data)
+    logger.debug(params, "params")
+
+    messagePack = {}
+    params.each do |key, value|
+      messagePack[key] = value.first
+    end
+
+    return messagePack
+  end
   
   def initialize(saveDirInfo, cgiParams)
     @cgiParams = cgiParams
     @saveDirInfo = saveDirInfo
-    
+
+    @logger = DodontoF::Logger.instance
+
     roomIndexKey = "room"
     initSaveFiles( getRequestData(roomIndexKey) )
-    
+
     @isAddMarker = false
     @jsonpCallBack = nil
     @isWebIf = false
     @isJsonResult = true
-    
+
     @diceBotTablePrefix = 'diceBotTable_'
     @fullBackupFileBaseName = "DodontoFFullBackup"
-    
+
     @allSaveDataFileExt = '.tar.gz'
     @defaultAllSaveData = 'default.sav'
     @defaultChatPallete = 'default.cpd'
-    
+
     @card = nil
   end
   
@@ -136,11 +198,11 @@ class DodontoFServer
   
   
   def getRequestData(key)
-    logging(key, "getRequestData key")
+    @logger.debug(key, "getRequestData key")
     
     value = @cgiParams[key]
-    # logging(@cgiParams, "@cgiParams")
-    # logging(value, "getRequestData value")
+    # @logger.debug(@cgiParams, "@cgiParams")
+    # @logger.debug(value, "getRequestData value")
     
     if( value.nil? )
       if( @isWebIf )
@@ -150,7 +212,7 @@ class DodontoFServer
     end
     
     
-    # logging(value, "getRequestData result")
+    # @logger.debug(value, "getRequestData result")
     
     return value
   end
@@ -178,24 +240,24 @@ class DodontoFServer
   def getSaveFileLockReadOnlyRealFile(saveFileName)
     getSaveFileLockRealFile(saveFileName, true)
   end
-  
-  def self.getLockFileName(saveFileName)
+
+  def getLockFileName(saveFileName)
     defaultLockFileName = (saveFileName + ".lock")
-    
+
     if( $SAVE_DATA_LOCK_FILE_DIR.nil? )
       return defaultLockFileName;
     end
-    
+
     if( saveFileName.index($SAVE_DATA_DIR) != 0 )
       return defaultLockFileName
     end
-    
+
     subDirName = saveFileName[$SAVE_DATA_DIR.size .. -1]
-    
+
     lockFileName = File.join($SAVE_DATA_LOCK_FILE_DIR, subDirName) + ".lock"
     return lockFileName
   end
-  
+
   #override
   def getSaveFileLock(saveFileName, isReadOnly = false)
     getSaveFileLockRealFile(saveFileName, isReadOnly)
@@ -203,11 +265,11 @@ class DodontoFServer
   
   def getSaveFileLockRealFile(saveFileName, isReadOnly = false)
     begin
-      lockFileName = self.class.getLockFileName(saveFileName)
+      lockFileName = getLockFileName(saveFileName)
       return FileLock.new(lockFileName);
       #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
-      loggingForce(@saveDirInfo, "when getSaveFileLock error : @saveDirInfo");
+      @logger.error(@saveDirInfo, "when getSaveFileLock error : @saveDirInfo");
       raise e
     end
   end
@@ -237,7 +299,7 @@ class DodontoFServer
       text = getSaveTextOnFileLocked(saveFileName)
     end
     
-    saveData = getJsonDataFromText(text)
+    saveData = getObjectFromJsonString(text)
     yield(saveData)
   end
   
@@ -247,11 +309,11 @@ class DodontoFServer
     
     saveFileLock.lock do
       saveDataText = getSaveTextOnFileLocked(saveFileName)
-      saveData = getJsonDataFromText(saveDataText)
+      saveData = getObjectFromJsonString(saveDataText)
       
       yield(saveData)
       
-      saveDataText = getTextFromJsonData(saveData)
+      saveDataText = getJsonString(saveData)
       createFile(saveFileName, saveDataText)
     end
   end
@@ -263,21 +325,21 @@ class DodontoFServer
       @commandSender = getRequestData('own')
     end
     
-    logging(@commandSender, "@commandSender")
+    @logger.debug(@commandSender, "@commandSender")
     
     return @commandSender
   end
   
   
   def createSaveFile(saveFileName, text)
-    logging(saveFileName, 'createSaveFile saveFileName')
+    @logger.debug(saveFileName, 'createSaveFile saveFileName')
     existFiles = nil
     
-    logging($saveFileNames, "$saveFileNames")
+    @logger.debug($saveFileNames, "$saveFileNames")
     changeSaveData($saveFileNames) do |saveData|
       existFiles = saveData["fileNames"]
       existFiles ||= []
-      logging(existFiles, 'pre existFiles')
+      @logger.debug(existFiles, 'pre existFiles')
       
       unless( existFiles.include?(saveFileName) ) 
         existFiles << saveFileName
@@ -288,7 +350,7 @@ class DodontoFServer
       saveData["fileNames"] = existFiles
     end
     
-    logging(existFiles, 'createSaveFile existFiles')
+    @logger.debug(existFiles, 'createSaveFile existFiles')
   end
   
   #override
@@ -298,105 +360,13 @@ class DodontoFServer
         file.write(text.toutf8)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       raise e
     end
   end
   
-  def getTextFromJsonData(jsonData)
-    self.class.getTextFromJsonData(jsonData)
-  end
-  
-  def self.getTextFromJsonData(jsonData)
-    return JsonBuilder.new.build(jsonData)
-  end
-  
-  def getDataFromMessagePack(data)
-    self.class.getDataFromMessagePack(data)
-  end  
-  
-  def self.getDataFromMessagePack(data)
-    MessagePack.pack(data)
-  end
-  
-  def getJsonDataFromText(text)
-    self.class.getJsonDataFromText(text)
-  end
-  
-  def self.getJsonDataFromText(text)
-    jsonData = nil
-    begin
-      logging(text, "getJsonDataFromText start")
-      begin
-        jsonData = JsonParser.new.parse(text)
-        logging("getJsonDataFromText 1 end")
-      rescue => e
-        text = CGI.unescape(text)
-        jsonData = JsonParser.new.parse(text)
-        logging("getJsonDataFromText 2 end")
-      end
-    rescue => e
-      # loggingException(e)
-      jsonData = {}
-    end
-    
-    return jsonData
-  end
-  
   def getMessagePackFromData(data)
     self.class.getMessagePackFromData(data)
-  end
-  
-  def self.getMessagePackFromData(data)
-    logging("getMessagePackFromData Begin")
-    
-    messagePack = {}
-    
-    if( data.nil? )
-      logging("data is nil")
-      return messagePack 
-    end
-    
-    begin
-      messagePack = MessagePack.unpack(data)
-    rescue Exception => e
-      loggingForce("getMessagePackFromData Exception rescue")
-      loggingException(e)
-    end
-    
-    logging(messagePack, "messagePack")
-    
-    if( isWebIfMessagePack(messagePack) )
-      logging(data, "data is webif.")
-      messagePack = parseWebIfMessageData(data)
-    end
-    
-    logging(messagePack, "getMessagePackFromData End messagePack")
-    
-    return messagePack
-  end
-  
-  def self.isWebIfMessagePack(messagePack)
-    logging(messagePack, "isWebif messagePack")
-    
-    unless( messagePack.kind_of?(Hash) )
-      logging("messagePack is NOT Hash")
-      return true
-    end
-    
-    return false
-  end
-  
-  def self.parseWebIfMessageData(data)
-    params = CGI.parse(data)
-    logging(params, "params")
-    
-    messagePack = {}
-    params.each do |key, value|
-      messagePack[key] = value.first
-    end
-    
-    return messagePack
   end
   
   #override
@@ -418,7 +388,7 @@ class DodontoFServer
   def analyzeCommand
     commandName = getRequestData('cmd')
 
-    logging(commandName, "commandName")
+    @logger.debug(commandName, "commandName")
 
     if( commandName.nil? or commandName.empty? )
       return getResponseTextWhenNoCommandName
@@ -507,7 +477,7 @@ class DodontoFServer
     }
 
     commandType = commands[commandName]
-    logging(commandType, "commandType")
+    @logger.debug(commandType, "commandType")
 
     begin
       case commandType
@@ -523,14 +493,14 @@ class DodontoFServer
       begin
         @db.close unless( @db.nil? )
       rescue Exception
-        # loggingForce("close Exception")
-        # loggingException(e)
+        # @logger.error("close Exception")
+        # @logger.exception(e)
       end
     end
   end
 
   def getResponseTextWhenNoCommandName
-    logging("getResponseTextWhenNoCommandName Begin")
+    @logger.debug("getResponseTextWhenNoCommandName Begin")
     
     response = analyzeWebInterface 
     
@@ -546,7 +516,7 @@ class DodontoFServer
     
     begin
       result = analyzeWebInterfaceCatched
-      logging("analyzeWebInterfaceCatched end result", result)
+      @logger.debug("analyzeWebInterfaceCatched end result", result)
       setJsonpCallBack
     rescue => e
       result['result'] = e.to_s
@@ -556,13 +526,13 @@ class DodontoFServer
   end
   
   def analyzeWebInterfaceCatched
-    logging("analyzeWebInterfaceCatched begin")
+    @logger.debug("analyzeWebInterfaceCatched begin")
     
     @isWebIf = true
     @isJsonResult = true
     
     commandName = getRequestData('webif')
-    logging(commandName, 'commandName')
+    @logger.debug(commandName, 'commandName')
     
     if( isInvalidRequestParam(commandName) )
       return nil
@@ -573,7 +543,7 @@ class DodontoFServer
       @isAddMarker = false
     end
     
-    logging(commandName, "commandName")
+    @logger.debug(commandName, "commandName")
     
     case commandName
     when 'getBusyInfo'
@@ -661,7 +631,7 @@ class DodontoFServer
   def setJsonpCallBack
     callBack = getRequestData('callback')
     
-    logging('callBack', callBack)
+    @logger.debug('callBack', callBack)
     if( isInvalidRequestParam(callBack) )
       return
     end
@@ -699,7 +669,7 @@ class DodontoFServer
     end
     
     $tableNames.each do |saveFileTypeName, dummy|
-      logging(saveFileTypeName, "saveFileTypeName")
+      @logger.debug(saveFileTypeName, "saveFileTypeName")
       
       func = @getCurrentSaveDataMethods[saveFileTypeName]
       
@@ -714,37 +684,37 @@ class DodontoFServer
   
   
   def getCurrentSaveDataForDbCharacter()
-    logging("getCurrentSaveDataForDbCharacter Begin")
+    @logger.debug("getCurrentSaveDataForDbCharacter Begin")
     
     update_index = @lastUpdateTimes['characters']
-    logging(update_index, "characters update_index")
+    @logger.debug(update_index, "characters update_index")
     
     lastTime = getLastUpdate('characters', update_index)
-    logging(lastTime, "lastTime")
+    @logger.debug(lastTime, "lastTime")
     
     # 最終更新が0の場合は結果が空の証拠なので取得無し
     if lastTime == 0
-      logging("characters has NO change")
+      @logger.debug("characters has NO change")
       return 
     end
     
     result = getAllCharacters()
-    logging(result.size, "characters get result.size")
-    logging(result, "characters get result")
+    @logger.debug(result.size, "characters get result.size")
+    @logger.debug(result, "characters get result")
     
-    logging("New characters.")
+    @logger.debug("New characters.")
     
     saveData = {}
     result.each do |row|
       saveData["characters"] ||= []
-      saveData["characters"] << row["json"] # getJsonDataFromText( row["json"] )
+      saveData["characters"] << row["json"] # getObjectFromJsonString( row["json"] )
     end
     
     @lastUpdateTimes['characters'] = lastTime
     
     yield(saveData)
     
-    logging("getCurrentSaveDataForDbCharacter End")
+    @logger.debug("getCurrentSaveDataForDbCharacter End")
   end
   
   def getLastUpdate(tableName, update_index)
@@ -753,7 +723,7 @@ class DodontoFServer
                                :where => {'update_index > ? ' => update_index} )
     
     lastTime = lastUpdateResult.first['MAX(update_index)'].to_i
-    logging(lastTime, "lastTime")
+    @logger.debug(lastTime, "lastTime")
     return lastTime
   end
   
@@ -771,18 +741,18 @@ class DodontoFServer
   
   
   def getCurrentSaveDataForDbChat()
-    logging("getCurrentSaveDataForDbChat Begin")
+    @logger.debug("getCurrentSaveDataForDbChat Begin")
     
     lastId = @lastUpdateTimes['chatMessageDataLog']
     
     result = readDb( "SELECT *",
                      :from => 'chats',
                      :where => {'id > ? ' => lastId} )
-    logging(result, "chats get result")
+    @logger.debug(result, "chats get result")
     
     return if result.empty?
     
-    logging("New chats message.")
+    @logger.debug("New chats message.")
     
     shapeUpDbResult(result)
     
@@ -798,13 +768,13 @@ class DodontoFServer
     
     yield(saveData)
     
-    logging(saveData, "getCurrentSaveDataForDbChat saveData")
-    logging("getCurrentSaveDataForDbChat End")
+    @logger.debug(saveData, "getCurrentSaveDataForDbChat saveData")
+    @logger.debug("getCurrentSaveDataForDbChat End")
   end
   
   
   def getCurrentSaveDataForDbMap()
-    logging("getCurrentSaveDataForDbMap Begin")
+    @logger.debug("getCurrentSaveDataForDbMap Begin")
     
     getCurrentSaveDataForDbJsonType('map', 'maps') do |data|
       saveData = {}
@@ -812,12 +782,12 @@ class DodontoFServer
       yield(saveData)
     end
     
-    logging("getCurrentSaveDataForDbMap End")
+    @logger.debug("getCurrentSaveDataForDbMap End")
   end
   
   
   def getCurrentSaveDataForDbTime()
-    logging("getCurrentSaveDataForDbTime Begin")
+    @logger.debug("getCurrentSaveDataForDbTime Begin")
     
     getCurrentSaveDataForDbJsonType('time', 'times') do |data|
       saveData = {}
@@ -825,12 +795,12 @@ class DodontoFServer
       yield(saveData)
     end
     
-    logging("getCurrentSaveDataForDbTime End")
+    @logger.debug("getCurrentSaveDataForDbTime End")
   end
   
   
   def getCurrentSaveDataForDbEffects()
-    logging("getCurrentSaveDataForDbEffects Begin")
+    @logger.debug("getCurrentSaveDataForDbEffects Begin")
     
     getCurrentSaveDataForDbJsonType('effects', 'effects') do |data|
       saveData = {}
@@ -838,21 +808,21 @@ class DodontoFServer
       yield(saveData)
     end
     
-    logging("getCurrentSaveDataForDbTime End")
+    @logger.debug("getCurrentSaveDataForDbTime End")
   end
   
   
   def getCurrentSaveDataForDbPlayRoom()
-    logging("getCurrentSaveDataForDbPlayRoom Begin")
+    @logger.debug("getCurrentSaveDataForDbPlayRoom Begin")
     
     getCurrentSaveDataForDbJsonType('playRoomInfo', 'rooms') do |data|
-      logging(data, 'getCurrentSaveDataForDbPlayRoom data')
+      @logger.debug(data, 'getCurrentSaveDataForDbPlayRoom data')
       
       saveData = data
       yield(saveData)
     end
     
-    logging("getCurrentSaveDataForDbPlayRoom End")
+    @logger.debug("getCurrentSaveDataForDbPlayRoom End")
   end
   
   
@@ -883,7 +853,7 @@ class DodontoFServer
     return if row.nil?
     
     time = row.delete('update_index')
-    data = getJsonDataFromText( row["json"] )
+    data = getObjectFromJsonString( row["json"] )
     
     yield(data)
     
@@ -907,7 +877,7 @@ class DodontoFServer
     list = {}
     result.each do |row|
       roomNo = row['roomNo'].to_i
-      list[roomNo] = getJsonDataFromText( row["json"] )
+      list[roomNo] = getObjectFromJsonString( row["json"] )
     end
     
     return list
@@ -924,7 +894,7 @@ class DodontoFServer
     row = result.first
     return {} if row.nil?
     
-    data = getJsonDataFromText( row["json"] )
+    data = getObjectFromJsonString( row["json"] )
     data ||= {}
 
     return data
@@ -944,7 +914,7 @@ class DodontoFServer
     others = getOtherDbOptions(options)
     
     commandText = "#{command} #{from} #{where} #{others}"
-    logging(commandText, "readDbCommon commandText")
+    @logger.debug(commandText, "readDbCommon commandText")
     
     result = query(commandText, *params)
     
@@ -969,7 +939,7 @@ class DodontoFServer
       commandText = "UPDATE #{table} SET #{setData} #{where} #{others}"
     end
     
-    logging(commandText, "readDbCommon commandText")
+    @logger.debug(commandText, "readDbCommon commandText")
     
     result = query(commandText, *params)
     return result
@@ -987,9 +957,9 @@ class DodontoFServer
     begin
       result = queryCatched(commandText, *params)
     rescue => e
-      loggingException(e)
-      loggingForce([commandText, params].inspect)
-      loggingForce("commandText : #{commandText}")
+      @logger.exception(e)
+      @logger.error([commandText, params].inspect)
+      @logger.error("commandText : #{commandText}")
       throw e
     end
     
@@ -997,8 +967,8 @@ class DodontoFServer
   end
   
   def queryCatched(commandText, *params)
-    logging("\n\n" + commandText + "\n", "query commandText")
-    logging(params, "query params")
+    @logger.debug("\n\n" + commandText + "\n", "query commandText")
+    @logger.debug(params, "query params")
     
     sqlResult = nil
     
@@ -1013,7 +983,7 @@ class DodontoFServer
       result << row
     end
     
-    logging(result, "query end result")
+    @logger.debug(result, "query end result")
     return result
   end
   
@@ -1081,13 +1051,13 @@ class DodontoFServer
   end
   
   def connectDbCommon(db)
-    logging("connectDbCommon Begin")
+    @logger.debug("connectDbCommon Begin")
     
     return db unless( db.nil? )
     
     db = Mysql::new($databaseHostName, $databaseUserName, $databasePassword, $databaseName)
     
-    logging("connectDbCommon End")
+    @logger.debug("connectDbCommon End")
     return db
   end
   
@@ -1102,7 +1072,7 @@ class DodontoFServer
   
   def initDb
     
-    logging("initDb Begin")
+    @logger.debug("initDb Begin")
     
     dropAllDb()
     
@@ -1115,21 +1085,21 @@ class DodontoFServer
       initLoginUserDb
       initPlayRoomDb
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
       throw e
     end
     
-    logging("initDb End")
+    @logger.debug("initDb End")
   end
 
   def dropAllDb
     %w{chats characters maps times effects users rooms}.each do |target|
       
-      logging("dropAllDb #{target}")
+      @logger.debug("dropAllDb #{target}")
       
       next unless isTableExist(target)
       
-      logging("dropAllDb #{target} DROP EXECUTE!")
+      @logger.debug("dropAllDb #{target} DROP EXECUTE!")
       query("DROP TABLE #{target}")
     end
   end
@@ -1304,7 +1274,7 @@ SQL_TEXT
   
   
   def getWebIfChatText
-    logging("getWebIfChatText begin")
+    @logger.debug("getWebIfChatText begin")
     
     time= getWebIfRequestNumber('time', -1)
     if( time != -1 )
@@ -1321,7 +1291,7 @@ SQL_TEXT
   
   
   def getWebIfChatTextFromTime(time)
-    logging(time, 'getWebIfChatTextFromTime time')
+    @logger.debug(time, 'getWebIfChatTextFromTime time')
     
     saveData = {}
     @lastUpdateTimes = {'chatMessageDataLog' => time}
@@ -1329,18 +1299,18 @@ SQL_TEXT
     
     deleteOldChatTextForWebIf(time, saveData)
     
-    logging(saveData, 'getWebIfChatTextFromTime saveData')
+    @logger.debug(saveData, 'getWebIfChatTextFromTime saveData')
     
     return saveData
   end
   
   
   def getWebIfChatTextFromSecond(seconds)
-    logging(seconds, 'getWebIfChatTextFromSecond seconds')
+    @logger.debug(seconds, 'getWebIfChatTextFromSecond seconds')
     
     time = getTimeForGetWebIfChatText(seconds)
-    logging(seconds, "seconds")
-    logging(time, "time")
+    @logger.debug(seconds, "seconds")
+    @logger.debug(time, "time")
     
     saveData = {}
     @lastUpdateTimes = {'chatMessageDataLog' => time}
@@ -1350,13 +1320,13 @@ SQL_TEXT
     
     deleteOldChatTextForWebIf(time, saveData)
     
-    logging("getCurrentSaveData end saveData", saveData)
+    @logger.debug("getCurrentSaveData end saveData", saveData)
     
     return saveData
   end
   
   def deleteOldChatTextForWebIf(time, saveData)
-    logging(time, 'deleteOldChatTextForWebIf time')
+    @logger.debug(time, 'deleteOldChatTextForWebIf time')
     
     return if( time.nil? )
     
@@ -1367,7 +1337,7 @@ SQL_TEXT
       ((writtenTime <= time) or (not data['sendto'].nil?))
     end
     
-    logging('deleteOldChatTextForWebIf End')
+    @logger.debug('deleteOldChatTextForWebIf End')
   end
   
   
@@ -1385,7 +1355,7 @@ SQL_TEXT
   
   def getChatColor()
     name = getWebIfRequestText('name')
-    logging(name, "name")
+    @logger.debug(name, "name")
     if( isInvalidRequestParam(name) )
       raise "対象ユーザー名(name)を指定してください"
     end
@@ -1469,7 +1439,7 @@ SQL_TEXT
   end
   
   def getWebIfRoomList()
-    logging("getWebIfRoomList Begin")
+    @logger.debug("getWebIfRoomList Begin")
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
     
@@ -1480,28 +1450,28 @@ SQL_TEXT
       "result" => 'OK',
     }
     
-    logging("getWebIfRoomList End")
+    @logger.debug("getWebIfRoomList End")
     return jsonData
   end
   
   def sendWebIfChatText
-    logging("sendWebIfChatText begin")
+    @logger.debug("sendWebIfChatText begin")
     
     name = getWebIfRequestText('name')
-    logging(name, "name")
+    @logger.debug(name, "name")
     
     message = getWebIfRequestText('message')
     message.gsub!(/\r\n/, "\r")
-    logging(message, "message")
+    @logger.debug(message, "message")
     
     color = getWebIfRequestText('color', getTalkDefaultColor)
-    logging(color, "color")
+    @logger.debug(color, "color")
     
     channel = getWebIfRequestInt('channel')
-    logging(channel, "channel")
+    @logger.debug(channel, "channel")
     
     gameType = getWebIfRequestText('bot')
-    logging(gameType, 'gameType')
+    @logger.debug(gameType, 'gameType')
     
     isNeedResult = true
     uniqueId = '0'
@@ -1522,7 +1492,7 @@ SQL_TEXT
       "uniqueId" => uniqueId,
       "channel" => channel,
     }
-    logging("sendWebIfChatText chatData", chatData)
+    @logger.debug("sendWebIfChatText chatData", chatData)
     
     sendChatMessageByChatData(chatData)
     
@@ -1571,13 +1541,13 @@ SQL_TEXT
   end
   
   def getWebIfRequestHash(key, default = {}, separator1 = ':', separator2 = ',')
-    logging("getWebIfRequestHash begin")
-    logging(key, "key")
-    logging(separator1, "separator1")
-    logging(separator2, "separator2")
+    @logger.debug("getWebIfRequestHash begin")
+    @logger.debug(key, "key")
+    @logger.debug(separator1, "separator1")
+    @logger.debug(separator2, "separator2")
     
     array = getWebIfRequestArray(key, [], separator2)
-    logging(array, "array")
+    @logger.debug(array, "array")
     
     if( array.empty? )
       return default
@@ -1585,18 +1555,18 @@ SQL_TEXT
     
     hash = {}
     array.each do |value|
-      logging(value, "array value")
+      @logger.debug(value, "array value")
       key, value = value.split(separator1)
       hash[key] = value
     end
     
-    logging(hash ,"getWebIfRequestHash result")
+    @logger.debug(hash ,"getWebIfRequestHash result")
     
     return hash
   end
   
   def sendWebIfAddMemo
-    logging('sendWebIfAddMemo begin')
+    @logger.debug('sendWebIfAddMemo begin')
     
     result = {}
     result['result'] = 'OK'
@@ -1615,7 +1585,7 @@ SQL_TEXT
       "imgId" => createCharacterImgId(),
     }
     
-    logging(jsonData, 'sendWebIfAddMemo jsonData')
+    @logger.debug(jsonData, 'sendWebIfAddMemo jsonData')
     addCharacterData( [jsonData] )
     
     return result
@@ -1623,7 +1593,7 @@ SQL_TEXT
   
   
   def sendWebIfAddCharacter
-    logging("sendWebIfAddCharacter begin")
+    @logger.debug("sendWebIfAddCharacter begin")
     
     result = {}
     result['result'] = 'OK'
@@ -1647,7 +1617,7 @@ SQL_TEXT
       "url" => getWebIfRequestText('url'),
     }
     
-    logging(jsonData, 'sendWebIfAddCharacter jsonData')
+    @logger.debug(jsonData, 'sendWebIfAddCharacter jsonData')
     
     
     if( jsonData['name'].empty? )
@@ -1658,7 +1628,7 @@ SQL_TEXT
     
     addResult = addCharacterData( [jsonData] )
     addFailedCharacterNames = addResult["addFailedCharacterNames"]
-    logging(addFailedCharacterNames, 'addFailedCharacterNames')
+    @logger.debug(addFailedCharacterNames, 'addFailedCharacterNames')
     
     if( addFailedCharacterNames.length > 0 )
       result['result'] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{addFailedCharacterNames.join(' ')}\""
@@ -1668,26 +1638,26 @@ SQL_TEXT
   end
   
   def getWebIfImageName(key, default)
-    logging("getWebIfImageName begin")
-    logging(key, "key")
-    logging(default, "default")
+    @logger.debug("getWebIfImageName begin")
+    @logger.debug(key, "key")
+    @logger.debug(default, "default")
     
     image = getWebIfRequestText(key, default)
-    logging(image, "image")
+    @logger.debug(image, "image")
     
     if( image != default )
       image.gsub!('(local)', $imageUploadDir)
       image.gsub!('__LOCAL__', $imageUploadDir)
     end
     
-    logging(image, "getWebIfImageName result")
+    @logger.debug(image, "getWebIfImageName result")
       
     return image
   end
   
   
   def sendWebIfChangeCharacter
-    logging("sendWebIfChangeCharacter begin")
+    @logger.debug("sendWebIfChangeCharacter begin")
     
     result = {}
     result['result'] = 'OK'
@@ -1702,10 +1672,10 @@ SQL_TEXT
   end
   
   def sendWebIfChangeCharacterChatched
-    logging("sendWebIfChangeCharacterChatched begin")
+    @logger.debug("sendWebIfChangeCharacterChatched begin")
     
     targetName = getWebIfRequestText('targetName')
-    logging(targetName, "targetName")
+    @logger.debug(targetName, "targetName")
     
     if( targetName.empty? )
       raise '変更するキャラクターの名前(\'target\'パラメータ）が正しく指定されていません'
@@ -1717,7 +1687,7 @@ SQL_TEXT
       
       characterData = nil
       result.each do |row|
-        data = getJsonDataFromText( row["json"] )
+        data = getObjectFromJsonString( row["json"] )
         
         if data['name'] == targetName
           characterData = data
@@ -1730,7 +1700,7 @@ SQL_TEXT
       end
       
       name = getWebIfRequestAny(:getWebIfRequestText, 'name', characterData)
-      logging(name, "name")
+      @logger.debug(name, "name")
       
 =begin
       if( characterData['name'] != name )
@@ -1775,7 +1745,7 @@ SQL_TEXT
   
   
   def getWebIfRoomInfo
-    logging("getWebIfRoomInfo begin")
+    @logger.debug("getWebIfRoomInfo begin")
     
     result = {}
     result['result'] = 'OK'
@@ -1789,7 +1759,7 @@ SQL_TEXT
     roomInfo = getRoomInfoForWebIf
     result.merge!(roomInfo)
     
-    logging(result, "getWebIfRoomInfo result")
+    @logger.debug(result, "getWebIfRoomInfo result")
     
     return result
   end
@@ -1824,7 +1794,7 @@ SQL_TEXT
   end
   
   def setWebIfRoomInfo
-    logging("setWebIfRoomInfo begin")
+    @logger.debug("setWebIfRoomInfo begin")
     
     result = {}
     result['result'] = 'OK'
@@ -1840,7 +1810,7 @@ SQL_TEXT
     saveData['canVisit'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'visit', roomInfo)
     saveData['gameType'] = getWebIfRequestAny(:getWebIfRequestText, 'game', roomInfo)
     
-    logging(result, "setWebIfRoomInfo result")
+    @logger.debug(result, "setWebIfRoomInfo result")
     
     return result
   end
@@ -1853,7 +1823,7 @@ SQL_TEXT
   end
   
   def changeCounterNames(counterNames)
-    logging(counterNames, "changeCounterNames(counterNames)")
+    @logger.debug(counterNames, "changeCounterNames(counterNames)")
     
     changeTimerData do |saveData|
       roundTimeData = getRoundTimeDataFromSaveData(saveData)
@@ -1865,26 +1835,26 @@ SQL_TEXT
   def getWebIfRequestAny(functionName, key, defaultInfos, key2 = nil)
     key2 ||= key
     
-    logging("getWebIfRequestAny begin")
-    logging(key, "key")
-    logging(key2, "key2")
-    logging(defaultInfos, "defaultInfos")
+    @logger.debug("getWebIfRequestAny begin")
+    @logger.debug(key, "key")
+    @logger.debug(key2, "key2")
+    @logger.debug(defaultInfos, "defaultInfos")
     
     defaultValue = defaultInfos[key2]
-    logging(defaultValue, "defaultValue")
+    @logger.debug(defaultValue, "defaultValue")
     
     command = "#{functionName}( key, defaultValue )"
-    logging(command, "getWebIfRequestAny command")
+    @logger.debug(command, "getWebIfRequestAny command")
     
     result = eval( command )
-    logging(result, "getWebIfRequestAny result")
+    @logger.debug(result, "getWebIfRequestAny result")
     
     return result
   end
   
   
   def getWebIfRefresh
-    logging("getWebIfRefresh Begin")
+    @logger.debug("getWebIfRefresh Begin")
     
     @lastUpdateTimes = {
       'chatMessageDataLog' => getWebIfRequestNumber('chat', -1),
@@ -1896,7 +1866,7 @@ SQL_TEXT
     }
     
     @lastUpdateTimes.delete_if{|type, time| time == -1}
-    logging(@lastUpdateTimes, "getWebIfRefresh lastUpdateTimes")
+    @logger.debug(@lastUpdateTimes, "getWebIfRefresh lastUpdateTimes")
     
     saveData = {}
     refreshLoop(saveData)
@@ -1918,14 +1888,14 @@ SQL_TEXT
     result['lastUpdateTimes'] = @lastUpdateTimes
     result['result'] = 'OK'
     
-    logging("getWebIfRefresh End result", result)
+    @logger.debug("getWebIfRefresh End result", result)
     
     return result
   end
   
   
   def refresh()
-    logging("==>Begin refresh");
+    @logger.debug("==>Begin refresh");
     
     saveData = {}
     
@@ -1934,16 +1904,16 @@ SQL_TEXT
     end
     
     params = getParamsFromRequestData()
-    logging(params, "params")
+    @logger.debug(params, "params")
     
     @lastUpdateTimes = params['times']
-    logging(@lastUpdateTimes, "@lastUpdateTimes");
+    @logger.debug(@lastUpdateTimes, "@lastUpdateTimes");
     
     isFirstChatRefresh = (@lastUpdateTimes['chatMessageDataLog'] == 0)
-    logging(isFirstChatRefresh, "isFirstChatRefresh");
+    @logger.debug(isFirstChatRefresh, "isFirstChatRefresh");
     
     refreshIndex = params['rIndex'];
-    logging(refreshIndex, "refreshIndex");
+    @logger.debug(refreshIndex, "refreshIndex");
     
     if( $isCommet )
       refreshLoop(saveData)
@@ -1967,8 +1937,8 @@ SQL_TEXT
       saveData['isFirstChatRefresh'] = isFirstChatRefresh
     end
     
-    logging(saveData, "refresh end saveData");
-    logging("==>End refresh");
+    @logger.debug(saveData, "refresh end saveData");
+    @logger.debug("==>End refresh");
     
     return saveData
   end
@@ -1981,7 +1951,7 @@ SQL_TEXT
   
   def getParamsFromRequestData()
     params = getRequestData('params')
-    logging(params, "params")
+    @logger.debug(params, "params")
     return params
   end
   
@@ -1991,8 +1961,8 @@ SQL_TEXT
     now = Time.now
     whileLimitTime = now + $refreshTimeout
     
-    logging(now, "now")
-    logging(whileLimitTime, "whileLimitTime")
+    @logger.debug(now, "now")
+    @logger.debug(whileLimitTime, "whileLimitTime")
     
     while( Time.now < whileLimitTime )
       
@@ -2001,9 +1971,9 @@ SQL_TEXT
       break unless( saveData.empty? )
       
       intalval = getRefreshInterval
-      logging(intalval, "saveData is empty, sleep second");
+      @logger.debug(intalval, "saveData is empty, sleep second");
       sleep( intalval )
-      logging("awake.");
+      @logger.debug("awake.");
     end
   end
   
@@ -2023,8 +1993,8 @@ SQL_TEXT
   
   
   def updateLoginUserInfo(userName = '', uniqueId = '', isVisiter = false)
-    logging(uniqueId, 'updateLoginUserInfo uniqueId')
-    logging(userName, 'updateLoginUserInfo userName')
+    @logger.debug(uniqueId, 'updateLoginUserInfo uniqueId')
+    @logger.debug(userName, 'updateLoginUserInfo userName')
     
     isGetOnly = (userName.empty? and uniqueId.empty? )
     
@@ -2046,7 +2016,7 @@ SQL_TEXT
     
     deleteUserInfo()
     
-    logging("updateLoginUserInfo END")
+    @logger.debug("updateLoginUserInfo END")
   end
   
   def getUserInfoParams(uniqueId, userName,isVisiter)
@@ -2145,7 +2115,7 @@ SQL_TEXT
   
   def getSaveDataLastAccessTimes( roomNumberRange )
     
-    logging(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
+    @logger.debug(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
     
     result = {}
     
@@ -2156,7 +2126,7 @@ SQL_TEXT
       result[roomNo] = time
     end
     
-    logging(result, "getSaveDataLastAccessTimes result")
+    @logger.debug(result, "getSaveDataLastAccessTimes result")
     
     return result
   end
@@ -2170,47 +2140,47 @@ SQL_TEXT
   end
   
   def removeOldRoomFromAccessTimes(accessTimes)
-    logging("removeOldRoom Begin")
+    @logger.debug("removeOldRoom Begin")
     if( $removeOldPlayRoomLimitDays <= 0 )
       return accessTimes
     end
     
-    logging(accessTimes, "accessTimes")
+    @logger.debug(accessTimes, "accessTimes")
     
     roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
     
     ignoreLoginUser = true
     password = nil
     result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
-    logging(result, "removePlayRoomByParams result")
+    @logger.debug(result, "removePlayRoomByParams result")
     
     return result
   end
   
   def getDeleteTargetRoomNumbers(accessTimes)
-    logging(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
+    @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
     
     roomNumbers = []
     
     accessTimes.each do |index, time|
-      logging(index, "index")
-      logging(time, "time")
+      @logger.debug(index, "index")
+      @logger.debug(time, "time")
       
       next if( time.nil? ) 
       
       timeDiffSeconds = (Time.now - time)
-      logging(timeDiffSeconds, "timeDiffSeconds")
+      @logger.debug(timeDiffSeconds, "timeDiffSeconds")
       
       limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
-      logging(limitSeconds, "limitSeconds")
+      @logger.debug(limitSeconds, "limitSeconds")
       
       if( timeDiffSeconds > limitSeconds )
-        logging( index, "roomNumbers added index")
+        @logger.debug( index, "roomNumbers added index")
         roomNumbers << index
       end
     end
     
-    logging(roomNumbers, "roomNumbers")
+    @logger.debug(roomNumbers, "roomNumbers")
     return roomNumbers
   end
   
@@ -2237,25 +2207,25 @@ COMMAND_END
     
     connectDb
     result = query(command)
-    logging(result, "findEmptyRoomNumber result")
+    @logger.debug(result, "findEmptyRoomNumber result")
     
     row = result.first
     row ||= {}
-    logging(row, "findEmptyRoomNumber row")
+    @logger.debug(row, "findEmptyRoomNumber row")
     
     count = row['roomNo'].to_i
     
     emptyRoomNubmer = count
-    logging(emptyRoomNubmer, 'emptyRoomNubmer')
+    @logger.debug(emptyRoomNubmer, 'emptyRoomNubmer')
     
     return emptyRoomNubmer
   end
   
   def getPlayRoomStates()
-    logging("getPlayRoomStates Begin");
+    @logger.debug("getPlayRoomStates Begin");
     
     params = getParamsFromRequestData()
-    logging(params, "params")
+    @logger.debug(params, "params")
     
     minRoom = getMinRoom(params)
     maxRoom = getMaxRoom(params)
@@ -2267,7 +2237,7 @@ COMMAND_END
       "playRoomStates" => playRoomStates,
     }
     
-    logging(result, "getPlayRoomStates End result");
+    @logger.debug(result, "getPlayRoomStates End result");
     
     return result
   end
@@ -2370,7 +2340,7 @@ COMMAND_END
     users = getAllUsersData(roomNo)
     userNames = users.collect{|i| i['userNames']}
     
-    logging(userNames, "getLoginUserNames userNames")
+    @logger.debug(userNames, "getLoginUserNames userNames")
     return userNames
   end
   
@@ -2417,7 +2387,7 @@ COMMAND_END
                      :where => {"update_at >= ? " => getLoginTimeLimit() },
                      :others => ["GROUP BY roomNo"],
                      :noRoom => true)
-    logging(result, "result")
+    @logger.debug(result, "result")
     
     result.each do |row|
       roomNo = row["roomNo"].to_i
@@ -2429,8 +2399,8 @@ COMMAND_END
     
     userList.sort!
     
-    logging(total, "getAllLoginCount total")
-    logging(userList, "getAllLoginCount userList")
+    @logger.debug(total, "getAllLoginCount total")
+    @logger.debug(userList, "getAllLoginCount userList")
     return total, userList
   end
   
@@ -2446,13 +2416,13 @@ COMMAND_END
       counts[gameType] += 1
     end
     
-    logging(counts, 'counts')
+    @logger.debug(counts, 'counts')
     
     countList = counts.collect{|gameType, count|[count, gameType]}
     countList.sort!
     countList.reverse!
     
-    logging('countList', countList)
+    @logger.debug('countList', countList)
     
     famousGames = []
     
@@ -2463,7 +2433,7 @@ COMMAND_END
       famousGames << {"gameType" => gameType, "count" => count}
     end
     
-    logging('famousGames', famousGames)
+    @logger.debug('famousGames', famousGames)
     
     return famousGames
   end
@@ -2478,7 +2448,7 @@ COMMAND_END
   end
   
   def getLoginInfo()
-    logging("getLoginInfo begin")
+    @logger.debug("getLoginInfo begin")
     
     uniqueId ||= createUniqueId()
     
@@ -2524,8 +2494,8 @@ COMMAND_END
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
     }
     
-    logging(result, "result")
-    logging("getLoginInfo end")
+    @logger.debug(result, "result")
+    @logger.debug("getLoginInfo end")
     return result
   end
   
@@ -2615,9 +2585,9 @@ COMMAND_END
       File.readlines($loginMessageFile).each do |line|
         loginMessage << line.chomp << "\n";
       end
-      logging(loginMessage, "loginMessage")
+      @logger.debug(loginMessage, "loginMessage")
     else
-      logging("#{$loginMessageFile} is NOT found.")
+      @logger.debug("#{$loginMessageFile} is NOT found.")
     end
     
     return loginMessage
@@ -2630,14 +2600,14 @@ COMMAND_END
         loginMessage << line.chomp << "\n";
       end
     else
-      logging("#{$loginMessageFile} is NOT found.")
+      @logger.debug("#{$loginMessageFile} is NOT found.")
     end
     
     return loginMessage
   end
   
   def getDiceBotInfos()
-    logging("getDiceBotInfos() Begin")
+    @logger.debug("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
     diceBotInfos = DiceBotInfos.new.getInfos
@@ -2645,11 +2615,11 @@ COMMAND_END
     commandInfos = getGameCommandInfos
     
     commandInfos.each do |commandInfo|
-      logging(commandInfo, "commandInfos.each commandInfos")
+      @logger.debug(commandInfo, "commandInfos.each commandInfos")
       setDiceBotPrefix(diceBotInfos, commandInfo)
     end
     
-    # logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
+    # @logger.debug(diceBotInfos, "getDiceBotInfos diceBotInfos")
     
     return diceBotInfos
   end
@@ -2673,7 +2643,7 @@ COMMAND_END
   end
   
   def setDiceBotPrefixToOne(botInfo, commandInfo)
-    logging(botInfo, "botInfo")
+    @logger.debug(botInfo, "botInfo")
     return if(botInfo.nil?)
     
     prefixs = botInfo["prefixs"]
@@ -2683,10 +2653,10 @@ COMMAND_END
   end
   
   def getGameCommandInfos
-    logging('getGameCommandInfos Begin')
+    @logger.debug('getGameCommandInfos Begin')
     
     if( @saveDirInfo.getSaveDataDirIndex == -1 )
-      logging('getGameCommandInfos room is -1, so END')
+      @logger.debug('getGameCommandInfos room is -1, so END')
       
       return []
     end
@@ -2694,17 +2664,17 @@ COMMAND_END
     require 'cgiDiceBot.rb'
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
-    logging(dir, 'dir')
+    @logger.debug(dir, 'dir')
     
     commandInfos = bot.getGameCommandInfos(dir, @diceBotTablePrefix)
-    logging(commandInfos, "getGameCommandInfos End commandInfos")
+    @logger.debug(commandInfos, "getGameCommandInfos End commandInfos")
     
     return commandInfos
   end
   
   
   def createDir(playRoomIndex)
-    logging("createDir BEGIN")
+    @logger.debug("createDir BEGIN")
     
     @saveDirInfo.setSaveDataDirIndex(playRoomIndex)
     @saveDirInfo.createDir()
@@ -2714,7 +2684,7 @@ COMMAND_END
     insertFirstTime
     insertFirstEffect
     
-    logging("createDir END")
+    @logger.debug("createDir END")
   end
   
   
@@ -2732,13 +2702,13 @@ COMMAND_END
   
   
   def createPlayRoom()
-    logging('createPlayRoom begin')
+    @logger.debug('createPlayRoom begin')
     
     resultText = "OK"
     playRoomIndex = -1
     begin
       params = getParamsFromRequestData()
-      logging(params, "params")
+      @logger.debug(params, "params")
       
       checkCreatePlayRoomPassword(params['createPassword'])
       
@@ -2754,27 +2724,27 @@ COMMAND_END
         playRoomIndex = findEmptyRoomNumber()
         raise "noEmptyPlayRoom" if(playRoomIndex == -1)
         
-        logging(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
+        @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
       end
       
-      logging(playRoomName, 'playRoomName')
-      logging('playRoomPassword is get')
-      logging(playRoomIndex, 'playRoomIndex')
+      @logger.debug(playRoomName, 'playRoomName')
+      @logger.debug('playRoomPassword is get')
+      @logger.debug(playRoomIndex, 'playRoomIndex')
       
       initSaveFiles(playRoomIndex)
       checkSetPassword(playRoomPassword, playRoomIndex)
       
-      logging("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
+      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
       removeSaveDir(playRoomIndex)
-      logging("@saveDirInfo.removeSaveDir(playRoomIndex) End")
+      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) End")
       
       createDir(playRoomIndex)
       
       playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      logging(playRoomChangedPassword, 'playRoomChangedPassword')
+      @logger.debug(playRoomChangedPassword, 'playRoomChangedPassword')
       
       viewStates = params['viewStates']
-      logging("viewStates", viewStates)
+      @logger.debug("viewStates", viewStates)
       
       
       changePlayRoomData do |saveData|
@@ -2792,7 +2762,7 @@ COMMAND_END
       
       sendRoomCreateMessage(playRoomIndex)
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
       resultText = getLanguageKey( e.to_s )
     end
     
@@ -2800,8 +2770,8 @@ COMMAND_END
       "resultText" => resultText,
       "playRoomIndex" => playRoomIndex,
     }
-    logging(result, 'result')
-    logging('createDir finished')
+    @logger.debug(result, 'result')
+    @logger.debug('createDir finished')
     
     return result
   end
@@ -2815,8 +2785,8 @@ COMMAND_END
   
   
   def checkCreatePlayRoomPassword(password)
-    logging('checkCreatePlayRoomPassword Begin')
-    logging(password, 'password')
+    @logger.debug('checkCreatePlayRoomPassword Begin')
+    @logger.debug(password, 'password')
     
     return if( $createPlayRoomPassword.empty? )
     return if( $createPlayRoomPassword == password )
@@ -2851,26 +2821,26 @@ COMMAND_END
   end
   
   def changePlayRoom()
-    logging("changePlayRoom begin")
+    @logger.debug("changePlayRoom begin")
     
     resultText = "OK"
     
     begin
       params = getParamsFromRequestData()
-      logging(params, "params")
+      @logger.debug(params, "params")
       
       playRoomPassword = params['playRoomPassword']
       checkSetPassword(playRoomPassword)
       
       playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      logging('playRoomPassword is get')
+      @logger.debug('playRoomPassword is get')
       
       viewStates = params['viewStates']
-      logging("viewStates", viewStates)
+      @logger.debug("viewStates", viewStates)
       
       
       changePlayRoomData do |saveData|
-        logging(saveData, 'changePlayRoom() saveData before')
+        @logger.debug(saveData, 'changePlayRoom() saveData before')
         saveData['playRoomName'] = params['playRoomName']
         saveData['playRoomChangedPassword'] = playRoomChangedPassword
         saveData['chatChannelNames'] = params['chatChannelNames']
@@ -2884,7 +2854,7 @@ COMMAND_END
           addViewStatesToSaveData(saveData, viewStates)
         end
         
-logging(saveData, 'changePlayRoom() saveData end')
+@logger.debug(saveData, 'changePlayRoom() saveData end')
         
         saveData
       end
@@ -2895,7 +2865,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     result = {
       "resultText" => resultText,
     }
-    logging(result, 'changePlayRoom result')
+    @logger.debug(result, 'changePlayRoom result')
     
     return result
   end
@@ -2957,7 +2927,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     password ||= ""
     
     adminPassword = params["adminPassword"]
-    logging(adminPassword, "removePlayRoom() adminPassword")
+    @logger.debug(adminPassword, "removePlayRoom() adminPassword")
     if( isMentenanceMode(adminPassword) )
       password = nil
     end
@@ -2966,7 +2936,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
-    logging(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
+    @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
     
     deletedRoomNumbers = []
     errorMessages = []
@@ -2975,10 +2945,10 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     roomNumbers.each do |roomNumber|
       roomNumber = roomNumber.to_i
-      logging(roomNumber, 'roomNumber')
+      @logger.debug(roomNumber, 'roomNumber')
       
       resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
-      logging(resultText, "checkRemovePlayRoom resultText")
+      @logger.debug(resultText, "checkRemovePlayRoom resultText")
       
       case resultText
       when "OK"
@@ -2999,7 +2969,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       "passwordRoomNumbers" => passwordRoomNumbers,
       "errorMessages" => errorMessages,
     }
-    logging(result, 'result')
+    @logger.debug(result, 'result')
     
     return result
   end
@@ -3030,12 +3000,12 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
     roomNumberRange = (roomNumber..roomNumber)
-    logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
+    @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
     
     unless( ignoreLoginUser )
       userNames = getLoginUserNames(roomNumber)
       userCount = userNames.size
-      logging(userCount, "checkRemovePlayRoom userCount");
+      @logger.debug(userCount, "checkRemovePlayRoom userCount");
       
       if( userCount > 0 )
         return "userExist"
@@ -3054,13 +3024,13 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
     lastAccessTime = lastAccessTimes[roomNumber]
-    logging(lastAccessTime, "lastAccessTime")
+    @logger.debug(lastAccessTime, "lastAccessTime")
     
     unless( lastAccessTime.nil? )
       now = Time.now
       spendTimes = now - lastAccessTime
-      logging(spendTimes, "spendTimes")
-      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+      @logger.debug(spendTimes, "spendTimes")
+      @logger.debug(spendTimes / 60 / 60, "spendTimes / 60 / 60")
       if( spendTimes < $deletablePassedSeconds )
         return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
       end
@@ -3082,15 +3052,15 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def saveAllData()
-    logging("saveAllData begin")
+    @logger.debug("saveAllData begin")
     dir = getRoomLocalSpaceDirName
     makeDir(dir)
     
     params = getParamsFromRequestData()
     @saveAllDataBaseUrl = params['baseUrl']
     chatPaletteData = params['chatPaletteData']
-    logging(@saveAllDataBaseUrl, "saveAllDataBaseUrl")
-    logging(chatPaletteData, "chatPaletteData")
+    @logger.debug(@saveAllDataBaseUrl, "saveAllDataBaseUrl")
+    @logger.debug(chatPaletteData, "chatPaletteData")
     
     saveDataAll = getAllSaveData()
     saveDataAll = moveAllImagesToDir(dir, saveDataAll)
@@ -3105,7 +3075,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     result['result'] = "OK"
     result["saveFileName"] = allSaveDataFile
     
-    logging(result, "saveAllData result")
+    @logger.debug(result, "saveAllData result")
     return result
   end
   
@@ -3119,14 +3089,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def moveAllImagesToDir(dir, saveDataAll)
-    logging(saveDataAll, 'moveAllImagesToDir saveDataAll')
+    @logger.debug(saveDataAll, 'moveAllImagesToDir saveDataAll')
     
     moveMapImageToDir(dir, saveDataAll)
     moveEffectsImageToDir(dir, saveDataAll)
     moveCharactersImagesToDir(dir, saveDataAll)
     movePlayroomImagesToDir(dir, saveDataAll)
     
-    logging(saveDataAll, 'moveAllImagesToDir result saveDataAll')
+    @logger.debug(saveDataAll, 'moveAllImagesToDir result saveDataAll')
     
     return saveDataAll
   end
@@ -3183,13 +3153,13 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def movePlayroomImagesToDir(dir, saveDataAll)
-    logging(dir, "movePlayroomImagesToDir dir")
+    @logger.debug(dir, "movePlayroomImagesToDir dir")
     playRoomInfo = saveDataAll['playRoomInfo']
     return if( playRoomInfo.nil? )
-    logging(playRoomInfo, "playRoomInfo")
+    @logger.debug(playRoomInfo, "playRoomInfo")
     
     backgroundImage = playRoomInfo['backgroundImage'] 
-    logging(backgroundImage, "backgroundImage")
+    @logger.debug(backgroundImage, "backgroundImage")
     return if( backgroundImage.nil? )
     return if( backgroundImage.empty? )
     
@@ -3197,40 +3167,40 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def changeFilePlace(from ,to)
-    logging(from, "changeFilePlace from")
+    @logger.debug(from, "changeFilePlace from")
     
     fromFileName, = from.split(/\t/)
     fromFileName ||= from
     
     result = copyFile(fromFileName ,to)
-    logging(result, "copyFile result")
+    @logger.debug(result, "copyFile result")
     
     return unless( result )
     
     from.gsub!(/.*\//, $imageUploadDirMarker + "/" )
-    logging(from, "changeFilePlace result")
+    @logger.debug(from, "changeFilePlace result")
   end
   
   def copyFile(from ,to)
-    logging("moveFile begin")
-    logging(from, "from")
-    logging(to, "to")
+    @logger.debug("moveFile begin")
+    @logger.debug(from, "from")
+    @logger.debug(to, "to")
     
-    logging(@saveAllDataBaseUrl, "@saveAllDataBaseUrl")
+    @logger.debug(@saveAllDataBaseUrl, "@saveAllDataBaseUrl")
     from.gsub!(@saveAllDataBaseUrl, './')
-    logging(from, "from2")
+    @logger.debug(from, "from2")
     
     return false if( from.nil? )
     return false unless( File.exist?(from) )
     
     fromDir =  File.dirname(from)
-    logging(fromDir, "fromDir")
+    @logger.debug(fromDir, "fromDir")
     if( fromDir == to )
-      logging("from, to is equal dir")
+      @logger.debug("from, to is equal dir")
       return true
     end
     
-    logging("copying...")
+    @logger.debug("copying...")
     
     result = true
     begin
@@ -3243,8 +3213,8 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def makeChatPalletSaveFile(dir, chatPaletteData)
-    logging("makeChatPalletSaveFile Begin")
-    logging(dir, "makeChatPalletSaveFile dir")
+    @logger.debug("makeChatPalletSaveFile Begin")
+    @logger.debug(dir, "makeChatPalletSaveFile dir")
     
     currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
@@ -3254,12 +3224,12 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
     
     FileUtils.cd(currentDir)
-    logging("makeChatPalletSaveFile End")
+    @logger.debug("makeChatPalletSaveFile End")
   end
   
   def makeDefaultSaveFileForAllSave(dir, saveDataAll)
-    logging("makeDefaultSaveFileForAllSave Begin")
-    logging(dir, "makeDefaultSaveFileForAllSave dir")
+    @logger.debug("makeDefaultSaveFileForAllSave Begin")
+    @logger.debug(dir, "makeDefaultSaveFileForAllSave dir")
     
     extension = "sav"
     result = saveSelectFilesFromSaveDataAll(saveDataAll, extension)
@@ -3269,14 +3239,14 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     FileUtils.mv(from, to)
     
-    logging("makeDefaultSaveFileForAllSave End")
+    @logger.debug("makeDefaultSaveFileForAllSave End")
   end
   
   
   def removeOldAllSaveFile(dir)
     fileNames = Dir.glob("#{dir}/#{@fullBackupFileBaseName}*#{@allSaveDataFileExt}")
     fileNames = fileNames.collect{|i| i.untaint}
-    logging(fileNames, "removeOldAllSaveFile fileNames")
+    @logger.debug(fileNames, "removeOldAllSaveFile fileNames")
     
     fileNames.each do |fileName|
       File.delete(fileName)
@@ -3284,7 +3254,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def makeAllSaveDataFile(dir, fileBaseName)
-    logging("makeAllSaveDataFile begin")
+    @logger.debug("makeAllSaveDataFile begin")
     
     require 'zlib'
     require 'archive/tar/minitar'
@@ -3358,38 +3328,38 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveData[key] = data
     end
     
-    text = getTextFromJsonData(saveData)
+    text = getJsonString(saveData)
     saveFileName = getNewSaveFileName(extension)
     createSaveFile(saveFileName, text)
     
     result["result"] = "OK"
     result["saveFileName"] = saveFileName
-    logging(result, "saveSelectFiles result")
+    @logger.debug(result, "saveSelectFiles result")
     
     return result
   end
   
   
   def getSelectFilesData(selectTypes, isAddPlayRoomInfo = false)
-    logging(selectTypes, "getSelectFilesData begin selectTypes")
+    @logger.debug(selectTypes, "getSelectFilesData begin selectTypes")
     
     @lastUpdateTimes = {}
     selectTypes.each do |type|
       @lastUpdateTimes[type] = 0;
     end
-    logging("dummy @lastUpdateTimes created")
+    @logger.debug("dummy @lastUpdateTimes created")
     
     saveDataAll = {}
     getCurrentSaveData() do |targetSaveData, saveFileTypeName|
       
       if saveFileTypeName == 'characters'
         jsons = targetSaveData["characters"]
-        characters = jsons.collect {|i| getJsonDataFromText(i) }
+        characters = jsons.collect {|i| getObjectFromJsonString(i) }
         targetSaveData["characters"] = characters
       end
       
       saveDataAll[saveFileTypeName] = targetSaveData
-      logging(saveFileTypeName, "saveFileTypeName in save")
+      @logger.debug(saveFileTypeName, "saveFileTypeName in save")
     end
     
     if( isAddPlayRoomInfo )
@@ -3397,7 +3367,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveDataAll['playRoomInfo'] = getPlayRoomData()
     end
     
-    logging(saveDataAll, "saveDataAll tmp")
+    @logger.debug(saveDataAll, "saveDataAll tmp")
     
     return saveDataAll
   end
@@ -3421,13 +3391,13 @@ logging(saveData, 'changePlayRoom() saveData end')
 
   
   def deleteOldSaveFile
-    logging('deleteOldSaveFile begin')
+    @logger.debug('deleteOldSaveFile begin')
     begin
       deleteOldSaveFileCatched
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
-    logging('deleteOldSaveFile end')
+    @logger.debug('deleteOldSaveFile end')
   end
   
   def deleteOldSaveFileCatched
@@ -3435,63 +3405,51 @@ logging(saveData, 'changePlayRoom() saveData end')
     changeSaveData($saveFileNames) do |saveData|
       existSaveFileNames = saveData["fileNames"]
       existSaveFileNames ||= []
-      logging(existSaveFileNames, 'existSaveFileNames')
+      @logger.debug(existSaveFileNames, 'existSaveFileNames')
       
       regExp = /DodontoF_[\d_]+.sav/
       
       deleteTargets = []
       
       existSaveFileNames.each do |saveFileName|
-        logging(saveFileName, 'saveFileName')
+        @logger.debug(saveFileName, 'saveFileName')
         next unless(regExp === saveFileName)
         
         createdTime = getSaveFileTimeStamp(saveFileName)
         now = Time.now.to_i
         diff = ( now - createdTime )
-        logging(diff, "createdTime diff")
+        @logger.debug(diff, "createdTime diff")
         next if( diff < $oldSaveFileDelteSeconds )
         
         begin
           deleteFile(saveFileName)
         rescue => e
-          loggingException(e)
+          @logger.exception(e)
         end
         
         deleteTargets << saveFileName
       end
       
-      logging(deleteTargets, "deleteTargets")
+      @logger.debug(deleteTargets, "deleteTargets")
       
       deleteTargets.each do |fileName|
         existSaveFileNames.delete_if{|i| i == fileName}
       end
-      logging(existSaveFileNames, "existSaveFileNames")
+      @logger.debug(existSaveFileNames, "existSaveFileNames")
       
       saveData["fileNames"] = existSaveFileNames
     end
     
   end
   
-  
-  def loggingException(e)
-    self.class.loggingException(e)
-  end
-  
-  def self.loggingException(e)
-    loggingForce( e.to_s, "exception mean" )
-    loggingForce( $@.join("\n"), "exception from" )
-    loggingForce($!.inspect, "$!.inspect" )
-  end
-  
-  
   def checkRoomStatus()
     deleteOldUploadFile()
     
     params = getParamsFromRequestData()
-    logging(params, 'params')
+    @logger.debug(params, 'params')
     
     roomNumber = params['roomNumber']
-    logging(roomNumber, 'roomNumber')
+    @logger.debug(roomNumber, 'roomNumber')
     
     @saveDirInfo.setSaveDataDirIndex(roomNumber)
     
@@ -3504,7 +3462,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     isPasswordLocked = false
     
     isRoomExist = existRoom?
-    logging(isRoomExist, "checkRoomStatus isRoomExist")
+    @logger.debug(isRoomExist, "checkRoomStatus isRoomExist")
     
     if( isRoomExist )
       saveData = getPlayRoomData()
@@ -3526,7 +3484,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       canVisit = false
     end
     
-    logging("isPasswordLocked", isPasswordLocked);
+    @logger.debug("isPasswordLocked", isPasswordLocked);
     
     result = {
       'isRoomExist' => isRoomExist,
@@ -3540,7 +3498,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       'isWelcomeMessageOn' => isWelcomeMessageOn,
     }
     
-    logging(result, "checkRoomStatus End result")
+    @logger.debug(result, "checkRoomStatus End result")
     
     return result
   end
@@ -3552,7 +3510,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def loginPassword()
     loginData = getParamsFromRequestData()
-    logging(loginData, 'loginData')
+    @logger.debug(loginData, 'loginData')
     
     roomNumber = loginData['roomNumber']
     password = loginData['password']
@@ -3562,7 +3520,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def checkLoginPassword(roomNumber, password, visiterMode)
-    logging("checkLoginPassword roomNumber", roomNumber)
+    @logger.debug("checkLoginPassword roomNumber", roomNumber)
     @saveDirInfo.setSaveDataDirIndex(roomNumber)
     dirName = @saveDirInfo.getDirName()
     
@@ -3605,10 +3563,10 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def logout()
     logoutData = getParamsFromRequestData()
-    logging(logoutData, 'logoutData')
+    @logger.debug(logoutData, 'logoutData')
     
     uniqueId = logoutData['uniqueId']
-    logging(uniqueId, 'uniqueId');
+    @logger.debug(uniqueId, 'uniqueId');
     
     changeDb do
       query("DELETE FROM users WHERE uniqueId = ?",
@@ -3635,7 +3593,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def getBotTableInfos()
-    logging("getBotTableInfos Begin")
+    @logger.debug("getBotTableInfos Begin")
     result = {
       "resultText"=> "OK",
     }
@@ -3643,13 +3601,13 @@ logging(saveData, 'changePlayRoom() saveData end')
     dir = getDiceBotExtraTableDirName
     result["tableInfos"] = getBotTableInfosFromDir(dir)
     
-    logging(result, "result")
-    logging("getBotTableInfos End")
+    @logger.debug(result, "result")
+    @logger.debug("getBotTableInfos End")
     return result
   end
   
   def getBotTableInfosFromDir(dir)
-    logging(dir, 'getBotTableInfosFromDir dir')
+    @logger.debug(dir, 'getBotTableInfosFromDir dir')
     
     require 'TableFileData'
     
@@ -3658,10 +3616,10 @@ logging(saveData, 'changePlayRoom() saveData end')
     tableFileData.setDir(dir, @diceBotTablePrefix)
     tableInfos = tableFileData.getAllTableInfo
     
-    logging(tableInfos, "getBotTableInfosFromDir tableInfos")
+    @logger.debug(tableInfos, "getBotTableInfosFromDir tableInfos")
     tableInfos.sort!{|a, b| a["command"].to_i <=> b["command"].to_i}
     
-    logging(tableInfos, 'getBotTableInfosFromDir result tableInfos')
+    @logger.debug(tableInfos, 'getBotTableInfosFromDir result tableInfos')
     
     return tableInfos
   end
@@ -3678,16 +3636,16 @@ logging(saveData, 'changePlayRoom() saveData end')
       return result
     end
     
-    logging("addBotTableMain called")
+    @logger.debug("addBotTableMain called")
     
     result = getBotTableInfos()
-    logging(result, "addBotTable result")
+    @logger.debug(result, "addBotTable result")
     
     return result
   end
   
   def addBotTableMain(params)
-    logging("addBotTableMain Begin")
+    @logger.debug("addBotTableMain Begin")
     
     dir = getDiceBotExtraTableDirName
     makeDir(dir)
@@ -3702,7 +3660,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       resultText = getLanguageKey( e.to_s )
     end
     
-    logging(resultText, "addBotTableMain End resultText")
+    @logger.debug(resultText, "addBotTableMain End resultText")
     
     return resultText
   end
@@ -3722,7 +3680,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def changeBotTableMain()
-    logging("changeBotTableMain Begin")
+    @logger.debug("changeBotTableMain Begin")
     
     dir = getDiceBotExtraTableDirName
     params = getParamsFromRequestData()
@@ -3737,7 +3695,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       resultText = getLanguageKey( e.to_s )
     end
     
-    logging(resultText, "changeBotTableMain End resultText")
+    @logger.debug(resultText, "changeBotTableMain End resultText")
     
     return resultText
   end
@@ -3750,7 +3708,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def removeBotTableMain()
-    logging("removeBotTableMain Begin")
+    @logger.debug("removeBotTableMain Begin")
     
     params = getParamsFromRequestData()
     command = params["command"]
@@ -3765,43 +3723,43 @@ logging(saveData, 'changePlayRoom() saveData end')
     tableInfos = tableFileData.getAllTableInfo
     
     tableInfo = tableInfos.find{|i| i["command"] == command}
-    logging(tableInfo, "tableInfo")
+    @logger.debug(tableInfo, "tableInfo")
     return if( tableInfo.nil? )
     
     fileName = tableInfo["fileName"]
-    logging(fileName, "fileName")
+    @logger.debug(fileName, "fileName")
     return if( fileName.nil? )
     
-    logging("isFile exist?")
+    @logger.debug("isFile exist?")
     return unless( File.exist?(fileName) )
     
     begin
       File.delete(fileName)
     rescue Exception => e
-      loggingException(e)
+      @logger.exception(e)
     end
     
-    logging("removeBotTableMain End")
+    @logger.debug("removeBotTableMain End")
   end
   
   
   
   def requestReplayDataList()
-    logging("requestReplayDataList begin")
+    @logger.debug("requestReplayDataList begin")
     result = {
       "resultText"=> "OK",
     }
     
     result["replayDataList"] = getReplayDataList() #[{"title"=>x, "url"=>y}]
     
-    logging(result, "result")
-    logging("requestReplayDataList end")
+    @logger.debug(result, "result")
+    @logger.debug("requestReplayDataList end")
     return result
   end
   
   def uploadReplayData()
     uploadFileBase($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
-      logging("uploadReplayData yield Begin")
+      @logger.debug("uploadReplayData yield Begin")
       
       params = getParamsFromRequestData()
       
@@ -3814,7 +3772,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       result["replayDataInfo"] = replayDataInfo
       result["replayDataList"] = getReplayDataList() #[{"title"=>x, "url"=>y}]
       
-      logging("uploadReplayData yield End")
+      @logger.debug("uploadReplayData yield End")
     end
     
   end
@@ -3856,7 +3814,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
 
   def removeReplayData()
-    logging("removeReplayData begin")
+    @logger.debug("removeReplayData begin")
     
     result = {
       "resultText"=> "NG",
@@ -3865,7 +3823,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     begin
       replayData = getParamsFromRequestData()
       
-      logging(replayData, "replayData")
+      @logger.debug(replayData, "replayData")
       
       replayDataList = []
       changeSaveData( getReplayDataInfoFileName() ) do |saveData|
@@ -3883,12 +3841,12 @@ logging(saveData, 'changePlayRoom() saveData end')
         end
       end
       
-      logging("removeReplayData replayDataList", replayDataList)
+      @logger.debug("removeReplayData replayDataList", replayDataList)
       
       result = requestReplayDataList()
     rescue => e
       result["resultText"] = e.to_s
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return result
@@ -3902,7 +3860,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       
       params = getParamsFromRequestData()
       baseUrl = params['baseUrl']
-      logging(baseUrl, "baseUrl")
+      @logger.debug(baseUrl, "baseUrl")
       
       fileUploadUrl = baseUrl + fileNameFullPath
       
@@ -3932,13 +3890,13 @@ logging(saveData, 'changePlayRoom() saveData end')
         File.delete(fileName)
       end
     rescue => e
-      loggingException(e)
+      @logger.exception(e)
     end
   end
   
   
   def uploadFileBase(fileUploadDir, fileMaxSize, isChangeFileName = true)
-    logging("uploadFile() Begin")
+    @logger.debug("uploadFile() Begin")
     
     result = {
       "resultText"=> "NG",
@@ -3969,7 +3927,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       end
       
       fileNameFullPath = fileJoin(fileUploadDir, fileName).untaint
-      logging(fileNameFullPath, "fileNameFullPath")
+      @logger.debug(fileNameFullPath, "fileNameFullPath")
       
       yield(fileNameFullPath, fileNameOriginal, result)
       
@@ -3982,19 +3940,19 @@ logging(saveData, 'changePlayRoom() saveData end')
       result["resultText"] = "OK"
       
     rescue => e
-      logging(e, "error")
+      @logger.debug(e, "error")
       result["resultText"] = getLanguageKey( e.to_s )
     end
     
-    logging(result, "load result")
-    logging("uploadFile() End")
+    @logger.debug(result, "load result")
+    @logger.debug("uploadFile() End")
     
     return result
   end
   
   
   def loadAllSaveData()
-    logging("loadAllSaveData() Begin")
+    @logger.debug("loadAllSaveData() Begin")
     checkLoad()
     
     fileUploadDir = getRoomLocalSpaceDirName
@@ -4010,7 +3968,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveFile = fileNameFullPath
     end
     
-    logging(result, "uploadFileBase result")
+    @logger.debug(result, "uploadFileBase result")
     
     unless( result["resultText"] == 'OK' )
       return result
@@ -4024,7 +3982,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     chatPaletteSaveData = loadAllSaveDataDefaultInfo(fileUploadDir)
     result['chatPaletteSaveData'] = chatPaletteSaveData
     
-    logging(result, 'loadAllSaveData result')
+    @logger.debug(result, 'loadAllSaveData result')
     
     return result
   end
@@ -4082,7 +4040,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def clearDir(dir)
-    logging(dir, "clearDir dir")
+    @logger.debug(dir, "clearDir dir")
     
     unless( File.exist?(dir) )
       return
@@ -4100,14 +4058,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def extendSaveData(allSaveDataFile, fileUploadDir)
-    logging(allSaveDataFile, 'allSaveDataFile')
-    logging(fileUploadDir, 'fileUploadDir')
+    @logger.debug(allSaveDataFile, 'allSaveDataFile')
+    @logger.debug(fileUploadDir, 'fileUploadDir')
     
     require 'zlib'
     require 'archive/tar/minitar'
     
     readTar(allSaveDataFile) do |tar|
-      logging("begin read scenario tar file")
+      @logger.debug("begin read scenario tar file")
       
       Archive::Tar::Minitar.unpackWithCheck(tar, fileUploadDir) do |fileName, isDirectory|
         checkUnpackFile(fileName, isDirectory)
@@ -4116,7 +4074,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     File.delete(allSaveDataFile)
     
-    logging("archive extend !")
+    @logger.debug("archive extend !")
   end
   
   def readTar(allSaveDataFile)
@@ -4126,7 +4084,7 @@ logging(saveData, 'changePlayRoom() saveData end')
         tar = file
         tar = Zlib::GzipReader.new(file)
         
-        logging("allSaveDataFile is gzip")
+        @logger.debug("allSaveDataFile is gzip")
         yield(tar)
         
       end
@@ -4134,7 +4092,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       File.open(allSaveDataFile, 'rb') do |file|
         tar = file
         
-        logging("allSaveDataFile is tar")
+        @logger.debug("allSaveDataFile is tar")
         yield(tar)
         
       end
@@ -4144,16 +4102,16 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   #直下のファイルで許容する拡張子の場合かをチェック
   def checkUnpackFile(fileName, isDirectory)
-    logging(fileName, 'checkUnpackFile fileName')
-    logging(isDirectory, 'checkUnpackFile isDirectory')
+    @logger.debug(fileName, 'checkUnpackFile fileName')
+    @logger.debug(isDirectory, 'checkUnpackFile isDirectory')
     
     if( isDirectory )
-      logging('isDirectory!')
+      @logger.debug('isDirectory!')
       return false
     end
     
     result = isAllowdUnpackFile(fileName)
-    logging(result, 'checkUnpackFile result')
+    @logger.debug(result, 'checkUnpackFile result')
     
     return result
   end
@@ -4161,7 +4119,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   def isAllowdUnpackFile(fileName)
     
     if( /\// =~ fileName )
-      loggingForce(fileName, 'NG! checkUnpackFile /\// paturn')
+      @logger.error(fileName, 'NG! checkUnpackFile /\// paturn')
       return false
     end
     
@@ -4169,7 +4127,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       return true
     end
     
-    # loggingForce(fileName, 'NG! checkUnpackFile else paturn')
+    # @logger.error(fileName, 'NG! checkUnpackFile else paturn')
     
     return false
   end
@@ -4199,7 +4157,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def makeDir(dir)
-    logging(dir, "makeDir dir")
+    @logger.debug(dir, "makeDir dir")
     
     if( File.exist?(dir) )
       if( File.directory?(dir) )
@@ -4225,36 +4183,36 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def loadAllSaveDataDefaultSaveData(dir)
-    logging('loadAllSaveDataDefaultSaveData begin')
+    @logger.debug('loadAllSaveDataDefaultSaveData begin')
     saveFile = File.join(dir, @defaultAllSaveData)
     
     unless( File.exist?(saveFile) )
-      logging(saveFile, 'saveFile is NOT exist')
+      @logger.debug(saveFile, 'saveFile is NOT exist')
       return
     end
     
     jsonDataString = File.readlines(saveFile).join
     loadFromJsonDataString(jsonDataString)
     
-    logging('loadAllSaveDataDefaultSaveData end')
+    @logger.debug('loadAllSaveDataDefaultSaveData end')
   end
   
   
   def loadAllSaveDataDefaultChatPallete(dir)
     file = File.join(dir, @defaultChatPallete)
-    logging(file, 'loadAllSaveDataDefaultChatPallete file')
+    @logger.debug(file, 'loadAllSaveDataDefaultChatPallete file')
     
     return nil unless( File.exist?(file) )
     
     buffer = File.readlines(file).join
-    logging(buffer, 'loadAllSaveDataDefaultChatPallete buffer')
+    @logger.debug(buffer, 'loadAllSaveDataDefaultChatPallete buffer')
     
     return buffer
   end
   
   
   def load()
-    logging("load() Begin")
+    @logger.debug("load() Begin")
     
     result = {}
     
@@ -4262,10 +4220,10 @@ logging(saveData, 'changePlayRoom() saveData end')
       checkLoad()
       
       params = getParamsFromRequestData()
-      logging(params, 'load params')
+      @logger.debug(params, 'load params')
       
       jsonDataString = params['fileData']
-      logging(jsonDataString, 'jsonDataString')
+      @logger.debug(jsonDataString, 'jsonDataString')
       
       result = loadFromJsonDataString(jsonDataString)
       
@@ -4273,7 +4231,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       result["resultText"] = e.to_s
     end
     
-    logging(result, "load result")
+    @logger.debug(result, "load result")
     
     return result
   end
@@ -4301,7 +4259,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     dirJsonText = JsonBuilder.new.build(dir)
     changedDir = dirJsonText[2...-2]
     
-    logging(changedDir, 'localSpace name')
+    @logger.debug(changedDir, 'localSpace name')
     
     text = text.gsub($imageUploadDirMarker, changedDir)
     return text
@@ -4311,12 +4269,12 @@ logging(saveData, 'changePlayRoom() saveData end')
   def loadFromJsonDataString(jsonDataString)
     jsonDataString = changeLoadText(jsonDataString)
     
-    jsonData = getJsonDataFromText(jsonDataString)
+    jsonData = getObjectFromJsonString(jsonDataString)
     loadFromJsonData(jsonData)
   end
   
   def loadFromJsonData(jsonData)
-    logging(jsonData, 'loadFromJsonData jsonData')
+    @logger.debug(jsonData, 'loadFromJsonData jsonData')
     
     params = getParamsFromRequestData()
     
@@ -4326,13 +4284,13 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
     
     targets = params['targets']
-    logging(targets, "targets")
+    @logger.debug(targets, "targets")
     
     if( targets.nil? ) 
-      logging("loadSaveFileDataAll(jsonData)")
+      @logger.debug("loadSaveFileDataAll(jsonData)")
       loadSaveFileDataAll(jsonData)
     else
-      logging("loadSaveFileDataFilterByTargets(jsonData, targets)")
+      @logger.debug("loadSaveFileDataFilterByTargets(jsonData, targets)")
       loadSaveFileDataFilterByTargets(jsonData, targets)
     end
     
@@ -4340,7 +4298,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       "resultText"=> "OK"
     }
     
-    logging(result, "loadFromJsonData result")
+    @logger.debug(result, "loadFromJsonData result")
     
     return result
   end
@@ -4361,7 +4319,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def loadCharacterDataList(saveDataAll, type)
     characterDataList = getLoadData(saveDataAll, 'characters', 'characters', [])
-    logging(characterDataList, "characterDataList")
+    @logger.debug(characterDataList, "characterDataList")
     
     characterDataList = characterDataList.delete_if{|i| (i["type"] != type)}
     addCharacterData( characterDataList )
@@ -4371,7 +4329,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     saveDataAll = getSaveDataAllFromSaveData(jsonData)
     
     targets.each do |target|
-      logging(target, 'loadSaveFileDataFilterByTargets each target')
+      @logger.debug(target, 'loadSaveFileDataFilterByTargets each target')
       
       case target
       when "map"
@@ -4380,13 +4338,13 @@ logging(saveData, 'changePlayRoom() saveData end')
       when "characterData", "mapMask", "mapMarker", "floorTile", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", getCardType()
         loadCharacterDataList(saveDataAll, target)
       when "characterWaitingRoom"
-        logging("characterWaitingRoom called")
+        @logger.debug("characterWaitingRoom called")
         waitingRoom = getLoadData(saveDataAll, 'characters', 'waitingRoom', [])
         setWaitingRoomInfo(waitingRoom)
       when "standingGraphicInfos"
         effects = getLoadData(saveDataAll, 'effects', 'effects', [])
         effects = effects.delete_if{|i| (i["type"] != target)}
-        logging(effects, "standingGraphicInfos effects");
+        @logger.debug(effects, "standingGraphicInfos effects");
         addEffectData(effects)
       when "cutIn"
         effects = getLoadData(saveDataAll, 'effects', 'effects', [])
@@ -4401,7 +4359,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       when "diceBotTable"
         loadDiceBotTable(jsonData)
       else
-        loggingForce(target, "invalid load target type")
+        @logger.error(target, "invalid load target type")
       end
     end
   end
@@ -4409,27 +4367,27 @@ logging(saveData, 'changePlayRoom() saveData end')
   def loadSaveFileDataAll(jsonData)
     saveDataAll = getSaveDataAllFromSaveData(jsonData)
     
-    logging("loadSaveFileDataAll(saveDataAll) begin")
+    @logger.debug("loadSaveFileDataAll(saveDataAll) begin")
     
     $tableNames.each do |fileTypeName, dummy|
-      logging(fileTypeName, "fileTypeName")
+      @logger.debug(fileTypeName, "fileTypeName")
       
       saveData = saveDataAll[fileTypeName]
       saveData ||= {}
-      logging(saveData, "saveData")
+      @logger.debug(saveData, "saveData")
       
       loadSaveFileDataForEachType(fileTypeName, saveData)
     end
     
     loadDiceBotTable(jsonData)
     
-    logging("loadSaveFileDataAll(saveDataAll) end")
+    @logger.debug("loadSaveFileDataAll(saveDataAll) end")
   end
   
   
   def loadSaveFileDataForEachType(fileTypeName, saveData)
-    logging(fileTypeName, "loadSaveFileDataForEachType fileTypeName")
-    logging(saveData, "loadSaveFileDataForRooms saveData")
+    @logger.debug(fileTypeName, "loadSaveFileDataForEachType fileTypeName")
+    @logger.debug(saveData, "loadSaveFileDataForRooms saveData")
     
     return if saveData.nil?
     
@@ -4463,7 +4421,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def loadSaveFileDataForCharacters(saveData)
     characters = saveData['characters']
-    logging(characters, "loadSaveFileDataForCharacters characters")
+    @logger.debug(characters, "loadSaveFileDataForCharacters characters")
     
     addCharacterData( characters )
   end
@@ -4500,51 +4458,51 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
-    logging("saveSmallImage begin")
-    logging(imageFileNameBase, "imageFileNameBase")
-    logging(uploadImageFileName, "uploadImageFileName")
+    @logger.debug("saveSmallImage begin")
+    @logger.debug(imageFileNameBase, "imageFileNameBase")
+    @logger.debug(uploadImageFileName, "uploadImageFileName")
     
     smallImageDir = getSmallImageDir
     uploadSmallImageFileName = fileJoin(smallImageDir, imageFileNameBase)
     uploadSmallImageFileName += ".png";
     uploadSmallImageFileName.untaint
-    logging(uploadSmallImageFileName, "uploadSmallImageFileName")
+    @logger.debug(uploadSmallImageFileName, "uploadSmallImageFileName")
     
     open( uploadSmallImageFileName, "wb+" ) do |file|
       file.write( smallImageData )
     end
-    logging("small image create successed.")
+    @logger.debug("small image create successed.")
     
     params = getParamsFromRequestData()
     tagInfo = params['tagInfo']
-    logging(tagInfo, "uploadImageData tagInfo")
+    @logger.debug(tagInfo, "uploadImageData tagInfo")
     
     tagInfo["smallImage"] = uploadSmallImageFileName
-    logging(tagInfo, "uploadImageData tagInfo smallImage url added")
+    @logger.debug(tagInfo, "uploadImageData tagInfo smallImage url added")
     
     margeTagInfo(tagInfo, uploadImageFileName)
-    logging(tagInfo, "saveSmallImage margeTagInfo tagInfo")
+    @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
     changeImageTagsLocal(uploadImageFileName, tagInfo)
     
-    logging("saveSmallImage end")
+    @logger.debug("saveSmallImage end")
   end
   
   def margeTagInfo(tagInfo, source)
-    logging(source, "margeTagInfo source")
+    @logger.debug(source, "margeTagInfo source")
     imageTags = getImageTags()
     tagInfo_old = imageTags[source]
-    logging(tagInfo_old, "margeTagInfo tagInfo_old")
+    @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
     return if( tagInfo_old.nil? )
     
     tagInfo_old.keys.each do |key|
       tagInfo[key] = tagInfo_old[key]
     end
     
-    logging(tagInfo, "margeTagInfo tagInfo")
+    @logger.debug(tagInfo, "margeTagInfo tagInfo")
   end
   
   def uploadImageData()
-    logging("uploadImageData load Begin")
+    @logger.debug("uploadImageData load Begin")
     
     result = {
       "resultText"=> "OK"
@@ -4554,13 +4512,13 @@ logging(saveData, 'changePlayRoom() saveData end')
       params = getParamsFromRequestData()
       
       imageFileName = params["imageFileName"]
-      logging(imageFileName, "imageFileName")
+      @logger.debug(imageFileName, "imageFileName")
       
       imageData = getImageDataFromParams(params, "imageData")
       smallImageData = getImageDataFromParams(params, "smallImageData")
       
       if( imageData.nil? )
-        logging("createSmallImage is here")
+        @logger.debug("createSmallImage is here")
         imageFileNameBase = File.basename(imageFileName)
         saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
         return result
@@ -4568,10 +4526,10 @@ logging(saveData, 'changePlayRoom() saveData end')
       
       saveDir = $imageUploadDir
       imageFileNameBase = getNewFileName(imageFileName, "img")
-      logging(imageFileNameBase, "imageFileNameBase")
+      @logger.debug(imageFileNameBase, "imageFileNameBase")
       
       uploadImageFileName = fileJoin(saveDir, imageFileNameBase)
-      logging(uploadImageFileName, "uploadImageFileName")
+      @logger.debug(uploadImageFileName, "uploadImageFileName")
       
       open( uploadImageFileName, "wb+" ) do |file|
         file.write( imageData )
@@ -4583,8 +4541,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       result["resultText"] = getLanguageKey( e.to_s )
     end
     
-    logging(result, "uploadImageData result")
-    logging("uploadImageData load End")
+    @logger.debug(result, "uploadImageData result")
+    @logger.debug("uploadImageData load End")
     
     return result
   end
@@ -4610,7 +4568,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       raise "invalidFileNameExtension\t#{fileName}"
     end
     
-    logging(extName, "extName")
+    @logger.debug(extName, "extName")
     
     roomNumber  = getRequestData('roomNumber')
     if( roomNumber.nil? )
@@ -4628,13 +4586,13 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def deleteImage()
-    logging("deleteImage begin")
+    @logger.debug("deleteImage begin")
     
     imageData = getParamsFromRequestData()
-    logging(imageData, "imageData")
+    @logger.debug(imageData, "imageData")
     
     imageUrlList = imageData['imageUrlList']
-    logging(imageUrlList, "imageUrlList")
+    @logger.debug(imageUrlList, "imageUrlList")
     
     deleteImages(imageUrlList)
   end
@@ -4642,10 +4600,10 @@ logging(saveData, 'changePlayRoom() saveData end')
   def deleteImages(imageUrlList)
     imageFiles = getAllImageFileNameFromTagInfoFile()
     addLocalImageToList(imageFiles)
-    logging(imageFiles, "imageFiles")
+    @logger.debug(imageFiles, "imageFiles")
     
     imageUrlFileName = $imageUrlText
-    logging(imageUrlFileName, "imageUrlFileName")
+    @logger.debug(imageUrlFileName, "imageUrlFileName")
     
     deleteCount = 0
     resultText = ""
@@ -4664,16 +4622,16 @@ logging(saveData, 'changePlayRoom() saveData end')
         deleteCount += 1
       else
         warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
-        loggingForce(warningMessage)
+        @logger.error(warningMessage)
         resultText += warningMessage
       end
     end
     
     resultText += "#{deleteCount}個のファイルを削除しました。"
     result = {"resultText" => resultText}
-    logging(result, "result")
+    @logger.debug(result, "result")
     
-    logging("deleteImage end")
+    @logger.debug("deleteImage end")
     return result
   end
   
@@ -4688,7 +4646,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-    logging(imageUrl, "deleteTargetImageUrl(imageUrl)")
+    @logger.debug(imageUrl, "deleteTargetImageUrl(imageUrl)")
     
     if( imageFiles.include?(imageUrl) )
       if( isExist?(imageUrl) )
@@ -4700,7 +4658,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     locker = getSaveFileLock(imageUrlFileName)
     locker.lock do 
       lines = readLines(imageUrlFileName)
-      logging(lines, "lines")
+      @logger.debug(lines, "lines")
       
       deleteResult = lines.reject!{|i| i.chomp == imageUrl }
       
@@ -4708,7 +4666,7 @@ logging(saveData, 'changePlayRoom() saveData end')
         return false
       end
       
-      logging(lines, "lines deleted")
+      @logger.debug(lines, "lines deleted")
       createFile(imageUrlFileName, lines.join)
     end
     
@@ -4723,16 +4681,16 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def uploadImageUrl()
-    logging("uploadImageUrl begin")
+    @logger.debug("uploadImageUrl begin")
     
     imageData = getParamsFromRequestData()
-    logging(imageData, "imageData")
+    @logger.debug(imageData, "imageData")
     
     imageUrl = imageData['imageUrl']
-    logging(imageUrl, "imageUrl")
+    @logger.debug(imageUrl, "imageUrl")
     
     imageUrlFileName = $imageUrlText
-    logging(imageUrlFileName, "imageUrlFileName")
+    @logger.debug(imageUrlFileName, "imageUrlFileName")
     
     resultText = "画像URLのアップロードに失敗しました。"
     locker = getSaveFileLock(imageUrlFileName)
@@ -4747,10 +4705,10 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
     
     tagInfo = imageData['tagInfo']
-    logging(tagInfo, 'uploadImageUrl.tagInfo')
+    @logger.debug(tagInfo, 'uploadImageUrl.tagInfo')
     changeImageTagsLocal(imageUrl, tagInfo)
     
-    logging("uploadImageUrl end")
+    @logger.debug("uploadImageUrl end")
     
     result = {"resultText" => resultText}
     return result
@@ -4758,21 +4716,21 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def getGraveyardCharacterData()
-    logging("getGraveyardCharacterData start.")
+    @logger.debug("getGraveyardCharacterData start.")
     
     result = getAllCharacters($characterStateGraveyard, true)
     
-    graveyard = result.collect{|i| getJsonDataFromText(i["json"])}
-    logging(graveyard, "getGraveyardCharacterData graveyard")
+    graveyard = result.collect{|i| getObjectFromJsonString(i["json"])}
+    @logger.debug(graveyard, "getGraveyardCharacterData graveyard")
     
     return graveyard
   end
   
   def getWaitingRoomInfo()
-    logging("getWaitingRoomInfo start.")
+    @logger.debug("getWaitingRoomInfo start.")
     
     result = getAllCharacters($characterStateWaitingRoom, true)
-    waitingRoom = result.collect{|i| getJsonDataFromText(i["json"])}
+    waitingRoom = result.collect{|i| getObjectFromJsonString(i["json"])}
     
     return waitingRoom
   end
@@ -4783,10 +4741,10 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def getImageList()
-    logging("getImageList start.")
+    @logger.debug("getImageList start.")
     
     imageList = getAllImageFileNameFromTagInfoFile()
-    logging(imageList, "imageList all result")
+    @logger.debug(imageList, "imageList all result")
     
     addTextsCharacterImageList(imageList, $imageUrlText)
     addLocalImageToList(imageList)
@@ -4837,7 +4795,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       next unless( isAllowedFileExt(fileName) )
       
       imageList << fileName
-      logging(fileName, "added local image")
+      @logger.debug(fileName, "added local image")
     end
     
     return imageList
@@ -4861,7 +4819,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def sendDiceBotChatMessage
-    logging('sendDiceBotChatMessage')
+    @logger.debug('sendDiceBotChatMessage')
     
     params = getParamsFromRequestData()
     
@@ -4875,14 +4833,14 @@ logging(saveData, 'changePlayRoom() saveData end')
       paramsClone['message'] += " \##{ i + 1 }" if( repeatCount > 1 )
       
       result = sendDiceBotChatMessageOnece( paramsClone )
-      logging(result, "sendDiceBotChatMessageOnece result")
+      @logger.debug(result, "sendDiceBotChatMessageOnece result")
       
       next if( result.nil? )
       
       results << result
     end
     
-    logging(results, "sendDiceBotChatMessage results")
+    @logger.debug(results, "sendDiceBotChatMessage results")
     
     return results
   end
@@ -4921,7 +4879,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       chatData['sendto'] = sendto
     end
     
-    logging(chatData, 'sendDiceBotChatMessageOnece chatData')
+    @logger.debug(chatData, 'sendDiceBotChatMessageOnece chatData')
     
     sendChatMessageByChatData(chatData)
     
@@ -4960,8 +4918,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     gameType = params['gameType']
     isNeedResult = params['isNeedResult']
     
-    logging(message, 'rollDice message')
-    logging(gameType, 'rollDice gameType')
+    @logger.debug(message, 'rollDice message')
+    @logger.debug(gameType, 'rollDice gameType')
     
     bot = CgiDiceBot.new
     dir = getDiceBotExtraTableDirName
@@ -4971,8 +4929,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/m, '')
     
-    logging(result, 'rollDice result')
-    logging(randResults, 'rollDice randResults')
+    @logger.debug(result, 'rollDice result')
+    @logger.debug(randResults, 'rollDice randResults')
     
     return result, bot.isSecret, randResults
   end
@@ -4983,10 +4941,10 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def getRolledMessage(params, isSecret, randResults)
-    logging("getRolledMessage Begin")
+    @logger.debug("getRolledMessage Begin")
 
-    logging(isSecret, "isSecret")
-    logging(randResults, "randResults")
+    @logger.debug(isSecret, "isSecret")
+    @logger.debug(randResults, "randResults")
     
     if( isSecret )
       params['message'] = getLanguageKey('secretDice')
@@ -4996,7 +4954,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     message = params['message']
     
     if( randResults.nil? )
-      logging("randResults is nil")
+      @logger.debug("randResults is nil")
       return message
     end
     
@@ -5008,8 +4966,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       "power" => getDiceBotPower(params),
     }
     
-    text = "###CutInCommand:rollVisualDice###" + getTextFromJsonData(data)
-    logging(text, "getRolledMessage End text")
+    text = "###CutInCommand:rollVisualDice###" + getJsonString(data)
+    @logger.debug(text, "getRolledMessage End text")
     
     return text
   end
@@ -5032,7 +4990,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def sendChatMessageAll
-    logging("sendChatMessageAll Begin")
+    @logger.debug("sendChatMessageAll Begin")
     
     result = {'result' => "NG" }
     
@@ -5042,18 +5000,18 @@ logging(saveData, 'changePlayRoom() saveData end')
     password = chatData["password"]
     return result unless( password == $mentenanceModePassword )
     
-    logging("adminPoassword check OK.")
+    @logger.debug("adminPoassword check OK.")
     
     rooms = []
     
     $saveDataMaxCount.times do |roomNumber|
-      logging(roomNumber, "loop roomNumber")
+      @logger.debug(roomNumber, "loop roomNumber")
       
       initSaveFiles(roomNumber)
       
       next unless existRoom?
       
-      logging(roomNumber, "sendChatMessageAll to No.")
+      @logger.debug(roomNumber, "sendChatMessageAll to No.")
       sendChatMessageByChatData(chatData)
       
       rooms << roomNumber
@@ -5061,7 +5019,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     result['result'] = "OK"
     result['rooms'] = rooms
-    logging(result, "sendChatMessageAll End, result")
+    @logger.debug(result, "sendChatMessageAll End, result")
     
     return result
   end
@@ -5108,7 +5066,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       @db.commit
     rescue => e
       @db.rollback
-      loggingException(e)
+      @logger.exception(e)
       throw e
     end
     
@@ -5128,20 +5086,20 @@ logging(saveData, 'changePlayRoom() saveData end')
                      :from => "chats" )
     row = result.first
     count = row['COUNT(*)']
-    logging(count, "chats count")
+    @logger.debug(count, "chats count")
     
     limit = $chatMessageDataLogAllLineMax
     limitMax = limit * 2
     
     if( count < limitMax )
-      logging('chats count is NOT limit.')
+      @logger.debug('chats count is NOT limit.')
       return
     end
     
     query("DELETE FROM chats WHERE id <= (SELECT id FROM chats ORDER BY id DESC LIMIT 1 OFFSET ?)", 
           limit)
     
-    logging('delete old chats')
+    @logger.debug('delete old chats')
   end
   
   
@@ -5154,7 +5112,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       end
     rescue => e
       result['result'] = getErrorResponseText(e)
-      loggingException(e)
+      @logger.exception(e)
     end
     
     return result
@@ -5167,19 +5125,19 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def changeMap()
     mapData = getParamsFromRequestData()
-    logging(mapData, "changeMap mapData")
+    @logger.debug(mapData, "changeMap mapData")
     
     changeMapSaveData(mapData)
   end
   
   def changeMapSaveData(newMapData)
-    logging("changeMap Begin")
+    @logger.debug("changeMap Begin")
     
     changeMapData do |oldMapData|
       newMapData
     end
     
-    logging("changeMap End")
+    @logger.debug("changeMap End")
   end
   
   def getMapId()
@@ -5194,7 +5152,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def drawOnMap
-    logging('drawOnMap Begin')
+    @logger.debug('drawOnMap Begin')
     
     params = getParamsFromRequestData()
     drawData = params['data']
@@ -5203,14 +5161,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def drawOnMapByMapMarks(drawData)
-    logging(drawData, 'drawOnMapByMapMarks drawData')
+    @logger.debug(drawData, 'drawOnMapByMapMarks drawData')
     
     changeMapData do |mapData|
       setDraws(mapData, drawData)
       mapData
     end
   
-    logging('drawOnMap End')
+    @logger.debug('drawOnMap End')
   end
   
   def changeMapData
@@ -5228,11 +5186,11 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     id = row['id']
     json = row['json']
-    data = getJsonDataFromText(json)
+    data = getObjectFromJsonString(json)
     
     data = yield(data)
     
-    json = getTextFromJsonData(data)
+    json = getJsonString(data)
     changeDb do 
       updateDb(:table => tableName,
                :set => {"json" => json},
@@ -5252,11 +5210,11 @@ logging(saveData, 'changePlayRoom() saveData end')
     return if row.nil?
     
     json = row['json']
-    data = getJsonDataFromText(json)
+    data = getObjectFromJsonString(json)
     
     data = yield(data)
     
-    json = getTextFromJsonData(data)
+    json = getJsonString(data)
     changeDb do 
       updateDb(:table => tableName,
                :set => {"json" => json},
@@ -5348,14 +5306,14 @@ logging(saveData, 'changePlayRoom() saveData end')
       effects = getArrayInfoFromHash(saveData, 'effects')
       
       effectDataList.each do |effectData|
-        logging(effectData, "addEffectData target effectData")
+        @logger.debug(effectData, "addEffectData target effectData")
         
         if( effectData['type'] == 'standingGraphicInfos' )
           keys = ['type', 'name', 'state']
           found = findEffect(effects, keys, effectData)
           
           if( found )
-            logging(found, "addEffectData is already exist, found data is => ")
+            @logger.debug(found, "addEffectData is already exist, found data is => ")
             next 
           end
         end
@@ -5395,7 +5353,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     return if( paramEffects.nil? )
     return if( paramEffects.empty? )
     
-    logging(paramEffects, "changeEffectsAll paramEffects")
+    @logger.debug(paramEffects, "changeEffectsAll paramEffects")
     
     type = paramEffects.first['type']
     
@@ -5414,16 +5372,16 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def removeEffect()
-    logging('removeEffect Begin')
+    @logger.debug('removeEffect Begin')
     
     params = getParamsFromRequestData()
     effectIds = params['effectIds']
-    logging(effectIds, 'effectIds')
+    @logger.debug(effectIds, 'effectIds')
     
     changeEffectsData do |saveData|
       
       effects = getArrayInfoFromHash(saveData, 'effects')
-      logging(effects, 'effects')
+      @logger.debug(effects, 'effects')
       
       effects.delete_if{|i|
         effectIds.include?(i['effectId'])
@@ -5432,7 +5390,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       saveData
     end
     
-    logging('removeEffect End')
+    @logger.debug('removeEffect End')
   end
   
   
@@ -5453,7 +5411,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
     
     imageInfoFileName = fileJoin(dir, 'imageInfo.json')
-    logging(imageInfoFileName, 'imageInfoFileName')
+    @logger.debug(imageInfoFileName, 'imageInfoFileName')
     
     return imageInfoFileName
   end
@@ -5508,7 +5466,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       begin
         deleteFile(smallImage)
       rescue => e
-        loggingException(e)
+        @logger.exception(e)
       end
     end
     
@@ -5527,13 +5485,13 @@ logging(saveData, 'changePlayRoom() saveData end')
     result['imageList'] = getImageList()
     result['imageDir'] = $imageUploadDir
     
-    logging("getImageTagsAndImageList result", result)
+    @logger.debug("getImageTagsAndImageList result", result)
     
     return result
   end
   
   def getImageTags(*roomNoList)
-    logging('getImageTags start')
+    @logger.debug('getImageTags start')
     
     imageTags = {}
     
@@ -5557,7 +5515,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       end
     end
     
-    logging(imageTags, 'getImageTags imageTags')
+    @logger.debug(imageTags, 'getImageTags imageTags')
     
     return imageTags
   end
@@ -5594,7 +5552,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     return false if( alreadyExist.nil? )
     
-    logging("target characterData is already exist. no creation.", "isAlreadyExistCharacter?")
+    @logger.debug("target characterData is already exist. no creation.", "isAlreadyExistCharacter?")
     return characterData['name']
   end
   
@@ -5615,7 +5573,7 @@ logging(saveData, 'changePlayRoom() saveData end')
         
         result = query("select LAST_INSERT_ID()")
         imgId = result.first["LAST_INSERT_ID()"].to_s
-        logging(imgId, "insert imgId")
+        @logger.debug(imgId, "insert imgId")
         
         characterData['imgId'] = imgId
         updateCharacters(characterData)
@@ -5627,7 +5585,7 @@ logging(saveData, 'changePlayRoom() saveData end')
                     :others => ["ORDER BY id"])
     shapeUpDbResult(result)
     
-    logging(result, "added characters")
+    @logger.debug(result, "added characters")
     
     return result
     
@@ -5668,10 +5626,10 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def changeCharacter()
-    logging("changeCharacter")
+    @logger.debug("changeCharacter")
     
     characterData = getParamsFromRequestData()
-    logging(characterData, "characterData")
+    @logger.debug(characterData, "characterData")
     
     changeCharacterData(characterData)
   end
@@ -5679,7 +5637,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   def changeCharacterData(characterData)
     changeDb do
       updateCharacters(characterData)
-      logging(characterData, "character data change")
+      @logger.debug(characterData, "character data change")
     end
     
 =begin
@@ -5690,7 +5648,7 @@ logging(saveData, 'changePlayRoom() saveData end')
         end
         
         if( alreadyExist ) 
-          logging("same name character alread exist");
+          @logger.debug("same name character alread exist");
           return;
         end
       end
@@ -5764,7 +5722,7 @@ logging(saveData, 'changePlayRoom() saveData end')
 
 
   def addCardZone()
-    logging("addCardZone Begin");
+    @logger.debug("addCardZone Begin");
     
     data = getParamsFromRequestData()
     
@@ -5778,18 +5736,18 @@ logging(saveData, 'changePlayRoom() saveData end')
       addCharacterData( [cardData] )
     end
     
-    logging("addCardZone End");
+    @logger.debug("addCardZone End");
   end
   
   
   def initCards()
-    logging("initCards Begin");
+    @logger.debug("initCards Begin");
     
     clearAllCards
     
     params = getParamsFromRequestData()
     cardTypeInfos = params['cardTypeInfos']
-    logging(cardTypeInfos, "cardTypeInfos")
+    @logger.debug(cardTypeInfos, "cardTypeInfos")
     
     allCards = []
     stateList = []
@@ -5808,15 +5766,15 @@ logging(saveData, 'changePlayRoom() saveData end')
       stateList << $characterStateNomal
     end
     
-    logging(allCards, "allCards")
-    logging(stateList, "stateList")
+    @logger.debug(allCards, "allCards")
+    @logger.debug(stateList, "stateList")
     
     addCharacterData(allCards, stateList)
     
     waitForRefresh = 0.2
     sleep( waitForRefresh )
     
-    logging("initCards End");
+    @logger.debug("initCards End");
     
     cardExist = (not cardTypeInfos.empty?)
     return {"result" => "OK", "cardExist" => cardExist }
@@ -5849,14 +5807,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def getCardsDataFromMountName(mountName)
     cardsListFileName = getCardsInfo.getCardFileName(mountName);
-    logging(cardsListFileName, "initCards cardsListFileName");
+    @logger.debug(cardsListFileName, "initCards cardsListFileName");
     
     cardsList = []
     readLines(cardsListFileName).each_with_index  do |i, lineIndex|
       cardsList << i.chomp.toutf8
     end
     
-    logging(cardsList, "initCards cardsList")
+    @logger.debug(cardsList, "initCards cardsList")
     
     cardData = cardsList.shift.split(/,/)
     imageNameBack = cardsList.shift
@@ -5873,7 +5831,7 @@ logging(saveData, 'changePlayRoom() saveData end')
         next
       end
       
-      logging(imageName, "initCards imageName")
+      @logger.debug(imageName, "initCards imageName")
       cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown)
       cardMount << cardData
     end
@@ -5889,7 +5847,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def addCard()
-    logging("addCard begin");
+    @logger.debug("addCard begin");
     
     addCardData = getParamsFromRequestData()
     
@@ -5913,7 +5871,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       addCharacterData( [cardData] )
     end
     
-    logging("addCard end");
+    @logger.debug("addCard end");
     
   end
   
@@ -5926,11 +5884,11 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     useLineCount = cardTypeInfo['useLineCount']
     useLineCount ||= cardsList.size
-    logging(useLineCount, 'useLineCount')
+    @logger.debug(useLineCount, 'useLineCount')
     
     deckCount = cardTypeInfo['deckCount']
     deckCount ||= 1
-    logging(deckCount, 'deckCount')
+    @logger.debug(deckCount, 'deckCount')
     
     cardsListTmp = []
     deckCount.to_i.times do
@@ -5941,17 +5899,17 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def getInitCardSetForRandomDungenTrump(cardList, cardTypeInfo)
-    logging("getInitCardSetForRandomDungenTrump start")
+    @logger.debug("getInitCardSetForRandomDungenTrump start")
     
-    logging(cardList.length, "cardList.length")
-    logging(cardTypeInfo, "cardTypeInfo")
+    @logger.debug(cardList.length, "cardList.length")
+    @logger.debug(cardTypeInfo, "cardTypeInfo")
     
     useCount = cardTypeInfo['cardCount']
     jorkerCount = cardTypeInfo['jorkerCount']
     
     useLineCount = 13 * 4 + jorkerCount
     cardList = cardList[0...useLineCount]
-    logging(cardList.length, "cardList.length")
+    @logger.debug(cardList.length, "cardList.length")
     
     aceList = []
     noAceList = []
@@ -5967,9 +5925,9 @@ logging(saveData, 'changePlayRoom() saveData end')
       noAceList << card
     end
     
-    logging(aceList, "aceList");
-    logging(aceList.length, "aceList.length");
-    logging(noAceList.length, "noAceList.length");
+    @logger.debug(aceList, "aceList");
+    @logger.debug(aceList.length, "aceList.length");
+    @logger.debug(noAceList.length, "noAceList.length");
     
     cardTypeInfo['aceList'] = aceList.clone
     
@@ -5977,8 +5935,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     aceList = aceList.sort_by{rand}
     result << aceList.shift
-    logging(aceList, "aceList shifted");
-    logging(result, "result");
+    @logger.debug(aceList, "aceList shifted");
+    @logger.debug(result, "result");
     
     noAceList = noAceList.sort_by{rand}
     
@@ -5988,8 +5946,8 @@ logging(saveData, 'changePlayRoom() saveData end')
     end
     
     result = result.sort_by{rand}
-    logging(result, "result.sorted");
-    logging(noAceList, "noAceList is empty? please check");
+    @logger.debug(result, "result.sorted");
+    @logger.debug(noAceList, "noAceList is empty? please check");
     
     while(aceList.length > 0)
       result << aceList.shift
@@ -5999,7 +5957,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       result << noAceList.shift
     end
     
-    logging(result, "getInitCardSetForRandomDungenTrump end, result")
+    @logger.debug(result, "getInitCardSetForRandomDungenTrump end, result")
     
     return result
   end
@@ -6075,7 +6033,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def setTrushMountDataCardsInfo(cardMountData, cards)
-    logging("setTrushMountDataCardsInfo Begin")
+    @logger.debug("setTrushMountDataCardsInfo Begin")
     
     mountName = cardMountData['mountName']
     imageName, _, isText = getCardTrushMountImageName(mountName, cards.last)
@@ -6085,11 +6043,11 @@ logging(saveData, 'changePlayRoom() saveData end')
     cardMountData["imageNameBack"] = imageName
     cardMountData["isText"] = isText
     
-    logging(cardMountData, "setTrushMountDataCardsInfo cardMountData")
+    @logger.debug(cardMountData, "setTrushMountDataCardsInfo cardMountData")
     
     updateCharacters(cardMountData)
     
-    logging("setTrushMountDataCardsInfo End")
+    @logger.debug("setTrushMountDataCardsInfo End")
   end
   
   def getCardTrushMountImageName(mountName, cardData = nil)
@@ -6126,28 +6084,28 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def returnCard
-    logging("returnCard Begin");
+    @logger.debug("returnCard Begin");
     
     params = getParamsFromRequestData()
     
     mountName = params['mountName']
-    logging(mountName, "mountName")
+    @logger.debug(mountName, "mountName")
     
     changeDb do
       
       trushCards = getTrushMountCards(mountName)
       
       cardData = trushCards.pop
-      logging(cardData, "cardData")
+      @logger.debug(cardData, "cardData")
       
       if( cardData.nil? )
-        logging("returnCard trushCards is empty. END.")
+        @logger.debug("returnCard trushCards is empty. END.")
         return
       end
       
       cardData['x'] = params['x'] + 150
       cardData['y'] = params['y'] + 10
-      logging('returned cardData', cardData)
+      @logger.debug('returned cardData', cardData)
       
       updateCharacters(cardData, nil, $characterStateNomal)
       
@@ -6157,14 +6115,14 @@ logging(saveData, 'changePlayRoom() saveData end')
       setTrushMountDataCardsInfo(trushMountData, trushCards)
     end
     
-    logging("returnCard End");
+    @logger.debug("returnCard End");
   end
   
   def drawCard()
-    logging("drawCard Begin")
+    @logger.debug("drawCard Begin")
     
     params = getParamsFromRequestData()
-    logging(params, 'params')
+    @logger.debug(params, 'params')
     
     result = {
       "result" => "NG"
@@ -6187,7 +6145,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       result["result"] = "OK"
     end
     
-    logging(result, "drawCard End")
+    @logger.debug(result, "drawCard End")
     
     return result
   end
@@ -6202,9 +6160,9 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def getMountCardsByMountType(mountName, mountType)
     result = getAllCharacters(mountType, true)
-    logging(result, "drawCard base targets.")
+    @logger.debug(result, "drawCard base targets.")
     
-    cards = result.collect{|i| getJsonDataFromText(i["json"])}
+    cards = result.collect{|i| getObjectFromJsonString(i["json"])}
     cards.delete_if{|i| i['mountName'] != mountName}
     
     return cards
@@ -6213,13 +6171,13 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def drawCardDataOne(params, cards)
-    logging("drawCardDataOne Begin")
+    @logger.debug("drawCardDataOne Begin")
     
     imgId = params['imgId']
     cardMount = findCharacterDataById(imgId)
     return nil if( cardMount.nil? )
     
-    logging(cardMount, "cardMount")
+    @logger.debug(cardMount, "cardMount")
     
     cardCountDisplayDiff = cardMount['cardCountDisplayDiff']
     unless( cardCountDisplayDiff.nil? )
@@ -6240,26 +6198,26 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     updateCharacters(cardData, nil, $characterStateNomal)
     
-    logging(cards.size, 'cardMount[mountName].size')
+    @logger.debug(cards.size, 'cardMount[mountName].size')
     setCardCountAndBackImage(cardMount, cards)
     
-    logging(cardData, "drawCardDataOne End")
+    @logger.debug(cardData, "drawCardDataOne End")
     
     return cardData
   end
   
 
   def drawTargetTrushCard
-    logging("drawTargetTrushCard Begin");
+    @logger.debug("drawTargetTrushCard Begin");
     
     params = getParamsFromRequestData()
     
     mountName = params['mountName']
-    logging(mountName, "mountName")
+    @logger.debug(mountName, "mountName")
     
     changeDb do
       cardData = findCharacterDataById(params['targetCardId'] )
-      logging(cardData, "cardData")
+      @logger.debug(cardData, "cardData")
       return if( cardData.nil? )
       
       cardData['x'] = params['x']
@@ -6274,26 +6232,26 @@ logging(saveData, 'changePlayRoom() saveData end')
       setTrushMountDataCardsInfo(trushMountData, trushCards)
     end
     
-    logging("drawTargetTrushCard End");
+    @logger.debug("drawTargetTrushCard End");
     
     return {"result" => "OK"}
   end
   
   def drawTargetCard
-    logging("drawTargetCard Begin")
+    @logger.debug("drawTargetCard Begin")
     
     params = getParamsFromRequestData()
-    logging(params, 'params')
+    @logger.debug(params, 'params')
     
     mountName = params['mountName']
-    logging(mountName, 'mountName')
+    @logger.debug(mountName, 'mountName')
     
     changeDb do
       cards = getMountCards(mountName)
       cardData = cards.find{|i| i['imgId'] === params['targetCardId'] }
       
       if( cardData.nil? )
-        logging(params['targetCardId'], "not found params['targetCardId']")
+        @logger.debug(params['targetCardId'], "not found params['targetCardId']")
         return
       end
       
@@ -6312,18 +6270,18 @@ logging(saveData, 'changePlayRoom() saveData end')
       cardMountData = findCharacterDataById( params['mountId'] )
       return if cardMountData.nil?
       
-      logging(cards.size, 'cardMount[mountName].size')
+      @logger.debug(cards.size, 'cardMount[mountName].size')
       setCardCountAndBackImage(cardMountData, cards)
     end
     
-    logging("drawTargetCard End")
+    @logger.debug("drawTargetCard End")
     
     return {"result" => "OK"}
   end
   
   
   def setCardCountAndBackImage(cardMountData, cards)
-    logging("setCardCountAndBackImage Begin")
+    @logger.debug("setCardCountAndBackImage Begin")
     
     cardMountData['cardCount'] = cards.size
     
@@ -6335,24 +6293,24 @@ logging(saveData, 'changePlayRoom() saveData end')
       end
     end
     
-    logging(cardMountData, "setCardCountAndBackImage cardMountData")
+    @logger.debug(cardMountData, "setCardCountAndBackImage cardMountData")
     updateCharacters(cardMountData)
     
-    logging("setCardCountAndBackImage End")
+    @logger.debug("setCardCountAndBackImage End")
   end
   
   def dumpTrushCards()
-    logging("dumpTrushCards Begin")
+    @logger.debug("dumpTrushCards Begin")
     
     params = getParamsFromRequestData()
-    logging(params, 'dumpTrushCards params')
+    @logger.debug(params, 'dumpTrushCards params')
     
     mountName = params['mountName']
-    logging(mountName, 'mountName')
+    @logger.debug(mountName, 'mountName')
     
     changeDb do
       card = findCharacterById( params['dumpedCardId'] )
-      cardData = getJsonDataFromText(card["json"])
+      cardData = getObjectFromJsonString(card["json"])
       
       updateCharacters(cardData, nil, $characterStateCardTrushMount)
       
@@ -6363,20 +6321,20 @@ logging(saveData, 'changePlayRoom() saveData end')
       setTrushMountDataCardsInfo(trushMountData, trushCards)
     end
     
-    logging("dumpTrushCards End")
+    @logger.debug("dumpTrushCards End")
   end
   
   
   def shuffleCards
-    logging("shuffleCard Begin")
+    @logger.debug("shuffleCard Begin")
     
     params = getParamsFromRequestData()
     mountName = params['mountName']
     trushMountId = params['mountId']
     isShuffle = params['isShuffle']
     
-    logging(mountName, 'mountName')
-    logging(trushMountId, 'trushMountId')
+    @logger.debug(mountName, 'mountName')
+    @logger.debug(trushMountId, 'trushMountId')
     
     changeDb do
       trushCards = getTrushMountCards(mountName)
@@ -6405,14 +6363,14 @@ logging(saveData, 'changePlayRoom() saveData end')
         end
       end
       
-      logging(mountCards, "mountCards")
-      logging(cardMountData, "cardMountData")
+      @logger.debug(mountCards, "mountCards")
+      @logger.debug(cardMountData, "cardMountData")
       
       setNextCardId(cardMountData, mountCards)
       setCardCountAndBackImage(cardMountData, mountCards)
     end
     
-    logging("shuffleCard End")
+    @logger.debug("shuffleCard End")
   end
   
   
@@ -6422,14 +6380,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def shuffleForNextRandomDungeon
-    logging("shuffleForNextRandomDungeon Begin")
+    @logger.debug("shuffleForNextRandomDungeon Begin")
     
     params = getParamsFromRequestData()
     mountName = params['mountName']
     trushMountId = params['mountId']
     
-    logging(mountName, 'mountName')
-    logging(trushMountId, 'trushMountId')
+    @logger.debug(mountName, 'mountName')
+    @logger.debug(trushMountId, 'trushMountId')
     
     changeDb do
       
@@ -6440,10 +6398,10 @@ logging(saveData, 'changePlayRoom() saveData end')
       return if( cardMountData.nil?) 
       
       aceList = cardMountData['aceList']
-      logging(aceList, "aceList")
+      @logger.debug(aceList, "aceList")
       
       result = getAllCharacters()
-      characters = result.collect{|i| getJsonDataFromText(i["json"])}
+      characters = result.collect{|i| getObjectFromJsonString(i["json"])}
       
       aceCards = []
       aceCards += deleteAceFromCards(trushCards, aceList)
@@ -6451,9 +6409,9 @@ logging(saveData, 'changePlayRoom() saveData end')
       aceCards += deleteAceFromCards(characters, aceList)
       aceCards = aceCards.sort_by{rand}
       
-      logging(aceCards, "aceCards")
-      logging(trushCards.length, "trushCards.length")
-      logging(mountCards.length, "mountCards.length")
+      @logger.debug(aceCards, "aceCards")
+      @logger.debug(trushCards.length, "trushCards.length")
+      @logger.debug(mountCards.length, "mountCards.length")
       
       useCount = cardMountData['useCount']
       if( (mountCards.size + 1) < useCount )
@@ -6463,19 +6421,19 @@ logging(saveData, 'changePlayRoom() saveData end')
       mountCards = mountCards.sort_by{rand}
       
       insertPoint = rand(useCount)
-      logging(insertPoint, "insertPoint")
+      @logger.debug(insertPoint, "insertPoint")
       mountCards[insertPoint, 0] = aceCards.shift
       
       while( aceCards.length > 0 )
         mountCards[useCount, 0] = aceCards.shift
-        logging(useCount, "useCount")
+        @logger.debug(useCount, "useCount")
       end
       
       mountCards = mountCards.reverse
       
       newDiff = mountCards.size - useCount
       newDiff = 3 if( newDiff < 3 )
-      logging(newDiff, "newDiff")
+      @logger.debug(newDiff, "newDiff")
       cardMountData['cardCountDisplayDiff'] = newDiff
       
       updateCharacters(mountCards, nil, $characterStateCardMount)
@@ -6489,7 +6447,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       setCardCountAndBackImage(cardMountData, mountCards)
     end
     
-    logging("shuffleForNextRandomDungeon End")
+    @logger.debug("shuffleForNextRandomDungeon End")
   end
   
   def deleteAceFromCards(cards, aceList)
@@ -6509,7 +6467,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     result = readDb( "SELECT *",
                      :from => "characters",
                      :where => {"type = ? " => cardMountType} )
-    characters = result.collect{|i| getJsonDataFromText(i["json"])}
+    characters = result.collect{|i| getObjectFromJsonString(i["json"])}
     
     cardMountData = characters.find do |i| 
       i['mountName'] == mountName
@@ -6539,7 +6497,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def getMountCardInfos
     params = getParamsFromRequestData()
-    logging(params, 'getMountCardInfos params')
+    @logger.debug(params, 'getMountCardInfos params')
     
     mountName = params['mountName']
     mountId = params['mountId']
@@ -6554,8 +6512,8 @@ logging(saveData, 'changePlayRoom() saveData end')
       
       cardCountDisplayDiff = cardMountData['cardCountDisplayDiff']
       
-      logging(cardCountDisplayDiff, "cardCountDisplayDiff")
-      logging(cards.length, "before cards.length")
+      @logger.debug(cardCountDisplayDiff, "cardCountDisplayDiff")
+      @logger.debug(cards.length, "before cards.length")
       
       unless( cardCountDisplayDiff.nil? )
         unless( cards.empty? )
@@ -6565,7 +6523,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       
     end
     
-    logging(cards.length, "getMountCardInfos cards.length")
+    @logger.debug(cards.length, "getMountCardInfos cards.length")
     
     return cards
   end
@@ -6573,7 +6531,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   def getTrushMountCardInfos
     
     params = getParamsFromRequestData()
-    logging(params, 'getTrushMountCardInfos params')
+    @logger.debug(params, 'getTrushMountCardInfos params')
     
     cards = []
     
@@ -6587,7 +6545,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   def getCardList
     params = getParamsFromRequestData()
-    logging(params, 'getCardList params')
+    @logger.debug(params, 'getCardList params')
     
     mountName = params['mountName']
     cardTypeInfo = {'mountName' => mountName}
@@ -6595,30 +6553,30 @@ logging(saveData, 'changePlayRoom() saveData end')
     
     cardMount, = getInitCardMountInfos(cardTypeInfo, mountName, index)
     
-    logging(cardMount, 'cardMount')
+    @logger.debug(cardMount, 'cardMount')
     
     return cardMount
   end
   
   
   def clearCharacterByType()
-    logging("clearCharacterByType Begin")
+    @logger.debug("clearCharacterByType Begin")
     
     clearData = getParamsFromRequestData()
-    logging(clearData, 'clearData')
+    @logger.debug(clearData, 'clearData')
     
     targetTypes = clearData['types']
-    logging(targetTypes, 'targetTypes')
+    @logger.debug(targetTypes, 'targetTypes')
     
     targetTypes.each do |targetType|
       clearCharacterByTypeLocal(targetType)
     end
     
-    logging("clearCharacterByType End")
+    @logger.debug("clearCharacterByType End")
   end
   
   def clearCharacterByTypeLocal(targetType)
-    logging(targetType, "clearCharacterByTypeLocal targetType")
+    @logger.debug(targetType, "clearCharacterByTypeLocal targetType")
     
     changeDb do
       updateDb(:table => 'characters',
@@ -6626,7 +6584,7 @@ logging(saveData, 'changePlayRoom() saveData end')
                :where => {"type=? " => targetType} )
     end
     
-    logging("clearCharacterByTypeLocal End")
+    @logger.debug("clearCharacterByTypeLocal End")
   end
   
   
@@ -6637,24 +6595,24 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def removeCharacterByRemoveCharacterDataList(removeCharacterDataList)
-    logging(removeCharacterDataList, "removeCharacterDataList")
+    @logger.debug(removeCharacterDataList, "removeCharacterDataList")
     
     changeDb do
       
       removeCharacterDataList.each do |removeCharacterData|
-        logging(removeCharacterData, "removeCharacterData")
+        @logger.debug(removeCharacterData, "removeCharacterData")
         
         isGotoGraveyard = removeCharacterData['isGotoGraveyard']
         
         imgId = removeCharacterData['imgId']
         character = findCharacterById(imgId)
         
-        logging(character, "remove target character")
+        @logger.debug(character, "remove target character")
         next if character.nil?
         
         state = (isGotoGraveyard ? $characterStateGraveyard : $characterStateDeleted)
         
-        logging("remove character")
+        @logger.debug("remove character")
         updateDb(:table => 'characters',
                  :set => {"state" => state },
                  :where => {"id=? " => imgId} )
@@ -6696,7 +6654,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   def resurrectCharacter
     params = getParamsFromRequestData()
     resurrectCharacterId = params['imgId']
-    logging(resurrectCharacterId, "resurrectCharacterId")
+    @logger.debug(resurrectCharacterId, "resurrectCharacterId")
     
     changeDb do
       updateDb(:table => 'characters',
@@ -6708,7 +6666,7 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def clearGraveyard
-    logging("clearGraveyard begin")
+    @logger.debug("clearGraveyard begin")
 
     changeDb do
       query("DELETE FROM characters WHERE state = ?",
@@ -6759,14 +6717,14 @@ logging(saveData, 'changePlayRoom() saveData end')
   
   
   def exitWaitingRoomCharacter
-    logging("exitWaitingRoomCharacter Begin")
+    @logger.debug("exitWaitingRoomCharacter Begin")
     
     params = getParamsFromRequestData()
     characterId = params['characterId']
     x = params['x']
     y = params['y']
     
-    logging(characterId, 'exitWaitingRoomCharacter characterId')
+    @logger.debug(characterId, 'exitWaitingRoomCharacter characterId')
     
     result = {"result" => "NG"}
     
@@ -6774,7 +6732,7 @@ logging(saveData, 'changePlayRoom() saveData end')
       character = findCharacterById(characterId)
       return result if(character.nil?)
       
-      data = getJsonDataFromText(character["json"])
+      data = getObjectFromJsonString(character["json"])
       data['x'] = x
       data['y'] = y
       
@@ -6797,10 +6755,10 @@ logging(saveData, 'changePlayRoom() saveData end')
     index = nil
     
     array.each_with_index do |i, targetIndex|
-      logging(i, "i")
-      logging(targetIndex, "targetIndex")
+      @logger.debug(i, "i")
+      @logger.debug(targetIndex, "targetIndex")
       b = yield(i)
-      logging(b, "yield(i)")
+      @logger.debug(b, "yield(i)")
       if( b )
         index = targetIndex
         break
@@ -6922,12 +6880,12 @@ logging(saveData, 'changePlayRoom() saveData end')
       
       return if(character.nil?)
       
-      data = getJsonDataFromText(character["json"])
+      data = getObjectFromJsonString(character["json"])
       data['x'] = params['x']
       data['y'] = params['y']
       
       updateCharacters(data, imgId)
-      logging(data, "character data change")
+      @logger.debug(data, "character data change")
     end
     
   end
@@ -6936,7 +6894,7 @@ logging(saveData, 'changePlayRoom() saveData end')
     character = findCharacterById(imgId)
     return nil if character.nil?
     
-    return getJsonDataFromText( character["json"] )
+    return getObjectFromJsonString( character["json"] )
   end
   
   def findCharacterById(imgId)
@@ -6959,20 +6917,17 @@ logging(saveData, 'changePlayRoom() saveData end')
   end
   
   def getResponse
-    
-    response = nil
-    
-    if( $dodontofWarning.nil? )
-      response = analyzeCommand
+    response =
+      if $dodontofWarning.nil?
+        analyzeCommand
+      else
+        { 'warning' => $dodontofWarning }
+      end
+
+    if isJsonResult
+      return getJsonString(response)
     else
-      response = {}
-      response["warning"] = $dodontofWarning
-    end
-    
-    if( isJsonResult )
-      return getTextFromJsonData(response)
-    else
-      return getDataFromMessagePack(response)
+      return MessagePack.pack(response)
     end
   end
   
@@ -7000,27 +6955,31 @@ end
 def getGzipResult(result)
   require 'zlib'
   require 'stringio'
-  
+
+  logger = DodontoF::Logger.instance
+
   stringIo = StringIO.new
   Zlib::GzipWriter.wrap(stringIo) do |gz|
     gz.write(result)
     gz.flush
     gz.finish
   end
-  
+
   gzipResult = stringIo.string
-  logging(gzipResult.length.to_s, "CGI response zipped length  ")
-  
+  logger.debug(gzipResult.length.to_s, "CGI response zipped length  ")
+
   return gzipResult
 end
 
 
 def main(cgiParams)
-  logging("main called")
+  logger = DodontoF::Logger.instance
+
+  logger.debug("main called")
   server = DodontoFServer.new(SaveDirInfo.new(), cgiParams)
-  logging("server created")
+  logger.debug("server created")
   printResult(server)
-  logging("printResult called")
+  logger.debug("printResult called")
 end
 
 def getInitializedHeaderText(server)
@@ -7041,87 +7000,89 @@ def getInitializedHeaderText(server)
 end
 
 def printResult(server)
-  logging("========================================>CGI begin.")
-  
+  logger = DodontoF::Logger.instance
+
+  logger.debug("========================================>CGI begin.")
+
   text = "empty"
-  
+
   header = getInitializedHeaderText(server)
-  
+
   begin
     result = server.getResponse
-    
+
     if( server.isAddMarker )
       result = "#D@EM>#" + result + "#<D@EM#";
     end
-    
+
     if( server.jsonpCallBack )
       result = "#{server.jsonpCallBack}(" + result + ");";
     end
-    
-    logging(result.length.to_s, "CGI response original length")
-    
+
+    logger.debug(result.length.to_s, "CGI response original length")
+
     if ( isGzipTarget(result, server) )
       if( $isModRuby )
         Apache.request.content_encoding = 'gzip'
       else
         header << "Content-Encoding: gzip\n"
-        
+
         if( server.jsonpCallBack )
           header << "Access-Control-Allow-Origin: *\n"
         end
       end
-      
+
       text = getGzipResult(result)
     else
       text = result
     end
   rescue Exception => e
     errorMessage = getErrorResponseText(e)
-    loggingForce(errorMessage, "errorMessage")
-    
+    logger.error(errorMessage, "errorMessage")
+
     text = "\n= ERROR ====================\n"
     text << errorMessage
     text << "============================\n"
   end
-  
-  logging(header, "RESPONSE header")
-  
+
+  logger.debug(header, "RESPONSE header")
+
   output = $stdout
   output.binmode if( defined?(output.binmode) )
-  
+
   output.print( header + "\n")
-  
+
   output.print( text )
-  
-  logging("========================================>CGI end.")
+
+  logger.debug("========================================>CGI end.")
 end
 
 
 def getCgiParams()
-  logging("getCgiParams Begin")
+  logger = DodontoF::Logger.instance
 
-  logging(ENV['REQUEST_METHOD'], "ENV[REQUEST_METHOD]")
+  logger.debug("getCgiParams Begin")
+
+  logger.debug(ENV['REQUEST_METHOD'], "ENV[REQUEST_METHOD]")
   input = nil
   messagePackedData = {}
   if( ENV['REQUEST_METHOD'] == "POST" )
     length = ENV['CONTENT_LENGTH'].to_i
-    logging(length, "getCgiParams length")
+    logger.debug(length, "getCgiParams length")
 
     input = $stdin.read(length)
-    logging(input, "getCgiParams input")
+    logger.debug(input, "getCgiParams input")
     messagePackedData = DodontoFServer.getMessagePackFromData( input )
   end
 
-  logging(messagePackedData, "messagePackedData")
-  logging("getCgiParams End")
+  logger.debug(messagePackedData, "messagePackedData")
+  logger.debug("getCgiParams End")
 
   return messagePackedData
 end
 
 
 def executeDodontoServerCgi()
-  initLog();
-  
   cgiParams = getCgiParams()
   
   case $dbType
