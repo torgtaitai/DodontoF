@@ -30,13 +30,8 @@ class SaveDirInfo
     @saveDataDirIndex = nil
     @subDir = subDir
     @saveDataMaxCount = saveDataMaxCount
-    @sampleMode = false
 
     @logger = DodontoF::Logger.instance
-  end
-  
-  def setSampleMode
-    @sampleMode = true
   end
   
   def getMaxCount
@@ -131,10 +126,8 @@ class SaveDirInfo
     
     @logger.debug(saveDataDirIndex.inspect, "saveDataDirIndex")
     
-    unless( @sampleMode )
-      if( saveDataDirIndex > @saveDataMaxCount )
-        raise "saveDataDirIndex:#{saveDataDirIndex} is over Limit:(#{@saveDataMaxCount}"
-      end
+    if( saveDataDirIndex > @saveDataMaxCount )
+      raise "saveDataDirIndex:#{saveDataDirIndex} is over Limit:(#{@saveDataMaxCount}"
     end
     
     @logger.debug(saveDataDirIndex, "saveDataDirIndex")
