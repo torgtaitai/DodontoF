@@ -29,7 +29,6 @@ require 'cgi'
 require 'stringio'
 require 'uri'
 require 'fileutils'
-require 'json/jsonParser'
 
 require 'dodontof/logger'
 require 'dodontof/utils'
@@ -3885,7 +3884,7 @@ class DodontoFServer
   def changeTextForLocalSpaceDir(text)
     #プレイルームにローカルなファイルを置く場合の特殊処理用ディレクトリ名変換
     dir = getRoomLocalSpaceDirName
-    dirJsonText = JsonBuilder.new.build(dir)
+    dirJsonText = getJsonString(dir)
     changedDir = dirJsonText[2...-2]
     
     @logger.debug(changedDir, 'localSpace name')

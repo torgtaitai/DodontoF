@@ -41,7 +41,7 @@ class DodontoFServerTest < Test::Unit::TestCase
   # 'createPlayRoom' => :hasReturn,
   def test_createPlayRoom
     result = create_mock_playroom
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert parsed.has_key? 'resultText'
     assert parsed.has_key? 'playRoomIndex'
@@ -144,7 +144,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
     assert parsed.has_key? 'deletedRoomNumbers'
@@ -184,7 +184,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     savedirs = SaveDirInfoForRemoveOldPlayRoom.new
     server = getDodontoFServerForTest.new savedirs, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
     assert parsed.has_key? 'deletedRoomNumbers'
@@ -209,7 +209,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
     assert 1 <= parsed.size
     parsed.each do |item|
       assert item.has_key? 'name'
@@ -227,7 +227,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert parsed.has_key? 'resultText'
     assert parsed.has_key? 'tableInfos'
@@ -250,7 +250,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
   def test_addBotTable
     result = create_mock_bot_table('TEST')
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert parsed.has_key? 'resultText'
     assert parsed.has_key? 'tableInfos'
@@ -293,7 +293,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new savedirs = SaveDirInfo.new, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert parsed.has_key? 'resultText'
     assert parsed.has_key? 'tableInfos'
@@ -338,7 +338,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert parsed.has_key? 'resultText'
     assert parsed.has_key? 'tableInfos'

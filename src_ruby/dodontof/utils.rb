@@ -14,7 +14,7 @@ module DodontoF
     # @param [Object] obj JSON に変換するオブジェクト
     # @return [String]
     def getJsonString(obj)
-      JsonBuilder.new.build(obj)
+      JsonBuilder.build(obj)
     end
     module_function :getJsonString
 
@@ -28,13 +28,13 @@ module DodontoF
       begin
         begin
           # 文字列の変換なしでパースを行ってみる
-          parsed = JsonParser.new.parse(jsonString)
+          parsed = JsonParser.parse(jsonString)
           logger.debug('getObjectFromJsonString parse end')
 
           return parsed
         rescue => e
           # エスケープされた文字を戻してパースを行う
-          parsedWithUnescaping = JsonParser.new.parse(CGI.unescape(jsonString))
+          parsedWithUnescaping = JsonParser.parse(CGI.unescape(jsonString))
           logger.debug('getObjectFromJsonString parse with unescaping end')
 
           return parsedWithUnescaping

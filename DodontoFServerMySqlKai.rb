@@ -4137,7 +4137,7 @@ COMMAND_END
   def changeTextForLocalSpaceDir(text)
     #プレイルームにローカルなファイルを置く場合の特殊処理用ディレクトリ名変換
     dir = getRoomLocalSpaceDirName
-    dirJsonText = JsonBuilder.new.build(dir)
+    dirJsonText = getJsonString(dir)
     changedDir = dirJsonText[2...-2]
     
     @logger.debug(changedDir, 'localSpace name')
@@ -5453,7 +5453,7 @@ COMMAND_END
     
     imgId = params['imgId'] if imgId.nil?
     
-    json = JsonBuilder.new.build(params)
+    json = getJsonString(params)
     
     setData = {"json" => json }
     setData["state"] = state unless state.nil?
@@ -6586,7 +6586,7 @@ COMMAND_END
       data['x'] = x
       data['y'] = y
       
-      json = JsonBuilder.new.build(data)
+      json = getJsonString(data)
       
       changeDb do
         updateDb(:table => 'characters',
