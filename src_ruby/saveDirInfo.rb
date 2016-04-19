@@ -5,26 +5,6 @@ require 'fileutils'
 require 'dodontof/logger'
 
 class SaveDirInfo
-  def self.removeDir(dirName)
-    return unless( FileTest.directory?(dirName) )
-
-    # force = true
-    # FileUtils.remove_entry_secure(dirName, force)
-    # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
-    # この下の方法で対応しています。
-
-    logger = DodontoF::Logger.instance
-
-    files = Dir.glob( File.join(dirName, "*") )
-
-    logger.debug(files, "removeDir files")
-    files.each do |fileName|
-      File.delete(fileName.untaint)
-    end
-
-    Dir.delete(dirName)
-  end
-  
   def init(saveDataDirIndexObject, saveDataMaxCount = 0, subDir = '.')
     @saveDataDirIndexObject = saveDataDirIndexObject
     @saveDataDirIndex = nil
@@ -203,7 +183,7 @@ class SaveDirInfo
   
   def removeSaveDir(saveDataDirIndex)
     dirName = getDirNameByIndex(saveDataDirIndex)
-    self.class.removeDir(dirName)
+    DodontoF::Utils.rmdir(dirName)
   end
   
   def getTrueSaveFileName(saveFileName)

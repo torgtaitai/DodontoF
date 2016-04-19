@@ -45,6 +45,17 @@ module DodontoF
       assert File.directory? './.temp/makeDirTest'
     end
 
+    # rmdir は指定したディレクトリを削除する
+    def test_rmdir
+      # そういうディレクトリを構成しておく
+      FileUtils.mkdir_p './.temp/test'
+      assert File.exists? './.temp/test'
+
+      Utils.rmdir('.temp/test')
+      assert File.exists? './.temp/'
+      assert !(File.exists? './.temp/test')
+    end
+
     # getLanguageKeyはキー値に対して何らかのラッピングを施す
     # (ラップキーが適切についているか？というのを検査するのは
     # ただのChangeDetectorになるので避けた)

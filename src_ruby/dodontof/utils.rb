@@ -2,8 +2,10 @@
 
 require 'cgi'
 require 'json/jsonParser'
+require 'fileutils'
 
 require 'dodontof/logger'
+
 
 module DodontoF
   # ユーティリティメソッドを格納するモジュール
@@ -65,6 +67,28 @@ module DodontoF
       File.chmod(0777, dir)
     end
     module_function :makeDir
+
+    # ディレクトリを削除します
+    def rmdir(dirName)
+      return unless( FileTest.directory?(dirName) )
+
+      # force = true
+      # FileUtils.remove_entry_secure(dirName, force)
+      # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
+      # この下の方法で対応しています。
+
+      logger = DodontoF::Logger.instance
+
+      files = Dir.glob( File.join(dirName, "*") )
+
+      logger.debug(files, "rmdir files")
+      files.each do |fileName|
+        File.delete(fileName.untaint)
+      end
+
+      Dir.delete(dirName)
+    end
+    module_function :rmdir
 
     # 指定されたキー値(文字列)に翻訳のための
     # 置換キーであることを示すラッピングを施して返します
