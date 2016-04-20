@@ -141,7 +141,7 @@ module DodontoF
         password = nil
       end
 
-      @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+      removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
     end
 
     def removeOlds()
@@ -301,8 +301,47 @@ module DodontoF
       ignoreLoginUser = true
       password = nil
       isForce = true
-      result = @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+      result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
       @logger.debug(result, "removePlayRoomByParams result")
+
+      return result
+    end
+
+    def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+      @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
+
+      deletedRoomNumbers = []
+      errorMessages = []
+      passwordRoomNumbers = []
+      askDeleteRoomNumbers = []
+
+      roomNumbers.each do |roomNumber|
+        roomNumber = roomNumber.to_i
+        @logger.debug(roomNumber, 'roomNumber')
+
+        resultText = @server.checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
+        @logger.debug(resultText, "checkRemovePlayRoom resultText")
+
+        case resultText
+        when "OK"
+          @server.removePlayRoomData(roomNumber)
+          deletedRoomNumbers << roomNumber
+        when "password"
+          passwordRoomNumbers << roomNumber
+        when "userExist"
+          askDeleteRoomNumbers << roomNumber
+        else
+          errorMessages << resultText
+        end
+      end
+
+      result = {
+        "deletedRoomNumbers" => deletedRoomNumbers,
+        "askDeleteRoomNumbers" => askDeleteRoomNumbers,
+        "passwordRoomNumbers" => passwordRoomNumbers,
+        "errorMessages" => errorMessages,
+      }
+      @logger.debug(result, 'result')
 
       return result
     end

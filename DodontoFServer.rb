@@ -2374,47 +2374,7 @@ class DodontoFServer
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
-  
-  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
-    @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
-    
-    deletedRoomNumbers = []
-    errorMessages = []
-    passwordRoomNumbers = []
-    askDeleteRoomNumbers = []
-    
-    roomNumbers.each do |roomNumber|
-      roomNumber = roomNumber.to_i
-      @logger.debug(roomNumber, 'roomNumber')
-      
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
-      @logger.debug(resultText, "checkRemovePlayRoom resultText")
-      
-      case resultText
-      when "OK"
-        removePlayRoomData(roomNumber)
-        deletedRoomNumbers << roomNumber
-      when "password"
-        passwordRoomNumbers << roomNumber
-      when "userExist"
-        askDeleteRoomNumbers << roomNumber
-      else
-        errorMessages << resultText
-      end
-    end
-    
-    result = {
-      "deletedRoomNumbers" => deletedRoomNumbers,
-      "askDeleteRoomNumbers" => askDeleteRoomNumbers,
-      "passwordRoomNumbers" => passwordRoomNumbers,
-      "errorMessages" => errorMessages,
-    }
-    @logger.debug(result, 'result')
-    
-    return result
-  end
-  
-  
+
   def removePlayRoomData(roomNumber)
     removeLocalImageTags(roomNumber)
     @saveDirInfo.removeSaveDir(roomNumber)

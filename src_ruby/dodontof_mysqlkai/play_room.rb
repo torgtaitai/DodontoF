@@ -191,7 +191,7 @@ module DodontoF_MySqlKai
         password = nil
       end
 
-      @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+      removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
     end
 
     def removeOlds()
@@ -310,8 +310,49 @@ COMMAND_END
 
       ignoreLoginUser = true
       password = nil
-      result = @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+      result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
       @logger.debug(result, "removePlayRoomByParams result")
+
+      return result
+    end
+
+    # DodontoF::PlayRoomとはisForceパラメタの存在に違いがあるので注意
+    def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+      @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
+
+      deletedRoomNumbers = []
+      errorMessages = []
+      passwordRoomNumbers = []
+      askDeleteRoomNumbers = []
+
+      roomNumbers.each do |roomNumber|
+        roomNumber = roomNumber.to_i
+        @logger.debug(roomNumber, 'roomNumber')
+
+        # DodontoF::PlayRoomとはisForceパラメタの存在に違いがあるので注意
+        resultText = @server.checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+        @logger.debug(resultText, "checkRemovePlayRoom resultText")
+
+        case resultText
+        when "OK"
+          @server.removePlayRoomData(roomNumber)
+          deletedRoomNumbers << roomNumber
+        when "password"
+          passwordRoomNumbers << roomNumber
+        when "userExist"
+          askDeleteRoomNumbers << roomNumber
+        else
+          errorMessages << resultText
+        end
+      end
+
+      result = {
+        "deletedRoomNumbers" => deletedRoomNumbers,
+        "askDeleteRoomNumbers" => askDeleteRoomNumbers,
+        "passwordRoomNumbers" => passwordRoomNumbers,
+        "errorMessages" => errorMessages,
+      }
+      @logger.debug(result, 'result')
 
       return result
     end
