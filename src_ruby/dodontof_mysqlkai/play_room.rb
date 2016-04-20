@@ -145,6 +145,8 @@ module DodontoF_MySqlKai
       return result
     end
 
+    # ** DodontoF::PlayRoomと違いgetStateは存在しない **
+
   private
 
     def checkCreatePlayRoomPassword(password)

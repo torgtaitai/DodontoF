@@ -2030,25 +2030,7 @@ class DodontoFServer
   end
   
   def getPlayRoomState(roomNo)
-    
-    # playRoomState = nil
-    playRoomState = {}
-    playRoomState['passwordLockState'] = false
-    playRoomState['index'] = sprintf("%3d", roomNo)
-    playRoomState['playRoomName'] = "（空き部屋）"
-    playRoomState['lastUpdateTime'] = ""
-    playRoomState['canVisit'] = false
-    playRoomState['gameType'] = ''
-    playRoomState['loginUsers'] = []
-    
-    begin
-      playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
-    rescue Exception => e
-      @logger.error("getPlayRoomStateLocal Exception rescue")
-      @logger.exception(e)
-    end
-    
-    return playRoomState
+    DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
   end
   
   def getPlayRoomStateLocal(roomNo, playRoomState)
