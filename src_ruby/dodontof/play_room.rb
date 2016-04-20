@@ -169,7 +169,7 @@ module DodontoF
 
       if( isExistPlayRoomInfo )
         @server.getSaveData(trueSaveFileName) do |saveData|
-          playRoomName = @server.getPlayRoomName(saveData, roomNumber)
+          playRoomName = getPlayRoomName(saveData, roomNumber)
           changedPassword = saveData['playRoomChangedPassword']
           chatChannelNames = saveData['chatChannelNames']
           canUseExternalImage = saveData['canUseExternalImage']
@@ -315,7 +315,7 @@ module DodontoF
 
       return playRoomState if( playRoomData.empty? )
 
-      playRoomName = @server.getPlayRoomName(playRoomData, roomNo)
+      playRoomName = getPlayRoomName(playRoomData, roomNo)
       passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
       canVisit = playRoomData['canVisit']
       gameType = playRoomData['gameType']
@@ -517,6 +517,13 @@ module DodontoF
 
       @logger.debug(userNames, "getLoginUserNames userNames")
       return userNames
+    end
+
+    # プレイルーム名を取得する
+    def getPlayRoomName(saveData, index)
+      playRoomName = saveData['playRoomName']
+      playRoomName ||= "プレイルームNo.#{index}"
+      return playRoomName
     end
 
     def checkPassword(roomNumber, password)

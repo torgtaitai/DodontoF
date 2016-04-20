@@ -2084,14 +2084,7 @@ SQL_TEXT
     now = Time.now.to_i
     return (now - $loginTimeOut)
   end
-  
-  
-  def getPlayRoomName(saveData, index)
-    playRoomName = saveData['playRoomName']
-    playRoomName ||= "プレイルームNo.#{index}"
-    return playRoomName
-  end
-  
+
   def getLoginUserCountList( roomNumberRange )
     loginUserCountList = {}
     roomNumberRange.each{|i| loginUserCountList[i] = 0 }

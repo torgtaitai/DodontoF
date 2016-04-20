@@ -154,7 +154,7 @@ module DodontoF_MySqlKai
     def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
       return playRoomState if( playRoomData.nil? or playRoomData.empty? )
 
-      playRoomName = @server.getPlayRoomName(playRoomData, roomNo)
+      playRoomName = getPlayRoomName(playRoomData, roomNo)
       passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
       canVisit = playRoomData['canVisit']
       gameType = playRoomData['gameType']
@@ -220,7 +220,7 @@ module DodontoF_MySqlKai
 
       if( isRoomExist )
         saveData = @server.getPlayRoomData()
-        playRoomName = @server.getPlayRoomName(saveData, roomNumber)
+        playRoomName = getPlayRoomName(saveData, roomNumber)
         changedPassword = saveData['playRoomChangedPassword']
         chatChannelNames = saveData['chatChannelNames']
         canUseExternalImage = saveData['canUseExternalImage']
@@ -565,6 +565,12 @@ COMMAND_END
 
       @logger.debug(roomNumbers, "roomNumbers")
       return roomNumbers
+    end
+
+    def getPlayRoomName(saveData, index)
+      playRoomName = saveData['playRoomName']
+      playRoomName ||= "プレイルームNo.#{index}"
+      return playRoomName
     end
   end
 end
