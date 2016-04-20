@@ -34,6 +34,7 @@ require 'json/jsonParser'
 require 'dodontof/logger'
 require 'dodontof/utils'
 require 'dodontof/dice_adapter'
+require 'dodontof/play_room'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -2443,76 +2444,7 @@ class DodontoFServer
   end
   
   def createPlayRoom()
-    @logger.debug('createPlayRoom begin')
-    
-    resultText = "OK"
-    playRoomIndex = -1
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      checkCreatePlayRoomPassword(params['createPassword'])
-      
-      playRoomName = params['playRoomName']
-      playRoomPassword = params['playRoomPassword']
-      chatChannelNames = params['chatChannelNames']
-      canUseExternalImage = params['canUseExternalImage']
-      
-      canVisit = params['canVisit']
-      playRoomIndex = params['playRoomIndex']
-      
-      if( playRoomIndex == -1 )
-        playRoomIndex = findEmptyRoomNumber()
-        raise "noEmptyPlayRoom" if(playRoomIndex == -1)
-        
-        @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
-      end
-      
-      @logger.debug(playRoomName, 'playRoomName')
-      @logger.debug('playRoomPassword is get')
-      @logger.debug(playRoomIndex, 'playRoomIndex')
-      
-      initSaveFiles(playRoomIndex)
-      checkSetPassword(playRoomPassword, playRoomIndex)
-      
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
-      @saveDirInfo.removeSaveDir(playRoomIndex)
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) End")
-      
-      createDir(playRoomIndex)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug(playRoomChangedPassword, 'playRoomChangedPassword')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      
-      changeSaveData(trueSaveFileName) do |saveData|
-        saveData['playRoomName'] = playRoomName
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = chatChannelNames
-        saveData['canUseExternalImage'] = canUseExternalImage
-        saveData['canVisit'] = canVisit
-        saveData['gameType'] = params['gameType']
-        
-        addViewStatesToSaveData(saveData, viewStates)
-      end
-      
-      sendRoomCreateMessage(playRoomIndex)
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-      "playRoomIndex" => playRoomIndex,
-    }
-    @logger.debug(result, 'result')
-    @logger.debug('createDir finished')
-    
-    return result
+    DodontoF::PlayRoom.new(self, @saveDirInfo).create
   end
   
   def checkCreatePlayRoomPassword(password)
