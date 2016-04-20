@@ -2375,49 +2375,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
   
-  
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
-    roomNumberRange = (roomNumber..roomNumber)
-    @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
-    
-    unless( ignoreLoginUser )
-      userNames = getLoginUserNames()
-      userCount = userNames.size
-      @logger.debug(userCount, "checkRemovePlayRoom userCount");
-      
-      if( userCount > 0 )
-        return "userExist"
-      end
-    end
-    
-    if( not password.nil? )
-      if( not checkPassword(roomNumber, password) )
-        return "password"
-      end
-    end
-    
-    if( $unremovablePlayRoomNumbers.include?(roomNumber) )
-      return "unremovablePlayRoomNumber"
-    end
-    
-    lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    lastAccessTime = lastAccessTimes[roomNumber]
-    lastAccessTime ||= 0
-    @logger.debug(lastAccessTime, "lastAccessTime")
-    
-    lastAccessTime = 0 if isForce
-    
-    now = Time.now.to_f
-    spendTimes = now - lastAccessTime.to_f
-    @logger.debug(spendTimes, "spendTimes")
-    @logger.debug(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-    if( spendTimes < $deletablePassedSeconds )
-      return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
-    end
-    
-    return "OK"
-  end
-  
   def getTrueSaveFileName(fileName)
     @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end

@@ -330,7 +330,7 @@ COMMAND_END
         @logger.debug(roomNumber, 'roomNumber')
 
         # DodontoF::PlayRoomとはisForceパラメタの存在に違いがあるので注意
-        resultText = @server.checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+        resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
         @logger.debug(resultText, "checkRemovePlayRoom resultText")
 
         case resultText
@@ -371,6 +371,61 @@ COMMAND_END
     def removeLocalSpaceDir(roomNumber)
       dir = @server.getRoomLocalSpaceDirNameByRoomNo(roomNumber)
       DodontoF::Utils.rmdir(dir)
+    end
+
+    # DodontoF::PlayRoomとはisForceパラメタの存在が違うので注意
+    def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+      roomNumberRange = (roomNumber..roomNumber)
+      @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
+
+      unless( ignoreLoginUser )
+        userNames = @server.getLoginUserNames(roomNumber)
+        userCount = userNames.size
+        @logger.debug(userCount, "checkRemovePlayRoom userCount");
+
+        if( userCount > 0 )
+          return "userExist"
+        end
+      end
+
+      if( not password.nil? )
+        if( not @server.checkPassword(roomNumber, password) )
+          return "password"
+        end
+      end
+
+      if( $unremovablePlayRoomNumbers.include?(roomNumber) )
+        return "unremovablePlayRoomNumber"
+      end
+
+      lastAccessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
+      lastAccessTime = lastAccessTimes[roomNumber]
+      # DodontoF::PlayRoomでは、ここで
+      # lastAccessTime ||= 0
+      # しているが、こちらには無い点に注意
+      @logger.debug(lastAccessTime, "lastAccessTime")
+
+      # DodontoF::PlayRoomでは、ここで
+      # lastAccessTime = 0 if isForce
+      # により強制的に時間経過を生じさせ処理している
+
+      # 上記のlastAccessTime ||=0が無い代わりに
+      # 以下のように陽にnil?の場合は削除しない対応で処理している点に注意
+      # DodontoF::PlayRoomでは0になるので自然と
+      # spendTimes < $deletablePassedSeconds が成り立つという扱い
+      # (しかしそれはバグだと思われる...どちらが正しいとするか。)
+      # TODO: 共通化する
+      unless( lastAccessTime.nil? )
+        now = Time.now
+        spendTimes = now - lastAccessTime
+        @logger.debug(spendTimes, "spendTimes")
+        @logger.debug(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+        if( spendTimes < $deletablePassedSeconds )
+          return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+        end
+      end
+
+      return "OK"
     end
   end
 end
