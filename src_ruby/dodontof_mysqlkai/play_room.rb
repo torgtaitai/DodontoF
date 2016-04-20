@@ -306,7 +306,7 @@ COMMAND_END
 
       @logger.debug(accessTimes, "accessTimes")
 
-      roomNumbers = @server.getDeleteTargetRoomNumbers(accessTimes)
+      roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
 
       ignoreLoginUser = true
       password = nil
@@ -482,6 +482,33 @@ COMMAND_END
       @logger.debug(result, "getSaveDataLastAccessTimes result")
 
       return result
+    end
+
+    def getDeleteTargetRoomNumbers(accessTimes)
+      @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
+
+      roomNumbers = []
+
+      accessTimes.each do |index, time|
+        @logger.debug(index, "index")
+        @logger.debug(time, "time")
+
+        next if( time.nil? )
+
+        timeDiffSeconds = (Time.now - time)
+        @logger.debug(timeDiffSeconds, "timeDiffSeconds")
+
+        limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
+        @logger.debug(limitSeconds, "limitSeconds")
+
+        if( timeDiffSeconds > limitSeconds )
+          @logger.debug( index, "roomNumbers added index")
+          roomNumbers << index
+        end
+      end
+
+      @logger.debug(roomNumbers, "roomNumbers")
+      return roomNumbers
     end
   end
 end
