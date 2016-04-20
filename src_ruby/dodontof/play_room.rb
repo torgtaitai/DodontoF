@@ -240,7 +240,7 @@ module DodontoF
       passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
       canVisit = playRoomData['canVisit']
       gameType = playRoomData['gameType']
-      timeStamp = @server.getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
+      timeStamp = getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
 
       timeString = ""
       unless( timeStamp.nil? )
@@ -257,6 +257,12 @@ module DodontoF
       playRoomState['loginUsers'] = loginUsers
 
       return playRoomState
+    end
+
+    def getSaveDataLastAccessTime( fileName, roomNo )
+      data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
+      time = data[roomNo]
+      return time
     end
   end
 end

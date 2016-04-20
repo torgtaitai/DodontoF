@@ -272,5 +272,7 @@ COMMAND_END
       viewStates['key'] = Time.now.to_f.to_s
       saveData['viewStateInfo'] = viewStates
     end
+
+    # ** DodontoF::PlayRoomと違って、getSaveDataLastAccessTimeの依存性がまだ外に出ているので後回しにした **
   end
 end

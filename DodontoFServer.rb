@@ -1928,17 +1928,9 @@ class DodontoFServer
     return loginUserList
   end
   
-  
   def getSaveDataLastAccessTimes( roomNumberRange )
     @saveDirInfo.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
   end
-  
-  def getSaveDataLastAccessTime( fileName, roomNo )
-    data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
-    time = data[roomNo]
-    return time
-  end
-  
   
   def removeOldPlayRoom()
     roomNumberRange = (0 .. $saveDataMaxCount)
