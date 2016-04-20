@@ -2681,19 +2681,7 @@ SQL_TEXT
   
   def removePlayRoom()
     params = getParamsFromRequestData()
-    
-    roomNumbers = params['roomNumbers']
-    ignoreLoginUser = params['ignoreLoginUser']
-    password = params['password']
-    password ||= ""
-    
-    adminPassword = params["adminPassword"]
-    @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-    if( isMentenanceMode(adminPassword) )
-      password = nil
-    end
-    
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
   
   def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)

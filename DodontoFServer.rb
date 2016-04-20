@@ -2394,20 +2394,7 @@ class DodontoFServer
   
   def removePlayRoom()
     params = getParamsFromRequestData()
-    
-    roomNumbers = params['roomNumbers']
-    ignoreLoginUser = params['ignoreLoginUser']
-    password = params['password']
-    password ||= ""
-    isForce = params['isForce']
-    
-    adminPassword = params["adminPassword"]
-    @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-    if( isMentenanceMode(adminPassword) )
-      password = nil
-    end
-    
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+    DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
   
   def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)

@@ -128,6 +128,22 @@ module DodontoF
       return result
     end
 
+    def remove(params)
+      roomNumbers = params['roomNumbers']
+      ignoreLoginUser = params['ignoreLoginUser']
+      password = params['password']
+      password ||= ""
+      isForce = params['isForce']
+
+      adminPassword = params["adminPassword"]
+      @logger.debug(adminPassword, "removePlayRoom() adminPassword")
+      if( @server.isMentenanceMode(adminPassword) )
+        password = nil
+      end
+
+      @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+    end
+
     def getState(roomNo)
       # playRoomState = nil
       playRoomState = {}
