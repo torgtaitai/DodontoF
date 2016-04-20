@@ -2123,25 +2123,6 @@ SQL_TEXT
     
     return loginUserList
   end
-  
-  
-  def getSaveDataLastAccessTimes( roomNumberRange )
-    
-    @logger.debug(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
-    
-    result = {}
-    
-    roomNumberRange.each do |roomNo|
-      where = {"roomNo >= ? " => roomNo }
-      time = getRoomTimeStamp(where)
-      
-      result[roomNo] = time
-    end
-    
-    @logger.debug(result, "getSaveDataLastAccessTimes result")
-    
-    return result
-  end
 
   def removeOldPlayRoom()
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds

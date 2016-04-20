@@ -1928,10 +1928,6 @@ class DodontoFServer
     return loginUserList
   end
   
-  def getSaveDataLastAccessTimes( roomNumberRange )
-    @saveDirInfo.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
-  end
-  
   def removeOldPlayRoom()
     DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
   end

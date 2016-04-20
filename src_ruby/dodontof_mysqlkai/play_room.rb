@@ -196,7 +196,7 @@ module DodontoF_MySqlKai
 
     def removeOlds()
       roomNumberRange = (0 .. $saveDataMaxCount)
-      accessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
+      accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
       result = removeOldRoomFromAccessTimes(accessTimes)
       return result
     end
@@ -398,7 +398,7 @@ COMMAND_END
         return "unremovablePlayRoomNumber"
       end
 
-      lastAccessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
+      lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
       lastAccessTime = lastAccessTimes[roomNumber]
       # DodontoF::PlayRoomでは、ここで
       # lastAccessTime ||= 0
@@ -464,6 +464,24 @@ COMMAND_END
       matched = DodontoF::Utils.isPasswordMatch?(password, changedPassword)
 
       return matched
+    end
+
+    def getSaveDataLastAccessTimes( roomNumberRange )
+      @logger.debug(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
+
+      result = {}
+
+      roomNumberRange.each do |roomNo|
+        # TODO: これ多分ネクストキーロックが効いて酷いのでは…。=でよさそうなので直す
+        where = {"roomNo >= ? " => roomNo }
+        time = @server.getRoomTimeStamp(where)
+
+        result[roomNo] = time
+      end
+
+      @logger.debug(result, "getSaveDataLastAccessTimes result")
+
+      return result
     end
   end
 end
