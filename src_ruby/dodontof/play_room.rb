@@ -81,6 +81,54 @@ module DodontoF
       return result
     end
 
+
+    def change()
+      @logger.debug("changePlayRoom begin")
+
+      resultText = "OK"
+
+      begin
+        params = @server.getParamsFromRequestData()
+        @logger.debug(params, "params")
+
+        playRoomPassword = params['playRoomPassword']
+        @server.checkSetPassword(playRoomPassword)
+
+        playRoomChangedPassword = @server.getChangedPassword(playRoomPassword)
+        @logger.debug('playRoomPassword is get')
+
+        viewStates = params['viewStates']
+        @logger.debug("viewStates", viewStates)
+
+        trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+
+        @server.changeSaveData(trueSaveFileName) do |saveData|
+          saveData['playRoomName'] = params['playRoomName']
+          saveData['playRoomChangedPassword'] = playRoomChangedPassword
+          saveData['chatChannelNames'] = params['chatChannelNames']
+          saveData['canUseExternalImage'] = params['canUseExternalImage']
+          saveData['canVisit'] = params['canVisit']
+          saveData['backgroundImage'] = params['backgroundImage']
+          saveData['gameType'] = params['gameType']
+
+          preViewStateInfo = saveData['viewStateInfo']
+          unless( @server.isSameViewState(viewStates, preViewStateInfo) )
+            @server.addViewStatesToSaveData(saveData, viewStates)
+          end
+
+        end
+      rescue Exception => e
+        resultText = DodontoF::Utils.getLanguageKey( e.to_s )
+      end
+
+      result = {
+        "resultText" => resultText,
+      }
+      @logger.debug(result, 'changePlayRoom result')
+
+      return result
+    end
+
   private
 
     def checkCreatePlayRoomPassword(password)

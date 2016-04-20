@@ -2691,58 +2691,11 @@ SQL_TEXT
     salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
     return pass.crypt(salt)
   end
-  
+
   def changePlayRoom()
-    @logger.debug("changePlayRoom begin")
-    
-    resultText = "OK"
-    
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      playRoomPassword = params['playRoomPassword']
-      checkSetPassword(playRoomPassword)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug('playRoomPassword is get')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      
-      changePlayRoomData do |saveData|
-        @logger.debug(saveData, 'changePlayRoom() saveData before')
-        saveData['playRoomName'] = params['playRoomName']
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = params['chatChannelNames']
-        saveData['canUseExternalImage'] = params['canUseExternalImage']
-        saveData['canVisit'] = params['canVisit']
-        saveData['backgroundImage'] = params['backgroundImage']
-        saveData['gameType'] = params['gameType']
-        
-        preViewStateInfo = saveData['viewStateInfo']
-        unless( isSameViewState(viewStates, preViewStateInfo) )
-          addViewStatesToSaveData(saveData, viewStates)
-        end
-        
-@logger.debug(saveData, 'changePlayRoom() saveData end')
-        
-        saveData
-      end
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-    }
-    @logger.debug(result, 'changePlayRoom result')
-    
-    return result
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change
   end
-  
-  
+
   def checkSetPassword(playRoomPassword, roomNumber = nil)
     return if( playRoomPassword.empty? )
     
