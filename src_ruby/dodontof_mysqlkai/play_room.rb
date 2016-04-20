@@ -48,7 +48,7 @@ module DodontoF_MySqlKai
 
         @server.createDir(playRoomIndex)
 
-        playRoomChangedPassword = @server.getChangedPassword(playRoomPassword)
+        playRoomChangedPassword = DodontoF::Utils.getChangedPassword(playRoomPassword)
         @logger.debug(playRoomChangedPassword, 'playRoomChangedPassword')
 
         viewStates = params['viewStates']
@@ -101,7 +101,7 @@ module DodontoF_MySqlKai
         playRoomPassword = params['playRoomPassword']
         checkSetPassword(playRoomPassword)
 
-        playRoomChangedPassword = @server.getChangedPassword(playRoomPassword)
+        playRoomChangedPassword = DodontoF::Utils.getChangedPassword(playRoomPassword)
         @logger.debug('playRoomPassword is get')
 
         viewStates = params['viewStates']

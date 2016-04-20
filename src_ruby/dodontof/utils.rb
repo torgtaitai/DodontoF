@@ -96,5 +96,15 @@ module DodontoF
       '###Language:' + key + '###'
     end
     module_function :getLanguageKey
+
+    # 指定の文字列(パスワード)をソルトを用いてエンコードして返す
+    # 生の状態でパスワードを保存するのを避けるための措置
+    def getChangedPassword(pass)
+      return nil if( pass.empty? )
+
+      salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
+      return pass.crypt(salt)
+    end
+    module_function :getChangedPassword
   end
 end

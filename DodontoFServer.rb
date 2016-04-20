@@ -2434,13 +2434,6 @@ class DodontoFServer
     saveData['viewStateInfo'] = viewStates
   end
   
-  def getChangedPassword(pass)
-    return nil if( pass.empty? )
-    
-    salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
-    return pass.crypt(salt)
-  end
-  
   def changePlayRoom()
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
