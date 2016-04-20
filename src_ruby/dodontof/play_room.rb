@@ -82,13 +82,12 @@ module DodontoF
     end
 
 
-    def change()
+    def change(params)
       @logger.debug("changePlayRoom begin")
 
       resultText = "OK"
 
       begin
-        params = @server.getParamsFromRequestData()
         @logger.debug(params, "params")
 
         playRoomPassword = params['playRoomPassword']

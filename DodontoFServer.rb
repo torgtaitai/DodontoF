@@ -2442,7 +2442,8 @@ class DodontoFServer
   end
   
   def changePlayRoom()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).change()
+    params = getParamsFromRequestData()
+    DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
   end
   
   

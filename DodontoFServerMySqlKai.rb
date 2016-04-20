@@ -2693,7 +2693,8 @@ SQL_TEXT
   end
 
   def changePlayRoom()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change
+    params = getParamsFromRequestData()
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
   end
 
   def checkSetPassword(playRoomPassword, roomNumber = nil)
