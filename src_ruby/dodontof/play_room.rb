@@ -144,6 +144,13 @@ module DodontoF
       @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
     end
 
+    def removeOlds()
+      roomNumberRange = (0 .. $saveDataMaxCount)
+      accessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
+      result = @server.removeOldRoomFromAccessTimes(accessTimes)
+      return result
+    end
+
     def getState(roomNo)
       # playRoomState = nil
       playRoomState = {}

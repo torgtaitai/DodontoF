@@ -2142,15 +2142,11 @@ SQL_TEXT
     
     return result
   end
-  
-  
+
   def removeOldPlayRoom()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    result = removeOldRoomFromAccessTimes(accessTimes)
-    return result
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
-  
+
   def removeOldRoomFromAccessTimes(accessTimes)
     @logger.debug("removeOldRoom Begin")
     if( $removeOldPlayRoomLimitDays <= 0 )

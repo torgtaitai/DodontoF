@@ -194,6 +194,13 @@ module DodontoF_MySqlKai
       @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
     end
 
+    def removeOlds()
+      roomNumberRange = (0 .. $saveDataMaxCount)
+      accessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
+      result = @server.removeOldRoomFromAccessTimes(accessTimes)
+      return result
+    end
+
   private
 
     def checkCreatePlayRoomPassword(password)

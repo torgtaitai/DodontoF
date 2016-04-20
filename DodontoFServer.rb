@@ -1933,10 +1933,7 @@ class DodontoFServer
   end
   
   def removeOldPlayRoom()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    result = removeOldRoomFromAccessTimes(accessTimes)
-    return result
+    DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
   
   def removeOldRoomFromAccessTimes(accessTimes)
