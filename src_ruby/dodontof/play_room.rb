@@ -270,7 +270,7 @@ module DodontoF
         timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
       end
 
-      loginUsers = @server.getLoginUserNames()
+      loginUsers = getLoginUserNames()
 
       playRoomState['passwordLockState'] = passwordLockState
       playRoomState['playRoomName'] = playRoomName
@@ -367,7 +367,7 @@ module DodontoF
       @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
 
       unless( ignoreLoginUser )
-        userNames = @server.getLoginUserNames()
+        userNames = getLoginUserNames()
         userCount = userNames.size
         @logger.debug(userCount, "checkRemovePlayRoom userCount");
 
@@ -402,6 +402,34 @@ module DodontoF
       end
 
       return "OK"
+    end
+
+    # アクセス中のユーザ名をすべて取得する
+    # 単純に使えるプロパティメソッドなのでpublicにするべきかもしれないが
+    # いったん利用者がないことを考えてprivateにしている
+    def getLoginUserNames()
+      userNames = []
+
+      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($loginUserInfo)
+      @logger.debug(trueSaveFileName, "getLoginUserNames trueSaveFileName")
+
+      unless( @server.isExist?(trueSaveFileName) )
+        return userNames
+      end
+
+      # getLoginUserNamesを初めて呼び出したタイミングの
+      # Time.nowを使いたいのでここでキャッシュしておく
+      @now_getLoginUserNames ||= Time.now.to_i
+
+      @server.getSaveData(trueSaveFileName) do |userInfos|
+        userInfos.each do |uniqueId, userInfo|
+          next if( @server.isDeleteUserInfo?(uniqueId, userInfo, @now_getLoginUserNames) )
+          userNames << userInfo['userName']
+        end
+      end
+
+      @logger.debug(userNames, "getLoginUserNames userNames")
+      return userNames
     end
   end
 end

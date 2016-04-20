@@ -2255,24 +2255,7 @@ SQL_TEXT
                      :where => {"roomNo = ? " => roomNo})
     return (not result.empty?)
   end
-  
-  
-  def getLoginUserNames(roomNo)
-    userNames = []
-    
-    unless( existRoom?(roomNo) )
-      return userNames
-    end
-    
-    deleteUserInfo(roomNo)
-    
-    users = getAllUsersData(roomNo)
-    userNames = users.collect{|i| i['userNames']}
-    
-    @logger.debug(userNames, "getLoginUserNames userNames")
-    return userNames
-  end
-  
+
   def getAllUsersData(roomNo = nil)
     tableName = 'users'
     

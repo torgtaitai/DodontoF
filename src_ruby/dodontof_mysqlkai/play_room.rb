@@ -166,7 +166,7 @@ module DodontoF_MySqlKai
         timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
       end
 
-      loginUsers = @server.getLoginUserNames(roomNo)
+      loginUsers = getLoginUserNames(roomNo)
 
       playRoomState['passwordLockState'] = passwordLockState
       playRoomState['playRoomName'] = playRoomName
@@ -379,7 +379,7 @@ COMMAND_END
       @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
 
       unless( ignoreLoginUser )
-        userNames = @server.getLoginUserNames(roomNumber)
+        userNames = getLoginUserNames(roomNumber)
         userCount = userNames.size
         @logger.debug(userCount, "checkRemovePlayRoom userCount");
 
@@ -426,6 +426,27 @@ COMMAND_END
       end
 
       return "OK"
+    end
+
+    # アクセス中のユーザ名をすべて取得する
+    # 単純に使えるプロパティメソッドなのでpublicにするべきかもしれないが
+    # いったん利用者がないことを考えてprivateにしている
+    #
+    # 実装がDodontoF::PlayRoomとまったく異なるので注意
+    def getLoginUserNames(roomNo)
+      userNames = []
+
+      unless( @server.existRoom?(roomNo) )
+        return userNames
+      end
+
+      @server.deleteUserInfo(roomNo)
+
+      users = @server.getAllUsersData(roomNo)
+      userNames = users.collect{|i| i['userNames']}
+
+      @logger.debug(userNames, "getLoginUserNames userNames")
+      return userNames
     end
   end
 end

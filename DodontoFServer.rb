@@ -2003,29 +2003,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
   end
   
-  def getLoginUserNames()
-    userNames = []
-    
-    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($loginUserInfo)
-    @logger.debug(trueSaveFileName, "getLoginUserNames trueSaveFileName")
-    
-    unless( isExist?(trueSaveFileName) )
-      return userNames
-    end
-    
-    @now_getLoginUserNames ||= Time.now.to_i
-    
-    getSaveData(trueSaveFileName) do |userInfos|
-      userInfos.each do |uniqueId, userInfo|
-        next if( isDeleteUserInfo?(uniqueId, userInfo, @now_getLoginUserNames) )
-        userNames << userInfo['userName']
-      end
-    end
-    
-    @logger.debug(userNames, "getLoginUserNames userNames")
-    return userNames
-  end
-  
   def getGameName(gameType)
     require 'diceBotInfos'
     diceBotInfos = DiceBotInfos.new.getInfos
