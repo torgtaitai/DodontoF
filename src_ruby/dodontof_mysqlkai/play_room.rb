@@ -201,6 +201,62 @@ module DodontoF_MySqlKai
       return result
     end
 
+    def check(params)
+      roomNumber = params['roomNumber']
+      @logger.debug(roomNumber, 'roomNumber')
+
+      @saveDirInfo.setSaveDataDirIndex(roomNumber)
+
+      isMentenanceModeOn = false
+      isWelcomeMessageOn = $isWelcomeMessageOn
+      playRoomName = ''
+      chatChannelNames = nil
+      canUseExternalImage = false
+      canVisit = false
+      isPasswordLocked = false
+
+      isRoomExist = @server.existRoom?
+      @logger.debug(isRoomExist, "checkRoomStatus isRoomExist")
+
+      if( isRoomExist )
+        saveData = @server.getPlayRoomData()
+        playRoomName = @server.getPlayRoomName(saveData, roomNumber)
+        changedPassword = saveData['playRoomChangedPassword']
+        chatChannelNames = saveData['chatChannelNames']
+        canUseExternalImage = saveData['canUseExternalImage']
+        canVisit = saveData['canVisit']
+        unless( changedPassword.nil? )
+          isPasswordLocked = true
+        end
+      end
+
+      adminPassword = params["adminPassword"]
+      if( @server.isMentenanceMode(adminPassword) )
+        isPasswordLocked = false
+        isWelcomeMessageOn = false
+        isMentenanceModeOn = true
+        canVisit = false
+      end
+
+      @logger.debug("isPasswordLocked", isPasswordLocked);
+
+      result = {
+        'isRoomExist' => isRoomExist,
+        'roomName' => playRoomName,
+        'roomNumber' => roomNumber,
+        'chatChannelNames' => chatChannelNames,
+        'canUseExternalImage' => canUseExternalImage,
+        'canVisit' => canVisit,
+        'isPasswordLocked' => isPasswordLocked,
+        'isMentenanceModeOn' => isMentenanceModeOn,
+        'isWelcomeMessageOn' => isWelcomeMessageOn,
+      }
+
+      @logger.debug(result, "checkRoomStatus End result")
+
+      return result
+    end
+
   private
 
     def checkCreatePlayRoomPassword(password)

@@ -2984,68 +2984,15 @@ SQL_TEXT
     end
     
   end
-  
+
   def checkRoomStatus()
     deleteOldUploadFile()
-    
+
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
-    
-    roomNumber = params['roomNumber']
-    @logger.debug(roomNumber, 'roomNumber')
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    
-    isMentenanceModeOn = false
-    isWelcomeMessageOn = $isWelcomeMessageOn
-    playRoomName = ''
-    chatChannelNames = nil
-    canUseExternalImage = false
-    canVisit = false
-    isPasswordLocked = false
-    
-    isRoomExist = existRoom?
-    @logger.debug(isRoomExist, "checkRoomStatus isRoomExist")
-    
-    if( isRoomExist )
-      saveData = getPlayRoomData()
-      playRoomName = getPlayRoomName(saveData, roomNumber)
-      changedPassword = saveData['playRoomChangedPassword']
-      chatChannelNames = saveData['chatChannelNames']
-      canUseExternalImage = saveData['canUseExternalImage']
-      canVisit = saveData['canVisit']
-      unless( changedPassword.nil? )
-        isPasswordLocked = true
-      end
-    end
-    
-    adminPassword = params["adminPassword"]
-    if( isMentenanceMode(adminPassword) )
-      isPasswordLocked = false
-      isWelcomeMessageOn = false
-      isMentenanceModeOn = true
-      canVisit = false
-    end
-    
-    @logger.debug("isPasswordLocked", isPasswordLocked);
-    
-    result = {
-      'isRoomExist' => isRoomExist,
-      'roomName' => playRoomName,
-      'roomNumber' => roomNumber,
-      'chatChannelNames' => chatChannelNames,
-      'canUseExternalImage' => canUseExternalImage,
-      'canVisit' => canVisit,
-      'isPasswordLocked' => isPasswordLocked,
-      'isMentenanceModeOn' => isMentenanceModeOn,
-      'isWelcomeMessageOn' => isWelcomeMessageOn,
-    }
-    
-    @logger.debug(result, "checkRoomStatus End result")
-    
-    return result
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).check(params)
   end
-  
+
   def isMentenanceMode(adminPassword)
     return false if( $mentenanceModePassword.nil? )
     return ( adminPassword == $mentenanceModePassword )
