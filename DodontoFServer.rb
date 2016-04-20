@@ -2439,22 +2439,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
   end
   
-  def isSameViewState(viewStates, preViewStateInfo)
-    result = true
-    
-    preViewStateInfo ||= {}
-    
-    viewStates.each do |key, value|
-      unless( value == preViewStateInfo[key] )
-        result = false
-        break
-      end
-    end
-    
-    return result
-  end
-  
-  
   def checkPassword(roomNumber, password)
     
     return true unless( $isPasswordNeedFroDeletePlayRoom )

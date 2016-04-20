@@ -122,7 +122,7 @@ module DodontoF_MySqlKai
           saveData['gameType'] = params['gameType']
 
           preViewStateInfo = saveData['viewStateInfo']
-          unless( @server.isSameViewState(viewStates, preViewStateInfo) )
+          unless( isSameViewState(viewStates, preViewStateInfo) )
             @server.addViewStatesToSaveData(saveData, viewStates)
           end
 
@@ -218,6 +218,21 @@ COMMAND_END
       if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
         raise "noPasswordPlayRoomNumber"
       end
+    end
+
+    def isSameViewState(viewStates, preViewStateInfo)
+      result = true
+
+      preViewStateInfo ||= {}
+
+      viewStates.each do |key, value|
+        unless( value == preViewStateInfo[key] )
+          result = false
+          break
+        end
+      end
+
+      return result
     end
   end
 end
