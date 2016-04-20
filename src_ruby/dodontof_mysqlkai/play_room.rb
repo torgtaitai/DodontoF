@@ -74,7 +74,7 @@ module DodontoF_MySqlKai
           saveData
         end
 
-        @server.sendRoomCreateMessage(playRoomIndex)
+        sendRoomCreateMessage(playRoomIndex)
       rescue Exception => e
         @logger.exception(e)
         resultText = DodontoF::Utils.getLanguageKey( e.to_s )
@@ -139,6 +139,18 @@ COMMAND_END
       @logger.debug(emptyRoomNubmer, 'emptyRoomNubmer')
 
       return emptyRoomNubmer
+    end
+
+    def sendRoomCreateMessage(roomNo)
+      chatData = {
+        "senderName" => "どどんとふ",
+        "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
+        "color" => "cc0066",
+        "uniqueId" => '0',
+        "channel" => 0,
+      }
+
+      @server.sendChatMessageByChatData(chatData)
     end
   end
 end

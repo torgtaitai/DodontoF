@@ -66,7 +66,7 @@ module DodontoF
           @server.addViewStatesToSaveData(saveData, viewStates)
         end
 
-        @server.sendRoomCreateMessage(playRoomIndex)
+        sendRoomCreateMessage(playRoomIndex)
       rescue Exception => e
         resultText = DodontoF::Utils.getLanguageKey( e.to_s )
       end
@@ -109,6 +109,18 @@ module DodontoF
       end
 
       return emptyRoomNubmer
+    end
+
+    def sendRoomCreateMessage(roomNo)
+      chatData = {
+        "senderName" => "どどんとふ",
+        "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
+        "color" => "cc0066",
+        "uniqueId" => '0',
+        "channel" => 0,
+      }
+
+      @server.sendChatMessageByChatData(chatData)
     end
   end
 end

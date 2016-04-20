@@ -2680,19 +2680,6 @@ SQL_TEXT
     end
   end
 
-  def sendRoomCreateMessage(roomNo)
-    chatData = {
-      "senderName" => "どどんとふ",
-      "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
-      "color" => "cc0066",
-      "uniqueId" => '0',
-      "channel" => 0,
-    }
-    
-    sendChatMessageByChatData(chatData)
-  end
-  
-  
   def addViewStatesToSaveData(saveData, viewStates)
     viewStates['key'] = Time.now.to_f.to_s
     saveData['viewStateInfo'] = viewStates
