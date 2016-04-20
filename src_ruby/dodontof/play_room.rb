@@ -9,13 +9,12 @@ module DodontoF
       @saveDirInfo = saveDirInfo
     end
 
-    def create
+    def create(params)
       @logger.debug('createPlayRoom begin')
 
       resultText = "OK"
       playRoomIndex = -1
       begin
-        params = @server.getParamsFromRequestData()
         @logger.debug(params, "params")
 
         @server.checkCreatePlayRoomPassword(params['createPassword'])

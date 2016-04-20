@@ -2706,7 +2706,8 @@ COMMAND_END
   
   
   def createPlayRoom()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).create
+    params = getParamsFromRequestData()
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).create(params)
   end
 
   

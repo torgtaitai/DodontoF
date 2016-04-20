@@ -2444,7 +2444,8 @@ class DodontoFServer
   end
   
   def createPlayRoom()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).create
+    params = getParamsFromRequestData()
+    DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
   end
   
   def checkCreatePlayRoomPassword(password)
