@@ -39,7 +39,7 @@ module DodontoF_MySqlKai
         @logger.debug(playRoomIndex, 'playRoomIndex')
 
         @server.initSaveFiles(playRoomIndex)
-        @server.checkSetPassword(playRoomPassword, playRoomIndex)
+        checkSetPassword(playRoomPassword, playRoomIndex)
 
         @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
         # DodontoF::PlayRoomとの違い(@server, @saveDirInfo)に注意
@@ -99,7 +99,7 @@ module DodontoF_MySqlKai
         @logger.debug(params, "params")
 
         playRoomPassword = params['playRoomPassword']
-        @server.checkSetPassword(playRoomPassword)
+        checkSetPassword(playRoomPassword)
 
         playRoomChangedPassword = @server.getChangedPassword(playRoomPassword)
         @logger.debug('playRoomPassword is get')
@@ -206,6 +206,18 @@ COMMAND_END
       }
 
       @server.sendChatMessageByChatData(chatData)
+    end
+
+    def checkSetPassword(playRoomPassword, roomNumber = nil)
+      return if( playRoomPassword.empty? )
+
+      if( roomNumber.nil? )
+        roomNumber = @saveDirInfo.getSaveDataDirIndex
+      end
+
+      if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
+        raise "noPasswordPlayRoomNumber"
+      end
     end
   end
 end

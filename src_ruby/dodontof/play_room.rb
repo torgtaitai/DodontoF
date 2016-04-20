@@ -39,7 +39,7 @@ module DodontoF
         @logger.debug(playRoomIndex, 'playRoomIndex')
 
         @server.initSaveFiles(playRoomIndex)
-        @server.checkSetPassword(playRoomPassword, playRoomIndex)
+        checkSetPassword(playRoomPassword, playRoomIndex)
 
         @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
         @saveDirInfo.removeSaveDir(playRoomIndex)
@@ -91,7 +91,7 @@ module DodontoF
         @logger.debug(params, "params")
 
         playRoomPassword = params['playRoomPassword']
-        @server.checkSetPassword(playRoomPassword)
+        checkSetPassword(playRoomPassword)
 
         playRoomChangedPassword = @server.getChangedPassword(playRoomPassword)
         @logger.debug('playRoomPassword is get')
@@ -168,6 +168,18 @@ module DodontoF
       }
 
       @server.sendChatMessageByChatData(chatData)
+    end
+
+    def checkSetPassword(playRoomPassword, roomNumber = nil)
+      return if( playRoomPassword.empty? )
+
+      if( roomNumber.nil? )
+        roomNumber = @saveDirInfo.getSaveDataDirIndex
+      end
+
+      if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
+        raise "noPasswordPlayRoomNumber"
+      end
     end
   end
 end

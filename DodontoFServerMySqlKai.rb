@@ -2697,19 +2697,6 @@ SQL_TEXT
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
   end
 
-  def checkSetPassword(playRoomPassword, roomNumber = nil)
-    return if( playRoomPassword.empty? )
-    
-    if( roomNumber.nil? )
-      roomNumber = @saveDirInfo.getSaveDataDirIndex
-    end
-    
-    if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
-      raise "noPasswordPlayRoomNumber"
-    end
-  end
-  
-  
   def isSameViewState(viewStates, preViewStateInfo)
     result = true
     
