@@ -28,7 +28,7 @@ module DodontoF_MySqlKai
         playRoomIndex = params['playRoomIndex']
 
         if( playRoomIndex == -1 )
-          playRoomIndex = @server.findEmptyRoomNumber()
+          playRoomIndex = findEmptyRoomNumber()
           raise "noEmptyPlayRoom" if(playRoomIndex == -1)
 
           @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
@@ -100,6 +100,45 @@ module DodontoF_MySqlKai
       return if( $createPlayRoomPassword == password )
 
       raise "errorPassword"
+    end
+
+
+    def findEmptyRoomNumber()
+      # このメソッドは全体的にDodontoF::PlayRoomと異なるので注意
+
+      emptyRoomNubmer = -1
+
+      command = <<COMMAND_END
+SELECT
+  IF(
+    (SELECT COUNT(roomNo) FROM rooms)=0,
+    0,
+    (
+      IF(
+        (SELECT MIN(roomNo) FROM rooms)<>0,
+        0,
+        MIN(roomNo+1)
+      )
+    )
+  ) AS roomNo
+FROM rooms
+WHERE (roomNo+1) NOT IN (SELECT roomNo FROM rooms)
+COMMAND_END
+
+      @server.connectDb
+      result = @server.query(command)
+      @logger.debug(result, "findEmptyRoomNumber result")
+
+      row = result.first
+      row ||= {}
+      @logger.debug(row, "findEmptyRoomNumber row")
+
+      count = row['roomNo'].to_i
+
+      emptyRoomNubmer = count
+      @logger.debug(emptyRoomNubmer, 'emptyRoomNubmer')
+
+      return emptyRoomNubmer
     end
   end
 end

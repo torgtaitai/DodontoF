@@ -28,7 +28,7 @@ module DodontoF
         playRoomIndex = params['playRoomIndex']
 
         if( playRoomIndex == -1 )
-          playRoomIndex = @server.findEmptyRoomNumber()
+          playRoomIndex = findEmptyRoomNumber()
           raise "noEmptyPlayRoom" if(playRoomIndex == -1)
 
           @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
@@ -91,6 +91,24 @@ module DodontoF
       return if( $createPlayRoomPassword == password )
 
       raise "errorPassword"
+    end
+
+    def findEmptyRoomNumber()
+      emptyRoomNubmer = -1
+
+      roomNumberRange = (0..$saveDataMaxCount)
+
+      roomNumberRange.each do |roomNumber|
+        @saveDirInfo.setSaveDataDirIndex(roomNumber)
+        trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+
+        next if( @server.isExist?(trueSaveFileName) )
+
+        emptyRoomNubmer = roomNumber
+        break
+      end
+
+      return emptyRoomNubmer
     end
   end
 end

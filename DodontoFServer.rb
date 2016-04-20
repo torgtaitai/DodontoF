@@ -1993,25 +1993,6 @@ class DodontoFServer
     return roomNumbers
   end
   
-  
-  def findEmptyRoomNumber()
-    emptyRoomNubmer = -1
-    
-    roomNumberRange = (0..$saveDataMaxCount)
-    
-    roomNumberRange.each do |roomNumber|
-      @saveDirInfo.setSaveDataDirIndex(roomNumber)
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      
-      next if( isExist?(trueSaveFileName) )
-      
-      emptyRoomNubmer = roomNumber
-      break
-    end
-    
-    return emptyRoomNubmer
-  end
-  
   def getPlayRoomStates()
     params = getParamsFromRequestData()
     @logger.debug(params, "params")

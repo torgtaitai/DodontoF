@@ -2195,44 +2195,7 @@ SQL_TEXT
     @logger.debug(roomNumbers, "roomNumbers")
     return roomNumbers
   end
-  
-  
-  def findEmptyRoomNumber()
-    emptyRoomNubmer = -1
-    
-    command = <<COMMAND_END
-SELECT 
-  IF(
-    (SELECT COUNT(roomNo) FROM rooms)=0,
-    0,
-    (
-      IF(
-        (SELECT MIN(roomNo) FROM rooms)<>0,
-        0,
-        MIN(roomNo+1)
-      ) 
-    )
-  ) AS roomNo
-FROM rooms
-WHERE (roomNo+1) NOT IN (SELECT roomNo FROM rooms)
-COMMAND_END
-    
-    connectDb
-    result = query(command)
-    @logger.debug(result, "findEmptyRoomNumber result")
-    
-    row = result.first
-    row ||= {}
-    @logger.debug(row, "findEmptyRoomNumber row")
-    
-    count = row['roomNo'].to_i
-    
-    emptyRoomNubmer = count
-    @logger.debug(emptyRoomNubmer, 'emptyRoomNubmer')
-    
-    return emptyRoomNubmer
-  end
-  
+
   def getPlayRoomStates()
     @logger.debug("getPlayRoomStates Begin");
     
