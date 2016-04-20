@@ -2374,17 +2374,6 @@ class DodontoFServer
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
-
-  def removePlayRoomData(roomNumber)
-    removeLocalImageTags(roomNumber)
-    @saveDirInfo.removeSaveDir(roomNumber)
-    removeLocalSpaceDir(roomNumber)
-  end
-  
-  def removeLocalImageTags(roomNumber)
-    tagInfos = getImageTags(roomNumber)
-    deleteImages(tagInfos.keys)
-  end
   
   
   def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
@@ -2427,14 +2416,6 @@ class DodontoFServer
     end
     
     return "OK"
-  end
-  
-  
-
-  
-  def removeLocalSpaceDir(roomNumber)
-    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
-    rmdir(dir)
   end
   
   def getTrueSaveFileName(fileName)

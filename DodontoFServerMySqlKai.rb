@@ -2662,18 +2662,6 @@ SQL_TEXT
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
 
-  def removePlayRoomData(roomNumber)
-    removeLocalImageTags(roomNumber)
-    removeSaveDir(roomNumber)
-    removeLocalSpaceDir(roomNumber)
-  end
-  
-  def removeLocalImageTags(roomNumber)
-    tagInfos = getImageTags(roomNumber)
-    deleteImages(tagInfos.keys)
-  end
-  
-  
   def removeSaveDir(roomNo)
     @saveDirInfo.removeSaveDir(roomNo)
     
@@ -2725,15 +2713,7 @@ SQL_TEXT
     
     return "OK"
   end
-  
-  
 
-  
-  def removeLocalSpaceDir(roomNumber)
-    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
-    rmdir(dir)
-  end
-  
   def getTrueSaveFileName(fileName)
     @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end

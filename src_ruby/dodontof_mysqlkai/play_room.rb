@@ -335,7 +335,7 @@ COMMAND_END
 
         case resultText
         when "OK"
-          @server.removePlayRoomData(roomNumber)
+          removePlayRoomData(roomNumber)
           deletedRoomNumbers << roomNumber
         when "password"
           passwordRoomNumbers << roomNumber
@@ -355,6 +355,22 @@ COMMAND_END
       @logger.debug(result, 'result')
 
       return result
+    end
+
+    def removePlayRoomData(roomNumber)
+      removeLocalImageTags(roomNumber)
+      @saveDirInfo.removeSaveDir(roomNumber)
+      removeLocalSpaceDir(roomNumber)
+    end
+
+    def removeLocalImageTags(roomNumber)
+      tagInfos = @saveDirInfo.getImageTags(roomNumber)
+      @saveDirInfo.deleteImages(tagInfos.keys)
+    end
+
+    def removeLocalSpaceDir(roomNumber)
+      dir = @server.getRoomLocalSpaceDirNameByRoomNo(roomNumber)
+      DodontoF::Utils.rmdir(dir)
     end
   end
 end
