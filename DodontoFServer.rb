@@ -2448,17 +2448,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
   end
   
-  def checkCreatePlayRoomPassword(password)
-    @logger.debug('checkCreatePlayRoomPassword Begin')
-    @logger.debug(password, 'password')
-    
-    return if( $createPlayRoomPassword.empty? )
-    return if( $createPlayRoomPassword == password )
-    
-    raise "errorPassword"
-  end
-  
-  
   def sendRoomCreateMessage(roomNo)
     chatData = {
       "senderName" => "どどんとふ",

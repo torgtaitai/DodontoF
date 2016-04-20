@@ -2716,19 +2716,7 @@ COMMAND_END
       yield(data)
     end
   end
-  
-  
-  def checkCreatePlayRoomPassword(password)
-    @logger.debug('checkCreatePlayRoomPassword Begin')
-    @logger.debug(password, 'password')
-    
-    return if( $createPlayRoomPassword.empty? )
-    return if( $createPlayRoomPassword == password )
-    
-    raise "errorPassword"
-  end
-  
-  
+
   def sendRoomCreateMessage(roomNo)
     chatData = {
       "senderName" => "どどんとふ",

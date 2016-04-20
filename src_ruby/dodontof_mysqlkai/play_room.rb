@@ -17,7 +17,7 @@ module DodontoF_MySqlKai
       begin
         @logger.debug(params, "params")
 
-        @server.checkCreatePlayRoomPassword(params['createPassword'])
+        checkCreatePlayRoomPassword(params['createPassword'])
 
         playRoomName = params['playRoomName']
         playRoomPassword = params['playRoomPassword']
@@ -88,6 +88,18 @@ module DodontoF_MySqlKai
       @logger.debug('createDir finished')
 
       return result
+    end
+
+  private
+
+    def checkCreatePlayRoomPassword(password)
+      @logger.debug('checkCreatePlayRoomPassword Begin')
+      @logger.debug(password, 'password')
+
+      return if( $createPlayRoomPassword.empty? )
+      return if( $createPlayRoomPassword == password )
+
+      raise "errorPassword"
     end
   end
 end
