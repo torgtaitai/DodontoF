@@ -2247,34 +2247,10 @@ SQL_TEXT
   
 
   def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-    
-    return playRoomState if( playRoomData.nil? or playRoomData.empty? )
-    
-    playRoomName = getPlayRoomName(playRoomData, roomNo)
-    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-    canVisit = playRoomData['canVisit']
-    gameType = playRoomData['gameType']
-    
-    timeStamp = getRoomTimeStamp()
-    
-    timeString = ""
-    unless( timeStamp.nil? )
-      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-    end
-    
-    loginUsers = getLoginUserNames(roomNo)
-    
-    playRoomState['passwordLockState'] = passwordLockState
-    playRoomState['playRoomName'] = playRoomName
-    playRoomState['lastUpdateTime'] = timeString
-    playRoomState['canVisit'] = canVisit
-    playRoomState['gameType'] = gameType
-    playRoomState['loginUsers'] = loginUsers
-    
-    return playRoomState
+    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
+    room.getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
   end
-  
-  
+
   def getRoomTimeStamp(where = nil)
     result = readDb("SELECT MAX(created_at)",
                     :from => "chats",

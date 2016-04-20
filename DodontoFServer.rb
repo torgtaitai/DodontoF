@@ -2033,42 +2033,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
   end
   
-  def getPlayRoomStateLocal(roomNo, playRoomState)
-    playRoomInfoFile = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-    
-    return playRoomState unless( isExist?(playRoomInfoFile) )
-    
-    playRoomData = nil
-    getSaveData(playRoomInfoFile) do |playRoomDataTmp|
-      playRoomData = playRoomDataTmp
-    end
-    @logger.debug(playRoomData, "playRoomData")
-    
-    return playRoomState if( playRoomData.empty? )
-    
-    playRoomName = getPlayRoomName(playRoomData, roomNo)
-    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-    canVisit = playRoomData['canVisit']
-    gameType = playRoomData['gameType']
-    timeStamp = getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
-    
-    timeString = ""
-    unless( timeStamp.nil? )
-      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-    end
-    
-    loginUsers = getLoginUserNames()
-    
-    playRoomState['passwordLockState'] = passwordLockState
-    playRoomState['playRoomName'] = playRoomName
-    playRoomState['lastUpdateTime'] = timeString
-    playRoomState['canVisit'] = canVisit
-    playRoomState['gameType'] = gameType
-    playRoomState['loginUsers'] = loginUsers
-    
-    return playRoomState
-  end
-  
   def getLoginUserNames()
     userNames = []
     

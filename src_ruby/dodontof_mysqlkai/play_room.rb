@@ -147,6 +147,37 @@ module DodontoF_MySqlKai
 
     # ** DodontoF::PlayRoomと違いgetStateは存在しない **
 
+    # DodontoF::PlayRoomと違い
+    # 1. getPlayRoomStateLocalが呼び出し可能点になっている
+    # 2. getPlayRoomStateLocalの引数の個数からして異なるし実装も全体的に違う
+    # という点に注意
+    def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
+      return playRoomState if( playRoomData.nil? or playRoomData.empty? )
+
+      playRoomName = @server.getPlayRoomName(playRoomData, roomNo)
+      passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
+      canVisit = playRoomData['canVisit']
+      gameType = playRoomData['gameType']
+
+      timeStamp = @server.getRoomTimeStamp()
+
+      timeString = ""
+      unless( timeStamp.nil? )
+        timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
+      end
+
+      loginUsers = @server.getLoginUserNames(roomNo)
+
+      playRoomState['passwordLockState'] = passwordLockState
+      playRoomState['playRoomName'] = playRoomName
+      playRoomState['lastUpdateTime'] = timeString
+      playRoomState['canVisit'] = canVisit
+      playRoomState['gameType'] = gameType
+      playRoomState['loginUsers'] = loginUsers
+
+      return playRoomState
+    end
+
   private
 
     def checkCreatePlayRoomPassword(password)

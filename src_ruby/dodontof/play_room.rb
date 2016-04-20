@@ -140,7 +140,7 @@ module DodontoF
       playRoomState['loginUsers'] = []
 
       begin
-        playRoomState = @server.getPlayRoomStateLocal(roomNo, playRoomState)
+        playRoomState = getStateCatched(roomNo, playRoomState)
       rescue Exception => e
         @logger.error("getPlayRoomStateLocal Exception rescue")
         @logger.exception(e)
@@ -221,6 +221,42 @@ module DodontoF
     def addViewStatesToSaveData(saveData, viewStates)
       viewStates['key'] = Time.now.to_f.to_s
       saveData['viewStateInfo'] = viewStates
+    end
+
+    def getStateCatched(roomNo, playRoomState)
+      playRoomInfoFile = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+
+      return playRoomState unless( @server.isExist?(playRoomInfoFile) )
+
+      playRoomData = nil
+      @server.getSaveData(playRoomInfoFile) do |playRoomDataTmp|
+        playRoomData = playRoomDataTmp
+      end
+      @logger.debug(playRoomData, "playRoomData")
+
+      return playRoomState if( playRoomData.empty? )
+
+      playRoomName = @server.getPlayRoomName(playRoomData, roomNo)
+      passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
+      canVisit = playRoomData['canVisit']
+      gameType = playRoomData['gameType']
+      timeStamp = @server.getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
+
+      timeString = ""
+      unless( timeStamp.nil? )
+        timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
+      end
+
+      loginUsers = @server.getLoginUserNames()
+
+      playRoomState['passwordLockState'] = passwordLockState
+      playRoomState['playRoomName'] = playRoomName
+      playRoomState['lastUpdateTime'] = timeString
+      playRoomState['canVisit'] = canVisit
+      playRoomState['gameType'] = gameType
+      playRoomState['loginUsers'] = loginUsers
+
+      return playRoomState
     end
   end
 end
