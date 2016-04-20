@@ -2697,11 +2697,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).check(params)
   end
   
-  def isMentenanceMode(adminPassword)
-    return false if( $mentenanceModePassword.nil? )
-    return ( adminPassword == $mentenanceModePassword )
-  end
-  
   def loginPassword()
     loginData = getParamsFromRequestData()
     @logger.debug(loginData, 'loginData')

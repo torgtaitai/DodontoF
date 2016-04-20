@@ -137,7 +137,7 @@ module DodontoF
 
       adminPassword = params["adminPassword"]
       @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-      if( @server.isMentenanceMode(adminPassword) )
+      if( isMentenanceMode(adminPassword) )
         password = nil
       end
 
@@ -181,7 +181,7 @@ module DodontoF
       end
 
       adminPassword = params["adminPassword"]
-      if( @server.isMentenanceMode(adminPassword) )
+      if( isMentenanceMode(adminPassword) )
         isPasswordLocked = false
         isWelcomeMessageOn = false
         isMentenanceModeOn = true
@@ -542,6 +542,11 @@ module DodontoF
       end
 
       return matched
+    end
+
+    def isMentenanceMode(adminPassword)
+      return false if( $mentenanceModePassword.nil? )
+      return ( adminPassword == $mentenanceModePassword )
     end
   end
 end

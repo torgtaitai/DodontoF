@@ -187,7 +187,7 @@ module DodontoF_MySqlKai
 
       adminPassword = params["adminPassword"]
       @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-      if( @server.isMentenanceMode(adminPassword) )
+      if( isMentenanceMode(adminPassword) )
         password = nil
       end
 
@@ -231,7 +231,7 @@ module DodontoF_MySqlKai
       end
 
       adminPassword = params["adminPassword"]
-      if( @server.isMentenanceMode(adminPassword) )
+      if( isMentenanceMode(adminPassword) )
         isPasswordLocked = false
         isWelcomeMessageOn = false
         isMentenanceModeOn = true
@@ -571,6 +571,11 @@ COMMAND_END
       playRoomName = saveData['playRoomName']
       playRoomName ||= "プレイルームNo.#{index}"
       return playRoomName
+    end
+
+    def isMentenanceMode(adminPassword)
+      return false if( $mentenanceModePassword.nil? )
+      return ( adminPassword == $mentenanceModePassword )
     end
   end
 end
