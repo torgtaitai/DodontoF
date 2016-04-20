@@ -2622,24 +2622,6 @@ SQL_TEXT
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
   end
 
-  def checkPassword(roomNumber, password)
-    
-    return true unless( $isPasswordNeedFroDeletePlayRoom )
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    
-    return true unless( existRoom? )
-    
-    matched = false
-    
-    saveData = getPlayRoomData()
-    changedPassword = saveData['playRoomChangedPassword']
-    matched = isPasswordMatch?(password, changedPassword)
-    
-    return matched
-  end
-  
-  
   def removePlayRoom()
     params = getParamsFromRequestData()
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)

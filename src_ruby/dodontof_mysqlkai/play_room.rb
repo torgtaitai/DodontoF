@@ -389,7 +389,7 @@ COMMAND_END
       end
 
       if( not password.nil? )
-        if( not @server.checkPassword(roomNumber, password) )
+        if( not checkPassword(roomNumber, password) )
           return "password"
         end
       end
@@ -447,6 +447,23 @@ COMMAND_END
 
       @logger.debug(userNames, "getLoginUserNames userNames")
       return userNames
+    end
+
+    # 実装がDodontoF::PlayRoomと異なるので注意
+    def checkPassword(roomNumber, password)
+      return true unless( $isPasswordNeedFroDeletePlayRoom )
+
+      @saveDirInfo.setSaveDataDirIndex(roomNumber)
+
+      return true unless( @server.existRoom? )
+
+      matched = false
+
+      saveData = @server.getPlayRoomData()
+      changedPassword = saveData['playRoomChangedPassword']
+      matched = @server.isPasswordMatch?(password, changedPassword)
+
+      return matched
     end
   end
 end

@@ -377,7 +377,7 @@ module DodontoF
       end
 
       if( not password.nil? )
-        if( not @server.checkPassword(roomNumber, password) )
+        if( not checkPassword(roomNumber, password) )
           return "password"
         end
       end
@@ -430,6 +430,24 @@ module DodontoF
 
       @logger.debug(userNames, "getLoginUserNames userNames")
       return userNames
+    end
+
+    def checkPassword(roomNumber, password)
+      return true unless( $isPasswordNeedFroDeletePlayRoom )
+
+      @saveDirInfo.setSaveDataDirIndex(roomNumber)
+      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
+      isExistPlayRoomInfo = ( @server.isExist?(trueSaveFileName) )
+
+      return true unless( isExistPlayRoomInfo )
+
+      matched = false
+      @server.getSaveData(trueSaveFileName) do |saveData|
+        changedPassword = saveData['playRoomChangedPassword']
+        matched = @server.isPasswordMatch?(password, changedPassword)
+      end
+
+      return matched
     end
   end
 end

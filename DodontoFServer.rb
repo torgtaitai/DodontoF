@@ -2326,27 +2326,7 @@ class DodontoFServer
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
   end
-  
-  def checkPassword(roomNumber, password)
-    
-    return true unless( $isPasswordNeedFroDeletePlayRoom )
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-    isExistPlayRoomInfo = ( isExist?(trueSaveFileName) ) 
-    
-    return true unless( isExistPlayRoomInfo )
-    
-    matched = false
-    getSaveData(trueSaveFileName) do |saveData|
-      changedPassword = saveData['playRoomChangedPassword']
-      matched = isPasswordMatch?(password, changedPassword)
-    end
-    
-    return matched
-  end
-  
-  
+
   def removePlayRoom()
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
