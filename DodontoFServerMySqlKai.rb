@@ -2147,24 +2147,6 @@ SQL_TEXT
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
 
-  def removeOldRoomFromAccessTimes(accessTimes)
-    @logger.debug("removeOldRoom Begin")
-    if( $removeOldPlayRoomLimitDays <= 0 )
-      return accessTimes
-    end
-    
-    @logger.debug(accessTimes, "accessTimes")
-    
-    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
-    
-    ignoreLoginUser = true
-    password = nil
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
-    @logger.debug(result, "removePlayRoomByParams result")
-    
-    return result
-  end
-  
   def getDeleteTargetRoomNumbers(accessTimes)
     @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
     

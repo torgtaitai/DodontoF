@@ -147,7 +147,7 @@ module DodontoF
     def removeOlds()
       roomNumberRange = (0 .. $saveDataMaxCount)
       accessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
-      result = @server.removeOldRoomFromAccessTimes(accessTimes)
+      result = removeOldRoomFromAccessTimes(accessTimes)
       return result
     end
 
@@ -286,6 +286,25 @@ module DodontoF
       data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
       time = data[roomNo]
       return time
+    end
+
+    def removeOldRoomFromAccessTimes(accessTimes)
+      @logger.debug("removeOldRoom Begin")
+      if( $removeOldPlayRoomLimitDays <= 0 )
+        return accessTimes
+      end
+
+      @logger.debug(accessTimes, "accessTimes")
+
+      roomNumbers = @server.getDeleteTargetRoomNumbers(accessTimes)
+
+      ignoreLoginUser = true
+      password = nil
+      isForce = true
+      result = @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
+      @logger.debug(result, "removePlayRoomByParams result")
+
+      return result
     end
   end
 end

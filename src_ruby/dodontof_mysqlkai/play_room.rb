@@ -197,7 +197,7 @@ module DodontoF_MySqlKai
     def removeOlds()
       roomNumberRange = (0 .. $saveDataMaxCount)
       accessTimes = @server.getSaveDataLastAccessTimes( roomNumberRange )
-      result = @server.removeOldRoomFromAccessTimes(accessTimes)
+      result = removeOldRoomFromAccessTimes(accessTimes)
       return result
     end
 
@@ -297,5 +297,23 @@ COMMAND_END
     end
 
     # ** DodontoF::PlayRoomと違って、getSaveDataLastAccessTimeの依存性がまだ外に出ているので後回しにした **
+
+    def removeOldRoomFromAccessTimes(accessTimes)
+      @logger.debug("removeOldRoom Begin")
+      if( $removeOldPlayRoomLimitDays <= 0 )
+        return accessTimes
+      end
+
+      @logger.debug(accessTimes, "accessTimes")
+
+      roomNumbers = @server.getDeleteTargetRoomNumbers(accessTimes)
+
+      ignoreLoginUser = true
+      password = nil
+      result = @server.removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+      @logger.debug(result, "removePlayRoomByParams result")
+
+      return result
+    end
   end
 end

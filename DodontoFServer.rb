@@ -1936,25 +1936,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
   
-  def removeOldRoomFromAccessTimes(accessTimes)
-    @logger.debug("removeOldRoom Begin")
-    if( $removeOldPlayRoomLimitDays <= 0 )
-      return accessTimes
-    end
-    
-    @logger.debug(accessTimes, "accessTimes")
-    
-    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
-    
-    ignoreLoginUser = true
-    password = nil
-    isForce = true
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
-    @logger.debug(result, "removePlayRoomByParams result")
-    
-    return result
-  end
-  
   def getDeleteTargetRoomNumbers(accessTimes)
     @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
     
