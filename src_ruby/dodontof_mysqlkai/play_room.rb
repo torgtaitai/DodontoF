@@ -66,7 +66,7 @@ module DodontoF_MySqlKai
           saveData['canVisit'] = canVisit
           saveData['gameType'] = params['gameType']
 
-          @server.addViewStatesToSaveData(saveData, viewStates)
+          addViewStatesToSaveData(saveData, viewStates)
 
           # DodontoF::PlayRoomとの違いに注意
           # changePlayRoomData()はchangeSaveData()と違い
@@ -123,7 +123,7 @@ module DodontoF_MySqlKai
 
           preViewStateInfo = saveData['viewStateInfo']
           unless( isSameViewState(viewStates, preViewStateInfo) )
-            @server.addViewStatesToSaveData(saveData, viewStates)
+            addViewStatesToSaveData(saveData, viewStates)
           end
 
           @logger.debug(saveData, 'changePlayRoom() saveData end')
@@ -233,6 +233,11 @@ COMMAND_END
       end
 
       return result
+    end
+
+    def addViewStatesToSaveData(saveData, viewStates)
+      viewStates['key'] = Time.now.to_f.to_s
+      saveData['viewStateInfo'] = viewStates
     end
   end
 end

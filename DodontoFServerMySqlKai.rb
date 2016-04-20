@@ -2680,11 +2680,6 @@ SQL_TEXT
     end
   end
 
-  def addViewStatesToSaveData(saveData, viewStates)
-    viewStates['key'] = Time.now.to_f.to_s
-    saveData['viewStateInfo'] = viewStates
-  end
-
   def changePlayRoom()
     params = getParamsFromRequestData()
     DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)

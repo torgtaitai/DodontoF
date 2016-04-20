@@ -2428,11 +2428,6 @@ class DodontoFServer
     params = getParamsFromRequestData()
     DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
   end
-
-  def addViewStatesToSaveData(saveData, viewStates)
-    viewStates['key'] = Time.now.to_f.to_s
-    saveData['viewStateInfo'] = viewStates
-  end
   
   def changePlayRoom()
     params = getParamsFromRequestData()

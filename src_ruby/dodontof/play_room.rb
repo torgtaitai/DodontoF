@@ -63,7 +63,7 @@ module DodontoF
           saveData['canVisit'] = canVisit
           saveData['gameType'] = params['gameType']
 
-          @server.addViewStatesToSaveData(saveData, viewStates)
+          addViewStatesToSaveData(saveData, viewStates)
         end
 
         sendRoomCreateMessage(playRoomIndex)
@@ -112,7 +112,7 @@ module DodontoF
 
           preViewStateInfo = saveData['viewStateInfo']
           unless( isSameViewState(viewStates, preViewStateInfo) )
-            @server.addViewStatesToSaveData(saveData, viewStates)
+            addViewStatesToSaveData(saveData, viewStates)
           end
 
         end
@@ -195,6 +195,11 @@ module DodontoF
       end
 
       return result
+    end
+
+    def addViewStatesToSaveData(saveData, viewStates)
+      viewStates['key'] = Time.now.to_f.to_s
+      saveData['viewStateInfo'] = viewStates
     end
   end
 end
