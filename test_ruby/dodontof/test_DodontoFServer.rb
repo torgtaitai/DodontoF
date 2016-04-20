@@ -9,15 +9,16 @@ require 'test/unit'
 # テスト用のコンフィグファイルをDodontoFServerに読みこませる
 $isTestMode = true
 require 'DodontoFServer.rb'
-
-TARGET_DODONTF_SERVER_CLASS = DodontoFServer
 require 'server_test_impl.rb'
 
 class DodontoFServerTest < Test::Unit::TestCase
-  include ServerTestImpl
+  include DodontoFServerTestImpl
 
-  class DodontoFServerForGetPlayRoomState < DodontoFServerForTest
+  def getTargetDodontoFServer
+    DodontoFServer
   end
+
+  # ------------------------ room系コマンドテスト
 
   def create_mock_playroom(name = 'testroom', index = -1)
     params = {
@@ -33,16 +34,20 @@ class DodontoFServerTest < Test::Unit::TestCase
         'viewStates' => {}
       }
     }
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     server.getResponse
   end
 
   # 'createPlayRoom' => :hasReturn,
   def test_createPlayRoom
-    expected = "{\"resultText\":\"OK\",\"playRoomIndex\":1}"
-
     result = create_mock_playroom
-    assert_equal expected, result
+    parsed = JsonParser.new.parse(result)
+
+    assert parsed.has_key? 'resultText'
+    assert parsed.has_key? 'playRoomIndex'
+
+    assert_equal 'OK', parsed['resultText']
+    assert_equal 1, parsed['playRoomIndex']
   end
 
   # 'getPlayRoomStates' => :hasReturn,
@@ -57,7 +62,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     create_mock_playroom('TESTROOM_ALPHA', 1)
     create_mock_playroom('TESTROOM_BETA', 5)
-    server = DodontoFServerForGetPlayRoomState.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
 
     # 必要なキーは帰ってきてますよね？
@@ -87,7 +92,7 @@ class DodontoFServerTest < Test::Unit::TestCase
       }
     }
 
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     assert_match /isRoomExist/, result
     assert_match /roomName/, result
@@ -117,7 +122,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     }
 
     create_mock_playroom('TESTROOM', 1)
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     assert_match /resultText/, result
     assert_match /OK/, result
@@ -137,7 +142,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     create_mock_playroom('TESTROOM2', 2) # テスト中作って10秒立たないからこれは消せないはず
 
-    server = DodontoFServerForTest.new SaveDirInfo.new, params
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
@@ -177,7 +182,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     create_mock_playroom('TESTROOM2', 2)
 
     savedirs = SaveDirInfoForRemoveOldPlayRoom.new
-    server = DodontoFServerForTest.new savedirs, params
+    server = getDodontoFServerForTest.new savedirs, params
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
@@ -192,5 +197,152 @@ class DodontoFServerTest < Test::Unit::TestCase
     assert_equal [], parsed['askDeleteRoomNumbers']
     assert_equal [], parsed['passwordRoomNumbers']
     assert_equal [], parsed['errorMessages']
+  end
+
+  # ------------------------ bot系コマンドテスト
+
+ def test_getDiceBotInfos
+    params = {
+      'cmd' => 'getDiceBotInfos',
+      'params' => { }
+    }
+
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
+    result = server.getResponse
+    parsed = JsonParser.new.parse(result)
+    assert 1 <= parsed.size
+    parsed.each do |item|
+      assert item.has_key? 'name'
+      assert item.has_key? 'gameType'
+      assert item.has_key? 'prefixs'
+      assert item.has_key? 'info'
+    end
+ end
+
+  def test_getBotTableInfos
+    params = {
+      'cmd' => 'getBotTableInfos',
+      'params' => { }
+    }
+
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
+    result = server.getResponse
+    parsed = JsonParser.new.parse(result)
+
+    assert parsed.has_key? 'resultText'
+    assert parsed.has_key? 'tableInfos'
+  end
+
+  def create_mock_bot_table(title)
+    params = {
+      'cmd' => 'addBotTable',
+      'params' => {
+        'gameType' => 'DiceBot',
+        'command' => '1d6',
+        'dice' => '',
+        'title' => title,
+        'table' => []
+      }
+    }
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
+    server.getResponse
+  end
+
+  def test_addBotTable
+    result = create_mock_bot_table('TEST')
+    parsed = JsonParser.new.parse(result)
+
+    assert parsed.has_key? 'resultText'
+    assert parsed.has_key? 'tableInfos'
+
+    item = parsed['tableInfos'][0]
+
+    assert item.has_key? 'fileName'
+    assert item.has_key? 'gameType'
+    assert item.has_key? 'command'
+    assert item.has_key? 'dice'
+    assert item.has_key? 'title'
+    assert item.has_key? 'table'
+  end
+
+  def test_changeBotTable
+    params = {
+      'cmd' => 'changeBotTable',
+      'params' => {
+        # 変えるときは元の値をここで指定できる
+        # 変えない時も指定しても動く
+        'originalGameType' => 'DiceBot',
+        'originalCommand' => '1d6',
+
+        'gameType' => 'DiceBot',
+        'command' => '1d6',
+        # dice, titleは指定しなくても動いちゃうので
+        # この辺はもしかしたらエラーチェックを入れたほうがいいのかもしれない
+        'dice' => 'DICE_TEST',
+        'title' => 'TEST_CHANGED',
+        # tableは指定しないとnilで落ちる。
+        # dice, titleと非対称な感じなのでどちらかに合わせたいところだが...。
+        'table' => [
+          '1:TABLETEST_1',
+          '2:TABLETEST_2'
+        ],
+      }
+    }
+
+    create_mock_bot_table('TEST')
+
+    server = getDodontoFServerForTest.new savedirs = SaveDirInfo.new, params
+    result = server.getResponse
+    parsed = JsonParser.new.parse(result)
+
+    assert parsed.has_key? 'resultText'
+    assert parsed.has_key? 'tableInfos'
+
+    item = parsed['tableInfos'][0]
+    assert item.has_key? 'fileName'
+    assert item.has_key? 'gameType'
+    assert item.has_key? 'command'
+    assert item.has_key? 'dice'
+    assert item.has_key? 'title'
+    assert item.has_key? 'table'
+
+    # prefixにマッチする名前になってる
+    assert_match /diceBotTable_/, item['fileName']
+    # gameTypeにマッチする名前になってる
+    assert_match /DiceBot/, item['fileName']
+    # commandにマッチする名前になってる
+    assert_match /1d6/, item['fileName']
+
+    assert_equal '1d6', item['command']
+    assert_equal 'DICE_TEST', item['dice']
+    assert_equal 'TEST_CHANGED', item['title']
+
+    table = item['table']
+    assert_equal 2, table.size
+    assert_equal 1, table[0][0]
+    assert_equal 2, table[1][0]
+    assert_match /TABLETEST_/, table[0][1]
+    assert_match /TABLETEST_/, table[1][1]
+  end
+
+  def test_removeBotTable
+    params = {
+      'cmd' => 'removeBotTable',
+      'params' => {
+        'gameType' => 'DiceBot',
+        'command' => '1d6',
+      }
+    }
+
+    create_mock_bot_table('TEST')
+
+    server = getDodontoFServerForTest.new SaveDirInfo.new, params
+    result = server.getResponse
+    parsed = JsonParser.new.parse(result)
+
+    assert parsed.has_key? 'resultText'
+    assert parsed.has_key? 'tableInfos'
+    # 削除されて0件が返ってくるはず
+    assert_equal 0, parsed['tableInfos'].size
   end
 end
