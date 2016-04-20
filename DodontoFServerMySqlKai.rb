@@ -3134,7 +3134,7 @@ SQL_TEXT
       result['visiterMode'] = true
     else
       playRoomChangedPassword = saveData['playRoomChangedPassword']
-      if( isPasswordMatch?(password, playRoomChangedPassword) )
+      if( DodontoF::Utils.isPasswordMatch?(password, playRoomChangedPassword) )
         result['resultText'] = "OK"
       else
         result['resultText'] = "passwordMismatch"
@@ -3143,13 +3143,7 @@ SQL_TEXT
     
     return result
   end
-  
-  def isPasswordMatch?(password, changedPassword)
-    return true if( changedPassword.nil? )
-    ( password.crypt(changedPassword) == changedPassword )
-  end
-  
-  
+
   def logout()
     logoutData = getParamsFromRequestData()
     @logger.debug(logoutData, 'logoutData')

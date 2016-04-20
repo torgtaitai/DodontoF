@@ -461,7 +461,7 @@ COMMAND_END
 
       saveData = @server.getPlayRoomData()
       changedPassword = saveData['playRoomChangedPassword']
-      matched = @server.isPasswordMatch?(password, changedPassword)
+      matched = DodontoF::Utils.isPasswordMatch?(password, changedPassword)
 
       return matched
     end

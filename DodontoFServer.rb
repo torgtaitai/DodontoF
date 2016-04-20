@@ -2827,7 +2827,7 @@ class DodontoFServer
     getSaveData(trueSaveFileName) do |saveData|
       
       playRoomChangedPassword = saveData['playRoomChangedPassword']
-      passwordMatched = isPasswordMatch?(password, playRoomChangedPassword)
+      passwordMatched = DodontoF::Utils.isPasswordMatch?(password, playRoomChangedPassword)
       
       if @isWebIf
         unless passwordMatched
@@ -2850,13 +2850,6 @@ class DodontoFServer
     
     return result
   end
-  
-  def isPasswordMatch?(password, changedPassword)
-    return true if( changedPassword.nil? )
-    return false if( password.nil? )
-    ( password.crypt(changedPassword) == changedPassword )
-  end
-  
   
   def logout()
     logoutData = getParamsFromRequestData()

@@ -106,5 +106,16 @@ module DodontoF
       return pass.crypt(salt)
     end
     module_function :getChangedPassword
+
+    # 生パスワード(password)と
+    # ソルトによりエンコードされたパスワード(changedPassword)が
+    # その実態として一致するかチェックします
+    # see also: getChangedPassword
+    def isPasswordMatch?(password, changedPassword)
+      return true if( changedPassword.nil? )
+      return false if( password.nil? )
+      ( password.crypt(changedPassword) == changedPassword )
+    end
+    module_function :isPasswordMatch?
   end
 end

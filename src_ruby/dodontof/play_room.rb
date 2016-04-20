@@ -444,7 +444,7 @@ module DodontoF
       matched = false
       @server.getSaveData(trueSaveFileName) do |saveData|
         changedPassword = saveData['playRoomChangedPassword']
-        matched = @server.isPasswordMatch?(password, changedPassword)
+        matched = DodontoF::Utils.isPasswordMatch?(password, changedPassword)
       end
 
       return matched
