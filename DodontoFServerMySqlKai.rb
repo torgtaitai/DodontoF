@@ -1449,23 +1449,24 @@ SQL_TEXT
     
     return jsonData
   end
-  
+
   def getWebIfRoomList()
     @logger.debug("getWebIfRoomList Begin")
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
-    
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
+
+    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
+    playRoomStates = room.getStates(minRoom, maxRoom)
+
     jsonData = {
       "playRoomStates" => playRoomStates,
       "result" => 'OK',
     }
-    
+
     @logger.debug("getWebIfRoomList End")
     return jsonData
   end
-  
+
   def sendWebIfChatText
     @logger.debug("sendWebIfChatText begin")
     
@@ -2123,57 +2124,11 @@ SQL_TEXT
 
   def getPlayRoomStates()
     @logger.debug("getPlayRoomStates Begin");
-    
+
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
-    
-    minRoom = getMinRoom(params)
-    maxRoom = getMaxRoom(params)
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
-    result = {
-      "minRoom" => minRoom,
-      "maxRoom" => maxRoom,
-      "playRoomStates" => playRoomStates,
-    }
-    
-    @logger.debug(result, "getPlayRoomStates End result");
-    
-    return result
-  end
-  
-  def getPlayRoomStatesLocal(minRoom, maxRoom)
-    playRoomStates = []
-    
-    playRoomDataList = getPlayRoomDataList(minRoom, maxRoom)
-    
-    (minRoom .. maxRoom).each do |roomNo|
-      playRoomState = getPlayRoomStateBase(roomNo)
-      playRoomData = playRoomDataList[roomNo]
-      playRoomStates << getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-    end
-    
-    return playRoomStates
-  end
-  
-  def getPlayRoomStateBase(roomNo)
-    playRoomState = {}
-    
-    playRoomState['passwordLockState'] = false
-    playRoomState['index'] = sprintf("%3d", roomNo)
-    playRoomState['playRoomName'] = "（空き部屋）"
-    playRoomState['lastUpdateTime'] = ""
-    playRoomState['canVisit'] = false
-    playRoomState['gameType'] = ''
-    playRoomState['loginUsers'] = []
-    
-    return playRoomState
-  end
-  
 
-  def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
-    room.getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
   end
 
   def getRoomTimeStamp(where = nil)
@@ -2191,8 +2146,7 @@ SQL_TEXT
     
     return timeStamp
   end
-  
-  
+
   def existRoom?(roomNo = nil)
     
     roomNo ||= getRoomNo()
@@ -2296,16 +2250,7 @@ SQL_TEXT
     
     return famousGames
   end
-  
-  
-  def getMinRoom(params)
-    [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
-  end
-  
-  def getMaxRoom(params)
-    [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
-  end
-  
+
   def getLoginInfo()
     @logger.debug("getLoginInfo begin")
     

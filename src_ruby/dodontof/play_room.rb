@@ -228,6 +228,38 @@ module DodontoF
       return playRoomState
     end
 
+    def getStates(minRoom, maxRoom)
+      roomNumberRange = (minRoom .. maxRoom)
+      playRoomStates = []
+
+      roomNumberRange.each do |roomNo|
+        @saveDirInfo.setSaveDataDirIndex(roomNo)
+
+        playRoomState = getState(roomNo)
+        next if( playRoomState.nil? )
+
+        playRoomStates << playRoomState
+      end
+
+      return playRoomStates;
+    end
+
+    def getStatesByParams(params)
+      minRoom = getMinRoom(params)
+      maxRoom = getMaxRoom(params)
+      playRoomStates = getStates(minRoom, maxRoom)
+
+      result = {
+        "minRoom" => minRoom,
+        "maxRoom" => maxRoom,
+        "playRoomStates" => playRoomStates,
+      }
+
+      @logger.debug(result, "getPlayRoomStatesLocal result");
+
+      return result
+    end
+
   private
 
     def checkCreatePlayRoomPassword(password)
@@ -547,6 +579,14 @@ module DodontoF
     def isMentenanceMode(adminPassword)
       return false if( $mentenanceModePassword.nil? )
       return ( adminPassword == $mentenanceModePassword )
+    end
+
+    def getMinRoom(params)
+      [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
+    end
+
+    def getMaxRoom(params)
+      [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
     end
   end
 end

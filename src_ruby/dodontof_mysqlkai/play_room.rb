@@ -147,38 +147,6 @@ module DodontoF_MySqlKai
 
     # ** DodontoF::PlayRoomと違いgetStateは存在しない **
 
-    # DodontoF::PlayRoomと違い
-    # 1. getPlayRoomStateLocalが呼び出し可能点になっている
-    # 2. getPlayRoomStateLocalの引数の個数からして異なるし実装も全体的に違う
-    # という点に注意
-    def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-      return playRoomState if( playRoomData.nil? or playRoomData.empty? )
-
-      playRoomName = getPlayRoomName(playRoomData, roomNo)
-      passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-      canVisit = playRoomData['canVisit']
-      gameType = playRoomData['gameType']
-
-      timeStamp = @server.getRoomTimeStamp()
-
-      timeString = ""
-      unless( timeStamp.nil? )
-        timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-      end
-
-      loginUsers = getLoginUserNames(roomNo)
-
-      playRoomState['passwordLockState'] = passwordLockState
-      playRoomState['playRoomName'] = playRoomName
-      playRoomState['lastUpdateTime'] = timeString
-      playRoomState['canVisit'] = canVisit
-      playRoomState['gameType'] = gameType
-      playRoomState['loginUsers'] = loginUsers
-
-      return playRoomState
-    end
-
-
     def remove(params)
       roomNumbers = params['roomNumbers']
       ignoreLoginUser = params['ignoreLoginUser']
@@ -253,6 +221,36 @@ module DodontoF_MySqlKai
       }
 
       @logger.debug(result, "checkRoomStatus End result")
+
+      return result
+    end
+
+    def getStates(minRoom, maxRoom)
+      playRoomStates = []
+
+      playRoomDataList = @server.getPlayRoomDataList(minRoom, maxRoom)
+
+      (minRoom .. maxRoom).each do |roomNo|
+        playRoomState = getStateBase(roomNo)
+        playRoomData = playRoomDataList[roomNo]
+        playRoomStates << getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
+      end
+
+      return playRoomStates
+    end
+
+    def getStatesByParams(params)
+      minRoom = getMinRoom(params)
+      maxRoom = getMaxRoom(params)
+      playRoomStates = getStates(minRoom, maxRoom)
+
+      result = {
+        "minRoom" => minRoom,
+        "maxRoom" => maxRoom,
+        "playRoomStates" => playRoomStates,
+      }
+
+      @logger.debug(result, "getPlayRoomStates End result");
 
       return result
     end
@@ -576,6 +574,56 @@ COMMAND_END
     def isMentenanceMode(adminPassword)
       return false if( $mentenanceModePassword.nil? )
       return ( adminPassword == $mentenanceModePassword )
+    end
+
+    def getStateBase(roomNo)
+      playRoomState = {}
+
+      playRoomState['passwordLockState'] = false
+      playRoomState['index'] = sprintf("%3d", roomNo)
+      playRoomState['playRoomName'] = "（空き部屋）"
+      playRoomState['lastUpdateTime'] = ""
+      playRoomState['canVisit'] = false
+      playRoomState['gameType'] = ''
+      playRoomState['loginUsers'] = []
+
+      return playRoomState
+    end
+
+    # DodontoF::PlayRoomとは引数の個数と実装が違うので注意
+    def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
+      return playRoomState if( playRoomData.nil? or playRoomData.empty? )
+
+      playRoomName = getPlayRoomName(playRoomData, roomNo)
+      passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
+      canVisit = playRoomData['canVisit']
+      gameType = playRoomData['gameType']
+
+      timeStamp = @server.getRoomTimeStamp()
+
+      timeString = ""
+      unless( timeStamp.nil? )
+        timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
+      end
+
+      loginUsers = getLoginUserNames(roomNo)
+
+      playRoomState['passwordLockState'] = passwordLockState
+      playRoomState['playRoomName'] = playRoomName
+      playRoomState['lastUpdateTime'] = timeString
+      playRoomState['canVisit'] = canVisit
+      playRoomState['gameType'] = gameType
+      playRoomState['loginUsers'] = loginUsers
+
+      return playRoomState
+    end
+
+    def getMinRoom(params)
+      [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
+    end
+
+    def getMaxRoom(params)
+      [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
     end
   end
 end

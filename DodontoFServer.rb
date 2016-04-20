@@ -1201,23 +1201,24 @@ class DodontoFServer
     
     return jsonData
   end
-  
+
   def getWebIfRoomList()
     @logger.debug("getWebIfRoomList Begin")
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
-    
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
+
+    room = DodontoF::PlayRoom.new(self, @saveDirInfo)
+    playRoomStates = room.getStates(minRoom, maxRoom)
+
     jsonData = {
       "playRoomStates" => playRoomStates,
       "result" => 'OK',
     }
-    
+
     @logger.debug("getWebIfRoomList End")
     return jsonData
   end
-  
+
   def sendWebIfChatText
     @logger.debug("sendWebIfChatText begin")
     
@@ -1928,37 +1929,8 @@ class DodontoFServer
   def getPlayRoomStates()
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
-    
-    minRoom = getMinRoom(params)
-    maxRoom = getMaxRoom(params)
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
-    result = {
-      "minRoom" => minRoom,
-      "maxRoom" => maxRoom,
-      "playRoomStates" => playRoomStates,
-    }
-    
-    @logger.debug(result, "getPlayRoomStatesLocal result");
-    
-    return result
-  end
-  
-  def getPlayRoomStatesLocal(minRoom, maxRoom)
-    roomNumberRange = (minRoom .. maxRoom)
-    playRoomStates = []
-    
-    roomNumberRange.each do |roomNo|
-      
-      @saveDirInfo.setSaveDataDirIndex(roomNo)
-      
-      playRoomState = getPlayRoomState(roomNo)
-      next if( playRoomState.nil? )
-      
-      playRoomStates << playRoomState
-    end
-    
-    return playRoomStates;
+
+    DodontoF::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
   end
   
   def getPlayRoomState(roomNo)
@@ -2030,15 +2002,6 @@ class DodontoFServer
     @logger.debug('famousGames', famousGames)
     
     return famousGames
-  end
-  
-  
-  def getMinRoom(params)
-    [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
-  end
-  
-  def getMaxRoom(params)
-    [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
   end
   
   def getLoginInfo()
