@@ -3802,10 +3802,6 @@ class DodontoFServer
     return dir
   end
   
-  def rmdir(dir)
-    SaveDirInfo.removeDir(dir)
-  end
-  
   def loadAllSaveDataDefaultInfo(dir)
     loadAllSaveDataDefaultSaveData(dir)
     chatPaletteSaveData = loadAllSaveDataDefaultChatPallete(dir)

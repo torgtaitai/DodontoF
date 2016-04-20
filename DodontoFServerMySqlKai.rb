@@ -4055,11 +4055,7 @@ COMMAND_END
     dir = File.join($imageUploadDir, "room_#{roomNo}")
     return dir
   end
-  
-  def rmdir(dir)
-    SaveDirInfo.removeDir(dir)
-  end
-  
+
   def loadAllSaveDataDefaultInfo(dir)
     loadAllSaveDataDefaultSaveData(dir)
     chatPaletteSaveData = loadAllSaveDataDefaultChatPallete(dir)
