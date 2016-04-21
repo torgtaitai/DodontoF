@@ -34,6 +34,7 @@ require 'json/jsonParser'
 require 'dodontof/logger'
 require 'dodontof/utils'
 require 'dodontof/dice_adapter'
+require 'dodontof/play_room'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -1200,23 +1201,24 @@ class DodontoFServer
     
     return jsonData
   end
-  
+
   def getWebIfRoomList()
     @logger.debug("getWebIfRoomList Begin")
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
-    
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
+
+    room = DodontoF::PlayRoom.new(self, @saveDirInfo)
+    playRoomStates = room.getStates(minRoom, maxRoom)
+
     jsonData = {
       "playRoomStates" => playRoomStates,
       "result" => 'OK',
     }
-    
+
     @logger.debug("getWebIfRoomList End")
     return jsonData
   end
-  
+
   def sendWebIfChatText
     @logger.debug("sendWebIfChatText begin")
     
@@ -1872,13 +1874,6 @@ class DodontoFServer
     saveData[uniqueId] = userInfo
   end
   
-  
-  def getPlayRoomName(saveData, index)
-    playRoomName = saveData['playRoomName']
-    playRoomName ||= "プレイルームNo.#{index}"
-    return playRoomName
-  end
-  
   def getLoginUserCountList( roomNumberRange )
     loginUserCountList = {}
     roomNumberRange.each{|i| loginUserCountList[i] = 0 }
@@ -1927,205 +1922,19 @@ class DodontoFServer
     return loginUserList
   end
   
-  
-  def getSaveDataLastAccessTimes( roomNumberRange )
-    @saveDirInfo.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
-  end
-  
-  def getSaveDataLastAccessTime( fileName, roomNo )
-    data = @saveDirInfo.getSaveDataLastAccessTime(fileName, roomNo)
-    time = data[roomNo]
-    return time
-  end
-  
-  
   def removeOldPlayRoom()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    result = removeOldRoomFromAccessTimes(accessTimes)
-    return result
-  end
-  
-  def removeOldRoomFromAccessTimes(accessTimes)
-    @logger.debug("removeOldRoom Begin")
-    if( $removeOldPlayRoomLimitDays <= 0 )
-      return accessTimes
-    end
-    
-    @logger.debug(accessTimes, "accessTimes")
-    
-    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
-    
-    ignoreLoginUser = true
-    password = nil
-    isForce = true
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
-    @logger.debug(result, "removePlayRoomByParams result")
-    
-    return result
-  end
-  
-  def getDeleteTargetRoomNumbers(accessTimes)
-    @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
-    
-    roomNumbers = []
-    
-    accessTimes.each do |index, time|
-      @logger.debug(index, "index")
-      @logger.debug(time, "time")
-      
-      next if( time.nil? ) 
-      
-      timeDiffSeconds = (Time.now - time)
-      @logger.debug(timeDiffSeconds, "timeDiffSeconds")
-      
-      limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
-      @logger.debug(limitSeconds, "limitSeconds")
-      
-      if( timeDiffSeconds > limitSeconds )
-        @logger.debug( index, "roomNumbers added index")
-        roomNumbers << index
-      end
-    end
-    
-    @logger.debug(roomNumbers, "roomNumbers")
-    return roomNumbers
-  end
-  
-  
-  def findEmptyRoomNumber()
-    emptyRoomNubmer = -1
-    
-    roomNumberRange = (0..$saveDataMaxCount)
-    
-    roomNumberRange.each do |roomNumber|
-      @saveDirInfo.setSaveDataDirIndex(roomNumber)
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      
-      next if( isExist?(trueSaveFileName) )
-      
-      emptyRoomNubmer = roomNumber
-      break
-    end
-    
-    return emptyRoomNubmer
+    DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
   
   def getPlayRoomStates()
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
-    
-    minRoom = getMinRoom(params)
-    maxRoom = getMaxRoom(params)
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
-    result = {
-      "minRoom" => minRoom,
-      "maxRoom" => maxRoom,
-      "playRoomStates" => playRoomStates,
-    }
-    
-    @logger.debug(result, "getPlayRoomStatesLocal result");
-    
-    return result
-  end
-  
-  def getPlayRoomStatesLocal(minRoom, maxRoom)
-    roomNumberRange = (minRoom .. maxRoom)
-    playRoomStates = []
-    
-    roomNumberRange.each do |roomNo|
-      
-      @saveDirInfo.setSaveDataDirIndex(roomNo)
-      
-      playRoomState = getPlayRoomState(roomNo)
-      next if( playRoomState.nil? )
-      
-      playRoomStates << playRoomState
-    end
-    
-    return playRoomStates;
+
+    DodontoF::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
   end
   
   def getPlayRoomState(roomNo)
-    
-    # playRoomState = nil
-    playRoomState = {}
-    playRoomState['passwordLockState'] = false
-    playRoomState['index'] = sprintf("%3d", roomNo)
-    playRoomState['playRoomName'] = "（空き部屋）"
-    playRoomState['lastUpdateTime'] = ""
-    playRoomState['canVisit'] = false
-    playRoomState['gameType'] = ''
-    playRoomState['loginUsers'] = []
-    
-    begin
-      playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
-    rescue Exception => e
-      @logger.error("getPlayRoomStateLocal Exception rescue")
-      @logger.exception(e)
-    end
-    
-    return playRoomState
-  end
-  
-  def getPlayRoomStateLocal(roomNo, playRoomState)
-    playRoomInfoFile = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-    
-    return playRoomState unless( isExist?(playRoomInfoFile) )
-    
-    playRoomData = nil
-    getSaveData(playRoomInfoFile) do |playRoomDataTmp|
-      playRoomData = playRoomDataTmp
-    end
-    @logger.debug(playRoomData, "playRoomData")
-    
-    return playRoomState if( playRoomData.empty? )
-    
-    playRoomName = getPlayRoomName(playRoomData, roomNo)
-    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-    canVisit = playRoomData['canVisit']
-    gameType = playRoomData['gameType']
-    timeStamp = getSaveDataLastAccessTime( $saveFiles['chatMessageDataLog'], roomNo )
-    
-    timeString = ""
-    unless( timeStamp.nil? )
-      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-    end
-    
-    loginUsers = getLoginUserNames()
-    
-    playRoomState['passwordLockState'] = passwordLockState
-    playRoomState['playRoomName'] = playRoomName
-    playRoomState['lastUpdateTime'] = timeString
-    playRoomState['canVisit'] = canVisit
-    playRoomState['gameType'] = gameType
-    playRoomState['loginUsers'] = loginUsers
-    
-    return playRoomState
-  end
-  
-  def getLoginUserNames()
-    userNames = []
-    
-    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($loginUserInfo)
-    @logger.debug(trueSaveFileName, "getLoginUserNames trueSaveFileName")
-    
-    unless( isExist?(trueSaveFileName) )
-      return userNames
-    end
-    
-    @now_getLoginUserNames ||= Time.now.to_i
-    
-    getSaveData(trueSaveFileName) do |userInfos|
-      userInfos.each do |uniqueId, userInfo|
-        next if( isDeleteUserInfo?(uniqueId, userInfo, @now_getLoginUserNames) )
-        userNames << userInfo['userName']
-      end
-    end
-    
-    @logger.debug(userNames, "getLoginUserNames userNames")
-    return userNames
+    DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
   end
   
   def getGameName(gameType)
@@ -2193,15 +2002,6 @@ class DodontoFServer
     @logger.debug('famousGames', famousGames)
     
     return famousGames
-  end
-  
-  
-  def getMinRoom(params)
-    [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
-  end
-  
-  def getMaxRoom(params)
-    [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
   end
   
   def getLoginInfo()
@@ -2443,329 +2243,18 @@ class DodontoFServer
   end
   
   def createPlayRoom()
-    @logger.debug('createPlayRoom begin')
-    
-    resultText = "OK"
-    playRoomIndex = -1
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      checkCreatePlayRoomPassword(params['createPassword'])
-      
-      playRoomName = params['playRoomName']
-      playRoomPassword = params['playRoomPassword']
-      chatChannelNames = params['chatChannelNames']
-      canUseExternalImage = params['canUseExternalImage']
-      
-      canVisit = params['canVisit']
-      playRoomIndex = params['playRoomIndex']
-      
-      if( playRoomIndex == -1 )
-        playRoomIndex = findEmptyRoomNumber()
-        raise "noEmptyPlayRoom" if(playRoomIndex == -1)
-        
-        @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
-      end
-      
-      @logger.debug(playRoomName, 'playRoomName')
-      @logger.debug('playRoomPassword is get')
-      @logger.debug(playRoomIndex, 'playRoomIndex')
-      
-      initSaveFiles(playRoomIndex)
-      checkSetPassword(playRoomPassword, playRoomIndex)
-      
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
-      @saveDirInfo.removeSaveDir(playRoomIndex)
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) End")
-      
-      createDir(playRoomIndex)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug(playRoomChangedPassword, 'playRoomChangedPassword')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      
-      changeSaveData(trueSaveFileName) do |saveData|
-        saveData['playRoomName'] = playRoomName
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = chatChannelNames
-        saveData['canUseExternalImage'] = canUseExternalImage
-        saveData['canVisit'] = canVisit
-        saveData['gameType'] = params['gameType']
-        
-        addViewStatesToSaveData(saveData, viewStates)
-      end
-      
-      sendRoomCreateMessage(playRoomIndex)
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-      "playRoomIndex" => playRoomIndex,
-    }
-    @logger.debug(result, 'result')
-    @logger.debug('createDir finished')
-    
-    return result
-  end
-  
-  def checkCreatePlayRoomPassword(password)
-    @logger.debug('checkCreatePlayRoomPassword Begin')
-    @logger.debug(password, 'password')
-    
-    return if( $createPlayRoomPassword.empty? )
-    return if( $createPlayRoomPassword == password )
-    
-    raise "errorPassword"
-  end
-  
-  
-  def sendRoomCreateMessage(roomNo)
-    chatData = {
-      "senderName" => "どどんとふ",
-      "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
-      "color" => "cc0066",
-      "uniqueId" => '0',
-      "channel" => 0,
-    }
-    
-    sendChatMessageByChatData(chatData)
-  end
-  
-  
-  def addViewStatesToSaveData(saveData, viewStates)
-    viewStates['key'] = Time.now.to_f.to_s
-    saveData['viewStateInfo'] = viewStates
-  end
-  
-  def getChangedPassword(pass)
-    return nil if( pass.empty? )
-    
-    salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
-    return pass.crypt(salt)
+    params = getParamsFromRequestData()
+    DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
   end
   
   def changePlayRoom()
-    @logger.debug("changePlayRoom begin")
-    
-    resultText = "OK"
-    
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      playRoomPassword = params['playRoomPassword']
-      checkSetPassword(playRoomPassword)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug('playRoomPassword is get')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-      
-      changeSaveData(trueSaveFileName) do |saveData|
-        saveData['playRoomName'] = params['playRoomName']
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = params['chatChannelNames']
-        saveData['canUseExternalImage'] = params['canUseExternalImage']
-        saveData['canVisit'] = params['canVisit']
-        saveData['backgroundImage'] = params['backgroundImage']
-        saveData['gameType'] = params['gameType']
-        
-        preViewStateInfo = saveData['viewStateInfo']
-        unless( isSameViewState(viewStates, preViewStateInfo) )
-          addViewStatesToSaveData(saveData, viewStates)
-        end
-        
-      end
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-    }
-    @logger.debug(result, 'changePlayRoom result')
-    
-    return result
+    params = getParamsFromRequestData()
+    DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
   end
-  
-  
-  def checkSetPassword(playRoomPassword, roomNumber = nil)
-    return if( playRoomPassword.empty? )
-    
-    if( roomNumber.nil? )
-      roomNumber = @saveDirInfo.getSaveDataDirIndex
-    end
-    
-    if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
-      raise "noPasswordPlayRoomNumber"
-    end
-  end
-  
-  
-  def isSameViewState(viewStates, preViewStateInfo)
-    result = true
-    
-    preViewStateInfo ||= {}
-    
-    viewStates.each do |key, value|
-      unless( value == preViewStateInfo[key] )
-        result = false
-        break
-      end
-    end
-    
-    return result
-  end
-  
-  
-  def checkPassword(roomNumber, password)
-    
-    return true unless( $isPasswordNeedFroDeletePlayRoom )
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-    isExistPlayRoomInfo = ( isExist?(trueSaveFileName) ) 
-    
-    return true unless( isExistPlayRoomInfo )
-    
-    matched = false
-    getSaveData(trueSaveFileName) do |saveData|
-      changedPassword = saveData['playRoomChangedPassword']
-      matched = isPasswordMatch?(password, changedPassword)
-    end
-    
-    return matched
-  end
-  
-  
+
   def removePlayRoom()
     params = getParamsFromRequestData()
-    
-    roomNumbers = params['roomNumbers']
-    ignoreLoginUser = params['ignoreLoginUser']
-    password = params['password']
-    password ||= ""
-    isForce = params['isForce']
-    
-    adminPassword = params["adminPassword"]
-    @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-    if( isMentenanceMode(adminPassword) )
-      password = nil
-    end
-    
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
-  end
-  
-  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password, isForce)
-    @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
-    
-    deletedRoomNumbers = []
-    errorMessages = []
-    passwordRoomNumbers = []
-    askDeleteRoomNumbers = []
-    
-    roomNumbers.each do |roomNumber|
-      roomNumber = roomNumber.to_i
-      @logger.debug(roomNumber, 'roomNumber')
-      
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
-      @logger.debug(resultText, "checkRemovePlayRoom resultText")
-      
-      case resultText
-      when "OK"
-        removePlayRoomData(roomNumber)
-        deletedRoomNumbers << roomNumber
-      when "password"
-        passwordRoomNumbers << roomNumber
-      when "userExist"
-        askDeleteRoomNumbers << roomNumber
-      else
-        errorMessages << resultText
-      end
-    end
-    
-    result = {
-      "deletedRoomNumbers" => deletedRoomNumbers,
-      "askDeleteRoomNumbers" => askDeleteRoomNumbers,
-      "passwordRoomNumbers" => passwordRoomNumbers,
-      "errorMessages" => errorMessages,
-    }
-    @logger.debug(result, 'result')
-    
-    return result
-  end
-  
-  
-  def removePlayRoomData(roomNumber)
-    removeLocalImageTags(roomNumber)
-    @saveDirInfo.removeSaveDir(roomNumber)
-    removeLocalSpaceDir(roomNumber)
-  end
-  
-  def removeLocalImageTags(roomNumber)
-    tagInfos = getImageTags(roomNumber)
-    deleteImages(tagInfos.keys)
-  end
-  
-  
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password, isForce)
-    roomNumberRange = (roomNumber..roomNumber)
-    @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
-    
-    unless( ignoreLoginUser )
-      userNames = getLoginUserNames()
-      userCount = userNames.size
-      @logger.debug(userCount, "checkRemovePlayRoom userCount");
-      
-      if( userCount > 0 )
-        return "userExist"
-      end
-    end
-    
-    if( not password.nil? )
-      if( not checkPassword(roomNumber, password) )
-        return "password"
-      end
-    end
-    
-    if( $unremovablePlayRoomNumbers.include?(roomNumber) )
-      return "unremovablePlayRoomNumber"
-    end
-    
-    lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    lastAccessTime = lastAccessTimes[roomNumber]
-    lastAccessTime ||= 0
-    @logger.debug(lastAccessTime, "lastAccessTime")
-    
-    lastAccessTime = 0 if isForce
-    
-    now = Time.now.to_f
-    spendTimes = now - lastAccessTime.to_f
-    @logger.debug(spendTimes, "spendTimes")
-    @logger.debug(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-    if( spendTimes < $deletablePassedSeconds )
-      return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
-    end
-    
-    return "OK"
-  end
-  
-  
-
-  
-  def removeLocalSpaceDir(roomNumber)
-    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
-    rmdir(dir)
+    DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
   
   def getTrueSaveFileName(fileName)
@@ -3164,68 +2653,11 @@ class DodontoFServer
 
   def checkRoomStatus()
     deleteOldUploadFile()
-    
+
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
-    
-    roomNumber = params['roomNumber']
-    @logger.debug(roomNumber, 'roomNumber')
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    
-    isMentenanceModeOn = false
-    isWelcomeMessageOn = $isWelcomeMessageOn
-    playRoomName = ''
-    chatChannelNames = nil
-    canUseExternalImage = false
-    canVisit = false
-    isPasswordLocked = false
-    trueSaveFileName = @saveDirInfo.getTrueSaveFileName($playRoomInfo)
-    isExistPlayRoomInfo = ( isExist?(trueSaveFileName) ) 
-    
-    if( isExistPlayRoomInfo )
-      getSaveData(trueSaveFileName) do |saveData|
-        playRoomName = getPlayRoomName(saveData, roomNumber)
-        changedPassword = saveData['playRoomChangedPassword']
-        chatChannelNames = saveData['chatChannelNames']
-        canUseExternalImage = saveData['canUseExternalImage']
-        canVisit = saveData['canVisit']
-        unless( changedPassword.nil? )
-          isPasswordLocked = true
-        end
-      end
-    end
-    
-    adminPassword = params["adminPassword"]
-    if( isMentenanceMode(adminPassword) )
-      isPasswordLocked = false
-      isWelcomeMessageOn = false
-      isMentenanceModeOn = true
-      canVisit = false
-    end
-    
-    @logger.debug("isPasswordLocked", isPasswordLocked);
-    
-    result = {
-      'isRoomExist' => isExistPlayRoomInfo,
-      'roomName' => playRoomName,
-      'roomNumber' => roomNumber,
-      'chatChannelNames' => chatChannelNames,
-      'canUseExternalImage' => canUseExternalImage,
-      'canVisit' => canVisit,
-      'isPasswordLocked' => isPasswordLocked,
-      'isMentenanceModeOn' => isMentenanceModeOn,
-      'isWelcomeMessageOn' => isWelcomeMessageOn,
-    }
-    
-    @logger.debug(result, "checkRoomStatus End result")
-    
-    return result
-  end
-  
-  def isMentenanceMode(adminPassword)
-    return false if( $mentenanceModePassword.nil? )
-    return ( adminPassword == $mentenanceModePassword )
+
+    DodontoF::PlayRoom.new(self, @saveDirInfo).check(params)
   end
   
   def loginPassword()
@@ -3263,7 +2695,7 @@ class DodontoFServer
     getSaveData(trueSaveFileName) do |saveData|
       
       playRoomChangedPassword = saveData['playRoomChangedPassword']
-      passwordMatched = isPasswordMatch?(password, playRoomChangedPassword)
+      passwordMatched = DodontoF::Utils.isPasswordMatch?(password, playRoomChangedPassword)
       
       if @isWebIf
         unless passwordMatched
@@ -3286,13 +2718,6 @@ class DodontoFServer
     
     return result
   end
-  
-  def isPasswordMatch?(password, changedPassword)
-    return true if( changedPassword.nil? )
-    return false if( password.nil? )
-    ( password.crypt(changedPassword) == changedPassword )
-  end
-  
   
   def logout()
     logoutData = getParamsFromRequestData()

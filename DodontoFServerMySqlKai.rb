@@ -38,6 +38,8 @@ require 'dodontof/logger'
 require 'dodontof/utils'
 require 'dodontof/dice_adapter'
 
+require 'dodontof_mysqlkai/play_room'
+
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
 end
@@ -1447,23 +1449,24 @@ SQL_TEXT
     
     return jsonData
   end
-  
+
   def getWebIfRoomList()
     @logger.debug("getWebIfRoomList Begin")
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
-    
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
+
+    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
+    playRoomStates = room.getStates(minRoom, maxRoom)
+
     jsonData = {
       "playRoomStates" => playRoomStates,
       "result" => 'OK',
     }
-    
+
     @logger.debug("getWebIfRoomList End")
     return jsonData
   end
-  
+
   def sendWebIfChatText
     @logger.debug("sendWebIfChatText begin")
     
@@ -2082,14 +2085,7 @@ SQL_TEXT
     now = Time.now.to_i
     return (now - $loginTimeOut)
   end
-  
-  
-  def getPlayRoomName(saveData, index)
-    playRoomName = saveData['playRoomName']
-    playRoomName ||= "プレイルームNo.#{index}"
-    return playRoomName
-  end
-  
+
   def getLoginUserCountList( roomNumberRange )
     loginUserCountList = {}
     roomNumberRange.each{|i| loginUserCountList[i] = 0 }
@@ -2121,195 +2117,20 @@ SQL_TEXT
     
     return loginUserList
   end
-  
-  
-  def getSaveDataLastAccessTimes( roomNumberRange )
-    
-    @logger.debug(roomNumberRange, "getSaveDataLastAccessTimes roomNumberRange")
-    
-    result = {}
-    
-    roomNumberRange.each do |roomNo|
-      where = {"roomNo >= ? " => roomNo }
-      time = getRoomTimeStamp(where)
-      
-      result[roomNo] = time
-    end
-    
-    @logger.debug(result, "getSaveDataLastAccessTimes result")
-    
-    return result
-  end
-  
-  
+
   def removeOldPlayRoom()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    accessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    result = removeOldRoomFromAccessTimes(accessTimes)
-    return result
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds
   end
-  
-  def removeOldRoomFromAccessTimes(accessTimes)
-    @logger.debug("removeOldRoom Begin")
-    if( $removeOldPlayRoomLimitDays <= 0 )
-      return accessTimes
-    end
-    
-    @logger.debug(accessTimes, "accessTimes")
-    
-    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
-    
-    ignoreLoginUser = true
-    password = nil
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
-    @logger.debug(result, "removePlayRoomByParams result")
-    
-    return result
-  end
-  
-  def getDeleteTargetRoomNumbers(accessTimes)
-    @logger.debug(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
-    
-    roomNumbers = []
-    
-    accessTimes.each do |index, time|
-      @logger.debug(index, "index")
-      @logger.debug(time, "time")
-      
-      next if( time.nil? ) 
-      
-      timeDiffSeconds = (Time.now - time)
-      @logger.debug(timeDiffSeconds, "timeDiffSeconds")
-      
-      limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
-      @logger.debug(limitSeconds, "limitSeconds")
-      
-      if( timeDiffSeconds > limitSeconds )
-        @logger.debug( index, "roomNumbers added index")
-        roomNumbers << index
-      end
-    end
-    
-    @logger.debug(roomNumbers, "roomNumbers")
-    return roomNumbers
-  end
-  
-  
-  def findEmptyRoomNumber()
-    emptyRoomNubmer = -1
-    
-    command = <<COMMAND_END
-SELECT 
-  IF(
-    (SELECT COUNT(roomNo) FROM rooms)=0,
-    0,
-    (
-      IF(
-        (SELECT MIN(roomNo) FROM rooms)<>0,
-        0,
-        MIN(roomNo+1)
-      ) 
-    )
-  ) AS roomNo
-FROM rooms
-WHERE (roomNo+1) NOT IN (SELECT roomNo FROM rooms)
-COMMAND_END
-    
-    connectDb
-    result = query(command)
-    @logger.debug(result, "findEmptyRoomNumber result")
-    
-    row = result.first
-    row ||= {}
-    @logger.debug(row, "findEmptyRoomNumber row")
-    
-    count = row['roomNo'].to_i
-    
-    emptyRoomNubmer = count
-    @logger.debug(emptyRoomNubmer, 'emptyRoomNubmer')
-    
-    return emptyRoomNubmer
-  end
-  
+
   def getPlayRoomStates()
     @logger.debug("getPlayRoomStates Begin");
-    
+
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
-    
-    minRoom = getMinRoom(params)
-    maxRoom = getMaxRoom(params)
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
-    
-    result = {
-      "minRoom" => minRoom,
-      "maxRoom" => maxRoom,
-      "playRoomStates" => playRoomStates,
-    }
-    
-    @logger.debug(result, "getPlayRoomStates End result");
-    
-    return result
-  end
-  
-  def getPlayRoomStatesLocal(minRoom, maxRoom)
-    playRoomStates = []
-    
-    playRoomDataList = getPlayRoomDataList(minRoom, maxRoom)
-    
-    (minRoom .. maxRoom).each do |roomNo|
-      playRoomState = getPlayRoomStateBase(roomNo)
-      playRoomData = playRoomDataList[roomNo]
-      playRoomStates << getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-    end
-    
-    return playRoomStates
-  end
-  
-  def getPlayRoomStateBase(roomNo)
-    playRoomState = {}
-    
-    playRoomState['passwordLockState'] = false
-    playRoomState['index'] = sprintf("%3d", roomNo)
-    playRoomState['playRoomName'] = "（空き部屋）"
-    playRoomState['lastUpdateTime'] = ""
-    playRoomState['canVisit'] = false
-    playRoomState['gameType'] = ''
-    playRoomState['loginUsers'] = []
-    
-    return playRoomState
-  end
-  
 
-  def getPlayRoomStateLocal(roomNo, playRoomState, playRoomData)
-    
-    return playRoomState if( playRoomData.nil? or playRoomData.empty? )
-    
-    playRoomName = getPlayRoomName(playRoomData, roomNo)
-    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-    canVisit = playRoomData['canVisit']
-    gameType = playRoomData['gameType']
-    
-    timeStamp = getRoomTimeStamp()
-    
-    timeString = ""
-    unless( timeStamp.nil? )
-      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
-    end
-    
-    loginUsers = getLoginUserNames(roomNo)
-    
-    playRoomState['passwordLockState'] = passwordLockState
-    playRoomState['playRoomName'] = playRoomName
-    playRoomState['lastUpdateTime'] = timeString
-    playRoomState['canVisit'] = canVisit
-    playRoomState['gameType'] = gameType
-    playRoomState['loginUsers'] = loginUsers
-    
-    return playRoomState
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
   end
-  
-  
+
   def getRoomTimeStamp(where = nil)
     result = readDb("SELECT MAX(created_at)",
                     :from => "chats",
@@ -2325,8 +2146,7 @@ COMMAND_END
     
     return timeStamp
   end
-  
-  
+
   def existRoom?(roomNo = nil)
     
     roomNo ||= getRoomNo()
@@ -2336,24 +2156,7 @@ COMMAND_END
                      :where => {"roomNo = ? " => roomNo})
     return (not result.empty?)
   end
-  
-  
-  def getLoginUserNames(roomNo)
-    userNames = []
-    
-    unless( existRoom?(roomNo) )
-      return userNames
-    end
-    
-    deleteUserInfo(roomNo)
-    
-    users = getAllUsersData(roomNo)
-    userNames = users.collect{|i| i['userNames']}
-    
-    @logger.debug(userNames, "getLoginUserNames userNames")
-    return userNames
-  end
-  
+
   def getAllUsersData(roomNo = nil)
     tableName = 'users'
     
@@ -2447,16 +2250,7 @@ COMMAND_END
     
     return famousGames
   end
-  
-  
-  def getMinRoom(params)
-    [[ params['minRoom'], 0 ].max, ($saveDataMaxCount - 1)].min
-  end
-  
-  def getMaxRoom(params)
-    [[ params['maxRoom'], ($saveDataMaxCount - 1) ].min, 0].max
-  end
-  
+
   def getLoginInfo()
     @logger.debug("getLoginInfo begin")
     
@@ -2704,78 +2498,8 @@ COMMAND_END
   
   
   def createPlayRoom()
-    @logger.debug('createPlayRoom begin')
-    
-    resultText = "OK"
-    playRoomIndex = -1
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      checkCreatePlayRoomPassword(params['createPassword'])
-      
-      playRoomName = params['playRoomName']
-      playRoomPassword = params['playRoomPassword']
-      chatChannelNames = params['chatChannelNames']
-      canUseExternalImage = params['canUseExternalImage']
-      
-      canVisit = params['canVisit']
-      playRoomIndex = params['playRoomIndex']
-      
-      if( playRoomIndex == -1 )
-        playRoomIndex = findEmptyRoomNumber()
-        raise "noEmptyPlayRoom" if(playRoomIndex == -1)
-        
-        @logger.debug(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
-      end
-      
-      @logger.debug(playRoomName, 'playRoomName')
-      @logger.debug('playRoomPassword is get')
-      @logger.debug(playRoomIndex, 'playRoomIndex')
-      
-      initSaveFiles(playRoomIndex)
-      checkSetPassword(playRoomPassword, playRoomIndex)
-      
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
-      removeSaveDir(playRoomIndex)
-      @logger.debug("@saveDirInfo.removeSaveDir(playRoomIndex) End")
-      
-      createDir(playRoomIndex)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug(playRoomChangedPassword, 'playRoomChangedPassword')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      
-      changePlayRoomData do |saveData|
-        saveData['playRoomName'] = playRoomName
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = chatChannelNames
-        saveData['canUseExternalImage'] = canUseExternalImage
-        saveData['canVisit'] = canVisit
-        saveData['gameType'] = params['gameType']
-        
-        addViewStatesToSaveData(saveData, viewStates)
-        
-        saveData
-      end
-      
-      sendRoomCreateMessage(playRoomIndex)
-    rescue Exception => e
-      @logger.exception(e)
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-      "playRoomIndex" => playRoomIndex,
-    }
-    @logger.debug(result, 'result')
-    @logger.debug('createDir finished')
-    
-    return result
+    params = getParamsFromRequestData()
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).create(params)
   end
 
   
@@ -2784,211 +2508,17 @@ COMMAND_END
       yield(data)
     end
   end
-  
-  
-  def checkCreatePlayRoomPassword(password)
-    @logger.debug('checkCreatePlayRoomPassword Begin')
-    @logger.debug(password, 'password')
-    
-    return if( $createPlayRoomPassword.empty? )
-    return if( $createPlayRoomPassword == password )
-    
-    raise "errorPassword"
-  end
-  
-  
-  def sendRoomCreateMessage(roomNo)
-    chatData = {
-      "senderName" => "どどんとふ",
-      "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
-      "color" => "cc0066",
-      "uniqueId" => '0',
-      "channel" => 0,
-    }
-    
-    sendChatMessageByChatData(chatData)
-  end
-  
-  
-  def addViewStatesToSaveData(saveData, viewStates)
-    viewStates['key'] = Time.now.to_f.to_s
-    saveData['viewStateInfo'] = viewStates
-  end
-  
-  def getChangedPassword(pass)
-    return nil if( pass.empty? )
-    
-    salt = [rand(64),rand(64)].pack("C*").tr("\x00-\x3f","A-Za-z0-9./")
-    return pass.crypt(salt)
-  end
-  
+
   def changePlayRoom()
-    @logger.debug("changePlayRoom begin")
-    
-    resultText = "OK"
-    
-    begin
-      params = getParamsFromRequestData()
-      @logger.debug(params, "params")
-      
-      playRoomPassword = params['playRoomPassword']
-      checkSetPassword(playRoomPassword)
-      
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      @logger.debug('playRoomPassword is get')
-      
-      viewStates = params['viewStates']
-      @logger.debug("viewStates", viewStates)
-      
-      
-      changePlayRoomData do |saveData|
-        @logger.debug(saveData, 'changePlayRoom() saveData before')
-        saveData['playRoomName'] = params['playRoomName']
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = params['chatChannelNames']
-        saveData['canUseExternalImage'] = params['canUseExternalImage']
-        saveData['canVisit'] = params['canVisit']
-        saveData['backgroundImage'] = params['backgroundImage']
-        saveData['gameType'] = params['gameType']
-        
-        preViewStateInfo = saveData['viewStateInfo']
-        unless( isSameViewState(viewStates, preViewStateInfo) )
-          addViewStatesToSaveData(saveData, viewStates)
-        end
-        
-@logger.debug(saveData, 'changePlayRoom() saveData end')
-        
-        saveData
-      end
-    rescue Exception => e
-      resultText = getLanguageKey( e.to_s )
-    end
-    
-    result = {
-      "resultText" => resultText,
-    }
-    @logger.debug(result, 'changePlayRoom result')
-    
-    return result
+    params = getParamsFromRequestData()
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
   end
-  
-  
-  def checkSetPassword(playRoomPassword, roomNumber = nil)
-    return if( playRoomPassword.empty? )
-    
-    if( roomNumber.nil? )
-      roomNumber = @saveDirInfo.getSaveDataDirIndex
-    end
-    
-    if( $noPasswordPlayRoomNumbers.include?(roomNumber) )
-      raise "noPasswordPlayRoomNumber"
-    end
-  end
-  
-  
-  def isSameViewState(viewStates, preViewStateInfo)
-    result = true
-    
-    preViewStateInfo ||= {}
-    
-    viewStates.each do |key, value|
-      unless( value == preViewStateInfo[key] )
-        result = false
-        break
-      end
-    end
-    
-    return result
-  end
-  
-  
-  def checkPassword(roomNumber, password)
-    
-    return true unless( $isPasswordNeedFroDeletePlayRoom )
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    
-    return true unless( existRoom? )
-    
-    matched = false
-    
-    saveData = getPlayRoomData()
-    changedPassword = saveData['playRoomChangedPassword']
-    matched = isPasswordMatch?(password, changedPassword)
-    
-    return matched
-  end
-  
-  
+
   def removePlayRoom()
     params = getParamsFromRequestData()
-    
-    roomNumbers = params['roomNumbers']
-    ignoreLoginUser = params['ignoreLoginUser']
-    password = params['password']
-    password ||= ""
-    
-    adminPassword = params["adminPassword"]
-    @logger.debug(adminPassword, "removePlayRoom() adminPassword")
-    if( isMentenanceMode(adminPassword) )
-      password = nil
-    end
-    
-    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)
   end
-  
-  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
-    @logger.debug(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
-    
-    deletedRoomNumbers = []
-    errorMessages = []
-    passwordRoomNumbers = []
-    askDeleteRoomNumbers = []
-    
-    roomNumbers.each do |roomNumber|
-      roomNumber = roomNumber.to_i
-      @logger.debug(roomNumber, 'roomNumber')
-      
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
-      @logger.debug(resultText, "checkRemovePlayRoom resultText")
-      
-      case resultText
-      when "OK"
-        removePlayRoomData(roomNumber)
-        deletedRoomNumbers << roomNumber
-      when "password"
-        passwordRoomNumbers << roomNumber
-      when "userExist"
-        askDeleteRoomNumbers << roomNumber
-      else
-        errorMessages << resultText
-      end
-    end
-    
-    result = {
-      "deletedRoomNumbers" => deletedRoomNumbers,
-      "askDeleteRoomNumbers" => askDeleteRoomNumbers,
-      "passwordRoomNumbers" => passwordRoomNumbers,
-      "errorMessages" => errorMessages,
-    }
-    @logger.debug(result, 'result')
-    
-    return result
-  end
-  
-  
-  def removePlayRoomData(roomNumber)
-    removeLocalImageTags(roomNumber)
-    removeSaveDir(roomNumber)
-    removeLocalSpaceDir(roomNumber)
-  end
-  
-  def removeLocalImageTags(roomNumber)
-    tagInfos = getImageTags(roomNumber)
-    deleteImages(tagInfos.keys)
-  end
-  
-  
+
   def removeSaveDir(roomNo)
     @saveDirInfo.removeSaveDir(roomNo)
     
@@ -2998,57 +2528,7 @@ COMMAND_END
       end
     end
   end
-  
-  
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
-    roomNumberRange = (roomNumber..roomNumber)
-    @logger.debug(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
-    
-    unless( ignoreLoginUser )
-      userNames = getLoginUserNames(roomNumber)
-      userCount = userNames.size
-      @logger.debug(userCount, "checkRemovePlayRoom userCount");
-      
-      if( userCount > 0 )
-        return "userExist"
-      end
-    end
-    
-    if( not password.nil? )
-      if( not checkPassword(roomNumber, password) )
-        return "password"
-      end
-    end
-    
-    if( $unremovablePlayRoomNumbers.include?(roomNumber) )
-      return "unremovablePlayRoomNumber"
-    end
-    
-    lastAccessTimes = getSaveDataLastAccessTimes( roomNumberRange )
-    lastAccessTime = lastAccessTimes[roomNumber]
-    @logger.debug(lastAccessTime, "lastAccessTime")
-    
-    unless( lastAccessTime.nil? )
-      now = Time.now
-      spendTimes = now - lastAccessTime
-      @logger.debug(spendTimes, "spendTimes")
-      @logger.debug(spendTimes / 60 / 60, "spendTimes / 60 / 60")
-      if( spendTimes < $deletablePassedSeconds )
-        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
-      end
-    end
-    
-    return "OK"
-  end
-  
-  
 
-  
-  def removeLocalSpaceDir(roomNumber)
-    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
-    rmdir(dir)
-  end
-  
   def getTrueSaveFileName(fileName)
     @saveDirInfo.getTrueSaveFileName($saveFileTempName)
   end
@@ -3442,73 +2922,15 @@ COMMAND_END
     end
     
   end
-  
+
   def checkRoomStatus()
     deleteOldUploadFile()
-    
+
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
-    
-    roomNumber = params['roomNumber']
-    @logger.debug(roomNumber, 'roomNumber')
-    
-    @saveDirInfo.setSaveDataDirIndex(roomNumber)
-    
-    isMentenanceModeOn = false
-    isWelcomeMessageOn = $isWelcomeMessageOn
-    playRoomName = ''
-    chatChannelNames = nil
-    canUseExternalImage = false
-    canVisit = false
-    isPasswordLocked = false
-    
-    isRoomExist = existRoom?
-    @logger.debug(isRoomExist, "checkRoomStatus isRoomExist")
-    
-    if( isRoomExist )
-      saveData = getPlayRoomData()
-      playRoomName = getPlayRoomName(saveData, roomNumber)
-      changedPassword = saveData['playRoomChangedPassword']
-      chatChannelNames = saveData['chatChannelNames']
-      canUseExternalImage = saveData['canUseExternalImage']
-      canVisit = saveData['canVisit']
-      unless( changedPassword.nil? )
-        isPasswordLocked = true
-      end
-    end
-    
-    adminPassword = params["adminPassword"]
-    if( isMentenanceMode(adminPassword) )
-      isPasswordLocked = false
-      isWelcomeMessageOn = false
-      isMentenanceModeOn = true
-      canVisit = false
-    end
-    
-    @logger.debug("isPasswordLocked", isPasswordLocked);
-    
-    result = {
-      'isRoomExist' => isRoomExist,
-      'roomName' => playRoomName,
-      'roomNumber' => roomNumber,
-      'chatChannelNames' => chatChannelNames,
-      'canUseExternalImage' => canUseExternalImage,
-      'canVisit' => canVisit,
-      'isPasswordLocked' => isPasswordLocked,
-      'isMentenanceModeOn' => isMentenanceModeOn,
-      'isWelcomeMessageOn' => isWelcomeMessageOn,
-    }
-    
-    @logger.debug(result, "checkRoomStatus End result")
-    
-    return result
+    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).check(params)
   end
-  
-  def isMentenanceMode(adminPassword)
-    return false if( $mentenanceModePassword.nil? )
-    return ( adminPassword == $mentenanceModePassword )
-  end
-  
+
   def loginPassword()
     loginData = getParamsFromRequestData()
     @logger.debug(loginData, 'loginData')
@@ -3546,7 +2968,7 @@ COMMAND_END
       result['visiterMode'] = true
     else
       playRoomChangedPassword = saveData['playRoomChangedPassword']
-      if( isPasswordMatch?(password, playRoomChangedPassword) )
+      if( DodontoF::Utils.isPasswordMatch?(password, playRoomChangedPassword) )
         result['resultText'] = "OK"
       else
         result['resultText'] = "passwordMismatch"
@@ -3555,13 +2977,7 @@ COMMAND_END
     
     return result
   end
-  
-  def isPasswordMatch?(password, changedPassword)
-    return true if( changedPassword.nil? )
-    ( password.crypt(changedPassword) == changedPassword )
-  end
-  
-  
+
   def logout()
     logoutData = getParamsFromRequestData()
     @logger.debug(logoutData, 'logoutData')

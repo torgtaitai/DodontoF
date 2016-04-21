@@ -51,7 +51,7 @@ class DodontoFServerTest < Test::Unit::TestCase
   end
 
   # 'getPlayRoomStates' => :hasReturn,
-  def test_getPlayRoomState
+  def test_getPlayRoomStates
     params = {
       'cmd' => 'getPlayRoomStates',
       'params' => {
