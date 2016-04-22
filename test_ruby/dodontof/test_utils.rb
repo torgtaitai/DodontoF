@@ -50,7 +50,7 @@ module DodontoF
     def test_rmdir
       # そういうディレクトリを構成しておく
       FileUtils.mkdir_p('./.temp/test')
-      assert(File.exist?('./.temp/test'))
+      assert_equal(true, File.exist?('./.temp/test'))
 
       Utils.rmdir('.temp/test')
 
