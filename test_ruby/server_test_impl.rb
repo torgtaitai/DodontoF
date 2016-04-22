@@ -13,39 +13,42 @@ module DodontoFServerTestImpl
   # テスト対象にするDodontoFServer
   # 利用者コードでinclude後にオーバライドしてください
   def getTargetDodontoFServer
-    fail NotImplementedError, 'ServerTestimpl need override TargetDodontoFServer()'
+    fail NotImplementedError, 'getTargetDodontoFServer() must be overridden'
   end
 
   # テスト用のモックオブジェクト
   # コンストラクション時にいい加減な物を渡してもエラーを抑止する
   # モック要件に応じて増やしたり継承したりして使う
   def getDodontoFServerForTest
-    @dodontof_server_for_Test ||= Class.new(getTargetDodontoFServer) do
-      attr_accessor :mock_raw_cgi_value
-      def getRawCGIValue; @mock_raw_cgi_value; end
+    @dodontofServerForTest ||= Class.new(getTargetDodontoFServer) do
+      attr_accessor :mockRawCgiValue
+
+      def getRawCGIValue
+        @mockRawCgiValue
+      end
     end
   end
 
   def setup
-    FileUtils.mkdir_p $SAVE_DATA_DIR
-    FileUtils.mkdir_p $imageUploadDir
-    FileUtils.mkdir_p $replayDataUploadDir
-    FileUtils.mkdir_p $saveDataTempDir
-    FileUtils.mkdir_p $fileUploadDir
-    FileUtils.cp_r 'saveData', File.join($SAVE_DATA_DIR, 'saveData')
+    FileUtils.mkdir_p($SAVE_DATA_DIR)
+    FileUtils.mkdir_p($imageUploadDir)
+    FileUtils.mkdir_p($replayDataUploadDir)
+    FileUtils.mkdir_p($saveDataTempDir)
+    FileUtils.mkdir_p($fileUploadDir)
+    FileUtils.cp_r('saveData', File.join($SAVE_DATA_DIR, 'saveData'))
   end
 
   def teardown
-    FileUtils.rm_r '.temp'
+    FileUtils.rm_r('.temp')
   end
 
-  def test_request_analyze
-    instance = getDodontoFServerForTest.new SaveDirInfo.new, {'test' => 'ok'}
-    assert_equal 'ok', instance.getRequestData('test'), 'ok'
+  def test_requestAnalyze
+    instance = getDodontoFServerForTest.new(SaveDirInfo.new, { 'test' => 'ok' })
+    assert_equal('ok', instance.getRequestData('test'), 'ok')
   end
 
   def test_response
-    instance = getDodontoFServerForTest.new SaveDirInfo.new, {'cmd' => ''}
-    assert_match /「.+」の動作環境は正常に起動しています。/, instance.getResponse
+    instance = getDodontoFServerForTest.new(SaveDirInfo.new, { 'cmd' => '' })
+    assert_match(/「.+」の動作環境は正常に起動しています。/, instance.getResponse)
   end
 end
