@@ -451,4 +451,22 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     assert_have_keys(parsed, 'resultText')
   end
+
+  # 'deleteImage' => :hasReturn,
+  def test_deleteImage
+    (image_path, _) = createMockImage()
+
+    params = {
+      'cmd' => 'deleteImage',
+      'params' => {
+        'imageUrlList' => [image_path]
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_have_keys(parsed, 'resultText')
+  end
 end
