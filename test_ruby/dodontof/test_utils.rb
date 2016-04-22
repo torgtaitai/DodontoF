@@ -42,8 +42,8 @@ module DodontoF
 
       Utils.makeDir('.temp/makeDirTest')
 
-      assert_true(File.exist?('./.temp/makeDirTest'))
-      assert_true(Dir.exist?('./.temp/makeDirTest'))
+      assert_equal(true, File.exist?('./.temp/makeDirTest'))
+      assert_equal(true, File.directory?('./.temp/makeDirTest'))
     end
 
     # rmdir は指定したディレクトリを削除する
@@ -54,8 +54,8 @@ module DodontoF
 
       Utils.rmdir('.temp/test')
 
-      assert_true(File.exist?('./.temp/'))
-      assert_false(File.exist?('./.temp/test'))
+      assert_equal(true, File.exist?('./.temp/'))
+      assert_equal(false, File.exist?('./.temp/test'))
     end
 
     # getLanguageKeyはキー値に対して何らかのラッピングを施す

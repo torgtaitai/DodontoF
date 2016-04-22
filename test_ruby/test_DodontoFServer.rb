@@ -96,8 +96,8 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     playRoomNames = playRoomStates.map { |r| r['playRoomName'] }
 
-    assert_include(playRoomNames, 'TESTROOM_ALPHA')
-    assert_not_include(playRoomNames, 'TESTROOM_BETA')
+    assert_equal(true, playRoomNames.include?('TESTROOM_ALPHA'))
+    assert_equal(false, playRoomNames.include?('TESTROOM_BETA'))
   end
 
   # 'checkRoomStatus' => :hasReturn,
@@ -247,7 +247,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
-    assert_compare(1, :<=,  parsed.size)
+    assert_operator(1, :<=,  parsed.size)
 
     expectedKeys = [
       'name',
