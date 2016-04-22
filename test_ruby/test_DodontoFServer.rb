@@ -423,6 +423,18 @@ class DodontoFServerTest < Test::Unit::TestCase
     [path, response]
   end
 
+  # テスト時の利便性のためにgetImageTagsAndImageListの呼び出しを分けておく
+  def callGetImageTagsAndImageList
+    params = {
+      'cmd' => 'getImageTagsAndImageList',
+      'params' => { }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+  end
+
   # 'uploadImageData' => :hasReturn,
   def test_uploadImageData
     (_, result) = createMockImage()
@@ -469,4 +481,20 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     assert_have_keys(parsed, 'resultText')
   end
+
+  # 'getImageTagsAndImageList' => :hasReturn,
+  def test_getImageTagsAndImageList
+    parsed = callGetImageTagsAndImageList
+
+    assert_have_keys(parsed,
+                     'imageDir',
+                     'imageList',
+                     'tagInfos')
+
+    images = parsed['imageList']
+    bases = images.map { |img| File.basename(img, '.*') }
+    parsed['tagInfos'].each do |k,t|
+      assert_equal(true, bases.include?(File.basename(k, '.*')))
+    end
+   end
 end
