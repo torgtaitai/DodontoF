@@ -431,4 +431,24 @@ class DodontoFServerTest < Test::Unit::TestCase
     assert_have_keys(parsed, 'resultText')
     assert_equal('OK', parsed['resultText'])
   end
+
+  # 'uploadImageUrl' => :hasReturn,
+  def test_uploadImageUrl
+    params = {
+      'cmd' => 'uploadImageUrl',
+      'params' => {
+        'imageUrl' => 'http://localhost:8080/testimage.png',
+        'tagInfo' => {
+          'roomNumber' => 1,
+          'imageTags' => 'TEST_TAGS'
+        }
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_have_keys(parsed, 'resultText')
+  end
 end
