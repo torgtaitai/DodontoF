@@ -44,11 +44,11 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = createMockPlayRoom
     parsed = JsonParser.new.parse(result)
 
-    expected_keys = [
+    expectedKeys = [
       'resultText',
       'playRoomIndex'
     ]
-    assert_have_keys(parsed, expected_keys)
+    assert_have_keys(parsed, expectedKeys)
 
     assert_equal('OK', parsed['resultText'])
     assert_equal(1, parsed['playRoomIndex'])
@@ -68,23 +68,36 @@ class DodontoFServerTest < Test::Unit::TestCase
     createMockPlayRoom('TESTROOM_BETA', 5)
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
+    parsed = JsonParser.new.parse(result)
 
     # 必要なキーは帰ってきてますよね？
-    assert_match(/index/, result)
-    assert_match(/minRoom/, result)
-    assert_match(/maxRoom/, result)
-    assert_match(/gameType/, result)
-    assert_match(/playRoomStates/, result)
-    assert_match(/playRoomName/, result)
-    assert_match(/lastUpdateTime/, result)
-    assert_match(/passwordLockState/, result)
-    assert_match(/loginUsers/, result)
-    assert_match(/canVisit/, result)
+    expectedKeysInParsed = [
+      'minRoom',
+      'maxRoom',
+      'playRoomStates'
+    ]
+    assert_have_keys(parsed, expectedKeysInParsed)
 
-    assert_match(/TESTROOM_ALPHA/, result,
-                 'TESTROOM_ALPHA はリザルトに入ってますよね？')
-    refute_match(/TESTROOM_BETA/, result,
-                 'TESTROOM_BETA はリザルトに入って *ません* よね？')
+    # 部屋のデータのテスト
+    playRoomStates = parsed['playRoomStates']
+
+    expectedKeysInPlayRoomState = [
+      'passwordLockState',
+      'index',
+      'playRoomName',
+      'lastUpdateTime',
+      'canVisit',
+      'gameType',
+      'loginUsers',
+    ]
+    playRoomStates.each do |r|
+      assert_have_keys(r, expectedKeysInPlayRoomState)
+    end
+
+    playRoomNames = playRoomStates.map { |r| r['playRoomName'] }
+
+    assert_include(playRoomNames, 'TESTROOM_ALPHA')
+    assert_not_include(playRoomNames, 'TESTROOM_BETA')
   end
 
   # 'checkRoomStatus' => :hasReturn,
@@ -98,16 +111,20 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
+    parsed = JsonParser.new.parse(result)
 
-    assert_match(/isRoomExist/, result)
-    assert_match(/roomName/, result)
-    assert_match(/roomNumber/, result)
-    assert_match(/chatChannelNames/, result)
-    assert_match(/canUseExternalImage/, result)
-    assert_match(/canVisit/, result)
-    assert_match(/isPasswordLocked/, result)
-    assert_match(/isMentenanceModeOn/, result)
-    assert_match(/isWelcomeMessageOn/, result)
+    expectedKeys = [
+      'isRoomExist',
+      'roomName',
+      'roomNumber',
+      'chatChannelNames',
+      'canUseExternalImage',
+      'canVisit',
+      'isPasswordLocked',
+      'isMentenanceModeOn',
+      'isWelcomeMessageOn',
+    ]
+    assert_have_keys(parsed, expectedKeys)
   end
 
   # 'changePlayRoom' => :hasReturn,
@@ -129,9 +146,9 @@ class DodontoFServerTest < Test::Unit::TestCase
     createMockPlayRoom('TESTROOM', 1)
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
+    parsed = JsonParser.new.parse(result)
 
-    assert_match(/resultText/, result)
-    assert_match(/OK/, result)
+    assert_equal({ 'resultText' => 'OK' }, parsed)
 
     state = server.getPlayRoomState(1)
     assert_equal('TESTROOM_CHANGED', state['playRoomName'])
@@ -153,13 +170,13 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
-    expected_keys = [
+    expectedKeys = [
       'deletedRoomNumbers',
       'askDeleteRoomNumbers',
       'passwordRoomNumbers',
       'errorMessages'
     ]
-    assert_have_keys(parsed, expected_keys)
+    assert_have_keys(parsed, expectedKeys)
 
     # 狙い通りか
     assert_equal([1], parsed['deletedRoomNumbers'])
@@ -204,13 +221,13 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
-    expected_keys = [
+    expectedKeys = [
       'deletedRoomNumbers',
       'askDeleteRoomNumbers',
       'passwordRoomNumbers',
       'errorMessages'
     ]
-    assert_have_keys(parsed, expected_keys)
+    assert_have_keys(parsed, expectedKeys)
 
     # 内容は正しいか
     assert_equal([2], parsed['deletedRoomNumbers'])
@@ -232,14 +249,14 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
     assert_compare(1, :<=,  parsed.size)
 
-    expected_keys = [
+    expectedKeys = [
       'name',
       'gameType',
       'prefixs',
       'info'
     ]
     parsed.each do |item|
-      assert_have_keys(item, expected_keys)
+      assert_have_keys(item, expectedKeys)
     end
  end
 
@@ -253,11 +270,11 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expected_keys = [
+    expectedKeys = [
       'resultText',
       'tableInfos'
     ]
-    assert_have_keys(parsed, expected_keys)
+    assert_have_keys(parsed, expectedKeys)
   end
 
   def createMockBotTable(title)
@@ -279,15 +296,15 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = createMockBotTable('TEST')
     parsed = JsonParser.new.parse(result)
 
-    expected_keys_in_parsed = [
+    expectedKeysInParsed = [
       'resultText',
       'tableInfos'
     ]
-    assert_have_keys(parsed, expected_keys_in_parsed)
+    assert_have_keys(parsed, expectedKeysInParsed)
 
     item = parsed['tableInfos'][0]
 
-    expected_keys_in_item = [
+    expectedKeysInItem = [
       'fileName',
       'gameType',
       'command',
@@ -295,7 +312,7 @@ class DodontoFServerTest < Test::Unit::TestCase
       'title',
       'table'
     ]
-    assert_have_keys(item, expected_keys_in_item)
+    assert_have_keys(item, expectedKeysInItem)
   end
 
   def test_changeBotTable
@@ -328,15 +345,15 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expected_keys_in_parsed = [
+    expectedKeysInParsed = [
       'resultText',
       'tableInfos'
     ]
-    assert_have_keys(parsed, expected_keys_in_parsed)
+    assert_have_keys(parsed, expectedKeysInParsed)
 
     item = parsed['tableInfos'][0]
 
-    expected_keys_in_item = [
+    expectedKeysInItem = [
       'fileName',
       'gameType',
       'command',
@@ -344,7 +361,7 @@ class DodontoFServerTest < Test::Unit::TestCase
       'title',
       'table'
     ]
-    assert_have_keys(item, expected_keys_in_item)
+    assert_have_keys(item, expectedKeysInItem)
 
     assert_match(/diceBotTable_/, item['fileName'],
                  'prefix にマッチする名前になっている')
@@ -380,11 +397,11 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expected_keys = [
+    expectedKeys = [
       'resultText',
       'tableInfos'
     ]
-    assert_have_keys(parsed, expected_keys)
+    assert_have_keys(parsed, expectedKeys)
 
     assert_equal(0, parsed['tableInfos'].size,
                  '削除されて0件が返ってくるはず')
