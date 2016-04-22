@@ -44,11 +44,9 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = createMockPlayRoom
     parsed = JsonParser.new.parse(result)
 
-    expectedKeys = [
-      'resultText',
-      'playRoomIndex'
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'resultText',
+                     'playRoomIndex')
 
     assert_equal('OK', parsed['resultText'])
     assert_equal(1, parsed['playRoomIndex'])
@@ -71,12 +69,10 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
 
     # 必要なキーは帰ってきてますよね？
-    expectedKeysInParsed = [
-      'minRoom',
-      'maxRoom',
-      'playRoomStates'
-    ]
-    assert_have_keys(parsed, expectedKeysInParsed)
+    assert_have_keys(parsed,
+                     'minRoom',
+                     'maxRoom',
+                     'playRoomStates')
 
     # 部屋のデータのテスト
     playRoomStates = parsed['playRoomStates']
@@ -91,7 +87,8 @@ class DodontoFServerTest < Test::Unit::TestCase
       'loginUsers',
     ]
     playRoomStates.each do |r|
-      assert_have_keys(r, expectedKeysInPlayRoomState)
+      # ループごとにオブジェクトを作らないよう配列を渡す
+      assert_have_keys(r, *expectedKeysInPlayRoomState)
     end
 
     playRoomNames = playRoomStates.map { |r| r['playRoomName'] }
@@ -113,18 +110,16 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expectedKeys = [
-      'isRoomExist',
-      'roomName',
-      'roomNumber',
-      'chatChannelNames',
-      'canUseExternalImage',
-      'canVisit',
-      'isPasswordLocked',
-      'isMentenanceModeOn',
-      'isWelcomeMessageOn',
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'isRoomExist',
+                     'roomName',
+                     'roomNumber',
+                     'chatChannelNames',
+                     'canUseExternalImage',
+                     'canVisit',
+                     'isPasswordLocked',
+                     'isMentenanceModeOn',
+                     'isWelcomeMessageOn')
   end
 
   # 'changePlayRoom' => :hasReturn,
@@ -170,13 +165,11 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
-    expectedKeys = [
-      'deletedRoomNumbers',
-      'askDeleteRoomNumbers',
-      'passwordRoomNumbers',
-      'errorMessages'
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'deletedRoomNumbers',
+                     'askDeleteRoomNumbers',
+                     'passwordRoomNumbers',
+                     'errorMessages')
 
     # 狙い通りか
     assert_equal([1], parsed['deletedRoomNumbers'])
@@ -221,13 +214,11 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed = JsonParser.new.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
-    expectedKeys = [
-      'deletedRoomNumbers',
-      'askDeleteRoomNumbers',
-      'passwordRoomNumbers',
-      'errorMessages'
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'deletedRoomNumbers',
+                     'askDeleteRoomNumbers',
+                     'passwordRoomNumbers',
+                     'errorMessages')
 
     # 内容は正しいか
     assert_equal([2], parsed['deletedRoomNumbers'])
@@ -256,7 +247,8 @@ class DodontoFServerTest < Test::Unit::TestCase
       'info'
     ]
     parsed.each do |item|
-      assert_have_keys(item, expectedKeys)
+      # ループごとにオブジェクトを作らないよう配列を渡す
+      assert_have_keys(item, *expectedKeys)
     end
  end
 
@@ -270,11 +262,9 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expectedKeys = [
-      'resultText',
-      'tableInfos'
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'resultText',
+                     'tableInfos')
   end
 
   def createMockBotTable(title)
@@ -296,23 +286,19 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = createMockBotTable('TEST')
     parsed = JsonParser.new.parse(result)
 
-    expectedKeysInParsed = [
-      'resultText',
-      'tableInfos'
-    ]
-    assert_have_keys(parsed, expectedKeysInParsed)
+    assert_have_keys(parsed,
+                     'resultText',
+                     'tableInfos')
 
     item = parsed['tableInfos'][0]
 
-    expectedKeysInItem = [
-      'fileName',
-      'gameType',
-      'command',
-      'dice',
-      'title',
-      'table'
-    ]
-    assert_have_keys(item, expectedKeysInItem)
+    assert_have_keys(item,
+                     'fileName',
+                     'gameType',
+                     'command',
+                     'dice',
+                     'title',
+                     'table')
   end
 
   def test_changeBotTable
@@ -345,23 +331,19 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expectedKeysInParsed = [
-      'resultText',
-      'tableInfos'
-    ]
-    assert_have_keys(parsed, expectedKeysInParsed)
+    assert_have_keys(parsed,
+                     'resultText',
+                     'tableInfos')
 
     item = parsed['tableInfos'][0]
 
-    expectedKeysInItem = [
-      'fileName',
-      'gameType',
-      'command',
-      'dice',
-      'title',
-      'table'
-    ]
-    assert_have_keys(item, expectedKeysInItem)
+    assert_have_keys(item,
+                     'fileName',
+                     'gameType',
+                     'command',
+                     'dice',
+                     'title',
+                     'table')
 
     assert_match(/diceBotTable_/, item['fileName'],
                  'prefix にマッチする名前になっている')
@@ -397,11 +379,9 @@ class DodontoFServerTest < Test::Unit::TestCase
     result = server.getResponse
     parsed = JsonParser.new.parse(result)
 
-    expectedKeys = [
-      'resultText',
-      'tableInfos'
-    ]
-    assert_have_keys(parsed, expectedKeys)
+    assert_have_keys(parsed,
+                     'resultText',
+                     'tableInfos')
 
     assert_equal(0, parsed['tableInfos'].size,
                  '削除されて0件が返ってくるはず')
