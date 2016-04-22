@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# = Simple JSON parser & builder
-#
-# Author::  Chihiro Ito
-# License:: Public domain (unlike other files)
-# Support:: http://groups.google.com/group/webos-goodies/
-# Version:: 1.09
+# このコードは下記URLのコードをもとに作成されました。
+# 元となるコードのライセンスはPublic Domainです。
+# http://ruby-webapi.googlecode.com/svn/trunk/misc/SimpleJson/SimpleJson_jp.rb
 
 # このコードはRuby1.9.0以上を対象としています。
 # Ruby1.8系で同様の機能を利用する場合には jsonParserPure.rb をrequireしてください。

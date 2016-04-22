@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# = Simple JSON parser & builder
-#
-# Author::  Chihiro Ito
-# License:: Public domain (unlike other files)
-# Support:: http://groups.google.com/group/webos-goodies/
-# Version:: 1.09
-#
-# シンプルな JSON 処理クラスです。 JsonParser は JSON 文字列を
+# このコードは下記URLのコードをもとに作成されました。
+# 元となるコードのライセンスはPublic Domainです。
+# http://ruby-webapi.googlecode.com/svn/trunk/misc/SimpleJson/SimpleJson_jp.rb
+
+# シンプルな JSON 処理モジュールです。 JsonParser は JSON 文字列を
 # 通常の配列・ハッシュに変換し、 JsonBuilder はその逆を行います。
 # これらのクラスは JSON 標準への準拠と信頼性・安定性を意図して
 # 制作されています。とくに JsonParser クラスには UTF-8 の正当性
@@ -15,7 +12,7 @@
 
 require 'strscan'
 
-# = Simple JSON parser
+# = JsonParser
 #
 # このクラスは JSON 文字列を配列やハッシュに変換します。
 # *json_str* が JSON 形式の文字列であれば、以下のようにして
@@ -209,7 +206,7 @@ module JsonParser
 end
 
 
-# = Simple JSON builder
+# = JsonBuilder
 #
 # Ruby オブジェクトを JSON 文字列に変換するクラスです。 *ruby_obj* を
 # 以下のようにして変換できます。
