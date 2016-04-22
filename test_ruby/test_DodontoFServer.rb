@@ -497,4 +497,30 @@ class DodontoFServerTest < Test::Unit::TestCase
       assert_equal(true, bases.include?(File.basename(k, '.*')))
     end
    end
+
+  # 'changeImageTags' => :hasNoReturn
+  def test_changeImageTags
+    (image_path, _) = createMockImage('TEST_IMAGE')
+
+    params = {
+      'cmd' => 'changeImageTags',
+      'params' => {
+        'source' => image_path,
+        'tagInfo' => {
+          'tagInfo' => 'TEST_TAG_CHANGED'
+        },
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_equal([nil], parsed,
+                 'commandがhasNoReturnのときgetResponseは[nil]')
+
+    tags = callGetImageTagsAndImageList
+    assert_equal('TEST_TAG_CHANGED', tags['tagInfos'][image_path]['tagInfo'],
+                 'タグが書き換えられてるよね？')
+  end
 end
