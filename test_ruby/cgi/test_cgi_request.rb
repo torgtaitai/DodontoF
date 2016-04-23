@@ -4,6 +4,7 @@ $LOAD_PATH.unshift(File.expand_path('../..', File.dirname(__FILE__)))
 $LOAD_PATH.unshift(File.expand_path( '..', File.dirname(__FILE__)))
 
 require 'stringio'
+require 'kconv'
 require 'test_helper'
 
 require 'test/unit'
@@ -36,7 +37,9 @@ class CGIRequestTest < Test::Unit::TestCase
     FileUtils.cp_r('saveData', saveDataDir)
 
     # ログイン人数カウントの準備
-    File.write(File.join(saveDataDir, 'loginCount.txt'), '0')
+    File.open(File.join(saveDataDir, 'loginCount.txt'), 'w') do |f|
+      f.print('0')
+    end
   end
 
   def teardown
@@ -59,8 +62,8 @@ class CGIRequestTest < Test::Unit::TestCase
 
     executeDodontoServerCgi
 
-    pattern = /^#{Regexp.escape('["「どどんとふ」の動作環境は正常に起動しています。"]')}$/
-    assert_match(pattern, out.string)
+    pattern = /^#{Regexp.escape('["「どどんとふ」の動作環境は正常に起動しています。"]')}$/u
+    assert_match(pattern, out.string.toutf8)
   end
 
   def test_CGI_GET_webif_getBusyInfo
@@ -72,8 +75,11 @@ class CGIRequestTest < Test::Unit::TestCase
 
     executeDodontoServerCgi
 
-    assert_match(/^\{"loginCount":\d+,"maxLoginCount":\d+,"version":".+?","result":"OK"\}$/,
-                 out.string)
+    # 1.8.7 対策で to_a が必要
+    out_tail = out.string.lines.to_a[-1].chomp
+    response = JsonParser.new.parse(out_tail)
+
+    assert_equal(true, response.kind_of?(Hash))
   end
 
   def test_CGI_POST_getPlayRoomStates
@@ -103,7 +109,9 @@ class CGIRequestTest < Test::Unit::TestCase
     executeDodontoServerCgi
 
     # 出力の変換
-    out_tail = out.string.lines.last.chomp
+
+    # 1.8.7 対策で to_a が必要
+    out_tail = out.string.lines.to_a[-1].chomp
     response = JsonParser.new.parse(out_tail)
 
     assert_equal(true, response.kind_of?(Hash))
