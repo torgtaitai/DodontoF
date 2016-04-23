@@ -23,6 +23,20 @@ class CGIRequestTest < Test::Unit::TestCase
     @prevStdin = $stdin
     # 標準出力の記録用
     @prevStdout = $stdout
+
+    # ディレクトリの準備
+    FileUtils.mkdir_p($SAVE_DATA_DIR)
+    FileUtils.mkdir_p($imageUploadDir)
+    FileUtils.mkdir_p($replayDataUploadDir)
+    FileUtils.mkdir_p($saveDataTempDir)
+    FileUtils.mkdir_p($fileUploadDir)
+
+    # セーブデータの準備
+    saveDataDir = File.join($SAVE_DATA_DIR, 'saveData')
+    FileUtils.cp_r('saveData', saveDataDir)
+
+    # ログイン人数カウントの準備
+    File.write(File.join(saveDataDir, 'loginCount.txt'), '0')
   end
 
   def teardown
@@ -30,6 +44,9 @@ class CGIRequestTest < Test::Unit::TestCase
     ENV.update(@environ)
     $stdin = @prevStdin
     $stdout = @prevStdout
+
+    # ファイルの削除
+    FileUtils.rm_r('.temp')
   end
 
   # コマンドを指定せずに GET した場合

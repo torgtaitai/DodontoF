@@ -22,7 +22,11 @@ module DodontoFServerTestImpl
   def getDodontoFServerForTest
     @dodontof_server_for_Test ||= Class.new(getTargetDodontoFServer) do
       attr_accessor :mock_raw_cgi_value
-      def getRawCGIValue; @mock_raw_cgi_value; end
+
+      def getRawCGIValue(key)
+        @mock_raw_cgi_value ||= {}
+        @mock_raw_cgi_value[key]
+      end
     end
   end
 
