@@ -66,6 +66,7 @@ class CGIRequestTest < Test::Unit::TestCase
     assert_match(pattern, out.string.toutf8)
   end
 
+  # GET で WebIF の getBusyInfo を呼び出した場合
   def test_CGI_GET_webif_getBusyInfo
     updateEnv('REQUEST_METHOD' => 'GET',
               'QUERY_STRING' => 'webif=getBusyInfo')
@@ -82,6 +83,7 @@ class CGIRequestTest < Test::Unit::TestCase
     assert_equal(true, response.kind_of?(Hash))
   end
 
+  # POST で getPlayRoomStates を呼び出した場合
   def test_CGI_POST_getPlayRoomStates
     # メッセージデータの準備
     paramObject = {
