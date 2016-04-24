@@ -8,6 +8,7 @@ require 'kconv'
 require 'test_helper'
 
 require 'test/unit'
+require 'test/unit/assertions/assert_have_keys'
 
 # テスト用のコンフィグファイルをDodontoFServerに読みこませる
 $isTestMode = true
@@ -62,8 +63,9 @@ class CGIRequestTest < Test::Unit::TestCase
 
     executeDodontoServerCgi
 
-    pattern = /^#{Regexp.escape('["「どどんとふ」の動作環境は正常に起動しています。"]')}$/u
-    assert_match(pattern, out.string.toutf8)
+    response = parseJsonResponse(out.string)
+    assert_equal(['「どどんとふ」の動作環境は正常に起動しています。'],
+                 response)
   end
 
   # GET で WebIF の getBusyInfo を呼び出した場合
@@ -76,11 +78,9 @@ class CGIRequestTest < Test::Unit::TestCase
 
     executeDodontoServerCgi
 
-    # 1.8.7 対策で to_a が必要
-    out_tail = out.string.lines.to_a[-1].chomp
-    response = JsonParser.new.parse(out_tail)
+    response = parseJsonResponse(out.string)
 
-    assert_equal(true, response.kind_of?(Hash))
+    assert_equal('OK', response['result'])
   end
 
   # POST で getPlayRoomStates を呼び出した場合
@@ -111,12 +111,38 @@ class CGIRequestTest < Test::Unit::TestCase
     executeDodontoServerCgi
 
     # 出力の変換
+    response = parseJsonResponse(out.string)
 
-    # 1.8.7 対策で to_a が必要
-    out_tail = out.string.lines.to_a[-1].chomp
-    response = JsonParser.new.parse(out_tail)
+    assert_have_keys(response,
+                     'minRoom',
+                     'maxRoom',
+                     'playRoomStates')
+  end
 
-    assert_equal(true, response.kind_of?(Hash))
+  # POST で WebIF の getBusyInfo を呼び出した場合
+  def test_CGI_POST_webif_getBusyInfo
+    # メッセージデータの準備
+    query = 'webif=getBusyInfo'
+
+    # 環境変数の更新
+    updateEnv('REQUEST_METHOD' => 'POST',
+              'CONTENT_TYPE' => 'text/plain',
+              'CONTENT_LENGTH' => query.bytesize.to_s)
+
+    # 標準入力、標準出力の変更
+    inIo = StringIO.new(query)
+    changeStdin(inIo)
+
+    out = StringIO.new
+    changeStdout(out)
+
+    # サーバー実行
+    executeDodontoServerCgi
+
+    # 出力の変換
+    response = parseJsonResponse(out.string)
+
+    assert_equal('OK', response['result'])
   end
 
   private
@@ -142,5 +168,12 @@ class CGIRequestTest < Test::Unit::TestCase
       @environ[key] = ENV[key] unless @environ.key?(key)
       ENV[key] = val
     end
+  end
+
+  # JSON 文字列を解析してオブジェクトに変換する
+  def parseJsonResponse(response)
+    # 1.8.7 対策で to_a が必要
+    tail = response.lines.to_a[-1].chomp
+    JsonParser.new.parse(tail)
   end
 end
