@@ -1,11 +1,12 @@
 #--*-coding:utf-8-*--
 
-$LOAD_PATH.unshift(File.expand_path( '..', File.dirname(__FILE__)))
+$LOAD_PATH.unshift(File.expand_path('..', File.dirname(__FILE__)))
 $LOAD_PATH.unshift(File.expand_path('.', File.dirname(__FILE__)))
 
 require 'test_helper'
 
 require 'test/unit'
+require 'test/unit/assertions/assert_have_keys'
 
 # テスト用のコンフィグファイルをDodontoFServerに読みこませる
 $isTestMode = true
