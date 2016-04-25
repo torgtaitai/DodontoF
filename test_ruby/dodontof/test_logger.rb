@@ -59,7 +59,7 @@ module DodontoF
 
       @logger.debug('debug')
 
-      assert(out.string.empty?)
+      assert_equal(true, out.string.empty?)
     end
 
     # デバッグモードでは error は出力を行う
@@ -139,8 +139,8 @@ module DodontoF
       end
 
       output = out.string
-      assert(output.include?(last_exception.inspect), '$!.inspect が含まれる')
-      assert(output.include?(exception.inspect), 'e.inspect が含まれる')
+      assert_equal(true, output.include?(last_exception.inspect), '$!.inspect が含まれる')
+      assert_equal(true, output.include?(exception.inspect), 'e.inspect が含まれる')
     end
 
     private
