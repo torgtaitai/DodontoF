@@ -203,31 +203,50 @@ class DodontoFServer
     end
     
   end
-  def getRawCGIValue
+
+  # CGI のクエリ文字列から指定したキーの値を取得する
+  # @param [String] key キー
+  # @return [String] キーが存在する場合
+  # @return [nil] キーが存在しない場合
+  def getRawCGIValue(key)
     @cgi ||= CGI.new
-    @cgi.params[key].first
-  end
-  
-  def getRequestData(key)
-    @logger.debug(key, "getRequestData key")
-    
-    value = @cgiParams[key]
-    # @logger.debug(@cgiParams, "@cgiParams")
-    # @logger.debug(value, "getRequestData value")
-    
-    if( value.nil? )
-      if( @isWebIf )
-        value = getRawCGIValue
-      end
+
+    # CGI#params[] では配列または nil が返るため、キーが含まれているか
+    # どうかのチェックが必要
+    if @cgi.params.key?(key)
+      @cgi.params[key].first
+    else
+      nil
     end
-    
-    
-    # @logger.debug(value, "getRequestData result")
-    
-    return value
   end
 
-  
+  # 指定したキーの値を返す
+  #
+  # Web インターフェースの場合はクエリ文字列からの値の取得を試みる
+  # @param [String] key キー
+  # @return [Object]
+  # @return [nil]
+  def getRequestData(key)
+    @logger.debug(key, "getRequestData key")
+
+    valueFromCgiParams = @cgiParams[key]
+    @logger.debug(@cgiParams, "@cgiParams")
+    @logger.debug(valueFromCgiParams, "getRequestData valueFromCgiParams")
+
+    unless valueFromCgiParams.nil?
+      @logger.debug(valueFromCgiParams, "getRequestData result cgiParams")
+      return valueFromCgiParams
+    end
+
+    return nil unless @isWebIf
+
+    # Web インターフェースの場合
+    valueWebIf = getRawCGIValue(key)
+
+    @logger.debug(valueWebIf, "getRequestData result WebIF")
+    return valueWebIf
+  end
+
   attr :isAddMarker
   attr :jsonpCallBack
   attr :isJsonResult
