@@ -174,6 +174,6 @@ class CGIRequestTest < Test::Unit::TestCase
   def parseJsonResponse(response)
     # 1.8.7 対策で to_a が必要
     tail = response.lines.to_a[-1].chomp
-    JsonParser.new.parse(tail)
+    JsonParser.parse(tail)
   end
 end

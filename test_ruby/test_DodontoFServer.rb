@@ -43,7 +43,7 @@ class DodontoFServerTest < Test::Unit::TestCase
   # 'createPlayRoom' => :hasReturn,
   def test_createPlayRoom
     result = createMockPlayRoom
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'resultText',
@@ -67,7 +67,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     createMockPlayRoom('TESTROOM_BETA', 5)
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     # 必要なキーは帰ってきてますよね？
     assert_have_keys(parsed,
@@ -109,7 +109,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'isRoomExist',
@@ -142,7 +142,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     createMockPlayRoom('TESTROOM', 1)
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_equal({ 'resultText' => 'OK' }, parsed)
 
@@ -163,7 +163,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
     assert_have_keys(parsed,
@@ -212,7 +212,7 @@ class DodontoFServerTest < Test::Unit::TestCase
       newSaveDirInfoForRemoveOldPlayRoom, params
     )
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     # ほしいレスポンスキーは帰ってくるのか
     assert_have_keys(parsed,
@@ -238,7 +238,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
     assert_operator(1, :<=,  parsed.size)
 
     expectedKeys = [
@@ -261,7 +261,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'resultText',
@@ -285,7 +285,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
   def test_addBotTable
     result = createMockBotTable('TEST')
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'resultText',
@@ -330,7 +330,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'resultText',
@@ -378,7 +378,7 @@ class DodontoFServerTest < Test::Unit::TestCase
 
     server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
     result = server.getResponse
-    parsed = JsonParser.new.parse(result)
+    parsed = JsonParser.parse(result)
 
     assert_have_keys(parsed,
                      'resultText',
