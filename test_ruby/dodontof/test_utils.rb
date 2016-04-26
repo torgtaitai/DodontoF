@@ -37,23 +37,25 @@ module DodontoF
     # この時他にファイルがあれば上書きする
     def test_makeDir
       # そういうディレクトリを構成しておく
-      FileUtils.mkdir_p './.temp'
+      FileUtils.mkdir_p('./.temp')
       open('./.temp/makeDirTest', 'w') { |f| f.puts 'test' }
 
       Utils.makeDir('.temp/makeDirTest')
-      assert File.exists? './.temp/makeDirTest'
-      assert File.directory? './.temp/makeDirTest'
+
+      assert_equal(true, File.exist?('./.temp/makeDirTest'))
+      assert_equal(true, File.directory?('./.temp/makeDirTest'))
     end
 
     # rmdir は指定したディレクトリを削除する
     def test_rmdir
       # そういうディレクトリを構成しておく
-      FileUtils.mkdir_p './.temp/test'
-      assert File.exists? './.temp/test'
+      FileUtils.mkdir_p('./.temp/test')
+      assert_equal(true, File.exist?('./.temp/test'))
 
       Utils.rmdir('.temp/test')
-      assert File.exists? './.temp/'
-      assert !(File.exists? './.temp/test')
+
+      assert_equal(true, File.exist?('./.temp/'))
+      assert_equal(false, File.exist?('./.temp/test'))
     end
 
     # getLanguageKeyはキー値に対して何らかのラッピングを施す
@@ -62,7 +64,7 @@ module DodontoF
     def test_getLanguageKey
       # LanguageKeyはキー値を何らかの形でラップしたものであるはずだから
       # 少なくとも指定したキーとマッチする部分列があるはずだ
-      assert_match /test/, Utils.getLanguageKey('test')
+      assert_match(/test/, Utils.getLanguageKey('test'))
     end
   end
 end

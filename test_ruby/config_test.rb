@@ -8,3 +8,6 @@ $imageUploadDir = ".temp/imageUploadSpace"
 $replayDataUploadDir = ".temp/replayDataUploadSpace"
 $saveDataTempDir = ".temp/saveDataTempSpace"
 $fileUploadDir = ".temp/fileUploadSpace"
+
+# 環境に依存しないようにするため gem の msgpack は使わない
+$isMessagePackInstalled = false
