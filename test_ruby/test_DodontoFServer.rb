@@ -387,4 +387,140 @@ class DodontoFServerTest < Test::Unit::TestCase
     assert_equal(0, parsed['tableInfos'].size,
                  '削除されて0件が返ってくるはず')
   end
+
+  # ------------------------ image系コマンドテスト
+
+  def createMockImage(name = 'TEST_IMAGE', tags=['TEST_TAG'])
+    image = open('test_ruby/resources/mock_image.png', 'rb') { |f| f.read }
+    params = {
+      'cmd' => 'uploadImageData',
+      'params' => {
+        'imageFileName' => "#{name}.png",
+        'imageData' => image,
+        'smallImageData' => image,
+        'tagInfo' => {
+          'tagInfo' => tags
+        }
+      }
+    }
+
+    # 後でファイル変更を検知するため引っ張り出しておく
+    image_paths = Dir.glob('.temp/imageUploadSpace/*.png').to_a
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    response = server.getResponse
+
+    # テスト中にしても、このやり方で画像をさがすのは
+    # あんまり望ましくない気はするのでもっとよいやり方があれば変更する
+    # TODO: create_mock_imageから差分式の画像アップロード先検出を削除する
+    diff_paths = Dir.glob('.temp/imageUploadSpace/*.png').to_a - image_paths
+
+    # 変なことにならないようにテストしておく
+    assert_equal(1, diff_paths.size)
+
+    path = diff_paths[0]
+
+    [path, response]
+  end
+
+  # テスト時の利便性のためにgetImageTagsAndImageListの呼び出しを分けておく
+  def callGetImageTagsAndImageList
+    params = {
+      'cmd' => 'getImageTagsAndImageList',
+      'params' => { }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+  end
+
+  # 'uploadImageData' => :hasReturn,
+  def test_uploadImageData
+    (_, result) = createMockImage()
+    parsed = JsonParser.parse(result)
+
+    assert_have_keys(parsed, 'resultText')
+    assert_equal('OK', parsed['resultText'])
+  end
+
+  # 'uploadImageUrl' => :hasReturn,
+  def test_uploadImageUrl
+    params = {
+      'cmd' => 'uploadImageUrl',
+      'params' => {
+        'imageUrl' => 'http://localhost:8080/testimage.png',
+        'tagInfo' => {
+          'roomNumber' => 1,
+          'imageTags' => 'TEST_TAGS'
+        }
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_have_keys(parsed, 'resultText')
+  end
+
+  # 'deleteImage' => :hasReturn,
+  def test_deleteImage
+    (image_path, _) = createMockImage()
+
+    params = {
+      'cmd' => 'deleteImage',
+      'params' => {
+        'imageUrlList' => [image_path]
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_have_keys(parsed, 'resultText')
+  end
+
+  # 'getImageTagsAndImageList' => :hasReturn,
+  def test_getImageTagsAndImageList
+    parsed = callGetImageTagsAndImageList
+
+    assert_have_keys(parsed,
+                     'imageDir',
+                     'imageList',
+                     'tagInfos')
+
+    images = parsed['imageList']
+    bases = images.map { |img| File.basename(img, '.*') }
+    parsed['tagInfos'].each do |k,t|
+      assert_equal(true, bases.include?(File.basename(k, '.*')))
+    end
+   end
+
+  # 'changeImageTags' => :hasNoReturn
+  def test_changeImageTags
+    (image_path, _) = createMockImage('TEST_IMAGE')
+
+    params = {
+      'cmd' => 'changeImageTags',
+      'params' => {
+        'source' => image_path,
+        'tagInfo' => {
+          'tagInfo' => 'TEST_TAG_CHANGED'
+        },
+      }
+    }
+
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    result = server.getResponse
+    parsed = JsonParser.parse(result)
+
+    assert_equal([nil], parsed,
+                 'commandがhasNoReturnのときgetResponseは[nil]')
+
+    tags = callGetImageTagsAndImageList
+    assert_equal('TEST_TAG_CHANGED', tags['tagInfos'][image_path]['tagInfo'],
+                 'タグが書き換えられてるよね？')
+  end
 end

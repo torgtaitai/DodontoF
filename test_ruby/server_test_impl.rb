@@ -23,9 +23,17 @@ module DodontoFServerTestImpl
     FileUtils.rm_r('.temp')
   end
 
-  def test_requestAnalyze
-    instance = getDodontoFServerForTest.new(SaveDirInfo.new, { 'test' => 'ok' })
-    assert_equal('ok', instance.getRequestData('test'), 'ok')
+  def setup
+    # DodontoFリポジトリの中にある、セットアップ時に使う
+    # $imageUploadDir の初期状態を保存したディレクトリ
+    initial_image_upload_dir = 'imageUploadSpace'
+
+    FileUtils.mkdir_p $SAVE_DATA_DIR
+    FileUtils.cp_r initial_image_upload_dir, $imageUploadDir
+    FileUtils.mkdir_p $replayDataUploadDir
+    FileUtils.mkdir_p $saveDataTempDir
+    FileUtils.mkdir_p $fileUploadDir
+    FileUtils.cp_r 'saveData', File.join($SAVE_DATA_DIR, 'saveData')
   end
 
   def test_response
