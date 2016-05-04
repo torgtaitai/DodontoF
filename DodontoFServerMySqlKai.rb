@@ -3951,42 +3951,13 @@ SQL_TEXT
       file.write(text);
     end
   end
-  
+
   def uploadImageUrl()
-    @logger.debug("uploadImageUrl begin")
-    
     imageData = getParamsFromRequestData()
-    @logger.debug(imageData, "imageData")
-    
-    imageUrl = imageData['imageUrl']
-    @logger.debug(imageUrl, "imageUrl")
-    
-    imageUrlFileName = $imageUrlText
-    @logger.debug(imageUrlFileName, "imageUrlFileName")
-    
-    resultText = "画像URLのアップロードに失敗しました。"
-    locker = getSaveFileLock(imageUrlFileName)
-    locker.lock do 
-      alreadyExistUrls = readLines(imageUrlFileName).collect{|i| i.chomp }
-      if( alreadyExistUrls.include?(imageUrl) )
-        resultText = "すでに登録済みの画像URLです。"
-      else
-        addTextToFile(imageUrlFileName, (imageUrl + "\n"))
-        resultText = "画像URLのアップロードに成功しました。"
-      end
-    end
-    
-    tagInfo = imageData['tagInfo']
-    @logger.debug(tagInfo, 'uploadImageUrl.tagInfo')
-    changeImageTagsLocal(imageUrl, tagInfo)
-    
-    @logger.debug("uploadImageUrl end")
-    
-    result = {"resultText" => resultText}
-    return result
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.uploadImageUrl(imageData)
   end
-  
-  
+
   def getGraveyardCharacterData()
     @logger.debug("getGraveyardCharacterData start.")
     
