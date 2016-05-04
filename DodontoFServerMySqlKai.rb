@@ -3816,64 +3816,13 @@ SQL_TEXT
     
     @logger.debug(tagInfo, "margeTagInfo tagInfo")
   end
-  
+
   def uploadImageData()
-    @logger.debug("uploadImageData load Begin")
-    
-    result = {
-      "resultText"=> "OK"
-    }
-    
-    begin
-      params = getParamsFromRequestData()
-      
-      imageFileName = params["imageFileName"]
-      @logger.debug(imageFileName, "imageFileName")
-      
-      imageData = getImageDataFromParams(params, "imageData")
-      smallImageData = getImageDataFromParams(params, "smallImageData")
-      
-      if( imageData.nil? )
-        @logger.debug("createSmallImage is here")
-        imageFileNameBase = File.basename(imageFileName)
-        saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
-        return result
-      end
-      
-      saveDir = $imageUploadDir
-      imageFileNameBase = getNewFileName(imageFileName, "img")
-      @logger.debug(imageFileNameBase, "imageFileNameBase")
-      
-      uploadImageFileName = fileJoin(saveDir, imageFileNameBase)
-      @logger.debug(uploadImageFileName, "uploadImageFileName")
-      
-      open( uploadImageFileName, "wb+" ) do |file|
-        file.write( imageData )
-      end
-      
-      saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
-      
-    rescue => e
-      result["resultText"] = getLanguageKey( e.to_s )
-    end
-    
-    @logger.debug(result, "uploadImageData result")
-    @logger.debug("uploadImageData load End")
-    
-    return result
+    params = getParamsFromRequestData()
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.uploadImageData(params)
   end
-  
-  
-  def getImageDataFromParams(params, key)
-    value = params[key]
-    
-    sizeCheckResult = checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
-    raise sizeCheckResult unless( sizeCheckResult.empty? )
-    
-    return value
-  end
-  
-  
+
   #新規ファイル名。reqにroomNumberを持っていた場合、ファイル名に付加するようにする
   def getNewFileName(fileName, preFix = "")
     @newFileNameIndex ||= 0

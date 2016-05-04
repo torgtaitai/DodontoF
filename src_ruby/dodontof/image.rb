@@ -90,5 +90,60 @@ module DodontoF
       result = {"resultText" => resultText}
       return result
     end
+
+    def uploadImageData(params)
+      @logger.debug("uploadImageData load Begin")
+
+      result = {
+        "resultText"=> "OK"
+      }
+
+      begin
+        imageFileName = params["imageFileName"]
+        @logger.debug(imageFileName, "imageFileName")
+
+        imageData = getImageDataFromParams(params, "imageData")
+        smallImageData = getImageDataFromParams(params, "smallImageData")
+
+        if( imageData.nil? )
+          @logger.debug("createSmallImage is here")
+          imageFileNameBase = File.basename(imageFileName)
+          @server.saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
+          return result
+        end
+
+        saveDir = @server.getUploadImageDataUploadDir(params)
+        imageFileNameBase = @server.getNewFileName(imageFileName, "img")
+        @logger.debug(imageFileNameBase, "imageFileNameBase")
+
+        uploadImageFileName = @server.fileJoin(saveDir, imageFileNameBase)
+        @logger.debug(uploadImageFileName, "uploadImageFileName")
+
+        open( uploadImageFileName, "wb+" ) do |file|
+          file.write( imageData )
+        end
+
+        @server.saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+
+      rescue => e
+        result["resultText"] = DodontoF::Utils.getLanguageKey( e.to_s )
+      end
+
+      @logger.debug(result, "uploadImageData result")
+      @logger.debug("uploadImageData load End")
+
+      return result
+    end
+
+    private
+
+    def getImageDataFromParams(params, key)
+      value = params[key]
+
+      sizeCheckResult = @server.checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
+      raise sizeCheckResult unless( sizeCheckResult.empty? )
+
+      return value
+    end
   end
 end
