@@ -256,7 +256,7 @@ module DodontoF_MySqlKai
       deleteCount = 0
       resultText = ""
       imageUrlList.each do |imageUrl|
-        if( @server.isProtectedImage(imageUrl) )
+        if( isProtectedImage(imageUrl) )
           warningMessage = "#{imageUrl}は削除できない画像です。"
           next
         end
@@ -337,6 +337,16 @@ module DodontoF_MySqlKai
       end
 
       return true
+    end
+
+    def isProtectedImage(imageUrl)
+      $protectImagePaths.each do |url|
+        if( imageUrl.index(url) == 0 )
+          return true
+        end
+      end
+
+      return false
     end
   end
 end

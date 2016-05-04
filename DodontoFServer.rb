@@ -3562,16 +3562,6 @@ class DodontoFServer
     image.deleteImage(params)
   end
 
-  def isProtectedImage(imageUrl)
-    $protectImagePaths.each do |url|
-      if( imageUrl.index(url) == 0 )
-        return true
-      end
-    end
-    
-    return false
-  end
-
   #override
   def addTextToFile(fileName, text)
     File.open(fileName, "a+") do |file|
