@@ -205,7 +205,7 @@ module DodontoF
       tagInfo["smallImage"] = uploadSmallImageFileName
       @logger.debug(tagInfo, "saveSmallImage tagInfo smallImage url added")
 
-      @server.margeTagInfo(tagInfo, uploadImageFileName)
+      margeTagInfo(tagInfo, uploadImageFileName)
       @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
       changeImageTagsLocal(uploadImageFileName, tagInfo)
 
@@ -230,6 +230,20 @@ module DodontoF
       imageFileNames = imageTags.keys
 
       return imageFileNames
+    end
+
+    def margeTagInfo(tagInfo, source)
+      @logger.debug(source, "margeTagInfo source")
+      imageTags = @server.getImageTags()
+      tagInfo_old = imageTags[source]
+      @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
+      return if( tagInfo_old.nil? )
+
+      tagInfo_old.keys.each do |key|
+        tagInfo[key] = tagInfo_old[key]
+      end
+
+      @logger.debug(tagInfo, "margeTagInfo tagInfo")
     end
   end
 end

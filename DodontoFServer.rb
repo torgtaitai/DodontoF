@@ -3512,20 +3512,6 @@ class DodontoFServer
     return smallImageDir
   end
 
-  def margeTagInfo(tagInfo, source)
-    @logger.debug(source, "margeTagInfo source")
-    imageTags = getImageTags()
-    tagInfo_old = imageTags[source]
-    @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
-    return if( tagInfo_old.nil? )
-    
-    tagInfo_old.keys.each do |key|
-      tagInfo[key] = tagInfo_old[key]
-    end
-    
-    @logger.debug(tagInfo, "margeTagInfo tagInfo")
-  end
-  
   def uploadImageData()
     params = getParamsFromRequestData()
     image = DodontoF::Image.new(self, @saveDirInfo)
