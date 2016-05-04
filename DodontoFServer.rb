@@ -2144,22 +2144,23 @@ class DodontoFServer
       end
     end
   end
-  
-  
+
   def getLoginWarning
-    unless( isExistDir?(getSmallImageDir) )
+    image = DodontoF::Image.new(self, @saveDirInfo)
+    smallImageDir = image.getSmallImageDir
+    unless( isExistDir?(smallImageDir) )
       return {
         "key" => "noSmallImageDir",
-        "params" => [getSmallImageDir],
+        "params" => [smallImageDir],
       }
     end
-    
+
     if( $isMentenanceNow )
     return {
       "key" => "canNotLoginBecauseMentenanceNow",
     }
     end
-    
+
     return nil
   end
   
@@ -3501,14 +3502,6 @@ class DodontoFServer
     end
     
     return lines.join("\n")
-  end
-  
-  def getSmallImageDir
-    saveDir = $imageUploadDir
-    smallImageDirName = "smallImages"
-    smallImageDir = fileJoin(saveDir, smallImageDirName);
-    
-    return smallImageDir
   end
 
   def uploadImageData()

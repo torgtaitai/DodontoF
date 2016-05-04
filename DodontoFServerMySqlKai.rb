@@ -2374,25 +2374,26 @@ SQL_TEXT
     # 識別子用の文字列生成。
     (Time.now.to_f * 1000).to_i.to_s(36)
   end
-  
-  
+
   def getLoginWarning
-    unless( isExistDir?(getSmallImageDir) )
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    smallImageDir = image.getSmallImageDir()
+    unless( isExistDir?(smallImageDir) )
       return {
         "key" => "noSmallImageDir",
-        "params" => [getSmallImageDir],
+        "params" => [smallImageDir],
       }
     end
-    
+
     if( $isMentenanceNow )
     return {
       "key" => "canNotLoginBecauseMentenanceNow",
     }
     end
-    
+
     return nil
   end
-  
+
   def getLoginMessage
     mesasge = ""
     mesasge << getLoginMessageHeader
@@ -3762,14 +3763,6 @@ SQL_TEXT
     end
     
     return lines.join("\n")
-  end
-  
-  def getSmallImageDir
-    saveDir = $imageUploadDir
-    smallImageDirName = "smallImages"
-    smallImageDir = fileJoin(saveDir, smallImageDirName);
-    
-    return smallImageDir
   end
 
   def uploadImageData()

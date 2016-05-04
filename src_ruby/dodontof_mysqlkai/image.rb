@@ -122,6 +122,14 @@ module DodontoF_MySqlKai
       deleteImages(tagInfos.keys)
     end
 
+    def getSmallImageDir
+      saveDir = $imageUploadDir
+      smallImageDirName = "smallImages"
+      smallImageDir = @server.fileJoin(saveDir, smallImageDirName);
+
+      return smallImageDir
+    end
+
     private
 
     def getImageDataFromParams(params, key)
@@ -154,7 +162,7 @@ module DodontoF_MySqlKai
       @logger.debug(imageFileNameBase, "imageFileNameBase")
       @logger.debug(uploadImageFileName, "uploadImageFileName")
 
-      smallImageDir = @server.getSmallImageDir
+      smallImageDir = getSmallImageDir
       uploadSmallImageFileName = @server.fileJoin(smallImageDir, imageFileNameBase)
       uploadSmallImageFileName += ".png";
       uploadSmallImageFileName.untaint
