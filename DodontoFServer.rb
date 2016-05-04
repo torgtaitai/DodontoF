@@ -3624,12 +3624,6 @@ class DodontoFServer
     end
   end
 
-  def isImageFile(fileName)
-    rule = /.(jpg|jpeg|gif|png|bmp|swf)$/i
-    (rule === fileName)
-  end
-  
-  
   def deleteInvalidImageFileName(imageList)
     imageList.delete_if{|i| (/\.txt$/===i)}
     imageList.delete_if{|i| (/\.lock$/===i)}

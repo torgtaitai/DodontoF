@@ -368,7 +368,7 @@ module DodontoF_MySqlKai
         file = file.untaint
 
         next if( imageList.include?(fileName) )
-        next unless( @server.isImageFile(fileName) )
+        next unless( isImageFile(fileName) )
         next unless( @server.isAllowedFileExt(fileName) )
 
         imageList << fileName
@@ -376,6 +376,11 @@ module DodontoF_MySqlKai
       end
 
       return imageList
+    end
+
+    def isImageFile(fileName)
+      rule = /.(jpg|jpeg|gif|png|bmp|swf)$/i
+      (rule === fileName)
     end
   end
 end
