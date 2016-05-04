@@ -4258,40 +4258,7 @@ class DodontoFServer
     image = DodontoF::Image.new(self, @saveDirInfo)
     image.getImageTagsAndImageList()
   end
-  
-  def getImageTags(*roomNoList)
-    @logger.debug('getImageTags start')
-    
-    imageTags = {}
-    
-    if roomNoList.empty? 
-      roomNoList = [nil, @saveDirInfo.getSaveDataDirIndex]
-    end
-    
-    roomNoList.each do |roomNumber|
-      getSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-        tmpTags = saveData['imageTags']
-        tmpTags ||= {}
-        
-=begin
-        unless( roomNumber.nil? )
-          tmpTags.each do |key, value|
-            next if value.nil?
-            value.delete("roomNumber")
-          end
-        end
-=end
-        
-        imageTags.merge!( tmpTags )
-      end
-    end
-    
-    @logger.debug(imageTags, 'getImageTags imageTags')
-    
-    return imageTags
-  end
-  
-  
+
   def createCharacterImgId(prefix = "character_")
     @imgIdIndex ||= 0;
     @imgIdIndex += 1;

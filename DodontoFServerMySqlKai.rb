@@ -4561,38 +4561,7 @@ SQL_TEXT
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.getImageTagsAndImageList()
   end
-  
-  def getImageTags(*roomNoList)
-    @logger.debug('getImageTags start')
-    
-    imageTags = {}
-    
-    if roomNoList.empty? 
-      roomNoList = [nil, @saveDirInfo.getSaveDataDirIndex]
-    end
-    
-    roomNoList.each do |roomNumber|
-      getSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-        tmpTags = saveData['imageTags']
-        tmpTags ||= {}
-        
-        unless( roomNumber.nil? )
-          tmpTags.each do |key, value|
-            next if value.nil?
-            value.delete("roomNumber")
-          end
-        end
-        
-        imageTags.merge!( tmpTags )
-      end
-    end
-    
-    @logger.debug(imageTags, 'getImageTags imageTags')
-    
-    return imageTags
-  end
-  
-  
+
   def createCharacterImgId(prefix = "character_")
     return nil
 =begin

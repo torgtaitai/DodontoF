@@ -138,7 +138,7 @@ module DodontoF
     def getImageTagsAndImageList
       result = {}
 
-      result['tagInfos'] = @server.getImageTags()
+      result['tagInfos'] = getImageTags()
       result['imageList'] = getImageList()
       result['imageDir'] = $imageUploadDir
 
@@ -152,6 +152,11 @@ module DodontoF
       tagInfo = effectData['tagInfo']
 
       changeImageTagsLocal(source, tagInfo)
+    end
+
+    def removeLocalImageTags(roomNumber)
+      tagInfos = getImageTags(roomNumber)
+      deleteImages(tagInfos.keys)
     end
 
     private
@@ -226,7 +231,7 @@ module DodontoF
     end
 
     def getAllImageFileNameFromTagInfoFile()
-      imageTags = @server.getImageTags()
+      imageTags = getImageTags()
       imageFileNames = imageTags.keys
 
       return imageFileNames
@@ -234,7 +239,7 @@ module DodontoF
 
     def margeTagInfo(tagInfo, source)
       @logger.debug(source, "margeTagInfo source")
-      imageTags = @server.getImageTags()
+      imageTags = getImageTags()
       tagInfo_old = imageTags[source]
       @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
       return if( tagInfo_old.nil? )
@@ -244,6 +249,38 @@ module DodontoF
       end
 
       @logger.debug(tagInfo, "margeTagInfo tagInfo")
+    end
+
+    def getImageTags(*roomNoList)
+      @logger.debug('getImageTags start')
+
+      imageTags = {}
+
+      if roomNoList.empty?
+        roomNoList = [nil, @saveDirInfo.getSaveDataDirIndex]
+      end
+
+      roomNoList.each do |roomNumber|
+        @server.getSaveData( @server.getImageInfoFileName(roomNumber) ) do |saveData|
+          tmpTags = saveData['imageTags']
+          tmpTags ||= {}
+
+=begin
+        unless( roomNumber.nil? )
+          tmpTags.each do |key, value|
+            next if value.nil?
+            value.delete("roomNumber")
+          end
+        end
+=end
+
+          imageTags.merge!( tmpTags )
+        end
+      end
+
+      @logger.debug(imageTags, 'getImageTags imageTags')
+
+      return imageTags
     end
   end
 end
