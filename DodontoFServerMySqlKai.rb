@@ -3772,37 +3772,7 @@ SQL_TEXT
     
     return smallImageDir
   end
-  
-  def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
-    @logger.debug("saveSmallImage begin")
-    @logger.debug(imageFileNameBase, "imageFileNameBase")
-    @logger.debug(uploadImageFileName, "uploadImageFileName")
-    
-    smallImageDir = getSmallImageDir
-    uploadSmallImageFileName = fileJoin(smallImageDir, imageFileNameBase)
-    uploadSmallImageFileName += ".png";
-    uploadSmallImageFileName.untaint
-    @logger.debug(uploadSmallImageFileName, "uploadSmallImageFileName")
-    
-    open( uploadSmallImageFileName, "wb+" ) do |file|
-      file.write( smallImageData )
-    end
-    @logger.debug("small image create successed.")
-    
-    params = getParamsFromRequestData()
-    tagInfo = params['tagInfo']
-    @logger.debug(tagInfo, "uploadImageData tagInfo")
-    
-    tagInfo["smallImage"] = uploadSmallImageFileName
-    @logger.debug(tagInfo, "uploadImageData tagInfo smallImage url added")
-    
-    margeTagInfo(tagInfo, uploadImageFileName)
-    @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
-    changeImageTagsLocal(uploadImageFileName, tagInfo)
-    
-    @logger.debug("saveSmallImage end")
-  end
-  
+
   def margeTagInfo(tagInfo, source)
     @logger.debug(source, "margeTagInfo source")
     imageTags = getImageTags()

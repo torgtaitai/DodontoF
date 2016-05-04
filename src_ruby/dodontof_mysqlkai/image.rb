@@ -108,7 +108,7 @@ module DodontoF_MySqlKai
         if( imageData.nil? )
           @logger.debug("createSmallImage is here")
           imageFileNameBase = File.basename(imageFileName)
-          @server.saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
+          saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
           return result
         end
 
@@ -124,7 +124,7 @@ module DodontoF_MySqlKai
           file.write( imageData )
         end
 
-        @server.saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+        saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
 
       rescue => e
         result["resultText"] = DodontoF::Utils.getLanguageKey( e.to_s )
@@ -180,6 +180,37 @@ module DodontoF_MySqlKai
       imageList.sort!
 
       return imageList
+    end
+
+    def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+      @logger.debug("saveSmallImage begin")
+      @logger.debug(imageFileNameBase, "imageFileNameBase")
+      @logger.debug(uploadImageFileName, "uploadImageFileName")
+
+      smallImageDir = @server.getSmallImageDir
+      uploadSmallImageFileName = @server.fileJoin(smallImageDir, imageFileNameBase)
+      uploadSmallImageFileName += ".png";
+      uploadSmallImageFileName.untaint
+      @logger.debug(uploadSmallImageFileName, "uploadSmallImageFileName")
+
+      open( uploadSmallImageFileName, "wb+" ) do |file|
+        file.write( smallImageData )
+      end
+      @logger.debug("small image create successed.")
+
+      # TODO: saveSmallImage中のgetParamsFromRequestDataを引数に追い出す
+      params = @server.getParamsFromRequestData()
+      tagInfo = params['tagInfo']
+      @logger.debug(tagInfo, "uploadImageData tagInfo")
+
+      tagInfo["smallImage"] = uploadSmallImageFileName
+      @logger.debug(tagInfo, "uploadImageData tagInfo smallImage url added")
+
+      @server.margeTagInfo(tagInfo, uploadImageFileName)
+      @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
+      @server.changeImageTagsLocal(uploadImageFileName, tagInfo)
+
+      @logger.debug("saveSmallImage end")
     end
   end
 end
