@@ -28,7 +28,7 @@ module DodontoF
       imageUrl = imageData['imageUrl']
       @logger.debug(imageUrl, "imageUrl")
 
-      imageUrlFileName = $imageUrlText
+      imageUrlFileName = getImageUrlText
       @logger.debug(imageUrlFileName, "imageUrlFileName")
 
       resultText = "画像URLのアップロードに失敗しました。"
@@ -138,7 +138,7 @@ module DodontoF
       imageList = getAllImageFileNameFromTagInfoFile()
       @logger.debug(imageList, "imageList all result")
 
-      addTextsCharacterImageList(imageList, $imageUrlText)
+      addTextsCharacterImageList(imageList, getImageUrlText)
       addLocalImageToList(imageList)
 
       deleteInvalidImageFileName(imageList)
@@ -248,7 +248,7 @@ module DodontoF
       addLocalImageToList(imageFiles)
       @logger.debug(imageFiles, "imageFiles")
 
-      imageUrlFileName = $imageUrlText
+      imageUrlFileName = getImageUrlText
       @logger.debug(imageUrlFileName, "imageUrlFileName")
 
       deleteCount = 0
@@ -403,6 +403,10 @@ module DodontoF
       imageList.delete_if{|i| (/\.json~$/===i)}
       imageList.delete_if{|i| (/^.svn$/===i)}
       imageList.delete_if{|i| (/\.db$/===i)}
+    end
+
+    def getImageUrlText
+      File.join($imageUploadDir, 'imageUrl.txt')
     end
   end
 end

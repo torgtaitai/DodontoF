@@ -85,7 +85,6 @@ end
 
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
-$imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
 
 $tableNames = {
   'chatMessageDataLog' => 'chats',
