@@ -171,8 +171,8 @@ module DodontoF_MySqlKai
       tagInfo["smallImage"] = uploadSmallImageFileName
       @logger.debug(tagInfo, "uploadImageData tagInfo smallImage url added")
 
-      margeTagInfo(tagInfo, uploadImageFileName)
-      @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
+      mergeTagInfo(tagInfo, uploadImageFileName)
+      @logger.debug(tagInfo, "saveSmallImage mergeTagInfo tagInfo")
       changeImageTagsLocal(uploadImageFileName, tagInfo)
 
       @logger.debug("saveSmallImage end")
@@ -198,18 +198,18 @@ module DodontoF_MySqlKai
       return imageFileNames
     end
 
-    def margeTagInfo(tagInfo, source)
-      @logger.debug(source, "margeTagInfo source")
+    def mergeTagInfo(tagInfo, source)
+      @logger.debug(source, "mergeTagInfo source")
       imageTags = getImageTags()
       tagInfo_old = imageTags[source]
-      @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
+      @logger.debug(tagInfo_old, "mergeTagInfo tagInfo_old")
       return if( tagInfo_old.nil? )
 
       tagInfo_old.keys.each do |key|
         tagInfo[key] = tagInfo_old[key]
       end
 
-      @logger.debug(tagInfo, "margeTagInfo tagInfo")
+      @logger.debug(tagInfo, "mergeTagInfo tagInfo")
     end
 
     def getImageTags(*roomNoList)
