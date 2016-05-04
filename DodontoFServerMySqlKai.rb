@@ -3821,35 +3821,7 @@ SQL_TEXT
     
     return false
   end
-  
-  def deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-    @logger.debug(imageUrl, "deleteTargetImageUrl(imageUrl)")
-    
-    if( imageFiles.include?(imageUrl) )
-      if( isExist?(imageUrl) )
-        deleteFile(imageUrl)
-        return true
-      end
-    end
-    
-    locker = getSaveFileLock(imageUrlFileName)
-    locker.lock do 
-      lines = readLines(imageUrlFileName)
-      @logger.debug(lines, "lines")
-      
-      deleteResult = lines.reject!{|i| i.chomp == imageUrl }
-      
-      unless( deleteResult )
-        return false
-      end
-      
-      @logger.debug(lines, "lines deleted")
-      createFile(imageUrlFileName, lines.join)
-    end
-    
-    return true
-  end
-  
+
   #override
   def addTextToFile(fileName, text)
     File.open(fileName, "a+") do |file|

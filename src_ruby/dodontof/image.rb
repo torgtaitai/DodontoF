@@ -263,7 +263,7 @@ module DodontoF
 
         imageUrl.untaint
         deleteResult1 = deleteImageTags(imageUrl)
-        deleteResult2 = @server.deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
+        deleteResult2 = deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
         deleteResult = (deleteResult1 or deleteResult2)
 
         if( deleteResult )
@@ -309,5 +309,34 @@ module DodontoF
 
       return true
     end
+
+    def deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
+      @logger.debug(imageUrl, "deleteTargetImageUrl(imageUrl)")
+
+      if( imageFiles.include?(imageUrl) )
+        if( @server.isExist?(imageUrl) )
+          @server.deleteFile(imageUrl)
+          return true
+        end
+      end
+
+      locker = @server.getSaveFileLock(imageUrlFileName)
+      locker.lock do
+        lines = @server.readLines(imageUrlFileName)
+        @logger.debug(lines, "lines")
+
+        deleteResult = lines.reject!{|i| i.chomp == imageUrl }
+
+        unless( deleteResult )
+          return false
+        end
+
+        @logger.debug(lines, "lines deleted")
+        @server.createFile(imageUrlFileName, lines.join)
+      end
+
+      return true
+    end
+
   end
 end
