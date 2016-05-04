@@ -141,7 +141,7 @@ module DodontoF
       addTextsCharacterImageList(imageList, $imageUrlText)
       addLocalImageToList(imageList)
 
-      @server.deleteInvalidImageFileName(imageList)
+      deleteInvalidImageFileName(imageList)
 
       imageList.sort!
 
@@ -396,6 +396,15 @@ module DodontoF
           imageList << line
         end
       end
+    end
+
+    def deleteInvalidImageFileName(imageList)
+      imageList.delete_if{|i| (/\.txt$/===i)}
+      imageList.delete_if{|i| (/\.lock$/===i)}
+      imageList.delete_if{|i| (/\.json$/===i)}
+      imageList.delete_if{|i| (/\.json~$/===i)}
+      imageList.delete_if{|i| (/^.svn$/===i)}
+      imageList.delete_if{|i| (/\.db$/===i)}
     end
   end
 end

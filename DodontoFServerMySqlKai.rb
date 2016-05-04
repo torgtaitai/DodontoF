@@ -3850,16 +3850,6 @@ SQL_TEXT
     addCharacterData(characters, stateList)
   end
 
-  def deleteInvalidImageFileName(imageList)
-    imageList.delete_if{|i| (/\.txt$/===i)}
-    imageList.delete_if{|i| (/\.lock$/===i)}
-    imageList.delete_if{|i| (/\.json$/===i)}
-    imageList.delete_if{|i| (/\.json~$/===i)}
-    imageList.delete_if{|i| (/^.svn$/===i)}
-    imageList.delete_if{|i| (/\.db$/===i)}
-  end
-  
-  
   def sendDiceBotChatMessage
     @logger.debug('sendDiceBotChatMessage')
     
