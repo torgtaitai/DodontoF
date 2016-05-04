@@ -136,6 +136,18 @@ module DodontoF_MySqlKai
       return result
     end
 
+    def getImageTagsAndImageList
+      result = {}
+
+      result['tagInfos'] = @server.getImageTags()
+      result['imageList'] = getImageList()
+      result['imageDir'] = $imageUploadDir
+
+      @logger.debug("getImageTagsAndImageList result", result)
+
+      return result
+    end
+
     private
 
     def getImageDataFromParams(params, key)
@@ -145,6 +157,22 @@ module DodontoF_MySqlKai
       raise sizeCheckResult unless( sizeCheckResult.empty? )
 
       return value
+    end
+
+    def getImageList()
+      @logger.debug("getImageList start.")
+
+      imageList = @server.getAllImageFileNameFromTagInfoFile()
+      @logger.debug(imageList, "imageList all result")
+
+      @server.addTextsCharacterImageList(imageList, $imageUrlText)
+      @server.addLocalImageToList(imageList)
+
+      @server.deleteInvalidImageFileName(imageList)
+
+      imageList.sort!
+
+      return imageList
     end
   end
 end

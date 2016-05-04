@@ -3931,23 +3931,7 @@ SQL_TEXT
     stateList = Array.new(characters.size, $characterStateWaitingRoom)
     addCharacterData(characters, stateList)
   end
-  
-  def getImageList()
-    @logger.debug("getImageList start.")
-    
-    imageList = getAllImageFileNameFromTagInfoFile()
-    @logger.debug(imageList, "imageList all result")
-    
-    addTextsCharacterImageList(imageList, $imageUrlText)
-    addLocalImageToList(imageList)
-    
-    deleteInvalidImageFileName(imageList)
-    
-    imageList.sort!
-    
-    return imageList
-  end
-    
+
   def addTextsCharacterImageList(imageList, *texts)
     texts.each do |text|
       next unless( isExist?(text) )
@@ -4640,15 +4624,8 @@ SQL_TEXT
   end
   
   def getImageTagsAndImageList
-    result = {}
-    
-    result['tagInfos'] = getImageTags()
-    result['imageList'] = getImageList()
-    result['imageDir'] = $imageUploadDir
-    
-    @logger.debug("getImageTagsAndImageList result", result)
-    
-    return result
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.getImageTagsAndImageList()
   end
   
   def getImageTags(*roomNoList)
