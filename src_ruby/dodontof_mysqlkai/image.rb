@@ -262,7 +262,7 @@ module DodontoF_MySqlKai
         end
 
         imageUrl.untaint
-        deleteResult1 = @server.deleteImageTags(imageUrl)
+        deleteResult1 = deleteImageTags(imageUrl)
         deleteResult2 = @server.deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
         deleteResult = (deleteResult1 or deleteResult2)
 
@@ -281,6 +281,34 @@ module DodontoF_MySqlKai
 
       @logger.debug("deleteImage end")
       return result
+    end
+
+    def deleteImageTags(source)
+      roomNumber = @saveDirInfo.getSaveDataDirIndex
+      isDeleted = deleteImageTagsByRoomNo(source, roomNumber)
+      return true if( isDeleted )
+
+      return deleteImageTagsByRoomNo(source, nil)
+    end
+
+    def deleteImageTagsByRoomNo(source, roomNumber)
+      @server.changeSaveData( @server.getImageInfoFileName(roomNumber) ) do |saveData|
+
+        imageTags = saveData['imageTags']
+        return false if imageTags.nil?
+
+        tagInfo = imageTags.delete(source)
+        return false if tagInfo.nil?
+
+        smallImage = tagInfo["smallImage"]
+        begin
+          @server.deleteFile(smallImage)
+        rescue => e
+          @logger.exception(e)
+        end
+      end
+
+      return true
     end
   end
 end

@@ -4219,35 +4219,6 @@ class DodontoFServer
     image = DodontoF::Image.new(self, @saveDirInfo)
     image.changeImageTags(effectData)
   end
-
-  def deleteImageTags(source)
-    roomNumber = @saveDirInfo.getSaveDataDirIndex
-    isDeleted = deleteImageTagsByRoomNo(source, roomNumber)
-    return true if( isDeleted )
-    
-    return deleteImageTagsByRoomNo(source, nil)
-  end
-  
-  def deleteImageTagsByRoomNo(source, roomNumber)
-    
-    changeSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-      
-      imageTags = saveData['imageTags']
-      return false if imageTags.nil?
-      
-      tagInfo = imageTags.delete(source)
-      return false if tagInfo.nil?
-      
-      smallImage = tagInfo["smallImage"]
-      begin
-        deleteFile(smallImage)
-      rescue => e
-        @logger.exception(e)
-      end
-    end
-    
-    return true
-  end
   
   def deleteFile(file)
     return unless File.exist?(file)
