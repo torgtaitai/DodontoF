@@ -20,44 +20,6 @@ module DodontoF
       deleteImages(imageUrlList)
     end
 
-    def deleteImages(imageUrlList)
-      imageFiles = getAllImageFileNameFromTagInfoFile()
-      @server.addLocalImageToList(imageFiles)
-      @logger.debug(imageFiles, "imageFiles")
-
-      imageUrlFileName = $imageUrlText
-      @logger.debug(imageUrlFileName, "imageUrlFileName")
-
-      deleteCount = 0
-      resultText = ""
-      imageUrlList.each do |imageUrl|
-        if( @server.isProtectedImage(imageUrl) )
-          warningMessage = "#{imageUrl}は削除できない画像です。"
-          next
-        end
-
-        imageUrl.untaint
-        deleteResult1 = @server.deleteImageTags(imageUrl)
-        deleteResult2 = @server.deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-        deleteResult = (deleteResult1 or deleteResult2)
-
-        if( deleteResult )
-          deleteCount += 1
-        else
-          warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
-          @logger.error(warningMessage)
-          resultText += warningMessage
-        end
-      end
-
-      resultText += "#{deleteCount}個のファイルを削除しました。"
-      result = {"resultText" => resultText}
-      @logger.debug(result, "result")
-
-      @logger.debug("deleteImage end")
-      return result
-    end
-
     def uploadImageUrl(imageData)
       @logger.debug("uploadImageUrl begin")
 
@@ -154,7 +116,7 @@ module DodontoF
       changeImageTagsLocal(source, tagInfo)
     end
 
-    def removeLocalImageTags(roomNumber)
+    def removeRoomImageTags(roomNumber)
       tagInfos = getImageTags(roomNumber)
       deleteImages(tagInfos.keys)
     end
@@ -281,6 +243,44 @@ module DodontoF
       @logger.debug(imageTags, 'getImageTags imageTags')
 
       return imageTags
+    end
+
+    def deleteImages(imageUrlList)
+      imageFiles = getAllImageFileNameFromTagInfoFile()
+      @server.addLocalImageToList(imageFiles)
+      @logger.debug(imageFiles, "imageFiles")
+
+      imageUrlFileName = $imageUrlText
+      @logger.debug(imageUrlFileName, "imageUrlFileName")
+
+      deleteCount = 0
+      resultText = ""
+      imageUrlList.each do |imageUrl|
+        if( @server.isProtectedImage(imageUrl) )
+          warningMessage = "#{imageUrl}は削除できない画像です。"
+          next
+        end
+
+        imageUrl.untaint
+        deleteResult1 = @server.deleteImageTags(imageUrl)
+        deleteResult2 = @server.deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
+        deleteResult = (deleteResult1 or deleteResult2)
+
+        if( deleteResult )
+          deleteCount += 1
+        else
+          warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
+          @logger.error(warningMessage)
+          resultText += warningMessage
+        end
+      end
+
+      resultText += "#{deleteCount}個のファイルを削除しました。"
+      result = {"resultText" => resultText}
+      @logger.debug(result, "result")
+
+      @logger.debug("deleteImage end")
+      return result
     end
   end
 end
