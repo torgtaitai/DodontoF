@@ -3623,37 +3623,7 @@ class DodontoFServer
       end
     end
   end
-  
-  def addLocalImageToList(imageList)
-    dir = "#{$imageUploadDir}/public"
-    addLocalImageToListByDir(imageList, dir)
-    
-    dir = getRoomLocalSpaceDirName
-    if( File.exist?(dir) )
-      addLocalImageToListByDir(imageList, dir)
-    end
-  end
-  
-  def addLocalImageToListByDir(imageList, dir)
-    makeDir(dir)
-    
-    files = Dir.glob("#{dir}/*")
-    
-    files.each do |fileName|
-      file = file.untaint
-      
-      next if( imageList.include?(fileName) )
-      next unless( isImageFile(fileName) )
-      next unless( isAllowedFileExt(fileName) )
-      
-      imageList << fileName
-      @logger.debug(fileName, "added local image")
-    end
-    
-    return imageList
-  end
-  
-  
+
   def isImageFile(fileName)
     rule = /.(jpg|jpeg|gif|png|bmp|swf)$/i
     (rule === fileName)

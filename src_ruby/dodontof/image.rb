@@ -139,7 +139,7 @@ module DodontoF
       @logger.debug(imageList, "imageList all result")
 
       @server.addTextsCharacterImageList(imageList, $imageUrlText)
-      @server.addLocalImageToList(imageList)
+      addLocalImageToList(imageList)
 
       @server.deleteInvalidImageFileName(imageList)
 
@@ -247,7 +247,7 @@ module DodontoF
 
     def deleteImages(imageUrlList)
       imageFiles = getAllImageFileNameFromTagInfoFile()
-      @server.addLocalImageToList(imageFiles)
+      addLocalImageToList(imageFiles)
       @logger.debug(imageFiles, "imageFiles")
 
       imageUrlFileName = $imageUrlText
@@ -346,6 +346,35 @@ module DodontoF
       end
 
       return false
+    end
+
+    def addLocalImageToList(imageList)
+      dir = "#{$imageUploadDir}/public"
+      addLocalImageToListByDir(imageList, dir)
+
+      dir = @server.getRoomLocalSpaceDirName
+      if( File.exist?(dir) )
+        addLocalImageToListByDir(imageList, dir)
+      end
+    end
+
+    def addLocalImageToListByDir(imageList, dir)
+      DodontoF::Utils.makeDir(dir)
+
+      files = Dir.glob("#{dir}/*")
+
+      files.each do |fileName|
+        file = file.untaint
+
+        next if( imageList.include?(fileName) )
+        next unless( @server.isImageFile(fileName) )
+        next unless( @server.isAllowedFileExt(fileName) )
+
+        imageList << fileName
+        @logger.debug(fileName, "added local image")
+      end
+
+      return imageList
     end
   end
 end
