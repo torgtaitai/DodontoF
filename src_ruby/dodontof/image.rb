@@ -70,7 +70,7 @@ module DodontoF
         if( imageData.nil? )
           @logger.debug("createSmallImage is here")
           imageFileNameBase = File.basename(imageFileName)
-          saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
+          saveSmallImage(smallImageData, imageFileNameBase, imageFileName, params)
           return result
         end
 
@@ -85,7 +85,7 @@ module DodontoF
           file.write( imageData )
         end
 
-        saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+        saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName, params)
 
       rescue => e
         result["resultText"] = DodontoF::Utils.getLanguageKey( e.to_s )
@@ -148,7 +148,7 @@ module DodontoF
       return imageList
     end
 
-    def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+    def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName, params)
       @logger.debug("saveSmallImage begin")
       @logger.debug(imageFileNameBase, "imageFileNameBase")
       @logger.debug(uploadImageFileName, "uploadImageFileName")
@@ -164,8 +164,6 @@ module DodontoF
       end
       @logger.debug("small image create successed.")
 
-      # TODO: saveSmallImage中のgetParamsFromRequestDataを引数に追い出す
-      params = @server.getParamsFromRequestData()
       tagInfo = params['tagInfo']
       @logger.debug(tagInfo, "saveSmallImage tagInfo")
 
