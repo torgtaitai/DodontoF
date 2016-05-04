@@ -4560,15 +4560,13 @@ SQL_TEXT
     
     return imageInfoFileName
   end
-  
+
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    source = effectData['source']
-    tagInfo = effectData['tagInfo']
-    
-    changeImageTagsLocal(source, tagInfo)
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.changeImageTags(effectData)
   end
-  
+
   def getAllImageFileNameFromTagInfoFile()
     imageTags = getImageTags()
     imageFileNames = imageTags.keys

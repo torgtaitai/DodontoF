@@ -148,6 +148,13 @@ module DodontoF_MySqlKai
       return result
     end
 
+    def changeImageTags(effectData)
+      source = effectData['source']
+      tagInfo = effectData['tagInfo']
+
+      @server.changeImageTagsLocal(source, tagInfo)
+    end
+
     private
 
     def getImageDataFromParams(params, key)
