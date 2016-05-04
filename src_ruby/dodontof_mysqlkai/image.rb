@@ -83,7 +83,7 @@ module DodontoF_MySqlKai
 
       tagInfo = imageData['tagInfo']
       @logger.debug(tagInfo, 'uploadImageUrl.tagInfo')
-      @server.changeImageTagsLocal(imageUrl, tagInfo)
+      changeImageTagsLocal(imageUrl, tagInfo)
 
       @logger.debug("uploadImageUrl end")
 
@@ -152,7 +152,7 @@ module DodontoF_MySqlKai
       source = effectData['source']
       tagInfo = effectData['tagInfo']
 
-      @server.changeImageTagsLocal(source, tagInfo)
+      changeImageTagsLocal(source, tagInfo)
     end
 
     private
@@ -208,9 +208,22 @@ module DodontoF_MySqlKai
 
       @server.margeTagInfo(tagInfo, uploadImageFileName)
       @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
-      @server.changeImageTagsLocal(uploadImageFileName, tagInfo)
+      changeImageTagsLocal(uploadImageFileName, tagInfo)
 
       @logger.debug("saveSmallImage end")
+    end
+
+    def changeImageTagsLocal(source, tagInfo)
+      return if( tagInfo.nil? )
+
+      roomNumber = tagInfo["roomNumber"]
+
+      @server.changeSaveData( @server.getImageInfoFileName(roomNumber) ) do |saveData|
+        saveData['imageTags'] ||= {}
+        imageTags = saveData['imageTags']
+
+        imageTags[source] = tagInfo
+      end
     end
   end
 end

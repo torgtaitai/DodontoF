@@ -4241,19 +4241,6 @@ class DodontoFServer
     return imageFileNames
   end
   
-  def changeImageTagsLocal(source, tagInfo)
-    return if( tagInfo.nil? )
-    
-    roomNumber = tagInfo["roomNumber"]
-    
-    changeSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-      saveData['imageTags'] ||= {}
-      imageTags = saveData['imageTags']
-      
-      imageTags[source] = tagInfo
-    end
-  end
-  
   def deleteImageTags(source)
     roomNumber = @saveDirInfo.getSaveDataDirIndex
     isDeleted = deleteImageTagsByRoomNo(source, roomNumber)
