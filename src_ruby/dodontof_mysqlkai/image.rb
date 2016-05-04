@@ -21,7 +21,7 @@ module DodontoF_MySqlKai
     end
 
     def deleteImages(imageUrlList)
-      imageFiles = @server.getAllImageFileNameFromTagInfoFile()
+      imageFiles = getAllImageFileNameFromTagInfoFile()
       @server.addLocalImageToList(imageFiles)
       @logger.debug(imageFiles, "imageFiles")
 
@@ -169,7 +169,7 @@ module DodontoF_MySqlKai
     def getImageList()
       @logger.debug("getImageList start.")
 
-      imageList = @server.getAllImageFileNameFromTagInfoFile()
+      imageList = getAllImageFileNameFromTagInfoFile()
       @logger.debug(imageList, "imageList all result")
 
       @server.addTextsCharacterImageList(imageList, $imageUrlText)
@@ -224,6 +224,13 @@ module DodontoF_MySqlKai
 
         imageTags[source] = tagInfo
       end
+    end
+
+    def getAllImageFileNameFromTagInfoFile()
+      imageTags = @server.getImageTags()
+      imageFileNames = imageTags.keys
+
+      return imageFileNames
     end
   end
 end

@@ -4537,13 +4537,6 @@ SQL_TEXT
     image.changeImageTags(effectData)
   end
 
-  def getAllImageFileNameFromTagInfoFile()
-    imageTags = getImageTags()
-    imageFileNames = imageTags.keys
-    
-    return imageFileNames
-  end
-
   def deleteImageTags(source)
     roomNumber = @saveDirInfo.getSaveDataDirIndex
     isDeleted = deleteImageTagsByRoomNo(source, roomNumber)
