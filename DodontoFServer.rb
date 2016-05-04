@@ -34,6 +34,7 @@ require 'dodontof/logger'
 require 'dodontof/utils'
 require 'dodontof/dice_adapter'
 require 'dodontof/play_room'
+require 'dodontof/image'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -3647,57 +3648,13 @@ class DodontoFServer
     
     return result.untaint
   end
-  
+
   def deleteImage()
-    @logger.debug("deleteImage begin")
-    
-    imageData = getParamsFromRequestData()
-    @logger.debug(imageData, "imageData")
-    
-    imageUrlList = imageData['imageUrlList']
-    @logger.debug(imageUrlList, "imageUrlList")
-    
-    deleteImages(imageUrlList)
+    params = getParamsFromRequestData()
+    image = DodontoF::Image.new(self, @saveDirInfo)
+    image.deleteImage(params)
   end
-    
-  def deleteImages(imageUrlList)
-    imageFiles = getAllImageFileNameFromTagInfoFile()
-    addLocalImageToList(imageFiles)
-    @logger.debug(imageFiles, "imageFiles")
-    
-    imageUrlFileName = $imageUrlText
-    @logger.debug(imageUrlFileName, "imageUrlFileName")
-    
-    deleteCount = 0
-    resultText = ""
-    imageUrlList.each do |imageUrl|
-      if( isProtectedImage(imageUrl) )
-        warningMessage = "#{imageUrl}は削除できない画像です。"
-        next
-      end
-      
-      imageUrl.untaint
-      deleteResult1 = deleteImageTags(imageUrl)
-      deleteResult2 = deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-      deleteResult = (deleteResult1 or deleteResult2)
-      
-      if( deleteResult )
-        deleteCount += 1
-      else
-        warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
-        @logger.error(warningMessage)
-        resultText += warningMessage
-      end
-    end
-    
-    resultText += "#{deleteCount}個のファイルを削除しました。"
-    result = {"resultText" => resultText}
-    @logger.debug(result, "result")
-    
-    @logger.debug("deleteImage end")
-    return result
-  end
-  
+
   def isProtectedImage(imageUrl)
     $protectImagePaths.each do |url|
       if( imageUrl.index(url) == 0 )

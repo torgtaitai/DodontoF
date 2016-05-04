@@ -418,8 +418,9 @@ COMMAND_END
     end
 
     def removeLocalImageTags(roomNumber)
-      tagInfos = @saveDirInfo.getImageTags(roomNumber)
-      @saveDirInfo.deleteImages(tagInfos.keys)
+      tagInfos = @server.getImageTags(roomNumber)
+      image = DodontoF::Image.new(@server, @saveDirInfo)
+      image.deleteImages(tagInfos.keys)
     end
 
     def removeLocalSpaceDir(roomNumber)
