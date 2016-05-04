@@ -3850,22 +3850,6 @@ SQL_TEXT
     addCharacterData(characters, stateList)
   end
 
-  def addTextsCharacterImageList(imageList, *texts)
-    texts.each do |text|
-      next unless( isExist?(text) )
-      
-      lines = readLines(text)
-      lines.each do |line|
-        line.chomp!
-        
-        next if(line.empty?)
-        next if(imageList.include?(line))
-        
-        imageList << line
-      end
-    end
-  end
-
   def deleteInvalidImageFileName(imageList)
     imageList.delete_if{|i| (/\.txt$/===i)}
     imageList.delete_if{|i| (/\.lock$/===i)}

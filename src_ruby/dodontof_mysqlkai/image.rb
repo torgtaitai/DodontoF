@@ -139,7 +139,7 @@ module DodontoF_MySqlKai
       imageList = getAllImageFileNameFromTagInfoFile()
       @logger.debug(imageList, "imageList all result")
 
-      @server.addTextsCharacterImageList(imageList, $imageUrlText)
+      addTextsCharacterImageList(imageList, $imageUrlText)
       addLocalImageToList(imageList)
 
       @server.deleteInvalidImageFileName(imageList)
@@ -381,6 +381,22 @@ module DodontoF_MySqlKai
     def isImageFile(fileName)
       rule = /.(jpg|jpeg|gif|png|bmp|swf)$/i
       (rule === fileName)
+    end
+
+    def addTextsCharacterImageList(imageList, *texts)
+      texts.each do |text|
+        next unless( @server.isExist?(text) )
+
+        lines = @server.readLines(text)
+        lines.each do |line|
+          line.chomp!
+
+          next if(line.empty?)
+          next if(imageList.include?(line))
+
+          imageList << line
+        end
+      end
     end
   end
 end
