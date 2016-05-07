@@ -1,4 +1,4 @@
-image
+title=トランプ,height=1,width=1,image
 cards/trump_mini_swf/backs.swf	裏向きの札
 cards/trump_mini_swf/clubAs.swf	クラブのA
 cards/trump_mini_swf/club2s.swf	クラブの2

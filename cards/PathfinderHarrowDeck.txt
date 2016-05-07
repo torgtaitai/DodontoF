@@ -1,4 +1,4 @@
-text
+title=Pathfinder：Harrow Deck,text
 <p align='center'><font size="42" color="#990000"><i></font></font><br><br><br>Pathfinder RPG<br>ハロウカードデック</i></font><p>
 <p align='center'><font size="38"><B>＝The Paladin＝</b></font><font size="28"><br><i>聖騎士</i></font><br></p><font size="36"><b>秩序にして善：</b><br></font><font size="28">　次のﾀｰﾝの開始時迄、”悪を討つ一撃”の能力を得る。この時ｈｄの半分の追加ﾀﾞﾒｰｼﾞを得るが、パラディンレベルがｈｄの半分以上あるならばそちらを使用出来る。</font><br><br><br><font size="36"><b>槌(筋力)：</b><br></font><font size="28">１回のd20判定に+8(判定前)、+4(判定後)の幸運ﾎﾞｰﾅｽを与える。他者にも利用出来るが、ﾎﾞｰﾅｽは半分になる(+4/+2)。</font><br>
 <p align='center'><font size="38"><B>＝The Keep＝</b></font><font size="28"><br><i>砦</i></font><br></p><font size="36"><b>中立にして善：</b><br></font><font size="28">　正のｴﾈﾙｷﾞｰ接触の能力を得る。回復量は１ｄ６×ｷｬﾗｸﾀｰﾚﾍﾞﾙに等しい。</font><br><br><br><font size="36"><b>槌(筋力)：</b><br></font><font size="28">１回のd20判定に+8(判定前)、+4(判定後)の幸運ﾎﾞｰﾅｽを与える。他者にも利用出来るが、ﾎﾞｰﾅｽは半分になる(+4/+2)。</font><br>

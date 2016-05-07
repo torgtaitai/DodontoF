@@ -1,4 +1,4 @@
-image
+title=トランプ,image
 cards/trump_swf/back.swf	裏向きの札
 cards/trump_swf/clubA.swf	クラブのA
 cards/trump_swf/club2.swf	クラブの2

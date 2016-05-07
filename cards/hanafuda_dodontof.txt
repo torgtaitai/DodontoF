@@ -1,4 +1,4 @@
-image
+title=花札：どどんとふバージョン,image
 cards/hanafuda/hanafuda0000.png
 cards/hanafuda/hanafuda0101.png
 cards/hanafuda/hanafuda0102d.png

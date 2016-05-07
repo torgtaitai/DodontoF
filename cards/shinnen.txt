@@ -1,4 +1,4 @@
-text
+title=深淵：運命カード,text
 <p align='center'><font size="43" color="#009999"><i><br><br><br><br>深淵<br>運命カード</i></font><p>
 <font size="10"><br></font><font size="38"><p align='left'>白の黒剣　　　　　　　[１]</p></font><font size="30"><br><u>ダメージ：</u><b>　衝撃</b><br>　頭がくらくらする。精神力−４<br><br><u>追加アクション：</u><b>攻撃／防御</b><br><br><u>語り部：</u><br><i>　血が一滴、したたった。<br>　無明の闇から、<br>　今、何かが誕生し、<br>　世界に波紋をもたらしていく。</i><br><br><p align='center'>運命番号[01]</p></font>
 <font size="10"><br></font><font size="38"><p align='left'>黒の翼人　　　　　　　[２]</p></font><font size="30"><br><u>ダメージ：</u><b>　演出</b><br>　顔をかすめ、触れた手が血で赤く濡れる。傷跡ができる。<br><br><u>追加アクション：</u><b>回避／移動</b><br><br><u>語り部：</u><br><i>　死は安寧。限られし命の者のさだめなり。拒むことこそ悪なり。</i><br><br><p align='center'>運命番号[02]</p></font>

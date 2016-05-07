@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：地縁カード:光,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>光</i></font><p>
 <font size="40">力強い巌</font><br><p align='right'><font size="40">【真の赤】</font></p><br><font size="36">1.陽気な丘小人<br>2.頑固な髭小人<br>3.力強い巨人族<br>4.古代から残る強力な結界<br>5.古代から残る神殿／建物<br>6.荘厳な大きな岩山</font>
 <font size="40">美しき水</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.飲んだら美味しそうな水<br>2.さらさらと流れる小川<br>3.水を飲んでいる小動物<br>4.虹がかかる小さな滝<br>5.魚が飛び跳ねている池<br>6.美しい泉の精</font>

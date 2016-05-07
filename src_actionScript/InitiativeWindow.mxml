@@ -1359,11 +1359,33 @@
               
               subColumn.visible = false;
               mainColumn.visible = true;
-              mainColumn.headerText = columnInfo.title;
+              mainColumn.headerText = getColumnTitle(columnInfo.title);
           }
           
           loadColumnInfosAfter();
       }
+      
+      static public function getColumnTitle(title:String):String {
+          var name:String = title;
+          
+          var max:RegExp = new RegExp("(.+)" + getMaxValueMarker() + "$");
+          var maxMatched:Object = max.exec(title);
+          if( maxMatched != null ) {
+              name = maxMatched[1];
+              return Language.text("initiativeColumnMaxFormat", name);
+          }
+          var min:RegExp = new RegExp("(.+)" + getMinValueMarker() + "$");
+          var minMatched:Object = min.exec(title);
+          if( minMatched != null ) {
+              name = minMatched[1];
+              return Language.text("initiativeColumnMinFormat", name);
+          }
+          
+          
+          var info:Object = getCounterNameInfo(title);
+          return info["name"];
+      }
+
       
       static private var checkBoxColumnHeaderStyles:Array;
       
@@ -1545,6 +1567,8 @@
           for(var i:int ; i < counterNames.length ; i++) {
               var counterName:String = counterNames[i];
               var count:int = piece.getCounter(counterName);
+              count = getCounterValue(count, piece, counterName);
+              
               var columnInfo:Object = getColumnInfo(counterName, checkBoxIndex);
               
               if( columnInfo.isCheckBox ) {
@@ -1566,6 +1590,88 @@
               });
           
           Log.logging("addCharacter end");
+      }
+      
+      private function getCounterValue(count:int, piece:InitiativedPiece, counterName:String):int {
+          Log.logging("count", count);
+          Log.logging("counterName", counterName);
+          
+          var info:Object = getCounterNameInfo(counterName);
+          Log.logging("info", info);
+          var name:String = info["name"];
+          
+          var min:int = getCounterLimit(info["min"], piece, (name + getMinValueMarker()), count);
+          if( count < min ) {
+              count = min;
+          }
+          
+          var max:int = getCounterLimit(info["max"], piece, (name + getMaxValueMarker()), count);
+          Log.logging("max", max);
+          if( count > max ) {
+              count = max;
+          }
+          Log.logging("changed count", count);
+          
+          return count;
+      }
+      
+      static public function getMaxValueMarker():String {
+          return "@MAX";
+      }
+      
+      static public function getMinValueMarker():String {
+          return "@MIN";
+      }
+      
+      static public function getCounterNameInfo(counterName:String):Object {
+          Log.logging("getCounterNameInfo counterName", counterName);
+          
+          var text:String = counterName;
+          text = text.replace(/＞/g, ">");
+          text = text.replace(/＜/g, "<");
+          text = text.replace(/？/g, "?");
+          var changer:ZenkakuToHankaku = new ZenkakuToHankaku();
+          text = changer.changeOnNumber(text);
+          
+          var result:Object = null;
+          
+          result = /^((-?\d+|\?)>)?([^\<\>]+)(>(-?\d+|\?))?$/.exec(text);
+          Log.logging("result match1", result);
+          if( result != null ) {
+              return {"name": result[3],
+                      "min" : result[5],
+                      "max" : result[2]  };
+          }
+          
+          result = /^((-?\d+|\?)<)?([^\<\>]+)(<(-?\d+|\?))?$/.exec(text);
+          Log.logging("result match2", result);
+          if( result != null ) {
+              return {"name": result[3],
+                      "min" : result[2],
+                      "max" : result[5]  };
+          }
+          
+          Log.logging("NOT match any paturn");
+          return {"name" : counterName};
+      }
+      
+      
+      private function getCounterLimit(limitText:String, piece:InitiativedPiece, marker:String, defaultCount:int):int {
+          
+          if ( limitText == null ) {
+              return defaultCount;
+          }
+          
+          var limit:int = parseInt(limitText);
+          if( limitText == "?" ) {
+              if( ! piece.isCounterExist(marker) ) {
+                  return defaultCount;
+              }
+              
+              limit = piece.getCounter(marker);
+          }
+          
+          return limit;
       }
       
       private function selectTargetInfo(targetInfo:Object):void {
@@ -1861,12 +1967,11 @@
           var stepper:NumericStepper = NumericStepper(event.currentTarget.itemEditorInstance);
           var newCount:int = stepper.value;
           
-          if( newCount == count ) {
-              return false;
-          }
-          
           var counterNames:Array = getCounterNames();
           var counterName:String = counterNames[counterIndex];
+          newCount = getCounterValue(newCount, piece, counterName);
+          
+          Log.logging("newCount", newCount);
           piece.setCounter(counterName, newCount);
           
           return true;

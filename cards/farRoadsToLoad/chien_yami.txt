@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：地縁カード:闇,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>闇</i></font><p>
 <font size="40">闇のなかに光るもの</font><br><p align='right'><font size="40">【真の金色】</font></p><br><font size="36">1.きらきらした石<br>2.宝石／鉱脈を発見<br>3.光っている苔／発光性植物<br>4.向こうから、明りが……<br>5.新たな洞窟／通路<br>6.闇に光るモンスターの目</font>
 <font size="40">闇のなかに流れる水</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.水のしたたる音<br>2.流水／地下水脈<br>3.たまり水／地下池／地下湖<br>4.魚／両棲類／水棲生物<br>5.モンスターと遭遇<br>6.暗闇からモンスターが襲ってくる</font>

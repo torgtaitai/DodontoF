@@ -12,8 +12,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.47.24"
-$versionDate = "2016/04/07"
+$versionOnly = "Ver.1.48.01"
+$versionDate = "2016/05/07"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -257,7 +257,7 @@ class DodontoFServer_MySqlKai
     
     return @card unless( @card.nil? )
     
-    @card = Card.new();
+    @card = Card.new(@logger);
     
     
     return @card
@@ -1457,7 +1457,7 @@ SQL_TEXT
     }
     
     if( getWebIfRequestBoolean("card", false) )
-      cardInfos = getCardsInfo.collectCardTypeAndTypeName()
+      cardInfos = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
       jsonData["cardInfos"] = cardInfos
     end
     
@@ -2277,12 +2277,10 @@ SQL_TEXT
     allLoginCount, loginUserCountList = getAllLoginCount()
     
     loginMessage = getLoginMessage()
-    cardInfos = getCardsInfo.collectCardTypeAndTypeName()
     diceBotInfos = getDiceBotInfos()
     
     result = {
       "loginMessage" => loginMessage,
-      "cardInfos" => cardInfos,
       "isDiceBotOn" => $isDiceBotOn,
       "uniqueId" => uniqueId,
       "refreshTimeout" => $refreshTimeout,
@@ -2318,6 +2316,20 @@ SQL_TEXT
     
     @logger.debug(result, "result")
     @logger.debug("getLoginInfo end")
+    return result
+  end
+  
+  
+  def getCardInfos
+    result = {}
+    result["result"] = "OK"
+    begin
+      result["cardInfos"] = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
+    rescue => e
+      result["result"] = e.to_s
+      @logger.exception(e)
+    end
+    
     return result
   end
   

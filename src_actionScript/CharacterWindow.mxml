@@ -1363,7 +1363,7 @@
         }
         subColumn.visible = false;
         mainColumn.visible = true;
-        mainColumn.headerText = columnInfo.title;
+        mainColumn.headerText = InitiativeWindow.getColumnTitle( columnInfo.title );
         
         //setHeaderColor(mainColumn, columnInfo);
         

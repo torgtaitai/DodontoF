@@ -109,7 +109,18 @@ package {
         }
         
         private function getSimpleMessage(message:String):String {
-            var index:int = message.indexOf(":");
+            var markerList:Array = [" : ", ":"];
+            var index:int = -1;
+            
+            for(var i:int = 0 ; i < markerList.length ; i++) {
+                var marker:String = markerList[i];
+                index = message.indexOf(marker);
+                if( index != -1 ) {
+                    index += (marker.length - 1)
+                    break;
+                }
+            }
+            
             if( index == -1 ) {
                 return message;
             }

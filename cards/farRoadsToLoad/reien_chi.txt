@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：霊縁カード:地,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>霊縁<br>地</i></font></p>
 <font size="48">山＋円</font><br><br><font size="32">【黒】『デュールの衣』</font><br><font size="24">●憎しみ／恐れ 1d6<br>対象を黒い皮膜で覆い、触れる者に 1打撃を与える。3ラウンド持続。</font><br><br><font size="32">【金】『光の鎧』</font><br><font size="24">●哀れみ／恐れ 1d6<br>対象に防御力 1d6 を付与する。3ラウンド持続。</font><br><br><font size="32">【赤】『ガルパニの鎧』</font><br><font size="24">●怒り／恐れ 1d6<br>対象の表面を硬化させ、防御値 1d6 を付与。3ラウンド持続。</font>
 <font size="48">山＋三角</font><br><br><font size="32">【赤】『大力の衣』</font><br><font size="24">●怒り／憎しみ 1d6<br>武器の攻撃力を 1d6 増大させる。3ラウンド持続。</font><br><br><font size="32">【白】『イーヴォの戒め』</font><br><font size="24">●悲しみ／恐れ 1d6<br>閃光を相手に浴びせる。対象との「感覚」の対抗RR に成功すれば、対象を 1ラウンド麻痺させる。</font><br><br><font size="32">【緑】『イバラのトゲ』</font><br><font size="24">●憎しみ／恐れ 1d6<br>対象の足下にイバラを生やし、1ラウンド足留めする。</font>

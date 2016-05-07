@@ -1,4 +1,4 @@
-image
+title=カードランカー,image
 ./cards/cardRanker/card_back.png
 ./cards/cardRanker/06black/card_bla_2_1.png	黒の2：黒竜	黒の2：黒竜
 ./cards/cardRanker/06black/card_bla_3_1.png	黒の3：闇騎士	黒の3：闇騎士

@@ -349,6 +349,10 @@ package {
             return isMode('mysqlkai');
         }
         
+        public function isInvisibleMode():Boolean {
+            return isMode('invisible');
+        }
+        
         public function isErrorLogMode():Boolean {
             return isMode('errorLog');
         }

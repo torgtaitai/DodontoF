@@ -1,4 +1,4 @@
-text,upDown
+title=ブレイド・オブ・アルカナ：タロット,text,upDown
 <p align='center'><font size="36" color="#FF9999"><i><br><br><br><br><br><br>ブレイド・オブ・アルカナ<br>タロット</i></font><p>
 <p align='center'><font size="54" ><br><br>-.<br>Ventus<br>ウェントス</font><p>
 <p align='center'><font size="54" ><br><br><br>1.<br>Effectus<br>エフェクトス</font><p>

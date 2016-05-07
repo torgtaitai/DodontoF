@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：霊縁カード:歌,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>霊縁<br>歌</i></font></p>
 <font size="48">竪琴＋三角</font><br><br><font size="32">【黒】『惑乱の調べ』</font><br><font size="24">●無名の感情 1d6<br>「霊感」の RR に成功すれば、対象を 1ラウンド混乱させる。</font><br><br><font size="32">【緑】『眠りの調べ』</font><br><font size="24">●哀れみ／慈しみ 1d6<br>対象との「霊感」の対抗RR に成功すれば、対象を眠らせることができる。対象は術者との「霊感」の対抗RR に成功しないかぎり目覚めない。</font>
 <font size="48">竪琴＋四角</font><br><br><font size="32">【赤】『岩鳴り』</font><br><font size="24">●無名の感情 1d6<br>岩に任意の音を発生させる。</font><br><br><font size="32">【青】『波の竪琴』</font><br><font size="24">●喜び／やるせなさ 1d6<br>「感覚」分の間、水面の波に音楽を奏でさせる。</font><br><br><font size="32">【紫】『風の歌』</font><br><font size="24">●喜び／悲しみ 1d6<br>「霊感」分の間、風に術者の声を宿らせ、歌を歌わせることができる。</font>

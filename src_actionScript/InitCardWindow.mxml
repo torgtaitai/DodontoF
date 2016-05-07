@@ -61,18 +61,63 @@
     import mx.events.FlexEvent;
     import mx.controls.Alert;
     import mx.events.CloseEvent;
-       
-    static private var cardInfos:Array = new Array();
+    
+    static private var cardInfos:Array = null;
     private var checkBoxes:Object = new Object();
-       
+    private var guiInputSender:GuiInputSender;
+    
     override protected function setup():void {
-        initCardTypes();
+        setEnable(false);
+        
+        guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
+        
+        if( cardInfos == null ) {
+            requestCardInfos();
+        } else {
+            initCardTypes();
+        }
     }
     
-    static private var cardTypeTrump:String = "trump_swf";
+    private function setEnable(b:Boolean):void {
+        if( b ){
+            executeButton.enabled = true;
+            status = null;
+        } else {
+            executeButton.enabled = false;
+            status = Language.s.loading;
+        }
+    }
+    
+    private function requestCardInfos():void {
+        guiInputSender.getCardInfos(requestCardInfosResult);
+    }
+    
+    private function requestCardInfosResult(obj:Object):void {
+        Log.loggingTuning("=>requestCardInfosResult() Begin");
+        try {
+            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
+            
+            var result:String = jsonData.result;
+            if( result != 'OK' ) {
+                Alert.show(result);
+                return;
+            }
+            
+            setCardInfos( jsonData.cardInfos );
+            
+            initCardTypes();
+        } catch(e:Error) {
+            Log.loggingException("requestCardInfosResult", e);
+        }
+        
+        Log.loggingTuning("=>requestCardInfosResult() End");
+    }
+    
+    
+    static private var cardTypeTrump:String = "trump";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
     
-    private var gropuBoxes:Object = new Object();
+    private var groupBoxes:Object = new Object();
     
     static private function isTrump(cardType:String):Boolean {
         return (cardType.indexOf(cardTypeTrump) == 0);
@@ -106,11 +151,13 @@
     }
     
     private function initCardTypes():void {
+        var groupCounts:Object = getCardGroupCounts(cardInfos);
+
+    
         for(var i:int = 0 ; i < cardInfos.length ; i++) {
             var cardInfo:Object = cardInfos[i];
             var cardType:String = cardInfo.type;
-            var cardName:String = cardInfo.title;
-
+            
             if( isTrump(cardType) ) {
                 initCardSizeInfo(cardType);
                 continue;
@@ -122,16 +169,33 @@
             
             var checkBox:CheckBox = new CheckBox();
             checkBox.id = cardType;
-            checkBox.label = getPrefixExclideText(cardName);
             
             checkBoxes[cardType] = checkBox;
             
-            if( isGroupCardType(cardType) ) {
+            if( isGroupCardType(cardType, groupCounts) ) {
+                checkBox.label = getGroupExclideCardName(cardType);
                 addGropBox(cardType, checkBox);
             } else {
+                checkBox.label = getCardName(cardType);
                 checkBoxPlace.addChild( checkBox );
             }
         }
+        setEnable(true);
+    }
+    
+    private function getCardGroupCounts(infos:Array):Object {
+        var groupCounts:Object = new Object();
+        
+        for(var i:int = 0 ; i < cardInfos.length ; i++) {
+            var cardInfo:Object = cardInfos[i];
+            var cardType:String = cardInfo.type;
+            var groupName:String = getCardNameGroup(cardType);
+            
+            groupCounts[groupName] ||= 0;
+            groupCounts[groupName] += 1;
+        }
+        
+        return groupCounts;
     }
     
     private function initCardSizeInfo(cardType:String):void {
@@ -143,54 +207,72 @@
         trumpSizeChanged = result.text;
     }
     
-    private function isGroupCardType(cardType:String):Boolean {
-        return (getPrefix(cardType) != "");
+    private function isGroupCardType(cardType:String, groupCounts:Object):Boolean {
+        var groupName:String = getCardNameGroup(cardType);
+        var count:int = groupCounts[groupName];
+        return ( count > 1 );
     }
     
     private function addGropBox(cardType:String, checkBox:CheckBox):void {
-        var prefix:String = getPrefix(cardType);
+        var group:String = getCardNameGroup(cardType);
         
-        var box:HBox = this.gropuBoxes[prefix];
+        var box:HBox = this.groupBoxes[group];
         
         if( box == null ) {
-            this.gropuBoxes[prefix] = new HBox();
-            box = this.gropuBoxes[prefix];
-            
-            var cardName:String = getCardName(cardType);
-            
-            var label:Label = new Label();
-            label.text = getPrefix( cardName );
-            Log.logging("getCardInfo(cardType)", getCardInfo(cardType));
-            
-            checkBoxPlace.addChild( label );
-            checkBoxPlace.addChild( box );
-
-            var blank:Label = new Label();
-            blank.text = getPrefix( "  " );
-            box.addChild( blank );
+            box = createGropBox(cardType);
+            this.groupBoxes[group] = box;
         }
         
         box.addChild( checkBox );
     }
     
-    private function getPrefix(cardType:String):String {
-        var index:int = cardType.indexOf(":");
+    private function createGropBox(cardType:String):HBox {
+        var box:HBox = new HBox();
         
-        if( index == -1 ) {
-            return "";
-        }
+        var cardGroup:String = getCardNameGroup( cardType );
+        var label:Label = new Label();
+        label.text = cardGroup;
         
-        return cardType.substr(0, index);
+        var blank:Label = new Label();
+        blank.text = "  ";
+        box.addChild( blank );
+        
+        checkBoxPlace.addChild( label );
+        checkBoxPlace.addChild( box );
+        
+        return box;
     }
     
-    private function getPrefixExclideText(text:String):String {
-        var index:int = text.indexOf(":");
+    
+    private var cardGroupReg:RegExp = /(.+)(:|：)(.+)/;
+    
+    private function getCardGroupInfo(cardType:String):Object {
         
-        if( index == -1 ) {
-            return text;
+        var cardName:String = getCardName(cardType);
+        
+        var info:Object = {"group" : cardName,
+                           "name" : cardName };
+        
+        var result:Object = cardGroupReg.exec(cardName);
+        
+        if( result == null ) {
+            return info;
         }
         
-        return text.substr( (index + 1) );
+        info = { "group" : result[1],
+                 "name" : result[3] };
+        
+        return info;
+    }
+    
+    private function getCardNameGroup(cardType:String):String {
+        var info:Object = getCardGroupInfo(cardType);
+        return info["group"];
+    }
+    
+    private function getGroupExclideCardName(cardType:String):String {
+        var info:Object = getCardGroupInfo(cardType);
+        return info["name"];
     }
     
     private function changeTrumpCheck():void {
@@ -275,7 +357,7 @@
     public function initCards(infos:Array, result:Function):void {
         try{
             var cardInitInfos:Array = getCardInitInfos();
-            DodontoF_Main.getInstance().getGuiInputSender().getSender().initCards(infos, result);
+            guiInputSender.getSender().initCards(infos, result);
         } catch(error:Error) {
             this.status = error.message;
         }
@@ -291,7 +373,7 @@
         }
         
         DodontoF_Main.getInstance().getDodontoF().selectMenuByManuName("isCardPickUpVisible", jsonData.cardExist);
-        DodontoF_Main.getInstance().getGuiInputSender().getSender().resetCharactersUpdateTime();
+        guiInputSender.getSender().resetCharactersUpdateTime();
         PopUpManager.removePopUp(this);
     }
     

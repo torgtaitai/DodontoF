@@ -112,6 +112,10 @@ package {
             return 0;
         }
         
+        public function isCounterExist(key:String):Boolean {
+            return false;
+        }
+        
         public function setCounter(key:String, value:int):void {
         }
         

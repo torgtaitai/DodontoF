@@ -1,4 +1,4 @@
-text,upDown
+title=ウィッチクエスト：ウィッチ・タロー,text,upDown
 <p align='center'><font size="42" color="#FF9999"><br><br><br><br><br><br>ウィッチタロー</font><p>
 <p align='center'><font size="42"><br><br><br><br><br><br>１．星(THE STAR)</font><p>			１．星(THE STAR)	１．星(THE STAR)\nキイワード：はじまり\n正位置：機嫌、新しい出発、希望	１．星(THE STAR)\nキイワード：はじまり\n逆位置：先が見えない、不安
 <p align='center'><font size="42"><br><br><br><br><br><br>２．姫(THE PRINCESS)</font><p>			２．姫(THE PRINCESS)	２．姫(THE PRINCESS)\nキイワード：少女、若さ、可憐、快活\n正位置：可憐な、若さあふれる、みずみずしい、守られる存在	２．姫(THE PRINCESS)\nキイワード：少女、若さ、可憐、快活\n逆位置：わがままな、（少女の持つ）残忍性を持った、塔に閉じ込められた

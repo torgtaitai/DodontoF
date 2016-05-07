@@ -5,20 +5,24 @@
 
 
 ・1行目について。
-(text|image)[,upDown]
+title=カード名称,(text|image)[,upDown]
 
-textなら2行目以降をはHTML文字列として解析。
-imageなら画像データへURLパスとして解析。
-upDownが付くなら上下の区別アリ。
+最初に
+　title= の箇所にカードの名称を記述。
+次の記述が
+　textなら2行目以降をはHTML文字列として解析。（使用できるタグについては後述）
+　imageなら画像データへURLパスとして解析。
+最後に、
+　upDownが付くなら上下の区別アリ。
 
 例１）N◎VA　→ HTMLで上下区別アリ。
-text,upDown
+title=トーキョーN◎VA：ニューロデッキ,text,upDown
 <p align='center'><font size="42" color="#FF9999"><i><br><br><br><br><br>N◎VA<br>ニューロデッキ</i></font><p>
 <p align='center'><font size="72"><br>カ<br>ブ<br>キ</font><p>
 ：
 
 例２）トランプ　→ 画像へのパスで上下の区別なし
-image
+title=トランプ,image
 cards/trump_2/trump13.png	裏向きの札
 cards/trump_2/trump0.png	スペードのA
 ：
@@ -85,5 +89,47 @@ text
 最後にタブ挟んで #FF0033 となっているのが、背面の色。
 
 
+・HTMLフォーマットで使用できるタグについて。
+カードで使用できるタグは限られています。
+これはFlashの仕様のため、拡張することもできません。
+
+以下のリンク先に詳細があります。
+http://help.adobe.com/ja_JP/FlashPlatform/reference/actionscript/3/flash/text/TextField.html#htmlText
+
+要約すると、
+アンカータグ　<a> 
+ボールドタグ　<b>
+ブレークタグ　<br>
+フォントタグ　<font>
+イメージタグ　<img>
+イタリックタグ　<i>
+リスト項目タグ　<li>
+段落タグ　<p>
+テキストフォーマットタグ　<textformat>
+下線タグ　<u>
+だけが使えます。
+
+・カードの表示順序
+カードの表示順序は src_ruby/config.rb の $cardOrder で定義してあります。
+
+抜粋）
+
+$cardOrder = <<____CARD_END_MARKER____
+トランプ
+アマデウス:脅威カード
+（省略）
+ランダムダンジョン・トランプ
+____CARD_END_MARKER____
 
 
+新しいカードを追加した場合には表示したい順序の箇所にこのように追加します。
+
+$cardOrder = <<____CARD_END_MARKER____
+トランプ
+追加カード
+アマデウス:脅威カード
+（省略）
+ランダムダンジョン・トランプ
+____CARD_END_MARKER____
+
+なお、「トランプ」と「ランダムダンジョン・トランプ」は順序を変更しても最上段・最下段で固定です。ご了承ください。

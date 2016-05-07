@@ -125,11 +125,28 @@ package {
             return parseInt(counters[key]);
         }
         
+        public function isCounterExist(key:String):Boolean {
+            return (counters[key] != null);
+        }
+        
         public function setCounter(key:String, value:int):void {
             if( key == null ) {
                 return;
             }
-            counters[key] = value;
+            
+            var names:Array = InitiativeWindow.getInstance().getCounterNameList();
+            if( names.indexOf(key) != -1 ) {
+                counters[key] = value;
+                return;
+            }
+            
+            for each(var name:String in names) {
+                var title:Object = InitiativeWindow.getColumnTitle(name);
+                if( key == title ) {
+                    counters[name] = value;
+                    return;
+                }
+            }
         }
         
         public function getStatusName(key:String):String {

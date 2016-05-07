@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="400"
-   height="250"
+   width="450"
+   height="280"
    title="{Language.s.setInitiativeInfoWindow}"
    showCloseButton="true"
    >
@@ -15,6 +15,7 @@
       <mx:Label text="{Language.s.inputerCounterNamesInfo_1}" />
       <mx:Label text="{Language.s.inputerCounterNamesInfo_2}" />
       <mx:Label text="{Language.s.inputerCounterNamesInfo_3}" />
+      <mx:Label text="{Language.s.inputerCounterNamesInfo_4}" />
     </mx:Box>
     <mx:HBox width="100%" height="100%">
       <mx:Label  text="{Language.s.counterNamelist}" />
@@ -40,25 +41,67 @@
     import mx.managers.PopUpManager;
     import mx.controls.Label;
     
-    public function init(initText:String):void {
-        counterNames.text = initText;
+    override protected function setup():void {
     }
     
-    override protected function setup():void {
+    public function init(text:String):void {
+        counterNames.text = getCounterNameText(text);
+    }
+    
+    private var maxReg:RegExp = new RegExp("[^ ]+" + InitiativeWindow.getMaxValueMarker(), "g");
+    private var minReg:RegExp = new RegExp("[^ ]+" + InitiativeWindow.getMinValueMarker(), "g");
+    
+    
+    private function getCounterNameText(text:String):String {
+        
+        text = text.replace(maxReg, '');
+        text = text.replace(minReg, '');
+        text = text.replace(/[\s　]+/g, ' ');
+        
+        return text;
     }
     
     public function execute():void {
         try {
             var text:String = counterNames.text;
-            text.replace(/[\s　]+/, ' ');
-            text.replace(/\s$/, '');
-            var counters:Array = text.split(/\s/);
+            
+            text = text.replace(maxReg, '');
+            text = text.replace(minReg, '');
+            text = text.replace(/[\s　]+/g, ' ');
+            text = text.replace(/\s+$/, '');
+            text = text.replace(/^\s+/, '');
+            
+            var counters:Array = text.split(/\s+/);
+            counters = getCounters( counters );
+            
             DodontoF_Main.getInstance().getRoundTimer().sendCounterNames(counters);
             
             PopUpManager.removePopUp(this);
         } catch(error:Error) {
             this.status = error.message;
         }
+    }
+    
+    
+    private function getCounters(counters:Array):Array {
+        var result:Array = new Array();
+        
+        for each(var counterName:String in counters) {
+            var info:Object = InitiativeWindow.getCounterNameInfo(counterName);
+            var name:String = info["name"];
+            
+            if( info["min"] == "?" ) {
+                result.push( name + InitiativeWindow.getMinValueMarker() );
+            }
+            
+            result.push( counterName );
+            
+            if( info["max"] == "?" ) {
+                result.push( name + InitiativeWindow.getMaxValueMarker() );
+            }
+        }
+        
+        return result;
     }
     
     ]]>

@@ -97,6 +97,7 @@ package {
         }
         
         private function init():void {
+            initActiveChannelNames();
             historyIndex = 0;
             restChatSendDataForReplay = new Array();
             setSlider();
@@ -154,10 +155,15 @@ package {
         }
         
         //リプレイで表示するチャンネルはここの辺りの処理で制御
-        private var activeChannelNames:Array = [DodontoF_Main.publicChatChannelName];
+        private var activeChannelNames:Array = [];
+        
+        public function initActiveChannelNames():void {
+            activeChannelNames = [DodontoF_Main.publicChatChannelName];
+        }
         
         public function setActiveChannel(names:Array):void {
             if( names == null ) {
+                activeChannelNames = null;
                 return;
             }
             
@@ -171,6 +177,10 @@ package {
         
         public function isIgnoreChannelName(channelName:String):Boolean {
             if( channelName == null ) {
+                return false;
+            }
+            
+            if( activeChannelNames == null ) {
                 return false;
             }
             

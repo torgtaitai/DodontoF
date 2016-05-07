@@ -1,4 +1,4 @@
-text,upDown
+title=トーキョーN◎VA：ニューロデッキ,text,upDown
 <p align='center'><font size="42" color="#FF9999"><i><br><br><br><br><br>N◎VA<br>ニューロデッキ</i></font><p>			裏向きのニューロカード
 <p align='center'><font size="54"><br>―.<br><br>カブキ<br>KABUKI</font><p>			カブキ
 <p align='center'><font size="54"><br>Ⅰ.<br><br>バサラ<br>VASARA</font><p>			バサラ

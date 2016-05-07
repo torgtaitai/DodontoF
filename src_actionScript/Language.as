@@ -1094,11 +1094,15 @@ package {
             p.setInitiativeInfoWindow = "イニシアティブ表設定";
             p.inputerCounterNames = "カウンターに使用するパラメータ名をスペース区切りで入力してください";
             p.inputerCounterNamesInfo_1 = "先頭に ＊（全角・半角どちらでも可）を付けて記述するとチェック欄になります。";
-            p.inputerCounterNamesInfo_2 = "　　　例）　HP　MP　AC　侵食率　ポシビリティ　*毒　＊転倒";
-            p.inputerCounterNamesInfo_3 = "(注)この設定は同一プレイルームの全員に影響します。";
+            p.inputerCounterNamesInfo_2 = "（最小）＜カウンター名＜（最大）で上下限を指定。「？」を指定すると個別に設定可能。";
+
+            p.inputerCounterNamesInfo_3 = "　　　例）　-15<HP<?　?<MP<99　AC　侵食率　ポシビリティ　*毒　＊転倒";
+            p.inputerCounterNamesInfo_4 = "(注)この設定は同一プレイルームの全員に影響します。";
             p.counterNamelist = "カウンター名一覧:";
             //p.initiativeWindowFontSize = "イニシアティブ表フォントサイズ:";
             //p.initiativeWindowFontSizeTips = "(注)この設定は他のプレイヤーに影響は無く、あなたの画面にだけ反映されます。";
+            p.initiativeColumnMaxFormat = "最大{0}";
+            p.initiativeColumnMinFormat = "最小{0}";
             
             // TagManagerWindow.mxml
             p.tagManagerWindowTitle = "画像タグ名管理";
@@ -1147,7 +1151,6 @@ package {
             japaneseDefault = p;
             languageTable[""] = japaneseDefault;
         }
-        
         
         
         static private var keywordFormat:RegExp = /^###Language:(.+)###$/;

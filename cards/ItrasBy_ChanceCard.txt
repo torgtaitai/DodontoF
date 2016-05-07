@@ -1,4 +1,4 @@
-image
+title=Itras By：チャンスカード,image
 cards/ItrasBy/ChanceCard/ItrasBy_ChanceCard_Back.gif	チャンスカード
 cards/ItrasBy/ChanceCard/ItrasBy_CC_HN.gif	手助けが必要だ
 cards/ItrasBy/ChanceCard/ItrasBy_CC_NA.gif	駄目だ、しかも…

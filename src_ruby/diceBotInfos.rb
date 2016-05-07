@@ -39,10 +39,10 @@ class DiceBotInfos
 　choice[a,b,c]：列挙した要素から一つを選択表示。ランダム攻撃対象決定などに
 　S3d6 ： 各コマンドの先頭に「S」を付けると他人結果の見えないシークレットロール
 　3d6/2 ： ダイス出目を割り算（切り捨て）。切り上げは /2U、四捨五入は /2R。
-　D66 ： D66用。[6,1]が16,61どちらかはゲーム種別に判定。D66Nはそのまま、D66Sは入替を強制。
+　D66 ： D66ダイス。順序はゲームに依存。D66N：そのまま、D66S：昇順。
 INFO_MESSAGE_TEXT
     }
-
+    
     noneDiceBot = {
     'name' => 'ダイスボット(指定無し)',
     'gameType' => 'DiceBot',
@@ -52,7 +52,7 @@ INFO_MESSAGE_TEXT
 ゲーム固有の判定がある場合はこの場所に記載されます。
 INFO_MESSAGE_TEXT
     }
-
+    
     @infos = [noneDiceBot,
              ]
 
@@ -75,7 +75,7 @@ INFO_MESSAGE_TEXT
   
   def deleteInfos
     @logger.debug(@orders, '@orders')
-
+    
     @infos.delete_if do |info|
       not @orders.include?(info['name'])
     end
@@ -97,14 +97,14 @@ INFO_MESSAGE_TEXT
   
   def addAnotherDiceBotToInfos
     ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-
+    
     require 'diceBot/DiceBot'
-
+    
     botFiles = Dir.glob("src_bcdice/diceBot/*.rb")
-
+    
     botNames = botFiles.collect{|i| File.basename(i, ".rb").untaint}
     botNames.delete_if{|i| ignoreBotNames.include?(i) }
-
+    
     botNames.each do |botName|
       @logger.debug(botName, 'load unknown dice bot botName')
       require "diceBot/#{botName}"

@@ -1,4 +1,4 @@
-text
+title=上海退魔行：陰陽カード,text
 <p align='center'><font size="43" color="#FF9999"><i><br><br><br>上海退魔行<br>陰陽<br>カード</i></font><p>
 <font size="35">破邪剣聖沖田総司<br>木<br><br>1.通常：使用者は場面に登場する。<br><br>2.判定前：使用者の行動が調査に関するものである限り、この判定に成功する。<br></font>
 <font size="35">無双拳聖<br>黄飛鴻<br>火<br><br>1.振り直し：対象はこの交渉判定を振りなおす。<br><br>2.判定前：他者のマイナス状態を１段階回復させる。<br></font>

@@ -1,4 +1,4 @@
-text
+title=ローズ・トゥ・ロード：タトゥーノ,text
 <p align='center'><font size="36" color="#FF9999"><i><br><br><br><br><br><br>ローズ・トゥ・ロード<br>タトゥーノ</i></font></p>
 <p align='center'><font size="36">*【真の青】</font><br><font size="25">水の力<br>“蒼海の”アウルの力<br>「河川」「泉」「湖沼」「海」「魚介類」「包容力」「吸収力」</font></p>
 <p align='center'><font size="36">*【真の赤】</font><br><font size="25">大地の力<br>“猛き”ガルパニの力<br>「土」「岩」「鉱石」「地震」「山」「抑止」「耐久」「目立たないが巨大な力」</font></p>

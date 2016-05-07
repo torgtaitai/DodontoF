@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：霊縁カード:風,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>霊縁<br>風</i></font></p>
 <font size="48">稲妻＋三角</font><br><br><font size="32">【紫】『疾風の恵み』</font><br><font size="24">●喜び／愛しさ 1d6<br>対象の「運動」を 1ラウンドだけ 2倍にする。</font><br><br><font size="32">【緑】『心眼』</font><br><font size="24">●喜び／哀れみ 1d6<br>対象の「感覚」を 1ラウンドだけ 2倍にする。</font>
 <font size="48">稲妻＋円</font><br><br><font size="32">【黒】『暗黒の一撃』</font><br><font size="24">●怒り／憎しみ 1d6<br>暗黒の力を対象の武器か拳に宿し、1ラウンドだけ攻撃力に 1d6 を加算する。</font><br><br><font size="32">【金】『威圧の炎』</font><br><font size="24">●喜び／怒り 1d6<br>半径「霊感」m の範囲に炎の渦を巻きあげる。この炎は幻で、触れても何も打撃は受けない。</font><br><br><font size="32">【青】『験比べ』</font><br><font size="24">●怒り／恐れ 2d6<br>対象との「霊感」の対抗RR に成功すれば一時間の間、対象の魔法を封じる。失敗すれば一時間の間、自分が魔法を使えなくなる。</font>

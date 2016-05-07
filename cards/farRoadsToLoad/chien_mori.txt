@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：地縁カード:森,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>森</i></font><p>
 <font size="40">豊かな水源</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.清らかな泉<br>2.小さな川<br>3.水を飲みに来ている動物<br>4.湿地に行く手を遮られる<br>5.みずみずしい果実<br>6.泉の精が現れる</font>
 <font size="40">森の脅威</font><br><p align='right'><font size="40">【真の黒】</font></p><br><font size="36">1.道に迷い、1日空費する<br>2.敵意を持った妖精<br>3.毒虫が降ってくる<br>4.大型の獣に襲われる<br>5.盗賊に奇襲される<br>6.モンスターと遭遇する</font>

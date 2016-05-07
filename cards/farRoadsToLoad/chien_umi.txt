@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：地縁カード:海,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>海</i></font><p>
 <font size="40">海の住人たち</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.回遊している人魚の群と遭遇<br>2.回游している魚の群と遭遇<br>3.海草が流れてくる<br>4.優雅に飛んでいる海鳥の群<br>5.海亀・魚の産卵<br>6.海棲モンスター</font>
 <font size="40">航海</font><br><p align='right'><font size="40">【真の紫】</font></p><br><font size="36">1.カモメが舞い降りる<br>2.潮風が吹く<br>3.美しい歌がきこえてくる<br>4.別れの挨拶をしている人達がいる<br>5.手を振っている人が見える<br>6.幽霊船／嵐に遭う</font>

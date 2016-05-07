@@ -1,4 +1,4 @@
-text
+title=ウィッチクエスト：ストラクチャーカード,text
 <p align='center'><font size="42" color="#FF9999"><br><br><br><br><br><br>ストラクチャーカード</font><p>
 <p align='center'><font size="42"><br><br><br><br><br><br>１．港<br>&lt;Harbour&gt;</font><p>			１．港<Harbour>	１．港<Harbour>\nキーワード：出発点、帰り着くところ、再会と別れ、旅立ち\n長所：冒険心に富んだ\n短所：荒れる		遭遇表をロール|SET1 １．港<Harbour>|WitchQuest
 <p align='center'><font size="42"><br><br><br><br><br><br>２．道<br>&lt;The Way&gt;</font><p>			２．道<The Way>	２．道<The Way>\nキーワード：旅のゆくえ、どこへ行くかわからない、道のり、手段\n長所：新しいことを切り拓いていく\n短所：常識に固執した、道から外れない		遭遇表をロール|SET2 ２．道<The Way>|WitchQuest

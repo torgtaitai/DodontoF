@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.47.24"
-$versionDate = "2016/04/07"
+$versionOnly = "Ver.1.48.01"
+$versionDate = "2016/05/07"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -256,7 +256,7 @@ class DodontoFServer
     
     return @card unless( @card.nil? )
     
-    @card = Card.new();
+    @card = Card.new(@logger);
     
     
     return @card
@@ -751,6 +751,7 @@ class DodontoFServer
       'resurrectCharacter' => :hasReturn,
       'clearGraveyard' => :hasReturn,
       'getLoginInfo' => :hasReturn,
+      'getCardInfos' => :hasReturn,
       'getPlayRoomStates' => :hasReturn,
       'deleteImage' => :hasReturn,
       'uploadImageUrl' => :hasReturn,
@@ -1209,7 +1210,7 @@ class DodontoFServer
     }
     
     if( getWebIfRequestBoolean("card", false) )
-      cardInfos = getCardsInfo.collectCardTypeAndTypeName()
+      cardInfos = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
       jsonData["cardInfos"] = cardInfos
     end
     
@@ -2031,12 +2032,10 @@ class DodontoFServer
     writeAllLoginInfo( allLoginCount )
     
     loginMessage = getLoginMessage()
-    cardInfos = getCardsInfo.collectCardTypeAndTypeName()
     diceBotInfos = getDiceBotInfos()
     
     result = {
       "loginMessage" => loginMessage,
-      "cardInfos" => cardInfos,
       "isDiceBotOn" => $isDiceBotOn,
       "uniqueId" => uniqueId,
       "refreshTimeout" => $refreshTimeout,
@@ -2073,6 +2072,20 @@ class DodontoFServer
     
     @logger.debug(result, "result")
     @logger.debug("getLoginInfo end")
+    return result
+  end
+  
+  
+  def getCardInfos
+    result = {}
+    result["result"] = "OK"
+    begin
+      result["cardInfos"] = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
+    rescue => e
+      result["result"] = e.to_s
+      @logger.exception(e)
+    end
+    
     return result
   end
   

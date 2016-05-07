@@ -1,4 +1,4 @@
-image
+title=Itras By：解決カード,image
 cards/ItrasBy/ResolutionCard/ItrasBy_ResoCard_Back.gif	解決カード
 cards/ItrasBy/ResolutionCard/ItrasBy_RC_AmorVictor.gif	愛の勝利
 cards/ItrasBy/ResolutionCard/ItrasBy_RC_Conscience.gif	悪魔と天使

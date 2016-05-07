@@ -1,4 +1,4 @@
-text
+title=ファー・ローズ・トゥ・ロード：地縁カード:石,text
 <p align='center'><font size="52" color="#FF9999"><i><br><br><br><br>地縁<br>石</i></font><p>
 <font size="40">住人たち</font><br><p align='right'><font size="40">【真の青】</font></p><br><font size="36">1.うわさ話<br>2.子供たち<br>3.おしゃべりする女たち<br>4.老人<br>5.不良少年／愚連隊<br>6.言いがかりをつけてくる悪党</font>
 <font size="40">都市の影</font><br><p align='right'><font size="40">【真の黒】</font></p><br><font size="36">1.怪しげな酒場<br>2.暗い路地裏<br>3.喧嘩に巻き込まれる<br>4.麻薬の取引人<br>5.盗賊団のアジト<br>6.強盗に襲われる</font>

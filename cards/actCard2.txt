@@ -1,4 +1,4 @@
-image
+title=マスカレイド・スタイル：アクト・カード 改定β版,image
 cards/masqueradeStyle2/actCard_back.png
 cards/masqueradeStyle2/actCard_01.png
 cards/masqueradeStyle2/actCard_02.png
