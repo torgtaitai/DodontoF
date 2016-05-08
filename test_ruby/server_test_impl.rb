@@ -10,18 +10,6 @@ require 'fileutils'
 # クラス定数を返却しておくことで、こちらに伝えるようにしてください
 # (内部的にDodontoFServer類をテストに乗せるためのモックオブジェクトを生成します)
 module DodontoFServerTestImpl
-  def setup
-    FileUtils.mkdir_p($SAVE_DATA_DIR)
-    FileUtils.mkdir_p($imageUploadDir)
-    FileUtils.mkdir_p($replayDataUploadDir)
-    FileUtils.mkdir_p($saveDataTempDir)
-    FileUtils.mkdir_p($fileUploadDir)
-    FileUtils.cp_r('saveData', File.join($SAVE_DATA_DIR, 'saveData'))
-  end
-
-  def teardown
-    FileUtils.rm_r('.temp')
-  end
 
   def setup
     # DodontoFリポジトリの中にある、セットアップ時に使う
@@ -34,6 +22,10 @@ module DodontoFServerTestImpl
     FileUtils.mkdir_p $saveDataTempDir
     FileUtils.mkdir_p $fileUploadDir
     FileUtils.cp_r 'saveData', File.join($SAVE_DATA_DIR, 'saveData')
+  end
+
+  def teardown
+    FileUtils.rm_r('.temp')
   end
 
   def test_response

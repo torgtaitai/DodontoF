@@ -541,7 +541,6 @@ class DodontoFServerTest < Test::Unit::TestCase
     assert_have_keys(
       parsed,
       'loginMessage',
-      'cardInfos',
       'isDiceBotOn',
       'uniqueId',
       'refreshTimeout',
