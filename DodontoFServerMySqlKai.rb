@@ -39,6 +39,7 @@ require 'dodontof/utils'
 require 'dodontof/dice_adapter'
 
 require 'dodontof_mysqlkai/play_room'
+require 'dodontof_mysqlkai/image'
 
 if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
@@ -84,7 +85,6 @@ end
 
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
-$imageUrlText = File.join($imageUploadDir, 'imageUrl.txt');
 
 $tableNames = {
   'chatMessageDataLog' => 'chats',
@@ -2386,25 +2386,26 @@ SQL_TEXT
     # 識別子用の文字列生成。
     (Time.now.to_f * 1000).to_i.to_s(36)
   end
-  
-  
+
   def getLoginWarning
-    unless( isExistDir?(getSmallImageDir) )
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    smallImageDir = image.getSmallImageDir()
+    unless( isExistDir?(smallImageDir) )
       return {
         "key" => "noSmallImageDir",
-        "params" => [getSmallImageDir],
+        "params" => [smallImageDir],
       }
     end
-    
+
     if( $isMentenanceNow )
     return {
       "key" => "canNotLoginBecauseMentenanceNow",
     }
     end
-    
+
     return nil
   end
-  
+
   def getLoginMessage
     mesasge = ""
     mesasge << getLoginMessageHeader
@@ -3775,116 +3776,13 @@ SQL_TEXT
     
     return lines.join("\n")
   end
-  
-  def getSmallImageDir
-    saveDir = $imageUploadDir
-    smallImageDirName = "smallImages"
-    smallImageDir = fileJoin(saveDir, smallImageDirName);
-    
-    return smallImageDir
-  end
-  
-  def saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
-    @logger.debug("saveSmallImage begin")
-    @logger.debug(imageFileNameBase, "imageFileNameBase")
-    @logger.debug(uploadImageFileName, "uploadImageFileName")
-    
-    smallImageDir = getSmallImageDir
-    uploadSmallImageFileName = fileJoin(smallImageDir, imageFileNameBase)
-    uploadSmallImageFileName += ".png";
-    uploadSmallImageFileName.untaint
-    @logger.debug(uploadSmallImageFileName, "uploadSmallImageFileName")
-    
-    open( uploadSmallImageFileName, "wb+" ) do |file|
-      file.write( smallImageData )
-    end
-    @logger.debug("small image create successed.")
-    
-    params = getParamsFromRequestData()
-    tagInfo = params['tagInfo']
-    @logger.debug(tagInfo, "uploadImageData tagInfo")
-    
-    tagInfo["smallImage"] = uploadSmallImageFileName
-    @logger.debug(tagInfo, "uploadImageData tagInfo smallImage url added")
-    
-    margeTagInfo(tagInfo, uploadImageFileName)
-    @logger.debug(tagInfo, "saveSmallImage margeTagInfo tagInfo")
-    changeImageTagsLocal(uploadImageFileName, tagInfo)
-    
-    @logger.debug("saveSmallImage end")
-  end
-  
-  def margeTagInfo(tagInfo, source)
-    @logger.debug(source, "margeTagInfo source")
-    imageTags = getImageTags()
-    tagInfo_old = imageTags[source]
-    @logger.debug(tagInfo_old, "margeTagInfo tagInfo_old")
-    return if( tagInfo_old.nil? )
-    
-    tagInfo_old.keys.each do |key|
-      tagInfo[key] = tagInfo_old[key]
-    end
-    
-    @logger.debug(tagInfo, "margeTagInfo tagInfo")
-  end
-  
+
   def uploadImageData()
-    @logger.debug("uploadImageData load Begin")
-    
-    result = {
-      "resultText"=> "OK"
-    }
-    
-    begin
-      params = getParamsFromRequestData()
-      
-      imageFileName = params["imageFileName"]
-      @logger.debug(imageFileName, "imageFileName")
-      
-      imageData = getImageDataFromParams(params, "imageData")
-      smallImageData = getImageDataFromParams(params, "smallImageData")
-      
-      if( imageData.nil? )
-        @logger.debug("createSmallImage is here")
-        imageFileNameBase = File.basename(imageFileName)
-        saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
-        return result
-      end
-      
-      saveDir = $imageUploadDir
-      imageFileNameBase = getNewFileName(imageFileName, "img")
-      @logger.debug(imageFileNameBase, "imageFileNameBase")
-      
-      uploadImageFileName = fileJoin(saveDir, imageFileNameBase)
-      @logger.debug(uploadImageFileName, "uploadImageFileName")
-      
-      open( uploadImageFileName, "wb+" ) do |file|
-        file.write( imageData )
-      end
-      
-      saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
-      
-    rescue => e
-      result["resultText"] = getLanguageKey( e.to_s )
-    end
-    
-    @logger.debug(result, "uploadImageData result")
-    @logger.debug("uploadImageData load End")
-    
-    return result
+    params = getParamsFromRequestData()
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.uploadImageData(params)
   end
-  
-  
-  def getImageDataFromParams(params, key)
-    value = params[key]
-    
-    sizeCheckResult = checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
-    raise sizeCheckResult unless( sizeCheckResult.empty? )
-    
-    return value
-  end
-  
-  
+
   #新規ファイル名。reqにroomNumberを持っていた場合、ファイル名に付加するようにする
   def getNewFileName(fileName, preFix = "")
     @newFileNameIndex ||= 0
@@ -3911,137 +3809,26 @@ SQL_TEXT
     
     return result.untaint
   end
-  
+
   def deleteImage()
-    @logger.debug("deleteImage begin")
-    
-    imageData = getParamsFromRequestData()
-    @logger.debug(imageData, "imageData")
-    
-    imageUrlList = imageData['imageUrlList']
-    @logger.debug(imageUrlList, "imageUrlList")
-    
-    deleteImages(imageUrlList)
+    params = getParamsFromRequestData()
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.deleteImage(params)
   end
-    
-  def deleteImages(imageUrlList)
-    imageFiles = getAllImageFileNameFromTagInfoFile()
-    addLocalImageToList(imageFiles)
-    @logger.debug(imageFiles, "imageFiles")
-    
-    imageUrlFileName = $imageUrlText
-    @logger.debug(imageUrlFileName, "imageUrlFileName")
-    
-    deleteCount = 0
-    resultText = ""
-    imageUrlList.each do |imageUrl|
-      if( isProtectedImage(imageUrl) )
-        warningMessage = "#{imageUrl}は削除できない画像です。"
-        next
-      end
-      
-      imageUrl.untaint
-      deleteResult1 = deleteImageTags(imageUrl)
-      deleteResult2 = deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-      deleteResult = (deleteResult1 or deleteResult2)
-      
-      if( deleteResult )
-        deleteCount += 1
-      else
-        warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
-        @logger.error(warningMessage)
-        resultText += warningMessage
-      end
-    end
-    
-    resultText += "#{deleteCount}個のファイルを削除しました。"
-    result = {"resultText" => resultText}
-    @logger.debug(result, "result")
-    
-    @logger.debug("deleteImage end")
-    return result
-  end
-  
-  def isProtectedImage(imageUrl)
-    $protectImagePaths.each do |url|
-      if( imageUrl.index(url) == 0 )
-        return true
-      end
-    end
-    
-    return false
-  end
-  
-  def deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-    @logger.debug(imageUrl, "deleteTargetImageUrl(imageUrl)")
-    
-    if( imageFiles.include?(imageUrl) )
-      if( isExist?(imageUrl) )
-        deleteFile(imageUrl)
-        return true
-      end
-    end
-    
-    locker = getSaveFileLock(imageUrlFileName)
-    locker.lock do 
-      lines = readLines(imageUrlFileName)
-      @logger.debug(lines, "lines")
-      
-      deleteResult = lines.reject!{|i| i.chomp == imageUrl }
-      
-      unless( deleteResult )
-        return false
-      end
-      
-      @logger.debug(lines, "lines deleted")
-      createFile(imageUrlFileName, lines.join)
-    end
-    
-    return true
-  end
-  
+
   #override
   def addTextToFile(fileName, text)
     File.open(fileName, "a+") do |file|
       file.write(text);
     end
   end
-  
+
   def uploadImageUrl()
-    @logger.debug("uploadImageUrl begin")
-    
     imageData = getParamsFromRequestData()
-    @logger.debug(imageData, "imageData")
-    
-    imageUrl = imageData['imageUrl']
-    @logger.debug(imageUrl, "imageUrl")
-    
-    imageUrlFileName = $imageUrlText
-    @logger.debug(imageUrlFileName, "imageUrlFileName")
-    
-    resultText = "画像URLのアップロードに失敗しました。"
-    locker = getSaveFileLock(imageUrlFileName)
-    locker.lock do 
-      alreadyExistUrls = readLines(imageUrlFileName).collect{|i| i.chomp }
-      if( alreadyExistUrls.include?(imageUrl) )
-        resultText = "すでに登録済みの画像URLです。"
-      else
-        addTextToFile(imageUrlFileName, (imageUrl + "\n"))
-        resultText = "画像URLのアップロードに成功しました。"
-      end
-    end
-    
-    tagInfo = imageData['tagInfo']
-    @logger.debug(tagInfo, 'uploadImageUrl.tagInfo')
-    changeImageTagsLocal(imageUrl, tagInfo)
-    
-    @logger.debug("uploadImageUrl end")
-    
-    result = {"resultText" => resultText}
-    return result
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.uploadImageUrl(imageData)
   end
-  
-  
+
   def getGraveyardCharacterData()
     @logger.debug("getGraveyardCharacterData start.")
     
@@ -4066,85 +3853,7 @@ SQL_TEXT
     stateList = Array.new(characters.size, $characterStateWaitingRoom)
     addCharacterData(characters, stateList)
   end
-  
-  def getImageList()
-    @logger.debug("getImageList start.")
-    
-    imageList = getAllImageFileNameFromTagInfoFile()
-    @logger.debug(imageList, "imageList all result")
-    
-    addTextsCharacterImageList(imageList, $imageUrlText)
-    addLocalImageToList(imageList)
-    
-    deleteInvalidImageFileName(imageList)
-    
-    imageList.sort!
-    
-    return imageList
-  end
-    
-  def addTextsCharacterImageList(imageList, *texts)
-    texts.each do |text|
-      next unless( isExist?(text) )
-      
-      lines = readLines(text)
-      lines.each do |line|
-        line.chomp!
-        
-        next if(line.empty?)
-        next if(imageList.include?(line))
-        
-        imageList << line
-      end
-    end
-  end
-  
-  def addLocalImageToList(imageList)
-    dir = "#{$imageUploadDir}/public"
-    addLocalImageToListByDir(imageList, dir)
-    
-    dir = getRoomLocalSpaceDirName
-    if( File.exist?(dir) )
-      addLocalImageToListByDir(imageList, dir)
-    end
-  end
-  
-  def addLocalImageToListByDir(imageList, dir)
-    makeDir(dir)
-    
-    files = Dir.glob("#{dir}/*")
-    
-    files.each do |fileName|
-      file = file.untaint
-      
-      next if( imageList.include?(fileName) )
-      next unless( isImageFile(fileName) )
-      next unless( isAllowedFileExt(fileName) )
-      
-      imageList << fileName
-      @logger.debug(fileName, "added local image")
-    end
-    
-    return imageList
-  end
-  
-  
-  def isImageFile(fileName)
-    rule = /.(jpg|jpeg|gif|png|bmp|swf)$/i
-    (rule === fileName)
-  end
-  
-  
-  def deleteInvalidImageFileName(imageList)
-    imageList.delete_if{|i| (/\.txt$/===i)}
-    imageList.delete_if{|i| (/\.lock$/===i)}
-    imageList.delete_if{|i| (/\.json$/===i)}
-    imageList.delete_if{|i| (/\.json~$/===i)}
-    imageList.delete_if{|i| (/^.svn$/===i)}
-    imageList.delete_if{|i| (/\.db$/===i)}
-  end
-  
-  
+
   def sendDiceBotChatMessage
     @logger.debug('sendDiceBotChatMessage')
     
@@ -4711,112 +4420,23 @@ SQL_TEXT
     
     return imageInfoFileName
   end
-  
+
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    source = effectData['source']
-    tagInfo = effectData['tagInfo']
-    
-    changeImageTagsLocal(source, tagInfo)
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.changeImageTags(effectData)
   end
-  
-  def getAllImageFileNameFromTagInfoFile()
-    imageTags = getImageTags()
-    imageFileNames = imageTags.keys
-    
-    return imageFileNames
-  end
-  
-  def changeImageTagsLocal(source, tagInfo)
-    return if( tagInfo.nil? )
-    
-    roomNumber = tagInfo["roomNumber"]
-    
-    changeSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-      saveData['imageTags'] ||= {}
-      imageTags = saveData['imageTags']
-      
-      imageTags[source] = tagInfo
-    end
-  end
-  
-  def deleteImageTags(source)
-    roomNumber = @saveDirInfo.getSaveDataDirIndex
-    isDeleted = deleteImageTagsByRoomNo(source, roomNumber)
-    return true if( isDeleted )
-    
-    return deleteImageTagsByRoomNo(source, nil)
-  end
-  
-  def deleteImageTagsByRoomNo(source, roomNumber)
-    
-    changeSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-      
-      imageTags = saveData['imageTags']
-      return false if imageTags.nil?
-      
-      tagInfo = imageTags.delete(source)
-      return false if tagInfo.nil?
-      
-      smallImage = tagInfo["smallImage"]
-      begin
-        deleteFile(smallImage)
-      rescue => e
-        @logger.exception(e)
-      end
-    end
-    
-    return true
-  end
-  
+
   def deleteFile(file)
     return unless File.exist?(file)
     File.delete(file)
   end
   
   def getImageTagsAndImageList
-    result = {}
-    
-    result['tagInfos'] = getImageTags()
-    result['imageList'] = getImageList()
-    result['imageDir'] = $imageUploadDir
-    
-    @logger.debug("getImageTagsAndImageList result", result)
-    
-    return result
+    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image.getImageTagsAndImageList()
   end
-  
-  def getImageTags(*roomNoList)
-    @logger.debug('getImageTags start')
-    
-    imageTags = {}
-    
-    if roomNoList.empty? 
-      roomNoList = [nil, @saveDirInfo.getSaveDataDirIndex]
-    end
-    
-    roomNoList.each do |roomNumber|
-      getSaveData( getImageInfoFileName(roomNumber) ) do |saveData|
-        tmpTags = saveData['imageTags']
-        tmpTags ||= {}
-        
-        unless( roomNumber.nil? )
-          tmpTags.each do |key, value|
-            next if value.nil?
-            value.delete("roomNumber")
-          end
-        end
-        
-        imageTags.merge!( tmpTags )
-      end
-    end
-    
-    @logger.debug(imageTags, 'getImageTags imageTags')
-    
-    return imageTags
-  end
-  
-  
+
   def createCharacterImgId(prefix = "character_")
     return nil
 =begin
