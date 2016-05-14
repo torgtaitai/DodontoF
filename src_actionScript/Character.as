@@ -683,5 +683,69 @@ package {
             textField.autoSize = TextFieldAutoSize.CENTER;
         }
         
+        
+        override public function setCounters(obj:Object):void {
+            super.setCounters(obj);
+            drowCounterBars();
+        }
+        
+        override public function setCounter(key:String, value:int):int {
+            var result:int = super.setCounter(key, value);
+            drowCounterBars();
+            return result;
+        }
+        
+        private function drowCounterBars():void {
+            if( view == null ) {
+                return;
+            }
+            
+            var layer:UIComponent = view;
+            layer.graphics.clear();
+            
+            var barInfos:Array = getStatusBarInfos();
+            
+            for(var i:int = 0 ; i < barInfos.length ; i++) {
+                var info:Object = barInfos[i];
+                var max:int = InitiativeWindow.getCounterLimitMax(this, info, 0);
+                var count:int = getCounter( info["counterName"] );
+                var percentage:Number = (1.0 * count / max);
+                var index:int = i;
+                drowCounterBar(layer, index, barInfos.length, percentage);
+            }
+        }
+            
+        private function getStatusBarInfos():Array {
+            var barInfos:Array = new Array();
+            
+            var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
+            for(var i:int = 0 ; i < counterNames.length ; i++) {
+                var counterName:String = counterNames[i];
+                var info:Object = InitiativeWindow.getCounterNameInfo(counterName);
+                if( info["max"] == null ) {
+                    continue;
+                }
+                info["counterName"] = counterName;
+                barInfos.push(info);
+            }
+            
+            return barInfos;
+        }
+            
+        private function drowCounterBar(layer:UIComponent, index:int, maxCount:int, percentage:Number):void {
+            var color:int = parseInt( InitiativeWindow.getCheckBoxDefaultColor(index) );
+            
+            var positionIndex:int = maxCount - index - 1;
+            
+            var barHeight:int = 5;
+            var baseY:int = -25 - ((barHeight + 1) * positionIndex);
+            var drawWidth:Number = getOwnWidth() * percentage;
+            
+            layer.graphics.lineStyle(1, color);
+            layer.graphics.beginFill(color);
+            layer.graphics.drawRect(0, baseY, drawWidth, barHeight);
+            layer.graphics.endFill();
+        }
+        
     }
 }

@@ -1173,6 +1173,8 @@
     
     private var previewImage:Image = new Image();
     
+    private var counterNames:Array = [];
+    
     
     override protected function setup():void {
         initWindowSizeByFont18(840, 600);
@@ -1310,6 +1312,8 @@
     private function initCounterColumns():void {
         Log.logging("initCounterColumns begin");
         
+        this.counterNames = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
+        
         var columns:Array = counterInfoListView.columns;
         var checkBoxIndex:int = 0;
         
@@ -1341,9 +1345,7 @@
     private function initCounterColumn(counterIndex:int, counterColumn:DataGridColumn, 
                                        checkBoxIndex:int, checkBoxColumn:DataGridColumn):Boolean {
         
-        var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
-        
-        if( counterIndex >= counterNames.length ) {
+        if( counterIndex >= this.counterNames.length ) {
             counterColumn.visible = false;
             checkBoxColumn.visible = false;
             return false;
@@ -1364,7 +1366,6 @@
         subColumn.visible = false;
         mainColumn.visible = true;
         mainColumn.headerText = InitiativeWindow.getColumnTitle( columnInfo.title );
-        
         //setHeaderColor(mainColumn, columnInfo);
         
         return columnInfo.isCheckBox;
@@ -1387,12 +1388,11 @@
         counterInfoList = new Array();
         changeStatusAliasButtonEnable( false );
         
-        var counterNames:Array = DodontoF_Main.getInstance().getRoundTimer().getCounterNames();
         var checkBoxIndex:int = 0;
         var counterInfo:Object = new Object();
         
-        for(var i:int = 0 ; i < counterNames.length ; i++) {
-            var counterName:String = counterNames[i];
+        for(var i:int = 0 ; i < this.counterNames.length ; i++) {
+            var counterName:String = this.counterNames[i];
             var isCheckBox:Boolean = initCounterValue(counterName,
                                                       i, checkBoxIndex,
                                                       counterInfo);
@@ -1484,17 +1484,18 @@
             }
             
             var counterIndex:int = index / 2;
+            var counterName:String = this.counterNames[counterIndex];
+            
+            Log.logging("counterName", counterName);
+            var counter:int = 0;
+            
             if( checkBoxColumn.visible ) {
-                var value:int = (counterInfo["checkBox" + counterIndex] ? 1 : 0);
-                Log.logging("checkBoxColumn.headerText", checkBoxColumn.headerText)
-                Log.logging("value", value);
-                counters[ "*" + checkBoxColumn.headerText ] = value;
+                counter = (counterInfo["checkBox" + counterIndex] ? 1 : 0);
             } else {
-                var counter:int = counterInfo["counter" + counterIndex];
-                Log.logging("column.headerText", column.headerText)
-                Log.logging("counter", counter);
-                counters[column.headerText] = counter;
+                counter = counterInfo["counter" + counterIndex];
             }
+            Log.logging("counter", counter);
+            counters[ counterName ] = counter;
         }
         
         return counters;

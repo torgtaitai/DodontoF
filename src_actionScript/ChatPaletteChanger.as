@@ -19,11 +19,13 @@ package {
         }
         
         public function getText(index:int, name:TextInput, changerInfos:Array):String {
-            characterName = name;
+            this.characterName = name;
+            
             var line:String = buffer[index];
             
             var definitionsFull:Object = addCounterNamesToDefinition(definitions);
             definitionsFull = addAllChangerToDefinition(definitionsFull, changerInfos, characterName.text);
+            Log.logging("definitionsFull", definitionsFull);
             
             return getTextFromText(line, definitionsFull);
         }
@@ -36,13 +38,19 @@ package {
             line = line.replace('＊', '*');
             line = line.replace('＠', '@');
             
-            for (var key:String in definitionsFull) {
-                var value:String = definitionsFull[key];
+            var beforeLine:String = "";
+            
+            while( beforeLine !=  line ) {
+                beforeLine = Utils.clone(line);
                 
-                var pattern:String = "{" + key + "}";
-                line = getChangedLine(line, pattern, value);
-                var pattern2:String = "｛" + key + "｝";
-                line = getChangedLine(line, pattern2, value);
+                for (var key:String in definitionsFull) {
+                    var value:String = definitionsFull[key];
+                    
+                    var pattern:String = "{" + key + "}";
+                    line = getChangedLine(line, pattern, value);
+                    var pattern2:String = "｛" + key + "｝";
+                    line = getChangedLine(line, pattern2, value);
+                }
             }
             
             Log.logging("getTextFromText result", line);
@@ -127,12 +135,12 @@ package {
             return result
         }
         
-        private function addAllChangerToDefinition(definitionsFull:Object, changerInfos:Array, currentName:String):Object {
+        private function addAllChangerToDefinition(definitionsFull:Object, changerInfos:Array, targetName:String):Object {
             
             for each(var changerInfo:Object in changerInfos) {
                 
                 var name:String = changerInfo.name;
-                if( name == currentName ) {
+                if( name == targetName ) {
                     continue;
                 }
                 

@@ -149,6 +149,9 @@ package {
         private function getComboBoxItems(imageTags:Array):Array {
             var items:Array = new Array();
             
+            imageTags = Utils.clone(imageTags);
+            imageTags.sort(Array.CASEINSENSITIVE);
+            
             for(var i:int = 0 ; i < imageTags.length ; i++) {
                 items.push( {label: imageTags[i]} );
             }

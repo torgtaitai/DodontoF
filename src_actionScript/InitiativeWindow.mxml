@@ -1283,16 +1283,21 @@
           return getRoundTimer().getCounterNames();
       }
       
-      public function isExistCounterName(counterName:String):Boolean {
+      public function getTrueCounterName(counterName:String):String {
           var names:Array = getCounterNames();
           
           for(var i:int = 0 ; i < names.length ; i++) {
-              if( names[i] == counterName ) {
-                  return true;
+              
+              var trueName:String = names[i];
+              var info:Object = getCounterNameInfo( trueName );
+              var name:String = info["name"];
+              
+              if( name == counterName ) {
+                  return trueName;
               }
           }
           
-          return false;
+          return "";
       }
       
       
@@ -1417,7 +1422,7 @@
          0x055D87,
          0xAF0065];
       
-      static private function getCheckBoxDefaultColor(index:int):String {
+      static public function getCheckBoxDefaultColor(index:int):String {
           var colors:Array = checkBoxDefaultColors;
           return colors[ (index % colors.length) ];
       }
@@ -1552,7 +1557,6 @@
       private function addCharacter(piece:InitiativedPiece, isCurrent:Boolean):void {
           Log.logging("addCharacter begin");
           
-          var counterNames:Array = getCounterNames();
           var characterInfo:Object = new Object();
           
           characterInfo["currentTarget"] = getCurrentTargetMarker(piece, isCurrent);
@@ -1564,10 +1568,14 @@
           characterInfo["character"] = piece;
           
           var checkBoxIndex:int = 0;
+          var counterNames:Array = getCounterNames();
+          
           for(var i:int ; i < counterNames.length ; i++) {
               var counterName:String = counterNames[i];
               var count:int = piece.getCounter(counterName);
-              count = getCounterValue(count, piece, counterName);
+              count = getCounterValue(piece, counterName, count);
+              Log.logging("counterName", counterName);
+              Log.logging("count", count);
               
               var columnInfo:Object = getColumnInfo(counterName, checkBoxIndex);
               
@@ -1592,20 +1600,19 @@
           Log.logging("addCharacter end");
       }
       
-      private function getCounterValue(count:int, piece:InitiativedPiece, counterName:String):int {
+      public function getCounterValue(piece:InitiativedPiece, counterName:String, count:int):int {
           Log.logging("count", count);
           Log.logging("counterName", counterName);
           
           var info:Object = getCounterNameInfo(counterName);
           Log.logging("info", info);
-          var name:String = info["name"];
           
-          var min:int = getCounterLimit(info["min"], piece, (name + getMinValueMarker()), count);
+          var min:int = getCounterLimitMin(piece, info, count);
           if( count < min ) {
               count = min;
           }
           
-          var max:int = getCounterLimit(info["max"], piece, (name + getMaxValueMarker()), count);
+          var max:int = getCounterLimitMax(piece, info, count);
           Log.logging("max", max);
           if( count > max ) {
               count = max;
@@ -1615,12 +1622,40 @@
           return count;
       }
       
+      static public function getCounterLimitMin(piece:InitiativedPiece, info:Object, count:int):int {
+          var name:String = info["name"];
+          return (info["min"], piece, (name + getMinValueMarker()), count);
+      }
+      
+      static public function getCounterLimitMax(piece:InitiativedPiece, info:Object, count:int):int {
+          var name:String = info["name"];
+          return getCounterLimit(info["max"], piece, (name + getMaxValueMarker()), count);
+      }
+      
       static public function getMaxValueMarker():String {
           return "@MAX";
       }
       
       static public function getMinValueMarker():String {
           return "@MIN";
+      }
+      
+      static private function getCounterLimit(limitText:String, piece:InitiativedPiece, marker:String, defaultCount:int):int {
+          
+          if ( limitText == null ) {
+              return defaultCount;
+          }
+          
+          var limit:int = parseInt(limitText);
+          if( limitText == "?" ) {
+              if( ! piece.isCounterExist(marker) ) {
+                  return defaultCount;
+              }
+              
+              limit = piece.getCounter(marker);
+          }
+          
+          return limit;
       }
       
       static public function getCounterNameInfo(counterName:String):Object {
@@ -1655,24 +1690,6 @@
           return {"name" : counterName};
       }
       
-      
-      private function getCounterLimit(limitText:String, piece:InitiativedPiece, marker:String, defaultCount:int):int {
-          
-          if ( limitText == null ) {
-              return defaultCount;
-          }
-          
-          var limit:int = parseInt(limitText);
-          if( limitText == "?" ) {
-              if( ! piece.isCounterExist(marker) ) {
-                  return defaultCount;
-              }
-              
-              limit = piece.getCounter(marker);
-          }
-          
-          return limit;
-      }
       
       private function selectTargetInfo(targetInfo:Object):void {
           for(var i:int = 0 ; i < initiativeInfoList.length ; i++) {
@@ -1969,7 +1986,6 @@
           
           var counterNames:Array = getCounterNames();
           var counterName:String = counterNames[counterIndex];
-          newCount = getCounterValue(newCount, piece, counterName);
           
           Log.logging("newCount", newCount);
           piece.setCounter(counterName, newCount);

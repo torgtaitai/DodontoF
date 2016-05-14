@@ -11,8 +11,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.48.01"
-$versionDate = "2016/05/07"
+$versionOnly = "Ver.1.48.03"
+$versionDate = "2016/05/14"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -2157,7 +2157,8 @@ class DodontoFServer
       end
     end
   end
-
+  
+  
   def getLoginWarning
     image = DodontoF::Image.new(self, @saveDirInfo)
     smallImageDir = image.getSmallImageDir
@@ -2167,13 +2168,13 @@ class DodontoFServer
         "params" => [smallImageDir],
       }
     end
-
+    
     if( $isMentenanceNow )
     return {
       "key" => "canNotLoginBecauseMentenanceNow",
     }
     end
-
+    
     return nil
   end
   
@@ -3560,26 +3561,28 @@ class DodontoFServer
     
     return result.untaint
   end
-
+  
   def deleteImage()
     params = getParamsFromRequestData()
     image = DodontoF::Image.new(self, @saveDirInfo)
     image.deleteImage(params)
   end
-
+  
   #override
   def addTextToFile(fileName, text)
     File.open(fileName, "a+") do |file|
       file.write(text);
     end
   end
-
+  
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
     image = DodontoF::Image.new(self, @saveDirInfo)
     image.uploadImageUrl(imageData)
   end
-
+  
+  
+  
   def getGraveyardCharacterData()
     @logger.debug("getGraveyardCharacterData start.")
     result = []
@@ -4118,7 +4121,7 @@ class DodontoFServer
     
     return imageInfoFileName
   end
-
+  
   def changeImageTags()
     effectData = getParamsFromRequestData()
     image = DodontoF::Image.new(self, @saveDirInfo)
@@ -4134,7 +4137,8 @@ class DodontoFServer
     image = DodontoF::Image.new(self, @saveDirInfo)
     image.getImageTagsAndImageList()
   end
-
+  
+  
   def createCharacterImgId(prefix = "character_")
     @imgIdIndex ||= 0;
     @imgIdIndex += 1;

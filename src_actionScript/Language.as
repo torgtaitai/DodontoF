@@ -1079,7 +1079,7 @@ package {
             p.input = "入力";
             // LoginWindow.mxml
             p.loginUser = "ログインユーザー：";
-            p.versionMismuch = "どどんとふの更新データが正しく読み込めませんでした。\n今開いているページを一度閉じて、再度開き直してください。\n２〜３回繰り返すと読み込みに成功すると思います。\n\n以下、技術的な情報：\nサーババージョン　　　：{0}\nクライアントバージョン：{1}\n";
+            p.versionMismuch = "どどんとふの更新データが正しく読み込めませんでした。\n　１．今開いているページを一度閉じて、再度開き直してください。\n　２．それでもダメな場合、ブラウザのキャッシュをクリアしてみてください。\n　３．それでもダメな場合、サーバーのファイルが正しく転送されているか再度確認してください。\n\n以下、技術的な情報：\nサーババージョン　　：{0}\nクライアントバージョン：{1}\n";
             p.loginRoomStates = "No. {0} ： {1} 人";
             p.nobadyLogined = "誰もログインしていません";
             p.loginStatus = "ログイン状況\n";
@@ -1208,12 +1208,16 @@ package {
                 languageTable[name] = info;
             }
             
+            // checkJapanese();
             
             return checkLanguageNames();
         }
         
         /*
         static private function checkJapanese():void {
+            
+            if( DodontoF_Main.getInstance().isInvisibleMode() ) { return; }
+            
             var japanese:Object = languageTable[""];
             if( japanese == null ) {
                 Log.logging("japanese is null");

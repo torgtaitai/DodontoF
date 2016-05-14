@@ -12,8 +12,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.48.01"
-$versionDate = "2016/05/07"
+$versionOnly = "Ver.1.48.03"
+$versionDate = "2016/05/14"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -2386,7 +2386,8 @@ SQL_TEXT
     # 識別子用の文字列生成。
     (Time.now.to_f * 1000).to_i.to_s(36)
   end
-
+  
+  
   def getLoginWarning
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     smallImageDir = image.getSmallImageDir()
@@ -2396,16 +2397,16 @@ SQL_TEXT
         "params" => [smallImageDir],
       }
     end
-
+    
     if( $isMentenanceNow )
     return {
       "key" => "canNotLoginBecauseMentenanceNow",
     }
     end
-
+    
     return nil
   end
-
+  
   def getLoginMessage
     mesasge = ""
     mesasge << getLoginMessageHeader
@@ -3782,7 +3783,8 @@ SQL_TEXT
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.uploadImageData(params)
   end
-
+  
+  
   #新規ファイル名。reqにroomNumberを持っていた場合、ファイル名に付加するようにする
   def getNewFileName(fileName, preFix = "")
     @newFileNameIndex ||= 0
@@ -3809,26 +3811,27 @@ SQL_TEXT
     
     return result.untaint
   end
-
+  
   def deleteImage()
     params = getParamsFromRequestData()
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.deleteImage(params)
   end
-
+  
   #override
   def addTextToFile(fileName, text)
     File.open(fileName, "a+") do |file|
       file.write(text);
     end
   end
-
+  
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.uploadImageUrl(imageData)
   end
-
+  
+  
   def getGraveyardCharacterData()
     @logger.debug("getGraveyardCharacterData start.")
     
@@ -4420,13 +4423,13 @@ SQL_TEXT
     
     return imageInfoFileName
   end
-
+  
   def changeImageTags()
     effectData = getParamsFromRequestData()
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.changeImageTags(effectData)
   end
-
+  
   def deleteFile(file)
     return unless File.exist?(file)
     File.delete(file)
@@ -4436,7 +4439,8 @@ SQL_TEXT
     image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
     image.getImageTagsAndImageList()
   end
-
+  
+  
   def createCharacterImgId(prefix = "character_")
     return nil
 =begin

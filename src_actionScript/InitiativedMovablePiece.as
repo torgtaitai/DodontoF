@@ -129,24 +129,31 @@ package {
             return (counters[key] != null);
         }
         
-        public function setCounter(key:String, value:int):void {
+        public function setCounter(key:String, value:int):int {
+            var initiativeWindow:InitiativeWindow = InitiativeWindow.getInstance();
+            value = initiativeWindow.getCounterValue(this, key, value);
+            
+            var notFountValue:int = -1;
+            
             if( key == null ) {
-                return;
+                return notFountValue;
             }
             
-            var names:Array = InitiativeWindow.getInstance().getCounterNameList();
+            var names:Array = initiativeWindow.getCounterNameList();
             if( names.indexOf(key) != -1 ) {
                 counters[key] = value;
-                return;
+                return counters[key];
             }
             
             for each(var name:String in names) {
                 var title:Object = InitiativeWindow.getColumnTitle(name);
                 if( key == title ) {
                     counters[name] = value;
-                    return;
+                    return counters[name];
                 }
             }
+            
+            return notFountValue;
         }
         
         public function getStatusName(key:String):String {

@@ -9,7 +9,7 @@ package {
         function getInfo():String;
         function isCounterExist(key:String):Boolean;
         function getCounter(key:String):int;
-        function setCounter(key:String, value:int):void;
+        function setCounter(key:String, value:int):int;
         function setInfo(info_:String):void;
         function getJsonData():Object;
         function getInitiative():Number;

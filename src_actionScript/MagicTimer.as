@@ -116,7 +116,8 @@ package {
             return false;
         }
         
-        public function setCounter(key:String, value:int):void {
+        public function setCounter(key:String, value:int):int {
+            return 0;
         }
         
         public function getInitiative():Number {

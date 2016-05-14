@@ -58,7 +58,7 @@
                horizontalAlign="center" verticalAlign="middle">
         <mx:Label text="{Language.s.tagName}：" fontWeight="bold"/>
         <torgtaitai:SuggestComboBox id="tagName" fontWeight="normal"
-                     width="100%" change="tagNameChanged()" enabled="false" />
+                     width="170" change="tagNameChanged()" enabled="false" />
         <mx:Label id="indexPrintLabel" text="0/0" />
         <mx:Button label="{Language.s.secretImage}" height="20" fontWeight="normal" click="createPasswordWindow()" />
         <mx:Button id="mirrored" label="{Language.s.reverseImage}" height="20" fontWeight="normal" toolTip="" selected="false" toggle="true"  click="changeMirror()"

@@ -543,13 +543,14 @@
             var operator:String = params.operator;
             var messageFormat:String = params.messageFormat;
             
-            var isExistCounterName:Boolean = InitiativeWindow.getInstance().isExistCounterName(counterName);
-            
+            var trueCounterName:String = "";
             if( counterName == initiativeCounterName ) {
-                isExistCounterName = true;
+                trueCounterName = counterName;
+            } else {
+                trueCounterName = InitiativeWindow.getInstance().getTrueCounterName(counterName);
             }
             
-            if( ! isExistCounterName ) {
+            if( trueCounterName == "" ) {
                 var errorMessage:String = Language.text("counterRemoconCounterNameWarning", counterName);
                 this.title = errorMessage;
                 Log.printSystemLogPublic(errorMessage);
@@ -557,11 +558,11 @@
             }
             Log.logging("no error.");
             
-            var value:int = character.getCounter(counterName);
+            var value:int = character.getCounter(trueCounterName);
             var before:String = "" + value;
             
             var modifyResult:Object = getModifiedValue(value, modifyValue, operator);
-            character.setCounter(counterName, modifyResult.value);
+            modifyResult.value = character.setCounter(trueCounterName, modifyResult.value);
             
             var message:String = getExecuteResultMessage(messageFormat, character.getName(),
                                                          counterName, before, modifyResult);

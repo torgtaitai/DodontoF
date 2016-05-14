@@ -34,25 +34,33 @@ $extraCardFileName = ""                #拡張カードファイル名
 $iniFileName = 'bcdice.ini'
 
 $allGameTypes = %w{
+Airgetlamh
+Alsetto
+Amadeus
 Arianrhod
 ArsMagica
 BarnaKronika
 BattleTech
 BeastBindTrinity
+BeginningIdol
 BloodCrusade
 BloodMoon
 CardRanker
 Chaos_Flare
 Chill
+Chill3
 CrashWorld
 Cthulhu
+Cthulhu7th
 CthulhuTech
 DarkBlaze
 DemonParasite
 DetatokoSaga
 DoubleCross
+Dracurouge
 EarthDawn
 EarthDawn3
+EarthDawn4
 EclipsePhase
 Elric!
 Elysion
@@ -75,10 +83,12 @@ HouraiGakuen
 HuntersMoon
 InfiniteFantasia
 Insane
+JamesBond
 Kamigakari
 KanColle
 KillDeathBusiness
 LogHorizon
+LogHorizon:Korean
 MagicaLogia
 MeikyuDays
 MeikyuKingdom
@@ -87,6 +97,7 @@ NJSLYRBATTLE
 Nechronica
 NightWizard
 NightmareHunterDeep
+Nuekagami
 Oukahoushin3rd
 ParasiteBlood
 Peekaboo
@@ -104,6 +115,7 @@ ShadowRun4
 SharedFantasia
 ShinkuuGakuen
 ShinobiGami
+ShoujoTenrankai
 SwordWorld
 SwordWorld2.0
 TORG
