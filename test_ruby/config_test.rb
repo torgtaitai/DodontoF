@@ -1,4 +1,4 @@
-#--*-coding:utf-8-*--
+# -*- coding: utf-8 -*-
 # テスト時用の設定群
 
 $logFileName = "test_log.txt"
