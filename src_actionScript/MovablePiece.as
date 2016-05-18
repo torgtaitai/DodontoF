@@ -284,7 +284,7 @@ package {
                 return false;
             }
             
-            return false;
+            return true;
         }
         
         protected function dragged():void {
@@ -449,6 +449,9 @@ package {
             
             this.view.scaleX = zoomRate;
             this.view.scaleY = zoomRate;
+            
+            //拡大するだけじゃなく、最前面表示にもして強調。
+            this.setViewForeground();
         }
         
         public function shrinkLittleForTeachDraggable():void {

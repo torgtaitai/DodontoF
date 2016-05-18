@@ -707,8 +707,17 @@ package {
             
             for(var i:int = 0 ; i < barInfos.length ; i++) {
                 var info:Object = barInfos[i];
+                
                 var max:int = InitiativeWindow.getCounterLimitMax(this, info, 0);
+                if( max <= 0 ) {
+                    continue;
+                }
+                
                 var count:int = getCounter( info["counterName"] );
+                if( count <= 0 ) {
+                    continue;
+                }
+                
                 var percentage:Number = (1.0 * count / max);
                 var index:int = i;
                 drowCounterBar(layer, index, barInfos.length, percentage);
