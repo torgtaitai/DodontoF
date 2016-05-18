@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby
-#--*-coding:utf-8-*--
+# -*- coding: utf-8 -*-
 $LOAD_PATH << File.dirname(__FILE__) + "/src_ruby"
 $LOAD_PATH << File.dirname(__FILE__) + "/src_ruby/ruby-mysql"
 $LOAD_PATH << File.dirname(__FILE__) + "/src_bcdice"

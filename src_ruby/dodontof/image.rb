@@ -1,4 +1,4 @@
-#--*-coding:utf-8-*--
+# -*- coding: utf-8 -*-
 
 module DodontoF
   # Image情報
