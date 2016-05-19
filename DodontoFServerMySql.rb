@@ -15,7 +15,7 @@ unless $isTestMode
 end
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$version = "Ver.1.48.04(2016/05/17)"
+$version = "Ver.1.48.05(2016/05/20)"
 
 class SaveDataManagerOnMySql
   include DodontoF::Utils

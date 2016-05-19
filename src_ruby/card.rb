@@ -128,20 +128,18 @@ class Card
     
     @logger.debug(targetType, "getCardInfo targetType")
     
-    @cardsListInfos.each do |info|
-      type = info['type']
-      
-      if type == targetType
-        return info
-      end
-      
-      if /#{targetType}/ === type
-        if (width == info['width']) and (height == info['height'])
-            @logger.debug(info, "found info")
-          return info
-        end
+    info = @cardsListInfos.find{|info| info['type'] == targetType}
+    @logger.debug(info, "perfect match info")
+    return info unless info.nil?
+    
+    info = @cardsListInfos.find do |info|
+      index = info['type'].index(targetType)
+      if index == 0
+        (width == info['width']) and (height == info['height'])
       end
     end
+    @logger.debug(info, "2nd found info")
+    return info unless info.nil?
     
     return nil
   end

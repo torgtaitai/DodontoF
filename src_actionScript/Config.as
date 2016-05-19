@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.48.04(2016/05/17)";
+        private var version:String = "Ver.1.48.05(2016/05/20)";
         
         public function getVersion():String {
             return version;
