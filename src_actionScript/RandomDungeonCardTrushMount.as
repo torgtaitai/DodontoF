@@ -74,7 +74,7 @@ package {
             try {
                 sender.shuffleForNextRandomDungeon(this.getMountName(), this.getId());
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("RandomDungeonCardTrushMount.getContextShuffleForNextRandomDungeon()", e);
             }
         }
         

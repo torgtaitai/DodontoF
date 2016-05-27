@@ -110,7 +110,7 @@ package {
             try {
                 drawCard(false);
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardMount.getContextMenuItemCardDraw()", e);
             }
         }
         
@@ -118,7 +118,7 @@ package {
             try {
                 drawCard(true);
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardMount.getContextMenuItemCardDrawPublic()", e);
             }
         }
         
@@ -126,7 +126,7 @@ package {
             try {
                 drawCardSecret();
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardMount.getContextMenuItemCardDrawSecret()", e);
             }
         }
         
@@ -134,7 +134,7 @@ package {
             try {
                 openDrawCardWindow();
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardMount.getContextMenuItemCardDrawMany()", e);
             }
         }
         
@@ -142,7 +142,7 @@ package {
             try {
                 openSelectCardWindow();
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardMount.getContextMenuItemCardSelect()", e);
             }
         }
         

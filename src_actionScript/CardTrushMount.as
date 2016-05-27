@@ -101,7 +101,7 @@ package {
             try {
                 returnCard();
             } catch(e:Error) {
-                Log.loggingException("MapMask.getContextMenuItemMoveLock()", e);
+                Log.loggingException("CardTrushMount.getContextMenuItemCardReturn()", e);
             }
         }
         

@@ -56,7 +56,7 @@
     private function setup():void {
         Log.loggingTuning("=>setup() Begin");
         
-        CommonPopupWindow.initWindowSizeByFont18Public(250, 200, this);
+        CommonPopupWindow.initWindowSizeByFont18Public(250, 220, this);
         Resizer.addResize(this, new Point(100, 100));
         
         statusTextField.background = true;

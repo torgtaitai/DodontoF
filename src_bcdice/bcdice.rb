@@ -25,7 +25,7 @@ end
 
 def mainBcDiceCli(args)
   message = args[0]
-  gameType = ""
+  gameType = "DiceBot"
   if( args.length >= 2 )
     gameType = args[0]
     message = args[1]

@@ -622,6 +622,7 @@
             }
         }
         
+        InitCardWindow.setCardInfos( jsonData.cardInfos );
         setDiceBotInfos(jsonData);
         
         Log.logging("result jsonData.uniqueId", jsonData.uniqueId);

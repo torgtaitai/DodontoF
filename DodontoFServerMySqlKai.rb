@@ -12,8 +12,8 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
 
 #サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.48.05"
-$versionDate = "2016/05/20"
+$versionOnly = "Ver.1.48.06"
+$versionDate = "2016/05/21"
 $version = "#{$versionOnly}(#{$versionDate})"
 
 
@@ -2277,10 +2277,12 @@ SQL_TEXT
     allLoginCount, loginUserCountList = getAllLoginCount()
     
     loginMessage = getLoginMessage()
+    cardInfos = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
     diceBotInfos = getDiceBotInfos()
     
     result = {
       "loginMessage" => loginMessage,
+      "cardInfos" => cardInfos,
       "isDiceBotOn" => $isDiceBotOn,
       "uniqueId" => uniqueId,
       "refreshTimeout" => $refreshTimeout,
@@ -2316,20 +2318,6 @@ SQL_TEXT
     
     @logger.debug(result, "result")
     @logger.debug("getLoginInfo end")
-    return result
-  end
-  
-  
-  def getCardInfos
-    result = {}
-    result["result"] = "OK"
-    begin
-      result["cardInfos"] = getCardsInfo.collectCardTypeAndTypeName($cardOrder)
-    rescue => e
-      result["result"] = e.to_s
-      @logger.exception(e)
-    end
-    
     return result
   end
   

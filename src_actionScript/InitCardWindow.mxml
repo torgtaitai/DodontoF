@@ -64,55 +64,13 @@
     
     static private var cardInfos:Array = null;
     private var checkBoxes:Object = new Object();
-    private var guiInputSender:GuiInputSender;
+    static private var guiInputSender:GuiInputSender;
     
     override protected function setup():void {
-        setEnable(false);
-        
         guiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
         
-        if( cardInfos == null ) {
-            requestCardInfos();
-        } else {
-            initCardTypes();
-        }
+        initCardTypes();
     }
-    
-    private function setEnable(b:Boolean):void {
-        if( b ){
-            executeButton.enabled = true;
-            status = null;
-        } else {
-            executeButton.enabled = false;
-            status = Language.s.loading;
-        }
-    }
-    
-    private function requestCardInfos():void {
-        guiInputSender.getCardInfos(requestCardInfosResult);
-    }
-    
-    private function requestCardInfosResult(obj:Object):void {
-        Log.loggingTuning("=>requestCardInfosResult() Begin");
-        try {
-            var jsonData:Object = SharedDataReceiver.getJsonDataFromResultEvent(obj);
-            
-            var result:String = jsonData.result;
-            if( result != 'OK' ) {
-                Alert.show(result);
-                return;
-            }
-            
-            setCardInfos( jsonData.cardInfos );
-            
-            initCardTypes();
-        } catch(e:Error) {
-            Log.loggingException("requestCardInfosResult", e);
-        }
-        
-        Log.loggingTuning("=>requestCardInfosResult() End");
-    }
-    
     
     static private var cardTypeTrump:String = "trump";
     static private var randomDungeonTrump:String = "randomDungeonTrump";
@@ -139,14 +97,13 @@
         return cardName;
     }
     
-    static public function getCardInfo(cardType:String):Object {
+    static private function getCardInfo(cardType:String):Object {
         for(var i:int = 0 ; i < cardInfos.length ; i++) {
             var cardInfo:Object = cardInfos[i];
             if( cardInfo.type == cardType ) {
                 return cardInfo;
             }
         }
-        
         return new Object();
     }
     
@@ -180,7 +137,6 @@
                 checkBoxPlace.addChild( checkBox );
             }
         }
-        setEnable(true);
     }
     
     private function getCardGroupCounts(infos:Array):Object {
