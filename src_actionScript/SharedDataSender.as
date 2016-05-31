@@ -984,12 +984,6 @@ package {
             sendCommandData(obj, resultFunction);
         }
 
-        public function getCardInfos(resultFunction:Function):void {
-            var data:Object = {};
-            var obj:Object = getParamObject("getCardInfos", data);
-            sendCommandData(obj, resultFunction);
-        }
-
         public function uploadImageUrl(imageUrl:String, tagInfo:Object, resultFunction:Function):void {
             var data:Object = {"imageUrl": imageUrl,
                                    "tagInfo" : tagInfo };

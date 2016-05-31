@@ -623,10 +623,6 @@ package {
             sender.getLoginInfo(resultFunction, uniqueId);
         }
         
-        public function getCardInfos(resultFunction:Function):void {
-            sender.getCardInfos(resultFunction);
-        }
-        
         public function sendChatMessageAll(name:String, message:String, password:String):void {
             sender.sendChatMessageAll(name, message, password);
         }
