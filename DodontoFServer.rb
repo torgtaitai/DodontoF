@@ -9,14 +9,18 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 #クライアント通知されたJsonデータからセーブデータ(.jsonテキスト)を読み出し・書き出しするのが主な作業。
 #変更可能な設定は config.rb にまとめているため、環境設定のためにこのファイルを変更する必要は基本的には無いです。
 
+# どどんとふ名前空間
+module DodontoF
+  # バージョン
+  VERSION = '1.48.07'
+  # リリース日
+  RELEASE_DATE = '2016/05/31'
 
-#サーバCGIとクライアントFlashのバージョン一致確認用
-$versionOnly = "Ver.1.48.07"
-$versionDate = "2016/05/31"
-$version = "#{$versionOnly}(#{$versionDate})"
-
-
-
+  # バージョンとリリース日を含む文字列
+  #
+  # サーバ CGI とクライアント Flash のバージョン一致確認用
+  FULL_VERSION_STRING = "Ver.#{VERSION}(#{RELEASE_DATE})"
+end
 
 if( RUBY_VERSION >= '1.9.0' )
   Encoding.default_external = 'utf-8'
@@ -1194,7 +1198,7 @@ class DodontoFServer
     jsonData = {
       "loginCount" => File.readlines($loginCountFileFullPath).join.to_i,
       "maxLoginCount" => $aboutMaxLoginCount,
-      "version" => $version,
+      "version" => DodontoF::FULL_VERSION_STRING,
       "result" => 'OK',
     }
     
@@ -2042,7 +2046,7 @@ class DodontoFServer
       "refreshTimeout" => $refreshTimeout,
       "refreshInterval" => getRefreshInterval(),
       "isCommet" => $isCommet,
-      "version" => $version,
+      "version" => DodontoF::FULL_VERSION_STRING,
       "playRoomMaxNumber" => ($saveDataMaxCount - 1),
       "warning" => getLoginWarning(),
       "playRoomGetRangeMax" => $playRoomGetRangeMax,
