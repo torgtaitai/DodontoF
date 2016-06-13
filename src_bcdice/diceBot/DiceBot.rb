@@ -141,8 +141,9 @@ class DiceBot
     
     debug('match')
     
-    output_msg = rollDiceCommandCatched(command)
+    output_msg, secret_flg = rollDiceCommandCatched(command)
     output_msg = '1' if( output_msg.nil? or output_msg.empty? )
+    secret_flg ||= false
     
     output_msg = "#{nick_e}: #{output_msg}" if(output_msg != '1')
     
@@ -169,14 +170,14 @@ class DiceBot
     result = nil
     begin
       debug('call rollDiceCommand command', command)
-      result = rollDiceCommand(command)
+      result, secret_flg = rollDiceCommand(command)
     rescue => e
       debug("executeCommand exception", e.to_s, $@.join("\n"))
     end
     
     debug('rollDiceCommand result', result)
     
-    return result
+    return result, secret_flg
   end
   
   def rollDiceCommand(command)

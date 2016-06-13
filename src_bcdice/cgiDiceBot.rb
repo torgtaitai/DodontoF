@@ -75,6 +75,10 @@ class CgiDiceBot
       # result << "##>isSecretDice<##" if( @isSecret )
     end
     
+    # 多言語対応のダイスボットは「GameType:Language」という書式なので、
+    # ここで言語名を削って表示する。（内部的には必要だが、表示では不要のため）
+    gameType.gsub!(/:.+$/, '')
+    
     unless( rollResult.empty? )
       result << "\n#{gameType} #{rollResult}"
     end

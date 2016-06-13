@@ -655,6 +655,7 @@ package {
             p.secretDice = "シークレットダイス";
             p.secretDiceResult = "隠しダイスロール結果";
             p.openSecretDiceResult = "結果公開";
+            p.deleteSecretDiceResult = "削除";
             
             // DiceSymbol.as
             p.diceSymbol = "ダイスシンボル";

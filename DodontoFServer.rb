@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.07'
+  VERSION = '1.48.08'
   # リリース日
-  RELEASE_DATE = '2016/05/31'
+  RELEASE_DATE = '2016/06/13'
 
   # バージョンとリリース日を含む文字列
   #
@@ -63,27 +63,7 @@ end
 require "FileLock.rb"
 require "saveDirInfo.rb"
 
-
-$dodontofWarning = nil
-
-if( $isMessagePackInstalled )
-  # gem install msgpack してる場合はこちら。
-  begin
-    require 'rubygems'
-    require 'msgpack'
-  rescue Exception
-    $dodontofWarning = {"key" => "youNeedInstallMsgPack"}
-  end
-else
-  if( RUBY_VERSION >= '1.9.0' )
-    # msgpack のRuby1.9用
-    require 'msgpack/msgpack19'
-  else
-    # MessagePackPure バージョン
-    require 'msgpack/msgpackPure'
-  end
-end
-
+require 'dodontof/msgpack_loader'
 
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
@@ -5663,10 +5643,12 @@ class DodontoFServer
   
   def getResponse
     response =
-      if $dodontofWarning.nil?
-        analyzeCommand
+      if DodontoF::MsgpackLoader.failed?
+        {
+          'warning' => { 'key' => 'youNeedInstallMsgPack' }
+        }
       else
-        { 'warning' => $dodontofWarning }
+        analyzeCommand
       end
 
     if isJsonResult

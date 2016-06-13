@@ -1514,7 +1514,11 @@
             var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
             data.setColorString(color);
             data.setDiceRollResult();
-            SecretDiceWindow.printMessage(data);
+            var secretMessage:String = SecretDiceWindow.printMessage(data);
+            
+            var secretMarker:String = Language.text("secretDice");
+            secretMessage = secretMarker + "\n" + secretMessage;
+            addLocalMessage(secretMessage);
         }
         
         public function sendDiceRollResultMessageForChatWindowUser(diceRolledText:String):void {

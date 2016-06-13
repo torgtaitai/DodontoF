@@ -12,6 +12,7 @@ package {
     import mx.core.UIComponent;
     import mx.events.MenuEvent;
     import mx.managers.PopUpManager;
+    import mx.utils.StringUtil;
     
     public class DiceSymbol extends MovablePiece {
         
@@ -136,14 +137,16 @@ package {
             allMenus.push( addMenuItem(menu, Language.s.rollDiceSymbol, this.rollDice) );
             
             var minNumber:int = (Config.getInstance().isHaveZeroDice(maxNumber) ? 0 : 1);
-            var loopCount:int = Math.min(this.maxNumber, limitMaxNumber);
+            var limitMax:int = limitMaxNumber - (Config.getInstance().isHaveZeroDice(maxNumber) ? 1 : 0);
+            
+            var loopCount:int = Math.min(this.maxNumber, limitMax);
             
             for(var i:int = minNumber ; i <= loopCount ; i++) {
                 var separatorBefore:Boolean = (i == minNumber);
                 pushSetDiceNumberMenuItem(menu, i, separatorBefore);
             }
             
-            if( this.maxNumber > limitMaxNumber ) {
+            if( this.maxNumber > limitMax ) {
                 hideMenu = addMenuItem(menu, Language.s.changeDiceNumberOver10, 
                                        this.getContextMenuItemSetDiceOver10Function(),
                                        true);
@@ -169,7 +172,8 @@ package {
         }
         
         private function getContextMenuItemSetDiceOver10Function():Function {
-            var from:int = limitMaxNumber + 1;
+            var limitMax:int = limitMaxNumber - (Config.getInstance().isHaveZeroDice(maxNumber) ? 1 : 0);
+            var from:int = limitMax + 1;
             var to:int = this.maxNumber;
             
             return function(event:ContextMenuEvent):void {
@@ -243,10 +247,14 @@ package {
         }
         
         public function changeNumber(targetNumber:int):void {
+            var oldNumber:int = this.number;
             this.number = targetNumber;
             
             var resultFunction:Function = function(event:Event):void { 
                 var message:String = Language.text("changeDiceSimboleNumber", ownerName);
+                if( isOpenMode()) {
+                    message += StringUtil.substitute("({0}→{1})", oldNumber, targetNumber);
+                }
                 var window:ChatWindow = ChatWindow.getInstance();
                 window.sendChatMessage(window.publicChatChannel, message);
             }
