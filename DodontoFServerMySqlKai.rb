@@ -61,27 +61,7 @@ end
 require "FileLock.rb"
 require "saveDirInfoMysql.rb"
 
-
-$dodontofWarning = nil
-
-if( $isMessagePackInstalled )
-  # gem install msgpack してる場合はこちら。
-  begin
-    require 'rubygems'
-    require 'msgpack'
-  rescue Exception
-    $dodontofWarning = {"key" => "youNeedInstallMsgPack"}
-  end
-else
-  if( RUBY_VERSION >= '1.9.0' )
-    # msgpack のRuby1.9用
-    require 'msgpack/msgpack19'
-  else
-    # MessagePackPure バージョン
-    require 'msgpack/msgpackPure'
-  end
-end
-
+require 'dodontof/msgpack_loader'
 
 
 $saveFileNames = File.join($saveDataTempDir, 'saveFileNames.json');
@@ -5826,10 +5806,12 @@ SQL_TEXT
   
   def getResponse
     response =
-      if $dodontofWarning.nil?
-        analyzeCommand
+      if DodontoF::MsgpackLoader.failed?
+        {
+          'warning' => { 'key' => 'youNeedInstallMsgPack' }
+        }
       else
-        { 'warning' => $dodontofWarning }
+        analyzeCommand
       end
 
     if isJsonResult
