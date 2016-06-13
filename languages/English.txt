@@ -589,6 +589,7 @@ deleteDice = Delete Dice
 secretDice = Secret Dice
 secretDiceResult = Open Secret Dice Result
 openSecretDiceResult = Open Result
+deleteSecretDiceResult = DEL
 diceSymbol = Dice Symbol
 openDiceSymbol = Open Dice
 rollDiceSymbol = Roll Dice

@@ -587,6 +587,7 @@ deleteDice = ダイスの削除
 secretDice = シークレットダイス
 secretDiceResult = 隠しダイスロール結果
 openSecretDiceResult = 結果公開
+deleteSecretDiceResult = 削除
 diceSymbol = ダイスシンボル
 openDiceSymbol = ダイス目を公開する
 rollDiceSymbol = ダイスを振る

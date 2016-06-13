@@ -585,6 +585,7 @@ deleteDice = 刪除骰子
 secretDice = 祕密骰
 secretDiceResult = 隱藏骰結果
 openSecretDiceResult = 公開結果
+deleteSecretDiceResult = 刪除
 diceSymbol = 代表骰
 openDiceSymbol = 公開骰數
 rollDiceSymbol = 擲骰
