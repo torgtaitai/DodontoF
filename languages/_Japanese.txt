@@ -678,6 +678,7 @@ magicTimerStartRound = 効果開始ラウンド:
 magicTimerStartInitiative = 効果開始イニシアティブ:
 magicTimerInfo = その他:
 changePlayRoom = プレイルーム変更
+disallowRenamingPlayRoomAsDeletable = このサーバーでは、プレイルーム名に「削除可」を含めることを禁止しています。\nセッション終了後は、ログアウト時の確認画面またはログイン画面でこのプレイルームを削除してください。
 useExternalImageTips = 外部画像の許可を行うと画像指定時に外部URLが使用出来るようになります。指定していない場合に外部URLを画像に使用すると×マークに指し換わります。
 canVisitTips = 見学可にすると、パスワード有りでも見学者ならログインできるようになります。見学者はチャットの「見学用」タブでの発言のみが許可され、名前は「（名前）＠見学」になります。チャット発言意外の、マップやキャラ等の操作は一切できません。
 playRoomNameTips = プレイルーム名を設定しない場合、仮使用とみなして削除されます。\n正式に利用する場合には正しく名前をつけましょう。

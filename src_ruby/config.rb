@@ -273,6 +273,9 @@ $characterInfoToolTipMaxHeight = -1
 #ログアウト時に他に人がいない場合、部屋の削除を質問するかどうかを設定（true:質問する、false:しない)
 $isAskRemoveRoomWhenLogout = true
 
+# プレイルーム名に「削除可」を含めることを禁止します（true：禁止、false：許可）。
+# セッション終了後のプレイルーム放置対策の機能です。
+$disallowRenamingPlayRoomAsDeletable = false
 
 # src_bcdice/diceBot/ に置いてあるダイスボットを全て一覧に表示するかどうかの指定。
 # false の場合は下記の $diceBotOrder に記載されていないダイスボットは一覧に表示されません。

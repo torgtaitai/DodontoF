@@ -2053,6 +2053,7 @@ class DodontoFServer
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
       'isAskRemoveRoomWhenLogout' => $isAskRemoveRoomWhenLogout,
+      'disallowRenamingPlayRoomAsDeletable' => $disallowRenamingPlayRoomAsDeletable,
     }
     
     @logger.debug(result, "result")
