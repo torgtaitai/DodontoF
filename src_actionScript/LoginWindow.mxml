@@ -610,7 +610,7 @@
         }
         
         DodontoF_Main.getInstance().setLogoutUrl( jsonData.logoutUrl );
-        isNeedCreatePassword = jsonData.isNeedCreatePassword 
+        isNeedCreatePassword = jsonData.isNeedCreatePassword;
         Config.getInstance().setImageUploadDirInfo(jsonData.imageUploadDirInfo);
         
         playRoomGetRangeMax = jsonData.playRoomGetRangeMax;
@@ -630,7 +630,10 @@
         DodontoF_Main.getInstance().setUniqueId( jsonData.uniqueId);
         DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
         Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
+        
+        // プレイルーム削除関連の設定
         Config.getInstance().isAskRemoveRoomWhenLogout = jsonData.isAskRemoveRoomWhenLogout;
+        Config.getInstance().disallowRenamingPlayRoomAsDeletable = jsonData.disallowRenamingPlayRoomAsDeletable;
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
         

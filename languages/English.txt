@@ -680,6 +680,7 @@ magicTimerStartRound = Start Round:
 magicTimerStartInitiative = Start Initiative:
 magicTimerInfo = Info:
 changePlayRoom = Change Play Room
+disallowRenamingPlayRoomAsDeletable = You can't include "削除可" (deletable) in the name of a play room in this server. Please delete this play room after the session has been over.
 useExternalImageTips = If check, you can use external site image to Image File target. If NOT checked, image change to X mark means no image.
 canVisitTips = If check, anyone can login ignore password. but visitor only can seeing, can NOT move anything, and talk only "for Visitor" Tab. and Name always safixed "@Visitor"
 playRoomNameTips = If you did NOT define play name, it's seemd to "actualy did not used", so anyone delete it.\nIf you want to play, set a good room name.

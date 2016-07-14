@@ -767,6 +767,7 @@ package {
             
             // ChangePlayRoomWindow.as
             p.changePlayRoom = "プレイルーム変更";
+            p.disallowRenamingPlayRoomAsDeletable = "このサーバーでは、プレイルーム名に「削除可」を含めることを禁止しています。\nセッション終了後は、ログアウト時の確認画面またはログイン画面でこのプレイルームを削除してください。";
             // CreatePlayRoomWindow.mxml
             p.useExternalImageTips = "外部画像の許可を行うと画像指定時に外部URLが使用出来るようになります。指定していない場合に外部URLを画像に使用すると×マークに指し換わります。";
             p.canVisitTips = "見学可にすると、パスワード有りでも見学者ならログインできるようになります。見学者はチャットの「見学用」タブでの発言のみが許可され、名前は「（名前）＠見学」になります。チャット発言意外の、マップやキャラ等の操作は一切できません。";

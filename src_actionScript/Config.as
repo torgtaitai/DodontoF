@@ -582,5 +582,17 @@ package {
             return isAskRemoveRoomWhenLogoutMode;
         }
         
+        // 部屋の名前に「削除可」を含めることを許可しないかどうか
+        private var _disallowRenamingPlayRoomAsDeletable:Boolean = false;
+
+        // 部屋の名前に「削除可」を含めることを許可しないかどうかの setter
+        public function set disallowRenamingPlayRoomAsDeletable(value:Boolean):void {
+            _disallowRenamingPlayRoomAsDeletable = value;
+        }
+
+        // 部屋の名前に「削除可」を含めることを許可しないかどうかの getter
+        public function get disallowRenamingPlayRoomAsDeletable():Boolean {
+            return _disallowRenamingPlayRoomAsDeletable;
+        }
     }
 }

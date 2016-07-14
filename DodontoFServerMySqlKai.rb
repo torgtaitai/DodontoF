@@ -2298,6 +2298,7 @@ SQL_TEXT
       'languages' => getLanguages(),
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
+      'disallowRenamingPlayRoomAsDeletable' => $disallowRenamingPlayRoomAsDeletable,
     }
     
     @logger.debug(result, "result")

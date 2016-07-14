@@ -2,6 +2,7 @@
 
 package {
     import mx.controls.CheckBox;
+    import mx.controls.Alert;
     
     public class ChangePlayRoomWindow extends CreatePlayRoomWindow {
         import mx.managers.PopUpManager;
@@ -60,8 +61,16 @@ package {
                 }
         }
         
-        
+        // プレイルーム情報の変更を実行する
         override protected function execute():void {
+            if (!isValidPlayRoomName(playRoomName.text)) {
+                // プレイルーム名に「削除可」を含めることを許可しない
+                Alert.show(Language.s.disallowRenamingPlayRoomAsDeletable,
+                           Language.s.changePlayRoom,
+                           Alert.OK);
+                return;
+            }
+
             try {
                 var chatChannelNames:Array = getChatChannelNames();
                 
@@ -83,6 +92,16 @@ package {
             
         }
         
+        // 有効なプレイルーム名かどうかを返す
+        private function isValidPlayRoomName(playRoomName:String):Boolean {
+            if (!Config.getInstance().disallowRenamingPlayRoomAsDeletable) {
+                return true;
+            }
+
+            // プレイルーム名に「削除可」を含めることを許可しない場合のみ
+            // チェックを行う
+            return playRoomName.indexOf("削除可") == -1;
+        }
     }
 }
 

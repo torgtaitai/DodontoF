@@ -676,6 +676,7 @@ magicTimerStartRound = 效果開始回合:
 magicTimerStartInitiative = 效果開始先攻值:
 magicTimerInfo = 其他:
 changePlayRoom = 變更遊戲室內容
+disallowRenamingPlayRoomAsDeletable = You can't include "削除可" (deletable) in the name of a play room in this server. Please delete this play room after the session has been over.
 useExternalImageTips = 許可使用外部圖像的話，指定圖像時可以使用外部網址。未指定本項時若使用外部網址將會顯示×記號。
 canVisitTips = 許可觀戰的話，即使遊戲室有密碼鎖也可以開放觀戰者自由進入。觀戰者只能在對話欄的「觀戰用」分頁發言，名稱會變成「（名稱）＠觀戰」的形式。完全無法進行意外的對話發言，或是對地圖及角色進行操作。
 playRoomNameTips = 未設定遊戲室名稱的場合，認定為被刪除的暫時使用。\n正式使用的場合請輸入正確的名稱。

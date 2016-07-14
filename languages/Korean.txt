@@ -1,4 +1,4 @@
-﻿# 샘-플-메-세-지-
+# 샘-플-메-세-지-
 # 이 문서는 도돈토후의 한국어 번역입니다
 # 도돈토후 짱 좋아여
 # 님들 roll20만 쓰지마시고 도돈토후 쓰세여...
@@ -678,6 +678,7 @@ magicTimerStartRound = 효과개시 라운드:
 magicTimerStartInitiative = 효과개시 이니셔티브:
 magicTimerInfo = 그 외:
 changePlayRoom = 플레이 룸 변경
+disallowRenamingPlayRoomAsDeletable = You can't include "削除可" (deletable) in the name of a play room in this server. Please delete this play room after the session has been over.
 useExternalImageTips = 외부 이미지를 허가하면 이미지 지정시에 외부 URL를 사용할 수 있게 됩니다. 지정하지 않은 경우는 외부 URL을 이미지에 사용하면 ×마크로 바뀝니다.
 canVisitTips = 관전 가능으로 하면 패스워드가 있어도 관전자라면 로그인 할 수 있게 됩니다. 관전자는 채팅의 「관전용」 탭에서만 발언할 수 있고 이름은 「（이름）＠관전」이 됩니다. 채팅 발언 이외의 맵이나 캐릭터 등의 조작은 할 수 없습니다.
 playRoomNameTips = 플레이 룸 명을 지정하지 않을 경우, 임시 사용으로 간주하고 삭제합니다. \n정식으로 이용할 경우는 올바른 이름을 붙여주세요.

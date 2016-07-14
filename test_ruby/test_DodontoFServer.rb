@@ -573,7 +573,8 @@ class DodontoFServerTest < Test::Unit::TestCase
       'languages',
       'canUseExternalImageModeOn',
       'characterInfoToolTipMax',
-      'isAskRemoveRoomWhenLogout'
+      'isAskRemoveRoomWhenLogout',
+      'disallowRenamingPlayRoomAsDeletable'
     )
 
     assert_equal(nil, parsed['warning'])
