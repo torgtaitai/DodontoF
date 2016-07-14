@@ -649,6 +649,24 @@ package {
             }
         }
         
+        private function checkChangePlayRoom(playRoomNameOriginal:String,
+                                             playRoomName:String):void {
+            if( playRoomNameOriginal == playRoomName ) {
+                return;
+            }
+            
+            var checker:Object = Config.getInstance().getWordChecker("changePlayRoomNameChaker");
+            
+            var targetText:String = playRoomName.replace(/(、|。|・|\/|\.|．|\t|　|_|＿)/g, '');
+            
+            for(var key:String in checker){
+                if( targetText.search(key) != -1 ) {
+                    var errorMessage:String = checker[key];
+                    throw new Error( errorMessage );
+                }
+            }
+        }
+        
         public function createPlayRoom(createPassword:String,
                                        playRoomName:String,
                                        playRoomPassword:String,
@@ -665,7 +683,8 @@ package {
                                   playRoomIndex, resultFunction);
         }
         
-        public function changePlayRoom(playRoomName:String,
+        public function changePlayRoom(playRoomNameOriginal:String,
+                                       playRoomName:String,
                                        playRoomPassword:String,
                                        chatChannelNames:Array,
                                        canUseExternalImage:Boolean,
@@ -676,6 +695,8 @@ package {
                                        playRoomIndex:int,
                                        resultFunction:Function):void {
             checkPlayRoom(playRoomName, playRoomPassword, chatChannelNames);
+            checkChangePlayRoom(playRoomNameOriginal, playRoomName);
+            
             sender.changePlayRoom(playRoomName, playRoomPassword, chatChannelNames,
                                   canUseExternalImage, canVisit, backgroundImage,
                                   gameType, viewStates, 

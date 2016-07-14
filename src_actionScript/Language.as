@@ -185,6 +185,8 @@ package {
             p.mainTabName = "メイン";
             p.smallTalkTabName = "雑談";
             p.visitorTabName = "見学用";
+            p.diceBotHelpWindow = "ダイスボット解説";
+            p.openDiceBotHelpTips = "ダイスボットのヘルプを別ウィンドウで表示します";
             p.botTableTips = "ダイスボット表追加・変更・削除";
             p.novelticModeTips = "シフトキー・Ctrlキーを押しながらのマウス操作でもログは隠れなくなります。";
             p.easyFileUploader = "簡易ファイルアップローダー";
@@ -848,6 +850,9 @@ package {
             p.chatPalletTabName = "タブ名：";
             p.chatPalletSendButton = "送信";
             p.chatPalletSaveData = "チャットパレットセーブデータ";
+            p.chatPalletMoveTabRightButton = "タブを【　　右→】へ";
+            p.chatPalletMoveTabLeftButton = "タブを【←左　　】へ";
+            
             // ChatWindow.mxml
             p.channerCoundIsEmptyErrorMessage = "チャンネル数が0で設定されています。正しいチャンネル設定を行ってください";
             p.sendChatErrorMessage = "チャット送信エラー";

@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.48.12(2016/07/04)";
+        private var version:String = "Ver.1.48.13(2016/07/14)";
         
         public function getVersion():String {
             return version;
@@ -580,6 +580,26 @@ package {
         
         public function get isAskRemoveRoomWhenLogout():Boolean {
             return isAskRemoveRoomWhenLogoutMode;
+        }
+        
+        
+        private var wordChecker:Object = new Object();
+        
+        public function setWordChecker(obj:Object):void {
+            wordChecker = obj;
+        }
+        
+        public function getWordChecker(key:String):Object {
+            if( wordChecker == null ) {
+                return new Object();
+            }
+            
+            var info:Object = wordChecker[key];
+            if( info == null ) {
+                return new Object();
+            }
+            
+            return info;
         }
         
     }

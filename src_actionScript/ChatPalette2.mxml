@@ -14,7 +14,6 @@
   <mx:Box id="chatPalet" width="100%" height="100%">
     <mx:TabNavigator id="tabSpace" width="100%" height="100%" change="changeTab()" >
     </mx:TabNavigator>
-    
     <mx:HBox width="100%" height="20">
       <mx:Button label="{Language.s.chatPalletEdit}" click="edit()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
@@ -95,6 +94,66 @@
         }
         
         initSaveLoad();
+        initMenu();
+    }
+    private function initMenu():void {
+        var menu:ContextMenu = new ContextMenu();
+        menu.hideBuiltInItems();
+        
+        MovablePiece.addMenuItem(menu, Language.s.chatPalletMoveTabRightButton, function():void{
+                var index:int = tabSpace.selectedIndex;
+                swapTab(index, index + 1);
+            }, true);
+        
+        MovablePiece.addMenuItem(menu, Language.s.chatPalletMoveTabLeftButton, function():void{
+                var index:int = tabSpace.selectedIndex;
+                swapTab(index, index - 1);
+            }, true);
+        
+        tabSpace.contextMenu = menu;
+    }
+    
+    private function swapTab(from:int, to:int):void {
+        var saveData:Object = getSaveData();
+        
+        var result:Boolean = swapArray(saveData.tabInfos, from, to);
+        if( ! result ) {
+            return;
+        }
+        
+        loadSaveData(saveData);
+        
+        tabSpace.validateNow();
+        this.validateNow();
+        
+        tabSpace.selectedIndex = tabSpace.numChildren - 1;
+        tabSpace.validateNow();
+        this.validateNow();
+        tabSpace.selectedIndex = to;
+        tabSpace.validateNow();
+        this.validateNow();
+    }
+    
+    private function swapArray(array:Array, index1:int, index2:int):Boolean {
+        if( index1  >= array.length ) {
+            return false;
+        }
+        if( index2  >= array.length ) {
+            return false;
+        }
+        
+        if( index1  < 0 ) {
+            return false;
+        }
+        if( index2  < 0 ) {
+            return false;
+        }
+        
+        var tmp:Object = array[index1];
+        array[index1] = array[index2];
+        array[index2] = tmp;
+        
+        return true;
     }
     
     private function initChatPalet():void {
@@ -188,10 +247,10 @@
             name : name,
             input : input,
             colorPicker : colorPicker,
-            tabName: tabName,
+            tabName : tabName,
             list : inputList,
             changer : changer,
-            tab: tab };
+            tab : tab };
         
         tabEditors.push(tabEditorInfo);
                     

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<torgtaitai:CommonPopupWindow
+   xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:torgtaitai="*" 
+   width="600"
+   height="500"
+   title="{Language.s.diceBotHelpWindow}"
+   showCloseButton="true"
+   >
+  
+  <mx:TextArea id="helpText"
+               width="100%" height="100%"
+               editable="false"
+               >
+  </mx:TextArea>
+      
+  
+  <mx:Script>
+    <![CDATA[
+    import mx.managers.PopUpManager;
+    import mx.events.CloseEvent;
+    
+    override protected function setup():void {
+        helpText.text = ChatWindow.getInstance().diceBotHelpText;
+    }
+    
+    
+    ]]>
+  </mx:Script>
+</torgtaitai:CommonPopupWindow>

@@ -117,7 +117,6 @@
     import mx.controls.Alert;
     import mx.controls.CheckBox;
     
-    
     protected var resultFunction:Function;
     protected var canselFunction:Function;
     protected var playRoomIndex:int;
@@ -145,6 +144,8 @@
     }
     
     override protected function setup():void {
+        initWindowSizeByFont18(900, 250);
+        
         Log.logging("CreatePlayRoomWindow.setup begin");
         try {
             init();

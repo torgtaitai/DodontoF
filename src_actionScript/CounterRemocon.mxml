@@ -229,17 +229,6 @@
                     initButtons();
                 }, true);
             
-            MovablePiece.addMenuItem(menu, Language.s.moveLeftCounterRemoconButton, function():void{
-                    if( index == 0 ) {
-                        return;
-                    }
-                    
-                    var button:Object = buttonInfos[index];
-                    buttonInfos.splice(index, 1);
-                    buttonInfos.splice(index - 1, 0, button);
-                    initButtons();
-                }, true);
-            
             MovablePiece.addMenuItem(menu, Language.s.moveRightCounterRemoconButton, function():void{
                     if( (index + 1) == buttonInfos.length ) {
                         return;
@@ -248,6 +237,17 @@
                     var button:Object = buttonInfos[index];
                     buttonInfos.splice(index, 1);
                     buttonInfos.splice(index + 1, 0, button);
+                    initButtons();
+                }, true);
+            
+            MovablePiece.addMenuItem(menu, Language.s.moveLeftCounterRemoconButton, function():void{
+                    if( index == 0 ) {
+                        return;
+                    }
+                    
+                    var button:Object = buttonInfos[index];
+                    buttonInfos.splice(index, 1);
+                    buttonInfos.splice(index - 1, 0, button);
                     initButtons();
                 }, false);
             

@@ -7,6 +7,7 @@ package {
         import mx.managers.PopUpManager;
         
         private var backgroundImage:String;
+        private var playRoomNameOriginal:String = "";
         
         public function setPlayRoomInfo(name:String,
                                         password:String,
@@ -16,6 +17,7 @@ package {
                                         backgroundImage_:String):void {
             this.validateNow();
             
+            playRoomNameOriginal = name;
             playRoomName.text = name;
             playRoomPassword.text = password;
             
@@ -60,14 +62,15 @@ package {
                 }
         }
         
-        
+        // プレイルーム情報の変更を実行する
         override protected function execute():void {
             try {
                 var chatChannelNames:Array = getChatChannelNames();
                 
                 executeButton.enabled = false;
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-                guiInputSender.changePlayRoom(playRoomName.text,
+                guiInputSender.changePlayRoom(playRoomNameOriginal,
+                                              playRoomName.text,
                                               playRoomPassword.text,
                                               chatChannelNames,
                                               canUseExternalImage.selected,
@@ -79,6 +82,7 @@ package {
                                               executeResult);
             } catch(error:Error) {
                 this.status = error.message;
+                executeButton.enabled = true;
             }
             
         }

@@ -68,6 +68,10 @@
                            >
               </mx:ComboBox>
               
+              <mx:Image id="diceBotHelpButton" source="{diceBotHelpIcon}" click="openDiceBotHelp()"
+                        toolTip="{Language.s.openDiceBotHelpTips}"
+                        />
+
               <mx:Image id="botTableButton" source="{botTableIcon}" click="manageDiceBotTable()"
                         toolTip="{Language.s.botTableTips}"
                         />
@@ -145,6 +149,10 @@
   <mx:Script>
     <![CDATA[
 
+        [Embed(source='image/icons/icon_help.png')]
+        [Bindable]
+        private static var diceBotHelpIcon:Class;
+        
         [Embed(source='image/icons/page_white_gear.png')]
         [Bindable]
         private static var botTableIcon:Class;
@@ -214,7 +222,7 @@
         private static var sendChatMessageErrorIcon:Class;
         
         [Bindable]
-        private var diceBotHelpText:String;
+        public var diceBotHelpText:String;
         
         [Bindable]
         static private var canTalk:Boolean = false;
@@ -1986,6 +1994,9 @@
             return true;
         }
         
+        private function openDiceBotHelp():void {
+            var window:DiceBotHelpWindow = DodontoF.popup(DiceBotHelpWindow, true) as DiceBotHelpWindow;
+        }
         
         public function manageDiceBotTable():void {
             var window:ManageBotTableWindow = DodontoF.popup(ManageBotTableWindow, true) as ManageBotTableWindow;

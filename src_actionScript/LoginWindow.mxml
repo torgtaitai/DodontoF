@@ -609,6 +609,8 @@
             stage.frameRate = jsonData.fps;
         }
         
+        Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
+        
         DodontoF_Main.getInstance().setLogoutUrl( jsonData.logoutUrl );
         isNeedCreatePassword = jsonData.isNeedCreatePassword 
         Config.getInstance().setImageUploadDirInfo(jsonData.imageUploadDirInfo);
@@ -631,6 +633,7 @@
         DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
         Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
         Config.getInstance().isAskRemoveRoomWhenLogout = jsonData.isAskRemoveRoomWhenLogout;
+        Config.getInstance().setWordChecker( jsonData.wordChecker );
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
         
@@ -665,6 +668,16 @@
         extendButton.enabled = true;
         
         getPlayRoomStates();
+        
+        checkErrorMessage(jsonData);
+    }
+    
+    private function checkErrorMessage(jsonData:Object):void {
+        if( jsonData.errorMessage == null ) {
+            return;
+        }
+        
+        loginMessage.text = jsonData.errorMessage;
     }
     
     private function analyzeLoginInfo(jsonData:Object):Boolean {

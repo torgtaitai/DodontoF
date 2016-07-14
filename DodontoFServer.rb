@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.12'
+  VERSION = '1.48.13'
   # リリース日
-  RELEASE_DATE = '2016/07/04'
+  RELEASE_DATE = '2016/07/14'
 
   # バージョンとリリース日を含む文字列
   #
@@ -44,15 +44,27 @@ if( $isFirstCgi )
   require 'cgiPatch_forFirstCgi'
 end
 
-require "config.rb"
+require "config"
+
+$globalErrorMessage = nil
 
 begin
-  require "config_local.rb"
-rescue Exception
+  require "config_local"
+rescue LoadError
+  # NO config_local.rb is NOT error.
+rescue Exception => e
+  $globalErrorMessage ||= ''
+  $globalErrorMessage << "config_local.rb has Error !\n\n"
+  $globalErrorMessage << e.to_s
+  
+  unless $!.nil?
+    $globalErrorMessage << 'exception from : ' << $!.backtrace.join("\n")
+    $globalErrorMessage << '$!.inspect : ' << $!.inspect
+  end
 end
 
 if $isTestMode
-  require "config_test.rb"
+  require "config_test"
 end
 
 
@@ -60,8 +72,8 @@ if( $loginCountFileFullPath.nil? )
   $loginCountFileFullPath = File.join($SAVE_DATA_DIR, 'saveData', $loginCountFile)
 end
 
-require "FileLock.rb"
-require "saveDirInfo.rb"
+require "FileLock"
+require "saveDirInfo"
 
 require 'dodontof/msgpack_loader'
 
@@ -236,7 +248,7 @@ class DodontoFServer
   attr :isJsonResult
   
   def getCardsInfo
-    require "card.rb"
+    require "card"
     
     return @card unless( @card.nil? )
     
@@ -2053,6 +2065,8 @@ class DodontoFServer
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
       'isAskRemoveRoomWhenLogout' => $isAskRemoveRoomWhenLogout,
+      'wordChecker' => $wordChecker,
+      'errorMessage' => $globalErrorMessage,
     }
     
     @logger.debug(result, "result")
@@ -5815,7 +5829,7 @@ def executeDodontoServerCgi()
   case $dbType
   when "mysql"
     #mod_ruby でも再読み込みするようにloadに
-    require 'DodontoFServerMySql.rb'
+    require 'DodontoFServerMySql'
     mainMySql(cgiParams)
   else
     #通常のテキストファイル形式
