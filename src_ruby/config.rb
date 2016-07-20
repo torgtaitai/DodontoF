@@ -277,7 +277,7 @@ $isAskRemoveRoomWhenLogout = true
 # 部屋の名前を変更する際に制限を付けるための設定。
 # 設定無しの場合は
 #  $wordChecker = {
-#  "changePlayRoomNameChaker" => {
+#  "changePlayRoomNameChecker" => {
 #    }
 #  }
 # と定義行を削除してください。
@@ -288,7 +288,7 @@ $isAskRemoveRoomWhenLogout = true
 # の書式で同様に定義を追記してください。
 #
 $wordChecker = {
-  "changePlayRoomNameChaker" => {
+  "changePlayRoomNameChecker" => {
     "削除可" => "部屋名に「削除可能」と付けるのではなく、自分で削除しましょう",
 #    "削除可" => "このサーバーでは、プレイルーム名に「削除可」を含めることを禁止しています。\nセッション終了後は、ログアウトログイン画面からプレイルームを削除してください。",
 
@@ -393,6 +393,7 @@ $diceBotOrder = <<____END_MARKER____
 グランクレスト
 ゲイシャ・ガール・ウィズ・カタナ
 ゲヘナ・アナスタシス
+黒絢のアヴァンドナー
 ゴリラTRPG
 サタスペ
 Shared†Fantasia

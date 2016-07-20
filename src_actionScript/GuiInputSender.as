@@ -655,7 +655,7 @@ package {
                 return;
             }
             
-            var checker:Object = Config.getInstance().getWordChecker("changePlayRoomNameChaker");
+            var checker:Object = Config.getInstance().getWordChecker("changePlayRoomNameChecker");
             
             var targetText:String = playRoomName.replace(/(、|。|・|\/|\.|．|\t|　|_|＿)/g, '');
             

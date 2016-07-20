@@ -106,6 +106,9 @@ package {
             
             for(var i:int = 0 ; i < characters.length ; i++) {
                 var character:Character = characters[i];
+                if( character.isHideMode() ) {
+                    continue;
+                }
                 
                 var characterInfo:Object = {
                     "name" : character.getName(),
