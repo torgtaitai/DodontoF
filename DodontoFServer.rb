@@ -161,6 +161,10 @@ class DodontoFServer
     return messagePack
   end
 
+  # セーブデータディレクトリの情報
+  # @return [SaveDirInfo]
+  attr_reader :saveDirInfo
+
   def initialize(saveDirInfo, cgiParams)
     @cgiParams = cgiParams
     @saveDirInfo = saveDirInfo
@@ -1221,7 +1225,7 @@ class DodontoFServer
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
 
-    room = DodontoF::PlayRoom.new(self, @saveDirInfo)
+    room = DodontoF::PlayRoom.new(self)
     playRoomStates = room.getStates(minRoom, maxRoom)
 
     jsonData = {
@@ -1937,18 +1941,18 @@ class DodontoFServer
   end
   
   def removeOldPlayRoom()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
+    DodontoF::PlayRoom.new(self).removeOlds
   end
   
   def getPlayRoomStates()
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
 
-    DodontoF::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
+    DodontoF::PlayRoom.new(self).getStatesByParams(params)
   end
   
   def getPlayRoomState(roomNo)
-    DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
+    DodontoF::PlayRoom.new(self).getState(roomNo)
   end
   
   def getGameName(gameType)
@@ -2262,17 +2266,17 @@ class DodontoFServer
   
   def createPlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
+    DodontoF::PlayRoom.new(self).create(params)
   end
   
   def changePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
+    DodontoF::PlayRoom.new(self).change(params)
   end
 
   def removePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
+    DodontoF::PlayRoom.new(self).remove(params)
   end
   
   def getTrueSaveFileName(fileName)
@@ -2675,7 +2679,7 @@ class DodontoFServer
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
 
-    DodontoF::PlayRoom.new(self, @saveDirInfo).check(params)
+    DodontoF::PlayRoom.new(self).check(params)
   end
   
   def loginPassword()
