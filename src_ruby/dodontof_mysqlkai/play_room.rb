@@ -414,7 +414,7 @@ COMMAND_END
     end
 
     def removePlayRoomData(roomNumber)
-      image = DodontoF_MySqlKai::Image.new(@server, @saveDirInfo)
+      image = DodontoF_MySqlKai::Image.new(@server)
       image.removeRoomImageTags(roomNumber)
       @saveDirInfo.removeSaveDir(roomNumber)
       removeLocalSpaceDir(roomNumber)
