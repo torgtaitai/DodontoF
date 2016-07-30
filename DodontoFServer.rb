@@ -172,7 +172,6 @@ class DodontoFServer
 
     @jsonpCallBack = nil
     @isWebIf = false
-    @isJsonResult = true
     @isRecordEmpty = false
 
     @diceBotTablePrefix = 'diceBotTable_'
@@ -243,7 +242,6 @@ class DodontoFServer
   end
 
   attr :jsonpCallBack
-  attr :isJsonResult
   
   def getCardsInfo
     require "card"
@@ -865,7 +863,6 @@ class DodontoFServer
     @logger.debug("analyzeWebInterfaceCatched begin")
     
     @isWebIf = true
-    @isJsonResult = true
     
     commandName = getRequestData('webif')
     @logger.debug(commandName, 'commandName')
@@ -5658,13 +5655,8 @@ class DodontoFServer
         analyzeCommand
       end
 
-    if isJsonResult
-      return getJsonString(response)
-    else
-      return MessagePack.pack(response)
-    end
+    return getJsonString(response)
   end
-  
 end
 
 
@@ -5716,23 +5708,6 @@ def main(cgiParams)
   logger.debug("printResult called")
 end
 
-def getInitializedHeaderText(server)
-  header = ""
-  
-  if( $isModRuby )
-    #Apache::request.content_type = "text/plain; charset=utf-8"
-    #Apache::request.send_header
-  else
-    if( server.isJsonResult )
-      header = "Content-Type: text/plain; charset=utf-8\n"
-    else
-      header = "Content-Type: application/x-msgpack; charset=x-user-defined\n"
-    end
-  end
-  
-  return header
-end
-
 def printResult(server)
   logger = DodontoF::Logger.instance
 
@@ -5740,7 +5715,7 @@ def printResult(server)
 
   text = "empty"
 
-  header = getInitializedHeaderText(server)
+  header = $isModRuby ? '' : "Content-Type: application/json\n"
 
   begin
     result = server.getResponse
