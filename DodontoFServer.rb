@@ -170,7 +170,6 @@ class DodontoFServer
     roomIndexKey = "room"
     initSaveFiles( getRequestData(roomIndexKey) )
 
-    @isAddMarker = false
     @jsonpCallBack = nil
     @isWebIf = false
     @isJsonResult = true
@@ -243,7 +242,6 @@ class DodontoFServer
     return valueWebIf
   end
 
-  attr :isAddMarker
   attr :jsonpCallBack
   attr :isJsonResult
   
@@ -874,11 +872,6 @@ class DodontoFServer
     
     if( isInvalidRequestParam(commandName) )
       return nil
-    end
-    
-    marker = getRequestData('marker')
-    if( isInvalidRequestParam(marker) )
-      @isAddMarker = false
     end
     
     @logger.debug(commandName, "commandName")
@@ -5751,10 +5744,6 @@ def printResult(server)
 
   begin
     result = server.getResponse
-
-    if( server.isAddMarker )
-      result = "#D@EM>#" + result + "#<D@EM#";
-    end
 
     if( server.jsonpCallBack )
       result = "#{server.jsonpCallBack}(" + result + ");";
