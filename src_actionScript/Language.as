@@ -901,7 +901,7 @@ package {
             p.deleting = "削除中・・・";
             p.deleteResultLoading = "結果受信中・・・";
             // ImageUploadSetInfo.mxml
-            p.uploadImageFormat = "対応画像:JPEG/GIF/PNG/SWF（アニメGIFは1コマ目のみを表示）";
+            p.uploadImageFormat = "対応画像:JPEG/GIF/PNG/SWF";
             p.secretImagePassword = "隠し画像パスワード設定";
             p.addedTags = "付与するタグ（半角・全角スペースで区切り）：";
             p.addedTagsTips = "タグ名に 縦nn横mm を記述することでマップ変更時に自動的にそのサイズが指定されます。";

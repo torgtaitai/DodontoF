@@ -49,7 +49,14 @@
     }
     
     public function setUploadMode():void {
+        
         isLocal.visible = true;
+        
+        if( ! Config.getInstance().canUploadImageOnPublic ) {
+            isLocal.selectedItem = privateIItem;
+            return;
+        }
+        
         isLocal.enabled = true;
     }
     

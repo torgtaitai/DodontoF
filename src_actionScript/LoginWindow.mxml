@@ -633,6 +633,7 @@
         DodontoF_Main.getInstance().setCanUseExternalImageModeOn( jsonData.canUseExternalImageModeOn );
         Config.getInstance().setCharacterInfoToolTipMax( jsonData.characterInfoToolTipMax );
         Config.getInstance().isAskRemoveRoomWhenLogout = jsonData.isAskRemoveRoomWhenLogout;
+        Config.getInstance().canUploadImageOnPublic = jsonData.canUploadImageOnPublic;
         Config.getInstance().setWordChecker( jsonData.wordChecker );
         
         DrawMapWindow.setLineCountLimit( jsonData.drawLineCountLimit );
