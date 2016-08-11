@@ -158,7 +158,11 @@ class DodontoFServer_MySqlKai
 
     return messagePack
   end
-  
+
+  # セーブデータディレクトリの情報
+  # @return [SaveDirInfo]
+  attr_reader :saveDirInfo
+
   def initialize(saveDirInfo, cgiParams)
     @cgiParams = cgiParams
     @saveDirInfo = saveDirInfo
@@ -1457,7 +1461,7 @@ SQL_TEXT
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
 
-    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
+    room = DodontoF_MySqlKai::PlayRoom.new(self)
     playRoomStates = room.getStates(minRoom, maxRoom)
 
     jsonData = {
@@ -2121,7 +2125,7 @@ SQL_TEXT
   end
 
   def removeOldPlayRoom()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds
+    DodontoF_MySqlKai::PlayRoom.new(self).removeOlds
   end
 
   def getPlayRoomStates()
@@ -2130,7 +2134,7 @@ SQL_TEXT
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
 
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).getStatesByParams(params)
   end
 
   def getRoomTimeStamp(where = nil)
@@ -2506,7 +2510,7 @@ SQL_TEXT
   
   def createPlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).create(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).create(params)
   end
 
   
@@ -2518,12 +2522,12 @@ SQL_TEXT
 
   def changePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).change(params)
   end
 
   def removePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).remove(params)
   end
 
   def removeSaveDir(roomNo)
@@ -2935,7 +2939,7 @@ SQL_TEXT
 
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).check(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).check(params)
   end
 
   def loginPassword()
