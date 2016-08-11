@@ -273,6 +273,10 @@ $characterInfoToolTipMaxHeight = -1
 #ログアウト時に他に人がいない場合、部屋の削除を質問するかどうかを設定（true:質問する、false:しない)
 $isAskRemoveRoomWhenLogout = true
 
+#画像アップロードで「全体」が指定できるかどうか。
+#true なら「全体」が指定可能。falseならできない。。
+$canUploadImageOnPublic = true
+
 
 # 部屋の名前を変更する際に制限を付けるための設定。
 # 設定無しの場合は
@@ -290,8 +294,6 @@ $isAskRemoveRoomWhenLogout = true
 $wordChecker = {
   "changePlayRoomNameChecker" => {
     "削除可" => "部屋名に「削除可能」と付けるのではなく、自分で削除しましょう",
-#    "削除可" => "このサーバーでは、プレイルーム名に「削除可」を含めることを禁止しています。\nセッション終了後は、ログアウトログイン画面からプレイルームを削除してください。",
-
   }
 }
 

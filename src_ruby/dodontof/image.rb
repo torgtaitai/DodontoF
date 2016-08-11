@@ -3,10 +3,13 @@
 module DodontoF
   # Image情報
   class Image
-    def initialize(server, saveDirInfo)
+    # コンストラクタ
+    # @param [DodontoFServer, DodontoFServer_MySqlKai]
+    #   server どどんとふサーバー
+    def initialize(server)
       @logger = DodontoF::Logger.instance
       @server = server
-      @saveDirInfo = saveDirInfo
+      @saveDirInfo = server.saveDirInfo
     end
 
     def deleteImage(params)

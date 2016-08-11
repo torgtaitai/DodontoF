@@ -3,10 +3,12 @@
 module DodontoF_MySqlKai
   # PlayRoom情報
   class PlayRoom
-    def initialize(server, saveDirInfo)
+    # コンストラクタ
+    # @param [DodontoFServer_MySqlKai] server どどんとふサーバー（MySQL 改）
+    def initialize(server)
       @logger = DodontoF::Logger.instance
       @server = server
-      @saveDirInfo = saveDirInfo
+      @saveDirInfo = server.saveDirInfo
     end
 
     def create(params)
@@ -412,7 +414,7 @@ COMMAND_END
     end
 
     def removePlayRoomData(roomNumber)
-      image = DodontoF_MySqlKai::Image.new(@server, @saveDirInfo)
+      image = DodontoF_MySqlKai::Image.new(@server)
       image.removeRoomImageTags(roomNumber)
       @saveDirInfo.removeSaveDir(roomNumber)
       removeLocalSpaceDir(roomNumber)

@@ -603,9 +603,8 @@ class DodontoFServerTest < Test::Unit::TestCase
       'params' => { }
     }
 
-    info = SaveDirInfo.new
-    server = getDodontoFServerForTest.new(info, params)
-    image = DodontoF::Image.new(server, info)
+    server = getDodontoFServerForTest.new(SaveDirInfo.new, params)
+    image = DodontoF::Image.new(server)
     target = image.getSmallImageDir
     FileUtils.rm_r(target)
 

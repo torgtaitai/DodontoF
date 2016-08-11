@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.14'
+  VERSION = '1.48.15'
   # リリース日
-  RELEASE_DATE = '2016/07/20'
+  RELEASE_DATE = '2016/08/05'
 
   # バージョンとリリース日を含む文字列
   #
@@ -160,6 +160,10 @@ class DodontoFServer
 
     return messagePack
   end
+
+  # セーブデータディレクトリの情報
+  # @return [SaveDirInfo]
+  attr_reader :saveDirInfo
 
   def initialize(saveDirInfo, cgiParams)
     @cgiParams = cgiParams
@@ -1214,7 +1218,7 @@ class DodontoFServer
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
 
-    room = DodontoF::PlayRoom.new(self, @saveDirInfo)
+    room = DodontoF::PlayRoom.new(self)
     playRoomStates = room.getStates(minRoom, maxRoom)
 
     jsonData = {
@@ -1930,18 +1934,18 @@ class DodontoFServer
   end
   
   def removeOldPlayRoom()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).removeOlds
+    DodontoF::PlayRoom.new(self).removeOlds
   end
   
   def getPlayRoomStates()
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
 
-    DodontoF::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
+    DodontoF::PlayRoom.new(self).getStatesByParams(params)
   end
   
   def getPlayRoomState(roomNo)
-    DodontoF::PlayRoom.new(self, @saveDirInfo).getState(roomNo)
+    DodontoF::PlayRoom.new(self).getState(roomNo)
   end
   
   def getGameName(gameType)
@@ -2058,6 +2062,7 @@ class DodontoFServer
       'canUseExternalImageModeOn' => $canUseExternalImageModeOn,
       'characterInfoToolTipMax' => [$characterInfoToolTipMaxWidth, $characterInfoToolTipMaxHeight],
       'isAskRemoveRoomWhenLogout' => $isAskRemoveRoomWhenLogout,
+      'canUploadImageOnPublic' => $canUploadImageOnPublic,
       'wordChecker' => $wordChecker,
       'errorMessage' => $globalErrorMessage,
     }
@@ -2138,7 +2143,7 @@ class DodontoFServer
   
   
   def getLoginWarning
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     smallImageDir = image.getSmallImageDir
     unless( isExistDir?(smallImageDir) )
       return {
@@ -2255,17 +2260,17 @@ class DodontoFServer
   
   def createPlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).create(params)
+    DodontoF::PlayRoom.new(self).create(params)
   end
   
   def changePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).change(params)
+    DodontoF::PlayRoom.new(self).change(params)
   end
 
   def removePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF::PlayRoom.new(self, @saveDirInfo).remove(params)
+    DodontoF::PlayRoom.new(self).remove(params)
   end
   
   def getTrueSaveFileName(fileName)
@@ -2668,7 +2673,7 @@ class DodontoFServer
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
 
-    DodontoF::PlayRoom.new(self, @saveDirInfo).check(params)
+    DodontoF::PlayRoom.new(self).check(params)
   end
   
   def loginPassword()
@@ -3498,7 +3503,7 @@ class DodontoFServer
 
   def uploadImageData()
     params = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.uploadImageData(params)
   end
   
@@ -3542,7 +3547,7 @@ class DodontoFServer
   
   def deleteImage()
     params = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.deleteImage(params)
   end
   
@@ -3555,7 +3560,7 @@ class DodontoFServer
   
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.uploadImageUrl(imageData)
   end
   
@@ -4102,7 +4107,7 @@ class DodontoFServer
   
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.changeImageTags(effectData)
   end
   
@@ -4112,7 +4117,7 @@ class DodontoFServer
   end
   
   def getImageTagsAndImageList
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.getImageTagsAndImageList()
   end
   
