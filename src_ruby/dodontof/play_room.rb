@@ -441,7 +441,7 @@ module DodontoF
     end
 
     def removePlayRoomData(roomNumber)
-      image = DodontoF::Image.new(@server, @saveDirInfo)
+      image = DodontoF::Image.new(@server)
       image.removeRoomImageTags(roomNumber)
       @saveDirInfo.removeSaveDir(roomNumber)
       removeLocalSpaceDir(roomNumber)

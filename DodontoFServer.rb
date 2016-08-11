@@ -2150,7 +2150,7 @@ class DodontoFServer
   
   
   def getLoginWarning
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     smallImageDir = image.getSmallImageDir
     unless( isExistDir?(smallImageDir) )
       return {
@@ -3510,7 +3510,7 @@ class DodontoFServer
 
   def uploadImageData()
     params = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.uploadImageData(params)
   end
   
@@ -3554,7 +3554,7 @@ class DodontoFServer
   
   def deleteImage()
     params = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.deleteImage(params)
   end
   
@@ -3567,7 +3567,7 @@ class DodontoFServer
   
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.uploadImageUrl(imageData)
   end
   
@@ -4114,7 +4114,7 @@ class DodontoFServer
   
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.changeImageTags(effectData)
   end
   
@@ -4124,7 +4124,7 @@ class DodontoFServer
   end
   
   def getImageTagsAndImageList
-    image = DodontoF::Image.new(self, @saveDirInfo)
+    image = DodontoF::Image.new(self)
     image.getImageTagsAndImageList()
   end
   

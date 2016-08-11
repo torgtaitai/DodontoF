@@ -2368,7 +2368,7 @@ SQL_TEXT
   
   
   def getLoginWarning
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     smallImageDir = image.getSmallImageDir()
     unless( isExistDir?(smallImageDir) )
       return {
@@ -3759,7 +3759,7 @@ SQL_TEXT
 
   def uploadImageData()
     params = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.uploadImageData(params)
   end
   
@@ -3793,7 +3793,7 @@ SQL_TEXT
   
   def deleteImage()
     params = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.deleteImage(params)
   end
   
@@ -3806,7 +3806,7 @@ SQL_TEXT
   
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.uploadImageUrl(imageData)
   end
   
@@ -4405,7 +4405,7 @@ SQL_TEXT
   
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.changeImageTags(effectData)
   end
   
@@ -4415,7 +4415,7 @@ SQL_TEXT
   end
   
   def getImageTagsAndImageList
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.getImageTagsAndImageList()
   end
   
