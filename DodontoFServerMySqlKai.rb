@@ -174,7 +174,6 @@ class DodontoFServer_MySqlKai
 
     @jsonpCallBack = nil
     @isWebIf = false
-    @isJsonResult = true
 
     @diceBotTablePrefix = 'diceBotTable_'
     @dice_adapter = DodontoF::DiceAdapter.new(getDiceBotExtraTableDirName, @diceBotTablePrefix)
@@ -236,7 +235,6 @@ class DodontoFServer_MySqlKai
   end
 
   attr :jsonpCallBack
-  attr :isJsonResult
   
   def getCardsInfo
     require "card.rb"
@@ -545,7 +543,6 @@ class DodontoFServer_MySqlKai
     @logger.debug("analyzeWebInterfaceCatched begin")
     
     @isWebIf = true
-    @isJsonResult = true
     
     commandName = getRequestData('webif')
     @logger.debug(commandName, 'commandName')
@@ -5818,13 +5815,8 @@ SQL_TEXT
         analyzeCommand
       end
 
-    if isJsonResult
-      return getJsonString(response)
-    else
-      return MessagePack.pack(response)
-    end
+    return getJsonString(response)
   end
-  
 end
 
 
@@ -5876,23 +5868,6 @@ def main(cgiParams)
   logger.debug("printResult called")
 end
 
-def getInitializedHeaderText(server)
-  header = ""
-  
-  if( $isModRuby )
-    #Apache::request.content_type = "text/plain; charset=utf-8"
-    #Apache::request.send_header
-  else
-    if( server.isJsonResult )
-      header = "Content-Type: text/plain; charset=utf-8\n"
-    else
-      header = "Content-Type: application/x-msgpack; charset=x-user-defined\n"
-    end
-  end
-  
-  return header
-end
-
 def printResult(server)
   logger = DodontoF::Logger.instance
 
@@ -5900,7 +5875,7 @@ def printResult(server)
 
   text = "empty"
 
-  header = getInitializedHeaderText(server)
+  header = $isModRuby ? '' : "Content-Type: application/json\n"
 
   begin
     result = server.getResponse
