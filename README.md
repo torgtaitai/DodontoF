@@ -658,8 +658,6 @@ playRoomStates：各部屋の情報の配列。以下、その内容<br>
 　　　（Flashからの定期取得処理と同一の動作）<br>
 　sec：何秒前までのチャットを取得するかの指定。allなら全取得、省略なら過去180秒（$oldMessageTimeoutで指定）<br>
 <br>
-　marker：基本不要。trueを設定することで、JSONの前後に #D@EM&lt;#(JSON)#&gt;D@EM# とマーカーを付与（CGI広告埋め込み対策）<br>
-<br>
 コマンド例）<br>
 　DodontoFServer.rb?webif=chat&room=0&password=himitsu&time=1339209851.85239&callback=responseFunction<br>
 <br>
