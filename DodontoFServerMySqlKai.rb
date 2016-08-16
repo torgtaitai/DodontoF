@@ -13,9 +13,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.14'
+  VERSION = '1.48.15'
   # リリース日
-  RELEASE_DATE = '2016/07/20'
+  RELEASE_DATE = '2016/08/05'
 
   # バージョンとリリース日を含む文字列
   #
@@ -158,7 +158,11 @@ class DodontoFServer_MySqlKai
 
     return messagePack
   end
-  
+
+  # セーブデータディレクトリの情報
+  # @return [SaveDirInfo]
+  attr_reader :saveDirInfo
+
   def initialize(saveDirInfo, cgiParams)
     @cgiParams = cgiParams
     @saveDirInfo = saveDirInfo
@@ -168,10 +172,8 @@ class DodontoFServer_MySqlKai
     roomIndexKey = "room"
     initSaveFiles( getRequestData(roomIndexKey) )
 
-    @isAddMarker = false
     @jsonpCallBack = nil
     @isWebIf = false
-    @isJsonResult = true
 
     @diceBotTablePrefix = 'diceBotTable_'
     @dice_adapter = DodontoF::DiceAdapter.new(getDiceBotExtraTableDirName, @diceBotTablePrefix)
@@ -232,9 +234,7 @@ class DodontoFServer_MySqlKai
     return valueWebIf
   end
 
-  attr :isAddMarker
   attr :jsonpCallBack
-  attr :isJsonResult
   
   def getCardsInfo
     require "card.rb"
@@ -543,18 +543,12 @@ class DodontoFServer_MySqlKai
     @logger.debug("analyzeWebInterfaceCatched begin")
     
     @isWebIf = true
-    @isJsonResult = true
     
     commandName = getRequestData('webif')
     @logger.debug(commandName, 'commandName')
     
     if( isInvalidRequestParam(commandName) )
       return nil
-    end
-    
-    marker = getRequestData('marker')
-    if( isInvalidRequestParam(marker) )
-      @isAddMarker = false
     end
     
     @logger.debug(commandName, "commandName")
@@ -1457,7 +1451,7 @@ SQL_TEXT
     minRoom = getWebIfRequestInt('minRoom', 0)
     maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
 
-    room = DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo)
+    room = DodontoF_MySqlKai::PlayRoom.new(self)
     playRoomStates = room.getStates(minRoom, maxRoom)
 
     jsonData = {
@@ -2121,7 +2115,7 @@ SQL_TEXT
   end
 
   def removeOldPlayRoom()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).removeOlds
+    DodontoF_MySqlKai::PlayRoom.new(self).removeOlds
   end
 
   def getPlayRoomStates()
@@ -2130,7 +2124,7 @@ SQL_TEXT
     params = getParamsFromRequestData()
     @logger.debug(params, "params")
 
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).getStatesByParams(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).getStatesByParams(params)
   end
 
   def getRoomTimeStamp(where = nil)
@@ -2364,7 +2358,7 @@ SQL_TEXT
   
   
   def getLoginWarning
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     smallImageDir = image.getSmallImageDir()
     unless( isExistDir?(smallImageDir) )
       return {
@@ -2506,7 +2500,7 @@ SQL_TEXT
   
   def createPlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).create(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).create(params)
   end
 
   
@@ -2518,12 +2512,12 @@ SQL_TEXT
 
   def changePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).change(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).change(params)
   end
 
   def removePlayRoom()
     params = getParamsFromRequestData()
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).remove(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).remove(params)
   end
 
   def removeSaveDir(roomNo)
@@ -2935,7 +2929,7 @@ SQL_TEXT
 
     params = getParamsFromRequestData()
     @logger.debug(params, 'params')
-    DodontoF_MySqlKai::PlayRoom.new(self, @saveDirInfo).check(params)
+    DodontoF_MySqlKai::PlayRoom.new(self).check(params)
   end
 
   def loginPassword()
@@ -3755,7 +3749,7 @@ SQL_TEXT
 
   def uploadImageData()
     params = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.uploadImageData(params)
   end
   
@@ -3789,7 +3783,7 @@ SQL_TEXT
   
   def deleteImage()
     params = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.deleteImage(params)
   end
   
@@ -3802,7 +3796,7 @@ SQL_TEXT
   
   def uploadImageUrl()
     imageData = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.uploadImageUrl(imageData)
   end
   
@@ -4401,7 +4395,7 @@ SQL_TEXT
   
   def changeImageTags()
     effectData = getParamsFromRequestData()
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.changeImageTags(effectData)
   end
   
@@ -4411,7 +4405,7 @@ SQL_TEXT
   end
   
   def getImageTagsAndImageList
-    image = DodontoF_MySqlKai::Image.new(self, @saveDirInfo)
+    image = DodontoF_MySqlKai::Image.new(self)
     image.getImageTagsAndImageList()
   end
   
@@ -5821,13 +5815,8 @@ SQL_TEXT
         analyzeCommand
       end
 
-    if isJsonResult
-      return getJsonString(response)
-    else
-      return MessagePack.pack(response)
-    end
+    return getJsonString(response)
   end
-  
 end
 
 
@@ -5879,23 +5868,6 @@ def main(cgiParams)
   logger.debug("printResult called")
 end
 
-def getInitializedHeaderText(server)
-  header = ""
-  
-  if( $isModRuby )
-    #Apache::request.content_type = "text/plain; charset=utf-8"
-    #Apache::request.send_header
-  else
-    if( server.isJsonResult )
-      header = "Content-Type: text/plain; charset=utf-8\n"
-    else
-      header = "Content-Type: application/x-msgpack; charset=x-user-defined\n"
-    end
-  end
-  
-  return header
-end
-
 def printResult(server)
   logger = DodontoF::Logger.instance
 
@@ -5903,14 +5875,10 @@ def printResult(server)
 
   text = "empty"
 
-  header = getInitializedHeaderText(server)
+  header = $isModRuby ? '' : "Content-Type: application/json\n"
 
   begin
     result = server.getResponse
-
-    if( server.isAddMarker )
-      result = "#D@EM>#" + result + "#<D@EM#";
-    end
 
     if( server.jsonpCallBack )
       result = "#{server.jsonpCallBack}(" + result + ");";

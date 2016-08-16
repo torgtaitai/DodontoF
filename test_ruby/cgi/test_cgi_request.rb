@@ -18,6 +18,9 @@ require 'msgpack/msgpackPure'
 require 'json/jsonParser'
 
 class CGIRequestTest < Test::Unit::TestCase
+  # メディアタイプ抽出での分割に使う正規表現パターン
+  MEDIA_TYPE_SPLIT_PATTERN = /\s*[;,]\s*/
+
   def setup
     # 環境変数の記録用
     @environ = {}
@@ -64,6 +67,8 @@ class CGIRequestTest < Test::Unit::TestCase
     executeDodontoServerCgi
 
     response = parseJsonResponse(out.string)
+
+    assert_equal('application/json', mediaType(out.string))
     assert_equal(['「どどんとふ」の動作環境は正常に起動しています。'],
                  response)
   end
@@ -80,6 +85,7 @@ class CGIRequestTest < Test::Unit::TestCase
 
     response = parseJsonResponse(out.string)
 
+    assert_equal('application/json', mediaType(out.string))
     assert_equal('OK', response['result'])
   end
 
@@ -113,6 +119,7 @@ class CGIRequestTest < Test::Unit::TestCase
     # 出力の変換
     response = parseJsonResponse(out.string)
 
+    assert_equal('application/json', mediaType(out.string))
     assert_have_keys(response,
                      'minRoom',
                      'maxRoom',
@@ -142,6 +149,7 @@ class CGIRequestTest < Test::Unit::TestCase
     # 出力の変換
     response = parseJsonResponse(out.string)
 
+    assert_equal('application/json', mediaType(out.string))
     assert_equal('OK', response['result'])
   end
 
@@ -168,6 +176,19 @@ class CGIRequestTest < Test::Unit::TestCase
       @environ[key] = ENV[key] unless @environ.key?(key)
       ENV[key] = val
     end
+  end
+
+  # レスポンスのメディアタイプを返す
+  #
+  # Rack のメディアタイプ抽出と同じアルゴリズム
+  # @see https://github.com/rack/rack/blob/a193c5763de43bd61c5b4a13cd05497247b5cadb/lib/rack/media_type.rb
+  def mediaType(response)
+    contentType = response.lines.grep(/^Content-Type:/i).first.
+      split(':', 2).last.strip
+    return nil unless contentType
+
+    result = contentType.split(MEDIA_TYPE_SPLIT_PATTERN, 2).first.downcase
+    result.respond_to?(:encode) ? result.encode('UTF-8') : result
   end
 
   # JSON 文字列を解析してオブジェクトに変換する

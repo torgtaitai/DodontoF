@@ -775,8 +775,6 @@ playRoomStates：各部屋の情報の配列。以下、その内容<br>
 　　　（Flashからの定期取得処理と同一の動作）<br>
 　sec：何秒前までのチャットを取得するかの指定。allなら全取得、省略なら過去180秒（$oldMessageTimeoutで指定）<br>
 <br>
-　marker：基本不要。trueを設定することで、JSONの前後に #D@EM&lt;#(JSON)#&gt;D@EM# とマーカーを付与（CGI広告埋め込み対策）<br>
-<br>
 コマンド例）<br>
 　DodontoFServer.rb?webif=chat&room=0&password=himitsu&time=1339209851.85239&callback=responseFunction<br>
 <br>
@@ -1156,10 +1154,13 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2016/08/05 Ver.1.48.15<br>
+・画像アップロードで「全体」を選べるかをコンフィグで制御可能に。src_ruby/config.rbの $canUploadImageOnPublic で指定できます。<br>
+<br>
 2016/07/20 Ver.1.48.14<br>
 ・キャラクターをマップの下に隠した場合にチャットの名前爛に表示しないように改良。<br>
 ・wordCheckerのスペルミスを修正。<br>
-・ダイスボットをボーンズ＆カーズVer2.02.58対応へ変更。<br>o
+・ダイスボットをボーンズ＆カーズVer2.02.58対応へ変更。<br>
 ・アマデウスを「神話創世RPG アマデウス03 絶界九龍」に対応。よっしーさんありがとうっ！<br>
 ・同人TRPG「黒絢のアヴァンドナー」に対応。anony403さんありがとうっ！<br>
 ・ソードワールド2.0の超越判定を修正。やしろさん指摘ありがとうっ！<br>
