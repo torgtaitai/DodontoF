@@ -35,7 +35,8 @@
 </p>
 
 <br/><hr/><br/>
-  
+
+<h2 id="index">目次</h2>
 <!-- INDEX-AREA -->
 <ul class="index-list">
   <li><a href='#howtobook'>どどんとふ解説書</a></li>
@@ -117,9 +118,10 @@
           <li><a href='#standingGraphics'>サンプル用立ち絵</a></li>
           <li><a href='#jsonPerser'>jsonParser.rb</a></li>
           <li><a href='#otherLibrary'>その他</a></li>
-      </ul>
-    </li>
-  </ul>
+        </ul>
+      </li>
+    </ul>
+  </li>
   <li>
     <a href='#others'>その他</a>
     <ul>
@@ -129,6 +131,7 @@
   <li><a href='#caution'>注意事項</a></li>
   <li><a href='#history'>履歴</a></li>
 </ul>
+<!-- INDEX-AREA-END -->
 
 <h2 id="aboutDodontoF">「どどんとふ」って何？</h2>
 「どどんとふ」はTRPGのオンラインセッションをお手軽＆楽しく遊ぶために作られたツールです。<br>
