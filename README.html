@@ -3,6 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>「どどんとふ」マニュアル</title>
+	<link rel="stylesheet" href="readme.css">
 </head>
 <body>
 <h1 id="manualTitle">「どどんとふ」マニュアル</h1>
@@ -42,11 +43,101 @@
 </p>
 
 <br/><hr/><br/>
-  
-<p>
-  <h2 id="index">目次</h2>
-<!-- INDEX-AREA --><ul><font size='4'><li><a href='#howtobook'>どどんとふ解説書</a></li></font><font size='4'><li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li></font><font size='4'><li><a href='#execteEnviroment'>実行環境</a></li></font><font size='4'><li><a href='#howToUse'>使用方法</a></li></font><font size='4'><li><a href='#howToSetting'>設置方法</a></li></font><ul><font size='3'><li><a href='#cgiServerSetting'>CGIサーバの用意</a></li></font><ul><font size='2'><li><a href='#cgiServerSettingOnCommonRentalServer'>レンタルサーバを用意する場合の注意事項</a></li></font><font size='2'><li><a href='#cgiServerSettingOnSakuraVPS'>さくらVPSを使用する場合</a></li></font></ul><font size='3'><li><a href='#forOwnServerAdmin'>自前サーバ運営者へのアドバイス</a></li></font><font size='3'><li><a href='#download'>実行ファイル一式のダウンロード</a></li></font><font size='3'><li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li></font><font size='3'><li><a href='#howToCheckSetting'>動作確認方法</a></li></font><font size='3'><li><a href='#othersSetting'>お知らせメッセージの変更</a></li></font><font size='3'><li><a href='#howToVersionUp'>バージョンアップ方法</a></li></font></ul><font size='4'><li><a href='#forDevelopment'>開発向けの詳細</a></li></font><ul><font size='3'><li><a href='#aboutCompile'>コンパイル方法について</a></li></font><font size='3'><li><a href='#aboutCompileInWindows'>Windowsでのコンパイル方法</a></li></font><font size='3'><li><a href='#aboutDiceBot'>ダイスボットの実装について</a></li></font></ul><font size='4'><li><a href='#aboutWebIf'>WEB IFについて</a></li></font><ul><font size='3'><li><a href='#whatIsWebIf'>WEB IFとは？</a></li></font><font size='3'><li><a href='#webIfBasicFormat'>基本フォーマット</a></li></font><font size='3'><li><a href='#webIf_getBusyInfo'>getBusyInfo：サーバ負荷情報の取得</a></li></font><font size='3'><li><a href='#webIf_getServerInfo'>getServerInfo：サーバの各種情報取得</a></li></font><font size='3'><li><a href='#webIf_getRoomList'>getRoomList：部屋情報一覧の取得</a></li></font><font size='3'><li><a href='#webIf_getLoginInfo'>getLoginInfo：初期ログイン用データ取得</a></li></font><font size='3'><li><a href='#webIf_getLoginUserInfo'>getLoginUserInfo：ログインユーザーの情報取得・更新</a></li></font><font size='3'><li><a href='#webIf_chat'>chat：チャットデータの取得</a></li></font><font size='3'><li><a href='#webIf_talk'>talk：チャットへの発言</a></li></font><font size='3'><li><a href='#webIf_getChatColor'>getChatColor：文字色取得</a></li></font><font size='3'><li><a href='#webIf_addCharacter'>addCharacter：キャラクター追加</a></li></font><font size='3'><li><a href='#webIf_changeCharacter'>changeCharacter：キャラクターの変更</a></li></font><font size='3'><li><a href='#webIf_getRoomInfo'>getRoomInfo：プレイルーム情報取得</a></li></font><font size='3'><li><a href='#webIf_setRoomInfo'>setRoomInfo：プレイルームの情報設定</a></li></font><font size='3'><li><a href='#webIf_addMemo'>addMemo：共有メモ追加</a></li></font><font size='3'><li><a href='#webIf_changeMemo'>changeMemo：共有メモ追加</a></li></font><font size='3'><li><a href='#webIf_refresh'>refresh：各種情報取得</a></li></font></ul><font size='4'><li><a href='#aboutLicense'>ライセンスについて</a></li></font><ul><font size='3'><li><a href='#fileConstraction'>ファイル構成</a></li></font><font size='3'><li><a href='#aboutLibrary'>ライブラリ・画像データ等について</a></li></font><ul><font size='2'><li><a href='#characterImage'>キャラクター画像</a></li></font><font size='2'><li><a href='#imageUploadSpace'>立ち絵画像</a></li></font><font size='2'><li><a href='#tubeloc'>tubeloc</a></li></font><font size='2'><li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li></font><font size='2'><li><a href='#corelib'>corelib</a></li></font><font size='2'><li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li></font><font size='2'><li><a href='#as3-msgpack'>as3-msgpack</a></li></font><font size='2'><li><a href='#msgpack-pure'>msgpack-pure</a></li></font><font size='2'><li><a href='#msgpack-pure-ruby'>msgpack-pure-ruby</a></li></font><font size='2'><li><a href='#simple-color-picker'>simple-color-picker</a></li></font><font size='2'><li><a href='#icons'>各種アイコン用画像集</a></li></font><font size='2'><li><a href='#standingGraphics'>サンプル用立ち絵</a></li></font><font size='2'><li><a href='#jsonPerser'>jsonParser.rb</a></li></font><font size='2'><li><a href='#otherLibrary'>その他</a></li></font></ul></ul><font size='4'><li><a href='#others'>その他</a></li></font><ul><font size='3'><li><a href='#aboutNaming'>名前の由来について</a></li></font></ul><font size='4'><li><a href='#caution'>注意事項</a></li></font><font size='4'><li><a href='#history'>履歴</a></li></font>
-</p>
+
+<h2 id="index">目次</h2>
+<!-- INDEX-AREA -->
+<ul class="index-list">
+  <li><a href='#howtobook'>どどんとふ解説書</a></li>
+  <li><a href='#aboutDodontoF'>「どどんとふ」って何？</a></li>
+  <li><a href='#execteEnviroment'>実行環境</a></li>
+  <li><a href='#howToUse'>使用方法</a></li>
+  <li>
+    <a href='#howToSetting'>設置方法</a>
+    <ul>
+      <li>
+        <a href='#cgiServerSetting'>CGIサーバの用意</a>
+        <ul>
+          <li><a href='#cgiServerSettingOnCommonRentalServer'>レンタルサーバを用意する場合の注意事項</a></li>
+          <li><a href='#cgiServerSettingOnSakuraVPS'>さくらVPSを使用する場合</a></li>
+        </ul>
+      </li>
+      <li><a href='#forOwnServerAdmin'>自前サーバ運営者へのアドバイス</a></li>
+      <li><a href='#download'>実行ファイル一式のダウンロード</a></li>
+      <li><a href='#dodontoFSettingMySQL'>設置方法その２：MySQLサーバ編</a></li>
+      <li><a href='#howToCheckSetting'>動作確認方法</a></li>
+      <li><a href='#othersSetting'>お知らせメッセージの変更</a></li>
+      <li><a href='#howToVersionUp'>バージョンアップ方法</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href='#forDevelopment'>開発向けの詳細</a>
+    <ul>
+      <li>
+        <a href='#aboutCompile'>コンパイル方法について</a>
+        <ul>
+          <li><a href='#getAdobeFlexSdk'>Adobe Flex SDKの準備</a></li>
+          <li><a href='#compileUsingRake'>Rakeを使用したコンパイル</a></li>
+          <li><a href='#compileManually'>手動コンパイル</a></li>
+        </ul>
+      </li>
+      <li><a href='#aboutDiceBot'>ダイスボットの実装について</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href='#aboutWebIf'>WEB IFについて</a>
+    <ul>
+      <li><a href='#whatIsWebIf'>WEB IFとは？</a></li>
+      <li><a href='#webIfBasicFormat'>基本フォーマット</a></li>
+      <li><a href='#webIf_getBusyInfo'>getBusyInfo：サーバ負荷情報の取得</a></li>
+      <li><a href='#webIf_getServerInfo'>getServerInfo：サーバの各種情報取得</a></li>
+      <li><a href='#webIf_getRoomList'>getRoomList：部屋情報一覧の取得</a></li>
+      <li><a href='#webIf_getLoginInfo'>getLoginInfo：初期ログイン用データ取得</a></li>
+      <li><a href='#webIf_getLoginUserInfo'>getLoginUserInfo：ログインユーザーの情報取得・更新</a></li>
+      <li><a href='#webIf_chat'>chat：チャットデータの取得</a></li>
+      <li><a href='#webIf_talk'>talk：チャットへの発言</a></li>
+      <li><a href='#webIf_getChatColor'>getChatColor：文字色取得</a></li>
+      <li><a href='#webIf_addCharacter'>addCharacter：キャラクター追加</a></li>
+      <li><a href='#webIf_changeCharacter'>changeCharacter：キャラクターの変更</a></li>
+      <li><a href='#webIf_getRoomInfo'>getRoomInfo：プレイルーム情報取得</a></li>
+      <li><a href='#webIf_setRoomInfo'>setRoomInfo：プレイルームの情報設定</a></li>
+      <li><a href='#webIf_addMemo'>addMemo：共有メモ追加</a></li>
+      <li><a href='#webIf_changeMemo'>changeMemo：共有メモ追加</a></li>
+      <li><a href='#webIf_refresh'>refresh：各種情報取得</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href='#aboutLicense'>ライセンスについて</a>
+    <ul>
+      <li><a href='#fileConstraction'>ファイル構成</a></li>
+      <li>
+        <a href='#aboutLibrary'>ライブラリ・画像データ等について</a>
+        <ul>
+          <li><a href='#characterImage'>キャラクター画像</a></li>
+          <li><a href='#imageUploadSpace'>立ち絵画像</a></li>
+          <li><a href='#tubeloc'>tubeloc</a></li>
+          <li><a href='#Hi-ReS-Stats'>Hi-ReS-Stats</a></li>
+          <li><a href='#corelib'>corelib</a></li>
+          <li><a href='#Archive::Tar::Minitar'>Archive::Tar::Minitar</a></li>
+          <li><a href='#as3-msgpack'>as3-msgpack</a></li>
+          <li><a href='#msgpack-pure'>msgpack-pure</a></li>
+          <li><a href='#msgpack-pure-ruby'>msgpack-pure-ruby</a></li>
+          <li><a href='#simple-color-picker'>simple-color-picker</a></li>
+          <li><a href='#icons'>各種アイコン用画像集</a></li>
+          <li><a href='#standingGraphics'>サンプル用立ち絵</a></li>
+          <li><a href='#jsonPerser'>jsonParser.rb</a></li>
+          <li><a href='#otherLibrary'>その他</a></li>
+      </ul>
+    </li>
+  </ul>
+  <li>
+    <a href='#others'>その他</a>
+    <ul>
+      <li><a href='#aboutNaming'>名前の由来について</a></li>
+    </ul>
+  </li>
+  <li><a href='#caution'>注意事項</a></li>
+  <li><a href='#history'>履歴</a></li>
+</ul>
 
 <h2 id="aboutDodontoF">「どどんとふ」って何？</h2>
 「どどんとふ」はTRPGのオンラインセッションをお手軽＆楽しく遊ぶために作られたツールです。<br>
@@ -454,35 +545,54 @@ DodontoF.swf<br>
 単純に利用するだけであれば読まなくでも問題ありません。<br>
 <br>
 <h3 id="aboutCompile">コンパイル方法について</h3>
-「どどんとふ」でコンパイルして作成する必要があるのはFlex(ActionScript)の生成ファイル<br>
-DodontoF.swf<br>
-のみです。<br>
-以下、Windowsでのコンパイル方法について述べます。<br>
-<br>
-<h3 id="aboutCompileInWindows">Windowsでのコンパイル方法</h3>
-コンパイルには<br>
-<a href="http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%203/">http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%203/</a><br>
-から 3.6.0.16995A の Adobe Flex SDK をダウンロードします。<br>
-<!--
-http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4<br>
-から Latest Milestone Release Builds の一番新しいリリースの Open Source Flex SDK をダウンロードします。<br>
--->
-ダウンロードファイルを展開後、binディレクトリへパスを通しておきます。<br>
-またJavaも必要なため、<br>
-https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_Developer-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=jdk-6u11-oth-JPR@CDS-CDS_Developer<br>
-から「Java SE Development Kit 6u11」をダウンロードし、インストールしておきます。
-その後、DodontoF/src_actionScript ディレクトリで以下を実行します。<br>
-<br>
-mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isReplayer,false -define=COMPILE::isMySql,false -include-libraries+=./corelib/bin/corelib.swc  -o ../DodontoF.swf DodontoF.mxml
-<br>
-これで DodontoF.swf が作成されるはずです。<br>
-作成された DodontoF.swf を DodontoF 直下に移動してください。<br>
-<br>
-コンパイル方法は以上です。<br>
-<br>
-上記以外はRubyのコードになりますのでファイルを直接編集してもらえれば反映されます。<br>
-ソースコードの内、〜Testで終わるファイルはUnitTest用ですので通常の運用では変更する必要はありません。<br>
-<br>
+<p>
+  「どどんとふ」でコンパイルして作成する必要があるのはFlex（ActionScript）の生成ファイル<br>
+  DodontoF.swf<br>
+  のみです。
+</p>
+<p>以下、コンパイル方法について述べます。</p>
+
+<h4 id="getAdobeFlexSdk">Adobe Flex SDKの準備</h4>
+<p>
+  コンパイルにはAdobe Flex SDKが必要です。<br>
+  <a href="http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%203/">http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%203/</a><br>
+  から 3.6.0.16995A の Adobe Flex SDK をダウンロードします。<br>
+  <!--
+  http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4<br>
+  から Latest Milestone Release Builds の一番新しいリリースの Open Source Flex SDK をダウンロードします。<br>
+  -->
+  ダウンロードファイルを展開後、binディレクトリへパスを通しておきます。
+</p>
+<p>
+  またJavaも必要なため、<br>
+  <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</a><br>
+  から「JDK」（Java SE Development Kit）をダウンロードし、インストールしておきます。
+</p>
+
+<h4 id="compileUsingRake">Rakeを使用したコンパイル</h4>
+<p>
+  Ruby 1.9以降がインストールされていて正しくパスが通されている場合は、Rubyに標準で添付されているビルドツールRakeを使用して簡単にコンパイルすることができます。<br>
+  DodontoF ディレクトリで以下を実行すると、DodontoF.swf が DodontoF ディレクトリに生成されます。
+</p>
+<pre><code>rake swf</code></pre>
+
+<h4 id="compileManually">手動コンパイル</h4>
+<p>上記のRakeが使えない場合は、手動でコンパイルを行ってください。</p>
+<p>
+  DodontoF/src_actionScript ディレクトリで以下を実行します。<br>
+  LinuxやOSXのようなUNIX環境では、<code>mxmlc.exe</code> を <code>mxmlc</code> に変えてください。
+</p>
+<pre><code>mxmlc.exe -target-player=10.0.12 -define=TEST::isTest,false -define=COMPILE::isReplayer,false -define=COMPILE::isMySql,false -include-libraries+=./corelib/bin/corelib.swc  -o ../DodontoF.swf DodontoF.mxml</code></pre>
+
+<p>
+  これで DodontoF.swf が作成されるはずです。<br>
+  作成された DodontoF.swf を DodontoF 直下に移動してください。
+</p>
+<p>コンパイル方法は以上です。</p>
+<p>
+  上記以外はRubyのコードになりますのでファイルを直接編集してもらえれば反映されます。<br>
+  ソースコードの内、〜Testで終わるファイルはUnitTest用ですので通常の運用では変更する必要はありません。
+</p>
 
 <h3 id="aboutDiceBot">ダイスボットの実装について</h3>
 どどんとふには標準で大量のダイスボットが付いていますが、それでも不足していたり、新しい機能を追加したくなる場合があるでしょう。<br>
