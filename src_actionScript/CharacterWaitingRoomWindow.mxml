@@ -140,7 +140,7 @@
             "command" : "exitWaintgRoom",
             "characterId" : data.imgId,
             "component" : image};
-        dragDropForExit.setDropEventWidthHeigth(image, value, squareLength, squareLength);
+        dragDropForExit.setDragEventWidthHeigth(image, value, squareLength, squareLength);
         
         preview.addChild(image);
     }

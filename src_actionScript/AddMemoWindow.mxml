@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:containers="flexlib.containers.*"
+   xmlns:controls="flexlib.controls.*"
    xmlns:torgtaitai="*" 
    width="500"
    height="350"
@@ -8,37 +10,107 @@
    showCloseButton="true"
    >
   
-  <mx:HBox width="100%" height="100%"
+  <mx:Box width="100%" height="100%"
            verticalGap="0"
            horizontalGap="0"
            horizontalAlign="center"
+           paddingRight="0" paddingLeft="0" 
            >
-	<mx:Label text="{Language.s.memo}" />
-    <mx:TextArea id="message"  width="100%" height="100%" />
-  </mx:HBox>
+      <containers:SuperTabNavigator id="tabs" 
+            categoryName="MemoWindows"
+            scrollSpeed="25" dropShadowEnabled="true"
+			stopScrollingEvent="{MouseEvent.MOUSE_UP}" startScrollingEvent="{MouseEvent.MOUSE_DOWN}"
+			width="100%" height="100%" horizontalGap="0"
+			closePolicy="{SuperTab.CLOSE_ROLLOVER}"
+      />
+      
+  </mx:Box>
   
   <mx:HBox height="30" width="100%" horizontalAlign="center" verticalAlign="middle">
     <mx:Button id="executeButton" label="{Language.s.addButton}" click="execute()" />
     <mx:Button label="{Language.s.cancelButton}" click="PopUpManager.removePopUp(this)" />
+    <mx:Spacer width="100%" />
+    <mx:Button label="{Language.s.addMemoTab}" click="clickAddTabButton()" />
   </mx:HBox>
 
   <mx:Script>
     <![CDATA[
-    import mx.containers.TitleWindow;
-    import mx.managers.PopUpManager;
-    import mx.events.FlexEvent;
     
     /** 
      * メモ追加画面
      */
     
+    import mx.containers.TitleWindow;
+    import mx.managers.PopUpManager;
+    import mx.events.FlexEvent;
+    import mx.containers.Box;
+    import flexlib.controls.SuperTabBar;
+    import flexlib.events.TabReorderEvent;
+    import flexlib.controls.tabBarClasses.SuperTab;
+    import flexlib.controls.*;
+    import flexlib.containers.*;
+    import mx.controls.Label;
+    import mx.containers.VBox;
+    import mx.containers.Canvas;
+    import mx.controls.TextArea;
+    import flash.events.Event;
     
     /**
      * Windowの初期化処理
      */
     override protected function setup():void {
+        addTab();
     }
     
+    protected function addTab(text:String = "", index:int = -1):VBox {
+        if( index == -1 ) {
+            index = tabs.numChildren;
+        }
+        
+        var title:String = text;
+        if( title == "" ) {
+            title = "" + (index + 1);
+        }
+        
+        var box:VBox = createNewTab(title, text);
+        tabs.addChildAt(box, index);
+        
+        return box;
+    }
+    
+    protected function createNewTab(title:String, text:String):VBox {
+        var box:VBox = new VBox();
+        box.setStyle("closable", true);
+        box.label = title;
+        box.toolTip = text;
+		
+        var textArea:TextArea = new TextArea();
+        textArea.percentWidth = 100;
+        textArea.percentHeight = 100;
+        textArea.text = text;
+        textArea.addEventListener(Event.CHANGE, function(event:Event):void {changeTextEvent(box, textArea)})
+        box.addChild(textArea);
+        
+        callLater( function():void{ changeTextEvent(box, textArea) } );
+        
+        return box;
+    }
+    
+    private function changeTextEvent(box:VBox, textArea:TextArea):void {
+        if( textArea.text == "" ) {
+            box.label = "" + (tabs.getChildIndex(box) + 1);
+        } else {
+            var label:String = textArea.text.split("\r")[0];
+            box.label = label
+        }
+        box.toolTip = textArea.text
+    }
+    
+    private function clickAddTabButton():void {
+        var index:int = tabs.numChildren;
+        addTab('', index);
+        tabs.selectedIndex = index;
+    }
     
     /** 
      * メモ追加実行
@@ -47,7 +119,7 @@
         try{
             var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
             
-            var characterJsonData:Object = Memo.getJsonData(message.text);
+            var characterJsonData:Object = Memo.getJsonData( getMessageText() );
             
             guiInputSender.getSender().addCharacter(characterJsonData);
             
@@ -56,6 +128,38 @@
             this.status = error.message;
         }
     }
+    
+    protected function getMessageList(text:String):Array {
+        if( text == null ) {
+            return [];
+        }
+        
+        return text.split( Memo.getMessageSplitter() );
+    }
+    
+    protected function getMessageText():String {
+        var messageList:Array = new Array();
+        
+        for(var i:int = 0 ; i < tabs.numChildren ; i++) {
+            var box:VBox = tabs.getChildAt(i) as VBox;
+            if( box == null ) {
+                continue;
+            }
+            
+            var textArea:TextArea = box.getChildAt(0) as TextArea;
+            if( textArea == null ) {
+                continue;
+            }
+            
+            messageList.push( textArea.text );
+        }
+        
+        return messageList.join(  Memo.getMessageSplitter() );
+    }
+    
+    protected function changeMessage():void {
+    }
+    
     
     ]]>
   </mx:Script>

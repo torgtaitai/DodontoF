@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <torgtaitai:ResizableWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:containers="flexlib.containers.*"
+   xmlns:controls="flexlib.controls.*"
    xmlns:torgtaitai="*"
    title="{Language.s.chatPallet}"
    width="220" height="220"
@@ -8,12 +10,20 @@
    showCloseButton="true"
    rollOver="changeLogVisible(event, true)"
    rollOut="changeLogVisible(event, false)"
-
    >
   
   <mx:Box id="chatPalet" width="100%" height="100%">
-    <mx:TabNavigator id="tabSpace" width="100%" height="100%" change="changeTab()" >
-    </mx:TabNavigator>
+    
+    <containers:SuperTabNavigator id="tabSpace" 
+            categoryName="ChatPalette"
+			width="100%" height="100%" horizontalGap="0"
+            change="changeTab()" tabClose="closeTabEvent(event)"
+            scrollSpeed="25" dropShadowEnabled="true"
+			stopScrollingEvent="{MouseEvent.MOUSE_UP}" startScrollingEvent="{MouseEvent.MOUSE_DOWN}"
+			closePolicy="{SuperTab.CLOSE_ROLLOVER}"
+      />
+
+    
     <mx:HBox width="100%" height="20">
       <mx:Button label="{Language.s.chatPalletEdit}" click="edit()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
@@ -25,13 +35,14 @@
       <mx:Button label="{Language.s.chatPalletLoad}" click="load()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
       
-      <mx:Spacer width="20"/>
+      <mx:Spacer width="100%"/>
       
       <mx:Button id="addPaletTabButton" label="{Language.s.chatPalletAddTab}"
-                 click="addPaletTab()" height="20"
+                 click="addPaletTabByButton()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
-      <mx:Button id="deletePaletTabButton" label="{Language.s.chatPalletDeleteTab}"
-                 click="deletePaletTab()" height="20"
+      
+      <mx:Button id="undoPaletTabButton" label="{Language.s.chatPalletUndo}"
+                 click="undoPaletTab()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
     </mx:HBox>
     
@@ -55,11 +66,16 @@
     import mx.controls.Text;
     import mx.events.ColorPickerEvent;
     import mx.core.IFlexDisplayObject;
+    import flexlib.controls.tabBarClasses.SuperTab;
+    import flexlib.events.SuperTabEvent;
     
     
     private var defaultTabCount:int = 5;
     private var tabEditors:Array = new Array();
     private var tabs:Array = new Array();
+    
+    [Bindable]
+    private var deletedTabs:Array = new Array();
     
     public function setInitPosition():void {
         setLoadAddAction( loadSaveDataFromLocalCash );
@@ -94,23 +110,7 @@
         }
         
         initSaveLoad();
-        initMenu();
-    }
-    private function initMenu():void {
-        var menu:ContextMenu = new ContextMenu();
-        menu.hideBuiltInItems();
-        
-        MovablePiece.addMenuItem(menu, Language.s.chatPalletMoveTabRightButton, function():void{
-                var index:int = tabSpace.selectedIndex;
-                swapTab(index, index + 1);
-            }, true);
-        
-        MovablePiece.addMenuItem(menu, Language.s.chatPalletMoveTabLeftButton, function():void{
-                var index:int = tabSpace.selectedIndex;
-                swapTab(index, index - 1);
-            }, true);
-        
-        tabSpace.contextMenu = menu;
+        setUndoButtonEnable();
     }
     
     private function swapTab(from:int, to:int):void {
@@ -178,9 +178,6 @@
     }
     
     private function addPaletTab():void {
-        addPaletTabButton.enabled = false;
-        
-        
         var tab:Box = tabs[tabSpace.numChildren] as Box;
         if( tab == null ) {
             tab = new Box();
@@ -194,21 +191,44 @@
         }
         
         tabSpace.addChild(tab);
-        
-        addPaletTabButton.enabled = true;
     }
     
-    private function deletePaletTab(isForce:Boolean = false):void {
-        if( tabSpace.numChildren <= 0 ) {
+    private function addPaletTabByButton():void {
+        addPaletTabButton.enabled = false;
+        addPaletTab();
+        addPaletTabButton.enabled = true;
+        
+        savePosition();
+    }
+    
+    private function deletePaletTab(index:int):void {
+        tabSpace.removeChildAt(index);
+    }
+    
+    private function closeTabEvent(event:SuperTabEvent):void {
+        var index:int = event.tabIndex;
+        var array:Array = tabs.splice(index, 1);
+        
+        for each(var tab:Object in array) {
+            deletedTabs.push(tab);
+        }
+        
+        setUndoButtonEnable();
+    }
+    
+    private function setUndoButtonEnable():void {
+        undoPaletTabButton.enabled = (deletedTabs.length != 0);
+    }
+    
+    private function undoPaletTab():void {
+        var tab:Box = deletedTabs.shift() as Box;
+        setUndoButtonEnable();
+        
+        if( tab == null ) {
             return;
         }
         
-        deletePaletTabButton.enabled = false;
-        
-        var tab:Box = tabs[ tabSpace.numChildren - 1];
-        tabSpace.removeChild(tab);
-        
-        deletePaletTabButton.enabled = true;
+        tabSpace.addChild(tab);
     }
     
     private function createInputList(input:TextInput, name:TextInput,
@@ -310,6 +330,8 @@
     
     private function initAddedTab(tab:Box, tabIndex:int):void {
         var name:TextInput = new TextInput();
+        savePosition();
+
         var state:ComboBox = new ComboBox();
         var tabName:TextInput = new TextInput();
         
@@ -383,6 +405,8 @@
             if( tab.label == "" ) {
                 tab.label = "" + tabIndex;
             }
+            
+            savePosition();
         }
     };
     
@@ -497,7 +521,6 @@
             
             var lines:Array = [];
             if( tabEditorInfo == null ) {
-                Log.logging("tabEditorInfo == null break;");
                 break;
             }
             var inputList:List = tabEditorInfo.list as List;
@@ -522,8 +545,7 @@
     
     public function loadSaveData(saveData:Object):void {
         while( tabSpace.numChildren > 0 ) {
-            var isForce:Boolean = true;
-            deletePaletTab(isForce);
+            deletePaletTab(0);
         }
         
         var tabInfos:Object = saveData.tabInfos;
@@ -607,7 +629,6 @@
         var index:int = tabSpace.selectedIndex;
         var color:String = ChatWindow.getInstance().getChannelColor(index);
         setStyle("backgroundColor", color);
-
     }
     
              ]]>

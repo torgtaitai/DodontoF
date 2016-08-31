@@ -278,7 +278,7 @@
         mainMenu.enabled = true;
         dodontoF_Main.setInitiativeWindow( popup(InitiativeWindow, false), "isInitiativeListVisible" );
         dodontoF_Main.setChatWindow( popup(ChatWindow, false), "isChatVisible");
-        dodontoF_Main.setChatPaletteWindow( popup(ChatPalette2, false), "isChatPaletteVisible" );
+        dodontoF_Main.setChatPaletteWindow( popup(ChatPalette, false), "isChatPaletteVisible" );
         dodontoF_Main.setDiceWindow( popup(DiceBox, false), "isDiceVisible" );
         dodontoF_Main.setCardPickUpWindow( popup(CardPickUpWindow, false), "isCardPickUpVisible" );
         dodontoF_Main.setButtonWindow( popup(CounterRemocon, false), "isCounterRemoconVisible" );

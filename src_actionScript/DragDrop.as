@@ -70,14 +70,14 @@ package {
         
         
         
-        public function setDropEvent(component:UIComponent, value:Object):void {
+        public function setDagEvent(component:UIComponent, value:Object):void {
             var width:Number = component.width;
             var height:Number = component.height;
-            setDropEventWidthHeigth(component, value, width, height);
+            setDragEventWidthHeigth(component, value, width, height);
         }
         
         
-        public function setDropEventWidthHeigth(component:UIComponent, value:Object,
+        public function setDragEventWidthHeigth(component:UIComponent, value:Object,
                                                 width:Number, height:Number):void {
             component.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void {
                     event.stopPropagation();

@@ -558,6 +558,7 @@ package {
             p.changeSharedMemo = "共有メモの変更";
             p.deleteSharedMemo = "共有メモの削除";
             // AddMemoWindow.mxml
+            p.addMemoTab = "タブ追加";
             p.memo = "メモ:";
             
             
@@ -838,7 +839,7 @@ package {
             p.chatPalletSave = "セーブ";
             p.chatPalletLoad = "ロード";
             p.chatPalletAddTab = "タブ追加";
-            p.chatPalletDeleteTab = "タブ削除";
+            p.chatPalletUndo = "削除戻し";
             p.chatPalletInputSample1 = "チャットパレット入力例：";
             p.chatPalletInputSample2 = "2d6+1 ダイスロール";
             p.chatPalletInputSample3 = "１ｄ２０＋{敏捷}＋｛格闘＠2｝　格闘！";
@@ -850,8 +851,6 @@ package {
             p.chatPalletTabName = "タブ名：";
             p.chatPalletSendButton = "送信";
             p.chatPalletSaveData = "チャットパレットセーブデータ";
-            p.chatPalletMoveTabRightButton = "タブを【　　右→】へ";
-            p.chatPalletMoveTabLeftButton = "タブを【←左　　】へ";
             
             // ChatWindow.mxml
             p.channerCoundIsEmptyErrorMessage = "チャンネル数が0で設定されています。正しいチャンネル設定を行ってください";

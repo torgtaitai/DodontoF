@@ -149,7 +149,7 @@
             "card" : card,
             "component" : component };
         
-        dragDropForDrow.setDropEventWidthHeigth(card.getView(), value, 104, 154);
+        dragDropForDrow.setDragEventWidthHeigth(card.getView(), value, 104, 154);
         
         return component;
     }

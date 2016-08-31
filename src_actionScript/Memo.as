@@ -144,12 +144,34 @@ package {
             var size:int = 1;
             view.loadImageWidthHeight(imageUrl, size, size);
             
-            view.toolTip = getMessage();
+            view.toolTip = getToolTipMessageText();
+        }
+        
+        private function getToolTipMessageText():String {
+            var messageList:Array = getMessage().split( getMessageSplitter() );
+            if( messageList.length <= 1 ) {
+                return getMessage();
+            }
+            
+            var text:String = "";
+            for each(var str:String in messageList) {
+                    var list:Array = str.split("\r");
+                    if( list.length == 0 ) {
+                        continue;
+                    }
+                    
+                    text += "[" + list[0] + "]\n";
+            }
+            
+            return text;
         }
         
         override protected function getTextAlpha():Number {
             return 0.7;
         }
         
+        static public function getMessageSplitter():String {
+            return "\t|\t";
+        }
     }
 }

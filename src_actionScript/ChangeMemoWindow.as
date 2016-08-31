@@ -17,13 +17,24 @@ package {
             title = Language.s.changeSharedMemoWindowTitle;
             executeButton.label = Language.s.changeButton;
             
-            message.text = memo.getMessage();
+            setMessage(memo.getMessage());
+        }
+        
+        private function setMessage(text:String):void {
+            var messageList:Array = getMessageList(text);
+            
+            for(var i:int = 0 ; i < messageList.length ; i++) {
+                var text:String = messageList[i];
+                addTab(text);
+            }
+            
+            tabs.selectedIndex = 0;
         }
         
         override public function execute():void {
             try{
                 var guiInputSender:GuiInputSender = DodontoF_Main.getInstance().getGuiInputSender();
-                memo.setMessage( message.text );
+                memo.setMessage( getMessageText() );
                 memo.loadViewImage();
                 guiInputSender.getSender().changeCharacter( memo.getJsonData() );
                 

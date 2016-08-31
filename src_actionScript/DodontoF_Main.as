@@ -746,8 +746,8 @@ package {
         
         private var chatPalette:ResizableWindow;
         
-        public function getChatPaletteWindow():ChatPalette2 {
-            return chatPalette as ChatPalette2;
+        public function getChatPaletteWindow():ChatPalette {
+            return chatPalette as ChatPalette;
         }
         
         public function setChatPaletteWindow(window:IFlexDisplayObject, eventName:String):void {
