@@ -18,7 +18,7 @@ class LostRoyal < DiceBot
   end
   
   def prefixs
-    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC']
+    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC', 'WPC']
   end
   
   def getHelpMessage
@@ -30,8 +30,11 @@ class LostRoyal < DiceBot
 　　x の並びには【判定表】の数値を順番に入力する。
 　　（例： LR[1,3,0,1,2] ）
 
-ファンブル表
+ファンブル表 
 　FC
+
+風力決定表
+　WPC
 INFO_MESSAGE_TEXT
   end
   
@@ -42,6 +45,8 @@ INFO_MESSAGE_TEXT
         return check_lostroyal([$1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_i,])
       when /FC/
         return roll_fumble_chart
+      when /WPC/
+        return roll_wind_power_chart
     end
     
     return nil
@@ -135,5 +140,45 @@ INFO_MESSAGE_TEXT
     ][key - 1]
     
     return "1D6 => [#{key}] #{text}"
+  end
+  
+  def roll_wind_power_chart
+    key = 0
+    total_bonus = 0
+    text = ""
+    
+    while true
+      dice, = roll(1, 6)
+      key += dice
+      
+      add, bonus, current_text, = [
+        [true, 0, "ほぼ凪（振り足し）"],
+        [true, 0, "弱い風（振り足し）"],
+        [false, 0, "ゆるやかな風"],
+        [false, 0, "ゆるやかな風"],
+        [false, 1, "やや強い風（儀式点プラス１）"],
+        [false, 2, "強い風（龍を幻視、儀式点プラス２）"],
+        [false, 3, "体が揺らぐほどの風（龍を幻視、儀式点プラス３）"],
+      ][[key, 7].min - 1]
+      
+      total_bonus += bonus
+      
+      if key != dice then
+        current_text = "1D6[#{dice}]+#{key - dice} #{current_text}"
+      else
+        current_text = "1D6[#{dice}] #{current_text}"
+      end
+      
+      unless text.empty? then
+        text = "#{text} => #{current_text}"
+      else
+        text = current_text
+      end
+      
+      unless add then
+        text += " [合計：儀式点 +#{total_bonus} ]"
+        return text
+      end
+    end
   end
 end
