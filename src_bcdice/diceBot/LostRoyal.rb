@@ -63,6 +63,10 @@ INFO_MESSAGE_TEXT
       if chained_sequence.size >= 3 then
         text += " [スペシャル]"
       end
+      
+      if is_fumble?(keys, chained_sequence) then
+        text += " [ファンブル]"
+      end
     end
     
     return text
@@ -101,5 +105,15 @@ INFO_MESSAGE_TEXT
     end
     
     return chained_keys
+  end
+  
+  def is_fumble?(keys, chained_sequence)
+    for k in chained_sequence
+      if keys.count(k) >= 2 then
+        return true
+      end
+    end
+    
+    false
   end
 end
