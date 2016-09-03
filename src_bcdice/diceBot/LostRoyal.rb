@@ -51,7 +51,51 @@ INFO_MESSAGE_TEXT
     end
     
     scores = (keys.map do |k| checking_table[k - 1] end).to_a
+    total_score = scores.inject(:+)
     
-    return "3D6 => [#{keys.join(",")}] => (#{scores.join("+")}) => #{scores.inject(:+)}"
+    chained_sequence = find_sequence(keys)
+    
+    text = "3D6 => [#{keys.join(",")}] => (#{scores.join("+")}) => #{total_score}"
+    
+    unless chained_sequence.nil? || chained_sequence.empty? then
+      text += " | #{chained_sequence.size} chain! (#{chained_sequence.join(",")}) => #{total_score + chained_sequence.size}"
+    end
+    
+    return text
+  end
+  
+  def find_sequence(keys)
+    keys = keys.sort
+    
+    sequence = (1...6).map do |start_key|
+      find_sequence_from_start_key(keys, start_key)
+    end.find_all do |x|
+      x.size > 1
+    end.sort do |a, b|
+      a.size <=> b.size
+    end.last
+    
+    sequence
+  end
+  
+  def find_sequence_from_start_key(keys, start_key)
+    chained_keys = []
+    
+    key = start_key
+    
+    while keys.include? key
+      chained_keys << key
+      key += 1
+    end
+    
+    if chained_keys.size > 0 && chained_keys[0] == 1 then
+      key = 6
+      while keys.include? key
+        chained_keys.unshift key
+        key -= 1
+      end
+    end
+    
+    return chained_keys
   end
 end
