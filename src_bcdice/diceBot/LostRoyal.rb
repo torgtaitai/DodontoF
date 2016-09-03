@@ -18,7 +18,7 @@ class LostRoyal < DiceBot
   end
   
   def prefixs
-    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC', 'WPC', 'EC']
+    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC', 'WPC', 'EC', 'HR[1-2]']
   end
   
   def getHelpMessage
@@ -38,6 +38,10 @@ class LostRoyal < DiceBot
 
 感情決定表
 　EC
+
+希望点の決定
+　HRx
+　　x にはダイスの数（ 1 - 2 ）を指定
 INFO_MESSAGE_TEXT
   end
   
@@ -52,6 +56,8 @@ INFO_MESSAGE_TEXT
         return roll_wind_power_chart
       when /EC/
         return roll_emotion_chart
+      when /HR([1-2])/
+        return roll_hope($1.to_i)
     end
     
     return nil
@@ -200,5 +206,38 @@ INFO_MESSAGE_TEXT
     ][key - 1]
     
     return "1D6 => [#{key}] #{text}"
+  end
+  
+  def roll_hope(number_of_dice)
+    total = 0
+    text = ""
+    
+    while true
+      d1, = roll(1, 6)
+      d2 = 0
+      
+      if number_of_dice >= 2 then
+        d2, = roll(1, 6)
+      end
+      
+      total += d1 + d2
+      
+      if number_of_dice == 2 then
+        text += "2D6[#{d1},#{d2}]"
+      else
+        text += "1D6[#{d1}]"
+      end
+      
+      if is_1or2(d1) || is_1or2(d2) then
+        text += " （振り足し） => "
+      else
+        text += " => 合計 #{total}"
+        return text
+      end
+    end
+  end
+  
+  def is_1or2(n)
+    n == 1 || n == 2
   end
 end
