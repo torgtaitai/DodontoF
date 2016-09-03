@@ -18,12 +18,40 @@ class LostRoyal < DiceBot
   end
   
   def prefixs
-    []
+    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]']
   end
   
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
 ・D66ダイスあり
+
+行為判定
+　LR[x,x,x,x,x,x]
+　　x の並びには【判定表】の数値を順番に入力する。
+　　（例： LR[1,3,0,1,2] ）
 INFO_MESSAGE_TEXT
+  end
+  
+  def rollDiceCommand(command)
+    
+    case command
+      when /LR\[([0-5]),([0-5]),([0-5]),([0-5]),([0-5]),([0-5])\]/i
+        return check_lostroyal([$1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_i,])
+    end
+    
+    return nil
+  end
+  
+  def check_lostroyal(checking_table)
+    keys = []
+    
+    for i in 0...3
+      key, = roll(1, 6)
+      keys << key
+    end
+    
+    scores = (keys.map do |k| checking_table[k - 1] end).to_a
+    
+    return "3D6 => [#{keys.join(",")}] => (#{scores.join("+")}) => #{scores.inject(:+)}"
   end
 end
