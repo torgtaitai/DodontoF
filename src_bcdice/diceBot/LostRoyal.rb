@@ -59,6 +59,10 @@ INFO_MESSAGE_TEXT
     
     unless chained_sequence.nil? || chained_sequence.empty? then
       text += " | #{chained_sequence.size} chain! (#{chained_sequence.join(",")}) => #{total_score + chained_sequence.size}"
+      
+      if chained_sequence.size >= 3 then
+        text += " [スペシャル]"
+      end
     end
     
     return text
