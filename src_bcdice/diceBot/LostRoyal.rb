@@ -18,7 +18,7 @@ class LostRoyal < DiceBot
   end
   
   def prefixs
-    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC', 'WPC']
+    ['LR\[[0-5],[0-5],[0-5],[0-5],[0-5],[0-5]\]', 'FC', 'WPC', 'EC']
   end
   
   def getHelpMessage
@@ -35,6 +35,9 @@ class LostRoyal < DiceBot
 
 風力決定表
 　WPC
+
+感情決定表
+　EC
 INFO_MESSAGE_TEXT
   end
   
@@ -47,6 +50,8 @@ INFO_MESSAGE_TEXT
         return roll_fumble_chart
       when /WPC/
         return roll_wind_power_chart
+      when /EC/
+        return roll_emotion_chart
     end
     
     return nil
@@ -180,5 +185,20 @@ INFO_MESSAGE_TEXT
         return text
       end
     end
+  end
+  
+  def roll_emotion_chart
+    key, = roll(1, 6)
+    
+    text = [
+      "愛情／殺意",
+      "友情／負目",
+      "崇拝／嫌悪",
+      "興味／侮蔑",
+      "信頼／嫉妬",
+      "守護／欲情",
+    ][key - 1]
+    
+    return "1D6 => [#{key}] #{text}"
   end
 end
