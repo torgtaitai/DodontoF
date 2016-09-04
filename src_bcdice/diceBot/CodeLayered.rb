@@ -46,12 +46,18 @@ INFO_MESSAGE_TEXT
     end
     
     result = dices.count do |x| x <= border end
-    critical_bonus = dices.count do |x| x == 1 end
     
-    text = "#{ability}D#{10} |> [#{dices.join ","}] ≦ #{border} |> #{result}"
+    text = "#{ability}D#{10} |> [#{dices.join ","}] ≦ #{border}"
     
-    if critical_bonus >= 1 then
-      text += " |> Critical!(#{critical_bonus}) |> #{result + critical_bonus}"
+    if result > 0 then
+      text += " |> #{result}"
+      
+      critical_bonus = dices.count do |x| x == 1 end
+      if critical_bonus >= 1 then
+        text += " |> Critical!(#{critical_bonus}) |> #{result + critical_bonus}"
+      end
+    else
+      text += " |> ファンブル"
     end
     
     return text
