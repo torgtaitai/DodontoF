@@ -17,49 +17,63 @@ class CodeLayered < DiceBot
   end
   
   def prefixs
-     ['CL\d+([\+\-]\d+)*(>=\d+)?']
+     ['CL\d+([\+\-]\d+)*(>=\d+)?(@\d+)?']
   end
   
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
 CLx
+CLx@w
 CLx+y
 CLx+y-v
+CLx+y-v@w
 CLx>=z
 CLx+y>=z
 CLx+y-v>=z
+CLx+y-v>=z@w
 　x = 能力値
 　y, v = 技能レベル、特技などによるダイス数の増減
 　z = 難易度
+　w = 判定値
 INFO_MESSAGE_TEXT
   end
   
   def rollDiceCommand(command)
     
     case command
-      when /^CL(\d+)([+\-](\d+))*\>\=(\d+)(\s+|$)/i
+      when /^CL(\d+)([+\-](\d+))*\>\=(\d+)(\@\d+)?(\s+|$)/i
         ability = $1.to_i
         difficulty = command.scan(/\>\=(\d+)/)[0][0].to_i
         matched = command.split(' ')[0].scan(/[+\-]\d+/)
         members = []
+        border = 6
+        
+        if command =~ /\@(\d+)/ then
+          border = $1.to_i
+        end
         
         unless matched.nil? then
           members = matched.map do |x| member_to_i(x) end
         end
         
-        return check_cl(ability, members, difficulty)
+        return check_cl(ability, members, difficulty, border)
 
         return check_cl($1.to_i, [$3.to_i], $4.to_i)
-      when /^CL(\d+)([+\-](\d+))*(\s+|$)/i
+      when /^CL(\d+)([+\-](\d+))*(\@\d+)?(\s+|$)/i
         ability = $1.to_i
         matched = command.split(' ')[0].scan(/[+\-]\d+/)
         members = []
+        border = 6
+        
+        if command =~ /\@(\d+)/ then
+          border = $1.to_i
+        end
         
         unless matched.nil? then
           members = matched.map do |x| member_to_i(x) end
         end
         
-        return check_cl(ability, members)
+        return check_cl(ability, members, -1, border)
     end
     
     return nil
