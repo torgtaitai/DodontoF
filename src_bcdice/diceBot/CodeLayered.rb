@@ -45,8 +45,15 @@ INFO_MESSAGE_TEXT
       dices << dice
     end
     
-    result = dices.count do |x| x < border end
+    result = dices.count do |x| x <= border end
+    critical_bonus = dices.count do |x| x == 1 end
     
-    return "#{ability}D#{10} |> [#{dices.join ","}] ≦ #{border} |> #{result}"
+    text = "#{ability}D#{10} |> [#{dices.join ","}] ≦ #{border} |> #{result}"
+    
+    if critical_bonus >= 1 then
+      text += " |> Critical!(#{critical_bonus}) |> #{result + critical_bonus}"
+    end
+    
+    return text
   end
 end
