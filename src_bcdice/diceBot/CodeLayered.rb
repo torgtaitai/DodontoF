@@ -39,10 +39,6 @@ INFO_MESSAGE_TEXT
         return check_cl($1.to_i, $3.to_i, $4.to_i)
       when /^CL(\d+)(\+(\d+))?(\s+|$)/i
         return check_cl($1.to_i, $3.to_i)
-      when /^CL(\d+)\>\=(\d+)(\s+|$)/i
-        return check_cl($1.to_i, 0, $2.to_i)
-      when /^CL(\d+)(\s+|$)/i
-        return check_cl($1.to_i)
     end
     
     return nil
