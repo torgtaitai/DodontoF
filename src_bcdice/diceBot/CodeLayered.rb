@@ -9,7 +9,7 @@ class CodeLayered < DiceBot
   end
   
   def gameName
-    '英雄武装ＲＰＧコード：レイヤード'
+    'コード：レイヤード'
   end
   
   def gameType
