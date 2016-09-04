@@ -57,8 +57,6 @@ INFO_MESSAGE_TEXT
         end
         
         return check_cl(ability, members, difficulty, border)
-
-        return check_cl($1.to_i, [$3.to_i], $4.to_i)
       when /^CL(\d+)([+\-](\d+))*(\@\d+)?(\s+|$)/i
         ability = $1.to_i
         matched = command.split(' ')[0].scan(/[+\-]\d+/)
