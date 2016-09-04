@@ -17,37 +17,41 @@ class CodeLayered < DiceBot
   end
   
   def prefixs
-     ['CL\d+']
+     ['CL\d+(\+\d+)?']
   end
   
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
 CLx
+CLx+y
 　x = 能力値
+　y = 技能レベル
 INFO_MESSAGE_TEXT
   end
   
   def rollDiceCommand(command)
     
     case command
-      when /CL(\d+)/i
+      when /^CL(\d+)(\+(\d+))?(\s+|$)/i
+        return check_cl($1.to_i, $3.to_i)
+      when /^CL(\d+)(\s+|$)/i
         return check_cl($1.to_i)
     end
     
     return nil
   end
   
-  def check_cl(ability, border = 6)
+  def check_cl(ability, additinal = 0, border = 6)
     dices = []
     
-    ability.times do
+    (ability + additinal).times do
       dice, = roll(1, 10)
       dices << dice
     end
     
     result = dices.count do |x| x <= border end
     
-    text = "#{ability}D#{10} |> [#{dices.join ","}] ≦ #{border}"
+    text = "#{ability + additinal}D#{10} |> [#{dices.join ","}] ≦ #{border}"
     
     if result > 0 then
       text += " |> #{result}"
