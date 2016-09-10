@@ -5,3 +5,5 @@ rvm:
   - 2.0
   - 1.9
   - 1.8
+
+install: gem install test-unit --no-ri --no-rdoc
