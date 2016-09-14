@@ -102,7 +102,7 @@ INFO_MESSAGE_TEXT
     
     result = dices.count do |x| x <= border end
     
-    text = "#{number_of_dice}D#{10} |> [#{dices.join ","}] ≦ #{border}"
+    text = "#{number_of_dice}D#{10}(能力値=#{ability}) |> [#{dices.join ","}] ≦ #{border}"
     
     if dices.min > ability then
       text += " |> ファンブル"
