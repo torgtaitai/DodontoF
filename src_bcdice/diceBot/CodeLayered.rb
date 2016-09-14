@@ -33,6 +33,7 @@ CLx+y-v>=z
 CLx+y-v>=z@w
 　x = 能力値
 　y, v = 技能レベル、特技などによるダイス数の増減
+　（ファンブルの処理の都合上、必ず能力値と分けてください）
 　z = 難易度
 　w = 判定値
 INFO_MESSAGE_TEXT
@@ -103,7 +104,12 @@ INFO_MESSAGE_TEXT
     
     text = "#{number_of_dice}D#{10} |> [#{dices.join ","}] ≦ #{border}"
     
-    if result > 0 then
+    if dices.min > ability then
+      text += " |> ファンブル"
+      result = -1
+    end
+    
+    if result >= 0 then
       text += " |> #{result}"
       
       critical_bonus = dices.count do |x| x == 1 end
@@ -112,9 +118,6 @@ INFO_MESSAGE_TEXT
       if critical_bonus >= 1 then
         text += " |> Critical!(#{critical_bonus}) |> #{result}"
       end
-    else
-      text += " |> ファンブル"
-      result = -1
     end
     
     if difficulty >= 0 then
