@@ -17,7 +17,7 @@ class CodeLayered < DiceBot
   end
   
   def prefixs
-     ['CL\d+([\+\-]\d+)*(>=\d+)?(@\d+)?']
+     ['CL\d+([\+\-]\d+)*(>=\d+)?(@\d+)?', 'EC']
   end
   
   def getHelpMessage
@@ -36,6 +36,9 @@ CLx+y-v>=z@w
 　（ファンブルの処理の都合上、必ず能力値と分けてください）
 　z = 難易度
 　w = 判定値
+
+EC
+　邂逅表
 INFO_MESSAGE_TEXT
   end
   
@@ -73,6 +76,8 @@ INFO_MESSAGE_TEXT
         end
         
         return check_cl(ability, members, -1, border)
+      when /^EC/i
+        return encounter_chart
     end
     
     return nil
@@ -129,5 +134,36 @@ INFO_MESSAGE_TEXT
     end
     
     return text
+  end
+  
+  def encounter_chart
+    dice, = roll(1, 100)
+    
+    index = (dice - 1) / 5
+    
+    relation, emotion = [
+      ["ライバル", "競争心"],
+      ["幼子", "庇護"],
+      ["刺激", "興味"],
+      ["同志", "誠意"],
+      ["友人", "友情"],
+      ["先達", "憧憬"],
+      ["ビジネス", "信用"],
+      ["くされ縁", "ウマが合う"],
+      ["秘密", "連帯感"],
+      ["借り", "借りがある"],
+      ["家族", "親愛"],
+      ["主人", "忠誠"],
+      ["戦友", "信頼"],
+      ["同類", "共感"],
+      ["貸し", "貸しがある"],
+      ["保護者", "頭が上がらない"],
+      ["苦手なひと", "苦手"],
+      ["ファン", "執着心"],
+      ["トラウマ", "恐怖"],
+      ["宿敵", "殺意"],
+    ][index]
+    
+    return "邂逅表 1D100[#{dice}] -> (#{index*5+1}-#{index*5+5}) 関係：#{relation} ／ 感情：#{emotion}"
   end
 end
