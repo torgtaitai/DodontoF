@@ -14,7 +14,7 @@ package {
             return thisObj;
         }
         
-        private var version:String = "Ver.1.48.16(2016/09/01)";
+        private var version:String = "Ver.1.48.18(2016/09/28)";
         
         public function getVersion():String {
             return version;
@@ -175,7 +175,7 @@ package {
                 return;
             }
             
-            fontSize = info.size;
+            setFontSize( info.size );
         }
         
         public function saveInfo(key:String, info:Object, isGlobal:Boolean = false):void {
@@ -499,8 +499,8 @@ package {
         
         public static function setFontSize(size:int):void {
             fontSize = size;
-            
             buttonFontSize = fontSize + 5;
+            Utils.setToolTipStyle(fontSize);
         }
         
         [Bindable]

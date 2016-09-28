@@ -433,7 +433,7 @@ package {
             return result;
         }
         
-        static public function setToolTipStyle(fontSize:int, maxWidth:int):void {
+        static public function setToolTipStyle(fontSize:int, maxWidth:int = -1):void {
             var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleDeclaration("ToolTip");
             //var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleManager(null).getStyleDeclaration("ToolTip");
             
@@ -445,7 +445,9 @@ package {
             toolTipStyle.setStyle("backgroundColor", "#33CC99");
             */
             
-            ToolTip.maxWidth = maxWidth;
+            if( maxWidth != -1 ) {
+                ToolTip.maxWidth = maxWidth;
+            }
         }
         
         static public function getBitMap(component:UIComponent, width:Number, height:Number):Bitmap {
@@ -563,9 +565,9 @@ package {
             } catch( e:Error ) {
                 Log.loggingException("Utils.stopMoviewPlay()", e);
             }
-       }
-       
-
+        }
+        
+        
         
         static public function getEnterText():String {
             if( isWindowsOs() ) {

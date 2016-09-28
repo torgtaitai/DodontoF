@@ -733,6 +733,7 @@ chatPalletEdit = Edit
 chatPalletSave = Save
 chatPalletLoad = Load
 chatPalletAddTab = Add Tab
+chatPalletDeleteTab = Delete Tab
 chatPalletUndo = Undo
 chatPalletInputSample1 = Chat Palet Sample：
 chatPalletInputSample2 = 2d6+1 Dice Roll

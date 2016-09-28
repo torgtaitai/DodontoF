@@ -839,6 +839,7 @@ package {
             p.chatPalletSave = "セーブ";
             p.chatPalletLoad = "ロード";
             p.chatPalletAddTab = "タブ追加";
+            p.chatPalletDeleteTab = "タブ削除";
             p.chatPalletUndo = "削除戻し";
             p.chatPalletInputSample1 = "チャットパレット入力例：";
             p.chatPalletInputSample2 = "2d6+1 ダイスロール";

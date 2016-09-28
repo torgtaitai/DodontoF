@@ -731,6 +731,7 @@ chatPalletEdit = 編集
 chatPalletSave = セーブ
 chatPalletLoad = ロード
 chatPalletAddTab = タブ追加
+chatPalletDeleteTab = タブ削除
 chatPalletUndo = 削除戻し
 chatPalletInputSample1 = チャットパレット入力例：
 chatPalletInputSample2 = 2d6+1 ダイスロール

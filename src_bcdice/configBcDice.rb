@@ -89,7 +89,6 @@ KanColle
 KillDeathBusiness
 LogHorizon
 LogHorizon:Korean
-LostRoyal
 MagicaLogia
 MeikyuDays
 MeikyuKingdom

@@ -17,10 +17,10 @@
     <containers:SuperTabNavigator id="tabSpace" 
             categoryName="ChatPalette"
 			width="100%" height="100%" horizontalGap="0"
-            change="changeTab()" tabClose="closeTabEvent(event)"
+            change="changeTab()"
             scrollSpeed="25" dropShadowEnabled="true"
 			stopScrollingEvent="{MouseEvent.MOUSE_UP}" startScrollingEvent="{MouseEvent.MOUSE_DOWN}"
-			closePolicy="{SuperTab.CLOSE_ROLLOVER}"
+			closePolicy="{SuperTab.CLOSE_NEVER}"
       />
 
     
@@ -41,6 +41,9 @@
                  click="addPaletTabByButton()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
       
+      <mx:Button id="removePaletTabButton" label="{Language.s.chatPalletDeleteTab}"
+                 click="removePaletTab(tabSpace.selectedIndex)" height="20"
+                 fontSize="10" paddingLeft="0" paddingRight="0" />
       <mx:Button id="undoPaletTabButton" label="{Language.s.chatPalletUndo}"
                  click="undoPaletTab()" height="20"
                  fontSize="10" paddingLeft="0" paddingRight="0" />
@@ -71,8 +74,10 @@
     
     
     private var defaultTabCount:int = 5;
-    private var tabEditors:Array = new Array();
+    
     private var tabs:Array = new Array();
+    private var tabEditors:Array = new Array();
+    
     
     [Bindable]
     private var deletedTabs:Array = new Array();
@@ -158,7 +163,7 @@
     
     private function initChatPalet():void {
         chatPalet.verticalScrollPolicy = "off";//ScrollPolicy.OFF;
-        tabEditors = new Array();
+        cleanTabs();
         
         for(var i:int = 0; i < defaultTabCount ; i++) {
             addPaletTab();
@@ -177,43 +182,60 @@
         setLines(lines, tabEditorInfo);
     }
     
-    private function addPaletTab():void {
-        var tab:Box = tabs[tabSpace.numChildren] as Box;
-        if( tab == null ) {
-            tab = new Box();
-            tab.percentWidth=100;
-            tab.percentHeight=100;
-            
-            var tabIndex:int = (tabSpace.numChildren + 1);
-            initAddedTab(tab, tabIndex);
-            
-            tabs.push( tab );
-        }
-        
-        tabSpace.addChild(tab);
-    }
     
     private function addPaletTabByButton():void {
         addPaletTabButton.enabled = false;
+        
         addPaletTab();
+        
         addPaletTabButton.enabled = true;
+        tabSpace.selectedIndex = tabSpace.numChildren - 1;
         
         savePosition();
     }
     
-    private function deletePaletTab(index:int):void {
-        tabSpace.removeChildAt(index);
+    private function addPaletTab():void {
+        var tab:Box = new Box();
+        tab.percentWidth=100;
+        tab.percentHeight=100;
+        
+        var tabIndex:int = (tabSpace.numChildren + 1);
+        var tabEditorInfo:Object = initAddedTab(tab, tabIndex);
+        
+        tabSpace.addChild( tab );
+        tabs.push( tab );
+        tabEditors.push( tabEditorInfo );
     }
     
-    private function closeTabEvent(event:SuperTabEvent):void {
-        var index:int = event.tabIndex;
-        var array:Array = tabs.splice(index, 1);
-        
-        for each(var tab:Object in array) {
-            deletedTabs.push(tab);
+    
+    private function cleanTabs():void {
+        while( tabSpace.numChildren > 0 ) {
+            tabSpace.removeChildAt(0);
         }
         
+        tabs.length = 0;
+        tabEditors.length = 0;
+        
+        deletedTabs.length = 0;
+        
         setUndoButtonEnable();
+    }
+    
+    private function removePaletTab(index:int):void {
+        
+        var info:Object = getSaveDataByIndex(index);
+        
+        tabSpace.removeChildAt(index);
+        
+        var array:Array;
+        array = tabs.splice(index, 1);
+        array = tabEditors.splice(index, 1);
+        
+        deletedTabs.push( info );
+        
+        setUndoButtonEnable();
+        
+        savePosition();
     }
     
     private function setUndoButtonEnable():void {
@@ -221,20 +243,24 @@
     }
     
     private function undoPaletTab():void {
-        var tab:Box = deletedTabs.shift() as Box;
+        
+        addPaletTab();
+        
+        var tabInfo:Object = deletedTabs.pop();
         setUndoButtonEnable();
         
-        if( tab == null ) {
+        if( tabInfo == null ) {
             return;
         }
         
-        tabSpace.addChild(tab);
+        var index:int = tabSpace.numChildren -1;
+        initTabByTabInfo(index, tabInfo);
     }
     
     private function createInputList(input:TextInput, name:TextInput,
                                      state:ComboBox, colorPicker:ColorPicker,
                                      tabName:TextInput, changeNameFunction:Function,
-                                     tab:Box):List {
+                                     tab:Box):Object {
         
         var changer:ChatPaletteChanger = new ChatPaletteChanger();
         
@@ -272,10 +298,11 @@
             changer : changer,
             tab : tab };
         
-        tabEditors.push(tabEditorInfo);
-                    
+        var result:Object =  {
+            tabEditorInfo : tabEditorInfo,
+            inputList: inputList };
         
-        return inputList;
+        return result;
     }
     
     private function createCharacterNameBox(name:TextInput, state:ComboBox,
@@ -328,7 +355,7 @@
     }
     
     
-    private function initAddedTab(tab:Box, tabIndex:int):void {
+    private function initAddedTab(tab:Box, tabIndex:int):Object {
         var name:TextInput = new TextInput();
         savePosition();
 
@@ -345,12 +372,13 @@
         var input:TextInput = new TextInput();
         var sendBox:Box = createSendBox(input, name, state, colorPicker);
         
-        var inputList:List = createInputList(input, name, state, colorPicker,
-                                             tabName, changeNameFunction, tab);
+        var obj:Object = createInputList( input, name, state, colorPicker,
+                                          tabName, changeNameFunction, tab );
+        var inputList:List = obj.inputList;
         
-        tab.addChild(nameBox);
-        tab.addChild(sendBox);
-        tab.addChild(inputList);
+        tab.addChild( nameBox );
+        tab.addChild( sendBox );
+        tab.addChild( inputList );
         
         tab.addEventListener(KeyboardEvent.KEY_DOWN, keyDownInChatMessage);
         
@@ -359,6 +387,8 @@
                 inputList.setStyle('color', event.color);
                 input.setStyle('color', event.color);
             });
+        
+        return obj.tabEditorInfo;
     }
     
     
@@ -516,27 +546,36 @@
         saveData.tabInfos = [];
         
         for(var i:int = 0 ; i < tabSpace.numChildren ; i++) {
-            
-            var tabEditorInfo:Object = tabEditors[i];
-            
-            var lines:Array = [];
-            if( tabEditorInfo == null ) {
+            var tabInfo:Object = getSaveDataByIndex(i);
+            if( tabInfo == null ) {
                 break;
             }
-            var inputList:List = tabEditorInfo.list as List;
-            if( inputList.dataProvider != null ) {
-                lines = inputList.dataProvider.source;
-            }
-            
-            var tabInfo:Object = new Object();
-            tabInfo.lines = lines;
-            tabInfo.name = tabEditorInfo.name.text;
-            tabInfo.color = tabEditorInfo.colorPicker.selectedColor;
-            tabInfo.tabName = tabEditorInfo.tabName.text;
             saveData.tabInfos.push(tabInfo);
         }
         
         return saveData;
+    }
+    
+    private function getSaveDataByIndex(index:int):Object {
+        var tabEditorInfo:Object = tabEditors[index];
+        
+        var lines:Array = [];
+        if( tabEditorInfo == null ) {
+            return null;
+        }
+        
+        var inputList:List = tabEditorInfo.list as List;
+        if( inputList.dataProvider != null ) {
+            lines = inputList.dataProvider.source;
+        }
+        
+        var tabInfo:Object = new Object();
+        tabInfo.lines = lines;
+        tabInfo.name = tabEditorInfo.name.text;
+        tabInfo.color = tabEditorInfo.colorPicker.selectedColor;
+        tabInfo.tabName = tabEditorInfo.tabName.text;
+        
+        return tabInfo;
     }
     
     public function load():void {
@@ -544,32 +583,32 @@
     }
     
     public function loadSaveData(saveData:Object):void {
-        while( tabSpace.numChildren > 0 ) {
-            deletePaletTab(0);
-        }
+        cleanTabs();
         
         var tabInfos:Object = saveData.tabInfos;
         
         for(var i:int = 0 ; i < tabInfos.length ; i++) {
             addPaletTab();
-            
             var tabInfo:Object = tabInfos[i];
-            var tabEditorInfo:Object = tabEditors[i];
-            
-            setLines(tabInfo.lines, tabEditorInfo);
-            tabEditorInfo.name.text = tabInfo.name;
-            
-            if( tabInfo.color != null ) {
-                tabEditorInfo.colorPicker.selectedColor = tabInfo.color;
-            }
-            
-            if( tabInfo.tabName != null ) {
-                tabEditorInfo.tabName.text = tabInfo.tabName;
-            }
-            
-            
-            tabEditorInfo.changeNameFunction();
+            initTabByTabInfo(i, tabInfo);
         }
+    }
+    
+    private function initTabByTabInfo(index:int, tabInfo:Object):void {
+        var tabEditorInfo:Object = tabEditors[index];
+        
+        setLines(tabInfo.lines, tabEditorInfo);
+        tabEditorInfo.name.text = tabInfo.name;
+        
+        if( tabInfo.color != null ) {
+            tabEditorInfo.colorPicker.selectedColor = tabInfo.color;
+        }
+        
+        if( tabInfo.tabName != null ) {
+            tabEditorInfo.tabName.text = tabInfo.tabName;
+        }
+        
+        tabEditorInfo.changeNameFunction();
     }
     
     private function loadOnChatPalette1(saveData:Object):void {

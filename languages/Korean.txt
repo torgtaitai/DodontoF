@@ -731,6 +731,7 @@ chatPalletEdit = 편집
 chatPalletSave = 세이브
 chatPalletLoad = 로드
 chatPalletAddTab = 탭 추가
+chatPalletDeleteTab = 탭 삭제
 chatPalletUndo = Undo
 chatPalletInputSample1 = 채팅 팔레트 입력예：
 chatPalletInputSample2 = 2d6+1 다이스 롤
