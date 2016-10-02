@@ -3,7 +3,9 @@
 
 $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 
-require 'DodontoFServer.rb'
+if( $0 === __FILE__ )
+  require 'DodontoFServer.rb'
+end
 #require 'rubygems'
 require 'mysql'
 
