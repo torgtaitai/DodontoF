@@ -749,7 +749,7 @@ chatPalletSaveData = Chat Palette Save Data
 channerCoundIsEmptyErrorMessage = Channel Count is Empty. set valid channel
 sendChatErrorMessage = Send Chat Error
 visitorNameSaffix = @Visitor
-diceBotCustomInfomation = ==【{0}Only】=======================\n
+diceBotCustomInfomation = ==【{0} Only】=======================\n
 alarmMessage = [Alarm：{0}]:
 alarmMessageSecond = :{0} seconds after
 needFlashPlayerOverVer10ErrorMessage = If you want to use this, need FlashPlayer Ver.10 or after.

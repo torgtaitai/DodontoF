@@ -20,6 +20,7 @@
             change="changeTab()"
             scrollSpeed="25" dropShadowEnabled="true"
 			stopScrollingEvent="{MouseEvent.MOUSE_UP}" startScrollingEvent="{MouseEvent.MOUSE_DOWN}"
+            tabsReordered="reorderTab(event)"
 			closePolicy="{SuperTab.CLOSE_NEVER}"
       />
 
@@ -71,11 +72,11 @@
     import mx.core.IFlexDisplayObject;
     import flexlib.controls.tabBarClasses.SuperTab;
     import flexlib.events.SuperTabEvent;
+    import flexlib.events.TabReorderEvent;
     
     
     private var defaultTabCount:int = 5;
     
-    private var tabs:Array = new Array();
     private var tabEditors:Array = new Array();
     
     
@@ -118,26 +119,6 @@
         setUndoButtonEnable();
     }
     
-    private function swapTab(from:int, to:int):void {
-        var saveData:Object = getSaveData();
-        
-        var result:Boolean = swapArray(saveData.tabInfos, from, to);
-        if( ! result ) {
-            return;
-        }
-        
-        loadSaveData(saveData);
-        
-        tabSpace.validateNow();
-        this.validateNow();
-        
-        tabSpace.selectedIndex = tabSpace.numChildren - 1;
-        tabSpace.validateNow();
-        this.validateNow();
-        tabSpace.selectedIndex = to;
-        tabSpace.validateNow();
-        this.validateNow();
-    }
     
     private function swapArray(array:Array, index1:int, index2:int):Boolean {
         if( index1  >= array.length ) {
@@ -203,7 +184,6 @@
         var tabEditorInfo:Object = initAddedTab(tab, tabIndex);
         
         tabSpace.addChild( tab );
-        tabs.push( tab );
         tabEditors.push( tabEditorInfo );
     }
     
@@ -213,9 +193,7 @@
             tabSpace.removeChildAt(0);
         }
         
-        tabs.length = 0;
         tabEditors.length = 0;
-        
         deletedTabs.length = 0;
         
         setUndoButtonEnable();
@@ -226,10 +204,7 @@
         var info:Object = getSaveDataByIndex(index);
         
         tabSpace.removeChildAt(index);
-        
-        var array:Array;
-        array = tabs.splice(index, 1);
-        array = tabEditors.splice(index, 1);
+        tabEditors.splice(index, 1);
         
         deletedTabs.push( info );
         
@@ -668,6 +643,27 @@
         var index:int = tabSpace.selectedIndex;
         var color:String = ChatWindow.getInstance().getChannelColor(index);
         setStyle("backgroundColor", color);
+    }
+    
+    private function reorderTab(event:TabReorderEvent):void {
+        var oldIndex:int = event.oldIndex;
+        var newIndex:int = event.newIndex;
+        
+        swap(tabEditors, oldIndex, newIndex);
+    }
+    
+    private function swap(targets:Array, oldIndex:int, newIndex:int):void {
+        var array:Array = tabEditors.splice(oldIndex, 1);
+        if( array.length != 1 ) {
+            //Log.loggingError("array.length is NOT 1");
+            return;
+        }
+        
+        if( newIndex > oldIndex ) {
+            newIndex -= 1;
+        }
+        
+        tabEditors.insertAt(newIndex, array[0]);
     }
     
              ]]>
