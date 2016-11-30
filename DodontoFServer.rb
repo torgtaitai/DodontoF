@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.19'
+  VERSION = '1.48.20'
   # リリース日
-  RELEASE_DATE = '2016/10/20'
+  RELEASE_DATE = '2016/11/30'
 
   # バージョンとリリース日を含む文字列
   #
@@ -941,6 +941,8 @@ class DodontoFServer
     case command
     when 'addCharacter'
       sendWebIfAddCharacter
+    when 'addMessageCard'
+      sendWebIfAddMessageCard
     when 'changeCharacter'
       sendWebIfChangeCharacter
     when 'addMemo'
@@ -1466,6 +1468,43 @@ class DodontoFServer
     
     return result
   end
+  
+  
+  def sendWebIfAddMessageCard
+    @logger.debug("sendWebIfAddMessageCard Begin")
+    
+    result = {}
+    result['result'] = 'OK'
+    
+    fontSize = getWebIfRequestInt('fontSize', 20)
+    text = getWebIfRequestText('text')
+    html = "<font size='#{fontSize * 4}'>#{text}</font>"
+    
+    text = getWebIfRequestText('back')
+    htmlBack = "<font size='#{fontSize * 4}'>#{text}</font>"
+    
+    params = {
+      'imageName' => html,
+      'imageNameBack' => htmlBack,
+      
+      "isOpen" => false,
+      "isBack" => false,
+      "isText" => true,
+      'mountName' => "messageCard",
+      "isUpDown" => false,
+      "canDelete" => true,
+      "canRewrite" => true,
+      "x" => 0,
+      "y" => 0,
+    }
+    
+    @logger.debug(params, 'sendWebIfAddMessageCard jsonData')
+    
+    addCardData( params )
+    
+    return result
+  end
+  
   
   def getWebIfImageName(key, default)
     @logger.debug("getWebIfImageName begin")
@@ -4423,24 +4462,28 @@ class DodontoFServer
   def addCard()
     @logger.debug("addCard begin");
     
-    addCardData = getParamsFromRequestData()
-    
-    isText = addCardData['isText']
-    imageName = addCardData['imageName']
-    imageNameBack = addCardData['imageNameBack']
-    mountName = addCardData['mountName']
-    isUpDown = addCardData['isUpDown']
-    canDelete = addCardData['canDelete']
-    canRewrite = addCardData['canRewrite']
-    isOpen = addCardData['isOpen']
-    isBack = addCardData['isBack']
+    params = getParamsFromRequestData()
+    addCardData(params)
+  end
+  
+  
+  def addCardData(params)
+    isText = params['isText']
+    imageName = params['imageName']
+    imageNameBack = params['imageNameBack']
+    mountName = params['mountName']
+    isUpDown = params['isUpDown']
+    canDelete = params['canDelete']
+    canRewrite = params['canRewrite']
+    isOpen = params['isOpen']
+    isBack = params['isBack']
     
     changeSaveData(@saveFiles['characters']) do |saveData|
       cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete, canRewrite)
-      cardData["x"] = addCardData['x']
-      cardData["y"] = addCardData['y']
-      cardData["owner"] = addCardData['owner']
-      cardData["ownerName"] = addCardData['ownerName']
+      cardData["x"] = params['x']
+      cardData["y"] = params['y']
+      cardData["owner"] = params['owner']
+      cardData["ownerName"] = params['ownerName']
       cardData["isOpen"] = isOpen unless( isOpen.nil? )
       cardData["isBack"] = isBack unless( isBack.nil? )
       

@@ -142,7 +142,7 @@ package {
         }
         
         override public function changeOwner(event:ContextMenuEvent = null):void {
-            Utils.sendSystemMessage(Language.s.changeCardOwnerMessage, [getOwnerName()]);
+            Utils.sendSystemMessage(Language.s.changeCardSetOwnerMessage, [getOwnerName()]);
             
             setOwnerName( getSelfOwnerName() );
             

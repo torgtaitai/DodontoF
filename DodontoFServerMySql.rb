@@ -17,9 +17,9 @@ end
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.19'
+  VERSION = '1.48.20'
   # リリース日
-  RELEASE_DATE = '2016/10/20'
+  RELEASE_DATE = '2016/11/30'
 
   # バージョンとリリース日を含む文字列
   #

@@ -101,6 +101,7 @@
       <li><a href='#webIf_setRoomInfo'>setRoomInfo：プレイルームの情報設定</a></li>
       <li><a href='#webIf_addMemo'>addMemo：共有メモ追加</a></li>
       <li><a href='#webIf_changeMemo'>changeMemo：共有メモ追加</a></li>
+      <li><a href='#webIf_addMessageCard'>addMessageCard：メッセージカード追加</a></li>
       <li><a href='#webIf_refresh'>refresh：各種情報取得</a></li>
     </ul>
   </li>
@@ -983,6 +984,25 @@ DodontoFServer.rb?webif=setRoomInfo&room=1&password=himitsu&counter=HP,MP,PPP&ch
 応答データ例）<br>
 　responseFunction({"result":"OK"});<br>
 <br>
+<h3 id="webIf_addMessageCard">addMessageCard：メッセージカード追加</h3>
+メッセージカードを追加することが出来ます。<br>
+<br>
+指定可能パラメータ：<br>
+　webif：コマンド名。この場合は addMessageCard を指定<br>
+　room：対象プレイルーム番号<br>
+　password：対象プレイルームのパスワード（パスワードが無い、あるいは見学可の場合は省略可能）<br>
+　callback: JSONP取得用の関数名設定用。省略可<br>
+　<br>
+　text：メッセージカードに表示する文字列<br>
+　back：メッセージカードの裏面に表示する文字列<br>
+　fontSize：メッセージカードのフォントサイズ。デフォルト20。省略可<br>
+<br>
+コマンド例）<br>
+　DodontoFServer.rb?webif=addMessageCard&room=1&password=himitsu&callback=responseFunction&message=qwerty&text=cardText&back=backText&fontSize=40<br>
+<br>
+応答データ例）<br>
+　responseFunction({"result":"OK"});<br>
+<br>
 <h3 id="webIf_refresh">refresh：各種情報取得</h3>
 部屋の各種情報を一括して取得できます。<br>
 <br>
@@ -1158,6 +1178,11 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2016/11/30 Ver.1.48.20<br>
+・WEBIFにメッセージカード追加コマンドaddMessageCardを追加。詳細はREADME.htmlを参照。<br>
+・ロストロイヤルのダイスボットのファンブル時の判定誤りを修正。EthanEricさん、酒田シンジさん、ありがとうっ！<br>
+・中国語メッセージを修正。zeteticlさんありがとうっ！<br>
+<br>
 2016/10/20 Ver.1.48.19<br>
 ・チャットパレットのタブをドラッグした後に変更画面が正しく動かなくなる不具合を修正。<br>
 ・ダイスボットをボーンズ＆カーズVer2.02.62対応へ変更。<br>

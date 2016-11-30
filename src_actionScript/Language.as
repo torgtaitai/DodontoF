@@ -219,7 +219,7 @@ package {
             p.cancelRecordQuestionTitle = "録画キャンセル確認";
             p.cancelRecordMessage = "「{0}」の録画をキャンセルしました。";
             p.diceOpenMessage = "「{0}」がダイスをオープンしました。出目は{1}({2}面ダイス)です。";
-            p.changeCardOwnerMessage = "「{0}」が「{1}」のカード一式を受け取りました。";
+            p.changeCardSetOwnerMessage = "「{0}」が「{1}」のカード一式を受け取りました。";
             p.returnCardNoNameMessage = "「{0}」が「{1}」の捨て札からカードを引き戻しました。";
             p.returnCardWithNameMessage = "「{0}」が捨て札から「{1}」を引き戻しました。";
             p.alarmSendTo = "送信先";
