@@ -18,7 +18,7 @@ class SwordWorld2_0 < SwordWorld
   end
   
   def prefixs
-     ['K\d+.*', 'Gr(\d+)?']
+     ['K\d+.*', 'Gr(\d+)?', 'FT']
   end
   
   def getHelpMessage
@@ -57,6 +57,9 @@ class SwordWorld2_0 < SwordWorld
 ・成長　(Gr)
 　末尾に数字を付加することで、複数回の成長をまとめて行えます。
 　例）Gr3
+
+・防御ファンブル表　(FT)
+　防御ファンブル表を出すことができます。
 INFO_MESSAGE_TEXT
   end
   
@@ -68,6 +71,8 @@ INFO_MESSAGE_TEXT
         else
           growth
         end
+      when /^FT/i
+        get_fumble_table
       else
         super(command)
     end
@@ -137,5 +142,18 @@ INFO_MESSAGE_TEXT
   
   def get_ability_by_dice(dice)
     ['器用度', '敏捷度', '筋力', '生命力', '知力', '精神力'][dice - 1]
+  end
+
+  def get_fumble_table()
+    table = [
+      'この表を2回振り、その両方を適用する。（同じ出目による影響は累積しない）。この自動失敗により得られる経験点は、+50点される',
+      'ダメージに、攻撃者を強化している「剣のかけら」の数が追加される',
+      'ダメージに、攻撃者の「レベル」が追加される',
+      'ダメージ決定を2回行い、より高い方を採用する',
+      '合算ダメージを2倍する',
+      '防護点無効'
+    ]
+    text, num = get_table_by_1d6(table)
+    return "防御ファンブル表(#{num}) → #{text}"
   end
 end
