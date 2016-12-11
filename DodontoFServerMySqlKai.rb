@@ -45,10 +45,6 @@ require 'dodontof/dice_adapter'
 require 'dodontof_mysqlkai/play_room'
 require 'dodontof_mysqlkai/image'
 
-if( $isFirstCgi )
-  require 'cgiPatch_forFirstCgi'
-end
-
 # require "configMysqlKai.rb"
 require "config.rb"
 
