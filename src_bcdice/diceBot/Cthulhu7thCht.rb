@@ -70,7 +70,7 @@ INFO_MESSAGE_TEXT
     return "錯誤。目標值需為1以上。" if(diff <= 0)
     
     unless ( @bonus_dice_range.include?(bonus_dice_count) )
-      return "錯誤。獎勵、懲罰骰値為#{@bonus_dice_range.min}～#{@bonus_dice_range.max}です。"
+      return "錯誤。獎勵、懲罰骰値為#{@bonus_dice_range.min}～#{@bonus_dice_range.max}。"
     end
     
     output = ""
