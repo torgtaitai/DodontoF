@@ -40,10 +40,6 @@ require 'dodontof/dice_adapter'
 require 'dodontof/play_room'
 require 'dodontof/image'
 
-if( $isFirstCgi )
-  require 'cgiPatch_forFirstCgi'
-end
-
 require "config"
 
 $globalErrorMessage = nil
