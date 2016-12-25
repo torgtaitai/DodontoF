@@ -396,6 +396,7 @@ $diceBotOrder = <<____END_MARKER____
 コード：レイヤード
 黒絢のアヴァンドナー
 ゴリラTRPG
+コロッサルハンター
 サタスペ
 Shared†Fantasia
 ジェームズ・ボンド007

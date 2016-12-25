@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <application xmlns="http://ns.adobe.com/air/application/1.5"> 
     <id>com.dodontof.DodontoFAir</id> 
-    <version>Ver.1.48.20(2016/11/30)</version> 
+    <version>Ver.1.48.21(2016/12/20)</version> 
     <filename>DodontoFAir</filename> 
     <initialWindow> 
         <content>DodontoFAir.swf</content> 

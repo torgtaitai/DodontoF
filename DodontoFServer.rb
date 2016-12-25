@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.20'
+  VERSION = '1.48.21'
   # リリース日
-  RELEASE_DATE = '2016/11/30'
+  RELEASE_DATE = '2016/12/20'
 
   # バージョンとリリース日を含む文字列
   #
@@ -2119,6 +2119,7 @@ class DodontoFServer
     fileNames.each do |fileName|
       next unless(/#{dir}\/(.+)\.txt$/ === fileName)
       name = $1
+      name.gsub!(/-/, '')
       
       # "_README.txt" のように _ で始まるファイルは対象外とします
       next if(/^_/ === name)

@@ -1284,6 +1284,8 @@ package {
                 return "";
             }
             
+            lang = lang.replace('-', '');
+            
             var beforeLang:String = currentLanguage;
             var beforeKeys:Array = Utils.getKeys(s, diceBotLangPrefix);
             

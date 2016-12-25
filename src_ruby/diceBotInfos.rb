@@ -104,6 +104,7 @@ INFO_MESSAGE_TEXT
     
     botNames = botFiles.collect{|i| File.basename(i, ".rb").untaint}
     botNames.delete_if{|i| ignoreBotNames.include?(i) }
+    botNames.delete_if{|i| /^_/ === i }
     
     botNames.each do |botName|
       @logger.debug(botName, 'load unknown dice bot botName')

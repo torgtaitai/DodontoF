@@ -2,7 +2,8 @@
 module DodontoF
   # ダイスBOTへのアダプタ
   class DiceAdapter
-
+    include DodontoF::Utils
+    
     def initialize(dir, prefix)
       @logger = DodontoF::Logger.instance
       @dir = dir
