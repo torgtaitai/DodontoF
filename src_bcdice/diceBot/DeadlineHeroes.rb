@@ -15,7 +15,7 @@ class DeadlineHeroes < DiceBot
       'DLH\\d+([\\+\\-]\\d+)*',
       'DC(肉体|L|P|精神|S|M|環境|C|E)\\-\d+',
       'RNC[JO]',
-      'HNC(.+)?',
+      'HNC(.+)?\\*?',
     ]
   end
   
@@ -42,6 +42,8 @@ class DeadlineHeroes < DiceBot
 　（●●には "色" や "動物" などを指定）
 　例）HNC武器
 　●●を省略すると「組み合わせ例」チャートを参照します。
+　ベース表を参照する際、末尾に * をつけると、追加の表参照を自動的に解決します。
+　例）HNCベースＢ*
 
 ・リアルネームチャート
 　RNCJ リアルネームチャート（日本）
@@ -93,18 +95,26 @@ INFO_MESSAGE_TEXT
       text += (" => " + fetchResultFromRealNameChart(diceTotal, getRealNameChartByName(chartName)))
       
       return text
-    when /^HNC(.+)?/i
-      if command.upcase == "HNC" then
+    when /^HNC(.+)?\*?/i
+      chartName = $1.to_s
+      
+      isNeededAutoCompletion = false
+      if chartName =~ /[\*＊]$/ then
+        isNeededAutoCompletion = true
+        chartName.sub!(/[\*＊]$/, "")
+      end
+      
+      if chartName == "" then
         result, = doRollHeroNameTemplateChart()
         return "ヒーローネームチャート（組み合わせ例）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
       else
-        chartName = $1.to_s
-        
-        result, = doRollHeroNameBaseChart(chartName)
+        result, = doRollHeroNameBaseChart(chartName, isNeededAutoCompletion)
         return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
         
         result, = doRollHeroNameElementChart(chartName)
         return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:name]}（意味：#{result[:mean]}）" unless result.nil?
+        
+        return "不明なチャート名です: #{chartName.inspect}"
       end
     end
     
@@ -300,14 +310,25 @@ INFO_MESSAGE_TEXT
     nil
   end
   
-  def doRollHeroNameBaseChart(chartName)
+  def doRollHeroNameBaseChart(chartName, isNeededAutoCompletion = false)
     chart = getHeroNameBaseChartByName(chartName.sub("A", "Ａ").sub("B", "Ｂ").sub("C", "Ｃ"))
     
     unless chart.nil? then
       dice, = roll(1, 10)
       
       if chart.has_key? dice then
-        return {:dice => dice, :result => chart[dice]}
+        result = {:dice => dice, :result => chart[dice]}
+        
+        if result[:result] =~ /［(.+)］/ then
+          if isNeededAutoCompletion then
+            innerResult = doRollHeroNameElementChart($1.to_s)
+            result[:innerResult] = innerResult
+            result[:coreResult] = innerResult[:name]
+            result[:result] += " => 1D10[#{innerResult[:dice]}] => #{innerResult[:name]}（意味：#{innerResult[:mean]}）"
+          end
+        end
+        
+        return result
       end
     end
     
