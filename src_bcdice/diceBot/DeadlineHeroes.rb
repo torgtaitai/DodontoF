@@ -14,6 +14,7 @@ class DeadlineHeroes < DiceBot
     [
       'DLH\\d+([\\+\\-]\\d+)*',
       'DC(肉体|L|P|精神|S|M|環境|C|E)\\-\d+',
+      'RNC[JO]',
     ]
   end
   
@@ -32,6 +33,10 @@ class DeadlineHeroes < DiceBot
 　"肉体" の代わりに L か P
 　"精神" の代わりに S か M
 　"環境" の代わりに C か E でも同等の挙動をします。
+
+・リアルネームチャート
+　RNCJ リアルネームチャート（日本）
+　RNCO リアルネームチャート（海外）
 INFO_MESSAGE_TEXT
   end
   
@@ -39,15 +44,7 @@ INFO_MESSAGE_TEXT
     
     case command
     when /^DLH(\d+([\+\-]\d+)*)/i
-      text = ""
-      
-      dice10, = roll(1, 10)
-      dice10 = 0 if dice10 == 10
-      dice01, = roll(1, 10)
-      dice01 = 0 if dice01 == 10
-      
-      diceTotal = dice10*10 + dice01
-      diceTotal = 100 if diceTotal == 0
+      dice10, dice01, diceTotal = rollD100
       
       text = "1D100[#{dice10},#{dice01}]=#{'%02d' % [diceTotal]}"
       
@@ -78,9 +75,30 @@ INFO_MESSAGE_TEXT
       chartName = '環境' if command =~ /^DC(環境|C|E)/i # C は「クレジット」、 E は environmental のニュアンス
       
       return fetchDeathChart(chartName, minusScore)
+    when /^RNC([JO])/i
+      chartName = $1 == 'J' ? '日本' : '海外'
+      dice10, dice01, diceTotal, = rollD100
+      
+      text = "リアルネームチャート（#{chartName}）"
+      text += ": 1D100[#{dice10},#{dice01}]=#{diceTotal}"
+      text += (" => " + fetchResultFromRealNameChart(diceTotal, getRealNameChartByName(chartName)))
+      
+      return text
     end
     
     return nil
+  end
+  
+  def rollD100
+    dice10, = roll(1, 10)
+    dice10 = 0 if dice10 == 10
+    dice01, = roll(1, 10)
+    dice01 = 0 if dice01 == 10
+    
+    diceTotal = dice10*10 + dice01
+    diceTotal = 100 if diceTotal == 0
+    
+    return [dice10, dice01, diceTotal]
   end
   
   def isRepdigit?(diceA, diceB)
@@ -169,6 +187,81 @@ INFO_MESSAGE_TEXT
       19 => "以後、イベント終了時まで、全ての判定の成功率－30％。",
       20 => "キミの名は史上最悪の汚点として永遠に歴史に刻まれる。もはやキミを信じる仲間はなく、キミを助ける社会もない。キミは［汚名］を受けた。",
     },
+  }
+  
+  def fetchResultFromRealNameChart(keyNumber, chart)
+    columns, chartBody, = chart
+    
+    chartBody.each do |row|
+      range, elements, = row
+      next unless range.include? keyNumber
+      
+      result = "(#{range.to_s}) … "
+      
+      if elements.size > 1 then
+        e1, e2, e3, = elements
+        c1, c2, c3, = columns
+        
+        result += ([[c1, e1], [c2, e2], [c3, e3]].map do |x|
+          c, e, = x
+          e.nil? ? nil : "#{c}: #{e}"
+        end.select do |x|
+          !x.nil?
+        end.join("  ｜  "))
+      else
+        result += elements.first
+      end
+      
+      return result
+    end
+    
+    return "未定義 … ？？？"
+  end
+  
+  def getRealNameChartByName(chartName)
+    return {} unless @@realNameCharts.has_key? chartName
+    return @@realNameCharts[chartName]
+  end
+  
+  @@realNameCharts = {
+    '日本' => [['姓', '名（男）', '名（女）'], [
+      [01..06, ['アイカワ／相川、愛川', 'アキラ／晶、章', 'アン／杏']],
+      [07..12, ['アマミヤ／雨宮', 'エイジ／映司、英治', 'イノリ／祈鈴、祈']],
+      [13..18, ['イブキ／伊吹', 'カズキ／和希、一輝', 'エマ／英真、恵茉']],
+      [19..24, ['オガミ／尾上', 'ギンガ／銀河', 'カノン／花音、観音']],
+      [25..30, ['カイ／甲斐', 'ケンイチロウ／健一郎', 'サラ／沙羅']],
+      [31..36, ['サカキ／榊、阪木', 'ゴウ／豪、剛', 'シズク／雫']],
+      [37..42, ['シシド／宍戸', 'ジロー／次郎、治郎', 'チズル／千鶴、千尋']],
+      [43..48, ['タチバナ／橘、立花', 'タケシ／猛、武', 'ナオミ／直美、尚美']],
+      [49..54, ['ツブラヤ／円谷', 'ツバサ／翼', 'ハル／華、波留']],
+      [55..60, ['ハヤカワ／早川', 'テツ／鉄、哲', 'ヒカル／光']],
+      [61..66, ['ハラダ／原田', 'ヒデオ／英雄', 'ベニ／紅']],
+      [67..72, ['フジカワ／藤川', 'マサムネ／正宗、政宗', 'マチ／真知、町']],
+      [73..78, ['ホシ／星', 'ヤマト／大和', 'ミア／深空、美杏']],
+      [79..84, ['ミゾグチ／溝口', 'リュウセイ／流星', 'ユリコ／由里子']],
+      [85..90, ['ヤシダ／矢志田', 'レツ／烈、裂', 'ルイ／瑠衣、涙']],
+      [91..96, ['ユウキ／結城', 'レン／連、錬', 'レナ／玲奈']],
+      [97..100, ['名無し（何らかの理由で名前を持たない、もしくは失った）']],
+    ]],
+    '海外' => [['名（男）', '名（女）', '姓'], [
+      [01..06, ['アルバス', 'アイリス', 'アレン']],
+      [07..12, ['クリス', 'オリーブ', 'ウォーケン']],
+      [13..18, ['サミュエル', 'カーラ', 'ウルフマン']],
+      [19..24, ['シドニー', 'キルスティン', 'オルセン']],
+      [25..30, ['スパイク', 'グウェン', 'カーター']],
+      [31..36, ['ダミアン', 'サマンサ', 'キャラダイン']],
+      [37..42, ['ディック', 'ジャスティナ', 'シーゲル']],
+      [43..48, ['デンゼル', 'タバサ', 'ジョーンズ']],
+      [49..54, ['ドン', 'ナディン', 'パーカー']],
+      [55..60, ['ニコラス', 'ノエル', 'フリーマン']],
+      [61..66, ['ネビル', 'ハーリーン', 'マーフィー']],
+      [67..72, ['バリ', 'マルセラ', 'ミラー']],
+      [73..78, ['ビリー', 'ラナ', 'ムーア']],
+      [79..84, ['ブルース', 'リンジー', 'リーヴ']],
+      [85..90, ['マーヴ', 'ロザリー', 'レイノルズ']],
+      [91..96, ['ライアン', 'ワンダ', 'ワード']],
+      [97..100, ['名無し（何らかの理由で名前を持たない、もしくは失った）']],
+    ]],
   }
   
 end
