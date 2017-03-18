@@ -127,7 +127,7 @@ INFO_MESSAGE_TEXT
     
     keyText, resultText, = fetchFromChart(keyNumber, getDeathChartByName(chartName))
     
-    return "デスチャート（#{chartName}）[マイナス値=#{minusScore} + 1D10(->#{dice}) = #{keyNumber}] => #{keyText} … #{resultText}"
+    return "デスチャート（#{chartName}）[マイナス値:#{minusScore} + 1D10(->#{dice}) = #{keyNumber}] => #{keyText} … #{resultText}"
   end
   
   def fetchFromChart(keyNumber, chart)
