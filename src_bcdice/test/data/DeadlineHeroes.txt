@@ -1,0 +1,6 @@
+input:
+1D6
+output:
+DeadlineHeroes : (1D6) ＞ 2
+rand:2/6
+============================
