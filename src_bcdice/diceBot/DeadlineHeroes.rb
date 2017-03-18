@@ -94,8 +94,10 @@ INFO_MESSAGE_TEXT
     when /^HNC(.+)/i
       chartName = $1.to_s
       
-      result, = doRollHeroNameElementChart(chartName)
+      result, = doRollHeroNameBaseChart(chartName)
+      return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
       
+      result, = doRollHeroNameElementChart(chartName)
       return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:name]}（意味：#{result[:mean]}）" unless result.nil?
     end
     
@@ -277,17 +279,31 @@ INFO_MESSAGE_TEXT
     ]],
   }
   
-  def doRollHeroNameElementChart(chartName)
-    elementChart = getHeroNameElementChartByName(chartName.sub("/", "／"))
+  def doRollHeroNameBaseChart(chartName)
+    chart = getHeroNameBaseChartByName(chartName.sub("A", "Ａ").sub("B", "Ｂ").sub("C", "Ｃ"))
     
-    unless elementChart.nil? then
+    unless chart.nil? then
+      dice, = roll(1, 10)
+      
+      if chart.has_key? dice then
+        return {:dice => dice, :result => chart[dice]}
+      end
+    end
+    
+    nil
+  end
+  
+  def doRollHeroNameElementChart(chartName)
+    chart = getHeroNameElementChartByName(chartName.sub("/", "／"))
+    
+    unless chart.nil? then
       dice, = roll(1, 10)
       
       name = nil
       mean = nil
       
-      if elementChart.has_key? dice then
-        name, mean, = elementChart[dice]
+      if chart.has_key? dice then
+        name, mean, = chart[dice]
       end
       
       return nil if name.nil? || mean.nil?
@@ -298,10 +314,54 @@ INFO_MESSAGE_TEXT
     end
   end
   
+  def getHeroNameBaseChartByName(chartName)
+    return @@heroNameBaseCharts[chartName] if @@heroNameBaseCharts.has_key? chartName
+    return nil
+  end
+  
   def getHeroNameElementChartByName(chartName)
     return @@heroNameElementCharts[chartName] if @@heroNameElementCharts.has_key? chartName
     return nil
   end
+  
+  @@heroNameBaseCharts = {
+    'ベースＡ' => {
+      1 => 'ザ・',
+      2 => 'キャプテン・',
+      3 => 'ミスター／ミス／ミセス・',
+      4 => 'ドクター／プロフェッサー・',
+      5 => 'ロード／バロン／ジェネラル・',
+      6 => 'マン・オブ・',
+      7 => '［強さ］',
+      8 => '［色］',
+      9 => 'マダム／ミドル・',
+      10 => '数字（１～10）・',
+    },
+    'ベースＢ' => {
+      1 => '［神話／夢］',
+      2 => '［武器］',
+      3 => '［動物］',
+      4 => '［鳥］',
+      5 => '［虫／爬虫類］',
+      6 => '［部位］',
+      7 => '［光］',
+      8 => '［攻撃］',
+      9 => '［その他］',
+      10 => '数字（１～10）・',
+    },
+    'ベースＣ' => {
+      1 => 'マン／ウーマン',
+      2 => 'ボーイ／ガール',
+      3 => 'マスク／フード',
+      4 => 'ライダー',
+      5 => 'マスター',
+      6 => 'ファイター／ソルジャー',
+      7 => 'キング／クイーン',
+      8 => '［色］',
+      9 => 'ヒーロー／スペシャル',
+      10 => 'ヒーロー／スペシャル',
+    },
+  }
   
   @@heroNameElementCharts = {
     '部位' => {
