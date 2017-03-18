@@ -15,7 +15,7 @@ class DeadlineHeroes < DiceBot
       'DLH\\d+([\\+\\-]\\d+)*',
       'DC(肉体|L|P|精神|S|M|環境|C|E)\\-\d+',
       'RNC[JO]',
-      'HNC.+',
+      'HNC(.+)?',
     ]
   end
   
@@ -40,6 +40,8 @@ class DeadlineHeroes < DiceBot
 ・ヒーローネームチャート
 　HNC●●
 　（●●には "色" や "動物" などを指定）
+　例）HNC武器
+　●●を省略すると「組み合わせ例」チャートを参照します。
 
 ・リアルネームチャート
 　RNCJ リアルネームチャート（日本）
@@ -91,14 +93,19 @@ INFO_MESSAGE_TEXT
       text += (" => " + fetchResultFromRealNameChart(diceTotal, getRealNameChartByName(chartName)))
       
       return text
-    when /^HNC(.+)/i
-      chartName = $1.to_s
-      
-      result, = doRollHeroNameBaseChart(chartName)
-      return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
-      
-      result, = doRollHeroNameElementChart(chartName)
-      return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:name]}（意味：#{result[:mean]}）" unless result.nil?
+    when /^HNC(.+)?/i
+      if command.upcase == "HNC" then
+        result, = doRollHeroNameTemplateChart()
+        return "ヒーローネームチャート（組み合わせ例）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
+      else
+        chartName = $1.to_s
+        
+        result, = doRollHeroNameBaseChart(chartName)
+        return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
+        
+        result, = doRollHeroNameElementChart(chartName)
+        return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:name]}（意味：#{result[:mean]}）" unless result.nil?
+      end
     end
     
     return nil
@@ -279,6 +286,20 @@ INFO_MESSAGE_TEXT
     ]],
   }
   
+  def doRollHeroNameTemplateChart()
+    chart = getHeroNameTemplateChart()
+    
+    unless chart.nil? then
+      dice, = roll(1, 10)
+      
+      if chart.has_key? dice then
+        return {:dice => dice, :result => chart[dice]}
+      end
+    end
+    
+    nil
+  end
+  
   def doRollHeroNameBaseChart(chartName)
     chart = getHeroNameBaseChartByName(chartName.sub("A", "Ａ").sub("B", "Ｂ").sub("C", "Ｃ"))
     
@@ -314,6 +335,10 @@ INFO_MESSAGE_TEXT
     end
   end
   
+  def getHeroNameTemplateChart()
+    @@heroNameTemplates
+  end
+  
   def getHeroNameBaseChartByName(chartName)
     return @@heroNameBaseCharts[chartName] if @@heroNameBaseCharts.has_key? chartName
     return nil
@@ -323,6 +348,19 @@ INFO_MESSAGE_TEXT
     return @@heroNameElementCharts[chartName] if @@heroNameElementCharts.has_key? chartName
     return nil
   end
+  
+  @@heroNameTemplates = {
+    1 => 'ベースＡ＋ベースＢ',
+    2 => 'ベースＢ',
+    3 => 'ベースＢ×２回',
+    4 => 'ベースＢ＋ベースＣ',
+    5 => 'ベースＡ＋ベースＢ＋ベースＣ',
+    6 => 'ベースＡ＋ベースＢ×２回',
+    7 => 'ベースＢ×２回＋ベースＣ',
+    8 => '（ベースＢ）・オブ・（ベースＢ）',
+    9 => '（ベースＢ）・ザ・（ベースＢ）',
+    10 => '任意',
+  }
   
   @@heroNameBaseCharts = {
     'ベースＡ' => {
