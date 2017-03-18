@@ -12,12 +12,19 @@ class DeadlineHeroes < DiceBot
   
   def prefixs
     [
+      'DLH\\d+([\\+\\-]\\d+)*',
       'DC(肉体|L|P|精神|S|M|環境|C|E)\\-\d+',
     ]
   end
   
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
+・行為判定
+　DLHxxx
+　（xxx=成功率）
+　「DLH50+20-30」などのように、加減算の式で記述することもできます。
+　成功率は上限を100％、下限を０％としています。
+
 ・デスチャート
 　DC●●-X
 　（●●=チャートの指定、X=マイナス値）
@@ -30,6 +37,35 @@ INFO_MESSAGE_TEXT
   def rollDiceCommand(command)
     
     case command
+    when /^DLH(\d+([\+\-]\d+)*)/i
+      text = ""
+      
+      dice10, = roll(1, 10)
+      dice10 = 0 if dice10 == 10
+      dice01, = roll(1, 10)
+      dice01 = 0 if dice01 == 10
+      
+      diceTotal = dice10*10 + dice01
+      diceTotal = 100 if diceTotal == 0
+      
+      text = "1D100[#{dice10},#{dice01}]=#{'%02d' % [diceTotal]}"
+      
+      expressions = $1
+      successRate = sumUpExpressions(expressions)
+      successRate = 100 if successRate > 100
+      successRate = 0 if successRate < 0
+      
+      text = "行為判定(成功率:#{(expressions =~ /[\+\-]/) ? (expressions + ' = '+successRate.to_s) : successRate.to_s}) => #{text} => "
+      
+      if diceTotal <= successRate then
+        # 成功
+        text += " 出目#{'%02d' % [diceTotal]}≦#{'%02d' % [successRate]}％ => 成功"
+      else
+        # 失敗
+        text += " 出目#{'%02d' % [diceTotal]}＞#{'%02d' % [successRate]}％ => 失敗"
+      end
+      
+      return text
     when /^DC(肉体|L|P|精神|S|M|環境|C|E)\-(\d+)/i
       minusScore = $2.to_i
       
@@ -42,6 +78,24 @@ INFO_MESSAGE_TEXT
     end
     
     return nil
+  end
+  
+  def isRepdigit?(diceA, diceB)
+    return diceA == diceB
+  end
+  
+  # ex: "10+15-23" -> 10+15-23 -> 2
+  def sumUpExpressions(formula)
+    ((formula.scan(/[\+\-]?\d+/).map do |x| convertExpressionToInt(x) end).inject(0) do |sum, x| sum + x end)
+  end
+  
+  # ex1: "10" -> 10
+  # ex2: "+15" -> 15
+  # ex3: "-23" -> -23
+  def convertExpressionToInt(expressionText)
+    return expressionText.to_i if expressionText =~ /^\-?\d+/
+    return convertExpressionToInt(expressionText.slice(1..-1)) if expressionText =~ /^\+\d+$/
+    raise
   end
   
   def fetchDeathChart(chartName, minusScore)
