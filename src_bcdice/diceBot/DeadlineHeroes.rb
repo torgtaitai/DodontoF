@@ -23,6 +23,16 @@ INFO_MESSAGE_TEXT
     return nil
   end
   
+  def fetchFromChart(keyNumber, chart)
+    minKey = chart.keys.min
+    maxKey = chart.keys.max
+    
+    return ["#{minKey}以下", chart[minKey]] if keyNumber < minKey
+    return ["#{maxKey}以上", chart[maxKey]] if keyNumber > maxKey
+    return ["未定義", "？？？"] unless chart.has_key? keyNumber
+    return [keyNumber.to_s, chart[keyNumber]
+  end
+  
   @@deathCharts = {
     '肉体' => [
       10 => "何も無し。キミは奇跡的に一命を取り留めた。闘いは続く。",
