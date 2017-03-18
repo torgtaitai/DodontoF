@@ -12,7 +12,7 @@ class DeadlineHeroes < DiceBot
   
   def prefixs
     [
-      'DC(肉体|精神|環境)\\-\d+',
+      'DC(肉体|L|P|精神|S|M|環境|C|E)\\-\d+',
     ]
   end
   
@@ -21,19 +21,22 @@ class DeadlineHeroes < DiceBot
 ・デスチャート
 　DC●●-X
 　（●●=チャートの指定、X=マイナス値）
+　"肉体" の代わりに L か P
+　"精神" の代わりに S か M
+　"環境" の代わりに C か E でも同等の挙動をします。
 INFO_MESSAGE_TEXT
   end
   
   def rollDiceCommand(command)
     
     case command
-    when /^DC(肉体|精神|環境)\-(\d+)/i
+    when /^DC(肉体|L|P|精神|S|M|環境|C|E)\-(\d+)/i
       minusScore = $2.to_i
       
       chartName = nil
-      chartName = '肉体' if command =~ /^DC(肉体)/i
-      chartName = '精神' if command =~ /^DC(精神)/i
-      chartName = '環境' if command =~ /^DC(環境)/i
+      chartName = '肉体' if command =~ /^DC(肉体|L|P)/i # L は「ライフ」、 P は physical のニュアンス
+      chartName = '精神' if command =~ /^DC(精神|S|M)/i # S は「サニティ」、 M は mental のニュアンス
+      chartName = '環境' if command =~ /^DC(環境|C|E)/i # C は「クレジット」、 E は environmental のニュアンス
       
       return fetchDeathChart(chartName, minusScore)
     end
