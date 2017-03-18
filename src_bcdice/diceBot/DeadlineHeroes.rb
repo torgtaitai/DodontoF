@@ -11,30 +11,66 @@ class DeadlineHeroes < DiceBot
   end
   
   def prefixs
-    []
+    [
+      'DC(肉体|精神|環境)\\-\d+',
+    ]
   end
   
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
+・デスチャート
+　DC●●-X
+　（●●=チャートの指定、X=マイナス値）
 INFO_MESSAGE_TEXT
   end
   
   def rollDiceCommand(command)
+    
+    case command
+    when /^DC(肉体|精神|環境)\-(\d+)/i
+      minusScore = $2.to_i
+      
+      chartName = nil
+      chartName = '肉体' if command =~ /^DC(肉体)/i
+      chartName = '精神' if command =~ /^DC(精神)/i
+      chartName = '環境' if command =~ /^DC(環境)/i
+      
+      return fetchDeathChart(chartName, minusScore)
+    end
+    
     return nil
   end
   
-  def fetchFromChart(keyNumber, chart)
-    minKey = chart.keys.min
-    maxKey = chart.keys.max
+  def fetchDeathChart(chartName, minusScore)
+    dice, = roll(1, 10)
+    keyNumber = dice + minusScore
     
-    return ["#{minKey}以下", chart[minKey]] if keyNumber < minKey
-    return ["#{maxKey}以上", chart[maxKey]] if keyNumber > maxKey
-    return ["未定義", "？？？"] unless chart.has_key? keyNumber
-    return [keyNumber.to_s, chart[keyNumber]
+    keyText, resultText, = fetchFromChart(keyNumber, getDeathChartByName(chartName))
+    
+    return "デスチャート（#{chartName}）[マイナス値=#{minusScore} + 1D10(->#{dice}) = #{keyNumber}] => #{keyText} … #{resultText}"
+  end
+  
+  def fetchFromChart(keyNumber, chart)
+    unless chart.empty? then
+      # return "key number = #{keyNumber}, size of chart = #{chart.size}, class of chart = #{chart.class}]"
+      minKey = chart.keys.min
+      maxKey = chart.keys.max
+      
+      return ["#{minKey}以下", chart[minKey]] if keyNumber < minKey
+      return ["#{maxKey}以上", chart[maxKey]] if keyNumber > maxKey
+      return [keyNumber.to_s, chart[keyNumber]] if chart.has_key? keyNumber
+    end
+    
+    return ["未定義", "？？？"]
+  end
+  
+  def getDeathChartByName(chartName)
+    return {} unless @@deathCharts.has_key? chartName
+    return @@deathCharts[chartName]
   end
   
   @@deathCharts = {
-    '肉体' => [
+    '肉体' => {
       10 => "何も無し。キミは奇跡的に一命を取り留めた。闘いは続く。",
       11 => "激痛が走る。以後、イベント終了時まで、全ての判定の成功率－10％。",
       12 => "キミは［硬直］ポイント２点を得る。［硬直］ポイントを所持している間、キミは「属性：妨害」のパワーを使用することができない。各ラウンド終了時、キミは所持している［硬直］ポイントを１点減らしてもよい。",
@@ -46,8 +82,8 @@ INFO_MESSAGE_TEXT
       18 => "叙事詩的一撃!!　キミは〈生存〉－30％の判定を行なう。失敗した場合、［死亡］する。",
       19 => "以後、イベント終了時まで、全ての判定の成功率－30％。",
       20 => "神話的一撃!!　キミは宙を舞って三回転ほどした後、地面に叩きつけられる。見るも無惨な姿。肉体は原型を留めていない（キミは［死亡］した）。",
-    ],
-    '精神' => [
+    },
+    '精神' => {
       10 => "何も無し。キミは歯を食いしばってストレスに耐えた。",
       11 => "以後、イベント終了時まで、全ての判定の成功率－10％。",
       12 => "キミは［恐怖］ポイント２点を得る。［恐怖］ポイントを所持している間、キミは「属性：攻撃」のパワーを使用できない。各ラウンド終了時、キミは所持している［恐怖］ポイントを１点減らしてもよい。",
@@ -59,8 +95,8 @@ INFO_MESSAGE_TEXT
       18 => "あまりに残酷な現実。キミは〈意志〉－30％の判定を行なう。失敗した場合、［絶望］してＮＰＣとなる。",
       19 => "以後、イベント終了時まで、全ての判定の成功率－30％。",
       20 => "宇宙開闢の理に触れるも、それは人類の認識限界を超える何かであった。キミは［絶望］し、以後ＮＰＣとなる。",
-    ],
-    '環境' => [
+    },
+    '環境' => {
       10 => "何も無し。キミは黒い噂を握りつぶした。",
       11 => "以後、イベント終了時まで、全ての判定の成功率－10％。",
       12 => "ピンチ！　以後、イベント終了時まで、キミは《支援》を使用できない。",
@@ -72,7 +108,7 @@ INFO_MESSAGE_TEXT
       18 => "捏造報道!!　身の覚えのない犯罪への荷担が、スクープとして報道される。キミは〈経済〉－30％の判定を行なう。失敗した場合、キミはヒーローとしての名声を失い、［汚名］を受ける。",
       19 => "以後、イベント終了時まで、全ての判定の成功率－30％。",
       20 => "キミの名は史上最悪の汚点として永遠に歴史に刻まれる。もはやキミを信じる仲間はなく、キミを助ける社会もない。キミは［汚名］を受けた。",
-    ],
+    },
   }
   
 end
