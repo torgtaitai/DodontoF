@@ -23,6 +23,7 @@ class DeadlineHeroes < DiceBot
 　DLHxxx
 　（xxx=成功率）
 　「DLH50+20-30」などのように、加減算の式で記述することもできます。
+　ファンブルについても、自動的に判別されます。
 　成功率は上限を100％、下限を０％としています。
 
 ・デスチャート
@@ -63,6 +64,7 @@ INFO_MESSAGE_TEXT
       else
         # 失敗
         text += " 出目#{'%02d' % [diceTotal]}＞#{'%02d' % [successRate]}％ => 失敗"
+        text += " (ファンブル！ … パワーの代償２倍＆振り直し不可)" if isRepdigit?(dice10, dice01)
       end
       
       return text
