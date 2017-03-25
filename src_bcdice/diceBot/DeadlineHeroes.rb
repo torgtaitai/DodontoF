@@ -42,8 +42,8 @@ class DeadlineHeroes < DiceBot
 　（●●には "色" や "動物" などを指定）
 　例）HNC武器
 　●●を省略すると「組み合わせ例」チャートを参照します。
-　ベース表を参照する際、末尾に * をつけると、追加の表参照を自動的に解決します。
-　例）HNCベースＢ*
+　末尾に * をつけると、追加の表参照を自動的に解決します。
+　例）HNC*　HNCベースＢ*
 
 ・リアルネームチャート
 　RNCJ リアルネームチャート（日本）
@@ -105,8 +105,8 @@ INFO_MESSAGE_TEXT
       end
       
       if chartName == "" then
-        result, = doRollHeroNameTemplateChart()
-        return "ヒーローネームチャート（組み合わせ例）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
+        result, = doRollHeroNameTemplateChart(isNeededAutoCompletion)
+        return "ヒーローネームチャート#{isNeededAutoCompletion ? '' : '（組み合わせ例）'}: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
       else
         result, = doRollHeroNameBaseChart(chartName, isNeededAutoCompletion)
         return "ヒーローネームチャート（#{chartName}）: 1D10[#{result[:dice]}] => #{result[:result]}" unless result.nil?
@@ -296,18 +296,60 @@ INFO_MESSAGE_TEXT
     ]],
   }
   
-  def doRollHeroNameTemplateChart()
+  def doRollHeroNameTemplateChart(isNeededAutoCompletion = false)
     chart = getHeroNameTemplateChart()
     
     unless chart.nil? then
       dice, = roll(1, 10)
       
       if chart.has_key? dice then
-        return {:dice => dice, :result => chart[dice]}
+        result = {:dice => dice, :result => chart[dice]}
+        
+        if isNeededAutoCompletion && result[:result] != "任意" then
+          elements = findElementsFromTemplateText(result[:result])
+          
+          resolvedElements = (elements.map do |x|
+            r = doRollHeroNameBaseChart(x, isNeededAutoCompletion)
+            
+            unless r.nil? then
+              r
+            else
+              {:result => x, :coreResult => x}
+            end
+          end)
+          
+          result[:result] += ((" => ( " + (resolvedElements.map do |x|
+            (x.has_key?(:chartName) ? "#{x[:chartName]}" : "") + (x.has_key?(:dice) ? "(1D10[#{x[:dice]}]) => " : "") + "#{x.has_key?(:innerChartName) ? ('［' + x[:innerChartName] + '］ => 1D10[' + x[:innerResult][:dice].to_s + '] => ') : ''}「#{x[:coreResult]}」"
+          end).join(" ＋ ") + " )") + " => 「" + (resolvedElements.map do |x| x[:coreResult] end).join("").sub(/・{2,}/, "・").sub(/・$/, "") + "」")
+        end
+        
+        return result
       end
     end
     
     nil
+  end
+  
+  def findElementsFromTemplateText(templateText)
+    case templateText
+    when /（ベースＢ）・オブ・（ベースＢ）/ then
+      ["ベースＢ", "・オブ・", "ベースＢ"]
+    when /（ベースＢ）・ザ・（ベースＢ）/ then
+      ["ベースＢ", "・ザ・", "ベースＢ"]
+    else
+      elements = templateText.split('＋')
+      
+      elements = elements.map do |x|
+        if x =~ /×２回$/ then
+          e = x.sub(/×２回$/, "")
+          [e, e]
+        else
+          x
+        end
+      end
+      
+      elements.flatten
+    end
   end
   
   def doRollHeroNameBaseChart(chartName, isNeededAutoCompletion = false)
@@ -317,12 +359,14 @@ INFO_MESSAGE_TEXT
       dice, = roll(1, 10)
       
       if chart.has_key? dice then
-        result = {:dice => dice, :result => chart[dice]}
+        result = {:dice => dice, :result => chart[dice], :chartName => chartName}
+        result[:coreResult] = result[:result]
         
         if result[:result] =~ /［(.+)］/ then
           if isNeededAutoCompletion then
             innerResult = doRollHeroNameElementChart($1.to_s)
             result[:innerResult] = innerResult
+            result[:innerChartName] = innerResult[:chartName]
             result[:coreResult] = innerResult[:name]
             result[:result] += " => 1D10[#{innerResult[:dice]}] => #{innerResult[:name]}（意味：#{innerResult[:mean]}）"
           end
@@ -350,7 +394,7 @@ INFO_MESSAGE_TEXT
       
       return nil if name.nil? || mean.nil?
       
-      return {:dice => dice, :name => name, :mean => mean,}
+      return {:dice => dice, :name => name, :coreResult => name, :mean => mean, :chartName => chartName}
     else
       nil
     end
