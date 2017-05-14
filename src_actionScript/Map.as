@@ -316,6 +316,10 @@ package {
                     continue;
                 }
                 
+                if( ! character.getDraggable() ) {
+                    continue;
+                }
+                
                 if( character.canExtendOnPositionX() ) {
                     xCharacters.push(character);
                     continue;
@@ -327,7 +331,7 @@ package {
                 }
             }
             
-            var cardExtended:Boolean = extendSortedCharacterToViewPosition(cards,       isListed, true);
+            var cardExtended:Boolean = extendSortedCharacterToViewPosition(cards,    isListed, true);
             var xExtended:Boolean = extendSortedCharacterToViewPosition(xCharacters, isListed, true);
             var yExtended:Boolean = extendSortedCharacterToViewPosition(yCharacters, isListed, false, xCharacters);
             
