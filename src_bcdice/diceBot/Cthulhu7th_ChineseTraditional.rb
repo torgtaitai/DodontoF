@@ -26,9 +26,9 @@ class Cthulhu7th_ChineseTraditional < DiceBot
 
 ・判定　CC(x)<=（目標値）
 　x：獎勵骰/懲罰骰：Bonus/Penalty Dice (2～－2)。沒有的話可以省略。
-　致命的失敗：Fumble／失敗：Failure／通常成功：Regular success／
-　困難成功：Hard success／極限成功：Extreme success／
-　決定性的成功：Critical success　自動判定。
+　致命的失敗：Fumble／失敗：Failure／通常成功：Regular Success／
+　困難成功：Hard Success／極限成功：Extreme Success／
+　決定性的成功：Critical Success　自動判定。
 例）CC<=30　CC(2)<=50　CC(-1)<=75
 
 ・組合判定　(CBR(x,y))
@@ -42,7 +42,8 @@ class Cthulhu7th_ChineseTraditional < DiceBot
 例）FAR(25,70,98)　FAR(50,80,98,-1)
 
 ・瘋狂表
-・實時型　Short／總結型　Longer 
+　實時症狀　　RealTime／總結症狀　　 Summary
+　狂熱症（英）Manias　／恐懼症（英） Phobias
 INFO_MESSAGE_TEXT
   end
  
