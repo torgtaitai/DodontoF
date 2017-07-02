@@ -2233,7 +2233,8 @@ class DodontoFServer
     @logger.debug("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
+    diceBotInfos = DiceBotInfos.get($diceBotOrder.split("\n"),
+                                    $isDisplayAllDice)
     
     commandInfos = getGameCommandInfos
     
