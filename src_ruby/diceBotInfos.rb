@@ -61,6 +61,10 @@ INFO_MESSAGE_TEXT
     'test'
   ]
 
+  KEY_GAME_TYPE = 'gameType'.freeze
+  KEY_COMMAND = 'command'.freeze
+  KEY_PREFIXS = 'prefixs'.freeze
+
   # ダイスボットディレクトリに含まれるダイスボットを収集する
   # @return [Array<DiceBot>]
   # @see https://github.com/torgtaitai/BCDice/commit/11ee56c8dfdb00ac232c8b5cbf87a963d37df974
@@ -120,5 +124,52 @@ INFO_MESSAGE_TEXT
 
     # 指定なし→各ゲーム→基本の順で返す
     [NONE_DICE_BOT_INFO] + orderedDiceBots.map(&:info) + [BASE_DICE_BOT_INFO]
+  end
+
+  # テーブルのコマンドも加えたダイスボットの情報の一覧を取得する
+  # @param [Array<String>] orderedGameNames 順序付けられたゲーム名の配列
+  # @param [Boolean] showAllDiceBots すべてのダイスボットを表示するか
+  # @param [Array<Hash>] commandInfos テーブルのコマンドの情報の配列
+  # @return [Array<Hash>]
+  #
+  # このメソッドは、ダイスボットから返された情報を破壊しない。
+  def self.withTableCommands(orderedGameNames, showAllDiceBots, commandInfos)
+    diceBotInfos = self.get(orderedGameNames, showAllDiceBots)
+
+    # ゲームタイプ => ダイスボット情報のインデックスの対応を作る
+    diceBotInfoIndexFor = Hash[
+      diceBotInfos.each_with_index.map { |info, i| [info[KEY_GAME_TYPE], i] }
+    ]
+    allGameTypes = diceBotInfoIndexFor.keys
+
+    # ゲームタイプ => 追加するコマンドの一覧の対応を作る
+    commandsToAdd = commandInfos.reduce({}) { |acc, commandInfo|
+      gameType = commandInfo[KEY_GAME_TYPE]
+      command = commandInfo[KEY_COMMAND]
+
+      # ゲームタイプ未指定ならすべてのゲームタイプに追加する
+      targetGameTypes = gameType.empty? ? allGameTypes : [gameType]
+
+      targetGameTypes.each do |targetGameType|
+        acc[targetGameType] ||= []
+        acc[targetGameType] << command
+      end
+
+      acc
+    }
+
+    commandsToAdd.each do |gameType, commands|
+      diceBotInfoIndex = diceBotInfoIndexFor[gameType]
+      next unless diceBotInfoIndex
+
+      originalInfo = diceBotInfos[diceBotInfoIndex]
+
+      # ダイスボットから返された情報を破壊しないようにして更新する
+      diceBotInfos[diceBotInfoIndex] = originalInfo.merge({
+        KEY_PREFIXS => originalInfo[KEY_PREFIXS] + commands
+      })
+    end
+
+    diceBotInfos
   end
 end
