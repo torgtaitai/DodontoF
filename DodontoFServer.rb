@@ -1980,18 +1980,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self).getState(roomNo)
   end
   
-  def getGameName(gameType)
-    require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
-    gameInfo = diceBotInfos.find{|i| i["gameType"] == gameType}
-    
-    return '--' if( gameInfo.nil? )
-    
-    return gameInfo["name"]
-  end
-  
-  
-  
   def getAllLoginCount()
     roomNumberRange = (0 .. $saveDataMaxCount)
     loginUserCountList = getLoginUserCountList( roomNumberRange )

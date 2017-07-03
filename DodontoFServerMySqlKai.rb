@@ -2171,18 +2171,6 @@ SQL_TEXT
     return result
   end
   
-  
-  def getGameName(gameType)
-    require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
-    gameInfo = diceBotInfos.find{|i| i["gameType"] == gameType}
-    
-    return '--' if( gameInfo.nil? )
-    
-    return gameInfo["name"]
-  end
-  
-  
   def getAllLoginCount()
     total = 0
     userList = []
