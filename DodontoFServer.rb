@@ -1980,18 +1980,6 @@ class DodontoFServer
     DodontoF::PlayRoom.new(self).getState(roomNo)
   end
   
-  def getGameName(gameType)
-    require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
-    gameInfo = diceBotInfos.find{|i| i["gameType"] == gameType}
-    
-    return '--' if( gameInfo.nil? )
-    
-    return gameInfo["name"]
-  end
-  
-  
-  
   def getAllLoginCount()
     roomNumberRange = (0 .. $saveDataMaxCount)
     loginUserCountList = getLoginUserCountList( roomNumberRange )
@@ -2229,61 +2217,24 @@ class DodontoFServer
     return loginMessage
   end
   
-  def getDiceBotInfos()
+  # ダイスボットの情報を返す
+  # @return [Array<Hash>]
+  #
+  # 部屋番号が指定されていた場合、テーブルのコマンドも含める。
+  def getDiceBotInfos
     @logger.debug("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
-    
-    commandInfos = getGameCommandInfos
-    
-    commandInfos.each do |commandInfo|
-      @logger.debug(commandInfo, "commandInfos.each commandInfos")
-      setDiceBotPrefix(diceBotInfos, commandInfo)
-    end
-    
-    # @logger.debug(diceBotInfos, "getDiceBotInfos diceBotInfos")
-    
-    return diceBotInfos
-  end
-  
-  def setDiceBotPrefix(diceBotInfos, commandInfo)
-    gameType = commandInfo["gameType"]
-    
-    if( gameType.empty? )
-      setDiceBotPrefixToAll(diceBotInfos, commandInfo)
-      return
-    end
-    
-    botInfo = diceBotInfos.find{|i| i["gameType"] == gameType}
-    setDiceBotPrefixToOne(botInfo, commandInfo)
-  end
-  
-  def setDiceBotPrefixToAll(diceBotInfos, commandInfo)
-    diceBotInfos.each do |botInfo|
-      setDiceBotPrefixToOne(botInfo, commandInfo)
-    end
-  end
-  
-  def setDiceBotPrefixToOne(botInfo, commandInfo)
-    @logger.debug(botInfo, "botInfo")
-    return if(botInfo.nil?)
-    
-    prefixs = botInfo["prefixs"]
-    return if( prefixs.nil? )
-    
-    prefixs << commandInfo["command"]
-  end
-  
-  def getGameCommandInfos
-    @logger.debug('getGameCommandInfos Begin')
 
-    if( @saveDirInfo.getSaveDataDirIndex == -1 )
-      @logger.debug('getGameCommandInfos room is -1, so END')
-      return []
-    end
+    orderedGameNames = $diceBotOrder.split("\n")
 
-    @dice_adapter.getGameCommandInfos
+    if @saveDirInfo.getSaveDataDirIndex != -1
+      DiceBotInfos.withTableCommands(orderedGameNames,
+                                     $isDisplayAllDice,
+                                     @dice_adapter.getGameCommandInfos)
+    else
+      DiceBotInfos.get(orderedGameNames, $isDisplayAllDice)
+    end
   end
 
   def createDir(playRoomIndex)

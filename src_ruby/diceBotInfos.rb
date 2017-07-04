@@ -2,10 +2,18 @@
 
 require 'dodontof/logger'
 
+# ダイスボットの情報の一覧の取得処理
 class DiceBotInfos
-  
-  def initialize
-    @baseDiceBot = {
+  # ダイスボット指定なしの場合の情報
+  NONE_DICE_BOT_INFO = {
+    'name' => 'ダイスボット(指定無し)',
+    'gameType' => 'DiceBot',
+    'prefixs' => [],
+    'info' => "ゲーム固有の判定がある場合はこの場所に記載されます。\n"
+  }
+
+  # 基本的なダイスボットの情報
+  BASE_DICE_BOT_INFO = {
     'name' => 'BaseDiceBot',
     'gameType' => 'BaseDiceBot',
     'prefixs' => [
@@ -20,7 +28,7 @@ class DiceBotInfos
       '\d+[\+\-\*\/]', #a+xDn のような加減算用
       'D66', #D66ダイス
       'make', #ランダムジェネレータ用
-      'choice\[', #ランダム選択　(choice[A, B, C])
+      'choice\[' #ランダム選択　(choice[A, B, C])
     ],
     'info' => <<INFO_MESSAGE_TEXT
 【ダイスボット】チャットにダイス用の文字を入力するとダイスロールが可能
@@ -41,77 +49,127 @@ class DiceBotInfos
 　3d6/2 ： ダイス出目を割り算（切り捨て）。切り上げは /2U、四捨五入は /2R。
 　D66 ： D66ダイス。順序はゲームに依存。D66N：そのまま、D66S：昇順。
 INFO_MESSAGE_TEXT
-    }
-    
-    noneDiceBot = {
-    'name' => 'ダイスボット(指定無し)',
-    'gameType' => 'DiceBot',
-    'prefixs' => [
-    ],
-    'info' => <<INFO_MESSAGE_TEXT
-ゲーム固有の判定がある場合はこの場所に記載されます。
-INFO_MESSAGE_TEXT
-    }
-    
-    @infos = [noneDiceBot,
-             ]
+  }
 
-    @logger = DodontoF::Logger.instance
+  # 収集時に無視するボット名
+  BOT_NAMES_TO_IGNORE = [
+    'DiceBot',
+    'DiceBotLoader',
+    'DiceBotLoaderList',
+    'baseBot',
+    '_Template',
+    'test'
+  ]
+
+  KEY_GAME_TYPE = 'gameType'.freeze
+  KEY_COMMAND = 'command'.freeze
+  KEY_PREFIXS = 'prefixs'.freeze
+
+  # ダイスボットディレクトリに含まれるダイスボットを収集する
+  # @return [Array<DiceBot>]
+  # @see https://github.com/torgtaitai/BCDice/commit/11ee56c8dfdb00ac232c8b5cbf87a963d37df974
+  # @todo BCDiceをコミット11ee56c以降に更新すると、BCDice側のDiceBotLoader.collectDiceBotsで行える
+  #
+  # BCDiceからのバックポート。
+  def self.collectDiceBots
+    diceBotDir = File.expand_path('../src_bcdice/diceBot', File.dirname(__FILE__))
+
+    require("#{diceBotDir}/DiceBot")
+
+    botFiles = Dir.glob("#{diceBotDir}/*.rb")
+    botNames =
+      botFiles.map { |botFile| File.basename(botFile, '.rb').untaint }
+    validBotNames =
+      # 特別な名前のものを除外する
+      (botNames - BOT_NAMES_TO_IGNORE).
+      # 正しいクラス名になるものだけ選ぶ
+      select { |botName| /\A[A-Z]/ === botName }
+
+    validBotNames.map { |botName|
+      require("#{diceBotDir}/#{botName}")
+      Object.const_get(botName).new
+    }
   end
-  
-  
-  def getInfos
-    
-    @orders = getDiceBotOrder
-    
-    addAnotherDiceBotToInfos()
-    sortInfos()
-    deleteInfos() unless( $isDisplayAllDice )
-    
-    @infos << @baseDiceBot
-    
-    return @infos
+
+  # ダイスボットの情報の一覧を取得する
+  # @param [Array<String>] orderedGameNames 順序付けられたゲーム名の配列
+  # @param [Boolean] showAllDiceBots すべてのダイスボットを表示するか
+  # @return [Array<Hash>]
+  def self.get(orderedGameNames, showAllDiceBots)
+    diceBots = self.collectDiceBots
+
+    # ゲーム名 => ダイスボットの対応を作る
+    diceBotFor = Hash[
+      diceBots.map { |diceBot| [diceBot.gameName, diceBot] }
+    ]
+    toDiceBot = lambda { |gameName| diceBotFor[gameName] }
+
+    orderedEnabledDiceBots = orderedGameNames.
+      map(&toDiceBot).
+      # ゲーム名が誤記されていた場合nilになるので除く
+      compact
+
+    orderedDiceBots =
+      if showAllDiceBots
+        disabledGameNames = diceBotFor.keys - orderedGameNames
+        orderedDisabledDiceBots = disabledGameNames.
+          sort.
+          map(&toDiceBot)
+
+        # 一覧に記載されていたゲーム→記載されていなかったゲームの順
+        orderedEnabledDiceBots + orderedDisabledDiceBots
+      else
+        orderedEnabledDiceBots
+      end
+
+    # 指定なし→各ゲーム→基本の順で返す
+    [NONE_DICE_BOT_INFO] + orderedDiceBots.map(&:info) + [BASE_DICE_BOT_INFO]
   end
-  
-  def deleteInfos
-    @logger.debug(@orders, '@orders')
-    
-    @infos.delete_if do |info|
-      not @orders.include?(info['name'])
+
+  # テーブルのコマンドも加えたダイスボットの情報の一覧を取得する
+  # @param [Array<String>] orderedGameNames 順序付けられたゲーム名の配列
+  # @param [Boolean] showAllDiceBots すべてのダイスボットを表示するか
+  # @param [Array<Hash>] commandInfos テーブルのコマンドの情報の配列
+  # @return [Array<Hash>]
+  #
+  # このメソッドは、ダイスボットから返された情報を破壊しない。
+  def self.withTableCommands(orderedGameNames, showAllDiceBots, commandInfos)
+    diceBotInfos = self.get(orderedGameNames, showAllDiceBots)
+
+    # ゲームタイプ => ダイスボット情報のインデックスの対応を作る
+    diceBotInfoIndexFor = Hash[
+      diceBotInfos.each_with_index.map { |info, i| [info[KEY_GAME_TYPE], i] }
+    ]
+    allGameTypes = diceBotInfoIndexFor.keys
+
+    # ゲームタイプ => 追加するコマンドの一覧の対応を作る
+    commandsToAdd = commandInfos.reduce({}) { |acc, commandInfo|
+      gameType = commandInfo[KEY_GAME_TYPE]
+      command = commandInfo[KEY_COMMAND]
+
+      # ゲームタイプ未指定ならすべてのゲームタイプに追加する
+      targetGameTypes = gameType.empty? ? allGameTypes : [gameType]
+
+      targetGameTypes.each do |targetGameType|
+        acc[targetGameType] ||= []
+        acc[targetGameType] << command
+      end
+
+      acc
+    }
+
+    commandsToAdd.each do |gameType, commands|
+      diceBotInfoIndex = diceBotInfoIndexFor[gameType]
+      next unless diceBotInfoIndex
+
+      originalInfo = diceBotInfos[diceBotInfoIndex]
+
+      # ダイスボットから返された情報を破壊しないようにして更新する
+      diceBotInfos[diceBotInfoIndex] = originalInfo.merge({
+        KEY_PREFIXS => originalInfo[KEY_PREFIXS] + commands
+      })
     end
+
+    diceBotInfos
   end
-  
-  def sortInfos
-    @infos = @infos.sort_by do |info|
-      index = @orders.index(info['name'])
-      index ||= 999
-      index.to_i
-    end
-  end
-  
-  def getDiceBotOrder
-    orders = $diceBotOrder.split("\n")
-    return orders
-  end
-  
-  
-  def addAnotherDiceBotToInfos
-    ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-    
-    require 'diceBot/DiceBot'
-    
-    botFiles = Dir.glob("src_bcdice/diceBot/*.rb")
-    
-    botNames = botFiles.collect{|i| File.basename(i, ".rb").untaint}
-    botNames.delete_if{|i| ignoreBotNames.include?(i) }
-    botNames.delete_if{|i| /^_/ === i }
-    
-    botNames.each do |botName|
-      @logger.debug(botName, 'load unknown dice bot botName')
-      require "diceBot/#{botName}"
-      diceBot = Module.const_get(botName).new
-      @infos << diceBot.info
-    end
-  end
-  
 end
