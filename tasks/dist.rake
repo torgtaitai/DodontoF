@@ -13,7 +13,7 @@ if RUBY_VERSION >= '1.9.2'
       dodontof_server_rb = "#{dodontof_root}/DodontoFServer.rb"
 
       version = catch(:version_found) do
-        File.open(dodontof_server_rb) do |f|
+        File.open(dodontof_server_rb, 'r:UTF-8') do |f|
           version_pattern = /\A\s*VERSION\s*=\s*(?:'([.\d]+)'|"([.\d]+)")/
           while line = f.gets
             m = line.match(version_pattern)
@@ -32,7 +32,7 @@ if RUBY_VERSION >= '1.9.2'
     # @return [String]
     def current_commit_id(dodontof_root)
       current_commit_id = Dir.chdir(dodontof_root) do
-        `git log -1 --format='%h'`
+        `git log -1 --format=%h`
       end
 
       if !current_commit_id || current_commit_id.empty?
@@ -97,6 +97,7 @@ if RUBY_VERSION >= '1.9.2'
       zip_filename = nil
       loop do
         print('どちらのファイル名で保存しますか? [V/c] > ')
+        $stdout.flush
 
         line = $stdin.gets
         abort unless line
@@ -111,6 +112,7 @@ if RUBY_VERSION >= '1.9.2'
         end
       end
 
+      puts
       rm_rf(zip_filename)
 
       zf_dodontof = ZipFileGenerator.new('DodontoF_WebSet', zip_filename)
