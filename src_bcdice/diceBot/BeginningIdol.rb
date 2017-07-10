@@ -1,6 +1,95 @@
 # -*- coding: utf-8 -*-
 
 class BeginningIdol < DiceBot
+  setPrefixes([
+    '[1-7]*PD\d+(?:[\+\-]\d+)?',
+    'HW',
+    'BWT',
+    'LWT',
+    'TWT',
+    'CWT',
+    'LO\d{0,2}',
+    'SU',
+    'WI',
+    'NA',
+    'GA',
+    'BA',
+    'WT',
+    'VA',
+    'MU',
+    'DR',
+    'VI',
+    'SP',
+    'CHR',
+    'PAR',
+    'SW',
+    'AN',
+    'MOV',
+    'FA',
+    'RE',
+    'HA',
+    'AT[1-6]?',
+    'LUR',
+    'SUR',
+    'WUR',
+    'NUR',
+    'GUR',
+    'BUR',
+    'BT\d*',
+    'SGT',
+    'RS',
+    'SH',
+    'MO',
+    'SEA',
+    'SPA',
+    'TN',
+    'CG',
+    'GG',
+    'FL',
+    'LN',
+    'MS',
+    'MSE',
+    'ST',
+    'FST',
+    'CHO',
+    'SCH',
+    'WCH',
+    'NCH',
+    'GCH',
+    'PCH',
+    'IT\d*',
+    'ACT',
+    'ACB',
+    'ACE',
+    'DT',
+    'RC',
+    'FC',
+    'CBT',
+    'RCB',
+    'HBT',
+    'RHB',
+    'RU',
+    '\d{2}C',
+    'BU',
+    '\d+S?A[1-6]*(?:[\+\-]\d+)?',
+    'SIP',
+    'BVT',
+    'LVT',
+    'TVT',
+    'CVT',
+    'BST',
+    'LST',
+    'TST',
+    'CST',
+    'BPT',
+    'LPT',
+    'TPT',
+    'CPT',
+    'BIT',
+    'LIT',
+    'TIT',
+    'CIT'
+  ])
 
   def initialize
     super
@@ -17,95 +106,6 @@ class BeginningIdol < DiceBot
     "BeginningIdol"
   end
 
-  def prefixs
-    [
-      '[1-7]*PD\d+(?:[\+\-]\d+)?',
-      'HW',
-      'BWT',
-      'LWT',
-      'TWT',
-      'CWT',
-      'LO\d{0,2}',
-      'SU',
-      'WI',
-      'NA',
-      'GA',
-      'BA',
-      'WT',
-      'VA',
-      'MU',
-      'DR',
-      'VI',
-      'SP',
-      'CHR',
-      'PAR',
-      'SW',
-      'AN',
-      'MOV',
-      'FA',
-      'HA',
-      'AT[1-6]?',
-      'LUR',
-      'SUR',
-      'WUR',
-      'NUR',
-      'GUR',
-      'BUR',
-      'BT\d*',
-      'SGT',
-      'RS',
-      'SH',
-      'MO',
-      'SEA',
-      'SPA',
-      'TN',
-      'CG',
-      'GG',
-      'FL',
-      'LN',
-      'MS',
-      'MSE',
-      'ST',
-      'FST',
-      'CHO',
-      'SCH',
-      'WCH',
-      'NCH',
-      'IT\d*',
-      'ACT',
-      'ACB',
-      'ACE',
-      'DT',
-      'RC',
-      'FC',
-      'CBT',
-      'RCB',
-      'HBT',
-      'RHB',
-      'RU',
-      '\d{2}C',
-      'BU',
-      '\d+S?A[1-6]*(?:[\+\-]\d+)?',
-      'SIP',
-      'BVT',
-      'LVT',
-      'TVT',
-      'CVT',
-      'BST',
-      'LST',
-      'TST',
-      'CST',
-      'BPT',
-      'LPT',
-      'TPT',
-      'CPT',
-      'BIT',
-      'LIT',
-      'TIT',
-      'CIT',
-    ]
-  end
-  
   def getHelpMessage
     return <<INFO_MESSAGE_TEXT
 ・パフォーマンス　[r]PDn[+m/-m](r：場に残った出目　n：振る数　m：修正値)
@@ -115,6 +115,7 @@ class BeginningIdol < DiceBot
 ・仕事表　WT　VA：バラエティ　MU：音楽関係　DR：ドラマ関係
 　VI：ビジュアル関係　SP：スポーツ　CHR：クリスマス　PAR：パートナー関係
 　SW：お菓子　AN：動物　MOV：映画　FA：ファンタジー
+・ランダムイベント　RE
 ・ハプニング表　HA
 ・特技リスト　AT[n](n：分野No.)
 ・アイドルスキル修得表　SGT：チャレンジガールズ　RS：ロードトゥプリンス
@@ -129,6 +130,7 @@ class BeginningIdol < DiceBot
 ・合宿ルール　散策表【SH：ショッピングモール　MO：山　SEA：海　SPA：温泉街】
 　TN：夜語りシチュエーション表　成長表【CG：コモン　GG：ゴールド】
 ・サビ表　CHO　SCH：情熱の夏　WCH：ぬくもりの冬　NCH：大自然
+　GCH：女性向け　PCH：力強い
 ・キャラ空白表　CBT：チャレンジガールズ　RCB：ロードトゥプリンス
 ・趣味空白表　HBT：チャレンジガールズ　RHB：ロードトゥプリンス
 ・マスコット暴走表　RU
@@ -146,13 +148,11 @@ class BeginningIdol < DiceBot
 []内は省略可　D66入れ替えあり
 INFO_MESSAGE_TEXT
   end
-  
-  
+
   def check_2D6(total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max)
     check_nD6(total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max)
   end
-  
-  
+
   def check_nD6(total_n, dice_n, signOfInequality, diff, dice_cnt, dice_max, n1, n_max)
     return '' unless signOfInequality == ">="
     if(dice_n <= 2)
@@ -165,20 +165,19 @@ INFO_MESSAGE_TEXT
       return " ＞ 失敗"
     end
   end
-  
-  
+
   def rollDiceCommand(command)
-    
+
     case command.upcase
     when /^([1-7]*)PD(\d+)([\+\-]\d+)?$/
       counts = $2.to_i
       return nil if counts <= 0
-      
+
       residual = $1
       adjust = $3.to_i
-      
+
       return rollPerformance(counts, residual, adjust)
-      
+
     when 'HW'
       title = '向かい風シーン表'
       table = [
@@ -190,7 +189,7 @@ INFO_MESSAGE_TEXT
         "屋内の電気がトラブルで点灯しないようだ。暗い世界は、気分まで滅入ってしまう。",
       ]
       return textFrom1D6Table(title, table)
-      
+
     when 'BWT'
       title = '大手芸能プロダクション仕事表'
       table = [
@@ -786,6 +785,97 @@ INFO_MESSAGE_TEXT
       ]
       return textFromD66Table(title, table)
 
+    when 'RE'
+      title = 'ランダムイベント'
+
+      number, = roll(1, 6)
+      if number % 2 == 0
+        name = 'オンイベント表'
+        table = [
+          [11, "雨女は誰？", 96],
+          [12, "千客万来☆アイドル喫茶", 97],
+          [13, "フチドル", 98],
+          [14, "生放送は踊る", 99],
+          [15, "貸し切りプールの誘惑", 100],
+          [16, "ケーオンストリート！", 101],
+          [21, "アイドル×アニメ×ドリーマー！", 102],
+          [22, "一日警察署長、緊急出動!?", 103],
+          [23, "アイドルフィン！", 104],
+          [24, "「カラオケ採点ガチバトル☆」", 105],
+          [25, "「大正乙女ろまんてぃっく」", 106],
+          [26, "鳩時計ラジオ", 107],
+          [31, "「ガチ学院」ＣＭ", 108],
+          [32, "「カラフルアイスクリーム」モデル", 109],
+          [33, "忙しすぎる毎日", 110],
+          [34, "悩める新人デザイナー", 112],
+          [35, "「スクール☆ライフ」", 113],
+          [36, "魔法のように", 114],
+          [41, "食レポとその後", 115],
+          [42, "ソロライブ！", 116],
+          [43, "お昼の放送", 117],
+          [44, "文化祭！", 118],
+          [45, "商店街を救え！", 120],
+          [46, "二つの仕事", 121],
+          [51, "温泉にて", 122],
+          [52, "アイドル探偵と豪華客船", 124],
+          [53, "のうぎょう", 125],
+          [54, "コント撮影", 127],
+          [55, "アイドルＶＳサメ", 128],
+          [56, "駅前で歌う", 130],
+          [61, "街の清掃ボランティア", 131],
+          [62, "ミニユニット活動", 132],
+          [63, "カブトムシ狩り", 134],
+          [64, "ポスター作り", 135],
+          [65, "メロディ", 136],
+          [66, "さいてい新聞部の取材", 138],
+        ]
+      else
+        name = 'オフイベント表'
+        table = [
+          [11, "アイドル、未知との遭遇", 139],
+          [12, "神様おねがい！", 140],
+          [13, "プチ合宿の罠!?", 141],
+          [14, "どこかで会ったような……", 142],
+          [15, "アイデンティティがっ！", 143],
+          [16, "ホリダシ×オオソウジ", 144],
+          [21, "エンドレス!?　握手会", 146],
+          [22, "不安な路線変更", 147],
+          [23, "全力ねこレース", 148],
+          [24, "恐怖の再テスト！", 149],
+          [25, "たくさんのファンレター", 150],
+          [26, "夕暮れの帰り道。", 152],
+          [31, "どきどき♪　調理実習", 153],
+          [32, "超アイドル衣装？", 154],
+          [33, "おもいでの修学旅行", 156],
+          [34, "アルバイト！", 158],
+          [35, "ドライブしよう！", 159],
+          [36, "ファミレス攻防戦", 160],
+          [41, "総合練習", 162],
+          [42, "歌声はお腹から", 164],
+          [43, "メイクレッスン基本から", 165],
+          [44, "怪我", 166],
+          [45, "エゴサ", 168],
+          [46, "喫茶店でひと息", 169],
+          [51, "天体観測ツアー", 170],
+          [52, "謎のコーチ", 172],
+          [53, "屋上にて", 174],
+          [54, "クラスメイトより", 176],
+          [55, "最強アイドル伝", 177],
+          [56, "イメチェンしよう", 178],
+          [61, "郊外ショッピング施設", 179],
+          [62, "お見舞い", 180],
+          [63, "ライブを観よう！", 181],
+          [64, "頂を目指す", 182],
+          [65, "重いコンダラ", 183],
+          [66, "アイドル改造計画", 184],
+        ]
+      end
+
+      isSwap = false
+      dice = getD66(isSwap)
+      outcome, text, page = table.assoc(dice)
+      return "#{title} ＞ (1D6) ＞ #{number}\n#{name} ＞ [#{outcome}] ＞ #{text}（『ビギニングロード』#{page}ページ）"
+
     when 'HA'
       title = 'ハプニング表'
       table = [
@@ -1292,7 +1382,7 @@ INFO_MESSAGE_TEXT
         text, number = get_table_by_1d6(articleTable)
         nameParts.push([articleIndex, articleTitle, text, number])
       end
-      
+
       setArrayFromD66Table(nameParts, name, describeTitle, describeTable)
       setArrayFromD66Table(nameParts, name, sceneTitle, sceneTable)
       setArrayFromD66Table(nameParts, name, materialTitle, materialTable)
@@ -1406,6 +1496,60 @@ INFO_MESSAGE_TEXT
       ]
       return textFrom1D6Table(title, table)
 
+    when 'GCH'
+      title = '女性向けサビ表'
+      table = [
+        [11, "女の子だから／キュンキュンしてる\nPC全員の【メンタル】が1D6点上昇する。"],
+        [12, "見つめていたい／心の声\nこの演目の間、【パフォーマンス値】が2点上昇する。"],
+        [13, "私の気持ち／あなたへ届け\nこの演目の間、【協調値】が1点上昇する。"],
+        [14, "繋がりたい／夜を過ごしたい\nPC全員の【メンタル】が1D6点上昇する。"],
+        [15, "手と手を繋いで／みんなと一緒に\nこの演目の間、シンフォニーをするたびに、【メンタル】が5点上昇する。"],
+        [16, "ファッションで／おしゃれして\n衣装の効果が1点上昇する。"],
+        [22, "アイドルだけど／アイドルとして\nこの演目の間、意地判定の達成値が2点上昇する。"],
+        [23, "愛してる／好きです\nこの演目の間、【協調値】が1点上昇する。"],
+        [24, "恋したい／恋してる\nこの演目の間、【協調値】が1点上昇する。"],
+        [25, "LOVE／「大好き」\nこの演目の間、【協調値】が1点上昇する。"],
+        [26, "お母さんには秘密／ヴェールでかくして\nこの演目の間、【メンタル】が減少しない。"],
+        [33, "愛に溺れて／沈んでいく\nこの演目の間、シンフォニーをするたびに、【パフォーマンス値】が2点上昇する。"],
+        [34, "潰してほしい／壊して\nこの演目の間、判定に失敗したPCは【獲得ファン人数】が2D6点上昇する。"],
+        [35, "どんなに遠くに／離れても\nこの演目の間、すべてのギャップは埋まっているものとして扱う。"],
+        [36, "想いを届けて／胸に秘めた鼓動\nPC全員の【メンタル】が1D6点上昇する。"],
+        [44, "私のことが好きなら／一緒に死にたい\nこの演目の間、【メンタル】が0になっても、行動不能にならない。"],
+        [45, "（台詞）／（ピアノソロ）\nPC全員の【メンタル】が1D6点上昇する。"],
+        [46, "せーのっ／いくよー！\nこの演目の間、PCはパフォーマンスのサイコロすべてを一度だけ振り直すことができる。"],
+        [55, "あの日みたいに／あの子のこと忘れて\nこの演目の間、判定に失敗しても、判定のサイコロを一度だけ振り直すことができる。"],
+        [56, "歌を届けよう／声に想いを\nこの演目の間、【パフォーマンス値】が2点上昇する。"],
+        [66, "（ユニット名）／（PCの名前）\n好きな能力値が1点上昇する。"],
+      ]
+      return textFromD66Table(title, table)
+
+    when 'PCH'
+      title = '力強いサビ表'
+      table = [
+        [11, "バトル／戦いに臨む\nこの演目の間、判定の達成値が2点上昇する。"],
+        [12, "宇宙に／銀河が\nこの演目の間、パフォーマンスのサイコロは取り除かれない。"],
+        [13, "空へ／天に向けて\nこの演目の判定に成功したPCは、【メンタル】が10点上昇する。"],
+        [14, "ぶち壊すぜ／むしゃくしゃして\nこの演目の間、一芸突破を行ったときの目標値が4になる。"],
+        [15, "バイクに乗って／ヘリで飛ばして\nPC全員は、アイテム「キャラアイテム」を1個獲得する。"],
+        [16, "アタック／殴りかかる\nこの演目の間、一芸突破を行ったときの判定の達成値が3点上昇する。"],
+        [22, "情熱／熱情\nこの演目の間、スペシャル値が1点減少。"],
+        [23, "走り切るのさ／星の輝き\nこの演目の間、PCの【メンタル】が減少しない。"],
+        [24, "心赴くまま／願いを込めて\nPC全員の【メンタル】が［自分からの【理解度】の合計］点上昇する。"],
+        [25, "高みへ／打ち破る\nこの演目の間、スペシャル値が1点減少。"],
+        [26, "イメージを／覚悟を\nこの演目の間、スペシャル値が1点減少。"],
+        [33, "弱気な自分に／暗闇裂く\nPC全員は、アイテム「ドリーミングシューズ」を1個獲得する。"],
+        [34, "衝動（リビドー）／強敵（ライバル）\nこの演目の間、スペシャル値が1点減少。"],
+        [35, "覚悟を決めて／クライマックス\nこの演目が最終演目の場合、判定の達成値が4点上昇する。"],
+        [36, "最高の力を／最弱脱ぎ捨て\nこの演目の間、スペシャル値が1点減少。"],
+        [44, "自我（エゴ）／瞬間（とき）\nこの演目の間、判定に失敗しても、判定のサイコロを一度だけ振り直すことができる。"],
+        [45, "（台詞）／（ギターソロ）\nこの演目の間、スペシャル値が1点減少。"],
+        [46, "Let's／try\nこの演目の間、判定の達成値が1点上昇する。"],
+        [55, "起死回生／負けたりしない\nPC全員の【メンタル】が1D6点上昇する。"],
+        [56, "共鳴していく／想いを束ねて\nこの演目の間、シンフォニーするたびに、【パフォーマンス値】が2点上昇する。"],
+        [66, "運命（デスティニー）／正義（ジャスティス）\nこの演目の間、スペシャル値が1点減少。"],
+      ]
+      return textFromD66Table(title, table)
+
     when /^IT(\d+)?$/
       counts = ( $1 || 1 ).to_i
       return getItem(counts)
@@ -1421,7 +1565,7 @@ INFO_MESSAGE_TEXT
         "その他アクセサリー表を使用する。",
       ]
       text = textFrom1D6Table(title, table)
-      
+
       title = '頭アクセサリー表'
       if text.include?(title)
         table = [
@@ -1449,7 +1593,7 @@ INFO_MESSAGE_TEXT
         ]
         return text + "\n" + textFromD66Table(title, table)
       end
-      
+
       title = '帽子アクセサリー表'
       if text.include?(title)
         table = [
@@ -1477,7 +1621,7 @@ INFO_MESSAGE_TEXT
         ]
         return text + "\n" + textFromD66Table(title, table)
       end
-      
+
       title = '胴アクセサリー表'
       if text.include?(title)
         table = [
@@ -1505,7 +1649,7 @@ INFO_MESSAGE_TEXT
         ]
         return text + "\n" + textFromD66Table(title, table)
       end
-      
+
       title = '腕アクセサリー表'
       if text.include?(title)
         table = [
@@ -1533,7 +1677,7 @@ INFO_MESSAGE_TEXT
         ]
         return text + "\n" + textFromD66Table(title, table)
       end
-      
+
       title = '足アクセサリー表'
       if text.include?(title)
         table = [
@@ -1561,7 +1705,7 @@ INFO_MESSAGE_TEXT
         ]
         return text + "\n" + textFromD66Table(title, table)
       end
-      
+
       title = 'その他アクセサリー表'
       if text.include?(title)
         table = [
@@ -1808,22 +1952,22 @@ INFO_MESSAGE_TEXT
     when /^(\d+)(S?)A([1-6]*)([\+\-]\d+)?$/
       title = '攻撃'
       counts = $1.to_i
-      return nil if counts <= 0 
-      
+      return nil if counts <= 0
+
       sure = (not $2.empty?)
       remove = $3
       adjust = $4
       adjust ||= ''
-      
+
       result = roll(counts, 6, 1)
       dice = result[1].split(",") - remove.split("")
-      
+
       text = "#{title} ＞ [" + result[1] + "]#{adjust} ＞ "
-      
+
       unless dice.count == counts or dice.empty?
         text += '[' + dice.join(",") + "]#{adjust} ＞ "
       end
-      
+
       if sure or (dice.count == dice.uniq.count)
         total = adjust.to_i
         total += dice.map(&:to_i).inject(:+) unless dice.empty?
@@ -2038,20 +2182,20 @@ INFO_MESSAGE_TEXT
       ]
       return textFrom1D6Table(title, table)
     end
-    
+
     return nil
   end
-  
+
   def rollPerformance(counts, residual, adjust)
     title = 'パフォーマンス'
-    
+
     string = ''
     string += '+' if adjust > 0
     string += "#{adjust}" unless adjust == 0
-    
+
     result = roll(counts, 6, 1)
     diceAll = result[1].delete(",") + residual
-    
+
     total = 0
     diceUse = []
     for i in 1..7
@@ -2060,21 +2204,21 @@ INFO_MESSAGE_TEXT
         diceUse.push(i)
       end
     end
-    
+
     text = " ＞ [" + result[1] + ']'
-    
+
     if residual.empty?
       text = "#{title}#{text}"
     else
       text = "シンフォニー#{text}"
     end
-    
+
     unless residual.empty?
       text += ',[' + residual.split("").sort.join(",") + ']'
     end
-    
+
     text += "#{string} ＞ "
-    
+
     if total == 0
       if residual.empty?
         total = 10 + adjust
@@ -2096,27 +2240,26 @@ INFO_MESSAGE_TEXT
       total += adjust
       text += "#{total}"
     end
-    
+
     return text
   end
-  
-  
+
   def textFromD66Table(title, table, chance = '')
     isSwap = true
     dice = getD66(isSwap)
     number, text, skill = table.assoc(dice)
-    
+
     text, skill = checkChance(text, skill, chance)
     return "#{title} ＞ [#{number}] ＞ " + replaceBadStatus(text) + getSkillText(skill)
   end
-  
+
   def checkChance(text, skill, chance)
     return text, skill if chance.empty?
     return text, skill unless /チャンスが(\d{1,2})以下ならオフ。/ === text
-    
+
     target = $1.to_i
     matchedText = $&
-    
+
     if target >= chance.to_i
       text = "オフ"
       skill = ''
@@ -2124,14 +2267,13 @@ INFO_MESSAGE_TEXT
       text.slice!( matchedText)
       text.slice!(/\n$/)
     end
-    
-    return text, skill 
+
+    return text, skill
   end
-  
-  
+
   def textFrom1D6Table(title, table1, table2 = nil)
     text1, number1 = get_table_by_1d6(table1)
-    
+
     text = "#{title} ＞ "
     if table2.nil?
       text += "[#{number1}] ＞ #{text1}"
@@ -2139,7 +2281,7 @@ INFO_MESSAGE_TEXT
       text2, number2 = get_table_by_1d6(table2)
       text += "[#{number1},#{number2}] ＞ #{text1}#{text2}"
     end
-    
+
     if /ランダムに決定した特技が指定特技のアイドルスキル\(身長分野、(属性|才能)分野、出身分野が出たら振り直し\)$/ =~ text
       category = $1
       while true
@@ -2149,11 +2291,10 @@ INFO_MESSAGE_TEXT
         text += " ＞ 振り直し"
       end
     end
-    
+
     return replaceBadStatus(text)
   end
-  
-  
+
   def getSkillList(field = 0)
     title = '特技リスト'
     table = [
@@ -2164,28 +2305,27 @@ INFO_MESSAGE_TEXT
              ['趣味', ['オカルト','ペット','スポーツ','おしゃれ','料理','趣味分野の空白','ショッピング','ダンス','ゲーム','音楽','アイドル']],
              ['出身', ['沖縄','九州地方','四国地方','中国地方','近畿地方','中部地方','関東地方','北陸地方','東北地方','北海道','海外']],
             ]
-    
+
     number1 = 0
     if field == 0
       table, number1 = get_table_by_1d6(table)
     else
       table = table[field - 1]
     end
-    
+
     fieldName, table = table
     skill, number2 = get_table_by_2d6(table)
-    
+
     text = title
     if field == 0
       text += " ＞ [#{number1},#{number2}]"
     else
       text += "(#{fieldName}分野) ＞ [#{number2}]"
     end
-    
+
     return "#{text} ＞ 《#{skill}／#{fieldName}#{number2}》"
   end
-  
-  
+
   def badStatus(counts = 1)
     title = '変調'
     table = [
@@ -2196,52 +2336,49 @@ INFO_MESSAGE_TEXT
              "「信じきれない」　PC全員の【理解度】を1点低いものとして扱う",
              "「すれ違い」　PCはアイテムの使用と、リザルトフェイズに「おねがい」をすることができなくなる",
             ]
-    
+
     return '' if counts <= 0
-    
+
     result = roll(counts, 6, 1)
     numbers = result[1].split(",").uniq
-    
+
     text = "#{title} ＞ [" + result[1] + '] ＞ '
     occurrences = numbers.count
-    
+
     if occurrences > 1
       text += "以下の#{occurrences}つが発生する。\n"
     end
-    
+
     occurrences.times do |i|
       text += table[numbers[i].to_i - 1] + "\n"
     end
-    
+
     return text[0, text.length - 1]
   end
-  
-  
+
   def getSkillText(skill)
     return '' if skill.nil? or skill.empty?
-    
+
     text = skill
     if /^AT([1-6]?)$/ =~ text
       text = getSkillList($1.to_i)
     else
       text = "特技 : #{text}"
     end
-    
+
     return "\n#{text}"
   end
-  
-  
+
   def setArrayFromD66Table(array, name, src, table)
     index = name.index(src)
     return if index.nil?
-    
+
     isSwap = true
     dice = getD66(isSwap)
     number, text, = table.assoc(dice)
     array.push([index, src, text, number])
   end
-  
-  
+
   def getItem(counts = 1)
     title = 'アイテム'
     table = [
@@ -2252,39 +2389,38 @@ INFO_MESSAGE_TEXT
       "お菓子",
       "差し入れ",
     ]
-    
+
     return '' if counts <= 0
-    
+
     result = roll(counts, 6, 1)
     numbers = result[1].split(",")
     unique = numbers.uniq
-    
+
     text = "#{title} ＞ [" + result[1] + '] ＞ '
     acquisitions = numbers.count
     kinds = unique.count
-    
+
     kinds.times do |i|
       string = table[unique[i].to_i - 1]
       unless kinds == 1
         string = "「#{string}」"
       end
-      
+
       text += string
       unless acquisitions == kinds
         text += numbers.count(unique[i]).to_s + 'つ'
       end
       text += 'と'
     end
-    
+
     text.slice!(/と$/)
-    
+
     return text
   end
-  
-  
+
   def replaceBadStatus(text)
     return text unless /変調がランダムに(一|二|三)つ発生する。/ =~ text
-    
+
     counts = 1
     case $1
     when '二'
@@ -2296,11 +2432,10 @@ INFO_MESSAGE_TEXT
     substitution = text.clone
     substitution.slice!($&)
     substitution += "\n" unless substitution.empty? or /\n$/ =~ substitution
-    
+
     return substitution + badStatus(counts)
   end
-  
-  
+
   def costume(title, brandOnly = false)
     table = []
     if title.include?('チャレンジガールズ')
@@ -2378,7 +2513,7 @@ INFO_MESSAGE_TEXT
     else
       return nil
     end
-    
+
     text = textFromD66Table(title, table)
     text.slice!(/\n.+$/) if brandOnly
     return text

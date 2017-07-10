@@ -53,6 +53,8 @@ $point_counter = {}
 require 'CardTrader'
 require 'TableFileData'
 require 'diceBot/DiceBot'
+require 'diceBot/DiceBotLoader'
+require 'diceBot/DiceBotLoaderList'
 require 'dice/AddDice'
 require 'dice/UpperDice'
 require 'dice/RerollDice'
@@ -87,7 +89,11 @@ end
 
 
 class BCDice
-  
+  # 設定コマンドのパターン
+  SET_COMMAND_PATTERN = /\Aset\s+(.+)/i
+
+  attr_reader :cardTrader
+
   def initialize(parent, cardTrader, diceBot, counterInfos, tableFileData)
     @parent = parent
     
@@ -138,29 +144,23 @@ class BCDice
   end
   
   def setMessage(message)
-    message = cutMessageCommend(message)
-    debug("setMessage message", message)
-    
-    @messageOriginal = parren_killer(message)
+    # 設定で変化し得るためopen系はここで正規表現を作る
+    openPattern = /\A\s*(?:#{$OPEN_DICE}|#{$OPEN_PLOT})\s*\z/i
+
+    messageToSet =
+      case message
+      when openPattern, SET_COMMAND_PATTERN
+        message
+      else
+        # 空白が含まれる場合、最初の部分だけを取り出す
+        message.split(/\s/, 2).first
+      end
+    debug("setMessage messageToSet", messageToSet)
+
+    @messageOriginal = parren_killer(messageToSet)
     @message = @messageOriginal.upcase
     debug("@message", @message)
   end
-  
-  
-  def cutMessageCommend(message)
-    case message
-    when /(^|\s+)(#{$OPEN_DICE}|#{$OPEN_PLOT})(\s+|$)/i
-      return message
-    end
-    
-    index = message.index(/\s/)
-    unless( index.nil? )
-      message = message[0...index]
-    end
-    
-    return message
-  end
-  
   
   def getOriginalMessage
     @messageOriginal
@@ -195,8 +195,10 @@ class BCDice
     debug("@nick_e, @tnick", @nick_e, @tnick)
     
     # ===== 設定関係 ========
-    if( /^set[\s]/i =~ @message )
-      setCommand(@message)
+    setMatches = @message.match(SET_COMMAND_PATTERN)
+    if setMatches
+      setCommand(setMatches[1])
+      return
     end
     
     # ポイントカウンター関係
@@ -239,59 +241,54 @@ class BCDice
   def setQuitFuction(func)
     @parent.quitFunction = func
   end
-  
+
   def setCommand(arg)
     debug('setCommand arg', arg)
-    
-    case arg
-    when (/^set[\s]+master$/i)
+
+    case arg.downcase
+    when 'master'
       # マスター登録
       setMaster()
-      
-    when (/^set[\s]+game$/i)
+
+    when 'game'
       # ゲーム設定
       setGame()
-      
-    when (/^set[\s]+v(iew[\s]*)?mode$/i)
+
+    when /\Av(?:iew\s*)?mode\z/
       # 表示モード設定
       setDisplayMode()
-      
-    when (/^set[\s]+upper$/i)
+
+    when 'upper'
       # 上方無限ロール閾値設定 0=Clear
       setUpplerRollThreshold()
-      
-    when (/^set[\s]+reroll$/i)
+
+    when 'reroll'
       # 個数振り足しロール回数制限設定 0=無限
       setRerollLimit()
-      
-    when (/^set[\s]+s(end[\s]*)?mode$/i)
-      # データ送信モード設定
-      setDataSendMode()
-      
-    when (/^set[\s]+r(ating[\s]*)?t(able)?$/i)
+
+    when /\Ar(?:ating\s*)?t(?:able)?\z/
       # レーティング表設定
       setRatingTable()
-      
-    when (/^set[\s]+sort$/i)
+
+    when 'sort'
       # ソートモード設定
       setSortMode()
-      
-    when (/^set[\s]+(cardplace|CP)$/i)
+
+    when 'cardplace', 'cp'
       # カードモード設定
       setCardMode()
-      
-    when (/^set[\s]+(shortspell|SS)$/i)
+
+    when 'shortspell', 'ss'
       # 呪文モード設定
       setSpellMode()
-      
-    when (/^set[\s]+tap$/i)
+
+    when 'tap'
       # タップモード設定
       setTapMode()
-      
-    when (/^set[\s]+(cardset|CS)$/i)
+
+    when 'cardset', 'cs'
       # カード読み込み
       readCardSet()
-    else
     end
   end
   
@@ -380,18 +377,6 @@ class BCDice
     else
       sendMessageToChannels("個数振り足しロールの回数を無限に設定しました")
     end
-  end
-  
-  
-  def setDataSendMode()
-    return unless( isMaster() )
-    
-    return unless( /(\d+)/  =~ @tnick )
-    $NOTICE_SW = $1.to_i
-    
-    $mode_str = ( ($NOTICE_SW != 0) ? "notice-mode" : "msg-mode" )
-    
-    sendMessageToChannels("SendModeを#{$mode_str}に変更しました")
   end
   
   def setRatingTable()
@@ -1788,288 +1773,29 @@ class BCDice
     
     return result
   end
-  
-  
-  
-  
-  def setGameByTitle(gameTitle)  # 各種ゲームモードの設定
+
+  # 指定したタイトルのゲームを設定する
+  # @param [String] gameTitle ゲームタイトル
+  # @return [String] ゲームを設定したことを示すメッセージ
+  def setGameByTitle(gameTitle)
     debug('setGameByTitle gameTitle', gameTitle)
-    
+
     @cardTrader.initValues
-    
-    diceBot = nil
-    
-    case gameTitle
-    when /(^|\s)((Cthulhu)|(COC))$/i
-      require 'diceBot/Cthulhu'
-      diceBot = Cthulhu.new
-    when /(^|\s)((Hieizan)|(COCH))$/i
-      require 'diceBot/Hieizan'
-      diceBot = Hieizan.new
-    when /(^|\s)((Elric!)|(EL))$/i
-      require 'diceBot/Elric'
-      diceBot = Elric.new
-    when /(^|\s)((RuneQuest)|(RQ))$/i
-      require 'diceBot/RuneQuest'
-      diceBot = RuneQuest.new
-    when /(^|\s)((Chill)|(CH))$/i
-      require 'diceBot/Chill'
-      diceBot = Chill.new
-    when /(^|\s)((RoleMaster)|(RM))$/i
-      require 'diceBot/RoleMaster'
-      diceBot = RoleMaster.new
-    when /(^|\s)((ShadowRun)|(SR))$/i
-      require 'diceBot/ShadowRun'
-      diceBot = ShadowRun.new
-    when /(^|\s)((ShadowRun4)|(SR4))$/i
-      require 'diceBot/ShadowRun4'
-      diceBot = ShadowRun4.new
-    when /(^|\s)((Pendragon)|(PD))$/i
-      require 'diceBot/Pendragon'
-      diceBot = Pendragon.new
-    when /(^|\s)(SwordWorld\s*2\.0|SW\s*2\.0)$/i
-      require 'diceBot/SwordWorld'
-      require 'diceBot/SwordWorld2_0'
-      diceBot = SwordWorld2_0.new
-    when /(^|\s)((SwordWorld)|(SW))$/i
-      require 'diceBot/SwordWorld'
-      diceBot = SwordWorld.new
-    when /(^|\s)((Arianrhod)|(AR))$/i
-      require 'diceBot/Arianrhod'
-      diceBot = Arianrhod.new
-    when /(^|\s)((Infinite[\s]*Fantasia)|(IF))$/i
-      require 'diceBot/InfiniteFantasia'
-      diceBot = InfiniteFantasia.new
-    when /(^|\s)(WARPS)$/i
-      require 'diceBot/WARPS'
-      diceBot = WARPS.new
-    when /(^|\s)((Demon[\s]*Parasite)|(DP))$/i
-      require 'diceBot/DemonParasite'
-      diceBot = DemonParasite.new
-    when /(^|\s)((Parasite\s*Blood)|(PB))$/i
-      require 'diceBot/DemonParasite'
-      require 'diceBot/ParasiteBlood'
-      diceBot = ParasiteBlood.new
-    when /(^|\s)((Gun[\s]*Dog)|(GD))$/i
-      require 'diceBot/Gundog'
-      diceBot = Gundog.new
-    when /(^|\s)((Gun[\s]*Dog[\s]*Zero)|(GDZ))$/i
-      require 'diceBot/Gundog'
-      require 'diceBot/GundogZero'
-      diceBot = GundogZero.new
-    when /(^|\s)((Tunnels[\s]*&[\s]*Trolls)|(TuT))$/i
-      require 'diceBot/TunnelsAndTrolls'
-      diceBot = TunnelsAndTrolls.new
-    when /(^|\s)((Nightmare[\s]*Hunter[=\s]*Deep)|(NHD))$/i
-      require 'diceBot/NightmareHunterDeep'
-      diceBot = NightmareHunterDeep.new
-    when /(^|\s)((War[\s]*Hammer(FRP)?)|(WH))$/i
-      require 'diceBot/Warhammer'
-      diceBot = Warhammer.new
-    when /(^|\s)((Phantasm[\s]*Adventure)|(PA))$/i
-      require 'diceBot/PhantasmAdventure'
-      diceBot = PhantasmAdventure.new
-    when /(^|\s)((Chaos[\s]*Flare)|(CF))$/i
-      require 'diceBot/ChaosFlare'
-      diceBot = ChaosFlare.new
-      
-      @cardTrader.set2Deck2Jorker
-      @cardTrader.setCardPlace(0)#手札の他のカード置き場
-      @cardTrader.setCanTapCard(false)#場札のタップ処理の必要があるか？
-      
-    when /(^|\s)((Cthulhu[\s]*Tech)|(CT))$/i
-      require 'diceBot/CthulhuTech'
-      diceBot = CthulhuTech.new
-    when /(^|\s)((Tokumei[\s]*Tenkousei)|(ToT))$/i
-      require 'diceBot/TokumeiTenkousei'
-      diceBot = TokumeiTenkousei.new
-    when /(^|\s)((Shinobi[\s]*Gami)|(SG))$/i
-      require 'diceBot/ShinobiGami'
-      diceBot = ShinobiGami.new
-    when /(^|\s)((Double[\s]*Cross)|(DX))$/i
-      require 'diceBot/DoubleCross'
-      diceBot = DoubleCross.new
-    when /(^|\s)((Sata[\s]*Supe)|(SS))$/i
-      require 'diceBot/Satasupe'
-      diceBot = Satasupe.new
-    when /(^|\s)((Ars[\s]*Magica)|(AM))$/i
-      require 'diceBot/ArsMagica'
-      diceBot = ArsMagica.new
-    when /(^|\s)((Dark[\s]*Blaze)|(DB))$/i
-      require 'diceBot/DarkBlaze'
-      diceBot = DarkBlaze.new
-    when /(^|\s)((Night[\s]*Wizard)|(NW))$/i
-      require 'diceBot/NightWizard'
-      diceBot = NightWizard.new
-    when /(^|\s)TORG$/i
-      require 'diceBot/Torg'
-      diceBot = Torg.new
-    when /(^|\s)TORG1.5$/i
-      require 'diceBot/Torg'
-      require 'diceBot/Torg1_5'
-      diceBot = Torg1_5.new
-    when /(^|\s)(hunters\s*moon|HM)$/i
-      require 'diceBot/HuntersMoon'
-      diceBot = HuntersMoon.new
-    when /(^|\s)(Blood\s*Crusade|BC)$/i
-      require 'diceBot/BloodCrusade'
-      diceBot = BloodCrusade.new
-    when /(^|\s)(Meikyu\s*Kingdom|MK)$/i
-      require 'diceBot/MeikyuKingdom'
-      diceBot = MeikyuKingdom.new
-    when /(^|\s)(Earth\s*Dawn|ED)$/i
-      require 'diceBot/EarthDawn'
-      diceBot = EarthDawn.new
-    when /(^|\s)(Earth\s*Dawn|ED)3$/i
-      require 'diceBot/EarthDawn'
-      require 'diceBot/EarthDawn3'
-      diceBot = EarthDawn3.new
-    when /(^|\s)(Earth\s*Dawn|ED)4$/i
-      require 'diceBot/EarthDawn'
-      require 'diceBot/EarthDawn4'
-      diceBot = EarthDawn4.new
-    when /(^|\s)(Embryo\s*Machine|EM)$/i
-      require 'diceBot/EmbryoMachine'
-      diceBot = EmbryoMachine.new
-    when /(^|\s)(Gehenna\s*An|GA)$/i
-      require 'diceBot/GehennaAn'
-      diceBot = GehennaAn.new
-    when /(^|\s)((Magica[\s]*Logia)|(ML))$/i
-      require 'diceBot/MagicaLogia'
-      diceBot = MagicaLogia.new
-    when /(^|\s)((Nechronica)|(NC))$/i
-      require 'diceBot/Nechronica'
-      diceBot = Nechronica.new
-    when /(^|\s)(Meikyu\s*Days|MD)$/i
-      require 'diceBot/MeikyuDays'
-      diceBot = MeikyuDays.new
-    when /(^|\s)(Peekaboo|PK)$/i
-      require 'diceBot/Peekaboo'
-      diceBot = Peekaboo.new
-    when /(^|\s)(Barna\s*Kronika|BK)$/i
-      require 'diceBot/BarnaKronika'
-      diceBot = BarnaKronika.new
-      
-      @cardTrader.set1Deck2Jorker
-      @cardTrader.setCardPlace(0)#手札の他のカード置き場
-      @cardTrader.setCanTapCard(false)#場札のタップ処理の必要があるか？
-      
-    when /(^|\s)(RokumonSekai2|RS2)$/i
-      require 'diceBot/RokumonSekai2'
-      diceBot = RokumonSekai2.new
-    when /(^|\s)(Monotone(\s*)Musium|MM)$/i
-      require 'diceBot/MonotoneMusium'
-      diceBot = MonotoneMusium.new
-    when /(^|\s)Zettai\s*Reido$/i
-      require 'diceBot/ZettaiReido'
-      diceBot = ZettaiReido.new
-    when /(^|\s)Eclipse\s*Phase$/i
-      require 'diceBot/EclipsePhase'
-      diceBot = EclipsePhase.new
-    when /(^|\s)NJSLYRBATTLE$/i
-      require 'diceBot/NjslyrBattle'
-      diceBot = NjslyrBattle.new
-    when /(^|\s)ShinMegamiTenseiKakuseihen$/i, /(^|\s)SMTKakuseihen$/i
-      require 'diceBot/ShinMegamiTenseiKakuseihen'
-      diceBot = ShinMegamiTenseiKakuseihen.new
-    when /(^|\s)Ryutama$/i
-      require 'diceBot/Ryutama'
-      diceBot = Ryutama.new
-    when /(^|\s)CardRanker$/i
-      require 'diceBot/CardRanker'
-      diceBot = CardRanker.new
-    when /(^|\s)ShinkuuGakuen$/i
-      require 'diceBot/ShinkuuGakuen'
-      diceBot = ShinkuuGakuen.new
-    when /(^|\s)CrashWorld$/i
-      require 'diceBot/CrashWorld'
-      diceBot = CrashWorld.new
-    when /(^|\s)WitchQuest$/i
-      require 'diceBot/WitchQuest'
-      diceBot = WitchQuest.new
-    when /(^|\s)BattleTech$/i
-      require 'diceBot/BattleTech'
-      diceBot = BattleTech.new
-    when /(^|\s)Elysion$/i
-      require 'diceBot/Elysion'
-      diceBot = Elysion.new
-    when /(^|\s)GeishaGirlwithKatana$/i
-      require 'diceBot/GeishaGirlwithKatana'
-      diceBot = GeishaGirlwithKatana.new
-    when /(^|\s)GURPS$/i
-      require 'diceBot/Gurps'
-      diceBot = Gurps.new
-    when /(^|\s)GurpsFW$/i
-      require 'diceBot/GurpsFW'
-      diceBot = GurpsFW.new
-    when /(^|\s)FilledWith$/i
-      require 'diceBot/FilledWith'
-      diceBot = FilledWith.new
-    when /(^|\s)HarnMaster$/i
-      require 'diceBot/HarnMaster'
-      diceBot = HarnMaster.new
-    when /(^|\s)Insane$/i
-      require 'diceBot/Insane'
-      diceBot = Insane.new
-    when /(^|\s)KillDeathBusiness$/i
-      require 'diceBot/KillDeathBusiness'
-      diceBot = KillDeathBusiness.new
-    when /(^|\s)Kamigakari$/i
-      require 'diceBot/Kamigakari'
-      diceBot = Kamigakari.new
-    when /(^|\s)RecordOfSteam$/i
-      require 'diceBot/RecordOfSteam'
-      diceBot = RecordOfSteam.new
-    when /(^|\s)Oukahoushin3rd$/i
-      require 'diceBot/Oukahoushin3rd'
-      diceBot = Oukahoushin3rd.new
-    when /(^|\s)BeastBindTrinity$/i
-      require 'diceBot/BeastBindTrinity'
-      diceBot = BeastBindTrinity.new
-    when /(^|\s)(BloodMoon)$/i
-      require 'diceBot/BloodMoon'
-      diceBot = BloodMoon.new
-    when /(^|\s)(Utakaze)$/i
-      require 'diceBot/Utakaze'
-      diceBot = Utakaze.new
-    when /(^|\s)(EndBreaker)$/i
-      require 'diceBot/EndBreaker'
-      diceBot = EndBreaker.new
-    when /(^|\s)(KanColle)$/i
-      require 'diceBot/KanColle'
-      diceBot = KanColle.new
-    when /(^|\s)(Grancrest)$/i
-      require 'diceBot/GranCrest'
-      diceBot = GranCrest.new
-    when /(^|\s)(HouraiGakuen)$/i
-      require 'diceBot/HouraiGakuen'
-      diceBot = HouraiGakuen.new
-    when /(^|\s)(TwilightGunsmoke)$/i
-      require 'diceBot/TwilightGunsmoke'
-      diceBot = TwilightGunsmoke.new
-    when /(^|\s)(Garako)$/i
-      require 'diceBot/Garako'
-      diceBot = Garako.new
-    when /(^|\s)(ShoujoTenrankai)$/i
-      require 'diceBot/ShoujoTenrankai'
-      diceBot = ShoujoTenrankai.new
-    when /(^|\s)None$/i, ""
-      diceBot = DiceBot.new
-    else
-      require 'diceBot/DiceBotLoader'
-      loader = DiceBotLoader.new
-      diceBot = loader.loadUnknownGame(gameTitle)
-    end
-    
-    if( diceBot.nil? )
-      diceBot = DiceBot.new
-    end
-    
+
+    loader = DiceBotLoaderList.find(gameTitle)
+    diceBot =
+      if loader
+        loader.loadDiceBot
+      else
+        DiceBotLoader.loadUnknownGame(gameTitle) || DiceBot.new
+      end
+
     setDiceBot(diceBot)
-    
+    diceBot.postSet
+
     message = "Game設定を#{diceBot.gameName}に設定しました"
     debug( 'setGameByTitle message', message )
-    
+
     return message
   end
   
