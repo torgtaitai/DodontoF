@@ -9,5 +9,6 @@ group :development, :test do
   else
     gem 'rake'
     gem 'test-unit'
+    gem 'rubyzip'
   end
 end
