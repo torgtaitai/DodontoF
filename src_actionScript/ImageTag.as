@@ -64,7 +64,7 @@ package {
             return result;
         }
         
-        public function setImageTypes(comboBox:ComboBox, tagInfos:Object, defaultTags:Array, enabled:Boolean = true):void {
+        public function setImageTypes(comboBox:ComboBox, tagInfos:Object, defaultTags:Array, password:String = ""):void {
             Log.logging("setImageTypes begin");
             
             var imageTags:Array = defaultTags.concat();
@@ -81,13 +81,17 @@ package {
                     continue;
                 }
                 
+                if( ! checkPassword(password, tagInfo) ) {
+                    continue;
+                }
+                
                 imageTags = addTagsToImageTags(tags, imageTags);
             }
             
             var selected:String = comboBox.text;
             
             comboBox.dataProvider = getComboBoxItems(imageTags);
-            comboBox.enabled = enabled;
+            comboBox.enabled = true;
             
             if( selected != "" ) {
                 Utils.selectComboBox(comboBox, selected, "label");
@@ -96,6 +100,18 @@ package {
             Log.logging("setImageTypes end");
         }
         
+        private function checkPassword(password:String, tagInfo:Object):Boolean {
+            var imagePassword:String = tagInfo["password"];
+            if( imagePassword == null ) {
+                return true;
+            }
+            
+            if( imagePassword == "" ) {
+                return true;
+            }
+            
+            return (password == imagePassword);
+        }
         
         static public function isTargetRoom(imageUrl:String, tagInfos:Object):Boolean {
            

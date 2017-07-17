@@ -56,7 +56,7 @@ module DodontoF
       return result
     end
 
-    def uploadImageData(params)
+    def uploadImageData(params, isSetFileName = false)
       @logger.debug("uploadImageData load Begin")
 
       result = {
@@ -89,6 +89,7 @@ module DodontoF
         end
 
         saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName, params)
+        result["fileName"] = uploadImageFileName if isSetFileName
 
       rescue => e
         result["resultText"] = DodontoF::Utils.getLanguageKey( e.to_s )
@@ -136,6 +137,7 @@ module DodontoF
 
     def getImageDataFromParams(params, key)
       value = params[key]
+      return nil if value.nil?
 
       sizeCheckResult = @server.checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
       raise sizeCheckResult unless( sizeCheckResult.empty? )
@@ -163,22 +165,13 @@ module DodontoF
       @logger.debug("saveSmallImage begin")
       @logger.debug(imageFileNameBase, "imageFileNameBase")
       @logger.debug(uploadImageFileName, "uploadImageFileName")
-
-      smallImageDir = getSmallImageDir
-      uploadSmallImageFileName = @server.fileJoin(smallImageDir, imageFileNameBase)
-      uploadSmallImageFileName += ".png";
-      uploadSmallImageFileName.untaint
-      @logger.debug(uploadSmallImageFileName, "uploadSmallImageFileName")
-
-      open( uploadSmallImageFileName, "wb+" ) do |file|
-        file.write( smallImageData )
-      end
-      @logger.debug("small image create successed.")
-
+      
+      smallImageFileName = writeSmallImageDataToFile(smallImageData, imageFileNameBase)
+      
       tagInfo = params['tagInfo']
       @logger.debug(tagInfo, "saveSmallImage tagInfo")
 
-      tagInfo["smallImage"] = uploadSmallImageFileName
+      tagInfo["smallImage"] = smallImageFileName unless smallImageFileName.nil?
       @logger.debug(tagInfo, "saveSmallImage tagInfo smallImage url added")
 
       mergeTagInfo(tagInfo, uploadImageFileName)
@@ -188,6 +181,24 @@ module DodontoF
       @logger.debug("saveSmallImage end")
     end
 
+    def writeSmallImageDataToFile(smallImageData, imageFileNameBase)
+      fileName = nil
+      
+      return fileName if smallImageData.nil?
+      
+      smallImageDir = getSmallImageDir
+      fileName = @server.fileJoin(smallImageDir, imageFileNameBase) + ".png";
+      fileName.untaint
+      @logger.debug(fileName, "smallImage fileName")
+      
+      open( fileName, "wb+" ) do |file|
+        file.write( smallImageData )
+      end
+      @logger.debug("small image create successed.")
+      
+      return fileName
+    end
+    
     def changeImageTagsLocal(source, tagInfo)
       return if( tagInfo.nil? )
 
@@ -309,6 +320,8 @@ module DodontoF
         return false if tagInfo.nil?
 
         smallImage = tagInfo["smallImage"]
+        return false if smallImage.nil?
+        
         begin
           @server.deleteFile(smallImage)
         rescue => e

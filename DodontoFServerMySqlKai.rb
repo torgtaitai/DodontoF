@@ -13,9 +13,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.27'
+  VERSION = '1.48.28'
   # リリース日
-  RELEASE_DATE = '2017/06/22'
+  RELEASE_DATE = '2017/07/17'
 
   # バージョンとリリース日を含む文字列
   #
@@ -192,7 +192,7 @@ class DodontoFServer_MySqlKai
   # @return [String] キーが存在する場合
   # @return [nil] キーが存在しない場合
   def getRawCGIValue(key)
-    @cgi ||= CGI.new
+    @cgi = CGI.new if @cgi.nil?
 
     # CGI#params[] では配列または nil が返るため、キーが含まれているか
     # どうかのチェックが必要
@@ -549,44 +549,87 @@ class DodontoFServer_MySqlKai
     
     @logger.debug(commandName, "commandName")
     
-    case commandName
-    when 'getBusyInfo'
-      return getBusyInfo
-    when 'getServerInfo'
-      return getWebIfServerInfo
-    when 'getRoomList'
-      return getWebIfRoomList
-    when 'getLoginInfo'
-      return getWebIfLoginInfo
-    end
+    result = analyzeWebInterfaceNoLogin(commandName)
+    return result unless result.nil?
     
-    loginOnWebInterface
+    loginData = loginOnWebInterface()
+    @isVisitorOnWebIf = loginData['visiterMode']
     
-    case commandName
-    when 'chat'
-      return getWebIfChatText
-    when 'talk'
-      return sendWebIfChatText
-    when 'addCharacter'
-      return sendWebIfAddCharacter
-    when 'changeCharacter'
-      return sendWebIfChangeCharacter
-    when 'addMemo'
-      return sendWebIfAddMemo
-    when 'getRoomInfo'
-      return getWebIfRoomInfo
-    when 'setRoomInfo'
-      return setWebIfRoomInfo
-    when 'getChatColor'
-      return getChatColor
-    when 'refresh'
-      return getWebIfRefresh
-    when 'getLoginUserInfo'
-      return getWebIfLoginUserInfo
-    end
+    result = analyzeWebInterfaceLogined(commandName)
+    return result unless result.nil?
     
     return {'result'=> "command [#{commandName}] is NOT found"}
   end
+  
+  
+  def analyzeWebInterfaceNoLogin(commandName)
+    case commandName
+    when 'getBusyInfo'
+      getBusyInfo
+    when 'getServerInfo'
+      getWebIfServerInfo
+    when 'getRoomList'
+      getWebIfRoomList
+    when 'getLoginInfo'
+      getWebIfLoginInfo
+    else
+      nil
+    end
+  end  
+  
+  
+  def analyzeWebInterfaceLogined(command)
+    
+    result = analyzeWebInterfaceLoginedEveryone(command)
+    return result unless result.nil?
+    
+    return nil if( @isVisitorOnWebIf )
+    
+    result = analyzeWebInterfaceParticipant(command)
+    return result unless result.nil?
+  end
+    
+  def analyzeWebInterfaceLoginedEveryone(command)
+    case command
+    when 'chat'
+      getWebIfChatText
+    when 'talk'
+      sendWebIfChatText
+    when 'refresh'
+      getWebIfRefresh
+    when 'getRoomInfo'
+      getWebIfRoomInfo
+    when 'getLoginUserInfo'
+      getWebIfLoginUserInfo
+    when 'getChatColor'
+      getChatColor
+    else
+      nil
+    end
+  end
+  
+  
+  def analyzeWebInterfaceParticipant(command)
+    case command
+    when 'addCharacter'
+      sendWebIfAddCharacter
+    when 'addMessageCard'
+      sendWebIfAddMessageCard
+    when 'changeCharacter'
+      sendWebIfChangeCharacter
+    when 'addMemo'
+      sendWebIfAddMemo
+    when 'changeMemo'
+      sendWebIfChangeMemo
+    when 'setRoomInfo'
+      setWebIfRoomInfo
+    when 'uploadImageData'
+      uploadImageDataWebIf
+    else
+      nil
+    end
+  end
+  
   
   def getWebIfLoginInfo
     uniqueId = getRequestData('uniqueId')
@@ -625,6 +668,21 @@ class DodontoFServer_MySqlKai
     end
     
     initSaveFiles(roomNumber)
+  end
+  
+  
+  def getRoomNumberOnWebInterface
+    roomNumberText = getRequestData('room')
+    if( isInvalidRequestParam(roomNumberText) )
+      raise "プレイルーム番号(room)を指定してください"
+    end
+    
+    unless( /^\d+$/ === roomNumberText )
+      raise "プレイルーム番号(room)には半角数字のみを指定してください"
+    end
+    
+    roomNumber = roomNumberText.to_i
+    return roomNumber
   end
   
   
@@ -1837,6 +1895,43 @@ SQL_TEXT
     end
   end
   
+  
+  def uploadImageDataWebIf()
+    @logger.debug("uploadImageDataWebIf begin")
+    
+    require 'base64'
+    
+    fileData = getRequestData('fileData')
+    raise "no fileData param" if fileData.nil?
+    imageFileName = fileData.original_filename
+    imageData = fileData.read
+    
+    smallImageData = getRequestData('smallImageData')
+    smallImageData = Base64.decode64( smallImageData )  unless smallImageData.nil?
+    
+    imagePassword = getWebIfRequestText('imagePassword', "")
+    tags = getWebIfRequestText('tags', "").split(/[\s　]/)
+    roomNumber = getRequestData('room')
+    
+    params = {
+      "tagInfo" => {
+        "tags" => tags,
+        "roomNumber" => roomNumber,
+        "password" => imagePassword },
+      "imageFileName" => imageFileName,
+      "imageData"=> imageData,
+      "smallImageData"=> smallImageData,
+    }
+    
+    image = DodontoF::Image.new(self)
+    result = image.uploadImageData(params)
+    result['result'] = result.delete('resultText')
+    
+    @logger.debug(result, "uploadImageDataWebIf result")
+    return result
+  end
+  
+  
   def getWebIfRequestAny(functionName, key, defaultInfos, key2 = nil)
     key2 ||= key
     
@@ -2403,9 +2498,9 @@ SQL_TEXT
     @logger.debug("getDiceBotInfos() Begin")
     
     require 'diceBotInfos'
-
+    
     orderedGameNames = $diceBotOrder.split("\n")
-
+    
     if @saveDirInfo.getSaveDataDirIndex != -1
       DiceBotInfos.withTableCommands(orderedGameNames,
                                      $isDisplayAllDice,
@@ -3714,6 +3809,7 @@ SQL_TEXT
     roomNumber  = getRequestData('roomNumber')
     if( roomNumber.nil? )
       roomNumber  = getRequestData('room')
+      roomNumber = roomNumber.to_i unless roomNumber.nil?
     end
     
     result = nil
@@ -3848,7 +3944,7 @@ SQL_TEXT
   end
   
   def getRollDiceResult( params )
-    
+    params['originalMessage'] = params['message']
     rollResult, isSecret, randResults = @dice_adapter.rollDice(params)
     
     secretMessage = ""
@@ -3901,10 +3997,10 @@ SQL_TEXT
   end
   
   def getDiceBotPower(params)
-    message = params['message']
+    message = params['originalMessage']
     
     power = 0
-    if /((!|！)+)$/ === message
+    if /((!|！)+)(\r|$)/ === message
       power = $1.length
     end
     
@@ -5876,7 +5972,8 @@ def getCgiParams()
   logger.debug(ENV['REQUEST_METHOD'], "ENV[REQUEST_METHOD]")
   input = nil
   messagePackedData = {}
-  if( ENV['REQUEST_METHOD'] == "POST" )
+  if( ENV['REQUEST_METHOD'].to_s == "POST" and
+      ENV['CONTENT_TYPE'].to_s == "application/x-msgpack" )
     length = ENV['CONTENT_LENGTH'].to_i
     logger.debug(length, "getCgiParams length")
 

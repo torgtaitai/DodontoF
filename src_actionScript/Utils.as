@@ -222,7 +222,8 @@ package {
             return -1;
         }
         
-        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data", defaultIndex:int = 0):int {
+        static public function selectComboBox(comboBox:ComboBox, key:String, field:String = "data", defaultIndex:int = 0,
+                                              isMatch:Function = null):int {
             comboBox.validateNow();
             
             var list:ArrayCollection = comboBox.dataProvider as  ArrayCollection;
@@ -230,8 +231,15 @@ package {
                 return -1;
             }
             
+            if( isMatch == null ) {
+                isMatch = function(text:String):Boolean {
+                    return (text == key);
+                }
+            }
+            
             for(var i:int = 0 ; i < list.length ; i++) {
-                if(list[i][field] == key){
+                var text:String = list[i][field];
+                if( isMatch(text) ) {
                     comboBox.selectedIndex = i;
                     return i;
                 }
@@ -239,6 +247,32 @@ package {
             
             comboBox.selectedIndex = defaultIndex;
             return -1;
+        }
+        
+        static public function selectGameTypeComboBox(comboBox:ComboBox, key:String):int {
+            
+            var isMatch:Function = function(gameType:String):Boolean {
+                
+                if( gameType == key ) {
+                    return true;
+                }
+                
+                if( gameType.indexOf(key + ":") != -1 ) {
+                    return true;
+                }
+                
+                if( key == null ) {
+                    return false;
+                }
+
+                if(key.indexOf(gameType + ":") != -1) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            return selectComboBox(comboBox, key, "gameType", 0, isMatch);
         }
         
         static public function getComboBoxText(combobox:ComboBox):String {
@@ -727,7 +761,7 @@ package {
         static public function setGameTypeToComboBox(gameType:String, diceBotGameType:ComboBox):void {
             Log.logging("setGameTypeToComboBox Begin");
             
-            var index:int = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+            var index:int = Utils.selectGameTypeComboBox(diceBotGameType, gameType);
             if( index == -1 ) {
                 index = Utils.selectComboBox(diceBotGameType, gameType, "name");
             }
@@ -736,7 +770,7 @@ package {
                 Log.logging("gameType not found", gameType);
                 
                 addNewGameType(gameType, diceBotGameType);
-                index = Utils.selectComboBox(diceBotGameType, gameType, "gameType");
+                index = Utils.selectGameTypeComboBox(diceBotGameType, gameType);
                 Log.logging("gameType add result", index);
             }
             

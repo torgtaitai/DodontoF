@@ -95,6 +95,7 @@
       <li><a href='#webIf_changeMemo'>changeMemo：共有メモ追加</a></li>
       <li><a href='#webIf_addMessageCard'>addMessageCard：メッセージカード追加</a></li>
       <li><a href='#webIf_refresh'>refresh：各種情報取得</a></li>
+      <li><a href='#webIf_uploadImageData'>uploadImageData：画像ファイルアップロード</a></li>
     </ul>
   </li>
   <li>
@@ -1040,6 +1041,87 @@ chatLastTime、チャットの更新時刻の2種類目、は chatMessageDataLog
 <br>
 となります。<br>
 <br>
+<h3 id="webIf_uploadImageData">uploadImageData：画像ファイルアップロード</h3>
+画像ファイルをアップロードすることが出来ます。<br>
+★このコマンドのみPOST指定で投げる必要があるため、他のコマンドのようにURLでコマンド指定はできません。<br>
+<br>
+指定可能パラメータ：<br>
+　webif：コマンド名。この場合は uploadImageData を指定<br>
+　room：対象プレイルーム番号<br>
+　password：対象プレイルームのパスワード（パスワードが無い、あるいは見学可の場合は省略可能）<br>
+　callback: JSONP取得用の関数名設定用。省略可<br>
+　<br>
+　fileData：アップロード対象の画像データ。<br>
+　tags：画像タグ。空白で区切ることで複数指定が可能です。<br>
+　smallImageData：縮小画像のBase64エンコードデータ。（省略可）<br>
+　<br>
+詳細な実例は同梱の chat.html の uploadImageData() を参照願います。<br>
+動作検証時には chat.html から部屋にログインして「画像」と書かれたリンクを押してください。<br>
+以下、該当箇所を抜粋。<br>
+<pre><code>
+例）
+HTML側：form部分から必須箇所のみ抜粋
+
+        &lt;form id=&quot;fileUpload&quot;&gt;
+          &lt;canvas id=&quot;smallImageCanvas&quot; &gt;&lt;/canvas&gt;
+          &lt;input type=&quot;file&quot; id=&quot;fileData&quot; name=&quot;fileData&quot; accept=&quot;image/*&quot; capture &gt;&lt;br&gt;
+          &lt;input id=&quot;tags&quot; placeholder=&quot;tags&quot; /&gt;
+          &lt;button type=&quot;button&quot; onclick=&quot;uploadImage()&quot;&gt;画像アップロード&lt;/button&gt;&lt;br&gt;
+        &lt;/form&gt;
+
+javascript側： 必須箇所のみ抜粋。
+
+function uploadImage() {
+    
+    //jqueryを導入していることが前提です。
+    // フォームデータを取得
+    var formData = new FormData( $('form#fileUpload')[0] );//アップロードする画像の指定
+    
+    //縮小画像を取得。縮小画像をアップロード時に送信すると
+    //「どどんとふ」本体の画像一覧に縮小画像が利用されるので動作が軽くなりユーザーに親切です。
+    //ただ設定は手間なのも事実なので、指定を省略することも可能です。
+    var canvas = document.querySelector('#smallImageCanvas');
+    var base64Data = canvas.toDataURL('image/png');
+    smallImageData = base64Data.replace('data:image/png;base64,', '');
+    formData.append( 'smallImageData', smallImageData ); //縮小画像の指定（省略可能）
+    
+    formData.append( 'webif', "uploadImageData" ); //webifの指定
+    formData.append( 'room', roomNo ); //部屋番号の指定
+    if(roomPass != "" || roomPass == null){
+        formData.append( 'password', roomPass ); //パスワードの指定
+    }
+    
+    formData.append( 'tags', $('#tags').val() ); //タグ名の指定
+    //formData.append( 'imagePassword', "パスワード" ); //絵のパスワードも指定できます（ここでは未使用）
+
+    for(item of formData) {
+        console.log(item);
+    };
+    
+    
+    var url = getServerUrl();
+
+    // POSTでアップロード
+    $.ajax({
+        url  : url,
+        type : "POST",
+        data : formData,
+        async: false,
+        cache       : false,
+        contentType : false,
+        processData : false
+    })
+        .done(function(data, textStatus, jqXHR){
+            $('#fileUploadResult').text( "result : " + data.result + ", fileName:" + data.fileName );
+        })
+        .fail(function(jqXHR, textStatus, errorThrown){
+            alert("fail");
+            console.log( 'ERROR', jqXHR, textStatus, errorThrown );
+        });
+}
+
+</code></pre>
+<br>
 <br>
 <h2 id="aboutLicense">ライセンスについて</h2>
 以下、各種同根ファイルを含めたライセンスについて。<br>
@@ -1170,6 +1252,16 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2017/07/17 Ver.1.48.28<br>
+・ダイスボットをボーンズ＆カーズVer2.02.71対応へ変更。<br>
+・ダイスボットの定義を変更。 prefixs メソッドではなく setPrefixes でコマンド名を定義するようになりました。ochaさんありがとうっ！！！<br>
+　詳細については<u><a href="src_bcdice/test/README.html">「■自作ダイスボットの作り方：その４　そして実装」</a></u>を参照。<br>
+　（従来のコマンドも動きますが、テスト実行時には非推奨の警告が表示されます）<br>
+・他言語のダイスボットを設定した状態でログインした際に、正しいダイスボットが選択されない問題を修正。Nanasuさんありがとうっ！<br>
+・ダイスボットのロール結果に「！」が含まれる場合にダイスの画像が巨大になる不具合を修正。「2D6 ロール！」のように付与メッセージでのみダイス画像が大きくなるように。<br>
+・WEBIFに画像アップロードコマンドのuploadFileを追加。詳細はREADME.htmlの「<u><a href="#webIf_uploadImageData">uploadImageData：画像ファイルアップロード</a></u>」を参照。<br>
+・画像選択時にパスワードの一致しない画像のタグは表示しないように機能変更。<br>
+<br>
 2017/06/22 Ver.1.48.27<br>
 ・ダイスボットをボーンズ＆カーズVer2.02.70対応へ変更。<br>
 ・ドラクルージュのダイスボットを更新。「ノブレスストーリア」に対応。<br>

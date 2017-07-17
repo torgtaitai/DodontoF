@@ -257,6 +257,7 @@
        private function setPassword(password:String):void {
            currentPassword = password;
            tagNameChanged();
+           refreshTagNameList();
        }
        
        private function changeNoSelectMode():void {
@@ -352,11 +353,15 @@
                return;
            }
            
-           var imageTag:ImageTag = new ImageTag();
-           imageTag.setImageTypes(tagName, tagInfos, defaultTags);
+           refreshTagNameList();
            
            imageLoadCompleteFunction.call();
            tagNameChanged();
+       }
+       
+       private function refreshTagNameList():void {
+           var imageTag:ImageTag = new ImageTag();
+           imageTag.setImageTypes(tagName, tagInfos, defaultTags, currentPassword);
        }
        
        
