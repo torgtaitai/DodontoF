@@ -90,8 +90,6 @@ class SaveDirInfo
       return @saveDataDirIndex
     end
     
-    @logger.debug(@requestData.inspect, "requestData")
-    
     @logger.debug(@saveDataDirIndexObject, "saveDataDirIndexObject")
     
     if( @saveDataDirIndexObject.instance_of?( StringIO ) )
