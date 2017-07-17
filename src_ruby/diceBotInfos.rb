@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'dodontof/logger'
+require 'diceBot/DiceBotLoader'
 
 # ダイスボットの情報の一覧の取得処理
 class DiceBotInfos
@@ -65,38 +66,12 @@ INFO_MESSAGE_TEXT
   KEY_COMMAND = 'command'.freeze
   KEY_PREFIXS = 'prefixs'.freeze
 
-  # ダイスボットディレクトリに含まれるダイスボットを収集する
-  # @return [Array<DiceBot>]
-  # @see https://github.com/torgtaitai/BCDice/commit/11ee56c8dfdb00ac232c8b5cbf87a963d37df974
-  # @todo BCDiceをコミット11ee56c以降に更新すると、BCDice側のDiceBotLoader.collectDiceBotsで行える
-  #
-  # BCDiceからのバックポート。
-  def self.collectDiceBots
-    diceBotDir = File.expand_path('../src_bcdice/diceBot', File.dirname(__FILE__))
-
-    require("#{diceBotDir}/DiceBot")
-
-    botFiles = Dir.glob("#{diceBotDir}/*.rb")
-    botNames =
-      botFiles.map { |botFile| File.basename(botFile, '.rb').untaint }
-    validBotNames =
-      # 特別な名前のものを除外する
-      (botNames - BOT_NAMES_TO_IGNORE).
-      # 正しいクラス名になるものだけ選ぶ
-      select { |botName| /\A[A-Z]/ === botName }
-
-    validBotNames.map { |botName|
-      require("#{diceBotDir}/#{botName}")
-      Object.const_get(botName).new
-    }
-  end
-
   # ダイスボットの情報の一覧を取得する
   # @param [Array<String>] orderedGameNames 順序付けられたゲーム名の配列
   # @param [Boolean] showAllDiceBots すべてのダイスボットを表示するか
   # @return [Array<Hash>]
   def self.get(orderedGameNames, showAllDiceBots)
-    diceBots = self.collectDiceBots
+    diceBots = DiceBotLoader.collectDiceBots
 
     # ゲーム名 => ダイスボットの対応を作る
     diceBotFor = Hash[
