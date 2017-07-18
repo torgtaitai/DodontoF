@@ -496,7 +496,7 @@ class DodontoFServerTest < Test::Unit::TestCase
     parsed['tagInfos'].each do |k,t|
       assert_equal(true, bases.include?(File.basename(k, '.*')))
     end
-   end
+  end
 
   # 'changeImageTags' => :hasNoReturn
   def test_changeImageTags

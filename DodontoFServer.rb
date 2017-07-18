@@ -166,16 +166,14 @@ class DodontoFServer
     @saveDirInfo = saveDirInfo
 
     @logger = DodontoF::Logger.instance
-
-    roomIndexKey = "room"
-    initSaveFiles( getRequestData(roomIndexKey) )
+    @cgi = nil
 
     @jsonpCallBack = nil
     @isWebIf = false
     @isRecordEmpty = false
 
-    @diceBotTablePrefix = 'diceBotTable_'
-    @dice_adapter = DodontoF::DiceAdapter.new(getDiceBotExtraTableDirName, @diceBotTablePrefix)
+    initSaveFiles(getRequestData('room'))
+    @dice_adapter = DodontoF::DiceAdapter.new(getDiceBotExtraTableDirName, 'diceBotTable_')
 
     @fullBackupFileBaseName = "DodontoFFullBackup"
 
