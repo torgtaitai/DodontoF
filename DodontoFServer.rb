@@ -5757,6 +5757,7 @@ def printResult(server)
     result = server.getResponse
 
     if( server.jsonpCallBack )
+      header = "Content-Type: text/javascript\n"
       result = "#{server.jsonpCallBack}(" + result + ");";
     end
 
