@@ -13,9 +13,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.28'
+  VERSION = '1.48.29'
   # リリース日
-  RELEASE_DATE = '2017/07/17'
+  RELEASE_DATE = '2017/08/06'
 
   # バージョンとリリース日を含む文字列
   #
