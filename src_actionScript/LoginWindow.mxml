@@ -2,8 +2,8 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="850"
-   height="470"
+   width="900"
+   height="500"
    title="{Language.s.loginWindowTitle}" 
    >
   

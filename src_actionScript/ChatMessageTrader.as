@@ -178,6 +178,15 @@ package {
                 return true;
             }
             
+            if( guiInputSender.getSender().getReciever().isFirstChatRefresh() ) {
+                Log.logging("初回ロード時は秘話の宛先指定を緩く判定。");
+                Log.logging("接続事のユニークID（strictlyUniqueId)ではなく、ブラウザキャッシュのユニークID（uniqueId)でマッチングを確認");
+                if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(sendto) ) {
+                    return true;
+                }
+
+                return true;
+            }
             Log.logging("残念、表示不能です。");
             return false;
         }

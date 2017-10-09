@@ -2,7 +2,7 @@
 <torgtaitai:CommonPopupWindow
    xmlns:mx="http://www.adobe.com/2006/mxml"
    xmlns:torgtaitai="*" 
-   width="690"
+   width="750"
    height="500"
    title="{Language.s.addCutInWindowTitle}"
    showCloseButton="true"

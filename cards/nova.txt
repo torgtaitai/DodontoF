@@ -1,7 +1,7 @@
 title=トーキョーN◎VA：ニューロデッキ,text,upDown
 <p align='center'><font size="42" color="#FF9999"><i><br><br><br><br><br>N◎VA<br>ニューロデッキ</i></font><p>			裏向きのニューロカード
-<p align='center'><font size="54"><br>―.<br><br>カブキ<br>KABUKI</font><p>			カブキ
-<p align='center'><font size="54"><br>Ⅰ.<br><br>バサラ<br>VASARA</font><p>			バサラ
+<p align='center'><font size="54"><br>—.<br><br>カブキ<br>KABUKI</font><p>			カブキ
+<p align='center'><font size="54"><br>1.<br><br>バサラ<br>VASARA</font><p>			バサラ
 <p align='center'><font size="54"><br>2.<br><br>タタラ<br>TATARA</font><p>			タタラ
 <p align='center'><font size="54"><br>3.<br><br>ミストレス<br>MISTRESS</font><p>			ミストレス
 <p align='center'><font size="54"><br>4.<br><br>カブト<br>KABUTO</font><p>			カブト
@@ -22,8 +22,12 @@ title=トーキョーN◎VA：ニューロデッキ,text,upDown
 <p align='center'><font size="54"><br>19.<br><br>トーキー<br>TALKIE</font><p>			トーキー
 <p align='center'><font size="54"><br>20.<br><br>イヌ<br>INU</font><p>			イヌ
 <p align='center'><font size="54"><br>21.<br><br>ニューロ<br>NEURO</font><p>			ニューロ
+<p align='center'><font size="54"><br>—.<br><br>コモン<br>COMMON</font><p>			コモン
 <p align='center'><font size="54"><br>-1.<br><br>ヒルコ<br>HIRUKO</font><p>			ヒルコ
 <p align='center'><font size="54"><br>-2.<br><br>クロガネ<br>KUROGANE</font><p>			クロガネ
+<p align='center'><font size="54"><br>-4.<br><br>イブキ<br>IBUKI</font><p>			イブキ
+<p align='center'><font size="54"><br>-6.<br><br>シキガミ<br>SHIKIGAMI</font><p>			シキガミ
 <p align='center'><font size="54"><br>-7.<br><br>アラシ<br>ARASHI</font><p>			アラシ
 <p align='center'><font size="54"><br>-9.<br><br>カゲムシャ<br>KAGEMUSHA</font><p>			カゲムシャ
+<p align='center'><font size="54"><br>-17.<br><br>エトランゼ<br>ETRANGER</font><p>			エトランゼ
 <p align='center'><font size="54"><br>-18.<br><br>アヤカシ<br>AYAKASHI</font><p>			アヤカシ
