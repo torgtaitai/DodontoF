@@ -23,8 +23,8 @@
 <h2 id="howtobook">どどんとふ解説書</h2>
 <p align="left">
 どどんとふの使用方法については<br>
-<!-- howtoBookUrl -->　　<a href="http://www.melonbooks.com/index.php?main_page=maker_affiliate_go&affiliate_id=AF0000026278">
-<img src="./image/DManual201508.jpg" /><br>
+<!-- howtoBookUrl -->　　<a href="http://www.melonbooks.com/index.php?main_page=maker_affiliate_go&affiliate_id=AF0000028347">
+<img src="./image/DManual201708.jpg" /><br>
 こちらの解説書を参照下さい。</a><br>
 </p>
 
@@ -1252,6 +1252,9 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2017/10/11 Ver.1.48.31.1<br>
+・Ver.1.48.31で他人の秘話も再ログイン時に表示されてしまう不具合を修正。 <br>
+<br>
 2017/10/09 Ver.1.48.31<br>
 ・秘話機能で会話したあと、再ログインした場合に前回までの秘話が消えてしまう問題を解消。<br>
 ・任意のコマンドを実行できてしまう脆弱性を修正。kittさん指摘ありがとうっ！<br>

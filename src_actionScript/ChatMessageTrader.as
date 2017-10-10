@@ -182,11 +182,11 @@ package {
                 Log.logging("初回ロード時は秘話の宛先指定を緩く判定。");
                 Log.logging("接続事のユニークID（strictlyUniqueId)ではなく、ブラウザキャッシュのユニークID（uniqueId)でマッチングを確認");
                 if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(sendto) ) {
+                    Log.logging("秘話指定先は自分（のパソコン）宛なので表示可能");
                     return true;
                 }
-
-                return true;
             }
+            
             Log.logging("残念、表示不能です。");
             return false;
         }

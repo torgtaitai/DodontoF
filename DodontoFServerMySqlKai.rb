@@ -13,9 +13,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.31'
+  VERSION = '1.48.31.1'
   # リリース日
-  RELEASE_DATE = '2017/10/09'
+  RELEASE_DATE = '2017/10/11'
 
   # バージョンとリリース日を含む文字列
   #
@@ -2327,6 +2327,8 @@ SQL_TEXT
   def getLoginInfo()
     @logger.debug("getLoginInfo begin")
     
+    params = getParamsFromRequestData()
+    uniqueId = params['uniqueId']
     uniqueId ||= createUniqueId()
     
     allLoginCount, loginUserCountList = getAllLoginCount()
