@@ -430,12 +430,13 @@ package {
                 var color:String = chatMessageData['color'];
                 var chatSenderUniqueId:String = chatMessageData['uniqueId'];
                 var sendto:String = chatMessageData['sendto'];
+                var sendtoName:String = chatMessageData['sendtoName'];
                 var channel:int = chatMessageData['channel'];
                 
                 var data:ChatSendData = new ChatSendData(channel, chatMessage);
                 data.setNameAndState(senderName);
                 data.setColorString(color);
-                data.setSendto(sendto);
+                data.setSendto(sendto, sendtoName);
                 
                 var isValidMessage:Boolean = ChatWindow.getInstance()
                     .addMessageToChatLogParts(data, writtenTime, chatSenderUniqueId);

@@ -181,8 +181,13 @@ package {
             if( guiInputSender.getSender().getReciever().isFirstChatRefresh() ) {
                 Log.logging("初回ロード時は秘話の宛先指定を緩く判定。");
                 Log.logging("接続事のユニークID（strictlyUniqueId)ではなく、ブラウザキャッシュのユニークID（uniqueId)でマッチングを確認");
+                
                 if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(sendto) ) {
                     Log.logging("秘話指定先は自分（のパソコン）宛なので表示可能");
+                    return true;
+                }
+                if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(chatSenderUniqueId) ) {
+                    Log.logging("秘話送付元は自分（のパソコン）なので表示可能");
                     return true;
                 }
             }
@@ -222,6 +227,7 @@ package {
             var senderName:String = chatSendData.getNameAndState();
             var color:String = chatSendData.getColor();
             var sendto:String = chatSendData.getSendto();
+            var sendtoName:String = chatSendData.getSendtoName();
             var chatMessage:String = chatSendData.getMessage();
             var channel:int = chatSendData.getChannel();
             
@@ -272,7 +278,7 @@ package {
             }
             
             var messageLine:String = getChatMessageForPrintHtml(chatMessage, senderName, color,
-                                                                time, chatWindow.getDisplayTime(), sendto);
+                                                                time, chatWindow.getDisplayTime(), sendto, sendtoName);
             addPrintBuffer(channel, messageLine);
             
             chatWindow.playAddMessageSound(senderName);
@@ -287,12 +293,13 @@ package {
                                                    color:String,
                                                    time:Number,
                                                    isDisplayTime:Boolean,
-                                                   sendto:String = ""):String {
+                                                   sendto:String = "",
+                                                   sendtoName:String = ""):String {
             var messageLine:String = 
                 "<font color='#" + color + "'>"
                 + "<b>"
                 + senderName
-                + getSendtoName(sendto)
+                + getSendtoName(sendto, sendtoName)
                 + "</b>"
                 + separator
                 + chatMessage + "</font>";
@@ -365,12 +372,16 @@ package {
         }
         
         
-        private function getSendtoName(sendto:String):String {
+        private function getSendtoName(sendto:String, sendtoName:String):String {
             if( ! Utils.isValidSendTo(sendto) ) {
                 return "";
             }
+
+            if( sendtoName == null || sendtoName == "" ) {
+                sendtoName = DodontoF_Main.getInstance().getDodontoF().getUserNameByUniqueId(sendto);
+            }
             
-            return " -> " + DodontoF_Main.getInstance().getDodontoF().getUserNameByUniqueId(sendto);
+            return " -> " + sendtoName;
         }
         
         public static function escapeHtml(htmlString:String):String {

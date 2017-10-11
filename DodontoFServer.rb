@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.31.1'
+  VERSION = '1.48.31.2'
   # リリース日
-  RELEASE_DATE = '2017/10/11'
+  RELEASE_DATE = '2017/10/12'
 
   # バージョンとリリース日を含む文字列
   #
@@ -3688,6 +3688,7 @@ class DodontoFServer
     sendto = params['sendto']
     unless( sendto.nil? )
       chatData['sendto'] = sendto
+      chatData['sendtoName'] = sendtoName
     end
     
     @logger.debug(chatData, 'sendDiceBotChatMessageOnece chatData')

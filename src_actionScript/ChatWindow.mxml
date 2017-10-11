@@ -1516,10 +1516,10 @@
             var message:String = jsonData.message;
             var name:String = jsonData.name;
             var state:String = jsonData.state;
-            var sendto:String = jsonData.sendto;
             var color:String = jsonData.color;
             
-            var data:ChatSendData = new ChatSendData(channel, message, name, state, sendto);
+            var data:ChatSendData = new ChatSendData(channel, message, name, state);
+            data.setSendto(jsonData.sendto, jsonData.sendtoName);
             data.setColorString(color);
             data.setDiceRollResult();
             var secretMessage:String = SecretDiceWindow.printMessage(data);

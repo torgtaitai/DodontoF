@@ -11,6 +11,7 @@ package {
         private var state:String;
         private var color:int = -1;
         private var sendto:String;
+        private var sendtoName:String;
         private var message:String = "";
         private var channel:int = 0;
         private var strictlyUniqueId:String = null;
@@ -38,14 +39,12 @@ package {
         public function ChatSendData(channel_:int,
                                      message_:String,
                                      name_:String = null, 
-                                     state_:String = null,
-                                     sendto_:String = null):void {
+                                     state_:String = null):void {
             channel = channel_;
             setMessage(message_);
             
             name = name_;
             state = state_;
-            sendto = sendto_;
         }
         
         public function replaceMessage(before:*, after:Object):void {
@@ -113,8 +112,9 @@ package {
             return getValue(state, getComboBoxText(getChatWindw().standingGraphicsStates));
         }
         
-        public function setSendto(to:String):void {
+        public function setSendto(to:String, name:String):void {
             sendto = to;
+            sendtoName = name;
         }
         
         
@@ -130,10 +130,17 @@ package {
             }
             
             sendto = getValue(sendto, getComboBoxText(getChatWindw().sendtoBox));
+            if( Utils.isValidSendTo(sendto) ) {
+                sendtoName = getChatWindw().sendtoBox.selectedItem.label;
+            }
         }
         
         public function getSendto():String {
             return sendto;
+        }
+        
+        public function getSendtoName():String {
+            return sendtoName;
         }
         
         private function getValue(param1:String, param2:String = ""):String {
@@ -319,6 +326,7 @@ package {
             var sendto:String = getSendto();
             if( Utils.isValidSendTo(sendto) ) {
                 data.sendto = sendto;
+                data.sendtoName = sendtoName;
             }
             
         }
