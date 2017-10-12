@@ -183,11 +183,11 @@ package {
                 Log.logging("接続事のユニークID（strictlyUniqueId)ではなく、ブラウザキャッシュのユニークID（uniqueId)でマッチングを確認");
                 
                 if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(sendto) ) {
-                    Log.logging("秘話指定先は自分（のパソコン）宛なので表示可能");
+                    Log.logging("秘話指定先は自分（同一のブラウザ）宛なので表示可能");
                     return true;
                 }
                 if( guiInputSender.getSender().isOwnUniqueIdByStrictlyId(chatSenderUniqueId) ) {
-                    Log.logging("秘話送付元は自分（のパソコン）なので表示可能");
+                    Log.logging("秘話送付元は自分（同一のブラウザ）なので表示可能");
                     return true;
                 }
             }
