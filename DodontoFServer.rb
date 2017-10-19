@@ -39,6 +39,7 @@ require 'dodontof/utils'
 require 'dodontof/dice_adapter'
 require 'dodontof/play_room'
 require 'dodontof/image'
+require 'PngImage'
 
 require "config"
 
@@ -802,6 +803,7 @@ class DodontoFServer
       'moveCharacter' => :hasNoReturn,
       'changeMap' => :hasNoReturn,
       'drawOnMap' => :hasNoReturn,
+      'convertDrawToFloorTile' => :hasNoReturn,
       'clearDrawOnMap' => :hasNoReturn,
       'sendChatMessage' => :hasNoReturn,
       'changeRoundTime' => :hasNoReturn,
@@ -3977,6 +3979,33 @@ class DodontoFServer
     return mapData['draws']
   end
   
+  def convertDrawToFloorTile
+    params = getParamsFromRequestData()
+    changeSaveData(@saveFiles['map']) do |saveData|
+      image = DodontoF::Image.new(self)
+
+      mapData = getMapData(saveData)
+
+      draws = mapData['draws'] || []
+      uploadImageFileName = image.convertDrawToFloorTile(mapData['xMax'], mapData['yMax'], draws, params)
+      draws.clear
+
+      characterDataList = [{
+        "type" => "floorTile",
+        "x" => 0,
+        "y" => 0,
+        "rotation" => 0,
+        "width" => mapData['xMax'],
+        "height" => mapData['yMax'],
+        "draggable" => true,
+        "imgId" => 0,
+        "imageUrl" => uploadImageFileName
+      }]
+      addCharacterData( characterDataList )
+
+    end
+  end
+
   def clearDrawOnMap
     changeSaveData(@saveFiles['map']) do |saveData|
       draws = getDraws(saveData)
