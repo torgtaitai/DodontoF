@@ -130,6 +130,31 @@ module DodontoF_MySqlKai
       return smallImageDir
     end
 
+    def convertDrawToFloorTile(xMax, yMax, draws, params)
+      image = PngImage.new(xMax, yMax)
+      image.drawPath(draws)
+
+
+      tagInfo = {
+        "roomNumber" => params['roomNumber'],
+        "password" => "",
+        "tags" => ["フロアタイル画像"]
+      }
+      params['tagInfo'] = tagInfo
+
+      saveDir = $imageUploadDir
+      imageFileNameBase = @server.getNewFileName("drawImage.png", "img")
+      uploadImageFileName = @server.fileJoin(saveDir, imageFileNameBase)
+
+      tagInfo['smallImage'] = uploadImageFileName
+
+      image.save(uploadImageFileName)
+
+      changeImageTagsLocal(uploadImageFileName, tagInfo)
+
+      return uploadImageFileName
+    end
+
     private
 
     def getImageDataFromParams(params, key)
