@@ -13,11 +13,18 @@ package {
     import mx.controls.Alert;
     import mx.core.UIComponent;
     import mx.core.Application;
+    import mx.controls.Image;
+    import flash.display.BitmapData;
+    import flash.utils.ByteArray;
+    import flash.geom.Matrix;
+    import flash.display.Loader;
+    import flash.net.URLRequest;
     
     
     public class MapPainter {
         
         private var otherDrawLayer:UIComponent = new UIComponent();
+        private var drawBackImageUrl:String =  Config.getInstance().getTransparentImage();
         
         private var drawTargetLayer:Sprite = new Sprite();
         private var preDrawTargetLayer:Sprite = new Sprite();
@@ -58,13 +65,61 @@ package {
         }
         
 
-        public function changeDraws(draws:Array):void {
+        public function changeDraws(draws:Array, imageUrl:String, mapWidth:int, mapHeight:int):void {
             Log.logging("changeDraws Begin");
             
             if( ownDrawingLine.length == 0 ) {
                 drawTargetLayer.graphics.clear();
             }
             
+            printBackDraws(draws, imageUrl, mapWidth, mapHeight);
+        }
+        
+        private function printBackDraws(draws:Array, imageUrl:String, mapWidth:int, mapHeight:int):void {
+            Log.logging("printBackDraws Begin");
+            
+            drawBackImage(imageUrl);
+            
+            Log.logging("changeDrawsOnly");
+            changeDrawsOnly(draws);
+        }
+
+        private function drawBackImage(imageUrl:String):void {
+            Log.logging("imageUrl", imageUrl);
+            
+            if( imageUrl == null || imageUrl == "") {
+                imageUrl =  Config.getInstance().getTransparentImage();
+                Log.logging("imageUrl is empty. so set transparent.git");
+            }
+            
+            imageUrl = Config.getInstance().getUrlString(imageUrl);
+            Log.logging("changed imageUrl", imageUrl);
+            
+            if( drawBackImageUrl != imageUrl) {
+                drawBackImageUrl = imageUrl
+                Log.logging("image source set!");
+                
+                var imageLoader:Loader = new Loader();
+                imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, this.completeHandlerForDrawBackImage);
+                imageLoader.load( new URLRequest(imageUrl) );
+            }
+        }
+        
+        private function completeHandlerForDrawBackImage(event:Event):void {
+            var imageLoader:Loader = event.target.loader;
+            
+            var bitmapData:BitmapData = new BitmapData(imageLoader.width, imageLoader.height, true, 0x000000);
+            bitmapData.draw(imageLoader);
+            
+            var layer:UIComponent = otherDrawLayer;
+            layer.graphics.clear();
+            
+            layer.graphics.beginBitmapFill(bitmapData, null, false, false);
+            layer.graphics.drawRect(0, 0, imageLoader.width, imageLoader.height);
+            layer.graphics.endFill();
+        }
+        
+        public function changeDrawsOnly(draws:Array):void {
             if( draws == null ) {
                 return;
             }
@@ -85,6 +140,7 @@ package {
             
             Log.logging("changeDraws End");
         }
+        
         
         private function deleteDrawLayers(draws:Array):void {
             var currentCount:int = otherDrawLayer.numChildren

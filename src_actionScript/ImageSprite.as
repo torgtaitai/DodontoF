@@ -152,7 +152,7 @@ package {
             widthSize = widthSize_;
             heightSize = heightSize_;
             
-            if( imageUrl == "" ) {
+            if( imageUrl == null || imageUrl == "" ) {
                 this.base.visible = false;
                 return;
             }

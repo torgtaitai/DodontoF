@@ -801,6 +801,7 @@ package {
             var bmp:BitmapData = capture(component);
             
             if(bmp == null) {
+                Log.printSystemLogPublic("画面キャプチャーに失敗しました。コマなどに外部画像を使用している場合はキャプチャを行うことは出来ません。画像を差し替えあるいはコマを削除してから、もう一度お試しください。");
                 return;
             }
             
@@ -810,20 +811,19 @@ package {
             Log.logging("saveCaptureImage End");
         }
         
-        static private function capture(component:UIComponent):BitmapData {
+        static public function capture(component:UIComponent):BitmapData {
             var result:BitmapData = new BitmapData(component.width, component.height);
         
             try {
                 result.draw(component, new Matrix());
             } catch(e:Error) {
-                Log.printSystemLogPublic("画面キャプチャーに失敗しました。コマなどに外部画像を使用している場合はキャプチャを行うことは出来ません。画像を差し替えあるいはコマを削除してから、もう一度お試しください。");
                 return null;
             }
         
             return result;
         }
     
-        static private function saveImage(date:ByteArray, fileName:String):void {
+        static public function saveImage(date:ByteArray, fileName:String):void {
             var onComplete:Function = function(event:Event):void
             {
                 Log.printSystemLogPublic(fileName + "を保存しました");

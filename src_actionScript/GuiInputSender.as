@@ -125,6 +125,10 @@ package {
             sender.undoDrawOnMap(resultFunction);
         }
         
+        public function convertDrawToImage(fileData:Object):void {
+            sender.convertDrawToImage(fileData);
+        }
+        
         public function deleteImage(imageUrlList:Array,
                                     resultFunction:Function):void {
             sender.deleteImage(imageUrlList, resultFunction);

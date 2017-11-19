@@ -12,9 +12,9 @@ $LOAD_PATH << File.dirname(__FILE__) # require_relative対策
 # どどんとふ名前空間
 module DodontoF
   # バージョン
-  VERSION = '1.48.31.2'
+  VERSION = '1.48.32'
   # リリース日
-  RELEASE_DATE = '2017/10/12'
+  RELEASE_DATE = '2017/11/19'
 
   # バージョンとリリース日を含む文字列
   #
@@ -802,6 +802,7 @@ class DodontoFServer
       'moveCharacter' => :hasNoReturn,
       'changeMap' => :hasNoReturn,
       'drawOnMap' => :hasNoReturn,
+      'convertDrawToImage' => :hasNoReturn,
       'clearDrawOnMap' => :hasNoReturn,
       'sendChatMessage' => :hasNoReturn,
       'changeRoundTime' => :hasNoReturn,
@@ -3977,8 +3978,40 @@ class DodontoFServer
     return mapData['draws']
   end
   
+  def convertDrawToImage
+    params = getParamsFromRequestData()
+    fileData = params['fileData']
+    raise "no fileData params\n" + params.inspect if fileData.nil?
+    
+    changeSaveData(@saveFiles['map']) do |saveData|
+      draws = getDraws(saveData)
+      
+      saveDir = getUploadImageDataUploadDir(params)
+      fileNameFullPath = fileJoin(saveDir, getNewFileName("drawsImage.png", "drawsImage"))
+      @logger.error(fileNameFullPath, "fileNameFullPath")
+      
+      open(fileNameFullPath, "wb+") do |file|
+        file.write(fileData)
+      end
+      File.chmod(0666, fileNameFullPath)
+
+      changeDrawImage(saveData, fileNameFullPath)
+      draws.clear
+    end
+  end
+
+  def changeDrawImage(saveData, newImageName)
+    mapData = getMapData(saveData)
+    oldImageName = mapData['drawsImage']
+    @logger.debug(oldImageName, "delete old file")
+    deleteFile(oldImageName)
+    mapData['drawsImage'] = newImageName
+    @logger.debug(newImageName, "add new file")
+  end
+
   def clearDrawOnMap
     changeSaveData(@saveFiles['map']) do |saveData|
+      changeDrawImage(saveData, "")
       draws = getDraws(saveData)
       draws.clear
     end
@@ -4142,6 +4175,7 @@ class DodontoFServer
   end
   
   def deleteFile(file)
+    return if file.nil?
     return unless File.exist?(file)
     File.delete(file)
   end

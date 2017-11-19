@@ -621,6 +621,8 @@ package {
             p.handPaintUndo = "取り消し（アンドゥ）";
             p.handPaintRedo = "取り消しの取り消し（リドゥ）";
             p.handLineWeight = "太さ:";
+            p.handPaintToImage = "確定";
+            p.handPaintToImageToolTip = "手書き線を画像として保存します。\n描き込み量を削減し軽くなりますが、\n確定後はアンドゥができなくなります";
             p.handPaintDeleteAll = "全削除";
             p.handPaintDrawTooMuch = "描き込み量：大量！";
             p.handPaintDrawMuch = "描き込み量：多い";

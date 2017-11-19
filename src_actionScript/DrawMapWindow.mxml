@@ -76,6 +76,11 @@
                     label="%1"
                     />
     
+    <mx:Button id="drawToImage"
+               label="{Language.s.handPaintToImage}"
+               toolTip="{Language.s.handPaintToImageToolTip}"
+               click="changeHandPaintToMapOverImage()"
+               />
     <mx:Button id="clearDraw"
                label="{Language.s.handPaintDeleteAll}"
                click="clearDrawOnMap()"
@@ -105,10 +110,12 @@
     [Bindable]
     private static var redoIcon:Class;
     
+	import flash.display.BitmapData;
 	import mx.managers.CursorManager;
     import mx.containers.TitleWindow;
     import mx.managers.PopUpManager;
     import mx.events.FlexEvent;
+    import mx.core.UIComponent;
     
     static private var thisObj:DrawMapWindow;
     static private var parentButton:Button;
@@ -368,6 +375,12 @@
                          }
                          );
     }
+    
+    
+		private function changeHandPaintToMapOverImage():void {
+			Log.logging("changeHandPaintToMapOverImage Begin");
+			getMap().changeHandPaintToMapOverImage();
+		}
     
     
         ]]>

@@ -591,6 +591,10 @@ package {
             parent.addChild(frontLayer);
         }
         
+        public function getOtherDrawLayer():UIComponent {
+               return mapPainter.getOtherDrawLayer();
+        }
+        
         public function addPaformanceMonitor():void {
             overMapLayer.addChild( new Stats() );
         }
@@ -956,8 +960,8 @@ package {
         }
         
         
-        public function changeDraws(draws:Array):void {
-            mapPainter.changeDraws(draws);
+        public function changeDraws(draws:Array, imageUrl:String):void {
+			mapPainter.changeDraws(draws, imageUrl, mapWidth * getSquareLength(), mapHeight * getSquareLength());
         }
         
         public function changeMap(imageUri_:String, mirrored_:Boolean,
@@ -1388,5 +1392,23 @@ package {
         public function setFloorTileEditMode(b:Boolean):void {
             overMapLayer.visible = ( ! b);
         }
+
+
+		public function changeHandPaintToMapOverImage():void {
+			Log.logging("Map.changeHandPaintToMapOverImage Begin");
+
+			var width:int = getSquareLength() * getWidth();
+			var height:int = getSquareLength() * getHeight();
+            var bmp:BitmapData = new BitmapData(width, height, true, 0x000000);
+			
+            bmp.draw(getOtherDrawLayer(), new Matrix());
+
+			if(bmp == null) {
+				return;
+			}
+			var fileData:ByteArray = new PNGEncoder().encode(bmp);
+			DodontoF_Main.getInstance().getGuiInputSender().convertDrawToImage(fileData);
+		}
+
     }
 }

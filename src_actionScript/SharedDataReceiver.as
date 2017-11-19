@@ -464,7 +464,8 @@ package {
                           mapData.xMax, mapData.yMax,
                           mapData.gridColor, mapData.gridInterval, mapData.isAlternately);
             map.changeMarks(mapData.mapMarks, mapData.mapMarksAlpha);
-            map.changeDraws(mapData.draws);
+			Log.logging("mapData.drawsImage", mapData.drawsImage);
+            map.changeDraws(mapData.draws, mapData.drawsImage);
             
             Log.logging("analyzeMap End");
         }
