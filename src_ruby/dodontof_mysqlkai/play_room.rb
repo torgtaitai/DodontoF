@@ -116,7 +116,7 @@ module DodontoF_MySqlKai
         changePlayRoomData do |saveData|
           @logger.debug(saveData, 'changePlayRoom() saveData before')
           saveData['playRoomName'] = params['playRoomName']
-          saveData['playRoomChangedPassword'] = playRoomChangedPassword
+          saveData['playRoomChangedPassword'] = playRoomChangedPassword unless(saveData['playRoomChangedPassword'] == playRoomPassword)
           saveData['chatChannelNames'] = params['chatChannelNames']
           saveData['canUseExternalImage'] = params['canUseExternalImage']
           saveData['canVisit'] = params['canVisit']

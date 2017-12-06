@@ -105,7 +105,7 @@ module DodontoF
 
         @server.changeSaveData(trueSaveFileName) do |saveData|
           saveData['playRoomName'] = params['playRoomName']
-          saveData['playRoomChangedPassword'] = playRoomChangedPassword
+          saveData['playRoomChangedPassword'] = playRoomChangedPassword unless(saveData['playRoomChangedPassword'] == playRoomPassword)
           saveData['chatChannelNames'] = params['chatChannelNames']
           saveData['canUseExternalImage'] = params['canUseExternalImage']
           saveData['canVisit'] = params['canVisit']
