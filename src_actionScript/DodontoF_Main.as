@@ -465,11 +465,9 @@ package {
             
             var url:String = logoutUrl;
             if((url == null) || (url == "")) {
-                //ログアウト先の指定が無いなら、今のＵＲＬに再ログイン
-                url = Utils.getOwnRawUrl();;
-                url = url.replace(/loginRoom=\d+\&?/, '');
-                url = url.replace(/\?$/, '');
-                url = url.replace(/\&$/, '');
+                //ログアウト先の指定が無いなら、DodontoF/ のＵＲＬに再ログイン
+                url = Utils.getOwnRawUrl();
+                url = url.replace(/[^\/]+$/, '');
             }
             
             var request:URLRequest = new URLRequest( url );

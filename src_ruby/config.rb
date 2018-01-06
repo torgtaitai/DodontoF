@@ -244,7 +244,7 @@ $isPasswordNeedFroDeletePlayRoom = true
 $drawLineCountLimit = 3000
 
 #ログアウト時に飛ばされるURL
-#空の場合はログインしていた DodontoF.swf をリロードしてログイン画面に戻ります。
+#空の場合は DodontoF/ とswfを省略したディレクトリ直下へログインし、ログイン画面に戻ります。
 $logoutUrl = ""
 
 #多言語化対応 trueなら多言語有効化
@@ -452,6 +452,7 @@ Standard RPG System
 ビギニングアイドル
 ファンタズムアドベンチャー
 フィルトウィズ
+ブラインド・ミトス
 ブラッド・クルセイド
 ブラッド・ムーン
 フルメタル・パニック！
