@@ -889,6 +889,7 @@ https://github.com/torgtaitai/BCDice<br>
 　dogTag：複数キャラクター作成時に付与される「１」のような番号表示用のパラメータ。実は任意の文字が使えます。省略可<br>
 　draggable：ドラッグ移動の是非。trueで移動可能(true,false)。省略可<br>
 　isHide：マップマスクの下にキャラクターを隠すかの指定。trueで隠す(true,false)。省略可<br>
+　url：キャラクターデータの参照URL。省略可<br>
 　<br>
 コマンド例）<br>
 　DodontoFServer.rb?webif=changeCharacter&room=1&password=himitsu&targetName=abc&name=def&counters=HP:1,MP:1,*check:0,*check:1&info=foo&x=0&y=1&size=2&initiative=9&rotation=30&statusAlias=check:abc,check2:def&dogTag=1&draggable=true&isHide=false&callback=responseFunction<br>
@@ -1252,6 +1253,20 @@ DodontoF : 「どどんとふ」の展開元ディレクトリ<br>
 
 
 <h2 id="history">履歴</h2>
+2018/04/30 Ver.1.49.04<br>
+・WebIFのchangeCharacterで参照URL（url）を変更できるように機能追加。中村夢実さん指摘ありがとうっ！<br>
+・ダイスボットをボーンズ＆カーズVer2.02.80対応へ変更。<br>
+・ダイスボットに「フタリソウサ」を追加。Luna*さんありがとうっ！<br>
+・ダイスボットに「」を追加。さんありがとうっ！<br>
+・ダイスボットに「」を追加。さんありがとうっ！<br>
+・ダイスボットに「トリニティセブン」を追加。紗羽有季さんありがとうっ！<br>
+・ダイスボットに「ストラトシャウト」を追加。ぷえりうすさんありがとうっ！<br>
+・ダイスボットに同人TPRGの「東京ゴーストリサーチ」を追加。梓さんありがとうっ！<br>
+・「ダークデイズドライブ」のダイスボットを機能拡張。梓さんありがとうっ！<br>
+・「マギカロギア」のダイスボットを「基本ルールブック・哲学戦線・黄昏選書」に対応。へきょさんありがとうっ！<br>
+・「ビーストバインドトリニティ」のダイスボットを変異段階に対応。倉坂悠さんありがとうっ！<br>
+・「ログ・ホライズン」のダイスボットを機能拡張。うろさんありがとうっ！<br>
+<br>
 2018/09/27 Ver.1.49.03<br>
 ・ダイスボットをボーンズ＆カーズVer2.02.79対応へ変更。<br>
 ・ダイスボットに「銀剣のステラナイツ」を追加。<br>
