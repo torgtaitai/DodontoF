@@ -387,6 +387,7 @@ package {
                                                          playRoomInfo.backgroundImage,
                                                          playRoomInfo.gameType,
                                                          playRoomInfo.viewStateInfo);
+            DodontoF_Main.getInstance().setPlayRoomPassword( playRoomInfo.playRoomChangedPassword);
             
             Log.logging("analyzePlayRoomInfo end");
         }
